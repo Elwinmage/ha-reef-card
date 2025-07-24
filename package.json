@@ -1,0 +1,28 @@
+{
+  "name": "ha-reef-card",
+  "version": "0.0.1",
+  "description": "A Home Assistant Lovelace card for reef tank management",
+  "main": "ha-reef-card.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elwinmage/ha-reef-card.git"
+  },
+  "keywords": [
+    "lovelace",
+      "reef",
+      "redsea",
+      "reefbeat",
+      "reefwave",
+      "reefled",
+      "reefrun",
+      "reefato+",
+      "reefmat",
+      "home-assistant"
+  ],
+  "author": "Eric MORAND",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Elwinmage/ha-reef-card/issues"
+  },
+  "homepage": "https://github.com/Elwinmage/ha-reef-card#readme",
+}
