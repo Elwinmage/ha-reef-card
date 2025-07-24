@@ -1,8 +1,0 @@
-export default class RSDose {
-
-    constructor(heads_nb){
-	this.heads_nb=heads_nb;
-	console.log("RSDOSE with "+heads_nb+" heads");
-    }
-
-}
