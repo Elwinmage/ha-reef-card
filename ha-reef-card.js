@@ -2,12 +2,10 @@ import {
     LitElement,
     html,
     unsafeCSS,
-} from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
-
-import RSDose from "./src/RSDOSE/device.js";
-import {style_rsdose} from "./src/RSDOSE/style.js";
-import RSMat from "./src/RSMAT/device.js";
-import {style_rsmat} from "./src/RSMAT/style.js";
+} from "lit";
+ 
+import RSDose,{style_rsdose} from "./rsdose.js";
+import RSMat,{style_rsmat} from "./rsmat.js";
 
 class ReefCard extends LitElement {
 
