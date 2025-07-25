@@ -2,7 +2,7 @@ import {
     LitElement,
     html,
     unsafeCSS,
-} from "lit";
+} from "./lit-core.min.js";
  
 import RSDose,{style_rsdose} from "./rsdose.js";
 import RSMat,{style_rsmat} from "./rsmat.js";
