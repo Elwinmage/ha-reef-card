@@ -1,13 +1,14 @@
 import { css } from "./lit-core.min.js";
 
-export default class RSMat {
+export default class RSRun {
 
     constructor(model){
 	this.model=model
     }
 
     get_img(){
-	return "/local/community/ha-reef-card/RSMAT.png.js";
+	//return this.model+".png";
+	return "/local/community/ha-reef-card/RSRUN.png.js";
     }
 
     get_model(){
@@ -19,12 +20,12 @@ export default class RSMat {
 /*
  * CSS
  */
-export const style_rsmat = css`
-  p.RSMAT{
-    color: yellow;
+export const style_rsrun = css`
+  p.RSRUN{
+    color: blue;
   }
 
-  img.RSMAT {
+  img.RSRUN {
     width: 200px;
   }
 `

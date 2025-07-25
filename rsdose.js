@@ -1,4 +1,4 @@
-import { css } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
+import { css } from "./lit-core.min.js";
 
 /*
  * RSDose 
@@ -12,11 +12,7 @@ export default class RSDose {
     }
 
     get_img(){
-	return "/local/community/ha-reef-card/src/RSDOSE/img/"+this.model+".png";
-    }
-
-    get_css(){
-	return "/local/community/ha-reef-card/src/RSDOSE/"+this.model+".css";
+	return "/local/community/ha-reef-card/"+this.model+".png.js";
     }
 
     get_model(){

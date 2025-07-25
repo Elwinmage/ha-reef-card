@@ -6,6 +6,7 @@ import {
  
 import RSDose,{style_rsdose} from "./rsdose.js";
 import RSMat,{style_rsmat} from "./rsmat.js";
+import RSRun,{style_rsrun} from "./rsrun.js";
 
 class ReefCard extends LitElement {
 
@@ -119,6 +120,7 @@ class ReefCard extends LitElement {
 		    dev=new RSDose(model);
 		    break;
 		case "RSRUN":
+		    dev=new RSRun(model);
 		    break;
 		case "RSWAVE":
 		    break;
@@ -143,8 +145,7 @@ class ReefCard extends LitElement {
 		e.setAttribute('class',dev.get_model())
 		e=this.shadowRoot.getElementById('device_name');
 		e.setAttribute('class',dev.get_model())
-		let device_name= document.createTextNode(elt.name);
-		e.appendChild(device_name);
+		e.innerText=elt.name;
 
 	    }
 	},300)
@@ -166,7 +167,7 @@ class ReefCard extends LitElement {
     }
 
     static get styles() {
-	return [unsafeCSS(style_rsdose),unsafeCSS(style_rsmat)];
+	return [unsafeCSS(style_rsdose),unsafeCSS(style_rsmat),unsafeCSS(style_rsrun)];
      }
 }
 
