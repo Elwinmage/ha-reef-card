@@ -4,6 +4,7 @@
   "description": "A Home Assistant Lovelace card for reef tank management",
     "type": "module",
     "source":"ha-reef-card.js",
+   "main":"ha-reef-card.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Elwinmage/ha-reef-card.git"
