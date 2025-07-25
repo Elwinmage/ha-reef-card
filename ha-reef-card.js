@@ -1,24 +1,18 @@
 import {
     LitElement,
     html,
-    css,
+    unsafeCSS,
 } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
 
-//import { RSDose } from "/local/community/ha-reef-card/src/RSDOSE/rsdose.js";
-import RSDose from "./src/RSDOSE/rsdose.js";
-
-
-function loadCSS(url) {
-    const link = document.createElement("link");
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    link.href = url;
-    document.head.appendChild(link);
-}
+import RSDose from "./src/RSDOSE/device.js";
+import {style_rsdose} from "./src/RSDOSE/style.js";
+import RSMat from "./src/RSMAT/device.js";
+import {style_rsmat} from "./src/RSMAT/style.js";
 
 class ReefCard extends LitElement {
 
     static get properties() {
+	console.log("get_properties")
 	return {
 	    hass: {},
 	    config: {},
@@ -36,8 +30,6 @@ class ReefCard extends LitElement {
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.current_device='';
 	this.first_init=true;
-	this.progs=[];
-	this.colors=['white','blue','moon'];
 	this.devices={};
     }
     
@@ -47,6 +39,7 @@ class ReefCard extends LitElement {
 	    this.first_init=false;
 	}
 	return html`
+
           ${this.device_select()}
     `;
     }
@@ -58,6 +51,10 @@ class ReefCard extends LitElement {
             <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
             `)}
         </select>
+<div class="device">
+  <p id="device_name"></p>
+  <img class="device" id="device_img" src="https://brands.home-assistant.io/redsea/icon@2x.png"/>
+</div>
     `;
     }
 
@@ -72,6 +69,7 @@ class ReefCard extends LitElement {
     }
     
     init_devices(){
+	console.log(this.hass);
 	var _devices=[]
 	for (var device_id in this.hass.devices){
 	    let dev=this.hass.devices[device_id];
@@ -112,6 +110,7 @@ class ReefCard extends LitElement {
             else{
                 console.log('Selected -->', this.selected);
 		var device=this.devices[this.selected]
+		var dev;
 		for  (var elt of device.elements){
 		    console.log(elt.name)
 		}
@@ -119,14 +118,14 @@ class ReefCard extends LitElement {
 		switch(model){
 		case "RSDOSE2":
 		case "RSDOSE4":
-		    var dev=new RSDose(model);
-		    ;
+		    dev=new RSDose(model);
 		    break;
 		case "RSRUN":
 		    break;
 		case "RSWAVE":
 		    break;
 		case "RSMAT":
+		    dev=new RSMat(model);
 		    break;
 		case "RSATO+":
 		    break;
@@ -141,6 +140,14 @@ class ReefCard extends LitElement {
 		    console.log("Unknow device type: "+device.elements[0].model)
 		}
 		
+		var e=this.shadowRoot.getElementById('device_img');
+		e.setAttribute('src',dev.get_img());
+		e.setAttribute('class',dev.get_model())
+		e=this.shadowRoot.getElementById('device_name');
+		e.setAttribute('class',dev.get_model())
+		let device_name= document.createTextNode(elt.name);
+		e.appendChild(device_name);
+
 	    }
 	},300)
 		
@@ -161,37 +168,8 @@ class ReefCard extends LitElement {
     }
 
     static get styles() {
-	return css`
-      :host {
-#        font-family: "Gloria Hallelujah", cursive;
-      }
-      wired-card {
-        background-color: white;
-        padding: 16px;
-        display: block;
-        font-size: 18px;
-      }
-
-div.hidden{
-display: none;
+	return [unsafeCSS(style_rsdose),unsafeCSS(style_rsmat)];
+     }
 }
 
-      .state {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px;
-        align-items: center;
-      }
-      .not-found {
-        background-color: yellow;
-        font-family: sans-serif;
-        font-size: 14px;
-        padding: 8px;
-      }
-      wired-toggle {
-        margin-left: 8px;
-      }
-    `;
-    }
-}
 customElements.define("reef-card", ReefCard);
