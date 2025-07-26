@@ -4,9 +4,9 @@ import {
     unsafeCSS,
 } from "./lit-core.min.js";
 
-import RSDose,{style_rsdose} from "./devices/rsdose/rsdose.js";
+import RSDose,{style_rsdose} from "/local/community/ha-reef-card/devices/rsdose/rsdose.js";
 import RSMat, {style_rsmat}  from "./devices/rsmat/rsmat.js";
-import RSRun, {style_rsrun} from "./devices/rsrunrsrun.js";
+import RSRun, {style_rsrun} from "./devices/rsrun/rsrun.js";
 
 class ReefCard extends LitElement {
 
@@ -52,7 +52,7 @@ class ReefCard extends LitElement {
         </select>
 <div class="device">
   <p id="device_name"></p>
-  <img class="device" id="device_img" src="./img/logo-redsea.jpg"/>
+  <img class="device" id="device_img" src="/local/community/ha-reef-card/img/logo-redsea.jpg"/>
 </div>
     `;
     }
