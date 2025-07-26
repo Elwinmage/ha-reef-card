@@ -1,17 +1,17 @@
-import { css } from "./lit-core.min.js";
+import { css } from "../../lit-core.min.js";
 
 export default class RSMat {
 
     constructor(model){
-	this.model=model
+	      this.model=model
     }
 
     get_img(){
-	return "/local/community/ha-reef-card/RSMAT.png.js";
+	      return "/local/community/ha-reef-card/devices/rsmat/img/RSMAT.png";
     }
 
     get_model(){
-	return this.model;
+	      return this.model;
     }
 }
 
