@@ -21,22 +21,19 @@ export default class RSDose {
 	      return this.model;
     }
 
+
+
     render(){
 	return html`
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/maphilight/1.4.0/jquery.maphilight.min.js"></script>
-<!-- Activate maphilight plugin -->
-<script type="text/javascript">$(function() {
-        $('.device_map').maphilight();
-    });
-</script>
+
 <div class="bg">
   <div class="device">
-    <img class="device_map" src='/local/community/ha-reef-card/devices/rsdose/img/RSDOSE4.png' usemap="#zones-reactives" />
-    <map name="zones-reactives">
-      <!-- <area shape="circle" coords="43,43,18" href="rouge.png" /> --> 
-      <area shape="circle" coords="156,139,50" alt="toto" href="rouge.png" />
+    <img class="device_map" id="redose4_img" alt=""  src='/local/community/ha-reef-card/devices/rsdose/img/RSDOSE4.png' usemap="#zones-reactives" />
+    <map name="zones-reactives" id="mymap">
+      <area shape="circle" coords="156,139,50" alt="toto" href="rouge.png" title="manual_head_1"/>
     </map>
+     <span class="dot"> </span>
+
     <div class="container1">
       <img src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_A.png'/>
     </div>
@@ -81,7 +78,6 @@ export default class RSDose {
 	  d="M 14.109476,0.60284517 C 13.398889,12.288973 10.29951,18.485597 6.8080681,25.368429 1.2164051,34.290687 0.87427411,44.462833 0.69067311,54.672725 L 12.136122,54.376722 c 0.190393,-8.00341 -0.158639,-15.95778 5.624057,-24.469581 4.28096,-8.58966 8.207356,-17.450457 8.090748,-29.40296283 z"/>
       </svg>
     </div>
-    <div class="action1"/>
   </div>
 </div>
 `
@@ -181,6 +177,20 @@ top: +288px;
 left: 335px;
 transform: scale(1.3);
 }
+
+.dot{
+height: 30px;
+  width: 30px;
+  background-color: rgba(200,200,200,0.5);
+  border-radius: 50%;
+  display: inline-block;
+
+}
+.dot:hover{
+  background-color: rgba(255,0,0,0.5);
+}
+
+
 .action1{
 flex: 0 0 auto;
 width:20px;
@@ -190,11 +200,9 @@ position: absolute;
 top: +136px;
 left: 43px;
 transform: scale(1);
+clip-path: circle(50px);
 }
 
-area{
-background-color:rgba(0,0,255,1);
-border: 2px
 }
 
   p.RSDOSE4{

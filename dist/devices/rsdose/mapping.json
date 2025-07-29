@@ -1,0 +1,19 @@
+{
+  "model": "RSDOSE4",
+  "heads": {
+    "id": 1,
+    "actions": [
+      {
+        "name": "manual_dose_head_1",
+        "shape": {
+          "type": "circle",
+          "center": {
+            "x": 93,
+            "y": 74
+          },
+          "radius": 15
+        }
+      }
+    ]
+  }
+}
