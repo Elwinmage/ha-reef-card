@@ -27,27 +27,14 @@ export default class RSDose {
 	return html`
 
 <div class="bg">
-  <div class="device">
-    <img class="device_map" id="redose4_img" alt=""  src='/local/community/ha-reef-card/devices/rsdose/img/RSDOSE4.png' usemap="#zones-reactives" />
-    <map name="zones-reactives" id="mymap">
-      <area shape="circle" coords="156,139,50" alt="toto" href="rouge.png" title="manual_head_1"/>
-    </map>
-     <span class="dot"> </span>
-
-    <div class="container1">
-      <img src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_A.png'/>
-    </div>
-    <div class="container2">
-      <img src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_B.png'/>
-    </div>
-    <div class="container3">
-      <img src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_C.png'/>
-    </div>
-    <div class="container4">
-      <img src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_C.png'/>
-    </div>
+    <img class="device_map" id="rsdose4_img" alt=""  src='/local/community/ha-reef-card/devices/rsdose/img/RSDOSE4.png' />
+    <span class="manual_dose_1"> </span>
+    <img class="container1" src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_A.png'/>
+<!--     <img class="container2" src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_B.png'/>
+    <img class="container3" src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_C.png'/>
+    <img class="container4" src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_C.png'/> -->
     <div class="mask">
-      <svg class="c1">
+      <svg class="c1" viewBox="0 0 86 56">
 	<path
 	  d="m 62.318421,1.8956482 1.39537,38.7913268 c 0.54297,1.680866 1.22439,3.292504 2.50465,4.604726 1.91092,2.04122 2.58392,1.568144 3.77452,1.674446 1.93472,-0.02183 3.81496,0.365021 6.0001,-1.534909 1.87295,-1.809 1.39537,-4.558213 2.09305,-6.83732 l 5.72102,-25.814373 -7.95361,-1.395371 -3.34889,8.093154 0.27907,-17.8607538 z"/>
 	<path
@@ -78,9 +65,10 @@ export default class RSDose {
 	  d="M 14.109476,0.60284517 C 13.398889,12.288973 10.29951,18.485597 6.8080681,25.368429 1.2164051,34.290687 0.87427411,44.462833 0.69067311,54.672725 L 12.136122,54.376722 c 0.190393,-8.00341 -0.158639,-15.95778 5.624057,-24.469581 4.28096,-8.58966 8.207356,-17.450457 8.090748,-29.40296283 z"/>
       </svg>
     </div>
-  </div>
 </div>
 `
+console.log();
+
     }
 }
 
@@ -95,37 +83,47 @@ export default class RSDose {
 export const style_rsdose = css`
 
 .bg{
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  top: 0;
+  left : 0;
+  border: 2px blue solid;
+/*  height: 450px;*/
+/*width: 100%;*/
+aspect-ratio: 2/1;
+border: 3px gray solid;
 }
 
+.device_map{
+  position: relative;
+  top: 0;
+  left : 0;
+/*width: 490px;*/
+width: 100%;
+  border: 1px black solid;
+}
 
 .container1{
 flex: 0 0 auto;
-width: 86px;
-height: 56px;
-position: absolute;
-top: +298px;
-left: -23px;
-transform: scale(0.3);
+width:15%;
+position: relative;
+top: 47%;
+left: 3%;
+border: 5px red solid;
 }
 
 .container2{
 flex: 0 0 auto;
-width: 86px;
-height: 56px;
+width: 80px;
+height: 229px;
 position: absolute;
-top: +305px;
-left: 62px;
-transform: scale(0.31);
+top: 182px;
+left: 150px;
 }
 
 .container3{
 flex: 0 0 auto;
 width: 86px;
 height: 56px;
-position: absolute;
 top: +313px;
 left: 155px;
 transform: scale(0.32);
@@ -134,7 +132,6 @@ transform: scale(0.32);
 flex: 0 0 auto;
 width: 86px;
 height: 56px;
-position: absolute;
 top: +322px;
 left: 258px;
 transform: scale(0.33);
@@ -142,11 +139,11 @@ transform: scale(0.33);
 
 .mask{
 flex: 0 0 auto;
-width: 86px;
-height: 56px;
+width: 17%;
 position: absolute;
-top: +272px;
-left: 40px;
+top: 41%;
+left: 10%;
+border: 1px  purple solid;
 }
 
 .mask2{
@@ -154,8 +151,8 @@ flex: 0 0 auto;
 width: 86px;
 height: 56px;
 position: absolute;
-top: +276px;
-left: 130px;
+top: 39%;
+left: 28%;
 transform: scale(1.1);
 }
 
@@ -178,15 +175,19 @@ left: 335px;
 transform: scale(1.3);
 }
 
-.dot{
-height: 30px;
-  width: 30px;
+.manual_dose_1{
+    flex: 0 0 auto;
+  height: 40px;
+  width: 40px;
   background-color: rgba(200,200,200,0.5);
   border-radius: 50%;
-  display: inline-block;
+/*    display: inline-block;*/
+  position:absolute;
+  left: 100px;
+  top: 100px;
 
 }
-.dot:hover{
+.manual_dose_1:hover{
   background-color: rgba(255,0,0,0.5);
 }
 
@@ -219,6 +220,9 @@ stroke: black;
 
 .c1 {
   fill: green;
+width: 100%;
+  height: auto;
+/*  display: block;*/
 }
 .c2 {
   fill: red;
