@@ -1,4 +1,4 @@
-import { css } from "../../lit-core.min.js";
+import { html,css } from "../../lit-core.min.js";
 
 export default class RSMat {
 
@@ -13,6 +13,16 @@ export default class RSMat {
     get_model(){
 	      return this.model;
     }
+
+    render(){
+	return html`
+<p id="device_name" class="RSMAT">${this.name}</p>
+<div class="device_bg">
+<img src="${this.get_img()}"/>
+</div>`;
+	
+    }
+
 }
 
 
