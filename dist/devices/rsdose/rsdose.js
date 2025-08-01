@@ -6,11 +6,27 @@ import RSDevice from "../device.js";
  */
 export default class RSDose extends RSDevice{
 
-    constructor(device){
-	super(device);
+    constructor(hass,device){
+	super(hass,device);
+	console.log("----RSDOSE-----")
+	console.log(device);
 	this.heads_nb=parseInt((this.model.charAt(this.model.length-1)));
-	this.heads = [1,2,3,4];
-	console.log("RSDOSE with "+this.heads_nb+" heads");
+	this.entities=[[],[],[],[],[]];
+	for (var entity_id in this.hass.entities){
+	    var entity=this.hass.entities[entity_id];
+	    for (var d of this.device.elements){
+		var fname=d['name'].split("_");
+		var head_id=0;
+		if (fname[fname.length  - 2 ] == "head"){
+		    head_id=parseInt(fname[fname.length-1]);
+		}
+		if(entity.device_id == d.id){
+		    this.entities[head_id].push(entity);
+		}
+		
+	    }
+	}
+	console.log(this.entities);
     }
 
 

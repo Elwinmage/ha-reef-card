@@ -5,7 +5,8 @@ import { html,css } from "../lit-core.min.js";
  */
 export default class RSDevice {
 
-    constructor(device){
+    constructor(hass,device){
+	this.hass = hass;
 	this.device = device;
 	this.model=this.device.elements[0].model;
 	this.name=this.device.elements[0].name;

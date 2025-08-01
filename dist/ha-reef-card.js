@@ -12,7 +12,6 @@ import RSRun, {style_rsrun} from "./devices/rsrun/rsrun.js";
 class ReefCard extends LitElement {
 
     static get properties() {
-	console.log("get_properties")
 	return {
 	    hass: {},
 	    config: {},
@@ -114,15 +113,15 @@ class ReefCard extends LitElement {
 		switch(model){
 		case "RSDOSE2":
 		case "RSDOSE4":
-		    this.current_device=new RSDose(device);
+		    this.current_device=new RSDose(this.hass,device);
 		    break;
 		case "RSRUN":
-		    this.current_device=new RSRun(device);
+		    this.current_device=new RSRun(this.device);
 		    break;
 		case "RSWAVE":
 		    break;
 		case "RSMAT":
-		    this.current_device=new RSMat(device);
+		    this.current_device=new RSMat(this.device);
 		    break;
 		case "RSATO+":
 		    break;
