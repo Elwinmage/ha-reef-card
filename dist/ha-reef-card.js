@@ -116,12 +116,12 @@ class ReefCard extends LitElement {
 		    this.current_device=new RSDose(this.hass,device);
 		    break;
 		case "RSRUN":
-		    this.current_device=new RSRun(this.device);
+		    this.current_device=new RSRun(this.hass,device);
 		    break;
 		case "RSWAVE":
 		    break;
 		case "RSMAT":
-		    this.current_device=new RSMat(this.device);
+		    this.current_device=new RSMat(this.hass,device);
 		    break;
 		case "RSATO+":
 		    break;

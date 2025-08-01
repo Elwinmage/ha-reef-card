@@ -11,6 +11,19 @@ export default class RSDevice {
 	this.model=this.device.elements[0].model;
 	this.name=this.device.elements[0].name;
 	this._img="/local/community/ha-reef-card/img/logo-redsea.jpg";
+	this.entities=[];
+	this._populate_entities();
+	console.log(this.entities);
+    }
+
+    _populate_entities(){
+	console.log("popualte entities for "+this.device.elements[0].id)
+	for (var entity_id in this.hass.entities){
+	    var entity=this.hass.entities[entity_id];
+	    if(entity.device_id == this.device.elements[0].id){
+		this.entities.push(entity);
+	    }
+	}
     }
 
     get_img(){

@@ -1,18 +1,44 @@
-import { css } from "../../lit-core.min.js";
+import { html,css } from "../../lit-core.min.js";
+import RSDevice from "../device.js";
 
-export default class RSRun {
+export default class RSRun extends RSDevice{
 
-    constructor(model){
-	      this.model=model
+    constructor(hass,device){
+	super(hass,device)
+	this._img="/local/community/ha-reef-card/devices/rsrun/img/RSRUN.png";
     }
 
-    get_img(){
-	      return "/local/community/ha-reef-card/devices/rsrun/img/RSRUN.png";
+
+    _populate_entities(){
+	this.entities=[[],[],[]];
+	for (var entity_id in this.hass.entities){
+	    var entity=this.hass.entities[entity_id];
+	    for (var d of this.device.elements){
+		var fname=d['name'].split("_");
+		var pump_id=0;
+		if (fname[fname.length  - 2 ] == "pump"){
+		    pump_id=parseInt(fname[fname.length-1]);
+		}
+		if(entity.device_id == d.id){
+		    this.entities[pump_id].push(entity);
+		}
+		
+	    }
+	}
+	
     }
 
-    get_model(){
-	      return this.model;
+
+        render(){
+	return html`
+<p id="device_name" class="RSMAT">${this.name}</p>
+<div class="device_bg">
+<img src="${this.get_img()}"/>
+</div>`;
+	
     }
+
+    
 }
 
 

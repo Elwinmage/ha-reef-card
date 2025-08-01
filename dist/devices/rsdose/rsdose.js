@@ -8,9 +8,11 @@ export default class RSDose extends RSDevice{
 
     constructor(hass,device){
 	super(hass,device);
-	console.log("----RSDOSE-----")
-	console.log(device);
+	this._img="/local/community/ha-reef-card/devices/rsdose/img/"+this.get_model()+".png";
 	this.heads_nb=parseInt((this.model.charAt(this.model.length-1)));
+    }
+
+    _populate_entities(){
 	this.entities=[[],[],[],[],[]];
 	for (var entity_id in this.hass.entities){
 	    var entity=this.hass.entities[entity_id];
@@ -26,10 +28,9 @@ export default class RSDose extends RSDevice{
 		
 	    }
 	}
-	console.log(this.entities);
+	
     }
-
-
+    
     _pipe_path(head){
 	var primary_path="M 14.109476,0.60284517 C 13.398889,12.288973 10.29951,18.485597 6.8080681,25.368429 1.2164051,34.290687 0.87427411,44.462833 0.69067311,54.672725 L 12.136122,54.376722 c 0.190393,-8.00341 -0.158639,-15.95778 5.624057,-24.469581 4.28096,-8.58966 8.207356,-17.450457 8.090748,-29.40296283 z";
 	switch (head){
