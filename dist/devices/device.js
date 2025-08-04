@@ -1,5 +1,4 @@
 import { html,css } from "../lit-core.min.js";
-
 /*
  * RSDose 
  */
@@ -10,7 +9,8 @@ export default class RSDevice {
 	this.device = device;
 	this.model=this.device.elements[0].model;
 	this.name=this.device.elements[0].name;
-	this._img="/local/community/ha-reef-card/img/logo-redsea.jpg";
+	this.img_path="/local/community/ha-reef-card/devices/img/";
+	this._img=this.img_path+this.get_model()+".png";
 	this.entities=[];
 	this._populate_entities();
 	console.log(this.entities);

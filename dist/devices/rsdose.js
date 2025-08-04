@@ -1,5 +1,5 @@
-import { html,css } from "../../lit-core.min.js";
-import RSDevice from "../device.js";
+import { html,css } from "../lit-core.min.js";
+import RSDevice from "./device.js";
 
 /*
  * RSDose 
@@ -8,7 +8,6 @@ export default class RSDose extends RSDevice{
 
     constructor(hass,device){
 	super(hass,device);
-	this._img="/local/community/ha-reef-card/devices/rsdose/img/"+this.get_model()+".png";
 	this.heads_nb=parseInt((this.model.charAt(this.model.length-1)));
     }
 
@@ -58,7 +57,7 @@ export default class RSDose extends RSDevice{
     _render_head(head){
 	if (head <= this.heads_nb){
 	    return html`
-		<img class="container${head}" src='/local/community/ha-reef-card/devices/rsdose/img/redsea_foundation_A.png'/>
+		<img class="container${head}" src='/local/community/ha-reef-card/devices/img/redsea_foundation_A.png'/>
    	        <div class="mask${head}">
  		  ${this._pipe_path(head)}
 		</div>
@@ -71,7 +70,7 @@ export default class RSDose extends RSDevice{
     render(){
 	return html`
 	<div class="bg">
-	  <img class="device_map" id="rsdose4_img" alt=""  src='/local/community/ha-reef-card/devices/rsdose/img/RSDOSE4.png' />
+	  <img class="device_map" id="rsdose4_img" alt=""  src='/local/community/ha-reef-card/devices/img/RSDOSE4.png' />
 	  ${Array.from({length:4},(x,i) => i+1).map(head => this._render_head(head))}
 	</div>`;
 

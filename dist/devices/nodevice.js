@@ -1,24 +1,20 @@
-import { html,css } from "../../lit-core.min.js";
+import { html,css } from "../lit-core.min.js";
+import RSDevice from "./device.js";
 
 /*
  * RSDose 
  */
-export default class NoDevice {
+export default class NoDevice extends RSDevice{
 
-    constructor(){
-	this.device = null;
-	this.model="";
-	this.name="";
+    constructor(hass){
+	var device={'elements':[{'model':'NODEVICE','name':''}]}
+	super(hass,device);
     }
 
-    get_img(){
-	      return "/local/community/ha-reef-card/devices/nodevice/img/logo-redsea.jpg";
-    }
 
-    get_model(){
-	      return this.model;
+    _populate_entities(){
     }
-
+    
     render(){
 	return html`
 <p id="device_name" class="RSDOSE4">${this.name}</p>
@@ -28,10 +24,6 @@ export default class NoDevice {
 `
     }
 }
-
-
-
-
 
 
 /*

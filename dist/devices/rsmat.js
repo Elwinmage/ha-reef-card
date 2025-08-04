@@ -1,11 +1,10 @@
-import { html,css } from "../../lit-core.min.js";
-import RSDevice from "../device.js";
+import { html,css } from "../lit-core.min.js";
+import RSDevice from "./device.js";
 
 export default class RSMat extends RSDevice{
 
     constructor(hass,device){
 	super(hass,device);
-	this._img="/local/community/ha-reef-card/devices/rsmat/img/"+this.get_model()+".png";
     }
 
 

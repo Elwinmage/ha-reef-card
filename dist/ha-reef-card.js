@@ -4,10 +4,10 @@ import {
     unsafeCSS,
 } from "./lit-core.min.js";
 
-import NoDevice,{style_nodevice} from "/local/community/ha-reef-card/devices/nodevice/nodevice.js";
-import RSDose,{style_rsdose} from "/local/community/ha-reef-card/devices/rsdose/rsdose.js";
-import RSMat, {style_rsmat}  from "./devices/rsmat/rsmat.js";
-import RSRun, {style_rsrun} from "./devices/rsrun/rsrun.js";
+import NoDevice,{style_nodevice} from "./devices/nodevice.js";
+import RSDose,{style_rsdose} from "./devices/rsdose.js";
+import RSMat, {style_rsmat}  from "./devices/rsmat.js";
+import RSRun, {style_rsrun} from "./devices/rsrun.js";
 
 class ReefCard extends LitElement {
 
@@ -31,7 +31,7 @@ class ReefCard extends LitElement {
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
 	this.devices={};
-	this.no_device= new NoDevice();
+	this.no_device= new NoDevice(this.hass);
 	this.current_device=this.no_device;
     }
     
