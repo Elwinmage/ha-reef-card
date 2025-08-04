@@ -1,5 +1,7 @@
 import { html,css } from "../lit-core.min.js";
 import RSDevice from "./device.js";
+import {config} from "./mapping/NODEVICE.js";
+
 
 /*
  * RSDose 
@@ -7,8 +9,8 @@ import RSDevice from "./device.js";
 export default class NoDevice extends RSDevice{
 
     constructor(hass){
-	var device={'elements':[{'model':'NODEVICE','name':''}]}
-	super(hass,device);
+				var device={'elements':[{'model':'NODEVICE','name':''}]};
+				super(hass,device,config);
     }
 
 
@@ -17,9 +19,9 @@ export default class NoDevice extends RSDevice{
     
     render(){
 	return html`
-<p id="device_name" class="RSDOSE4">${this.name}</p>
+<p id="device_name" class="RSDOSE4">${this.conf.name}</p>
 <div class="device_bg">
-<img src="${this.get_img()}"/>
+<img src="${this.conf.background_img}"/>
 </div>
 `
     }
