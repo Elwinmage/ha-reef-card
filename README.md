@@ -10,7 +10,7 @@
 > Under developpement, first version will be release in few days. You can test and made returns if you want!
 
 
-# ha-reef-card
+# Overview
 Reef card for home assistant help you to manage your reef tank.
 Used with  [ha-reefbeat-component](http://github.com/Elwinmage), your RedSea deviced can be automaticaly detected.
 
