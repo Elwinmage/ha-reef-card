@@ -7,7 +7,7 @@
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 > [!CAUTION]
-> Under developpement, first version will be release in few days. You can test and made returns if you want!
+> Under developpement, first version will be release in few weeks. You can test and made returns if you want!
 
 
 # Overview
