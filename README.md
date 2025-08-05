@@ -13,3 +13,7 @@
 Reef card for home assistant help you to manage your reef tank.
 Used with  [ha-reefbeat-component](http://github.com/Elwinmage), your RedSea deviced can be automaticaly detected.
 
+***
+
+[buymecoffee]: https://paypal.me/Elwinmage
+[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square
