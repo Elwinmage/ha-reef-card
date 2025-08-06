@@ -22,6 +22,11 @@ export default class RSDevice {
 				
     }
 
+
+		_get_val(entity_id){
+				console.log("get_val for "+entity_id+": "+this.hass.states[entity_id]);
+				return this.hass.states[entity_id].state;
+		}
 		
     _populate_entities(){
 				for (var entity_id in this.hass.entities){
@@ -33,7 +38,21 @@ export default class RSDevice {
 				}
     }
 
-    render(){
+		_press(button){
+				console.log(button);
+				// this.hass.callService("homeassistant", "press", {
+				// 				entity_id: state.entity_id,
+				// 		});
+				// }
+		}
+		
+		_render_sensor(sensor){
+				return html`
+<span id="${sensor.name}" style="top:${sensor.top};left:${sensor.left}">${this._get_val(sensor.name)}</span>
+`;
+		}
+		
+		render(){
 				return html`
 <div class="bg">
     <img class="device_map" id="rsdose4_img" alt=""  src='${this.conf.background_img}'/>

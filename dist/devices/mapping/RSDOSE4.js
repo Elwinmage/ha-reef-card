@@ -11,9 +11,20 @@ export const config = {
 								"width": 20,
 								"top": 43,
 								"left": 1,
-								"img": "/local/community/ha-reef-card/devices/img/generic_container.png"
+								"img": "/local/community/ha-reef-card/devices/img/generic_container.png",
+								"sensors": [
+										{
+												"name": "supplement",
+												"left":1,
+												"top": 80,
+												"rotate": "-90deg",
+												"border_radius": "5px",
+												"background_color": "140,67,148",
+												"color": "white"
+										}
+								]
 						},
-						"actions": [
+						"buttons": [
 								{
 										"name": "manual_dose_head_1",
 										"width": 5,
@@ -37,9 +48,11 @@ export const config = {
 								"width": 20,
 								"top": 43,
 								"left": 21,
-								"img": "/local/community/ha-reef-card/devices/img/generic_container.png"
+								"img": "/local/community/ha-reef-card/devices/img/generic_container.png",
+								"sensors": []
+
 						},
-						"actions": [
+						"buttons": [
 								{
 										"name": "manual_dose_head_2",
 										"width": 5,
@@ -63,9 +76,10 @@ export const config = {
 								"width": 20,
 								"top": 43,
 								"left": 41,
-								"img": "/local/community/ha-reef-card/devices/img/generic_container.png"
+								"img": "/local/community/ha-reef-card/devices/img/generic_container.png",
+								"sensors": []
 						},
-						"actions": [
+						"buttons": [
 								{
 										"name": "manual_dose_head_3",
 										"width": 5,
@@ -91,10 +105,11 @@ export const config = {
 								"width": 20,
 								"top": 43,
 								"left": 61,
-								"img": "/local/community/ha-reef-card/devices/img/generic_container.png"
-						},
+								"img": "/local/community/ha-reef-card/devices/img/generic_container.png",
+								"sensors": []
+							},
 
-						"actions": [
+						"buttons": [
 								{
 										"name": "manual_dose_head_4",
 										"width": 5,

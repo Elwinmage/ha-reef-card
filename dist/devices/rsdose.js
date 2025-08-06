@@ -56,13 +56,23 @@ export default class RSDose extends RSDevice{
 `;
     }
 
+		_get_val(head,entity_id){
+				console.log("rsdose._get_val: "+entity_id);
+				let entity = this.hass.states[this.entities[head][entity_id].entity_id];
+				return entity.state;
+		}
+		
+		_render_sensor(head,sensor){
+				return html`
+						<span class="sensor" id="${sensor.name}" style="top:${sensor.top}%;left:${sensor.left}%;transform: rotate(${sensor.rotate});background-color:rgb(${sensor.background_color});color:${sensor.color};border-radius:${sensor.border_radius};">${this._get_val(head,sensor.name)}</span>
+`;
+			}
+		
 
 		_render_container(head,container){
 				let supplement=this.hass.states[this.entities[head]['supplement'].entity_id];
 				let supplement_uid=this.hass.states[this.entities[head]['supplement_uid'].entity_id];
 				let img=null;
-				console.log(supplement_uid);
-
 				switch (supplement_uid.state){
 				case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
 						img='/local/community/ha-reef-card/devices/img/redsea_foundation_A.png';
@@ -78,13 +88,16 @@ export default class RSDose extends RSDevice{
 						break;
 				}
 				return html`
+<div class="container_info">
 		<img class="container" style="width:${container.width}%;top:${container.top}%;left:${container.left}%;" src='${img}'/>
+${container.sensors.map(sensor => this._render_sensor(head,sensor))}
+</div>
 				`;
 		}
 		
-		_render_action(action){
+		_render_button(button){
         return html`
-<span id="${action.name}" class="action" style="width:${action.width}%;top:${action.top}%;left:${action.left}%;border-radius:${action.border_radius}%;"> </span>
+<button id="${button.name}" class="button" style="width:${button.width}%;top:${button.top}%;left:${button.left}%;border-radius:${button.border_radius}%;" @click="${this._press}"> </button>
 `;
 		}
 		
@@ -96,7 +109,7 @@ ${this._render_container(head,hd.container)}
    	        <div class="mask${head}">
  		  ${this._pipe_path(head)}
 		</div>
-${hd.actions.map(action => this._render_action(action))}
+${hd.buttons.map(button => this._render_button(button))}
 
    	    `;
 				}
@@ -174,14 +187,20 @@ export const style_rsdose = css`
     transform: scale(1.3);
     }
 
-.action{
+.button{
     flex: 0 0 auto;
     aspect-ratio: 1/1;
     position:absolute;
 }
 
-.action:hover{
+.button:hover{
 background-color:rgba(250,0,0,0.5);
+}
+
+
+.sensor {
+    flex: 0 0 auto;
+position: absolute;
 }
 
 

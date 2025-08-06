@@ -171,3 +171,12 @@ class ReefCard extends LitElement {
 }
 
 customElements.define("reef-card", ReefCard);
+
+// Addign the the visual card selection
+window.customCards = window.customCards || [];
+window.customCards.push({
+    type: "reef-card",
+    name: "Reef Tank Card",
+//		image: "media-source://media_source/local/my_image.jpg",
+    description: "A custom card for reef tank management." // optional
+});
