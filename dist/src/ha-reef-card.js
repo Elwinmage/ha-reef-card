@@ -718,7 +718,7 @@ window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae0
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.png", import.meta.url)
+    "background_img": new URL("devices/img/NODEVICE.b2964d18.png", import.meta.url)
 };
 
 
@@ -781,7 +781,7 @@ window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b519
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.png", import.meta.url),
+    "background_img": new URL("devices/img/RSDOSE4.305b25b9.png", import.meta.url),
     "heads_nb": 4,
     "heads": {
         "head_1": {
@@ -978,16 +978,16 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         let img = null;
         switch(supplement_uid.state){
             case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-                img = new URL("redsea_foundation_A.png", import.meta.url);
+                img = new URL("devices/img/redsea_foundation_A.e972bfb4.png", import.meta.url);
                 break;
             case "76830db3-a0bd-459a-9974-76a57d026893":
-                img = new URL("redsea_foundation_B.png", import.meta.url);
+                img = new URL("devices/img/redsea_foundation_B.88a50fcd.png", import.meta.url);
                 break;
             case "f524734e-8651-496e-b09b-640b40fc8bab":
-                img = new URL("redsea_foundation_C.png", import.meta.url);
+                img = new URL("devices/img/redsea_foundation_C.9fd2eba3.png", import.meta.url);
                 break;
             default:
-                img = new URL("generic_container.png", import.meta.url);
+                img = new URL("devices/img/generic_container.f2c1f472.png", import.meta.url);
                 break;
         }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
