@@ -1206,7 +1206,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
     static get properties() {
         return {
             hass: {},
-            config: {},
+            user_config: {},
             select_devices: {
                 type: Array
             },
@@ -1235,6 +1235,13 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
         this.first_init = true;
         this.devices = {};
     }
+    _set_current_device_from_name(dev, name) {
+        if (dev['text'] == name) {
+            console.log("Found");
+            console.log(dev['value']);
+            this._set_current_device(dev['value']);
+        }
+    }
     render() {
         console.log(this.hass);
         if (this.first_init == true) {
@@ -1242,11 +1249,14 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             this.first_init = false;
             this.no_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<no-device id="device" hass="${this.hass}"/>`;
             this.current_device = this.no_device;
+            if (this.user_config['device']) {
+                console.log("Device-Id SET");
+                console.log(this.select_devices);
+                this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
+                return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.current_device}`;
+            }
         }
-        /*	return html`
-          ${this.device_select()}
-          ${this.current_device.render()}
-    `;*/ return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
           ${this.device_select()}
   ${this.current_device}
     `;
@@ -1293,67 +1303,123 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
         console.log(this.devices);
         for (var d of _devices)this.select_devices.push(d);
     }
+    _set_current_device(device_id) {
+        console.log('Selected -->', device_id);
+        var device = this.devices[device_id];
+        for (var elt of device.elements)console.log(elt.name);
+        var model = device.elements[0].model;
+        switch(model){
+            case "RSDOSE2":
+            case "RSDOSE4":
+                //this.current_device=new RSDose(this.hass,device);
+                console.log("RSDOSE4");
+                this.current_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
+                break;
+            case "RSRUN":
+                break;
+            case "RSWAVE":
+                break;
+            case "RSMAT":
+                break;
+            case "RSATO+":
+                break;
+            case "RSLED50":
+            case "RSLED60":
+            case "RSLED90":
+            case "RSLED115":
+            case "RSLED160":
+            case "RSLED170":
+                break;
+            default:
+                console.log("Unknow device type: " + device.elements[0].model);
+        }
+    }
     onChange() {
         setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
             /*	    if(this.no_device==null){
-		this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
-	    }*/ this.current_device = this.no_device;
+		    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
+		    }*/ this.current_device = this.no_device;
             if (this.selected == "unselected") console.log('Nothing selected');
-            else {
-                console.log('Selected -->', this.selected);
-                var device = this.devices[this.selected];
-                for (var elt of device.elements)console.log(elt.name);
-                var model = device.elements[0].model;
-                switch(model){
-                    case "RSDOSE2":
-                    case "RSDOSE4":
-                        //this.current_device=new RSDose(this.hass,device);
-                        console.log("RSDOSE4");
-                        this.current_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
-                        break;
-                    case "RSRUN":
-                        break;
-                    case "RSWAVE":
-                        break;
-                    case "RSMAT":
-                        break;
-                    case "RSATO+":
-                        break;
-                    case "RSLED50":
-                    case "RSLED60":
-                    case "RSLED90":
-                    case "RSLED115":
-                    case "RSLED160":
-                    case "RSLED170":
-                        break;
-                    default:
-                        console.log("Unknow device type: " + device.elements[0].model);
-                }
-            //		this.current_device=this.no_device;
-            /*		old=this.shadowRoot.getElementById('device');
-		parent=old.parentElement;
-		parent.replaceChild(this.current_device=,)*/ }
+            else this._set_current_device(this.selected);
         }, 300);
+    }
+    // card configuration
+    static getConfigElement() {
+        return document.createElement("reef-card-editor");
     }
     setConfig(config) {
         console.log("setConfig");
-    // if (!config.entities) {
-    //   throw new Error("You need to define entities");
-    //   }
-    //   this.config = config;
+        // if (!config.entities) {
+        //   throw new Error("You need to define entities");
+        //   }
+        this.user_config = config;
     }
 }
 
 
 
+class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+    static get properties() {
+        return {
+            // hass: {},
+            _config: {
+                state: true
+            }
+        };
+    }
+    setConfig(config) {
+        this._config = config;
+    }
+    static styles = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+            .table {
+                display: table;
+            }
+            .row {
+                display: table-row;
+            }
+            .cell {
+                display: table-cell;
+                padding: 0.5em;
+            }
+        `;
+    render() {
+        console.log("CONFIG UI");
+        console.log(this._config);
+        if (this._config) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <form class="table">
+                <div class="row">
+                    <label class="label cell" for="device">Device:</label>
+                    <input
+                        @change="${this.handleChangedEvent}"
+                        class="value cell" id="device" value="${this._config['device']}"></input>
+                </div>
+            </form>
+        `;
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+    }
+    handleChangedEvent(changedEvent) {
+        console.log("CONFIG CHANGED");
+        // this._config is readonly, copy needed
+        var newConfig = Object.assign({}, this._config);
+        if (changedEvent.target.id == "device") newConfig.device = changedEvent.target.value;
+        const messageEvent = new CustomEvent("config-changed", {
+            detail: {
+                config: newConfig
+            },
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(messageEvent);
+    }
+}
 
-//import { ReefCardEditor } from "./editor";
+
 customElements.define("reef-card", (0, $bf513b85805031e6$export$8a2b7dacab8abd83));
 //customElements.define('rs-device', RSDevice);
-customElements.define('rs-dose', RSDOse);
-customElements.define("no-device", (0, $020e09b811cd87ab$export$942630849b5196f4));
-//customElements.define("reef-card-editor",ReefCardEditor);
+//customElements.define('rs-dose', RSDOse);
+//customElements.define("no-device",NoDevice);
+customElements.define("reef-card-editor", (0, $fc7d6e547b6fcb14$export$d7c6282dbee77504));
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "reef-card",

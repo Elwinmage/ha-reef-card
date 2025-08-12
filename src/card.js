@@ -18,7 +18,7 @@ export class ReefCard extends LitElement {
     static get properties() {
 	return {
 	    hass: {},
-	    config: {},
+	    user_config: {},
 	    select_devices: {type: Array},
 	    current_device: {type: String},
 	    version: {type: String},
@@ -36,6 +36,15 @@ export class ReefCard extends LitElement {
 	this.first_init=true;
 	this.devices={}
     }
+
+
+    _set_current_device_from_name(dev,name){
+	if (dev['text']==name){
+	    console.log("Found");
+	    console.log(dev['value']);
+	    this._set_current_device(dev['value']);
+	}
+    }
     
     render() {
 	console.log(this.hass);
@@ -44,16 +53,18 @@ export class ReefCard extends LitElement {
 	    this.first_init=false;
 	    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
 	    this.current_device=this.no_device;
+	    if(this.user_config['device']){
+		console.log("Device-Id SET");
+		console.log(this.select_devices);
+		this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
+
+		return html`${this.current_device}`;
+	    }
 	}
-/*	return html`
-          ${this.device_select()}
-          ${this.current_device.render()}
-    `;*/
 	return html`
           ${this.device_select()}
   ${this.current_device}
     `;
-
     }
 
     device_select(){
@@ -104,12 +115,50 @@ export class ReefCard extends LitElement {
 	
     }
 
+    
+    _set_current_device(device_id){
+        console.log('Selected -->', device_id);
+	var device=this.devices[device_id]
+	for  (var elt of device.elements){
+	    console.log(elt.name)
+	}
+	var model = device.elements[0].model
+	switch(model){
+	case "RSDOSE2":
+	case "RSDOSE4":
+	    //this.current_device=new RSDose(this.hass,device);
+	    console.log("RSDOSE4");
+	    this.current_device=html`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
+	    break;
+	case "RSRUN":
+	    //										this.current_device=new RSRun(this.hass,device);
+	    break;
+	case "RSWAVE":
+	    break;
+	case "RSMAT":
+	    //										this.current_device=new RSMat(this.hass,device);
+	    break;
+	case "RSATO+":
+	    break;
+	case "RSLED50":
+	case "RSLED60":
+	case "RSLED90":
+	case "RSLED115":
+	case "RSLED160":
+	case "RSLED170":
+	    break;
+	default:
+	    console.log("Unknow device type: "+device.elements[0].model)
+	}
+	
+    }
+    
     onChange(){
 	setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
-/*	    if(this.no_device==null){
-		this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
-	    }*/
+	    /*	    if(this.no_device==null){
+		    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
+		    }*/
 	    this.current_device=this.no_device;
 	    
             if (this.selected=="unselected"){
@@ -117,55 +166,22 @@ export class ReefCard extends LitElement {
                 console.log('Nothing selected');
             }
             else{
-                console.log('Selected -->', this.selected);
-		var device=this.devices[this.selected]
-		for  (var elt of device.elements){
-		    console.log(elt.name)
-		}
-		var model = device.elements[0].model
-		switch(model){
-		case "RSDOSE2":
-		case "RSDOSE4":
-		    //this.current_device=new RSDose(this.hass,device);
-		    console.log("RSDOSE4");
-		    this.current_device=html`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
-		    break;
-		case "RSRUN":
-		    //										this.current_device=new RSRun(this.hass,device);
-		    break;
-		case "RSWAVE":
-		    break;
-		case "RSMAT":
-		    //										this.current_device=new RSMat(this.hass,device);
-		    break;
-		case "RSATO+":
-		    break;
-		case "RSLED50":
-		case "RSLED60":
-		case "RSLED90":
-		case "RSLED115":
-		case "RSLED160":
-		case "RSLED170":
-		    break;
-		default:
-		    console.log("Unknow device type: "+device.elements[0].model)
-		}
-//		this.current_device=this.no_device;
-/*		old=this.shadowRoot.getElementById('device');
-		parent=old.parentElement;
-		parent.replaceChild(this.current_device=,)*/
-		
+		this._set_current_device(this.selected);
 	    }
 	},300)
     }
 
+    // card configuration
+    static getConfigElement() {
+        return document.createElement("reef-card-editor");
+    }
 
     setConfig(config) {
 	console.log("setConfig");
 	// if (!config.entities) {
 	//   throw new Error("You need to define entities");
 	//   }
-	//   this.config = config;
+	this.user_config = config;
 	
     }
 
