@@ -33,18 +33,14 @@ export default class RSDevice extends LitElement {
     }
 
     _press(button){
-	console.log(button)
-	console.log('pressed');
-	console.log(this.entities);
-	console.log(this.entities[button.name]);
+	console.log("button pressed: :"+this.entities[button.name].entity_id)
+	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
 
 
     _toggle(swtch){
-	console.log("toggle ");
-	console.log(swtch);
-	console.log(this.entities);
-	console.log(this.entities[swtch.name]);
+	console.log("toggle switch: :"+this.entities[swtch.name].entity_id)
+	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
     }
 
 

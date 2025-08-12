@@ -26,7 +26,6 @@ export const config = {
 		}
 		
 	    ],
-	    
 	    "buttons": [
 		{
 		    "name": "manual_head",
@@ -45,14 +44,18 @@ export const config = {
 	    "color": "0,129,197",
 	    "alpha": "0.4",
 	    "sensors": [],
+	    "switches" : [
+		{
+		    "name": "schedule_enabled",
+		    "type": "hacs",
+		    "class": "pump_state_head",
+		}
+		
+	    ],
 	    "buttons": [
 		{
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
-		},
-		{
-		    "name": "pump_state_head_2",
-		    "class": "pump_state_head",
 		},
 		{
 		    "name": "supplement_info",
@@ -66,15 +69,18 @@ export const config = {
 	    "color": "0,130,100",
 	    "alpha": "0.4",
 	    "sensors": [],
+	    "switches" : [
+		{
+		    "name": "schedule_enabled",
+		    "type": "hacs",
+		    "class": "pump_state_head",
+		}
+		
+	    ],
 	    "buttons": [
 		{
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
-		    "type": "hacs",
-		},
-		{
-		    "name": "pump_state_head_3",
-		    "class": "pump_state_head",
 		    "type": "hacs",
 		},
 		{
@@ -90,15 +96,18 @@ export const config = {
 	    "color": "100,160,75",
 	    "alpha": "0.4",
 	    "sensors": [],
+	    "switches" : [
+		{
+		    "name": "schedule_enabled",
+		    "type": "hacs",
+		    "class": "pump_state_head",
+		}
+		
+	    ],
 	    "buttons": [
 		{
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
-		    "type": "hacs",
-		},
-		{
-		    "name": "pump_state_head_4",
-		    "class": "pump_state_head",
 		    "type": "hacs",
 		},
 		{

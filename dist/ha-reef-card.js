@@ -618,6 +618,10 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
 
+.disable{
+  background-color: rgba(175,175,175,0.5);
+}
+
 div,img{
     flex: 0 0 auto;
     position: absolute;
@@ -650,16 +654,16 @@ class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$exp
         }
     }
     _press(button) {
-        console.log(button);
-        console.log('pressed');
-        console.log(this.entities);
-        console.log(this.entities[button.name]);
+        console.log("button pressed: :" + this.entities[button.name].entity_id);
+        this.hass.callService("button", "press", {
+            entity_id: this.entities[button.name].entity_id
+        });
     }
     _toggle(swtch) {
-        console.log("toggle ");
-        console.log(swtch);
-        console.log(this.entities);
-        console.log(this.entities[swtch.name]);
+        console.log("toggle switch: :" + this.entities[swtch.name].entity_id);
+        this.hass.callService("switch", "toggle", {
+            entity_id: this.entities[swtch.name].entity_id
+        });
     }
     _render_switch(swtch) {
         console.log("RENDER switch");
@@ -822,14 +826,17 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "color": "0,129,197",
             "alpha": "0.4",
             "sensors": [],
+            "switches": [
+                {
+                    "name": "schedule_enabled",
+                    "type": "hacs",
+                    "class": "pump_state_head"
+                }
+            ],
             "buttons": [
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head"
-                },
-                {
-                    "name": "pump_state_head_2",
-                    "class": "pump_state_head"
                 },
                 {
                     "name": "supplement_info",
@@ -842,15 +849,17 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "color": "0,130,100",
             "alpha": "0.4",
             "sensors": [],
+            "switches": [
+                {
+                    "name": "schedule_enabled",
+                    "type": "hacs",
+                    "class": "pump_state_head"
+                }
+            ],
             "buttons": [
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head",
-                    "type": "hacs"
-                },
-                {
-                    "name": "pump_state_head_3",
-                    "class": "pump_state_head",
                     "type": "hacs"
                 },
                 {
@@ -864,15 +873,17 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "color": "100,160,75",
             "alpha": "0.4",
             "sensors": [],
+            "switches": [
+                {
+                    "name": "schedule_enabled",
+                    "type": "hacs",
+                    "class": "pump_state_head"
+                }
+            ],
             "buttons": [
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head",
-                    "type": "hacs"
-                },
-                {
-                    "name": "pump_state_head_4",
-                    "class": "pump_state_head",
                     "type": "hacs"
                 },
                 {
