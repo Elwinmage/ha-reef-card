@@ -655,26 +655,50 @@ class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$exp
     }
     _press(button) {
         console.log("button pressed: :" + this.entities[button.name].entity_id);
-        this.hass.callService("button", "press", {
-            entity_id: this.entities[button.name].entity_id
-        });
+    //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
     _toggle(swtch) {
-        console.log("toggle switch: :" + this.entities[swtch.name].entity_id);
-        this.hass.callService("switch", "toggle", {
-            entity_id: this.entities[swtch.name].entity_id
+        console.log(this.entities);
+        console.log(swtch);
+        var entity_id = this.entities[swtch.name].entity_id;
+        console.log("toggle switch: " + entity_id);
+        //	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
+        const actionConfig = {
+            entity: entity_id,
+            tap_action: {
+                action: "more-info"
+            }
+        };
+        // Open more info on tap action
+        const event = new Event("hass-action", {
+            bubbles: true,
+            composed: true
         });
-    }
+        event.detail = {
+            config: actionConfig,
+            action: "tap"
+        };
+        console.log("EVENT ***");
+        console.log(event);
+        this.dispatchEvent(event);
+    /*	let e = new Event('hass-more-info', { composed: true });
+	e.detail = { entity_id};
+	console.log(e);
+	let res=this.dispatchEvent(e);
+	console.log(res);*/ }
     _render_switch(swtch) {
         console.log("RENDER switch");
         console.log(swtch);
         console.log(this.config);
+        console.log(this.entities[swtch.name]);
+        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
  <style>
       #${swtch.name}:hover {
 background-color: rgba(${this.config.color},${this.config.alpha});
 }
 </style>
+<ha-entity-toggle .hass="${this.hass}" .label="${swtch.name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
 <div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"></div>
 `;
     }
