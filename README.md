@@ -8,7 +8,7 @@
 
 > [!CAUTION]
 > This card is on early developpement and should only be install for test purposes.  
-> The first version will be published in hacs standard library in few weeks and will only support ReefDose 4.<br />
+> The first version will be published in hacs standard library in few weeks and will support ReefDose 4 from Redsea.<br />
 > You can vote to choose the next supported device [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 > [!NOTE]
