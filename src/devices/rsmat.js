@@ -4,7 +4,7 @@ import {config} from "./mapping/RSMAT.js";
 
 // TODO: RSMAT Implement basic services
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/17
-//   labels: enhacement, rsmat
+//   labels: enhancement, rsmat
 
 export default class RSMat extends RSDevice{
 

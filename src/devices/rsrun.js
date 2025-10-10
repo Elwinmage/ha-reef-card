@@ -4,12 +4,12 @@ import {config} from "./mapping/RSRUN.js";
 
 // TODO: RSUN Implement advanced schedule edition
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/19
-//   labels: enhacement, rsrun
+//   labels: enhancement, rsrun
 export default class RSRun extends RSDevice{
 
 // TODO: RSUN Implement basic services
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/18
-//   labels: enhacement, rsrun
+//   labels: enhancement, rsrun
     constructor(hass,device){
 				super(hass,device,config)
     }
