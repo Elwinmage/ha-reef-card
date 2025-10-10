@@ -9,10 +9,12 @@ import styles from "./rsdose.styles";
  * RSDose 
  */
 // TODO: RSDOSE Implement advanced schedule edition
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/14
 //   labels: enhacement, rsdose
 export default class RSDose extends RSDevice{
 
 // TODO: RSDOSE Implement basic services
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
 //   labels: enhacement, rsdose
     static styles = styles;
     _heads = []

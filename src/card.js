@@ -124,16 +124,20 @@ export class ReefCard extends LitElement {
 	}
 	var model = device.elements[0].model
 	    //TODO : Implement MAIN tank view support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
 	    // labels: enhancement
 
 	switch(model){
 	    //TODO : Implement RSDOSE support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/10
 	    // labels: enhancement, rsdose
 	case "RSDOSE2":
 	    //TODO : Implement RSDOSE2 support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/9
 	    // labels: enhancement, rsdose, rsdose2
 	case "RSDOSE4":
 	    //TODO : Implement RSDOSE4 support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
 	    // labels: enhancement, rsdose, rsdose4
 	    //this.current_device=new RSDose(this.hass,device);
 	    console.log("RSDOSE4");
@@ -141,27 +145,32 @@ export class ReefCard extends LitElement {
 	    break;
 	case "RSRUN":
 	    //TODO : Implement RSRUN support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/7
 	    // labels: enhancement, rsrun
 
 	    //										this.current_device=new RSRun(this.hass,device);
 	    break;
 	case "RSWAVE":
 	    //TODO : Implement RSWAVE support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/6
 	    // labels: enhancement, rswave
 
 	    break;
 	case "RSMAT":
 	    //TODO : Implement RSMAT support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
 	    // labels: enhancement, rsmat
 
 	    //										this.current_device=new RSMat(this.hass,device);
 	    break;
 	case "RSATO+":
 	    //TODO : Implement RSATO+ support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/4
 	    // labels: enhancement, rsato
 	    
 	    break;
 	    //TODO : Implement RSLED support
+	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/3
 	    // labels: enhancement, rsled
 	    
 	case "RSLED50":
