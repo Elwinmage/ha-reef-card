@@ -7,7 +7,8 @@
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 > [!CAUTION]
-> Under developpement, first version will be release in few weeks!
+> This card is on early developpement and should only be install for test purposes.  
+> The first version will be published in hacs standard library in few weeks.
 
 > [!NOTE]
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
@@ -121,7 +122,7 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 > [!CAUTION]
 > This card is on early developpement and should only be install for test purposes.  
 > The first version will be published in hacs standard library in few weeks.
-> For now, if you want to test it use the "Custom repositary" in hacs parameters.
+> For now, if you want to test it, use the "Custom repositary" in hacs parameters.
 
 # Configuration
 
