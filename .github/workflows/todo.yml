@@ -4,7 +4,9 @@ jobs:
   build:
     runs-on: "ubuntu-latest"
     permissions:
+      contents: write
       issues: write
+      pull-requests: write
     steps:
       - uses: "actions/checkout@v4"
       - name: "TODO to Issue"
@@ -13,6 +15,10 @@ jobs:
           AUTO_ASSIGN: "true"
           INSERT_ISSUE_URLS: "true"
           CLOSE_ISSUES: "true"
+      - name: Set Git user
+        run: |
+          git config --global user.email "moranderic31@gmail.com"
+          git config --global user.name "Elwinmage"          
       - name: Commit and Push Changes
         run: |
           git add -A
