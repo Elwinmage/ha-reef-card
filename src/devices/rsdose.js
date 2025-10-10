@@ -8,8 +8,12 @@ import styles from "./rsdose.styles";
 /*
  * RSDose 
  */
+// TODO: RSDOSE Implement advanced schedule edition
+//   labels: enhacement, rsdose
 export default class RSDose extends RSDevice{
 
+// TODO: RSDOSE Implement basic services
+//   labels: enhacement, rsdose
     static styles = styles;
     _heads = []
     

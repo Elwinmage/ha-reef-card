@@ -2,8 +2,12 @@ import { html,css } from "../lit-core.min.js";
 import RSDevice from "./device.js";
 import {config} from "./mapping/RSRUN.js";
 
+// TODO: RSUN Implement advanced schedule edition
+//   labels: enhacement, rsrun
 export default class RSRun extends RSDevice{
 
+// TODO: RSUN Implement basic services
+//   labels: enhacement, rsrun
     constructor(hass,device){
 				super(hass,device,config)
     }

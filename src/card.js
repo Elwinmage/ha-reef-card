@@ -123,23 +123,47 @@ export class ReefCard extends LitElement {
 	    console.log(elt.name)
 	}
 	var model = device.elements[0].model
+	    //TODO : Implement MAIN tank view support
+	    // labels: enhancement
+
 	switch(model){
+	    //TODO : Implement RSDOSE support
+	    // labels: enhancement, rsdose
 	case "RSDOSE2":
+	    //TODO : Implement RSDOSE2 support
+	    // labels: enhancement, rsdose, rsdose2
 	case "RSDOSE4":
+	    //TODO : Implement RSDOSE4 support
+	    // labels: enhancement, rsdose, rsdose4
 	    //this.current_device=new RSDose(this.hass,device);
 	    console.log("RSDOSE4");
 	    this.current_device=html`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
 	    break;
 	case "RSRUN":
+	    //TODO : Implement RSRUN support
+	    // labels: enhancement, rsrun
+
 	    //										this.current_device=new RSRun(this.hass,device);
 	    break;
 	case "RSWAVE":
+	    //TODO : Implement RSWAVE support
+	    // labels: enhancement, rswave
+
 	    break;
 	case "RSMAT":
+	    //TODO : Implement RSMAT support
+	    // labels: enhancement, rsmat
+
 	    //										this.current_device=new RSMat(this.hass,device);
 	    break;
 	case "RSATO+":
+	    //TODO : Implement RSATO+ support
+	    // labels: enhancement, rsato
+	    
 	    break;
+	    //TODO : Implement RSLED support
+	    // labels: enhancement, rsled
+	    
 	case "RSLED50":
 	case "RSLED60":
 	case "RSLED90":

@@ -2,6 +2,8 @@ import { html,css } from "../lit-core.min.js";
 import RSDevice from "./device.js";
 import {config} from "./mapping/RSMAT.js";
 
+// TODO: RSMAT Implement basic services
+//   labels: enhacement, rsmat
 
 export default class RSMat extends RSDevice{
 
