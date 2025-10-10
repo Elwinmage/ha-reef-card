@@ -25,7 +25,7 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 > The list of future implementations can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
 > The list of bugs can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
 
-# Features
+# Compatibility
 
 ✅ Implemented  ☑️ Current Work ❌ Planned
 <table>
