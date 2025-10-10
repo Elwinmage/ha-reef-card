@@ -20,6 +20,7 @@
 Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) it takes your Redsea (ReefBeat) devices automaticaly into account.
 > [!NOTE]
 > If you have non redsea devices and you want them to be taken into account, you can ask [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
+
 > [!TIP]
 > The list of future implementations can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
 > The list of bugs can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
