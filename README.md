@@ -8,13 +8,11 @@
 
 > [!CAUTION]
 > This card is on early developpement and should only be install for test purposes.  
-> The first version will be published in hacs standard library in few weeks.
+> The first version will be published in hacs standard library in few weeks and will support ReefDose 4 from Redsea.<br />
+> ***You can vote to choose the next supported device [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).***
 
 > [!NOTE]
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
-
-> [!TIP]
-> [You can vote to choose the next supported device](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # Overview
 **Reef card** for home assistant help you to manage your reef tank. 
@@ -23,7 +21,11 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 > [!NOTE]
 > If you have non redsea devices and you want them to be taken into account, you can ask [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
 
-# Features
+> [!TIP]
+> The list of future implementations can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
+> The list of bugs can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
+
+# Compatibility
 
 ✅ Implemented  ☑️ Current Work ❌ Planned
 <table>
