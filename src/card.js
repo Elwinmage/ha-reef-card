@@ -3,8 +3,7 @@ import {
     html,
  } from "lit";
 
-/*import styles_base from './devices/device.styles';
-import styles_rsdose4 from './devices/rsdose.styles';*/
+import DeviceList from './common';
 
 import styles from './card.styles';
 
@@ -23,25 +22,20 @@ export class ReefCard extends LitElement {
 	    current_device: {type: String},
 	    version: {type: String},
 	    progs: {type: Array},
-	    devices: {},
+	    devices_list: {},
 	    current_device: html``
 	};
     }
-
     
     constructor() {
 	super();
 	this.version='v0.0.1';
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
-	this.devices={}
     }
-
 
     _set_current_device_from_name(dev,name){
 	if (dev['text']==name){
-	    console.log("Found");
-	    console.log(dev['value']);
 	    this._set_current_device(dev['value']);
 	}
     }
@@ -54,8 +48,6 @@ export class ReefCard extends LitElement {
 	    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
 	    this.current_device=this.no_device;
 	    if(this.user_config['device']){
-		console.log("Device-Id SET");
-		console.log(this.select_devices);
 		this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
 
 		return html`${this.current_device}`;
@@ -78,51 +70,21 @@ export class ReefCard extends LitElement {
     `;
     }
 
-    device_compare( a, b ) {
-	if ( a.text < b.text ){
-	    return -1;
-	}
-	else if ( a.text > b.text ){
-	    return 1;
-	}
-	return 0;
-    }
-    
     init_devices(){
-	console.log(this.hass);
-	var _devices=[]
-	for (var device_id in this.hass.devices){
-	    let dev=this.hass.devices[device_id];
-	    let dev_id=dev.identifiers[0];
-	    if (Array.isArray(dev_id) && dev_id[0]=='redsea'){
-		// dev.lenght==2 to get only main device, not sub
-		if(dev_id.length==2){
-		    _devices.push({value:dev.primary_config_entry,text:dev.name});
-		}
-		if  (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)){
-		    Object.defineProperty(this.devices,dev.primary_config_entry , {value:{name:dev.name,elements:[dev]}})
-		}
-		else{
-		    this.devices[dev.primary_config_entry].elements.push(dev)
-		}
-	    }
-	}
-        _devices.sort(this.device_compare);                                                                                                                                             
-	console.log(this.devices)
-        for (var d of _devices){
-            this.select_devices.push(d);
-        }                                                                                                                                                                               
-	
+	this.devices_list=new DeviceList(this.hass);
+	for (var d of this.devices_list.main_devices){
+	    this.select_devices.push(d);
+	}// for
     }
 
-    
     _set_current_device(device_id){
         console.log('Selected -->', device_id);
-	var device=this.devices[device_id]
-	for  (var elt of device.elements){
-	    console.log(elt.name)
+	if (device_id=="unselected"){
+	    this.current_device=this.no_device;
+	    return;
 	}
-	var model = device.elements[0].model
+	var device=this.devices_list.devices[device_id];
+	var model = device.elements[0].model;
 	    //TODO : Implement MAIN tank view support
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
 	    // labels: enhancement
@@ -140,7 +102,6 @@ export class ReefCard extends LitElement {
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
 	    // labels: enhancement, rsdose, rsdose4
 	    //this.current_device=new RSDose(this.hass,device);
-	    console.log("RSDOSE4");
 	    this.current_device=html`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
 	    break;
 	case "RSRUN":
@@ -181,7 +142,7 @@ export class ReefCard extends LitElement {
 	case "RSLED170":
 	    break;
 	default:
-	    console.log("Unknow device type: "+device.elements[0].model)
+	    console.log("Unknow device type: "+model)
 	}
 	
     }
@@ -189,13 +150,9 @@ export class ReefCard extends LitElement {
     onChange(){
 	setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
-	    /*	    if(this.no_device==null){
-		    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
-		    }*/
 	    this.current_device=this.no_device;
 	    
             if (this.selected=="unselected"){
-		
                 console.log('Nothing selected');
             }
             else{
