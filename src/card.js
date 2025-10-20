@@ -49,7 +49,6 @@ export class ReefCard extends LitElement {
 	    this.current_device=this.no_device;
 	    if(this.user_config['device']){
 		this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
-
 		return html`${this.current_device}`;
 	    }
 	}

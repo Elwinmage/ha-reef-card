@@ -615,8 +615,50 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 
 
 
+class $038fea56b681b6a5$export$2e2bcd8739ae039 {
+    constructor(hass){
+        this._hass = hass;
+        this.main_devices = [];
+        this.devices = {};
+        this.init_devices();
+    }
+    device_compare(a, b) {
+        if (a.text < b.text) return -1;
+        else if (a.text > b.text) return 1;
+         // else
+        return 0;
+    }
+    init_devices() {
+        console.log(this._hass);
+        for(var device_id in this._hass.devices){
+            let dev = this._hass.devices[device_id];
+            let dev_id = dev.identifiers[0];
+            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
+                // dev.lenght==2 to get only main device, not sub
+                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
+                    value: dev.primary_config_entry,
+                    text: dev.name
+                });
+                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
+                    value: {
+                        name: dev.name,
+                        elements: [
+                            dev
+                        ]
+                    }
+                });
+                else this.devices[dev.primary_config_entry].elements.push(dev);
+            }
+        } //for
+        this.main_devices.sort(this.device_compare);
+        console.log(this.devices);
+    }
+}
+
+
 
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+
 
 .disable{
   background-color: rgba(175,175,175,0.5);
@@ -630,6 +672,36 @@ div,img{
 `;
 
 
+
+
+const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
+    en: {
+        canNotFindTranslation: "Can not find translation string: ",
+        disabledInHa: "Device disabled in HomeAssistant!"
+    },
+    fr: {
+        canNotFindTranslation: "Traduction introuvable pour: ",
+        disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!"
+    }
+};
+
+
+class $a10d60b4def555b4$var$myi18n {
+    constructor(){
+        this.fallback = "en";
+        this.lang = document.querySelector('home-assistant').hass.selectedLanguage;
+        this.d = (0, $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
+    }
+    _(message, params = []) {
+        console.log("Translate " + message + " in " + this.lang);
+        let res = this.d[this.lang][message];
+        if (res == null) res = this.d[this.fallback][message];
+        if (res == null) res = this._("canNotFindTranslation") + message;
+        return res;
+    }
+}
+var $a10d60b4def555b4$var$i18n = new $a10d60b4def555b4$var$myi18n();
+var $a10d60b4def555b4$export$2e2bcd8739ae039 = $a10d60b4def555b4$var$i18n;
 
 
 class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
@@ -687,19 +759,23 @@ class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$exp
 	let res=this.dispatchEvent(e);
 	console.log(res);*/ }
     _render_switch(swtch) {
-        console.log("RENDER switch");
-        console.log(swtch);
-        console.log(this.config);
-        console.log(this.entities[swtch.name]);
-        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+        // console.log("RENDER switch");
+        // console.log(swtch);
+        // console.log(this.config);
+        // console.log(this.entities[swtch.name]);
+        // console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+        let label_name = swtch.name;
+        // Don not display label
+        if ('label' in swtch && swtch.label == false) label_name = '';
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
  <style>
       #${swtch.name}:hover {
 background-color: rgba(${this.config.color},${this.config.alpha});
 }
 </style>
-<ha-entity-toggle .hass="${this.hass}" .label="${swtch.name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"></div>
+<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}">
+<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+</div>
 `;
     }
     _render_button(button) {
@@ -736,8 +812,14 @@ background-color: rgba(${this.config.color},${this.config.alpha});
             }
         ];
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-${actuators.map((type)=>this._render_actuators_type(type))}
-`;
+                     ${actuators.map((type)=>this._render_actuators_type(type))}
+                      `;
+    }
+    _render_disabled() {
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="device_bg">
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' />
+                          <p class='disabled_in_ha'>${(0, $a10d60b4def555b4$export$2e2bcd8739ae039)._("disabledInHa")}</p>
+                        </div">`;
     }
 }
 window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae039);
@@ -746,7 +828,7 @@ window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae0
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.png", import.meta.url)
+    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
 };
 
 
@@ -809,8 +891,16 @@ window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b519
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
+    "switches": [
+        {
+            "name": "device_state",
+            "type": "hacs",
+            "label": false,
+            "class": "on_off"
+        }
+    ],
     "heads": {
         "head_1": {
             "color": "140,67,148",
@@ -1013,16 +1103,16 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         let img = null;
         switch(supplement_uid.state){
             case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-                img = new URL("redsea_foundation_A.png", import.meta.url);
+                img = new URL("redsea_foundation_A.69ced2e5.png", import.meta.url);
                 break;
             case "76830db3-a0bd-459a-9974-76a57d026893":
-                img = new URL("redsea_foundation_B.png", import.meta.url);
+                img = new URL("redsea_foundation_B.fd69d513.png", import.meta.url);
                 break;
             case "f524734e-8651-496e-b09b-640b40fc8bab":
-                img = new URL("redsea_foundation_C.png", import.meta.url);
+                img = new URL("redsea_foundation_C.3bc03a8d.png", import.meta.url);
                 break;
             default:
-                img = new URL("generic_container.png", import.meta.url);
+                img = new URL("generic_container.973c97af.png", import.meta.url);
                 break;
         }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -1046,6 +1136,15 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 
 
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+.on_off{
+flex: 0 0 auto;
+ position: absolute;
+aspect-ratio: 1/1;
+width: 15%;
+border-radius: 50%;
+top: 26%;
+left: 0%;
+}
 
     .head{
     flex: 0 0 auto;
@@ -1079,23 +1178,6 @@ left: 65%;
      top: 0%;
 //border: 4px solid blue;
 position: absolute;
-    }
-
-
-    .device_bg{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    aspect-ratio: 1/1.2;
-//border: 2px solid red;
-    }
-
-    .device_img{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
     }
 
     .container{
@@ -1169,8 +1251,53 @@ position: absolute;
 `;
 
 
+
+var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+.device_bg{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    aspect-ratio: 1/1.2;
+ //border: 2px solid red;
+    }
+
+.device_img{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    }
+
+.device_img_disabled{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    filter: grayscale(80%);
+    }
+
+.disabled_in_ha{
+  color: white;
+  text-align: center;
+  position : relative;
+  width: 100%;
+  top:-23%;
+  left: 0%;
+  background-color:rgba(255,0,0,0.5);
+}
+  
+`;
+
+
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$export$2e2bcd8739ae039) {
-    static styles = (0, $9e31fe09da958909$export$2e2bcd8739ae039);
+    // TODO: RSDOSE Implement basic services
+    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
+    //   labels: enhancement, rsdose
+    static styles = [
+        (0, $9e31fe09da958909$export$2e2bcd8739ae039),
+        (0, $244c2d90fdd5377f$export$2e2bcd8739ae039)
+    ];
     _heads = [];
     constructor(hass, device){
         super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device);
@@ -1202,10 +1329,23 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
 <div class="head" id="head_${head_id}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" />
+
 </div>
 `;
     }
     render() {
+        // disabled
+        let disabled = false;
+        let sub_nb = this.device.elements.length;
+        for(var i = 0; i < sub_nb; i++)if (this.device.elements[i].disabled_by != null) {
+            disabled = true;
+            break;
+        } // if
+         // for
+        if (disabled == true) {
+            console.log("DISABLED");
+            return this._render_disabled();
+        } //if
         this._populate_entities_with_heads();
         console.log("000");
         console.log(this.hass);
@@ -1219,6 +1359,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._render_head(head))}
        </div>
+        ${this._render_actuators()}
 	</div>`;
     }
 }
@@ -1243,7 +1384,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             progs: {
                 type: Array
             },
-            devices: {},
+            devices_list: {},
             current_device: (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``
         };
     }
@@ -1257,14 +1398,9 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             }
         ];
         this.first_init = true;
-        this.devices = {};
     }
     _set_current_device_from_name(dev, name) {
-        if (dev['text'] == name) {
-            console.log("Found");
-            console.log(dev['value']);
-            this._set_current_device(dev['value']);
-        }
+        if (dev['text'] == name) this._set_current_device(dev['value']);
     }
     render() {
         console.log(this.hass);
@@ -1274,8 +1410,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             this.no_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<no-device id="device" hass="${this.hass}"/>`;
             this.current_device = this.no_device;
             if (this.user_config['device']) {
-                console.log("Device-Id SET");
-                console.log(this.select_devices);
                 this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
                 return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.current_device}`;
             }
@@ -1295,48 +1429,35 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
 <div class="device">
     `;
     }
-    device_compare(a, b) {
-        if (a.text < b.text) return -1;
-        else if (a.text > b.text) return 1;
-        return 0;
-    }
     init_devices() {
-        console.log(this.hass);
-        var _devices = [];
-        for(var device_id in this.hass.devices){
-            let dev = this.hass.devices[device_id];
-            let dev_id = dev.identifiers[0];
-            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
-                // dev.lenght==2 to get only main device, not sub
-                if (dev_id.length == 2) _devices.push({
-                    value: dev.primary_config_entry,
-                    text: dev.name
-                });
-                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
-                    value: {
-                        name: dev.name,
-                        elements: [
-                            dev
-                        ]
-                    }
-                });
-                else this.devices[dev.primary_config_entry].elements.push(dev);
-            }
-        }
-        _devices.sort(this.device_compare);
-        console.log(this.devices);
-        for (var d of _devices)this.select_devices.push(d);
+        this.devices_list = new (0, $038fea56b681b6a5$export$2e2bcd8739ae039)(this.hass);
+        for (var d of this.devices_list.main_devices)this.select_devices.push(d);
+         // for
     }
     _set_current_device(device_id) {
         console.log('Selected -->', device_id);
-        var device = this.devices[device_id];
-        for (var elt of device.elements)console.log(elt.name);
+        if (device_id == "unselected") {
+            this.current_device = this.no_device;
+            return;
+        }
+        var device = this.devices_list.devices[device_id];
         var model = device.elements[0].model;
+        //TODO : Implement MAIN tank view support
+        //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
+        // labels: enhancement
         switch(model){
+            //TODO : Implement RSDOSE support
+            //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/10
+            // labels: enhancement, rsdose
             case "RSDOSE2":
+            //TODO : Implement RSDOSE2 support
+            //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/9
+            // labels: enhancement, rsdose, rsdose2
             case "RSDOSE4":
+                //TODO : Implement RSDOSE4 support
+                //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
+                // labels: enhancement, rsdose, rsdose4
                 //this.current_device=new RSDose(this.hass,device);
-                console.log("RSDOSE4");
                 this.current_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
                 break;
             case "RSRUN":
@@ -1347,6 +1468,9 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
                 break;
             case "RSATO+":
                 break;
+            //TODO : Implement RSLED support
+            //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/3
+            // labels: enhancement, rsled
             case "RSLED50":
             case "RSLED60":
             case "RSLED90":
@@ -1355,15 +1479,13 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             case "RSLED170":
                 break;
             default:
-                console.log("Unknow device type: " + device.elements[0].model);
+                console.log("Unknow device type: " + model);
         }
     }
     onChange() {
         setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
-            /*	    if(this.no_device==null){
-		    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
-		    }*/ this.current_device = this.no_device;
+            this.current_device = this.no_device;
             if (this.selected == "unselected") console.log('Nothing selected');
             else this._set_current_device(this.selected);
         }, 300);
@@ -1383,17 +1505,37 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
 
 
 
+
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
     static get properties() {
         return {
             // hass: {},
             _config: {
                 state: true
-            }
+            },
+            select_devices: {
+                type: Array
+            },
+            devices_list: {}
         };
+    }
+    constructor(){
+        super();
+        this.select_devices = [
+            {
+                value: 'unselected',
+                text: "Select a device"
+            }
+        ];
+        this.first_init = true;
     }
     setConfig(config) {
         this._config = config;
+    }
+    init_devices() {
+        this.devices_list = new (0, $038fea56b681b6a5$export$2e2bcd8739ae039)(this.hass);
+        for (var d of this.devices_list.main_devices)this.select_devices.push(d);
+         // for
     }
     static styles = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
             .table {
@@ -1408,25 +1550,38 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$ex
             }
         `;
     render() {
-        console.log("CONFIG UI");
-        console.log(this._config);
-        if (this._config) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        if (this._config) {
+            if (this.first_init == true) {
+                this.first_init = false;
+                this.init_devices();
+            }
+            console.log("??????");
+            console.log(this._config);
+            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
             <form class="table">
                 <div class="row">
                     <label class="label cell" for="device">Device:</label>
-                    <input
-                        @change="${this.handleChangedEvent}"
-                        class="value cell" id="device" value="${this._config['device']}"></input>
+                    <select id="device" class="value cell" @change="${this.handleChangedEvent}">
+                      ${this.select_devices.map((option)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      <option value="${option.value}" ?selected=${this._config.device === option.text}>${option.text}</option>
+                        `)}
+                   </select>
                 </div>
             </form>
         `;
+        }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
     }
     handleChangedEvent(changedEvent) {
-        console.log("CONFIG CHANGED");
         // this._config is readonly, copy needed
         var newConfig = Object.assign({}, this._config);
-        if (changedEvent.target.id == "device") newConfig.device = changedEvent.target.value;
+        var elt = this.shadowRoot.getElementById("device");
+        let val = 'unselected';
+        if (elt.selectedIndex == 0) delete newConfig.device;
+        else {
+            val = elt.options[elt.selectedIndex].text;
+            newConfig.device = val;
+        }
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
                 config: newConfig
@@ -1440,9 +1595,6 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$ex
 
 
 customElements.define("reef-card", (0, $bf513b85805031e6$export$8a2b7dacab8abd83));
-//customElements.define('rs-device', RSDevice);
-//customElements.define('rs-dose', RSDOse);
-//customElements.define("no-device",NoDevice);
 customElements.define("reef-card-editor", (0, $fc7d6e547b6fcb14$export$d7c6282dbee77504));
 window.customCards = window.customCards || [];
 window.customCards.push({

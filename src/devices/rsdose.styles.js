@@ -1,6 +1,15 @@
 import {css} from 'lit';
 
 export default css`
+.on_off{
+flex: 0 0 auto;
+ position: absolute;
+aspect-ratio: 1/1;
+width: 15%;
+border-radius: 50%;
+top: 26%;
+left: 0%;
+}
 
     .head{
     flex: 0 0 auto;
@@ -34,23 +43,6 @@ left: 65%;
      top: 0%;
 //border: 4px solid blue;
 position: absolute;
-    }
-
-
-    .device_bg{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    aspect-ratio: 1/1.2;
-//border: 2px solid red;
-    }
-
-    .device_img{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
     }
 
     .container{
@@ -122,3 +114,4 @@ position: absolute;
     stroke: black;
     }
 `
+

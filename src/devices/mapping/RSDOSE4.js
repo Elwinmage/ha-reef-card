@@ -3,6 +3,14 @@ export const config = {
     "model": "RSDOSE4",
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
+    "switches": [
+	{
+	    "name": "device_state",
+	    "type":"hacs",
+	    "label":false,
+	    "class":"on_off",
+	}
+    ],
     "heads": {
 	"head_1": {
 	    "color": "140,67,148",

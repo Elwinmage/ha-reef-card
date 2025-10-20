@@ -2,7 +2,9 @@ import { html } from "lit";
 import RSDevice from "./device";
 import {config} from "./mapping/RSDOSE4";
 import DoseHead from "./dose_head";
-import styles from "./rsdose.styles";
+import style_rsdose from "./rsdose.styles";
+import style_common from "./common.styles";
+
 
 
 /*
@@ -16,7 +18,7 @@ export default class RSDose extends RSDevice{
 // TODO: RSDOSE Implement basic services
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
 //   labels: enhancement, rsdose
-    static styles = styles;
+    static styles = [style_rsdose,style_common];
     _heads = []
     
     constructor(hass,device){
@@ -61,13 +63,26 @@ export default class RSDose extends RSDevice{
 	return html`
 <div class="head" id="head_${head_id}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" />
+
 </div>
 `;
 
     }
     
-    
     render(){
+	// disabled
+	let disabled=false;
+	let sub_nb=this.device.elements.length;
+	for( var i = 0; i<sub_nb; i++){
+	    if (this.device.elements[i].disabled_by!=null){
+		disabled=true;
+		break;
+	    }// if
+	}// for
+	if (disabled==true){
+	    console.log("DISABLED");
+	    return this._render_disabled();
+	}//if
 	this._populate_entities_with_heads();
 	console.log("000");
 	console.log(this.hass);
@@ -79,6 +94,7 @@ export default class RSDose extends RSDevice{
         <div class="heads">
 	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
        </div>
+        ${this._render_actuators()}
 	</div>`;
 
 

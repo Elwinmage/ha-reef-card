@@ -52,13 +52,15 @@ export class ReefCardEditor extends LitElement {
 		this.first_init=false;
 		this.init_devices();
 	    }
+	    console.log("??????");
+	    console.log(this._config);
 	    return html`
             <form class="table">
                 <div class="row">
                     <label class="label cell" for="device">Device:</label>
                     <select id="device" class="value cell" @change="${this.handleChangedEvent}">
                       ${this.select_devices.map(option => html`
-                      <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
+                      <option value="${option.value}" ?selected=${this._config.device === option.text}>${option.text}</option>
                         `)}
                    </select>
                 </div>

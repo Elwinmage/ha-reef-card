@@ -1,8 +1,11 @@
 import { html, LitElement } from "lit";
 
+import i18n from "../translations/myi18n.js";
+
 /*
  * RSDose 
  */
+
 export default class RSDevice extends LitElement {
 
     static get properties() {
@@ -19,7 +22,6 @@ export default class RSDevice extends LitElement {
 	this.device = device;
 	this.config=config;
 	this.entities={};
-
     }
 
     _populate_entities(){
@@ -75,19 +77,26 @@ export default class RSDevice extends LitElement {
 
 
     _render_switch(swtch){
-	console.log("RENDER switch");
-	console.log(swtch);
-	console.log(this.config);
-	console.log(this.entities[swtch.name]);
-	console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+	// console.log("RENDER switch");
+	// console.log(swtch);
+	// console.log(this.config);
+	// console.log(this.entities[swtch.name]);
+	// console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+	let label_name=swtch.name;
+	// Don not display label
+	if ('label' in swtch && swtch.label==false){
+	    label_name='';
+	}
+	
         return html`
  <style>
       #${swtch.name}:hover {
 background-color: rgba(${this.config.color},${this.config.alpha});
 }
 </style>
-<ha-entity-toggle .hass="${this.hass}" .label="${swtch.name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-<div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}"></div>
+<div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
+<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+</div>
 `;
     }
 
@@ -122,9 +131,16 @@ background-color: rgba(${this.config.color},${this.config.alpha});
     _render_actuators(){
 	let actuators=[{"name":"buttons","fn":this._render_button},{"name":"switches","fn":this._render_switch}];
 	return html `
-${actuators.map(type => this._render_actuators_type(type))}
-`;
+                     ${actuators.map(type => this._render_actuators_type(type))}
+                      `;
     }
+
+    _render_disabled(){
+	return html`<div class="device_bg">
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' />
+                          <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
+                        </div">`;
+    }// end of function -- _render_disabled
 }
 window.customElements.define('rs-device', RSDevice);
 
