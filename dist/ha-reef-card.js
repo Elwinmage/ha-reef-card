@@ -704,7 +704,136 @@ var $a10d60b4def555b4$var$i18n = new $a10d60b4def555b4$var$myi18n();
 var $a10d60b4def555b4$export$2e2bcd8739ae039 = $a10d60b4def555b4$var$i18n;
 
 
+
+
+var $d4da9a7c12391d03$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+
+:hover{
+cursor: pointer;
+}
+
+.switch_on{
+position :absolute;
+border-radius: 30px;
+background-color: rgba(255,10,10,0.5);
+border: 1px solid red;
+width: 100%;
+height: 100%;
+}
+
+.switch_off{
+position :absolute;
+border-radius: 30px;
+background-color: rgba(175,175,175,0.5);
+//border: 1px solid red;
+width: 100%;
+height: 100%;
+}
+
+.switch_in_on{
+position :absolute;
+left: 50%;
+top: -75%;
+aspect-ratio: 1/1;
+border-radius: 30px;
+background-color: rgba(250,250,250,1);
+//border: 1px solid red;
+width: 60%;
+}
+
+.switch_in_off{
+position :absolute;
+left: -10%;
+top: -75%;
+aspect-ratio: 1/1;
+border-radius: 30px;
+background-color: rgba(255,20,20,1);
+//border: 1px solid red;
+width: 60%;
+}
+
+
+`;
+
+
+class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+    static styles = (0, $d4da9a7c12391d03$export$2e2bcd8739ae039);
+    static get properties() {
+        return {
+            hass: {},
+            label: {
+                type: String
+            },
+            stateObj: {}
+        };
+    }
+    constructor(hass, label, stateObj){
+        super();
+        this.hass = hass;
+        this.label = label;
+        this.stateObj = stateObj;
+    }
+    render() {
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        <div class="switch_${this.stateObj.state}"  @click="${()=>this._toggle()}">
+   	    <div class="switch_in_${this.stateObj.state}"></div>
+        </div>`;
+    }
+    _toggle() {
+        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
+        else this.stateObj.state = 'on';
+         //else
+        //TOGGLE switch
+        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
+        this.requestUpdate();
+    }
+} // end of class
+window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
+
+
+
+var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+.device_bg{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    aspect-ratio: 1/1.2;
+ //border: 2px solid red;
+    }
+
+.device_img{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    }
+
+.device_img_disabled{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    filter: grayscale(80%);
+    }
+
+.disabled_in_ha{
+  color: white;
+  text-align: center;
+  position : absolute;
+  width: 100%;
+  top:15%;
+  left: 0%;
+  background-color:rgba(255,0,0,0.5);
+}
+  
+`;
+
+
 class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+    static styles = [
+        (0, $244c2d90fdd5377f$export$2e2bcd8739ae039)
+    ];
     static get properties() {
         return {
             hass: {},
@@ -764,19 +893,35 @@ class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$exp
         // console.log(this.config);
         // console.log(this.entities[swtch.name]);
         // console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+        //<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
         let label_name = swtch.name;
         // Don not display label
         if ('label' in swtch && swtch.label == false) label_name = '';
+        //<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
+        console.log("**//**/*/*/*/");
+        console.log(this.entities[swtch.name].entity_id);
+        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
- <style>
+<!--  <style>
       #${swtch.name}:hover {
 background-color: rgba(${this.config.color},${this.config.alpha});
 }
 </style>
-<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}">
-<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"> -->
+<div class="${swtch.class}">
+<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
+    //         return html`
+    //  <style>
+    //       #${swtch.name}:hover {
+    // background-color: rgba(${this.config.color},${this.config.alpha});
+    // }
+    // </style>
+    // <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
+    // <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+    // </div>
+    // `;
     }
     _render_button(button) {
         console.log("RENDER button");
@@ -817,7 +962,7 @@ background-color: rgba(${this.config.color},${this.config.alpha});
     }
     _render_disabled() {
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' />
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
                           <p class='disabled_in_ha'>${(0, $a10d60b4def555b4$export$2e2bcd8739ae039)._("disabledInHa")}</p>
                         </div">`;
     }
@@ -898,7 +1043,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "name": "device_state",
             "type": "hacs",
             "label": false,
-            "class": "on_off"
+            "class": "on_off",
+            "style": "switch"
         }
     ],
     "heads": {
@@ -920,7 +1066,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "schedule_enabled",
                     "type": "hacs",
-                    "class": "pump_state_head"
+                    "class": "pump_state_head",
+                    "style": "button"
                 }
             ],
             "buttons": [
@@ -944,7 +1091,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "schedule_enabled",
                     "type": "hacs",
-                    "class": "pump_state_head"
+                    "class": "pump_state_head",
+                    "style": "button"
                 }
             ],
             "buttons": [
@@ -967,7 +1115,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "schedule_enabled",
                     "type": "hacs",
-                    "class": "pump_state_head"
+                    "class": "pump_state_head",
+                    "style": "button"
                 }
             ],
             "buttons": [
@@ -991,7 +1140,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "schedule_enabled",
                     "type": "hacs",
-                    "class": "pump_state_head"
+                    "class": "pump_state_head",
+                    "style": "button"
                 }
             ],
             "buttons": [
@@ -1139,11 +1289,12 @@ var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf3
 .on_off{
 flex: 0 0 auto;
  position: absolute;
-aspect-ratio: 1/1;
-width: 15%;
+//aspect-ratio: 1/1;
+width: 22%;
+height: 10%;
 border-radius: 50%;
-top: 26%;
-left: 0%;
+top: 25.8%;
+left: 2%;
 }
 
     .head{
@@ -1250,44 +1401,6 @@ position: absolute;
     }
 `;
 
-
-
-var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-.device_bg{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    aspect-ratio: 1/1.2;
- //border: 2px solid red;
-    }
-
-.device_img{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    }
-
-.device_img_disabled{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    filter: grayscale(80%);
-    }
-
-.disabled_in_ha{
-  color: white;
-  text-align: center;
-  position : relative;
-  width: 100%;
-  top:-23%;
-  left: 0%;
-  background-color:rgba(255,0,0,0.5);
-}
-  
-`;
 
 
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$export$2e2bcd8739ae039) {

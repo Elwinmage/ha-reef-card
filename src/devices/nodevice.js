@@ -1,4 +1,5 @@
 import { html } from "lit";
+import { html } from "lit";
 import RSDevice from "./device";
 import {config} from "./mapping/NODEVICE";
 import styles from "./nodevice.styles";

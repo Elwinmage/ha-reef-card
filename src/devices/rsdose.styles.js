@@ -4,11 +4,12 @@ export default css`
 .on_off{
 flex: 0 0 auto;
  position: absolute;
-aspect-ratio: 1/1;
-width: 15%;
+//aspect-ratio: 1/1;
+width: 22%;
+height: 10%;
 border-radius: 50%;
-top: 26%;
-left: 0%;
+top: 25.8%;
+left: 2%;
 }
 
     .head{
@@ -114,4 +115,3 @@ position: absolute;
     stroke: black;
     }
 `
-

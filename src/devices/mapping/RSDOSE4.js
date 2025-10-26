@@ -9,6 +9,7 @@ export const config = {
 	    "type":"hacs",
 	    "label":false,
 	    "class":"on_off",
+	    "style": "switch",
 	}
     ],
     "heads": {
@@ -31,6 +32,7 @@ export const config = {
 		    "name": "schedule_enabled",
 		    "type": "hacs",
 		    "class": "pump_state_head",
+		    "style": "button",
 		}
 		
 	    ],
@@ -57,6 +59,7 @@ export const config = {
 		    "name": "schedule_enabled",
 		    "type": "hacs",
 		    "class": "pump_state_head",
+		    "style": "button",
 		}
 		
 	    ],
@@ -82,6 +85,7 @@ export const config = {
 		    "name": "schedule_enabled",
 		    "type": "hacs",
 		    "class": "pump_state_head",
+		    "style": "button",
 		}
 		
 	    ],
@@ -109,6 +113,7 @@ export const config = {
 		    "name": "schedule_enabled",
 		    "type": "hacs",
 		    "class": "pump_state_head",
+		    "style": "button",
 		}
 		
 	    ],

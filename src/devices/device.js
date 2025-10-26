@@ -2,12 +2,19 @@ import { html, LitElement } from "lit";
 
 import i18n from "../translations/myi18n.js";
 
+import Switch from "./base/switch";
+
+import style_common from "./common.styles";
+
 /*
  * RSDose 
  */
 
 export default class RSDevice extends LitElement {
 
+
+    static styles = [style_common];
+    
     static get properties() {
 	return {
 	    hass: {},
@@ -82,22 +89,37 @@ export default class RSDevice extends LitElement {
 	// console.log(this.config);
 	// console.log(this.entities[swtch.name]);
 	// console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+	//<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
 	let label_name=swtch.name;
 	// Don not display label
 	if ('label' in swtch && swtch.label==false){
 	    label_name='';
 	}
-	
+	//<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
+	console.log("**//**/*/*/*/");
+	console.log(this.entities[swtch.name].entity_id);
+	console.log(this.hass.states[this.entities[swtch.name].entity_id]);
         return html`
- <style>
+<!--  <style>
       #${swtch.name}:hover {
 background-color: rgba(${this.config.color},${this.config.alpha});
 }
 </style>
-<div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
-<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+<div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}"> -->
+<div class="${swtch.class}">
+<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
+//         return html`
+//  <style>
+//       #${swtch.name}:hover {
+// background-color: rgba(${this.config.color},${this.config.alpha});
+// }
+// </style>
+// <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
+// <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+// </div>
+// `;
     }
 
 
@@ -137,7 +159,7 @@ background-color: rgba(${this.config.color},${this.config.alpha});
 
     _render_disabled(){
 	return html`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' />
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
                           <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
                         </div">`;
     }// end of function -- _render_disabled

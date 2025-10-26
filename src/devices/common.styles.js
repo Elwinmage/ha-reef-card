@@ -30,7 +30,7 @@ export default css`
   text-align: center;
   position : absolute;
   width: 100%;
-  top:-23%;
+  top:15%;
   left: 0%;
   background-color:rgba(255,0,0,0.5);
 }

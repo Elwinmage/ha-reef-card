@@ -2,6 +2,7 @@ import { html } from "lit";
 import RSDevice from "./device";
 import {config} from "./mapping/RSDOSE4";
 import DoseHead from "./dose_head";
+
 import style_rsdose from "./rsdose.styles";
 import style_common from "./common.styles";
 
