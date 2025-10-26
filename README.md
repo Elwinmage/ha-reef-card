@@ -13,6 +13,8 @@
 
 > [!NOTE]
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
+# Supported Languages: 🇫🇷 🇬🇧 
+<!-- You want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
 
 # Overview
 **Reef card** for home assistant help you to manage your reef tank. 
