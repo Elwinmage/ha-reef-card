@@ -973,7 +973,7 @@ window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae0
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
+    "background_img": new URL("NODEVICE.png", import.meta.url)
 };
 
 
@@ -1036,7 +1036,7 @@ window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b519
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.png", import.meta.url),
     "heads_nb": 4,
     "switches": [
         {
@@ -1253,16 +1253,16 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         let img = null;
         switch(supplement_uid.state){
             case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-                img = new URL("redsea_foundation_A.69ced2e5.png", import.meta.url);
+                img = new URL("redsea_foundation_A.png", import.meta.url);
                 break;
             case "76830db3-a0bd-459a-9974-76a57d026893":
-                img = new URL("redsea_foundation_B.fd69d513.png", import.meta.url);
+                img = new URL("redsea_foundation_B.png", import.meta.url);
                 break;
             case "f524734e-8651-496e-b09b-640b40fc8bab":
-                img = new URL("redsea_foundation_C.3bc03a8d.png", import.meta.url);
+                img = new URL("redsea_foundation_C.png", import.meta.url);
                 break;
             default:
-                img = new URL("generic_container.973c97af.png", import.meta.url);
+                img = new URL("generic_container.png", import.meta.url);
                 break;
         }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -1522,10 +1522,10 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
             this.first_init = false;
             this.no_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<no-device id="device" hass="${this.hass}"/>`;
             this.current_device = this.no_device;
-            if (this.user_config['device']) {
-                this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-                return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.current_device}`;
-            }
+        }
+        if (this.user_config['device']) {
+            this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
+            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.current_device}`;
         }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
           ${this.device_select()}
