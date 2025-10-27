@@ -3,7 +3,6 @@ import RSDevice from "./device";
 
 import styles from "./dose_head.styles";
 
-
 export default class DoseHead extends RSDevice{
 
     static styles = styles;

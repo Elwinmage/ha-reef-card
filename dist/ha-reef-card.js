@@ -756,15 +756,22 @@ width: 60%;
 `;
 
 
-class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
-    static styles = (0, $d4da9a7c12391d03$export$2e2bcd8739ae039);
+
+class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
     static get properties() {
         return {
             hass: {},
             label: {
                 type: String
             },
-            stateObj: {}
+            stateObj: {},
+            alreadyClicked: {
+                type: Boolean
+            },
+            doubleClick: {
+                type: Boolean
+            },
+            mouseDown: {}
         };
     }
     constructor(hass, label, stateObj){
@@ -772,12 +779,60 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $ab210b2da7b39b9d$ex
         this.hass = hass;
         this.label = label;
         this.stateObj = stateObj;
+        //Disable context menu
+        this.mouseDown = 0;
+        //this.addEventListener("contextmenu", function(e) {e.preventDefault();});
+        this.addEventListener("mousedown", function(e) {
+            this.mouseDown = e.timeStamp;
+        });
+        this.addEventListener("click", function(e) {
+            if (e.detail === 1) {
+                console.debug(e);
+                this._click_evt(e);
+            } else if (e.detail === 2) {
+                this.doubleClick = true;
+                this._dblclick(e);
+            }
+        });
+        this.alreadyClicked = false;
+        this.doubleClick = false;
+    }
+    sleep(ms) {
+        return new Promise((resolve)=>setTimeout(resolve, ms));
+    }
+    async _click_evt(e) {
+        console.debug(this.mouseDown, '   ', e.timeStamp - this.mouseDown);
+        if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
+        else {
+            await this.sleep(300);
+            if (this.doubleClick == true) this.doubleClick = false;
+            else this._click(e);
+        }
+        this.mouseDown = 0;
+    }
+}
+window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae039);
+
+
+class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $163c208f0715304f$export$2e2bcd8739ae039) {
+    static styles = (0, $d4da9a7c12391d03$export$2e2bcd8739ae039);
+    constructor(hass, label, stateObj){
+        super(hass, label, stateObj);
     }
     render() {
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-        <div class="switch_${this.stateObj.state}"  @click="${()=>this._toggle()}">
+        <div class="switch_${this.stateObj.state}" @auxclick="${()=>this.auxclick()}" @contextmenu="${()=>this.contextmenu()}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    _longclick() {
+        console.debug("Long Click");
+    }
+    _dblclick(e) {
+        console.debug("Double click");
     }
     _toggle() {
         if (this.stateObj.state == 'on') this.stateObj.state = 'off';
@@ -973,7 +1028,7 @@ window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae0
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.png", import.meta.url)
+    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
 };
 
 
@@ -1036,7 +1091,7 @@ window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b519
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
     "switches": [
         {
@@ -1253,16 +1308,16 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         let img = null;
         switch(supplement_uid.state){
             case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-                img = new URL("redsea_foundation_A.png", import.meta.url);
+                img = new URL("redsea_foundation_A.69ced2e5.png", import.meta.url);
                 break;
             case "76830db3-a0bd-459a-9974-76a57d026893":
-                img = new URL("redsea_foundation_B.png", import.meta.url);
+                img = new URL("redsea_foundation_B.fd69d513.png", import.meta.url);
                 break;
             case "f524734e-8651-496e-b09b-640b40fc8bab":
-                img = new URL("redsea_foundation_C.png", import.meta.url);
+                img = new URL("redsea_foundation_C.3bc03a8d.png", import.meta.url);
                 break;
             default:
-                img = new URL("generic_container.png", import.meta.url);
+                img = new URL("generic_container.973c97af.png", import.meta.url);
                 break;
         }
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
