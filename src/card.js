@@ -100,8 +100,7 @@ export class ReefCard extends LitElement {
 	    //TODO : Implement RSDOSE4 support
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
 	    // labels: enhancement, rsdose, rsdose4
-	    //this.current_device=new RSDose(this.hass,device);
-	    this.current_device=html`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
+	    this.current_device=html`<rs-dose4 id="device" .hass="${this.hass}" .device="${device}" .user_config="${this.user_config}"/>`;
 	    break;
 	case "RSRUN":
 	    //TODO : Implement RSRUN support

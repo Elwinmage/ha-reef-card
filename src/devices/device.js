@@ -20,17 +20,55 @@ export default class RSDevice extends LitElement {
 	    hass: {},
 	    config: {},
 	    device:{},
+	    user_config: {}
 	}
     }
     
-    constructor(config,hass,device){
+    constructor(config,hass,device,user_config){
 	super();
 	this.hass = hass;
 	this.device = device;
 	this.config=config;
+	this.user_config=user_config;
 	this.entities={};
+	this.first_init=true;
     }
 
+    find_leaves(tree,path){
+	var keys = Object.keys(tree);
+	if (keys[0]=='0'){
+	    eval(path+'="'+tree+'"');
+	    return;
+	}
+	for (var key of keys){
+	    let sep='.';
+	    let ipath=path+sep+key;
+	    this.find_leaves(tree[key],ipath);
+	}
+    }
+
+    update_config(){
+	if (this.first_init){
+	    console.debug("RSDevice.update_config for ",this.device);
+	    if ("conf" in this.user_config){
+		console.debug("User config detected");
+		console.debug(this.user_config.conf);
+		if (this.device.elements[0].model in this.user_config.conf){
+		    let device_conf=this.user_config.conf[this.device.elements[0].model];
+		    if ('common' in device_conf){
+			this.find_leaves(device_conf['common'],"this.config");
+			if ('devices' in device_conf && this.device.name in device_conf.devices){
+			    console.log(this.device.name);
+			    this.find_leaves(device_conf['devices'][this.device.name],"this.config");
+			}
+		    }//if
+		    //apply new params
+		}//if
+	    }//if
+	    this.first_init=false;
+	}//if
+    }//end of function update_config
+    
     _populate_entities(){
 	for (var entity_id in this.hass.entities){
 	    var entity=this.hass.entities[entity_id];
@@ -46,8 +84,6 @@ export default class RSDevice extends LitElement {
 	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
 	
     }
-
-
     _toggle(swtch){
 	console.log(this.entities);
 	console.log(swtch);

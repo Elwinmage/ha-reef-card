@@ -52,7 +52,6 @@ export class ReefCardEditor extends LitElement {
 		this.first_init=false;
 		this.init_devices();
 	    }
-	    console.log("??????");
 	    console.log(this._config);
 	    return html`
             <form class="table">

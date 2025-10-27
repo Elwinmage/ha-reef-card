@@ -31,8 +31,13 @@ export default class DeviceList {
 		    Object.defineProperty(this.devices,dev.primary_config_entry , {value:{name:dev.name,elements:[dev]}})
 		}
 		else{
-		    this.devices[dev.primary_config_entry].elements.push(dev)
-		}
+		    this.devices[dev.primary_config_entry].elements.push(dev);
+		    // Change main device name with main device
+		    if(dev_id.length==2){
+			this.devices[dev.primary_config_entry].name=dev.name;
+		    }//if
+		    
+		}//else
 	    }
 	}//for
 	this.main_devices.sort(this.device_compare);

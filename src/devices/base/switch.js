@@ -25,6 +25,7 @@ export class Switch extends  MyElement {
 
     async _click(e){
 	console.debug("Click ",e.detail," ",e.timeStamp);
+	this._toggle();
     }
 
     _longclick(){

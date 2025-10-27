@@ -22,8 +22,8 @@ export default class RSDose extends RSDevice{
     static styles = [style_rsdose,style_common];
     _heads = []
     
-    constructor(hass,device){
-	super(config,hass,device);
+    constructor(hass,device,user_config){
+	super(config,hass,device,user_config);
     }// end of constructor
 
     _populate_entities(){
@@ -71,6 +71,7 @@ export default class RSDose extends RSDevice{
     }
     
     render(){
+	this.update_config();
 	// disabled
 	let disabled=false;
 	let sub_nb=this.device.elements.length;

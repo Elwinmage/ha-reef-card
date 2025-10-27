@@ -1,46 +1,244 @@
-/**
- * @license
- * Copyright 2019 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */ const $def2de46b9306e8a$var$t = globalThis, $def2de46b9306e8a$export$b4d10f6001c083c2 = $def2de46b9306e8a$var$t.ShadowRoot && (void 0 === $def2de46b9306e8a$var$t.ShadyCSS || $def2de46b9306e8a$var$t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, $def2de46b9306e8a$var$s = Symbol(), $def2de46b9306e8a$var$o = new WeakMap;
-class $def2de46b9306e8a$export$505d1e8739bad805 {
-    constructor(t, e, o){
-        if (this._$cssResult$ = !0, o !== $def2de46b9306e8a$var$s) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
-        this.cssText = t, this.t = e;
+
+function $parcel$export(e, n, v, s) {
+  Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
+}
+
+      var $parcel$global = globalThis;
+    
+var $parcel$modules = {};
+var $parcel$inits = {};
+
+var parcelRequire = $parcel$global["parcelRequire94c2"];
+
+if (parcelRequire == null) {
+  parcelRequire = function(id) {
+    if (id in $parcel$modules) {
+      return $parcel$modules[id].exports;
     }
-    get styleSheet() {
-        let t = this.o;
-        const s = this.t;
-        if ($def2de46b9306e8a$export$b4d10f6001c083c2 && void 0 === t) {
-            const e = void 0 !== s && 1 === s.length;
-            e && (t = $def2de46b9306e8a$var$o.get(s)), void 0 === t && ((this.o = t = new CSSStyleSheet).replaceSync(this.cssText), e && $def2de46b9306e8a$var$o.set(s, t));
+    if (id in $parcel$inits) {
+      var init = $parcel$inits[id];
+      delete $parcel$inits[id];
+      var module = {id: id, exports: {}};
+      $parcel$modules[id] = module;
+      init.call(module.exports, module, module.exports);
+      return module.exports;
+    }
+    var err = new Error("Cannot find module '" + id + "'");
+    err.code = 'MODULE_NOT_FOUND';
+    throw err;
+  };
+
+  parcelRequire.register = function register(id, init) {
+    $parcel$inits[id] = init;
+  };
+
+  $parcel$global["parcelRequire94c2"] = parcelRequire;
+}
+
+var parcelRegister = parcelRequire.register;
+parcelRegister("5c2Je", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => RSDevice);
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+
+var $dPhcg = parcelRequire("dPhcg");
+parcelRequire("6vZH1");
+
+var $37d5w = parcelRequire("37d5w");
+class RSDevice extends (0, $eGUNk.LitElement) {
+    static styles = [
+        (0, $37d5w.default)
+    ];
+    static get properties() {
+        return {
+            hass: {},
+            config: {},
+            device: {},
+            user_config: {}
+        };
+    }
+    constructor(config, hass, device, user_config){
+        super();
+        this.hass = hass;
+        this.device = device;
+        this.config = config;
+        this.user_config = user_config;
+        this.entities = {};
+        this.first_init = true;
+    }
+    find_leaves(tree, path) {
+        var keys = Object.keys(tree);
+        if (keys[0] == '0') {
+            eval(path + '="' + tree + '"');
+            return;
         }
-        return t;
+        for (var key of keys){
+            let sep = '.';
+            let ipath = path + sep + key;
+            this.find_leaves(tree[key], ipath);
+        }
     }
-    toString() {
-        return this.cssText;
+    update_config() {
+        if (this.first_init) {
+            console.debug("RSDevice.update_config for ", this.device);
+            if ("conf" in this.user_config) {
+                console.debug("User config detected");
+                console.debug(this.user_config.conf);
+                if (this.device.elements[0].model in this.user_config.conf) {
+                    let device_conf = this.user_config.conf[this.device.elements[0].model];
+                    if ('common' in device_conf) {
+                        this.find_leaves(device_conf['common'], "this.config");
+                        if ('devices' in device_conf && this.device.name in device_conf.devices) {
+                            console.log(this.device.name);
+                            this.find_leaves(device_conf['devices'][this.device.name], "this.config");
+                        }
+                    } //if
+                //apply new params
+                } //if
+            } //if
+            this.first_init = false;
+        } //if
+    }
+    _populate_entities() {
+        for(var entity_id in this.hass.entities){
+            var entity = this.hass.entities[entity_id];
+            if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
+        }
+    }
+    _press(button) {
+        console.log("button pressed: :" + this.entities[button.name].entity_id);
+    //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
+    }
+    _toggle(swtch) {
+        console.log(this.entities);
+        console.log(swtch);
+        var entity_id = this.entities[swtch.name].entity_id;
+        console.log("toggle switch: " + entity_id);
+        //	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
+        const actionConfig = {
+            entity: entity_id,
+            tap_action: {
+                action: "more-info"
+            }
+        };
+        // Open more info on tap action
+        const event = new Event("hass-action", {
+            bubbles: true,
+            composed: true
+        });
+        event.detail = {
+            config: actionConfig,
+            action: "tap"
+        };
+        console.log("EVENT ***");
+        console.log(event);
+        this.dispatchEvent(event);
+    /*	let e = new Event('hass-more-info', { composed: true });
+	e.detail = { entity_id};
+	console.log(e);
+	let res=this.dispatchEvent(e);
+	console.log(res);*/ }
+    _render_switch(swtch) {
+        // console.log("RENDER switch");
+        // console.log(swtch);
+        // console.log(this.config);
+        // console.log(this.entities[swtch.name]);
+        // console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+        //<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+        let label_name = swtch.name;
+        // Don not display label
+        if ('label' in swtch && swtch.label == false) label_name = '';
+        //<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
+        console.log("**//**/*/*/*/");
+        console.log(this.entities[swtch.name].entity_id);
+        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
+        return (0, $l56HR.html)`
+<!--  <style>
+      #${swtch.name}:hover {
+background-color: rgba(${this.config.color},${this.config.alpha});
+}
+</style>
+<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"> -->
+<div class="${swtch.class}">
+<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
+</div>
+`;
+    //         return html`
+    //  <style>
+    //       #${swtch.name}:hover {
+    // background-color: rgba(${this.config.color},${this.config.alpha});
+    // }
+    // </style>
+    // <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
+    // <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
+    // </div>
+    // `;
+    }
+    _render_button(button) {
+        console.log("RENDER button");
+        console.log(button);
+        console.log(this.config);
+        return (0, $l56HR.html)`
+ <style>
+      #${button.name}:hover {
+background-color: rgba(${this.config.color},${this.config.alpha});
+}
+</style>
+<div id="${button.name}" class="${button.class}" @click="${()=>this._press(button)}"></div>
+`;
+    }
+    _render_actuators_type(type) {
+        if (type.name in this.config) {
+            console.log("Render " + type.name);
+            console.log(this.config);
+            return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
+        }
+        console.log("No " + type.name);
+        return (0, $l56HR.html)``;
+    }
+    _render_actuators() {
+        let actuators = [
+            {
+                "name": "buttons",
+                "fn": this._render_button
+            },
+            {
+                "name": "switches",
+                "fn": this._render_switch
+            }
+        ];
+        return (0, $l56HR.html)`
+                     ${actuators.map((type)=>this._render_actuators_type(type))}
+                      `;
+    }
+    _render_disabled() {
+        return (0, $l56HR.html)`<div class="device_bg">
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._("disabledInHa")}</p>
+                        </div">`;
     }
 }
-const $def2de46b9306e8a$export$8d80f9cac07cdb3 = (t)=>new $def2de46b9306e8a$export$505d1e8739bad805("string" == typeof t ? t : t + "", void 0, $def2de46b9306e8a$var$s), $def2de46b9306e8a$export$dbf350e5966cf602 = (t, ...e)=>{
-    const o = 1 === t.length ? t[0] : e.reduce((e, s, o)=>e + ((t)=>{
-            if (!0 === t._$cssResult$) return t.cssText;
-            if ("number" == typeof t) return t;
-            throw Error("Value passed to 'css' function must be a 'css' function result: " + t + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-        })(s) + t[o + 1], t[0]);
-    return new $def2de46b9306e8a$export$505d1e8739bad805(o, t, $def2de46b9306e8a$var$s);
-}, $def2de46b9306e8a$export$2ca4a66ec4cecb90 = (s, o)=>{
-    if ($def2de46b9306e8a$export$b4d10f6001c083c2) s.adoptedStyleSheets = o.map((t)=>t instanceof CSSStyleSheet ? t : t.styleSheet);
-    else for (const e of o){
-        const o = document.createElement("style"), n = $def2de46b9306e8a$var$t.litNonce;
-        void 0 !== n && o.setAttribute("nonce", n), o.textContent = e.cssText, s.appendChild(o);
-    }
-}, $def2de46b9306e8a$export$ee69dfd951e24778 = $def2de46b9306e8a$export$b4d10f6001c083c2 ? (t)=>t : (t)=>t instanceof CSSStyleSheet ? ((t)=>{
-        let e = "";
-        for (const s of t.cssRules)e += s.cssText;
-        return $def2de46b9306e8a$export$8d80f9cac07cdb3(e);
-    })(t) : t;
+window.customElements.define('rs-device', RSDevice);
 
+});
+parcelRegister("j0ZcV", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
+$parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
+$parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
+parcelRequire("2emM7");
+parcelRequire("l56HR");
+parcelRequire("eGUNk");
+parcelRequire("dJV7N");
 
+});
+parcelRegister("2emM7", function(module, exports) {
+
+$parcel$export(module.exports, "ReactiveElement", () => $19fe8e3abedf4df0$export$c7c07a37856565d);
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
+
+var $j8KxL = parcelRequire("j8KxL");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -154,8 +352,8 @@ class $19fe8e3abedf4df0$export$c7c07a37856565d extends HTMLElement {
         const i = [];
         if (Array.isArray(s)) {
             const e = new Set(s.flat(1 / 0).reverse());
-            for (const s of e)i.unshift((0, $def2de46b9306e8a$export$ee69dfd951e24778)(s));
-        } else void 0 !== s && i.push((0, $def2de46b9306e8a$export$ee69dfd951e24778)(s));
+            for (const s of e)i.unshift((0, $j8KxL.getCompatibleStyle)(s));
+        } else void 0 !== s && i.push((0, $j8KxL.getCompatibleStyle)(s));
         return i;
     }
     static _$Eu(t, s) {
@@ -181,7 +379,7 @@ class $19fe8e3abedf4df0$export$c7c07a37856565d extends HTMLElement {
     }
     createRenderRoot() {
         const t = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-        return (0, $def2de46b9306e8a$export$2ca4a66ec4cecb90)(t, this.constructor.elementStyles), t;
+        return (0, $j8KxL.adoptStyles)(t, this.constructor.elementStyles), t;
     }
     connectedCallback() {
         this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(!0), this._$EO?.forEach((t)=>t.hostConnected?.());
@@ -285,7 +483,62 @@ $19fe8e3abedf4df0$export$c7c07a37856565d.elementStyles = [], $19fe8e3abedf4df0$e
     ReactiveElement: $19fe8e3abedf4df0$export$c7c07a37856565d
 }), ($19fe8e3abedf4df0$var$a.reactiveElementVersions ??= []).push("2.1.1");
 
+});
+parcelRegister("j8KxL", function(module, exports) {
 
+$parcel$export(module.exports, "css", () => $def2de46b9306e8a$export$dbf350e5966cf602);
+$parcel$export(module.exports, "adoptStyles", () => $def2de46b9306e8a$export$2ca4a66ec4cecb90);
+$parcel$export(module.exports, "getCompatibleStyle", () => $def2de46b9306e8a$export$ee69dfd951e24778);
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */ const $def2de46b9306e8a$var$t = globalThis, $def2de46b9306e8a$export$b4d10f6001c083c2 = $def2de46b9306e8a$var$t.ShadowRoot && (void 0 === $def2de46b9306e8a$var$t.ShadyCSS || $def2de46b9306e8a$var$t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, $def2de46b9306e8a$var$s = Symbol(), $def2de46b9306e8a$var$o = new WeakMap;
+class $def2de46b9306e8a$export$505d1e8739bad805 {
+    constructor(t, e, o){
+        if (this._$cssResult$ = !0, o !== $def2de46b9306e8a$var$s) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+        this.cssText = t, this.t = e;
+    }
+    get styleSheet() {
+        let t = this.o;
+        const s = this.t;
+        if ($def2de46b9306e8a$export$b4d10f6001c083c2 && void 0 === t) {
+            const e = void 0 !== s && 1 === s.length;
+            e && (t = $def2de46b9306e8a$var$o.get(s)), void 0 === t && ((this.o = t = new CSSStyleSheet).replaceSync(this.cssText), e && $def2de46b9306e8a$var$o.set(s, t));
+        }
+        return t;
+    }
+    toString() {
+        return this.cssText;
+    }
+}
+const $def2de46b9306e8a$export$8d80f9cac07cdb3 = (t)=>new $def2de46b9306e8a$export$505d1e8739bad805("string" == typeof t ? t : t + "", void 0, $def2de46b9306e8a$var$s), $def2de46b9306e8a$export$dbf350e5966cf602 = (t, ...e)=>{
+    const o = 1 === t.length ? t[0] : e.reduce((e, s, o)=>e + ((t)=>{
+            if (!0 === t._$cssResult$) return t.cssText;
+            if ("number" == typeof t) return t;
+            throw Error("Value passed to 'css' function must be a 'css' function result: " + t + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+        })(s) + t[o + 1], t[0]);
+    return new $def2de46b9306e8a$export$505d1e8739bad805(o, t, $def2de46b9306e8a$var$s);
+}, $def2de46b9306e8a$export$2ca4a66ec4cecb90 = (s, o)=>{
+    if ($def2de46b9306e8a$export$b4d10f6001c083c2) s.adoptedStyleSheets = o.map((t)=>t instanceof CSSStyleSheet ? t : t.styleSheet);
+    else for (const e of o){
+        const o = document.createElement("style"), n = $def2de46b9306e8a$var$t.litNonce;
+        void 0 !== n && o.setAttribute("nonce", n), o.textContent = e.cssText, s.appendChild(o);
+    }
+}, $def2de46b9306e8a$export$ee69dfd951e24778 = $def2de46b9306e8a$export$b4d10f6001c083c2 ? (t)=>t : (t)=>t instanceof CSSStyleSheet ? ((t)=>{
+        let e = "";
+        for (const s of t.cssRules)e += s.cssText;
+        return $def2de46b9306e8a$export$8d80f9cac07cdb3(e);
+    })(t) : t;
+
+});
+
+
+parcelRegister("l56HR", function(module, exports) {
+
+$parcel$export(module.exports, "html", () => $f58f44579a4747ac$export$c0bb0b647f701bb5);
+$parcel$export(module.exports, "noChange", () => $f58f44579a4747ac$export$9c068ae9cc5db4e8);
+$parcel$export(module.exports, "render", () => $f58f44579a4747ac$export$b3890eb0ae9dca99);
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -558,15 +811,26 @@ const $f58f44579a4747ac$export$b3890eb0ae9dca99 = (t, i, s)=>{
     return h._$AI(t), h;
 };
 
+});
 
+parcelRegister("eGUNk", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
+$parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
+$parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
+$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
+$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 
+$parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
+var $2emM7 = parcelRequire("2emM7");
+
+var $l56HR = parcelRequire("l56HR");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */ const $ab210b2da7b39b9d$var$s = globalThis;
-class $ab210b2da7b39b9d$export$3f2f9f5909897157 extends (0, $19fe8e3abedf4df0$export$c7c07a37856565d) {
+class $ab210b2da7b39b9d$export$3f2f9f5909897157 extends (0, $2emM7.ReactiveElement) {
     constructor(){
         super(...arguments), this.renderOptions = {
             host: this
@@ -578,7 +842,7 @@ class $ab210b2da7b39b9d$export$3f2f9f5909897157 extends (0, $19fe8e3abedf4df0$ex
     }
     update(t) {
         const r = this.render();
-        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = (0, $f58f44579a4747ac$export$b3890eb0ae9dca99)(r, this.renderRoot, this.renderOptions);
+        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = (0, $l56HR.render)(r, this.renderRoot, this.renderOptions);
     }
     connectedCallback() {
         super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -587,7 +851,7 @@ class $ab210b2da7b39b9d$export$3f2f9f5909897157 extends (0, $19fe8e3abedf4df0$ex
         super.disconnectedCallback(), this._$Do?.setConnected(!1);
     }
     render() {
-        return 0, $f58f44579a4747ac$export$9c068ae9cc5db4e8;
+        return 0, $l56HR.noChange;
     }
 }
 $ab210b2da7b39b9d$export$3f2f9f5909897157._$litElement$ = !0, $ab210b2da7b39b9d$export$3f2f9f5909897157["finalized"] = !0, $ab210b2da7b39b9d$var$s.litElementHydrateSupport?.({
@@ -605,92 +869,28 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 };
 ($ab210b2da7b39b9d$var$s.litElementVersions ??= []).push("4.2.1");
 
+});
 
+parcelRegister("dJV7N", function(module, exports) {
 /**
  * @license
  * Copyright 2022 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */ const $a00bca1a101a9088$export$6acf61af03e62db = !1;
 
+});
 
 
+parcelRegister("dPhcg", function(module, exports) {
 
-class $038fea56b681b6a5$export$2e2bcd8739ae039 {
-    constructor(hass){
-        this._hass = hass;
-        this.main_devices = [];
-        this.devices = {};
-        this.init_devices();
-    }
-    device_compare(a, b) {
-        if (a.text < b.text) return -1;
-        else if (a.text > b.text) return 1;
-         // else
-        return 0;
-    }
-    init_devices() {
-        console.log(this._hass);
-        for(var device_id in this._hass.devices){
-            let dev = this._hass.devices[device_id];
-            let dev_id = dev.identifiers[0];
-            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
-                // dev.lenght==2 to get only main device, not sub
-                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
-                    value: dev.primary_config_entry,
-                    text: dev.name
-                });
-                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
-                    value: {
-                        name: dev.name,
-                        elements: [
-                            dev
-                        ]
-                    }
-                });
-                else this.devices[dev.primary_config_entry].elements.push(dev);
-            }
-        } //for
-        this.main_devices.sort(this.device_compare);
-        console.log(this.devices);
-    }
-}
+$parcel$export(module.exports, "default", () => $a10d60b4def555b4$export$2e2bcd8739ae039);
 
-
-
-var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-
-
-.disable{
-  background-color: rgba(175,175,175,0.5);
-}
-
-div,img{
-    flex: 0 0 auto;
-    position: absolute;
-}
-
-`;
-
-
-
-
-const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
-    en: {
-        canNotFindTranslation: "Can not find translation string: ",
-        disabledInHa: "Device disabled in HomeAssistant!"
-    },
-    fr: {
-        canNotFindTranslation: "Traduction introuvable pour: ",
-        disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!"
-    }
-};
-
-
+var $hudnx = parcelRequire("hudnx");
 class $a10d60b4def555b4$var$myi18n {
     constructor(){
         this.fallback = "en";
         this.lang = document.querySelector('home-assistant').hass.selectedLanguage;
-        this.d = (0, $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
+        this.d = (0, $hudnx.dict);
     }
     _(message, params = []) {
         console.log("Translate " + message + " in " + this.lang);
@@ -703,10 +903,70 @@ class $a10d60b4def555b4$var$myi18n {
 var $a10d60b4def555b4$var$i18n = new $a10d60b4def555b4$var$myi18n();
 var $a10d60b4def555b4$export$2e2bcd8739ae039 = $a10d60b4def555b4$var$i18n;
 
+});
+parcelRegister("hudnx", function(module, exports) {
+
+$parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
+const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
+    en: {
+        canNotFindTranslation: "Can not find translation string: ",
+        disabledInHa: "Device disabled in HomeAssistant!"
+    },
+    fr: {
+        canNotFindTranslation: "Traduction introuvable pour: ",
+        disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!"
+    }
+};
+
+});
 
 
+parcelRegister("6vZH1", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
 
-var $d4da9a7c12391d03$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+var $ih117 = parcelRequire("ih117");
+
+var $1Um3j = parcelRequire("1Um3j");
+class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
+    static styles = (0, $ih117.default);
+    constructor(hass, label, stateObj){
+        super(hass, label, stateObj);
+    }
+    render() {
+        return (0, $l56HR.html)`
+        <div class="switch_${this.stateObj.state}" @auxclick="${()=>this.auxclick()}" @contextmenu="${()=>this.contextmenu()}">
+   	    <div class="switch_in_${this.stateObj.state}"></div>
+        </div>`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+        this._toggle();
+    }
+    _longclick() {
+        console.debug("Long Click");
+    }
+    _dblclick(e) {
+        console.debug("Double click");
+    }
+    _toggle() {
+        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
+        else this.stateObj.state = 'on';
+         //else
+        //TOGGLE switch
+        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
+        this.requestUpdate();
+    }
+} // end of class
+window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
+
+});
+parcelRegister("ih117", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $d4da9a7c12391d03$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $d4da9a7c12391d03$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 :hover{
 cursor: pointer;
@@ -755,9 +1015,14 @@ width: 60%;
 
 `;
 
+});
 
+parcelRegister("1Um3j", function(module, exports) {
 
-class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+$parcel$export(module.exports, "default", () => $163c208f0715304f$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $eGUNk = parcelRequire("eGUNk");
+class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
             hass: {},
@@ -813,41 +1078,15 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$exp
 }
 window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae039);
 
-
-class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $163c208f0715304f$export$2e2bcd8739ae039) {
-    static styles = (0, $d4da9a7c12391d03$export$2e2bcd8739ae039);
-    constructor(hass, label, stateObj){
-        super(hass, label, stateObj);
-    }
-    render() {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-        <div class="switch_${this.stateObj.state}" @auxclick="${()=>this.auxclick()}" @contextmenu="${()=>this.contextmenu()}">
-   	    <div class="switch_in_${this.stateObj.state}"></div>
-        </div>`;
-    }
-    async _click(e) {
-        console.debug("Click ", e.detail, " ", e.timeStamp);
-    }
-    _longclick() {
-        console.debug("Long Click");
-    }
-    _dblclick(e) {
-        console.debug("Double click");
-    }
-    _toggle() {
-        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
-        else this.stateObj.state = 'on';
-         //else
-        //TOGGLE switch
-        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
-        this.requestUpdate();
-    }
-} // end of class
-window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
+});
 
 
+parcelRegister("37d5w", function(module, exports) {
 
-var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+$parcel$export(module.exports, "default", () => $244c2d90fdd5377f$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 .device_bg{
     position: relative;
     top: 0;
@@ -884,147 +1123,79 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf3
   
 `;
 
+});
 
-class $3c8030911d42bc18$export$2e2bcd8739ae039 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
-    static styles = [
-        (0, $244c2d90fdd5377f$export$2e2bcd8739ae039)
-    ];
-    static get properties() {
-        return {
-            hass: {},
-            config: {},
-            device: {}
-        };
+
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+class $038fea56b681b6a5$export$2e2bcd8739ae039 {
+    constructor(hass){
+        this._hass = hass;
+        this.main_devices = [];
+        this.devices = {};
+        this.init_devices();
     }
-    constructor(config, hass, device){
-        super();
-        this.hass = hass;
-        this.device = device;
-        this.config = config;
-        this.entities = {};
+    device_compare(a, b) {
+        if (a.text < b.text) return -1;
+        else if (a.text > b.text) return 1;
+         // else
+        return 0;
     }
-    _populate_entities() {
-        for(var entity_id in this.hass.entities){
-            var entity = this.hass.entities[entity_id];
-            if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
-        }
-    }
-    _press(button) {
-        console.log("button pressed: :" + this.entities[button.name].entity_id);
-    //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-    }
-    _toggle(swtch) {
-        console.log(this.entities);
-        console.log(swtch);
-        var entity_id = this.entities[swtch.name].entity_id;
-        console.log("toggle switch: " + entity_id);
-        //	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
-        const actionConfig = {
-            entity: entity_id,
-            tap_action: {
-                action: "more-info"
+    init_devices() {
+        console.log(this._hass);
+        for(var device_id in this._hass.devices){
+            let dev = this._hass.devices[device_id];
+            let dev_id = dev.identifiers[0];
+            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
+                // dev.lenght==2 to get only main device, not sub
+                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
+                    value: dev.primary_config_entry,
+                    text: dev.name
+                });
+                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
+                    value: {
+                        name: dev.name,
+                        elements: [
+                            dev
+                        ]
+                    }
+                });
+                else {
+                    this.devices[dev.primary_config_entry].elements.push(dev);
+                    // Change main device name with main device
+                    if (dev_id.length == 2) this.devices[dev.primary_config_entry].name = dev.name;
+                     //if
+                } //else
             }
-        };
-        // Open more info on tap action
-        const event = new Event("hass-action", {
-            bubbles: true,
-            composed: true
-        });
-        event.detail = {
-            config: actionConfig,
-            action: "tap"
-        };
-        console.log("EVENT ***");
-        console.log(event);
-        this.dispatchEvent(event);
-    /*	let e = new Event('hass-more-info', { composed: true });
-	e.detail = { entity_id};
-	console.log(e);
-	let res=this.dispatchEvent(e);
-	console.log(res);*/ }
-    _render_switch(swtch) {
-        // console.log("RENDER switch");
-        // console.log(swtch);
-        // console.log(this.config);
-        // console.log(this.entities[swtch.name]);
-        // console.log(this.hass.states[this.entities[swtch.name].entity_id]);
-        //<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-        let label_name = swtch.name;
-        // Don not display label
-        if ('label' in swtch && swtch.label == false) label_name = '';
-        //<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
-        console.log("**//**/*/*/*/");
-        console.log(this.entities[swtch.name].entity_id);
-        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-<!--  <style>
-      #${swtch.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
-<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"> -->
-<div class="${swtch.class}">
-<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
-</div>
-`;
-    //         return html`
-    //  <style>
-    //       #${swtch.name}:hover {
-    // background-color: rgba(${this.config.color},${this.config.alpha});
-    // }
-    // </style>
-    // <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
-    // <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-    // </div>
-    // `;
-    }
-    _render_button(button) {
-        console.log("RENDER button");
-        console.log(button);
-        console.log(this.config);
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
- <style>
-      #${button.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
-<div id="${button.name}" class="${button.class}" @click="${()=>this._press(button)}"></div>
-`;
-    }
-    _render_actuators_type(type) {
-        if (type.name in this.config) {
-            console.log("Render " + type.name);
-            console.log(this.config);
-            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
-        }
-        console.log("No " + type.name);
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
-    }
-    _render_actuators() {
-        let actuators = [
-            {
-                "name": "buttons",
-                "fn": this._render_button
-            },
-            {
-                "name": "switches",
-                "fn": this._render_switch
-            }
-        ];
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                     ${actuators.map((type)=>this._render_actuators_type(type))}
-                      `;
-    }
-    _render_disabled() {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${(0, $a10d60b4def555b4$export$2e2bcd8739ae039)._("disabledInHa")}</p>
-                        </div">`;
+        } //for
+        this.main_devices.sort(this.device_compare);
+        console.log(this.devices);
     }
 }
-window.customElements.define('rs-device', $3c8030911d42bc18$export$2e2bcd8739ae039);
 
 
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+
+.disable{
+  background-color: rgba(175,175,175,0.5);
+}
+
+div,img{
+    flex: 0 0 auto;
+    position: absolute;
+}
+
+`;
+
+
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $5c2Je = parcelRequire("5c2Je");
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
@@ -1032,8 +1203,9 @@ const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
 };
 
 
-
-var $4161d82e68a13a1d$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $4161d82e68a13a1d$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 .device_bg{
   position: relative;
   top: 0;
@@ -1053,7 +1225,7 @@ var $4161d82e68a13a1d$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf3
 `;
 
 
-class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $3c8030911d42bc18$export$2e2bcd8739ae039) {
+class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $5c2Je.default) {
     static styles = (0, $4161d82e68a13a1d$export$2e2bcd8739ae039);
     device = {
         'elements': [
@@ -1075,7 +1247,7 @@ class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $3c8030911d42bc18$ex
         console.log(this.hass);
         console.log(this.device);
         console.log("pppppp");
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
 <p id="device_name">${this.config.name}</p>
 <div class="device_bg">
 <img class="device_img" src="${this.config.background_img}"/>
@@ -1086,8 +1258,10 @@ class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $3c8030911d42bc18$ex
 window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b5196f4);
 
 
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
 
-
+var $5c2Je = parcelRequire("5c2Je");
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
@@ -1216,10 +1390,13 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
 };
 
 
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
 
-
-
-var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+var $5c2Je = parcelRequire("5c2Je");
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 
 .supplement_info{
@@ -1279,7 +1456,7 @@ stroke: black;
 `;
 
 
-class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$export$2e2bcd8739ae039) {
+class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     static styles = (0, $12c519d2fc52c039$export$2e2bcd8739ae039);
     static get properties() {
         return {
@@ -1292,7 +1469,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         super();
     }
     _pipe_path() {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
 		<svg viewBox="0 0 86 56" style="fill:rgb(${this.config.color});">
 		    <path d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"></path>
 		    <path d="m 62,0 1,39 c 0,2 1,3 2,5 2,2 2,1 4,2 2,0 4,0 6,-2 2,-2 1,-5 2,-7 l 6,-30 -8,0 -3,8 0,-28 z"></path>
@@ -1320,14 +1497,14 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
                 img = new URL("generic_container.973c97af.png", import.meta.url);
                 break;
         }
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
 <div class="container">
   <img src='${img}'/>
 </div>
 `;
     }
     render() {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" >
  		  ${this._pipe_path()}
@@ -1339,8 +1516,9 @@ ${this._render_actuators()}
 window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae039);
 
 
-
-var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 .on_off{
 flex: 0 0 auto;
  position: absolute;
@@ -1458,17 +1636,18 @@ position: absolute;
 
 
 
-class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$export$2e2bcd8739ae039) {
+var $37d5w = parcelRequire("37d5w");
+class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
     //   labels: enhancement, rsdose
     static styles = [
         (0, $9e31fe09da958909$export$2e2bcd8739ae039),
-        (0, $244c2d90fdd5377f$export$2e2bcd8739ae039)
+        (0, $37d5w.default)
     ];
     _heads = [];
-    constructor(hass, device){
-        super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device);
+    constructor(hass, device, user_config){
+        super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device, user_config);
     }
     _populate_entities() {}
     _populate_entities_with_heads() {
@@ -1494,7 +1673,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         return entity.state;
     }
     _render_head(head_id) {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" />
 
@@ -1502,6 +1681,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
 `;
     }
     render() {
+        this.update_config();
         // disabled
         let disabled = false;
         let sub_nb = this.device.elements.length;
@@ -1519,7 +1699,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
         console.log(this.hass);
         console.log(this.device);
         console.log("000");
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
 	<div class="device_bg">
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
         <div class="heads">
@@ -1534,7 +1714,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $3c8030911d42bc18$exp
 window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae039);
 
 
-class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     static styles = (0, $040001cdf6cad6dd$export$2e2bcd8739ae039);
     static get properties() {
         return {
@@ -1553,7 +1733,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
                 type: Array
             },
             devices_list: {},
-            current_device: (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``
+            current_device: (0, $l56HR.html)``
         };
     }
     constructor(){
@@ -1575,22 +1755,22 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
         if (this.first_init == true) {
             this.init_devices();
             this.first_init = false;
-            this.no_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<no-device id="device" hass="${this.hass}"/>`;
+            this.no_device = (0, $l56HR.html)`<no-device id="device" hass="${this.hass}"/>`;
             this.current_device = this.no_device;
         }
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${this.current_device}`;
+            return (0, $l56HR.html)`${this.current_device}`;
         }
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
           ${this.device_select()}
   ${this.current_device}
     `;
     }
     device_select() {
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        return (0, $l56HR.html)`
         <select id="device" @change="${this.onChange}">
-            ${this.select_devices.map((option)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            ${this.select_devices.map((option)=>(0, $l56HR.html)`
             <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
             `)}
         </select>
@@ -1625,8 +1805,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
                 //TODO : Implement RSDOSE4 support
                 //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
                 // labels: enhancement, rsdose, rsdose4
-                //this.current_device=new RSDose(this.hass,device);
-                this.current_device = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<rs-dose4 id="device" hass="${this.hass}" device="${device}"/>`;
+                this.current_device = (0, $l56HR.html)`<rs-dose4 id="device" .hass="${this.hass}" .device="${device}" .user_config="${this.user_config}"/>`;
                 break;
             case "RSRUN":
                 break;
@@ -1672,9 +1851,12 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $ab210b2da7b39b9d$ex
 }
 
 
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
 
-
-class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
+class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
             // hass: {},
@@ -1705,7 +1887,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$ex
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
-    static styles = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+    static styles = (0, $j8KxL.css)`
             .table {
                 display: table;
             }
@@ -1723,14 +1905,13 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$ex
                 this.first_init = false;
                 this.init_devices();
             }
-            console.log("??????");
             console.log(this._config);
-            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            return (0, $l56HR.html)`
             <form class="table">
                 <div class="row">
                     <label class="label cell" for="device">Device:</label>
                     <select id="device" class="value cell" @change="${this.handleChangedEvent}">
-                      ${this.select_devices.map((option)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      ${this.select_devices.map((option)=>(0, $l56HR.html)`
                       <option value="${option.value}" ?selected=${this._config.device === option.text}>${option.text}</option>
                         `)}
                    </select>
@@ -1738,7 +1919,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $ab210b2da7b39b9d$ex
             </form>
         `;
         }
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+        return (0, $l56HR.html)``;
     }
     handleChangedEvent(changedEvent) {
         // this._config is readonly, copy needed
