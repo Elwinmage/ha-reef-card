@@ -6,7 +6,9 @@ import DoseHead from "./dose_head";
 import style_rsdose from "./rsdose.styles";
 import style_common from "./common.styles";
 
+import i18n from "../translations/myi18n.js";
 
+import {rgbToHex,hexToRgb,updateObj} from "../common";
 
 /*
  * RSDose 
@@ -55,7 +57,7 @@ export default class RSDose extends RSDevice{
 	}
     }
     _get_val(head,entity_id){
-	console.log("rsdose._get_val: "+entity_id);
+	console.debug("rsdose._get_val: "+entity_id);
 	let entity = this.hass.states[this.entities[head][entity_id].entity_id];
 	return entity.state;
     }
@@ -86,10 +88,10 @@ export default class RSDose extends RSDevice{
 	    return this._render_disabled();
 	}//if
 	this._populate_entities_with_heads();
-	console.log("000");
-	console.log(this.hass);
-	console.log(this.device);
-	console.log("000");
+	console.debug("000");
+	console.debug(this.hass);
+	console.debug(this.device);
+	console.debug("000");
 	return html`
 	<div class="device_bg">
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -99,9 +101,67 @@ export default class RSDose extends RSDevice{
         ${this._render_actuators()}
 	</div>`;
 
-
     }
+
+
+    _editor_head_color(head_id){
+
+	let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
+	console.debug(this.config.heads["head_"+head_id].color," => ",color);
+	return html `
+<tr>
+<td>         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label> </td>
+<td>
+           <input type="color" id="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}"/>
+</td>
+</tr>
+     `;
+    }//end of function _editor_head_color
+
+    handleChangedEvent(changedEvent) {
+	console.debug("rsdose.handleChangedEvent ",changedEvent);
+	console.debug("  target =>  ",this._config.conf);
+	console.debug("  target =>  ",this.current_device.config.model);
+	console.debug("  target =>  ",this.current_device.device.name);
+        // this._config is readonly, copy needed
+        //var newConfig = Object.assign({},this._config);
+	/*console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads);
+	
+	console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id]);*/
+	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[changedEvent.target.id]:{color:hexToRgb(changedEvent.currentTarget.value)}}}}}}};
+	
+	var newConfig = Object.assign({},this._config);
+	try{
+	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = hexToRgb(changedEvent.currentTarget.value);
+	}
+	catch (error){
+	    updateObj(newConfig,newVal);
+	}
+	console.debug("new config ",newConfig);
+	console.debug("old config ",this._config);
+	console.debug("new val ",newVal);
+        const messageEvent = new CustomEvent("config-changed", {
+            detail: { config: newConfig },
+            bubbles: true,
+            composed: true,
+        });
+        this.dispatchEvent(messageEvent);
+    }// end of function handleChangedEvent
+    
+    editor(){
+	console.debug("rsdose.editor");
+	this._populate_entities_with_heads();
+	return html`
+<hr />
+<table>
+    	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._editor_head_color(head))}
+</table>
+`;
+    }//end of function editor
 }
 
 
+
+
 window.customElements.define('rs-dose4', RSDose);
+

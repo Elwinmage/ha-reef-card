@@ -910,11 +910,13 @@ $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
         canNotFindTranslation: "Can not find translation string: ",
-        disabledInHa: "Device disabled in HomeAssistant!"
+        disabledInHa: "Device disabled in HomeAssistant!",
+        head: "Head"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
-        disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!"
+        disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!",
+        head: "T\xeate"
     }
 };
 
@@ -1142,6 +1144,12 @@ class $038fea56b681b6a5$export$2e2bcd8739ae039 {
          // else
         return 0;
     }
+    get_by_name(name) {
+        for (var id of this.main_devices){
+            if (id.text == name) return this.devices[id.value];
+             //if
+        } //for
+    }
     init_devices() {
         console.log(this._hass);
         for(var device_id in this._hass.devices){
@@ -1172,6 +1180,44 @@ class $038fea56b681b6a5$export$2e2bcd8739ae039 {
         this.main_devices.sort(this.device_compare);
         console.log(this.devices);
     }
+}
+function $038fea56b681b6a5$export$5a544e13ad4e1fa5(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    var rgb = parseInt(result[1], 16) + "," + parseInt(result[2], 16) + "," + parseInt(result[3], 16);
+    console.log("hexToRgb: ", hex, " => ", rgb);
+    /*    return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+    } : null;*/ return rgb;
+}
+function $038fea56b681b6a5$export$34d09c4a771c46ef(orig) {
+    var regex_hex, regex_trim, color, regex_rgb, matches, hex;
+    // Remove whitespace
+    regex_trim = new RegExp(/[^#0-9a-f\.\(\)rgba]+/gim);
+    color = orig.replace(regex_trim, ' ').trim();
+    // Check if already hex
+    regex_hex = new RegExp(/#(([0-9a-f]{1})([0-9a-f]{1})([0-9a-f]{1}))|(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}))/gi);
+    if (regex_hex.exec(color)) return color;
+    // Extract RGB values
+    regex_rgb = new RegExp(/rgba?\([\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*([,\/][\t\s]*[0-9\.]{1,})?[\t\s]*\);?/gim);
+    matches = regex_rgb.exec(orig);
+    if (matches) {
+        hex = '#' + (matches[1] | 256).toString(16).slice(1) + (matches[2] | 256).toString(16).slice(1) + (matches[3] | 256).toString(16).slice(1);
+        return hex;
+    } else return orig;
+}
+function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
+    var keys = Object.keys(newVal);
+    var n = obj;
+    if (keys.length > 0) {
+        if (!(keys[0] in obj)) {
+            obj[keys[0]] = newVal[keys[0]];
+            return;
+        }
+        $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj[keys[0]], newVal[keys[0]]);
+    }
+    return;
 }
 
 
@@ -1637,6 +1683,9 @@ position: absolute;
 
 
 var $37d5w = parcelRequire("37d5w");
+
+var $dPhcg = parcelRequire("dPhcg");
+
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
@@ -1668,7 +1717,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         }
     }
     _get_val(head, entity_id) {
-        console.log("rsdose._get_val: " + entity_id);
+        console.debug("rsdose._get_val: " + entity_id);
         let entity = this.hass.states[this.entities[head][entity_id].entity_id];
         return entity.state;
     }
@@ -1695,10 +1744,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             return this._render_disabled();
         } //if
         this._populate_entities_with_heads();
-        console.log("000");
-        console.log(this.hass);
-        console.log(this.device);
-        console.log("000");
+        console.debug("000");
+        console.debug(this.hass);
+        console.debug(this.device);
+        console.debug("000");
         return (0, $l56HR.html)`
 	<div class="device_bg">
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -1709,6 +1758,72 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
        </div>
         ${this._render_actuators()}
 	</div>`;
+    }
+    _editor_head_color(head_id) {
+        let color = (0, $038fea56b681b6a5$export$34d09c4a771c46ef)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
+        console.debug(this.config.heads["head_" + head_id].color, " => ", color);
+        return (0, $l56HR.html)`
+<tr>
+<td>         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label> </td>
+<td>
+           <input type="color" id="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}"/>
+</td>
+</tr>
+     `;
+    }
+    handleChangedEvent(changedEvent) {
+        console.debug("rsdose.handleChangedEvent ", changedEvent);
+        console.debug("  target =>  ", this._config.conf);
+        console.debug("  target =>  ", this.current_device.config.model);
+        console.debug("  target =>  ", this.current_device.device.name);
+        // this._config is readonly, copy needed
+        //var newConfig = Object.assign({},this._config);
+        /*console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads);
+	
+	console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id]);*/ var newVal = {
+            conf: {
+                [this.current_device.config.model]: {
+                    devices: {
+                        [this.current_device.device.name]: {
+                            heads: {
+                                [changedEvent.target.id]: {
+                                    color: (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(changedEvent.currentTarget.value)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        var newConfig = Object.assign({}, this._config);
+        try {
+            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(changedEvent.currentTarget.value);
+        } catch (error) {
+            (0, $038fea56b681b6a5$export$6fb918aa09a6c9f0)(newConfig, newVal);
+        }
+        console.debug("new config ", newConfig);
+        console.debug("old config ", this._config);
+        console.debug("new val ", newVal);
+        const messageEvent = new CustomEvent("config-changed", {
+            detail: {
+                config: newConfig
+            },
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(messageEvent);
+    }
+    editor() {
+        console.debug("rsdose.editor");
+        this._populate_entities_with_heads();
+        return (0, $l56HR.html)`
+<hr />
+<table>
+    	${Array.from({
+            length: this.config.heads_nb
+        }, (x, i)=>i + 1).map((head)=>this._editor_head_color(head))}
+</table>
+`;
     }
 }
 window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae039);
@@ -1856,6 +1971,7 @@ var $j8KxL = parcelRequire("j8KxL");
 var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
 
+
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
@@ -1866,7 +1982,8 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             select_devices: {
                 type: Array
             },
-            devices_list: {}
+            devices_list: {},
+            current_device: {}
         };
     }
     constructor(){
@@ -1878,6 +1995,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             }
         ];
         this.first_init = true;
+        this.current_device = null;
     }
     setConfig(config) {
         this._config = config;
@@ -1905,21 +2023,45 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
                 this.first_init = false;
                 this.init_devices();
             }
-            console.log(this._config);
+            console.debug(this._config);
             return (0, $l56HR.html)`
-            <form class="table">
-                <div class="row">
-                    <label class="label cell" for="device">Device:</label>
+            <div class="card-config">
+                <div class="tabs">
+                <div class="tab">
+                    <label class="rab-label" for="device">Device:</label>
                     <select id="device" class="value cell" @change="${this.handleChangedEvent}">
                       ${this.select_devices.map((option)=>(0, $l56HR.html)`
                       <option value="${option.value}" ?selected=${this._config.device === option.text}>${option.text}</option>
                         `)}
                    </select>
+</div>
+                ${this.device_conf()}
                 </div>
-            </form>
+            </div>
         `;
         }
         return (0, $l56HR.html)``;
+    }
+    device_conf() {
+        if (this._config.device && this._config.device.length > 0) {
+            var device = this.devices_list.get_by_name(this._config.device);
+            console.debug("device: ", device);
+            var model = device.elements[0].model;
+            var lit_device = null;
+            switch(model){
+                case "RSDOSE4":
+                    console.debug("RSDOSE4 editor");
+                    lit_device = new (0, $205242e0eaceda90$export$2e2bcd8739ae039)(this.hass, device, this._config);
+                    break;
+                default:
+                    break;
+            } //switch
+            if (lit_device != null && typeof lit_device['editor'] == 'function') {
+                this.current_device = lit_device;
+                return lit_device.editor();
+            } //if
+        }
+        return ``;
     }
     handleChangedEvent(changedEvent) {
         // this._config is readonly, copy needed

@@ -2,6 +2,9 @@ import { css, html, LitElement } from 'lit';
 
 import DeviceList from './common';
 
+import RSDose from './devices/rsdose';
+
+
 export class ReefCardEditor extends LitElement {
 
     static get properties() {
@@ -10,6 +13,7 @@ export class ReefCardEditor extends LitElement {
             _config: { state: true },
 	    select_devices: {type: Array},
 	    devices_list: {},
+	    current_device: {},
         };
     }
 
@@ -18,12 +22,12 @@ export class ReefCardEditor extends LitElement {
 	super();
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
+	this.current_device=null;
     }
     
     setConfig(config) {
         this._config = config;
     }
-
 
     init_devices(){
 	this.devices_list=new DeviceList(this.hass);
@@ -32,7 +36,6 @@ export class ReefCardEditor extends LitElement {
 	}// for
     }
 
-    
     static styles = css`
             .table {
                 display: table;
@@ -52,22 +55,48 @@ export class ReefCardEditor extends LitElement {
 		this.first_init=false;
 		this.init_devices();
 	    }
-	    console.log(this._config);
+	    console.debug(this._config);
 	    return html`
-            <form class="table">
-                <div class="row">
-                    <label class="label cell" for="device">Device:</label>
+            <div class="card-config">
+                <div class="tabs">
+                <div class="tab">
+                    <label class="rab-label" for="device">Device:</label>
                     <select id="device" class="value cell" @change="${this.handleChangedEvent}">
                       ${this.select_devices.map(option => html`
                       <option value="${option.value}" ?selected=${this._config.device === option.text}>${option.text}</option>
                         `)}
                    </select>
+</div>
+                ${this.device_conf()}
                 </div>
-            </form>
+            </div>
         `;}
 	    return html``;
     }// end of - render
 
+
+    device_conf(){
+	if (this._config.device && this._config.device.length > 0){
+	    var device=this.devices_list.get_by_name(this._config.device);
+	    console.debug("device: ",device);
+	    var model = device.elements[0].model;
+	    var lit_device=null;
+	    switch(model){
+	    case "RSDOSE4":
+		console.debug("RSDOSE4 editor");
+		lit_device=new RSDose(this.hass,device,this._config);
+		break;
+	    default:
+		break;
+	    }//switch
+	    if (lit_device!=null && typeof lit_device['editor'] == 'function'){
+		this.current_device=lit_device;
+		return lit_device.editor();
+	       }//if
+	}
+	return ``;
+    }
+    
     handleChangedEvent(changedEvent) {
         // this._config is readonly, copy needed
         var newConfig = Object.assign({}, this._config);
