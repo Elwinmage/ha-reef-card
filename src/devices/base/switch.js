@@ -11,16 +11,38 @@ export class Switch extends  MyElement {
 
     static styles = style_switch;
 	
-
-    constructor(hass,label,stateObj){
- 	super(hass,label,stateObj);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */
+    constructor(hass,conf,color="255,255,255",alpha=1,stateObj){
+ 	super(hass,conf,stateObj);
+	this.color=color;
+	this.alpha=alpha;
     }//end of constructor
 
     render(){
-	return html`
-        <div class="switch_${this.stateObj.state}" @auxclick="${() => this.auxclick()}" @contextmenu="${() => this.contextmenu()}">
+	if (this.conf.style=="switch"){
+	    return html`
+        <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
+	}//if
+	else if (this.conf.style=="button"){
+	    console.debug("switch conf: ",this.conf);
+// background-color: rgba(${this.config.color},${this.config.alpha}); 
+	    return html`
+ <style>
+      #${this.conf.name}:hover {
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="switch_button"  id="${this.conf.name}"></div>
+`;
+	}
+	else{
+	    console.error("Switch style "+this.conf.style+" unknown for "+this.conf.name);
+	}
     }//end of function render
 
     async _click(e){
@@ -28,11 +50,11 @@ export class Switch extends  MyElement {
 	this._toggle();
     }
 
-    _longclick(){
+    async _longclick(e){
 	console.debug("Long Click");
     }//end of function longclick
     
-    _dblclick(e){
+    async _dblclick(e){
 	console.debug("Double click");
     }//end of function dblclick
 

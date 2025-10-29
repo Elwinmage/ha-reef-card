@@ -5,10 +5,10 @@ export default css`
 flex: 0 0 auto;
  position: absolute;
 //aspect-ratio: 1/1;
-width: 22%;
-height: 10%;
+width: 5.5%;
+height: 2%;
 border-radius: 50%;
-top: 25.8%;
+top: 28%;
 left: 2%;
 }
 

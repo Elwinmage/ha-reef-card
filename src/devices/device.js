@@ -125,25 +125,19 @@ export default class RSDevice extends LitElement {
 	    label_name='';
 	}
         return html`
-<!--  <style>
-      #${swtch.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
-<div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}"> -->
 <div class="${swtch.class}">
-<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
+<common-switch .hass="${this.hass}" .conf="${swtch}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
     }
 
-    _render_button(button){
+    _render_button(button,swtch=false){
         return html`
- <style>
+     <style>
       #${button.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
+      background-color: rgba(${this.config.color},${this.config.alpha});
+      }
+     </style>
 <div id="${button.name}" class="${button.class}" @click="${() => this._press(button)}"></div>
 `;
     }

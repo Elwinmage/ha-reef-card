@@ -143,24 +143,18 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         // Don not display label
         if ('label' in swtch && swtch.label == false) label_name = '';
         return (0, $l56HR.html)`
-<!--  <style>
-      #${swtch.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
-<div id="${swtch.name}" class="${swtch.class}" @click="${()=>this._toggle(swtch)}"> -->
 <div class="${swtch.class}">
-<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
+<common-switch .hass="${this.hass}" .conf="${swtch}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
     }
-    _render_button(button) {
+    _render_button(button, swtch = false) {
         return (0, $l56HR.html)`
- <style>
+     <style>
       #${button.name}:hover {
-background-color: rgba(${this.config.color},${this.config.alpha});
-}
-</style>
+      background-color: rgba(${this.config.color},${this.config.alpha});
+      }
+     </style>
 <div id="${button.name}" class="${button.class}" @click="${()=>this._press(button)}"></div>
 `;
     }
@@ -195,9 +189,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -788,8 +782,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 $parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
+$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -905,23 +899,40 @@ var $ih117 = parcelRequire("ih117");
 var $1Um3j = parcelRequire("1Um3j");
 class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
     static styles = (0, $ih117.default);
-    constructor(hass, label, stateObj){
-        super(hass, label, stateObj);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, color = "255,255,255", alpha = 1, stateObj){
+        super(hass, conf, stateObj);
+        this.color = color;
+        this.alpha = alpha;
     }
     render() {
-        return (0, $l56HR.html)`
-        <div class="switch_${this.stateObj.state}" @auxclick="${()=>this.auxclick()}" @contextmenu="${()=>this.contextmenu()}">
+        if (this.conf.style == "switch") return (0, $l56HR.html)`
+        <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
+        else if (this.conf.style == "button") {
+            console.debug("switch conf: ", this.conf);
+            // background-color: rgba(${this.config.color},${this.config.alpha}); 
+            return (0, $l56HR.html)`
+ <style>
+      #${this.conf.name}:hover {
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="switch_button"  id="${this.conf.name}"></div>
+`;
+        } else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
     }
     async _click(e) {
         console.debug("Click ", e.detail, " ", e.timeStamp);
         this._toggle();
     }
-    _longclick() {
+    async _longclick(e) {
         console.debug("Long Click");
     }
-    _dblclick(e) {
+    async _dblclick(e) {
         console.debug("Double click");
     }
     _toggle() {
@@ -967,8 +978,8 @@ height: 100%;
 
 .switch_in_on{
 position :absolute;
-left: 50%;
-top: -75%;
+left: 38%;
+top: -20%;
 aspect-ratio: 1/1;
 border-radius: 30px;
 background-color: rgba(250,250,250,1);
@@ -978,14 +989,74 @@ width: 60%;
 
 .switch_in_off{
 position :absolute;
-left: -10%;
-top: -75%;
+left: 0%;
+top: -25%;
 aspect-ratio: 1/1;
 border-radius: 30px;
 background-color: rgba(255,20,20,1);
 //border: 1px solid red;
 width: 60%;
 }
+
+//RSDOSE
+.supplement_info{
+position :absolute;
+aspect-ratio: 1/2.6;
+width : 62%;
+top: 49%;
+left: 2%;
+border-radius: 30px;
+}
+
+
+.manual_dose_head{
+ position: absolute;
+aspect-ratio: 1/1;
+width: 15%;
+border-radius: 50%;
+top: 5%;
+left: 33%;
+}
+
+.pump_state_head{
+ position: absolute;
+ aspect-ratio: 1/1;
+ width: 55%;
+ border-radius: 50%;
+ top: 10%;
+ left: 35%;
+}
+
+.container{
+position: absolute;
+top: 41%;
+width: 68%;
+aspect-ratio: 1/3;
+}
+
+img{
+ position: absolute;
+ width: 100%;
+}
+
+.pipe{
+  flex: 0 0 auto;
+  position: absolute;
+  width: 70%;
+  top: 32%;
+  left: 30%;
+//  border : 3px solid gray;
+  }
+
+svg{
+stroke: black;
+}
+
+.switch_button{
+aspect-ratio: 1/1;
+width: 100%;
+ border-radius: 50%;
+};
 
 
 `;
@@ -1001,9 +1072,7 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
             hass: {},
-            label: {
-                type: String
-            },
+            conf: {},
             stateObj: {},
             alreadyClicked: {
                 type: Boolean
@@ -1014,10 +1083,10 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
             mouseDown: {}
         };
     }
-    constructor(hass, label, stateObj){
+    constructor(hass, conf, stateObj){
         super();
         this.hass = hass;
-        this.label = label;
+        this.conf = conf;
         this.stateObj = stateObj;
         //Disable context menu
         this.mouseDown = 0;
@@ -1542,10 +1611,10 @@ var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 flex: 0 0 auto;
  position: absolute;
 //aspect-ratio: 1/1;
-width: 22%;
-height: 10%;
+width: 5.5%;
+height: 2%;
 border-radius: 50%;
-top: 25.8%;
+top: 28%;
 left: 2%;
 }
 

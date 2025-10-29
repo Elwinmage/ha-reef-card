@@ -5,7 +5,7 @@ export default class MyElement extends LitElement{
     static get properties(){
 	return {
 	    hass: {},
-	    label: {type: String},
+	    conf: {},
 	    stateObj: {},
 	    alreadyClicked: {type: Boolean},
 	    doubleClick: {type: Boolean},
@@ -14,10 +14,10 @@ export default class MyElement extends LitElement{
 	};
     }// end of get properties 
 
-    constructor(hass,label,stateObj){
+    constructor(hass,conf,stateObj){
 	super();
 	this.hass=hass;
-	this.label=label;
+	this.conf=conf;
 	this.stateObj=stateObj;
 	//Disable context menu
 	this.mouseDown=0;
