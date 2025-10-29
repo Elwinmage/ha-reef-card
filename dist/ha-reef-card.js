@@ -55,15 +55,17 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         return {
             hass: {},
             config: {},
+            initial_config: {},
             device: {},
             user_config: {}
         };
     }
-    constructor(config, hass, device, user_config){
+    constructor(i_config, hass, device, user_config){
         super();
         this.hass = hass;
         this.device = device;
-        this.config = config;
+        this.initial_config = i_config;
+        this.config = i_config;
         this.user_config = user_config;
         this.entities = {};
         this.first_init = true;
@@ -81,24 +83,20 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         }
     }
     update_config() {
-        if (this.first_init) {
-            console.debug("RSDevice.update_config for ", this.device);
-            if ("conf" in this.user_config) {
-                console.debug("User config detected");
-                console.debug(this.user_config.conf);
-                if (this.device.elements[0].model in this.user_config.conf) {
-                    let device_conf = this.user_config.conf[this.device.elements[0].model];
-                    if ('common' in device_conf) {
-                        this.find_leaves(device_conf['common'], "this.config");
-                        if ('devices' in device_conf && this.device.name in device_conf.devices) {
-                            console.log(this.device.name);
-                            this.find_leaves(device_conf['devices'][this.device.name], "this.config");
-                        }
-                    } //if
-                //apply new params
-                } //if
+        this.config = JSON.parse(JSON.stringify(this.initial_config));
+        console.debug("RSDevice.update_config for ", this.device);
+        if ("conf" in this.user_config) {
+            console.debug("User config detected: ", this.user_config.conf);
+            console.debug("Initial config: ", this.initial_config);
+            if (this.device.elements[0].model in this.user_config.conf) {
+                let device_conf = this.user_config.conf[this.device.elements[0].model];
+                if ('common' in device_conf) this.find_leaves(device_conf['common'], "this.config");
+                 //if
+                if ('devices' in device_conf && this.device.name in device_conf.devices) {
+                    console.log(this.device.name);
+                    this.find_leaves(device_conf['devices'][this.device.name], "this.config");
+                }
             } //if
-            this.first_init = false;
         } //if
     }
     _populate_entities() {
@@ -141,19 +139,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
 	let res=this.dispatchEvent(e);
 	console.log(res);*/ }
     _render_switch(swtch) {
-        // console.log("RENDER switch");
-        // console.log(swtch);
-        // console.log(this.config);
-        // console.log(this.entities[swtch.name]);
-        // console.log(this.hass.states[this.entities[swtch.name].entity_id]);
-        //<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
         let label_name = swtch.name;
         // Don not display label
         if ('label' in swtch && swtch.label == false) label_name = '';
-        //<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
-        console.log("**//**/*/*/*/");
-        console.log(this.entities[swtch.name].entity_id);
-        console.log(this.hass.states[this.entities[swtch.name].entity_id]);
         return (0, $l56HR.html)`
 <!--  <style>
       #${swtch.name}:hover {
@@ -165,21 +153,8 @@ background-color: rgba(${this.config.color},${this.config.alpha});
 <common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
-    //         return html`
-    //  <style>
-    //       #${swtch.name}:hover {
-    // background-color: rgba(${this.config.color},${this.config.alpha});
-    // }
-    // </style>
-    // <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
-    // <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-    // </div>
-    // `;
     }
     _render_button(button) {
-        console.log("RENDER button");
-        console.log(button);
-        console.log(this.config);
         return (0, $l56HR.html)`
  <style>
       #${button.name}:hover {
@@ -190,11 +165,7 @@ background-color: rgba(${this.config.color},${this.config.alpha});
 `;
     }
     _render_actuators_type(type) {
-        if (type.name in this.config) {
-            console.log("Render " + type.name);
-            console.log(this.config);
-            return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
-        }
+        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
         console.log("No " + type.name);
         return (0, $l56HR.html)``;
     }
@@ -224,9 +195,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -817,8 +788,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 $parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
+$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -911,12 +882,14 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
         canNotFindTranslation: "Can not find translation string: ",
         disabledInHa: "Device disabled in HomeAssistant!",
-        head: "Head"
+        head: "Head",
+        heads_colors: "Heads Colors"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
         disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!",
-        head: "T\xeate"
+        head: "T\xeate",
+        heads_colors: "Couleur des t\xeates"
     }
 };
 
@@ -1696,6 +1669,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     ];
     _heads = [];
     constructor(hass, device, user_config){
+        console.log("rsdose.constr config:", (0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20));
         super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device, user_config);
     }
     _populate_entities() {}
@@ -1730,6 +1704,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 `;
     }
     render() {
+        console.debug("rsdose.render");
         this.update_config();
         // disabled
         let disabled = false;
@@ -1744,10 +1719,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             return this._render_disabled();
         } //if
         this._populate_entities_with_heads();
-        console.debug("000");
-        console.debug(this.hass);
-        console.debug(this.device);
-        console.debug("000");
         return (0, $l56HR.html)`
 	<div class="device_bg">
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -1760,34 +1731,25 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 	</div>`;
     }
     _editor_head_color(head_id) {
+        this.update_config();
         let color = (0, $038fea56b681b6a5$export$34d09c4a771c46ef)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
-        console.debug(this.config.heads["head_" + head_id].color, " => ", color);
         return (0, $l56HR.html)`
-<tr>
-<td>         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label> </td>
-<td>
-           <input type="color" id="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}"/>
-</td>
-</tr>
+         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" /> 
+         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label>
+         <br />
      `;
     }
     handleChangedEvent(changedEvent) {
         console.debug("rsdose.handleChangedEvent ", changedEvent);
-        console.debug("  target =>  ", this._config.conf);
-        console.debug("  target =>  ", this.current_device.config.model);
-        console.debug("  target =>  ", this.current_device.device.name);
-        // this._config is readonly, copy needed
-        //var newConfig = Object.assign({},this._config);
-        /*console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads);
-	
-	console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id]);*/ var newVal = {
+        const hex = changedEvent.currentTarget.value;
+        var newVal = {
             conf: {
                 [this.current_device.config.model]: {
                     devices: {
                         [this.current_device.device.name]: {
                             heads: {
                                 [changedEvent.target.id]: {
-                                    color: (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(changedEvent.currentTarget.value)
+                                    color: (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(hex)
                                 }
                             }
                         }
@@ -1795,15 +1757,12 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                 }
             }
         };
-        var newConfig = Object.assign({}, this._config);
+        var newConfig = JSON.parse(JSON.stringify(this._config));
         try {
-            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(changedEvent.currentTarget.value);
+            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(hex);
         } catch (error) {
             (0, $038fea56b681b6a5$export$6fb918aa09a6c9f0)(newConfig, newVal);
         }
-        console.debug("new config ", newConfig);
-        console.debug("old config ", this._config);
-        console.debug("new val ", newVal);
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
                 config: newConfig
@@ -1813,16 +1772,19 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         });
         this.dispatchEvent(messageEvent);
     }
-    editor() {
+    editor(doc) {
         console.debug("rsdose.editor");
         this._populate_entities_with_heads();
+        var element = doc.getElementById("heads_colors");
+        if (element) element.reset();
         return (0, $l56HR.html)`
 <hr />
-<table>
-    	${Array.from({
+<h1>${(0, $dPhcg.default)._("heads_colors")}</h1>
+<form id="heads_colors">
+   	${Array.from({
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._editor_head_color(head))}
-</table>
+</form>
 `;
     }
 }
@@ -1975,7 +1937,7 @@ var $eGUNk = parcelRequire("eGUNk");
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
-            // hass: {},
+            hass: {},
             _config: {
                 state: true
             },
@@ -1996,8 +1958,10 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         ];
         this.first_init = true;
         this.current_device = null;
+        this.addEventListener('config-changed', this.render());
     }
     setConfig(config) {
+        console.debug("Loading config");
         this._config = config;
     }
     init_devices() {
@@ -2018,6 +1982,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             }
         `;
     render() {
+        console.debug("editor.render: ", this._config);
         if (this._config) {
             if (this.first_init == true) {
                 this.first_init = false;
@@ -2058,14 +2023,15 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             } //switch
             if (lit_device != null && typeof lit_device['editor'] == 'function') {
                 this.current_device = lit_device;
-                return lit_device.editor();
+                return lit_device.editor(this.shadowRoot);
             } //if
         }
         return ``;
     }
     handleChangedEvent(changedEvent) {
+        console.debug("editor.handleChangedEvent");
         // this._config is readonly, copy needed
-        var newConfig = Object.assign({}, this._config);
+        var newConfig = JSON.parse(JSON.stringify(this._config));
         var elt = this.shadowRoot.getElementById("device");
         let val = 'unselected';
         if (elt.selectedIndex == 0) delete newConfig.device;
@@ -2092,6 +2058,14 @@ window.customCards.push({
     type: "reef-card",
     name: "Reef Tank Card",
     description: "A custom card for reef management."
+});
+window.customCards = window.customCards || [];
+window.customCards.push({
+    type: "reef-card-editor",
+    name: "Content Card Editor",
+    preview: false,
+    description: "Reef Card!",
+    documentationURL: "https://github.com/Elwinmage/ha-reef-card"
 });
 
 

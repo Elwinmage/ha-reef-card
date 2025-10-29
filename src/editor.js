@@ -9,7 +9,7 @@ export class ReefCardEditor extends LitElement {
 
     static get properties() {
         return {
-            // hass: {},
+            hass: {},
             _config: { state: true },
 	    select_devices: {type: Array},
 	    devices_list: {},
@@ -17,17 +17,18 @@ export class ReefCardEditor extends LitElement {
         };
     }
 
-
     constructor(){
 	super();
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
 	this.current_device=null;
+	this.addEventListener('config-changed', this.render());
     }
     
     setConfig(config) {
+	console.debug("Loading config");
         this._config = config;
-    }
+    }// end of function setConfig
 
     init_devices(){
 	this.devices_list=new DeviceList(this.hass);
@@ -50,6 +51,8 @@ export class ReefCardEditor extends LitElement {
         `;
 
     render() {
+	
+	console.debug("editor.render: ",this._config);
 	if(this._config){
 	    if (this.first_init==true){
 		this.first_init=false;
@@ -91,15 +94,16 @@ export class ReefCardEditor extends LitElement {
 	    }//switch
 	    if (lit_device!=null && typeof lit_device['editor'] == 'function'){
 		this.current_device=lit_device;
-		return lit_device.editor();
+		return lit_device.editor(this.shadowRoot);
 	       }//if
 	}
 	return ``;
     }
     
     handleChangedEvent(changedEvent) {
+	console.debug("editor.handleChangedEvent");
         // this._config is readonly, copy needed
-        var newConfig = Object.assign({}, this._config);
+        var newConfig = JSON.parse(JSON.stringify(this._config)); 
 	var elt = this.shadowRoot.getElementById("device");
 	let val='unselected';
 	if (elt.selectedIndex == 0){

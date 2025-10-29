@@ -22,9 +22,10 @@ export default class RSDose extends RSDevice{
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
 //   labels: enhancement, rsdose
     static styles = [style_rsdose,style_common];
-    _heads = []
+    _heads = [];
     
     constructor(hass,device,user_config){
+	console.log("rsdose.constr config:",config);
 	super(config,hass,device,user_config);
     }// end of constructor
 
@@ -73,6 +74,7 @@ export default class RSDose extends RSDevice{
     }
     
     render(){
+	console.debug("rsdose.render");
 	this.update_config();
 	// disabled
 	let disabled=false;
@@ -88,10 +90,6 @@ export default class RSDose extends RSDevice{
 	    return this._render_disabled();
 	}//if
 	this._populate_entities_with_heads();
-	console.debug("000");
-	console.debug(this.hass);
-	console.debug(this.device);
-	console.debug("000");
 	return html`
 	<div class="device_bg">
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -103,43 +101,27 @@ export default class RSDose extends RSDevice{
 
     }
 
-
     _editor_head_color(head_id){
-
+	this.update_config();
 	let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
-	console.debug(this.config.heads["head_"+head_id].color," => ",color);
 	return html `
-<tr>
-<td>         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label> </td>
-<td>
-           <input type="color" id="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}"/>
-</td>
-</tr>
+         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" /> 
+         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label>
+         <br />
      `;
     }//end of function _editor_head_color
 
     handleChangedEvent(changedEvent) {
 	console.debug("rsdose.handleChangedEvent ",changedEvent);
-	console.debug("  target =>  ",this._config.conf);
-	console.debug("  target =>  ",this.current_device.config.model);
-	console.debug("  target =>  ",this.current_device.device.name);
-        // this._config is readonly, copy needed
-        //var newConfig = Object.assign({},this._config);
-	/*console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads);
-	
-	console.debug(newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id]);*/
-	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[changedEvent.target.id]:{color:hexToRgb(changedEvent.currentTarget.value)}}}}}}};
-	
-	var newConfig = Object.assign({},this._config);
+	const hex=changedEvent.currentTarget.value;
+	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[changedEvent.target.id]:{color:hexToRgb(hex)}}}}}}};
+	var newConfig = JSON.parse(JSON.stringify(this._config));
 	try{
-	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = hexToRgb(changedEvent.currentTarget.value);
+	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = hexToRgb(hex);
 	}
 	catch (error){
 	    updateObj(newConfig,newVal);
 	}
-	console.debug("new config ",newConfig);
-	console.debug("old config ",this._config);
-	console.debug("new val ",newVal);
         const messageEvent = new CustomEvent("config-changed", {
             detail: { config: newConfig },
             bubbles: true,
@@ -148,19 +130,23 @@ export default class RSDose extends RSDevice{
         this.dispatchEvent(messageEvent);
     }// end of function handleChangedEvent
     
-    editor(){
+    editor(doc){
 	console.debug("rsdose.editor");
 	this._populate_entities_with_heads();
+	var element = doc.getElementById("heads_colors");
+	if (element){
+	    element.reset();
+	}
 	return html`
 <hr />
-<table>
-    	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._editor_head_color(head))}
-</table>
-`;
+<h1>${i18n._("heads_colors")}</h1>
+<form id="heads_colors">
+   	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._editor_head_color(head))}
+</form>
+`
+	;
     }//end of function editor
 }
-
-
 
 
 window.customElements.define('rs-dose4', RSDose);

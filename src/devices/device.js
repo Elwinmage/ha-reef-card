@@ -19,16 +19,18 @@ export default class RSDevice extends LitElement {
 	return {
 	    hass: {},
 	    config: {},
+	    initial_config: {},
 	    device:{},
 	    user_config: {}
 	}
     }
     
-    constructor(config,hass,device,user_config){
+    constructor(i_config,hass,device,user_config){
 	super();
 	this.hass = hass;
 	this.device = device;
-	this.config=config;
+	this.initial_config=i_config;
+	this.config=i_config;
 	this.user_config=user_config;
 	this.entities={};
 	this.first_init=true;
@@ -48,24 +50,21 @@ export default class RSDevice extends LitElement {
     }
 
     update_config(){
-	if (this.first_init){
-	    console.debug("RSDevice.update_config for ",this.device);
-	    if ("conf" in this.user_config){
-		console.debug("User config detected");
-		console.debug(this.user_config.conf);
-		if (this.device.elements[0].model in this.user_config.conf){
-		    let device_conf=this.user_config.conf[this.device.elements[0].model];
-		    if ('common' in device_conf){
-			this.find_leaves(device_conf['common'],"this.config");
-			if ('devices' in device_conf && this.device.name in device_conf.devices){
-			    console.log(this.device.name);
-			    this.find_leaves(device_conf['devices'][this.device.name],"this.config");
-			}
-		    }//if
-		    //apply new params
+	this.config=JSON.parse(JSON.stringify(this.initial_config));
+	console.debug("RSDevice.update_config for ",this.device);
+	if ("conf" in this.user_config){
+	    console.debug("User config detected: ", this.user_config.conf);
+	    console.debug("Initial config: ", this.initial_config);
+	    if (this.device.elements[0].model in this.user_config.conf){
+		let device_conf=this.user_config.conf[this.device.elements[0].model];
+		if ('common' in device_conf){
+		    this.find_leaves(device_conf['common'],"this.config");
 		}//if
+		if ('devices' in device_conf && this.device.name in device_conf.devices){
+		    console.log(this.device.name);
+		    this.find_leaves(device_conf['devices'][this.device.name],"this.config");
+		}
 	    }//if
-	    this.first_init=false;
 	}//if
     }//end of function update_config
     
@@ -120,21 +119,11 @@ export default class RSDevice extends LitElement {
 
 
     _render_switch(swtch){
-	// console.log("RENDER switch");
-	// console.log(swtch);
-	// console.log(this.config);
-	// console.log(this.entities[swtch.name]);
-	// console.log(this.hass.states[this.entities[swtch.name].entity_id]);
-	//<ha-entity-toggle .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
 	let label_name=swtch.name;
 	// Don not display label
 	if ('label' in swtch && swtch.label==false){
 	    label_name='';
 	}
-	//<common-switch class="on_off" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}></common-switch>
-	console.log("**//**/*/*/*/");
-	console.log(this.entities[swtch.name].entity_id);
-	console.log(this.hass.states[this.entities[swtch.name].entity_id]);
         return html`
 <!--  <style>
       #${swtch.name}:hover {
@@ -146,23 +135,9 @@ background-color: rgba(${this.config.color},${this.config.alpha});
 <common-switch class="on_off" .hass="${this.hass}" .label="${label_name}"  .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
 </div>
 `;
-//         return html`
-//  <style>
-//       #${swtch.name}:hover {
-// background-color: rgba(${this.config.color},${this.config.alpha});
-// }
-// </style>
-// <div id="${swtch.name}" class="${swtch.class}" @click="${() => this._toggle(swtch)}">
-// <ha-entity-toggle width="500px" .hass="${this.hass}" .label="${label_name}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></ha-entity-toggle>
-// </div>
-// `;
     }
 
-
     _render_button(button){
-	console.log("RENDER button");
-	console.log(button);
-	console.log(this.config);
         return html`
  <style>
       #${button.name}:hover {
@@ -176,10 +151,7 @@ background-color: rgba(${this.config.color},${this.config.alpha});
 
     _render_actuators_type(type){
 	if (type.name in this.config){
-	    console.log("Render "+type.name);
-	    console.log(this.config);
 	    return html`${this.config[type.name].map(actuator => type.fn.call(this,actuator))}`;
-
 	}
 	console.log("No "+type.name);
 	return html``;
