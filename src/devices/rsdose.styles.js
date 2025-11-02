@@ -99,7 +99,7 @@ background-color:rgba(250,0,0,0.5);
 
 .sensor {
     flex: 0 0 auto;
-position: absolute;
+    position: absolute;
 }
 
 

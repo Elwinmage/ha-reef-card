@@ -2,10 +2,11 @@ import { html } from "lit";
 import RSDevice from "./device";
 
 import styles from "./dose_head.styles";
+import style_sensors from "./base/sensor.styles";
 
 export default class DoseHead extends RSDevice{
 
-    static styles = styles;
+    static styles = [styles,style_sensors];
 
     static get properties() {
 	return {
@@ -65,7 +66,9 @@ export default class DoseHead extends RSDevice{
    	        <div class="pipe" >
  		  ${this._pipe_path()}
 		</div>
+
 ${this._render_actuators()}
+${this._render_sensors()}
    	    `;
     }
 };

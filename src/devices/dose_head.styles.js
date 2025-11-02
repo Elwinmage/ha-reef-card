@@ -2,7 +2,6 @@ import {css} from 'lit';
 
 export default css`
 
-
 .supplement_info{
 position :absolute;
 aspect-ratio: 1/2.6;
@@ -56,5 +55,13 @@ img{
 svg{
 stroke: black;
 }
+
+.manual_head_volume{
+position: absolute;
+width: 45%;
+top: 0%;
+left: 20%;
+}
+
 
 `;

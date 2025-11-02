@@ -45,6 +45,7 @@ var $eGUNk = parcelRequire("eGUNk");
 
 var $dPhcg = parcelRequire("dPhcg");
 parcelRequire("6vZH1");
+parcelRequire("258Ll");
 
 var $37d5w = parcelRequire("37d5w");
 class RSDevice extends (0, $eGUNk.LitElement) {
@@ -138,13 +139,21 @@ class RSDevice extends (0, $eGUNk.LitElement) {
 	console.log(e);
 	let res=this.dispatchEvent(e);
 	console.log(res);*/ }
-    _render_switch(swtch) {
-        let label_name = swtch.name;
+    _render_disabled() {
+        return (0, $l56HR.html)`<div class="device_bg">
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._("disabledInHa")}</p>
+                        </div">`;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // ACTUATORS
+    _render_switch(mapping_conf) {
+        let label_name = '';
         // Don not display label
-        if ('label' in swtch && swtch.label == false) label_name = '';
+        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
         return (0, $l56HR.html)`
-<div class="${swtch.class}">
-<common-switch .hass="${this.hass}" .conf="${swtch}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
+<div class="${mapping_conf.class}">
+<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
 </div>
 `;
     }
@@ -178,11 +187,34 @@ class RSDevice extends (0, $eGUNk.LitElement) {
                      ${actuators.map((type)=>this._render_actuators_type(type))}
                       `;
     }
-    _render_disabled() {
-        return (0, $l56HR.html)`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._("disabledInHa")}</p>
-                        </div">`;
+    ////////////////////////////////////////////////////////////////////////////////
+    // SENSORS
+    _render_sensors() {
+        let sensors = [
+            {
+                "name": "sensors",
+                "fn": this._render_sensor
+            }
+        ];
+        return (0, $l56HR.html)`
+                     ${sensors.map((type)=>this._render_sensors_type(type))}
+                      `;
+    }
+    _render_sensors_type(type) {
+        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor))}`;
+        console.log("No " + type.name);
+        return (0, $l56HR.html)``;
+    }
+    _render_sensor(mapping_conf) {
+        if ('disabled' in mapping_conf && mapping_conf.disabled == true) return (0, $l56HR.html)``;
+        let label_name = '';
+        // Don not display label
+        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        return (0, $l56HR.html)`
+<div class="${mapping_conf.name}">
+<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+</div>
+`;
     }
 }
 window.customElements.define('rs-device', RSDevice);
@@ -1125,6 +1157,64 @@ window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae
 });
 
 
+parcelRegister("258Ll", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $ircx4 = parcelRequire("ircx4");
+
+var $1Um3j = parcelRequire("1Um3j");
+class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
+    static styles = (0, $ircx4.default);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, color = "255,255,255", alpha = 1, stateObj){
+        super(hass, conf, stateObj);
+        this.color = color;
+        this.alpha = alpha;
+    }
+    render() {
+        console.debug("Sensor render: ", this.stateObj);
+        return (0, $l56HR.html)`
+<style>
+.sensor{
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="sensor" id="${this.conf.name}">${this.stateObj.state} ${this.stateObj.attributes.unit_of_measurement}</div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('common-sensor', $1842d87d95211302$export$f5fe6b3a9dfe845b);
+
+});
+parcelRegister("ircx4", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $d6c47842c28a305f$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+.sensor{
+  border-radius: 30px;
+  text-align: center;
+}
+
+`;
+
+});
+
+
 parcelRegister("37d5w", function(module, exports) {
 
 $parcel$export(module.exports, "default", () => $244c2d90fdd5377f$export$2e2bcd8739ae039);
@@ -1375,8 +1465,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "top": 80,
                     "rotate": "-90deg",
                     "border_radius": "5px",
-                    "background_color": "140,67,148",
-                    "color": "white"
+                    "disabled": true
+                },
+                {
+                    "name": "manual_head_volume"
                 }
             ],
             "switches": [
@@ -1403,7 +1495,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_2": {
             "color": "0,129,197",
             "alpha": "0.4",
-            "sensors": [],
+            "sensors": [
+                {
+                    "name": "manual_head_volume"
+                }
+            ],
             "switches": [
                 {
                     "name": "schedule_enabled",
@@ -1427,7 +1523,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_3": {
             "color": "0,130,100",
             "alpha": "0.4",
-            "sensors": [],
+            "sensors": [
+                {
+                    "name": "manual_head_volume"
+                }
+            ],
             "switches": [
                 {
                     "name": "schedule_enabled",
@@ -1452,7 +1552,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_4": {
             "color": "100,160,75",
             "alpha": "0.4",
-            "sensors": [],
+            "sensors": [
+                {
+                    "name": "manual_head_volume"
+                }
+            ],
             "switches": [
                 {
                     "name": "schedule_enabled",
@@ -1485,7 +1589,6 @@ var $5c2Je = parcelRequire("5c2Je");
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
 
 .supplement_info{
 position :absolute;
@@ -1541,11 +1644,24 @@ svg{
 stroke: black;
 }
 
+.manual_head_volume{
+position: absolute;
+width: 45%;
+top: 0%;
+left: 20%;
+}
+
+
 `;
 
 
+
+var $ircx4 = parcelRequire("ircx4");
 class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
-    static styles = (0, $12c519d2fc52c039$export$2e2bcd8739ae039);
+    static styles = [
+        (0, $12c519d2fc52c039$export$2e2bcd8739ae039),
+        (0, $ircx4.default)
+    ];
     static get properties() {
         return {
             entities: {},
@@ -1597,7 +1713,9 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
    	        <div class="pipe" >
  		  ${this._pipe_path()}
 		</div>
+
 ${this._render_actuators()}
+${this._render_sensors()}
    	    `;
     }
 }
@@ -1705,7 +1823,7 @@ background-color:rgba(250,0,0,0.5);
 
 .sensor {
     flex: 0 0 auto;
-position: absolute;
+    position: absolute;
 }
 
 

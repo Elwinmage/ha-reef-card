@@ -1,8 +1,9 @@
-import { html, LitElement } from "lit";
+import { html,LitElement } from "lit";
 
 import i18n from "../translations/myi18n.js";
 
 import Switch from "./base/switch";
+import Sensor from "./base/sensor";
 
 import style_common from "./common.styles";
 
@@ -117,16 +118,25 @@ export default class RSDevice extends LitElement {
 	console.log(res);*/
     }
 
+    _render_disabled(){
+	return html`<div class="device_bg">
+                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+                          <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
+                        </div">`;
+    }//end of function _render_disabled
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // ACTUATORS
 
-    _render_switch(swtch){
-	let label_name=swtch.name;
+    _render_switch(mapping_conf){
+	let label_name='';
 	// Don not display label
-	if ('label' in swtch && swtch.label==false){
-	    label_name='';
+	if ('label' in mapping_conf && mapping_conf.label!=false){
+	    label_name=mapping_conf.name;
 	}
         return html`
-<div class="${swtch.class}">
-<common-switch .hass="${this.hass}" .conf="${swtch}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[swtch.name].entity_id]}"></common-switch>
+<div class="${mapping_conf.class}">
+<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
 </div>
 `;
     }
@@ -142,7 +152,6 @@ export default class RSDevice extends LitElement {
 `;
     }
     
-
     _render_actuators_type(type){
 	if (type.name in this.config){
 	    return html`${this.config[type.name].map(actuator => type.fn.call(this,actuator))}`;
@@ -159,12 +168,41 @@ export default class RSDevice extends LitElement {
                       `;
     }
 
-    _render_disabled(){
-	return html`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
-                        </div">`;
-    }// end of function -- _render_disabled
+    ////////////////////////////////////////////////////////////////////////////////
+    // SENSORS
+    _render_sensors(){
+	let sensors=[{"name":"sensors","fn":this._render_sensor}];
+	return html `
+                     ${sensors.map(type => this._render_sensors_type(type))}
+                      `;
+    }
+
+    _render_sensors_type(type){
+	if (type.name in this.config){
+	    return html`${this.config[type.name].map(sensor => type.fn.call(this,sensor))}`;
+	}
+	console.log("No "+type.name);
+	return html``;
+    }
+
+    _render_sensor(mapping_conf){
+	if ('disabled' in mapping_conf && mapping_conf.disabled==true){
+	    return html``;
+	}
+	    
+	let label_name='';
+	// Don not display label
+	if ('label' in mapping_conf && mapping_conf.label!=false){
+	label_name=mapping_conf.name;
+	}
+        return html`
+<div class="${mapping_conf.name}">
+<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+</div>
+`;
+    }//end of function _render_sensor
+    
+    
 }
 window.customElements.define('rs-device', RSDevice);
 

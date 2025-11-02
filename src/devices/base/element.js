@@ -2,6 +2,7 @@ import { html, LitElement } from "lit";
 
 export default class MyElement extends LitElement{
 
+
     static get properties(){
 	return {
 	    hass: {},

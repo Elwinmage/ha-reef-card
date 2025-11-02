@@ -23,8 +23,10 @@ export const config = {
 		    "top": 80,
 		    "rotate": "-90deg",
 		    "border_radius": "5px",
-		    "background_color": "140,67,148",
-		    "color": "white"
+		    "disabled": true,
+		},
+		{
+		    "name": "manual_head_volume",
 		}
 	    ],
 	    "switches" : [
@@ -53,7 +55,11 @@ export const config = {
 	"head_2": {
 	    "color": "0,129,197",
 	    "alpha": "0.4",
-	    "sensors": [],
+	    "sensors": [
+		{
+		    "name": "manual_head_volume",
+		}
+	    ],
 	    "switches" : [
 		{
 		    "name": "schedule_enabled",
@@ -79,7 +85,12 @@ export const config = {
 	"head_3": {
 	    "color": "0,130,100",
 	    "alpha": "0.4",
-	    "sensors": [],
+	    "sensors": [
+		{
+		    "name": "manual_head_volume",
+		}
+
+	    ],
 	    "switches" : [
 		{
 		    "name": "schedule_enabled",
@@ -107,7 +118,12 @@ export const config = {
 	"head_4": {
 	    "color": "100,160,75",
 	    "alpha": "0.4",
-	    "sensors": [],
+	    "sensors": [
+		{
+		    "name": "manual_head_volume",
+		}
+
+	    ],
 	    "switches" : [
 		{
 		    "name": "schedule_enabled",
