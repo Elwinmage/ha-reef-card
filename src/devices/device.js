@@ -153,14 +153,6 @@ export default class RSDevice extends LitElement {
 <common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
 </div>
 	`;
-/*        return html`
-     <style>
-      #${button.name}:hover {
-      background-color: rgba(${this.config.color},${this.config.alpha});
-      }
-     </style>
-<div id="${button.name}" class="${button.class}" @click="${() => this._press(button)}"></div>
-`;*/
     }
     
     _render_actuators_type(type){

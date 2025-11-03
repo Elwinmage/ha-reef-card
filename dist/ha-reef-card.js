@@ -169,14 +169,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
 <common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
 </div>
 	`;
-    /*        return html`
-     <style>
-      #${button.name}:hover {
-      background-color: rgba(${this.config.color},${this.config.alpha});
-      }
-     </style>
-<div id="${button.name}" class="${button.class}" @click="${() => this._press(button)}"></div>
-`;*/ }
+    }
     _render_actuators_type(type) {
         if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
         console.log("No " + type.name);
@@ -967,6 +960,7 @@ background-color: rgba(${this.color},${this.alpha});
     }
     async _click(e) {
         console.debug("Click ", e.detail, " ", e.timeStamp);
+        console.debug("switch toggled:" + this.stateObj.entity_id);
         this._toggle();
     }
     async _longclick(e) {
@@ -1207,7 +1201,8 @@ background-color: rgba(${this.color},${this.alpha});
     }
     async _click(e) {
         console.debug("Click ", e.detail, " ", e.timeStamp);
-        this._toggle();
+        console.debug("button pressed: :" + this.stateObj.entity_id);
+    //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
     async _longclick(e) {
         console.debug("Long Click");
@@ -2010,8 +2005,20 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.update_config();
         let color = (0, $038fea56b681b6a5$export$34d09c4a771c46ef)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
         return (0, $l56HR.html)`
-         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" /> 
-         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label>
+         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
+<datalist id="RedSeaColors">
+<option>#8c4394</option>
+<option>#0081c5</option>
+<option>#008264</option>
+<option>#64a04b</option>
+<option>#A0A0A0</option>
+<option>#f04e99</option>
+<option>#f14b4c</option>
+<option>#f08f37</option>
+<option>#d9d326</option>
+<option>#FFFFFF</option>
+</datalist>
+         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
          <br />
      `;
     }

@@ -100,13 +100,24 @@ export default class RSDose extends RSDevice{
 	</div>`;
 
     }
-
     _editor_head_color(head_id){
 	this.update_config();
 	let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
 	return html `
-         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" /> 
-         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state} : </label>
+         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
+<datalist id="RedSeaColors">
+<option>#8c4394</option>
+<option>#0081c5</option>
+<option>#008264</option>
+<option>#64a04b</option>
+<option>#A0A0A0</option>
+<option>#f04e99</option>
+<option>#f14b4c</option>
+<option>#f08f37</option>
+<option>#d9d326</option>
+<option>#FFFFFF</option>
+</datalist>
+         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
          <br />
      `;
     }//end of function _editor_head_color

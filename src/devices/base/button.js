@@ -1,53 +1,41 @@
 import { html } from "lit";
 
-import style_switch from "./switch.styles";
+import style_button from "./button.styles";
 
 import MyElement from "./element";
 
 /*
- *  Switch
+ *  Button
  */
-export class Switch extends  MyElement {
+export class Button extends  MyElement {
 
-    static styles = style_switch;
+    static styles = [style_button];
 	
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
      */
     constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
+	console.debug("Construct button");
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
 
     render(){
-	if (this.conf.style=="switch"){
-	    return html`
-        <div class="switch_${this.stateObj.state}">
-   	    <div class="switch_in_${this.stateObj.state}"></div>
-        </div>`;
-	}//if
-	else if (this.conf.style=="button"){
-	    console.debug("switch conf: ",this.conf);
-// background-color: rgba(${this.config.color},${this.config.alpha}); 
-	    return html`
+	console.debug("devices.base.button.render",this.conf);
+	return html`
  <style>
-      #${this.conf.name}:hover {
+.button{
 background-color: rgba(${this.color},${this.alpha});
-}   
+}
 </style>
-   	    <div class="switch_button"  id="${this.conf.name}"></div>
+   	    <div class="button"  id="${this.conf.name}"></div>
 `;
-	}
-	else{
-	    console.error("Switch style "+this.conf.style+" unknown for "+this.conf.name);
-	}
     }//end of function render
 
     async _click(e){
 	console.debug("Click ",e.detail," ",e.timeStamp);
-	console.debug("switch toggled:"+this.stateObj.entity_id);
-
-	this._toggle();
+	console.debug("button pressed: :"+this.stateObj.entity_id);
+	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
 
     async _longclick(e){
@@ -59,7 +47,7 @@ background-color: rgba(${this.color},${this.alpha});
     }//end of function dblclick
 
     _config(){
-	console.debug("devices.base.switch.config");
+	console.debug("devices.base.button.config");
     }
     
     _toggle(){
@@ -69,11 +57,11 @@ background-color: rgba(${this.color},${this.alpha});
 	else {
 	    this.stateObj.state='on';
 	}//else
-	//TOGGLE switch
+	//TOGGLE button
 	console.debug(this.stateObj.entity_id," => ", this.stateObj.state);
 	this.requestUpdate();
     }// end of function _toggle
     
 }// end of class
 
-window.customElements.define('common-switch', Switch);
+window.customElements.define('common-button', Button);
