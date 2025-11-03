@@ -15,10 +15,8 @@ export class Switch extends  MyElement {
      * conf the conf in mapping file
      * stateObj the hass element 
      */
-    constructor(hass,conf,color="255,255,255",alpha=1,stateObj){
- 	super(hass,conf,stateObj);
-	this.color=color;
-	this.alpha=alpha;
+    constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
+ 	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
 
     render(){
@@ -58,6 +56,10 @@ background-color: rgba(${this.color},${this.alpha});
 	console.debug("Double click");
     }//end of function dblclick
 
+    _config(){
+	console.debug("devices.base.switch.config");
+    }
+    
     _toggle(){
 	if (this.stateObj.state=='on'){
 	    this.stateObj.state='off';

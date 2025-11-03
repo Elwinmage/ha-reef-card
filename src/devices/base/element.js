@@ -11,14 +11,15 @@ export default class MyElement extends LitElement{
 	    alreadyClicked: {type: Boolean},
 	    doubleClick: {type: Boolean},
 	    mouseDown: {}
-	    
 	};
     }// end of get properties 
 
-    constructor(hass,conf,stateObj){
+    constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
 	super();
 	this.hass=hass;
 	this.conf=conf;
+	this.color=color;
+	this.alpha=alpha;
 	this.stateObj=stateObj;
 	//Disable context menu
 	this.mouseDown=0;
@@ -47,7 +48,12 @@ export default class MyElement extends LitElement{
     async _click_evt(e){
 	console.debug(this.mouseDown,'   ',e.timeStamp-this.mouseDown);
 	if(e.timeStamp-this.mouseDown > 500){
-	    this._longclick(e);
+	    if (this.conf["invert_action"]==true){
+		this._click(e);
+	    }
+	    else{
+		this._longclick(e);
+	    }
 	}
 	else{
 	    await this.sleep(300);
@@ -55,10 +61,24 @@ export default class MyElement extends LitElement{
 		this.doubleClick=false;
 	    }
 	    else{
-		this._click(e);
+		if (this.conf["invert_action"]==true){
+		    this._longclick(e);
+		}
+		else {
+		    this._click(e);
+		}
 	    }
 	}
 	this.mouseDown=0;
+    }
+
+    _click(e){
+    }
+
+    _longclick(e){
+    }
+
+    _dblclick(e){
     }
 }
 

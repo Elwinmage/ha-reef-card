@@ -45,6 +45,7 @@ var $eGUNk = parcelRequire("eGUNk");
 
 var $dPhcg = parcelRequire("dPhcg");
 parcelRequire("6vZH1");
+parcelRequire("5T0tY");
 parcelRequire("258Ll");
 
 var $37d5w = parcelRequire("37d5w");
@@ -157,16 +158,25 @@ class RSDevice extends (0, $eGUNk.LitElement) {
 </div>
 `;
     }
-    _render_button(button, swtch = false) {
+    _render_button(mapping_conf) {
+        console.debug("devices.device._render_button", mapping_conf);
+        console.debug("devices.device._render_button entities", this.entities);
+        console.debug("devices.device._render_button states", this.hass.states);
+        let entity = this.entities[mapping_conf.name];
+        let stateObject = this.hass.states[entity.entity_id];
         return (0, $l56HR.html)`
+<div class="${mapping_conf.class}">
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
+</div>
+	`;
+    /*        return html`
      <style>
       #${button.name}:hover {
       background-color: rgba(${this.config.color},${this.config.alpha});
       }
      </style>
-<div id="${button.name}" class="${button.class}" @click="${()=>this._press(button)}"></div>
-`;
-    }
+<div id="${button.name}" class="${button.class}" @click="${() => this._press(button)}"></div>
+`;*/ }
     _render_actuators_type(type) {
         if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
         console.log("No " + type.name);
@@ -934,10 +944,8 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, color = "255,255,255", alpha = 1, stateObj){
-        super(hass, conf, stateObj);
-        this.color = color;
-        this.alpha = alpha;
+     */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, color, alpha);
     }
     render() {
         if (this.conf.style == "switch") return (0, $l56HR.html)`
@@ -966,6 +974,9 @@ background-color: rgba(${this.color},${this.alpha});
     }
     async _dblclick(e) {
         console.debug("Double click");
+    }
+    _config() {
+        console.debug("devices.base.switch.config");
     }
     _toggle() {
         if (this.stateObj.state == 'on') this.stateObj.state = 'off';
@@ -1115,10 +1126,12 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
             mouseDown: {}
         };
     }
-    constructor(hass, conf, stateObj){
+    constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super();
         this.hass = hass;
         this.conf = conf;
+        this.color = color;
+        this.alpha = alpha;
         this.stateObj = stateObj;
         //Disable context menu
         this.mouseDown = 0;
@@ -1143,16 +1156,93 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
     }
     async _click_evt(e) {
         console.debug(this.mouseDown, '   ', e.timeStamp - this.mouseDown);
-        if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
-        else {
+        if (e.timeStamp - this.mouseDown > 500) {
+            if (this.conf["invert_action"] == true) this._click(e);
+            else this._longclick(e);
+        } else {
             await this.sleep(300);
             if (this.doubleClick == true) this.doubleClick = false;
+            else if (this.conf["invert_action"] == true) this._longclick(e);
             else this._click(e);
         }
         this.mouseDown = 0;
     }
+    _click(e) {}
+    _longclick(e) {}
+    _dblclick(e) {}
 }
 window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae039);
+
+});
+
+
+parcelRegister("5T0tY", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $f5LQx = parcelRequire("f5LQx");
+
+var $1Um3j = parcelRequire("1Um3j");
+class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
+    static styles = [
+        (0, $f5LQx.default)
+    ];
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
+        console.debug("Construct button");
+        super(hass, conf, stateObj, color, alpha);
+    }
+    render() {
+        console.debug("devices.base.button.render", this.conf);
+        return (0, $l56HR.html)`
+ <style>
+.button{
+background-color: rgba(${this.color},${this.alpha});
+}
+</style>
+   	    <div class="button"  id="${this.conf.name}"></div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+        this._toggle();
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+    _config() {
+        console.debug("devices.base.button.config");
+    }
+    _toggle() {
+        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
+        else this.stateObj.state = 'on';
+         //else
+        //TOGGLE button
+        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
+        this.requestUpdate();
+    }
+} // end of class
+window.customElements.define('common-button', $4492769e229d8dfa$export$353f5b6fc5456de1);
+
+});
+parcelRegister("f5LQx", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $afcc6ff40448b8c3$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $afcc6ff40448b8c3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+.button{
+//aspect-ratio: 1/1;
+width:100%;
+height:100%;
+border-radius: 30px;
+}
+`;
 
 });
 
@@ -1169,10 +1259,8 @@ class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, color = "255,255,255", alpha = 1, stateObj){
-        super(hass, conf, stateObj);
-        this.color = color;
-        this.alpha = alpha;
+     */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, color, alpha);
     }
     render() {
         console.debug("Sensor render: ", this.stateObj);
@@ -1461,10 +1549,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "sensors": [
                 {
                     "name": "supplement",
-                    "left": 1,
-                    "top": 80,
-                    "rotate": "-90deg",
-                    "border_radius": "5px",
                     "disabled": true
                 },
                 {
@@ -1483,10 +1567,15 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head",
-                    "type": "hacs"
+                    "type": "hacs",
+                    "config": [
+                        "manua_head_volume",
+                        "manual_head"
+                    ],
+                    "invert_action": true
                 },
                 {
-                    "name": "supplement_info",
+                    "name": "supplement",
                     "type": "ui",
                     "class": "supplement_info"
                 }
@@ -1514,7 +1603,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "manual_dose_head"
                 },
                 {
-                    "name": "supplement_info",
+                    "name": "supplement",
                     "type": "ui",
                     "class": "supplement_info"
                 }
@@ -1543,7 +1632,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "type": "hacs"
                 },
                 {
-                    "name": "supplement_info",
+                    "name": "supplement",
                     "type": "ui",
                     "class": "supplement_info"
                 }
@@ -1572,7 +1661,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "type": "hacs"
                 },
                 {
-                    "name": "supplement_info",
+                    "name": "supplement",
                     "type": "ui",
                     "class": "supplement_info"
                 }

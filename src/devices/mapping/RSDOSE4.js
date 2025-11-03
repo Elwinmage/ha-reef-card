@@ -19,10 +19,6 @@ export const config = {
 	    "sensors": [
 		{
 		    "name": "supplement",
-		    "left":1,
-		    "top": 80,
-		    "rotate": "-90deg",
-		    "border_radius": "5px",
 		    "disabled": true,
 		},
 		{
@@ -43,9 +39,12 @@ export const config = {
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
 		    "type": "hacs",
+		    "config": ["manua_head_volume","manual_head"],
+		    "invert_action": true,
+		    
 		},
 		{
-		    "name": "supplement_info",
+		    "name": "supplement",
 		    "type": "ui",
 		    "class": "supplement_info",
 		}
@@ -75,7 +74,7 @@ export const config = {
 		    "class": "manual_dose_head",
 		},
 		{
-		    "name": "supplement_info",
+		    "name": "supplement",
 		    "type": "ui",
 		    "class": "supplement_info",
 		}
@@ -107,7 +106,7 @@ export const config = {
 		    "type": "hacs",
 		},
 		{
-		    "name": "supplement_info",
+		    "name": "supplement",
 		    "type": "ui",
 		    "class": "supplement_info",
 		}
@@ -140,7 +139,7 @@ export const config = {
 		    "type": "hacs",
 		},
 		{
-		    "name": "supplement_info",
+		    "name": "supplement",
 		    "type": "ui",
 		    "class": "supplement_info",
 		}

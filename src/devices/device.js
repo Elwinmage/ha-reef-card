@@ -3,6 +3,7 @@ import { html,LitElement } from "lit";
 import i18n from "../translations/myi18n.js";
 
 import Switch from "./base/switch";
+import Button from "./base/button";
 import Sensor from "./base/sensor";
 
 import style_common from "./common.styles";
@@ -141,15 +142,25 @@ export default class RSDevice extends LitElement {
 `;
     }
 
-    _render_button(button,swtch=false){
-        return html`
+    _render_button(mapping_conf){
+	console.debug("devices.device._render_button",mapping_conf);
+	console.debug("devices.device._render_button entities",this.entities);
+	console.debug("devices.device._render_button states",this.hass.states);
+	let entity=this.entities[mapping_conf.name];
+	let stateObject=this.hass.states[entity.entity_id];
+	return html`
+<div class="${mapping_conf.class}">
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
+</div>
+	`;
+/*        return html`
      <style>
       #${button.name}:hover {
       background-color: rgba(${this.config.color},${this.config.alpha});
       }
      </style>
 <div id="${button.name}" class="${button.class}" @click="${() => this._press(button)}"></div>
-`;
+`;*/
     }
     
     _render_actuators_type(type){
