@@ -4,6 +4,8 @@ import style_button from "./button.styles";
 
 import MyElement from "./element";
 
+import msgbox from './message';
+
 /*
  *  Button
  */
@@ -16,7 +18,6 @@ export class Button extends  MyElement {
      * stateObj the hass element 
      */
     constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
-	console.debug("Construct button");
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
 
@@ -35,6 +36,7 @@ background-color: rgba(${this.color},${this.alpha});
     async _click(e){
 	console.debug("Click ",e.detail," ",e.timeStamp);
 	console.debug("button pressed: :"+this.stateObj.entity_id);
+	msgbox.publish("button pressed: :"+this.stateObj.entity_id);
 	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
 

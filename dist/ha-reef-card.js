@@ -1161,7 +1161,44 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
         }
         this.mouseDown = 0;
     }
-    _click(e) {}
+    _click(e) {
+        console.log("click event: ", this.stateObj);
+    /*//	let evt = new Event('hass-more-info', { composed: true });
+//	evt.detail = this.stateObj.entity_id;
+//	console.log(evt);
+//	let res=this.dispatchEvent(evt);
+
+	const actionConfig = {
+	    entity: this.stateObj.entity_id,
+	    tap_action: {
+		action: "more-info",
+	    },
+	};
+
+	// Open more info on tap action
+	const event = new Event("hass-action", {
+	    bubbles: true,
+	    composed: true,
+	});
+	event.detail = {
+	    config: actionConfig,
+	    action: "tap",
+	};
+	
+	console.log("EVENT ***");
+	console.log(event);
+	let res=this.dispatchEvent(event);
+
+
+	const actionConfig2 = {
+	    entity: this.stateObj.entity_id,
+	    tap_action: {
+		action: "more-info",
+	    },
+	};
+
+	console.log(res);
+	console.log(res2);*/ }
     _longclick(e) {}
     _dblclick(e) {}
 }
@@ -1177,6 +1214,8 @@ var $l56HR = parcelRequire("l56HR");
 var $f5LQx = parcelRequire("f5LQx");
 
 var $1Um3j = parcelRequire("1Um3j");
+
+var $1zU0r = parcelRequire("1zU0r");
 class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
     static styles = [
         (0, $f5LQx.default)
@@ -1185,7 +1224,6 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
      * conf the conf in mapping file
      * stateObj the hass element 
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
-        console.debug("Construct button");
         super(hass, conf, stateObj, color, alpha);
     }
     render() {
@@ -1202,6 +1240,7 @@ background-color: rgba(${this.color},${this.alpha});
     async _click(e) {
         console.debug("Click ", e.detail, " ", e.timeStamp);
         console.debug("button pressed: :" + this.stateObj.entity_id);
+        (0, $1zU0r.default).publish("button pressed: :" + this.stateObj.entity_id);
     //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
     async _longclick(e) {
@@ -1231,6 +1270,12 @@ $parcel$export(module.exports, "default", () => $afcc6ff40448b8c3$export$2e2bcd8
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $afcc6ff40448b8c3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+:hover{
+cursor: pointer;
+}
+
+
 .button{
 //aspect-ratio: 1/1;
 width:100%;
@@ -1240,6 +1285,123 @@ border-radius: 30px;
 `;
 
 });
+
+parcelRegister("1zU0r", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $126480f3fbd709ec$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $a18oa = parcelRequire("a18oa");
+
+var $1Um3j = parcelRequire("1Um3j");
+/*
+ *  Message
+ */ class $126480f3fbd709ec$var$Message extends (0, $1Um3j.default) {
+    static styles = (0, $a18oa.default);
+    static get properties() {
+        return {
+            _hass: {},
+            message: {
+                type: String
+            },
+            shadowRoot: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(){
+        super(null);
+    }
+    init(hass, shadowRoot) {
+        this._hass = hass;
+        this._shadowRoot = shadowRoot;
+        console.debug("HASS: ", hass);
+        this.message = null;
+    }
+    set hass(obj) {
+        this._hass = obj; // Don't set it to the same name or you'll cause an infinite loop
+    // Add code here that handles a change in the hass object
+    }
+    async publish(message) {
+        let elt = this._shadowRoot.querySelector("#message");
+        elt.innerHTML = message;
+        console.log(elt.hidden);
+        elt.hidden = false;
+        await this.sleep(2000);
+        for(let opacity = 0.8; opacity > 0.1; opacity -= 0.02){
+            elt.style.opacity = opacity;
+            await this.sleep(50);
+        }
+        elt.innerHTML = null;
+        elt.hidden = true;
+    }
+    render() {
+        console.debug("Message render", this.message);
+        return (0, $l56HR.html)`
+                <div class="content" id="message" hidden></div>
+            `;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('my-message', $126480f3fbd709ec$var$Message);
+var $126480f3fbd709ec$var$msgbox = new $126480f3fbd709ec$var$Message();
+var $126480f3fbd709ec$export$2e2bcd8739ae039 = $126480f3fbd709ec$var$msgbox;
+
+});
+parcelRegister("a18oa", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $74b0813ce521583f$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $74b0813ce521583f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+.my-message{
+  //flex: 0 0 auto;
+  border: 1px solid gray;
+  background-color: rgba(155,155,155,0.9);
+  border-radius: 30px;
+  position: absolute;
+  min-width: 200px;
+  min-height: 100px;
+//margin: auto;
+top: 100px;
+//width: 100%;
+//left: 0px;
+  }
+
+.content{
+position: absolute;
+top: 55px;
+left: 0px;
+width: 30%;
+//height: 100%;
+padding-left: 50px;
+padding-right: 50px;
+margin-left: 35%;
+margin-left: 35%;
+text-align:center;
+border-radius: 30px;
+ background-color: rgba(55,55,55,0.9);
+color: white;
+border: 1px solid gray;
+z-index:100;
+}
+
+
+
+`;
+
+});
+
 
 
 parcelRegister("258Ll", function(module, exports) {
@@ -1440,6 +1602,14 @@ parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
+.popup{
+  background-color: rgba(175,175,175,0.9);
+position : absolute;
+left :100px;
+top: 100px;
+width: 400px;
+
+}
 
 .disable{
   background-color: rgba(175,175,175,0.5);
@@ -1449,6 +1619,7 @@ div,img{
     flex: 0 0 auto;
     position: absolute;
 }
+
 
 `;
 
@@ -1922,6 +2093,9 @@ background-color:rgba(250,0,0,0.5);
     svg {
     stroke: black;
     }
+
+
+
 `;
 
 
@@ -2074,8 +2248,71 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae039);
 
 
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $e67bab7b1c812f74$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+.mask{
+position: absolute;
+top: 0px;
+left: 0px;
+width: 100%;
+height: 100%;
+
+text-align:center;
+background-color: rgba(175,175,175,0.8);
+//border: 1px solid gray;
+z-index:100;
+}
+
+`;
+
+
+
+var $1Um3j = parcelRequire("1Um3j");
+class $70f5dbc919a9d6f3$export$11b712ecf57ff440 extends (0, $1Um3j.default) {
+    static styles = (0, $e67bab7b1c812f74$export$2e2bcd8739ae039);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, color = "255,255,255", alpha = 1){
+        super(hass, color, alpha);
+    }
+    render() {
+        console.debug("MoreInfo render: ", this.stateObj);
+        return (0, $l56HR.html)`
+<style>
+.moreinfo{
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="moreinfo" id="${this.conf.name}">${this.stateObj.state} ${this.stateObj.attributes.unit_of_measurement}</div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('my-moreinfo', $70f5dbc919a9d6f3$export$11b712ecf57ff440);
+
+
+
+var $1zU0r = parcelRequire("1zU0r");
+
+var $a18oa = parcelRequire("a18oa");
 class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
-    static styles = (0, $040001cdf6cad6dd$export$2e2bcd8739ae039);
+    static styles = [
+        (0, $a18oa.default),
+        (0, $040001cdf6cad6dd$export$2e2bcd8739ae039)
+    ];
     static get properties() {
         return {
             hass: {},
@@ -2106,6 +2343,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             }
         ];
         this.first_init = true;
+        this.msg = null;
     }
     _set_current_device_from_name(dev, name) {
         if (dev['text'] == name) this._set_current_device(dev['value']);
@@ -2120,7 +2358,11 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         }
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-            return (0, $l56HR.html)`${this.current_device}`;
+            (0, $1zU0r.default).init(this.hass, this.shadowRoot);
+            return (0, $l56HR.html)`
+${this.current_device}
+${(0, $1zU0r.default).render()}
+`;
         }
         return (0, $l56HR.html)`
           ${this.device_select()}

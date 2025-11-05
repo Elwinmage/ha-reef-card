@@ -73,6 +73,43 @@ export default class MyElement extends LitElement{
     }
 
     _click(e){
+	console.log("click event: ",this.stateObj);
+/*//	let evt = new Event('hass-more-info', { composed: true });
+//	evt.detail = this.stateObj.entity_id;
+//	console.log(evt);
+//	let res=this.dispatchEvent(evt);
+
+	const actionConfig = {
+	    entity: this.stateObj.entity_id,
+	    tap_action: {
+		action: "more-info",
+	    },
+	};
+
+	// Open more info on tap action
+	const event = new Event("hass-action", {
+	    bubbles: true,
+	    composed: true,
+	});
+	event.detail = {
+	    config: actionConfig,
+	    action: "tap",
+	};
+	
+	console.log("EVENT ***");
+	console.log(event);
+	let res=this.dispatchEvent(event);
+
+
+	const actionConfig2 = {
+	    entity: this.stateObj.entity_id,
+	    tap_action: {
+		action: "more-info",
+	    },
+	};
+
+	console.log(res);
+	console.log(res2);*/
     }
 
     _longclick(e){

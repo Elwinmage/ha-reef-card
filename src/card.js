@@ -5,14 +5,19 @@ import {
 
 import DeviceList from './common';
 
-import styles from './card.styles';
+import style_card from './card.styles';
 
 import NoDevice from './devices/nodevice';
 import RSDose from './devices/rsdose';
 
+import MoreInfo from './devices/base/more-info';
+import msgbox from './devices/base/message';
+
+import style_messages from './devices/base/message.styles';
+
 export class ReefCard extends LitElement {
 
-    static styles = styles;
+    static styles = [style_messages,style_card];
     
     static get properties() {
 	return {
@@ -32,6 +37,7 @@ export class ReefCard extends LitElement {
 	this.version='v0.0.1';
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
+	this.msg=null;
     }
 
     _set_current_device_from_name(dev,name){
@@ -50,7 +56,11 @@ export class ReefCard extends LitElement {
 	}
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
-	    return html`${this.current_device}`;
+	    msgbox.init(this.hass,this.shadowRoot);
+	    return html`
+${this.current_device}
+${msgbox.render()}
+`;
 	}
     return html`
           ${this.device_select()}
