@@ -31,7 +31,6 @@ class Message extends  MyElement {
     init(hass,shadowRoot){
 	this._hass = hass;
 	this._shadowRoot=shadowRoot;
-	console.debug("HASS: ",hass);
 	this.message=null;
     }//end of constructor
 
@@ -47,7 +46,7 @@ class Message extends  MyElement {
 	console.log(elt.hidden);
 	elt.hidden=false;
 	await this.sleep(2000);
-	for (let opacity=0.8;opacity> 0.1;opacity-=0.02){
+	for (let opacity=0.8;opacity> 0.02;opacity-=0.02){
 	    elt.style.opacity=opacity;
 	    await this.sleep(50);
 	}

@@ -16,6 +16,8 @@ width: 400px;
 }
 
 div,img{
+
+display: flex;
     flex: 0 0 auto;
     position: absolute;
 }

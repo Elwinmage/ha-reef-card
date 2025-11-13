@@ -12,12 +12,14 @@ import RSDose from './devices/rsdose';
 
 import MoreInfo from './devices/base/more-info';
 import msgbox from './devices/base/message';
+import moreinfo from './devices/base/more-info';
 
 import style_messages from './devices/base/message.styles';
+import style_moreinfo from './devices/base/more-info.styles';
 
 export class ReefCard extends LitElement {
 
-    static styles = [style_messages,style_card];
+    static styles = [style_messages,style_card,style_moreinfo];
     
     static get properties() {
 	return {
@@ -56,15 +58,19 @@ export class ReefCard extends LitElement {
 	}
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
+	    moreinfo.init(this.hass,this.shadowRoot);
 	    msgbox.init(this.hass,this.shadowRoot);
 	    return html`
 ${this.current_device}
+${moreinfo.render()}
 ${msgbox.render()}
 `;
 	}
     return html`
           ${this.device_select()}
   ${this.current_device}
+${moreinfo.render()}
+${msgbox.render()}
     `;
     }
 
