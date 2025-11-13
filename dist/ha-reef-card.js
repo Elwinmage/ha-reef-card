@@ -2022,23 +2022,29 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         let supplement = this.hass.states[this.entities['supplement'].entity_id];
         let supplement_uid = this.hass.states[this.entities['supplement_uid'].entity_id];
         let img = null;
-        switch(supplement_uid.state){
-            case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-                img = new URL("redsea_foundation_A.69ced2e5.png", import.meta.url);
-                break;
-            case "76830db3-a0bd-459a-9974-76a57d026893":
-                img = new URL("redsea_foundation_B.fd69d513.png", import.meta.url);
-                break;
-            case "f524734e-8651-496e-b09b-640b40fc8bab":
-                img = new URL("redsea_foundation_C.3bc03a8d.png", import.meta.url);
-                break;
-            default:
-                img = new URL("generic_container.973c97af.png", import.meta.url);
-                break;
-        }
+        /*	switch (supplement_uid.state){
+ 	case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
+	    img=new URL('img/redsea_foundation_A.png',import.meta.url);
+	    break;
+	case "76830db3-a0bd-459a-9974-76a57d026893":
+	    img=new URL('img/redsea_foundation_B.png',import.meta.url);
+	    break;
+	case "f524734e-8651-496e-b09b-640b40fc8bab":
+	    img=new URL('img/redsea_foundation_C.png',import.meta.url);
+	    break;
+	case "bf9a7da3-741b-4c1d-8542-d9344a95fb70":
+	    img=new URL('img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.png',import.meta.url);
+	    break;
+	default:
+	    img=new URL('img/generic_container.png',import.meta.url); 
+	    break;
+	    }*/ //	console.debug("base url",import.meta.url);
+        //img=new URL('img/'+supplement_uid.state+'.png',import.meta.url);
+        //img='https://ha-dev:8123/hacsfiles/ha-reef-card/'+supplement_uid.state+'.png';
+        img = '/hacsfiles/ha-reef-card/' + supplement_uid.state + '.supplement.png';
         return (0, $l56HR.html)`
 <div class="container">
-  <img src='${img}'/>
+  <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
 </div>
 `;
     }

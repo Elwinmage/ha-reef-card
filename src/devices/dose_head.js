@@ -38,7 +38,8 @@ export default class DoseHead extends RSDevice{
 	let supplement=this.hass.states[this.entities['supplement'].entity_id];
 	let supplement_uid=this.hass.states[this.entities['supplement_uid'].entity_id];
 	let img=null;
-	switch (supplement_uid.state){
+
+/*	switch (supplement_uid.state){
  	case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
 	    img=new URL('img/redsea_foundation_A.png',import.meta.url);
 	    break;
@@ -48,14 +49,21 @@ export default class DoseHead extends RSDevice{
 	case "f524734e-8651-496e-b09b-640b40fc8bab":
 	    img=new URL('img/redsea_foundation_C.png',import.meta.url);
 	    break;
+	case "bf9a7da3-741b-4c1d-8542-d9344a95fb70":
+	    img=new URL('img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.png',import.meta.url);
+	    break;
 	default:
 	    img=new URL('img/generic_container.png',import.meta.url); 
 	    break;
-	}
+	    }*/
+//	console.debug("base url",import.meta.url);
+	//img=new URL('img/'+supplement_uid.state+'.png',import.meta.url);
+	//img='https://ha-dev:8123/hacsfiles/ha-reef-card/'+supplement_uid.state+'.png';
+	img='/hacsfiles/ha-reef-card/'+supplement_uid.state+'.supplement.png';
 	
 	return html`
 <div class="container">
-  <img src='${img}'/>
+  <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
 </div>
 `;
     }
