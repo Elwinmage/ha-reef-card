@@ -23,6 +23,7 @@ export const config = {
 		},
 		{
 		    "name": "manual_head_volume",
+		    "force_integer": true,
 		}
 	    ],
 	    "switches" : [
@@ -57,6 +58,7 @@ export const config = {
 	    "sensors": [
 		{
 		    "name": "manual_head_volume",
+		    "force_integer": true,
 		}
 	    ],
 	    "switches" : [
@@ -87,6 +89,7 @@ export const config = {
 	    "sensors": [
 		{
 		    "name": "manual_head_volume",
+		    "force_integer": true,
 		}
 
 	    ],
@@ -120,6 +123,7 @@ export const config = {
 	    "sensors": [
 		{
 		    "name": "manual_head_volume",
+		    "force_integer": true,
 		}
 
 	    ],

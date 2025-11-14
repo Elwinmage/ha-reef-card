@@ -21,13 +21,17 @@ export class Sensor extends  MyElement {
 
     render(){
 	console.debug("Sensor render: ",this.stateObj);
+	let value=this.stateObj.state;
+	if(this.conf.force_integer){
+	    value=Math.floor(value);
+	}
 	return html`
 <style>
 .sensor{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="sensor" id="${this.conf.name}">${this.stateObj.state} ${this.stateObj.attributes.unit_of_measurement}</div>
+   	    <div class="sensor" id="${this.conf.name}">${value} ${this.stateObj.attributes.unit_of_measurement}</div>
 `;
     }//end of function render
 

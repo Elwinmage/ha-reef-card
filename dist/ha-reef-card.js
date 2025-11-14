@@ -1111,7 +1111,6 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
             hass: {},
             conf: {},
             stateObj: {},
-            //	    alreadyClicked: {type: Boolean},
             doubleClick: {
                 type: Boolean
             },
@@ -1125,7 +1124,6 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
         this.color = color;
         this.alpha = alpha;
         this.stateObj = stateObj;
-        //Disable context menu
         this.mouseDown = 0;
         this.mouseUp = 0;
         this.oldMouseUp = 0;
@@ -1142,102 +1140,55 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
             this.mouseUp = e.timeStamp;
             if (e.timeStamp - this.mouseDown > 500) this._click_evt(e);
         });
-        //	this.addEventListener("touchcancel", function (e) {this.mouseUp=e.timeStamp;this._handleClick(e);});
         this.addEventListener("click", function(e) {
             this._handleClick(e);
         });
     }
     _handleClick(e) {
-        console.log("_handleClick", e, e.type);
-        if (e.pointerType != "touch" /*&& e.type!="touchend"*/ ) {
-            if (e.detail === 1) {
-                console.debug(e);
-                this._click_evt(e);
-            } else if (e.detail === 2) {
+        if (e.pointerType != "touch") {
+            if (e.detail === 1) this._click_evt(e);
+            else if (e.detail === 2) {
                 this.doubleClick = true;
                 this._dblclick(e);
             }
         } else {
-            console.debug("ICI:", e, this.oldMouseUp, this.mouseUp);
-            if (this.mouseUp - this.oldMouseUp < 200) {
-                console.debug("send dbl");
+            if (this.mouseUp - this.oldMouseUp < 400) {
                 this.doubleClick = true;
                 this._dblclick(e);
-            } else {
-                console.debug("send single");
-                this._click_evt(e);
-            }
+            } else this._click_evt(e);
             this.oldMouseUp = this.mouseUp;
         }
     }
     sleep(ms) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
     }
-    hassAction(e) {
-        console.debug("Hass Action: ", e);
-    }
+    hassAction(e) {}
     async _click_evt(e) {
         let timing = e.timeStamp - this.mouseDown;
-        console.debug("Timing: ", e.timeStamp, '-', this.mouseDown, '=', timing, e);
-        //	if(timing > 0){
         if (e.timeStamp - this.mouseDown > 500) {
             if (this.conf["invert_action"] == true) this._click(e);
             else this._longclick(e);
         } else {
-            console.debug("sleeping");
             await this.sleep(300);
-            if (this.doubleClick == true) {
-                this.doubleClick = false;
-                console.debug("dbl", e);
-            } else {
-                console.debug("simple", e);
-                if (this.conf["invert_action"] == true) this._longclick(e);
-                else this._click(e);
-            }
+            if (this.doubleClick == true) this.doubleClick = false;
+            else if (this.conf["invert_action"] == true) this._longclick(e);
+            else this._click(e);
         }
         this.mouseDown = e.timeStamp;
-    //	}
     }
-    _click(e) {
-        console.log("click event: ", this.stateObj);
-    /*//	let evt = new Event('hass-more-info', { composed: true });
-//	evt.detail = this.stateObj.entity_id;
-//	console.log(evt);
-//	let res=this.dispatchEvent(evt);
-
-	const actionConfig = {
-	    entity: this.stateObj.entity_id,
-	    tap_action: {
-		action: "more-info",
-	    },
-	};
-
-	// Open more info on tap action
-	const event = new Event("hass-action", {
-	    bubbles: true,
-	    composed: true,
-	});
-	event.detail = {
-	    config: actionConfig,
-	    action: "tap",
-	};
-	
-	console.log("EVENT ***");
-	console.log(event);
-	let res=this.dispatchEvent(event);
-
-
-	const actionConfig2 = {
-	    entity: this.stateObj.entity_id,
-	    tap_action: {
-		action: "more-info",
-	    },
-	};
-
-	console.log(res);
-	console.log(res2);*/ }
+    _click(e) {}
     _longclick(e) {}
     _dblclick(e) {}
+    msgbox(msg) {
+        this.dispatchEvent(new CustomEvent("hass-notification", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                message: msg
+            }
+        }));
+        return;
+    }
 }
 window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae039);
 
@@ -1261,58 +1212,27 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
      * stateObj the hass element 
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super(hass, conf, stateObj, color, alpha);
-        //	this.addEventListener("hass-action", function (e) {console.debug("HASS ACTION!!!");});
-        this.addEventListener("hass-notification", function(e) {
-            console.debug("HASS NOTIFICATION!!!");
-        });
     }
     render() {
-        console.debug("devices.base.button.render", this.conf);
         return (0, $l56HR.html)`
  <style>
 .button{
 background-color: rgba(${this.color},${this.alpha});
 }
 </style>
-   	    <div class="button" @action="${this._handleAction}" id="${this.conf.name}"></div>
+   	    <div class="button" id="${this.conf.name}"></div>
 `;
     }
-    _handleAction(ev) {
-        console.debug("ENFINNN!!");
-    }
     async _click(e) {
-        console.debug("Click button ", e.detail, " ", e.timeStamp);
-        //console.debug("button pressed: :"+this.stateObj.entity_id);
-        //msgbox.publish("button pressed!"+this.stateObj.entity_id);
         //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-        this.dispatchEvent(new CustomEvent("hass-notification", {
-            bubbles: true,
-            composed: true,
-            detail: {
-                message: "click"
-            }
-        }));
+        this.msgbox("Click");
     }
     async _longclick(e) {
-        console.debug("Long Click");
         //	moreinfo.display("testme","hello");
-        this.dispatchEvent(new CustomEvent("hass-notification", {
-            bubbles: true,
-            composed: true,
-            detail: {
-                message: "long"
-            }
-        }));
+        this.msgbox("Long Click");
     }
     async _dblclick(e) {
-        console.debug("Double click");
-        this.dispatchEvent(new CustomEvent("hass-notification", {
-            bubbles: true,
-            composed: true,
-            detail: {
-                message: "double"
-            }
-        }));
+        this.msgbox("Double Click");
     }
     _config() {
         console.debug("devices.base.button.config");
@@ -1499,13 +1419,15 @@ class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
     }
     render() {
         console.debug("Sensor render: ", this.stateObj);
+        let value = this.stateObj.state;
+        if (this.conf.force_integer) value = Math.floor(value);
         return (0, $l56HR.html)`
 <style>
 .sensor{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="sensor" id="${this.conf.name}">${this.stateObj.state} ${this.stateObj.attributes.unit_of_measurement}</div>
+   	    <div class="sensor" id="${this.conf.name}">${value} ${this.stateObj.attributes.unit_of_measurement}</div>
 `;
     }
     async _click(e) {
@@ -1800,7 +1722,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "disabled": true
                 },
                 {
-                    "name": "manual_head_volume"
+                    "name": "manual_head_volume",
+                    "force_integer": true
                 }
             ],
             "switches": [
@@ -1834,7 +1757,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "alpha": "0.4",
             "sensors": [
                 {
-                    "name": "manual_head_volume"
+                    "name": "manual_head_volume",
+                    "force_integer": true
                 }
             ],
             "switches": [
@@ -1862,7 +1786,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "alpha": "0.4",
             "sensors": [
                 {
-                    "name": "manual_head_volume"
+                    "name": "manual_head_volume",
+                    "force_integer": true
                 }
             ],
             "switches": [
@@ -1891,7 +1816,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "alpha": "0.4",
             "sensors": [
                 {
-                    "name": "manual_head_volume"
+                    "name": "manual_head_volume",
+                    "force_integer": true
                 }
             ],
             "switches": [
@@ -1987,8 +1913,6 @@ width: 60%;
 top: 0%;
 left: 20%;
 }
-
-
 `;
 
 
@@ -2338,118 +2262,10 @@ window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae03
 
 
 var $9HhHn = parcelRequire("9HhHn");
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
-parcelRequire("j0ZcV");
-var $j8KxL = parcelRequire("j8KxL");
-var $74b0813ce521583f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-.my-message{
-  //flex: 0 0 auto;
-  border: 1px solid gray;
-  background-color: rgba(155,155,155,0.9);
-  border-radius: 30px;
-  position: absolute;
-  min-width: 200px;
-  min-height: 100px;
-//margin: auto;
-top: 100px;
-//width: 100%;
-//left: 0px;
-  }
-
-.content{
-position: absolute;
-top: 55px;
-left: 0px;
-width: 30%;
-//height: 100%;
-padding-left: 50px;
-padding-right: 50px;
-margin-left: 35%;
-margin-left: 35%;
-text-align:center;
-border-radius: 30px;
- background-color: rgba(55,55,55,0.9);
-color: white;
-border: 1px solid gray;
-z-index:100;
-}
-
-
-
-`;
-
-
-
-var $1Um3j = parcelRequire("1Um3j");
-/*
- *  Message
- */ class $126480f3fbd709ec$var$Message extends (0, $1Um3j.default) {
-    static styles = (0, $74b0813ce521583f$export$2e2bcd8739ae039);
-    static get properties() {
-        return {
-            _hass: {},
-            message: {
-                type: String
-            },
-            shadowRoot: {}
-        };
-    }
-    /*
-     * conf the conf in mapping file
-     * stateObj the hass element 
-     */ constructor(){
-        super(null);
-    }
-    init(hass, shadowRoot) {
-        this._hass = hass;
-        this._shadowRoot = shadowRoot;
-        this.message = null;
-    }
-    set hass(obj) {
-        this._hass = obj; // Don't set it to the same name or you'll cause an infinite loop
-    // Add code here that handles a change in the hass object
-    }
-    async publish(message) {
-        let elt = this._shadowRoot.querySelector("#message");
-        elt.innerHTML = message;
-        console.log(elt.hidden);
-        elt.hidden = false;
-        await this.sleep(2000);
-        for(let opacity = 0.8; opacity > 0.02; opacity -= 0.02){
-            elt.style.opacity = opacity;
-            await this.sleep(50);
-        }
-        elt.innerHTML = null;
-        elt.hidden = true;
-    }
-    render() {
-        console.debug("Message render", this.message);
-        return (0, $l56HR.html)`
-                <div class="content" id="message" hidden></div>
-            `;
-    }
-    async _click(e) {
-        console.debug("Click ", e.detail, " ", e.timeStamp);
-    }
-    async _longclick(e) {
-        console.debug("Long Click");
-    }
-    async _dblclick(e) {
-        console.debug("Double click");
-    }
-} // end of class
-window.customElements.define('my-message', $126480f3fbd709ec$var$Message);
-var $126480f3fbd709ec$var$msgbox = new $126480f3fbd709ec$var$Message();
-var $126480f3fbd709ec$export$2e2bcd8739ae039 = $126480f3fbd709ec$var$msgbox;
-
-
-
 
 var $jMR4F = parcelRequire("jMR4F");
 class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     static styles = [
-        (0, $74b0813ce521583f$export$2e2bcd8739ae039),
         (0, $040001cdf6cad6dd$export$2e2bcd8739ae039),
         (0, $jMR4F.default)
     ];
@@ -2499,18 +2315,15 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
             (0, $9HhHn.default).init(this.hass, this.shadowRoot);
-            (0, $126480f3fbd709ec$export$2e2bcd8739ae039).init(this.hass, this.shadowRoot);
             return (0, $l56HR.html)`
 ${this.current_device}
 ${(0, $9HhHn.default).render()}
-${(0, $126480f3fbd709ec$export$2e2bcd8739ae039).render()}
 `;
         }
         return (0, $l56HR.html)`
           ${this.device_select()}
   ${this.current_device}
 ${(0, $9HhHn.default).render()}
-${(0, $126480f3fbd709ec$export$2e2bcd8739ae039).render()}
     `;
     }
     device_select() {

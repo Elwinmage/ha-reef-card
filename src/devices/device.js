@@ -196,7 +196,7 @@ export default class RSDevice extends LitElement {
 	let label_name='';
 	// Don not display label
 	if ('label' in mapping_conf && mapping_conf.label!=false){
-	label_name=mapping_conf.name;
+	    label_name=mapping_conf.name;
 	}
         return html`
 <div class="${mapping_conf.name}">
