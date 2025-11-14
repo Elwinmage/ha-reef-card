@@ -1531,6 +1531,8 @@ var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 .sensor{
   border-radius: 30px;
   text-align: center;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 `;
@@ -1981,7 +1983,7 @@ stroke: black;
 
 .manual_head_volume{
 position: absolute;
-width: 45%;
+width: 60%;
 top: 0%;
 left: 20%;
 }
