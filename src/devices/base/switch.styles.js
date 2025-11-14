@@ -103,7 +103,10 @@ stroke: black;
 .switch_button{
 aspect-ratio: 1/1;
 width: 100%;
+height:100%;
  border-radius: 50%;
+ color: white;
+ text-align:center;
 };
 
 

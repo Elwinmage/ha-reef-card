@@ -31,11 +31,11 @@ export class Switch extends  MyElement {
 // background-color: rgba(${this.config.color},${this.config.alpha}); 
 	    return html`
  <style>
-      #${this.conf.name}:hover {
+      #${this.conf.name}{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="switch_button"  id="${this.conf.name}"></div>
+   	    <div class="switch_button"  id="${this.conf.name}">${eval(this.conf.label)}</div>
 `;
 	}
 	else{

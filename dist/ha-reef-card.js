@@ -932,7 +932,7 @@ var $l56HR = parcelRequire("l56HR");
 var $ih117 = parcelRequire("ih117");
 
 var $1Um3j = parcelRequire("1Um3j");
-class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
+class Switch extends (0, $1Um3j.default) {
     static styles = (0, $ih117.default);
     /*
      * conf the conf in mapping file
@@ -950,11 +950,11 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
             // background-color: rgba(${this.config.color},${this.config.alpha}); 
             return (0, $l56HR.html)`
  <style>
-      #${this.conf.name}:hover {
+      #${this.conf.name}{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="switch_button"  id="${this.conf.name}"></div>
+   	    <div class="switch_button"  id="${this.conf.name}">${eval(this.conf.label)}</div>
 `;
         } else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
     }
@@ -981,7 +981,7 @@ background-color: rgba(${this.color},${this.alpha});
         this.requestUpdate();
     }
 } // end of class
-window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
+window.customElements.define('common-switch', Switch);
 
 });
 parcelRegister("ih117", function(module, exports) {
@@ -1092,7 +1092,10 @@ stroke: black;
 .switch_button{
 aspect-ratio: 1/1;
 width: 100%;
+height:100%;
  border-radius: 50%;
+ color: white;
+ text-align:center;
 };
 
 
