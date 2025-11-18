@@ -13,7 +13,7 @@
 
 > [!NOTE]
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
-# Supported Languages: 🇫🇷 🇬🇧 
+# Supported Languages: [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/fr/README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/README.md) 
 <!-- You want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
 
 # Overview
