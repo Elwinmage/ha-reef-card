@@ -70,13 +70,10 @@ export default class RSDose extends RSDevice{
 
 </div>
 `;
-
     }
-    
-    render(){
-	console.debug("rsdose.render");
-	this.update_config();
-	// disabled
+
+
+    is_disabled(){
 	let disabled=false;
 	let sub_nb=this.device.elements.length;
 	for( var i = 0; i<sub_nb; i++){
@@ -85,7 +82,14 @@ export default class RSDose extends RSDevice{
 		break;
 	    }// if
 	}// for
-	if (disabled==true){
+	return disabled;
+    }//end of function is_disabled
+
+    
+    render(){
+	console.debug("rsdose.render");
+	this.update_config();
+	if (this.is_disabled()){
 	    console.log("DISABLED");
 	    return this._render_disabled();
 	}//if
@@ -99,7 +103,8 @@ export default class RSDose extends RSDevice{
         ${this._render_actuators()}
 	</div>`;
 
-    }
+    }//end of function render
+    
     _editor_head_color(head_id){
 	this.update_config();
 	let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
@@ -143,6 +148,10 @@ export default class RSDose extends RSDevice{
     
     editor(doc){
 	console.debug("rsdose.editor");
+	if(this.is_disabled()){
+	    console.debug("DISABLED");
+	    return html ``;
+	}
 	this._populate_entities_with_heads();
 	var element = doc.getElementById("heads_colors");
 	if (element){

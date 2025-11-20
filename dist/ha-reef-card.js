@@ -2163,10 +2163,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 </div>
 `;
     }
-    render() {
-        console.debug("rsdose.render");
-        this.update_config();
-        // disabled
+    is_disabled() {
         let disabled = false;
         let sub_nb = this.device.elements.length;
         for(var i = 0; i < sub_nb; i++)if (this.device.elements[i].disabled_by != null) {
@@ -2174,7 +2171,12 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             break;
         } // if
          // for
-        if (disabled == true) {
+        return disabled;
+    }
+    render() {
+        console.debug("rsdose.render");
+        this.update_config();
+        if (this.is_disabled()) {
             console.log("DISABLED");
             return this._render_disabled();
         } //if
@@ -2246,6 +2248,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     editor(doc) {
         console.debug("rsdose.editor");
+        if (this.is_disabled()) {
+            console.debug("DISABLED");
+            return (0, $l56HR.html)``;
+        }
         this._populate_entities_with_heads();
         var element = doc.getElementById("heads_colors");
         if (element) element.reset();
@@ -2500,7 +2506,6 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             var lit_device = null;
             switch(model){
                 case "RSDOSE4":
-                    console.debug("RSDOSE4 editor");
                     lit_device = new (0, $205242e0eaceda90$export$2e2bcd8739ae039)(this.hass, device, this._config);
                     break;
                 default:

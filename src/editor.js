@@ -51,7 +51,6 @@ export class ReefCardEditor extends LitElement {
         `;
 
     render() {
-	
 	console.debug("editor.render: ",this._config);
 	if(this._config){
 	    if (this.first_init==true){
@@ -73,8 +72,9 @@ export class ReefCardEditor extends LitElement {
                 ${this.device_conf()}
                 </div>
             </div>
-        `;}
-	    return html``;
+        `;
+	}
+	   return html``;
     }// end of - render
 
 
@@ -86,7 +86,6 @@ export class ReefCardEditor extends LitElement {
 	    var lit_device=null;
 	    switch(model){
 	    case "RSDOSE4":
-		console.debug("RSDOSE4 editor");
 		lit_device=new RSDose(this.hass,device,this._config);
 		break;
 	    default:
