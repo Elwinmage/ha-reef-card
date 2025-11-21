@@ -85,40 +85,6 @@ export default class RSDevice extends LitElement {
 	return (this.hass.states[this.entities['device_state'].entity_id].state=='on');
     }
     
-    _press(button){
-	console.log("button pressed: :"+this.entities[button.name].entity_id);
-	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-	
-    }
-    _toggle(swtch){
-	var entity_id=this.entities[swtch.name].entity_id ;
-	//	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
-	const actionConfig = {
-	    entity: entity_id,
-	    tap_action: {
-		action: "more-info",
-	    },
-	};
-
-	// Open more info on tap action
-	const event = new Event("hass-action", {
-	    bubbles: true,
-	    composed: true,
-	});
-	event.detail = {
-	    config: actionConfig,
-	    action: "tap",
-	};
-	
-	this.dispatchEvent(event);
-	
-	/*	let e = new Event('hass-more-info', { composed: true });
-	e.detail = { entity_id};
-	console.log(e);
-	let res=this.dispatchEvent(e);
-	console.log(res);*/
-    }
-
     _render_disabled(){
 	return html`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
@@ -164,7 +130,6 @@ export default class RSDevice extends LitElement {
 	if (type.name in this.config){
 	    return html`${this.config[type.name].map(actuator => type.fn.call(this,actuator,state))}`;
 	}
-	console.log("No "+type.name);
 	return html``;
     }
     

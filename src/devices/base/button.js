@@ -33,35 +33,22 @@ background-color: rgba(${this.color},${this.alpha});
     }//end of function render
 
     async _click(e){
-	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-	this.msgbox("Click");
+	let data={'entity_id':this.stateObj.entity_id};
+	this.run_action("tap_action","button","press",data);
     }
 
     async _longclick(e){
-	//	moreinfo.display("testme","hello");
-	this.msgbox("Long Click");
+	let data="Hold";
+	this.run_action("hold_action","__personnal__","message_box",data);
+	
     }//end of function longclick
     
     async _dblclick(e){
-	this.msgbox("Double Click");
+	let data="Double Tap";
+	this.run_action("double_tap_action","__personnal__","message_box",data);
+	
     }//end of function dblclick
 
-    _config(){
-	console.debug("devices.base.button.config");
-    }
-    
-    _toggle(){
-	if (this.stateObj.state=='on'){
-	    this.stateObj.state='off';
-	}//if 
-	else {
-	    this.stateObj.state='on';
-	}//else
-	//TOGGLE button
-	console.debug(this.stateObj.entity_id," => ", this.stateObj.state);
-	this.requestUpdate();
-    }// end of function _toggle
-    
 }// end of class
 
 window.customElements.define('common-button', Button);

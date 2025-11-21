@@ -111,34 +111,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     is_on() {
         return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
     }
-    _press(button) {
-        console.log("button pressed: :" + this.entities[button.name].entity_id);
-    //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-    }
-    _toggle(swtch) {
-        var entity_id = this.entities[swtch.name].entity_id;
-        //	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
-        const actionConfig = {
-            entity: entity_id,
-            tap_action: {
-                action: "more-info"
-            }
-        };
-        // Open more info on tap action
-        const event = new Event("hass-action", {
-            bubbles: true,
-            composed: true
-        });
-        event.detail = {
-            config: actionConfig,
-            action: "tap"
-        };
-        this.dispatchEvent(event);
-    /*	let e = new Event('hass-more-info', { composed: true });
-	e.detail = { entity_id};
-	console.log(e);
-	let res=this.dispatchEvent(e);
-	console.log(res);*/ }
     _render_disabled() {
         return (0, $l56HR.html)`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
@@ -172,7 +144,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     }
     _render_actuators_type(type, state) {
         if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator, state))}`;
-        console.log("No " + type.name);
         return (0, $l56HR.html)``;
     }
     _render_actuators(state) {
@@ -958,36 +929,6 @@ background-color: rgba(${this.color},${this.alpha});
 `;
         else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
     }
-    async run_action(type, domain, action, data) {
-        let enabled = true;
-        if (this.conf[type]) {
-            let params = [
-                'enabled',
-                'domain',
-                'action',
-                'data'
-            ];
-            for (let param of params)if (param in this.conf[type]) eval(param + "=this.conf['" + type + "']['" + param + "'];");
-             //if - has domain
-             // for
-        }
-        if (enabled) {
-            if (domain == "__personnal__") switch(action){
-                case "message_box":
-                    this.msgbox(data);
-                    break;
-                default:
-                    let error_str = "Error: try to run unknown personnal action: " + action;
-                    this.msgbox(error_str);
-                    console.error(error_str);
-                    break;
-            } //switch
-            else {
-                console.debug("Call Service", domain, action, data);
-                this.hass.callService(domain, action, data);
-            } //else -- ha domain action
-        } //if -- enabled
-    }
     async _click(e) {
         let data = {
             'entity_id': this.stateObj.entity_id
@@ -1001,17 +942,6 @@ background-color: rgba(${this.color},${this.alpha});
     async _dblclick(e) {
         let data = "Double Tap";
         this.run_action("double_tap_action", "__personnal__", "message_box", data);
-    }
-    _config() {
-        console.debug("devices.base.switch.config");
-    }
-    _toggle() {
-        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
-        else this.stateObj.state = 'on';
-         //else
-        //TOGGLE switch
-        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
-        this.requestUpdate();
     }
 } // end of class
 window.customElements.define('common-switch', Switch);
@@ -1138,10 +1068,10 @@ height:100%;
 
 parcelRegister("1Um3j", function(module, exports) {
 
-$parcel$export(module.exports, "default", () => $163c208f0715304f$export$2e2bcd8739ae039);
+$parcel$export(module.exports, "default", () => MyElement);
 parcelRequire("j0ZcV");
 var $eGUNk = parcelRequire("eGUNk");
-class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
+class MyElement extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
             hass: {},
@@ -1198,7 +1128,36 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
     sleep(ms) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
     }
-    hassAction(e) {}
+    async run_action(type, domain, action, data) {
+        let enabled = true;
+        if (this.conf[type]) {
+            let params = [
+                'enabled',
+                'domain',
+                'action',
+                'data'
+            ];
+            for (let param of params)if (param in this.conf[type]) eval(param + "=this.conf['" + type + "']['" + param + "'];");
+             //if - has domain
+             // for
+        }
+        if (enabled) {
+            if (domain == "__personnal__") switch(action){
+                case "message_box":
+                    this.msgbox(data);
+                    break;
+                default:
+                    let error_str = "Error: try to run unknown personnal action: " + action;
+                    this.msgbox(error_str);
+                    console.error(error_str);
+                    break;
+            } //switch
+            else {
+                console.debug("Call Service", domain, action, data);
+                this.hass.callService(domain, action, data);
+            } //else -- ha domain action
+        } //if -- enabled
+    }
     async _click_evt(e) {
         let timing = e.timeStamp - this.mouseDown;
         if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
@@ -1223,7 +1182,7 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
         return;
     }
 }
-window.customElements.define('my-element', $163c208f0715304f$export$2e2bcd8739ae039);
+window.customElements.define('my-element', MyElement);
 
 });
 
@@ -1257,26 +1216,18 @@ background-color: rgba(${this.color},${this.alpha});
 `;
     }
     async _click(e) {
-        //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
-        this.msgbox("Click");
+        let data = {
+            'entity_id': this.stateObj.entity_id
+        };
+        this.run_action("tap_action", "button", "press", data);
     }
     async _longclick(e) {
-        //	moreinfo.display("testme","hello");
-        this.msgbox("Long Click");
+        let data = "Hold";
+        this.run_action("hold_action", "__personnal__", "message_box", data);
     }
     async _dblclick(e) {
-        this.msgbox("Double Click");
-    }
-    _config() {
-        console.debug("devices.base.button.config");
-    }
-    _toggle() {
-        if (this.stateObj.state == 'on') this.stateObj.state = 'off';
-        else this.stateObj.state = 'on';
-         //else
-        //TOGGLE button
-        console.debug(this.stateObj.entity_id, " => ", this.stateObj.state);
-        this.requestUpdate();
+        let data = "Double Tap";
+        this.run_action("double_tap_action", "__personnal__", "message_box", data);
     }
 } // end of class
 window.customElements.define('common-button', $4492769e229d8dfa$export$353f5b6fc5456de1);

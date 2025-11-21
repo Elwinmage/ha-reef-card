@@ -56,8 +56,35 @@ export default class MyElement extends LitElement{
 	return new Promise(resolve => setTimeout(resolve, ms)); 
     }
 
-    hassAction(e){
-    }//end of function hassAction
+    async run_action(type,domain,action,data){
+	let enabled=true;
+	if (this.conf[type]){
+	    let params=['enabled','domain','action','data'];
+	    for (let param of params){
+		if (param in this.conf[type]){
+		    eval(param+"=this.conf['"+type+"']['"+param+"'];");
+		}//if - has domain
+	    }// for
+	}
+	if (enabled){
+	    if(domain=="__personnal__"){
+		switch(action){
+		case "message_box":
+		    this.msgbox(data);
+		    break;
+		default:
+		    let error_str="Error: try to run unknown personnal action: "+action;
+		    this.msgbox(error_str);
+		    console.error(error_str);
+		    break;
+		}//switch
+	    }//if -- personnal domain
+	    else{
+		console.debug("Call Service",domain,action,data);
+		this.hass.callService(domain, action, data);
+	    }//else -- ha domain action
+	}//if -- enabled
+    }//end of function -- run_action
 
     async _click_evt(e){
 	let timing = e.timeStamp-this.mouseDown;
