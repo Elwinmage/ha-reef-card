@@ -45,7 +45,6 @@ export class ReefCard extends LitElement {
     }
     
     render() {
-	console.log(this.hass);
 	if(this.first_init==true){
 	    this.init_devices();
 	    this.first_init=false;
@@ -86,7 +85,6 @@ ${moreinfo.render()}
     }
 
     _set_current_device(device_id){
-        console.log('Selected -->', device_id);
 	if (device_id=="unselected"){
 	    this.current_device=this.no_device;
 	    return;
@@ -174,7 +172,6 @@ ${moreinfo.render()}
     }
 
     setConfig(config) {
-	console.log("setConfig");
 	// if (!config.entities) {
 	//   throw new Error("You need to define entities");
 	//   }

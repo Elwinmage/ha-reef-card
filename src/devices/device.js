@@ -110,8 +110,6 @@ export default class RSDevice extends LitElement {
 	    action: "tap",
 	};
 	
-	console.log("EVENT ***");
-	console.log(event);
 	this.dispatchEvent(event);
 	
 	/*	let e = new Event('hass-more-info', { composed: true });

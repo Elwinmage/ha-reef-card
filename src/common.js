@@ -26,7 +26,6 @@ export default class DeviceList {
     }//enf of function get_by_name
     
     init_devices(){
-	console.log(this._hass);
 	for (var device_id in this._hass.devices){
 	    let dev=this._hass.devices[device_id];
 	    let dev_id=dev.identifiers[0];
@@ -49,7 +48,6 @@ export default class DeviceList {
 	    }
 	}//for
 	this.main_devices.sort(this.device_compare);
-	console.log(this.devices)
     }// end of - init_devices
 };
 
@@ -57,7 +55,6 @@ export default class DeviceList {
 export function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     var rgb=parseInt(result[1], 16)+","+parseInt(result[2], 16)+","+ parseInt(result[3], 16)
-    console.log("hexToRgb: ",hex," => ",rgb);
 /*    return result ? {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),

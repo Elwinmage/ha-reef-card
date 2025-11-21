@@ -28,7 +28,6 @@ export default class DoseHead extends RSDevice{
 	if (! this.state_on ){
 	    color=off_color;
 	}
-	console.debug('color',color);
 	return html`
 		<svg viewBox="0 0 86 56" style="fill:rgb(${color});">
 		    <path d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"></path>
@@ -39,9 +38,6 @@ export default class DoseHead extends RSDevice{
     }
 
     _render_container(){
-	console.log(this.hass);
-	console.log(this.entities);
-	console.log(this.entities['supplement']);
 	let supplement=this.hass.states[this.entities['supplement'].entity_id];
 	let supplement_uid=this.hass.states[this.entities['supplement_uid'].entity_id];
 	let img=null;

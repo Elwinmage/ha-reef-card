@@ -25,7 +25,6 @@ export default class RSDose extends RSDevice{
     _heads = [];
     
     constructor(hass,device,user_config){
-	console.log("rsdose.constr config:",config);
 	super(config,hass,device,user_config);
     }// end of constructor
 

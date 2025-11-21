@@ -133,8 +133,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             config: actionConfig,
             action: "tap"
         };
-        console.log("EVENT ***");
-        console.log(event);
         this.dispatchEvent(event);
     /*	let e = new Event('hass-more-info', { composed: true });
 	e.detail = { entity_id};
@@ -228,9 +226,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -821,8 +819,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 $parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
+$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -1523,7 +1521,6 @@ class $038fea56b681b6a5$export$2e2bcd8739ae039 {
         } //for
     }
     init_devices() {
-        console.log(this._hass);
         for(var device_id in this._hass.devices){
             let dev = this._hass.devices[device_id];
             let dev_id = dev.identifiers[0];
@@ -1550,13 +1547,11 @@ class $038fea56b681b6a5$export$2e2bcd8739ae039 {
             }
         } //for
         this.main_devices.sort(this.device_compare);
-        console.log(this.devices);
     }
 }
 function $038fea56b681b6a5$export$5a544e13ad4e1fa5(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     var rgb = parseInt(result[1], 16) + "," + parseInt(result[2], 16) + "," + parseInt(result[3], 16);
-    console.log("hexToRgb: ", hex, " => ", rgb);
     /*    return result ? {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),
@@ -1986,7 +1981,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _pipe_path() {
         let color = this.config.color;
         if (!this.state_on) color = (0, $iXBpj.off_color);
-        console.debug('color', color);
         return (0, $l56HR.html)`
 		<svg viewBox="0 0 86 56" style="fill:rgb(${color});">
 		    <path d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"></path>
@@ -1995,9 +1989,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 `;
     }
     _render_container() {
-        console.log(this.hass);
-        console.log(this.entities);
-        console.log(this.entities['supplement']);
         let supplement = this.hass.states[this.entities['supplement'].entity_id];
         let supplement_uid = this.hass.states[this.entities['supplement_uid'].entity_id];
         let img = null;
@@ -2164,7 +2155,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     ];
     _heads = [];
     constructor(hass, device, user_config){
-        console.log("rsdose.constr config:", (0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20));
         super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device, user_config);
     }
     _populate_entities() {}
@@ -2348,7 +2338,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         if (dev['text'] == name) this._set_current_device(dev['value']);
     }
     render() {
-        console.log(this.hass);
         if (this.first_init == true) {
             this.init_devices();
             this.first_init = false;
@@ -2385,7 +2374,6 @@ ${(0, $9HhHn.default).render()}
          // for
     }
     _set_current_device(device_id) {
-        console.log('Selected -->', device_id);
         if (device_id == "unselected") {
             this.current_device = this.no_device;
             return;
@@ -2444,7 +2432,6 @@ ${(0, $9HhHn.default).render()}
         return document.createElement("reef-card-editor");
     }
     setConfig(config) {
-        console.log("setConfig");
         // if (!config.entities) {
         //   throw new Error("You need to define entities");
         //   }
