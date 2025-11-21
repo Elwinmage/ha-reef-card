@@ -6,6 +6,8 @@ import Switch from "./base/switch";
 import Button from "./base/button";
 import Sensor from "./base/sensor";
 
+import {off_color} from "../common.js";
+
 import style_common from "./common.styles";
 
 /*
@@ -50,7 +52,7 @@ export default class RSDevice extends LitElement {
 	    this.find_leaves(tree[key],ipath);
 	}
     }
-
+        
     update_config(){
 	this.config=JSON.parse(JSON.stringify(this.initial_config));
 	if ("conf" in this.user_config){
@@ -79,16 +81,17 @@ export default class RSDevice extends LitElement {
 	}
     }
 
+    is_on(){
+	return (this.hass.states[this.entities['device_state'].entity_id].state=='on');
+    }
+    
     _press(button){
 	console.log("button pressed: :"+this.entities[button.name].entity_id);
 	//	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
 	
     }
     _toggle(swtch){
-	console.log(this.entities);
-	console.log(swtch);
 	var entity_id=this.entities[swtch.name].entity_id ;
-	console.log("toggle switch: "+entity_id);
 	//	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
 	const actionConfig = {
 	    entity: entity_id,
@@ -128,63 +131,71 @@ export default class RSDevice extends LitElement {
     ////////////////////////////////////////////////////////////////////////////////
     // ACTUATORS
 
-    _render_switch(mapping_conf){
+    _render_switch(mapping_conf,state){
 	let label_name='';
 	// Don not display label
 	if ('label' in mapping_conf && mapping_conf.label!=false){
 	    label_name=mapping_conf.name;
 	}
+	let color=this.config.color;
+	if (! state){
+	    color=off_color;
+	}
         return html`
 <div class="${mapping_conf.class}">
-<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
+<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
 </div>
 `;
     }
 
-    _render_button(mapping_conf){
+    _render_button(mapping_conf,state){
 	let entity=this.entities[mapping_conf.name];
 	let stateObject=this.hass.states[entity.entity_id];
+	let color=this.config.color;
+	if (! state){
+	    color=off_color;
+	}
 	return html`
 <div class="${mapping_conf.class}">
-<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"</common-button>
 </div>
 	`;
     }
     
-    _render_actuators_type(type){
+    _render_actuators_type(type,state){
 	if (type.name in this.config){
-	    return html`${this.config[type.name].map(actuator => type.fn.call(this,actuator))}`;
+	    return html`${this.config[type.name].map(actuator => type.fn.call(this,actuator,state))}`;
 	}
 	console.log("No "+type.name);
 	return html``;
     }
     
     
-    _render_actuators(){
+    _render_actuators(state){
 	let actuators=[{"name":"buttons","fn":this._render_button},{"name":"switches","fn":this._render_switch}];
 	return html `
-                     ${actuators.map(type => this._render_actuators_type(type))}
+                     ${actuators.map(type => this._render_actuators_type(type,state))}
                       `;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
     // SENSORS
-    _render_sensors(){
+    _render_sensors(state=true){
 	let sensors=[{"name":"sensors","fn":this._render_sensor}];
 	return html `
-                     ${sensors.map(type => this._render_sensors_type(type))}
+                     ${sensors.map(type => this._render_sensors_type(type,state))}
                       `;
     }
 
-    _render_sensors_type(type){
+    _render_sensors_type(type,state){
 	if (type.name in this.config){
-	    return html`${this.config[type.name].map(sensor => type.fn.call(this,sensor))}`;
+	    return html`${this.config[type.name].map(sensor => type.fn.call(this,sensor,state))}`;
 	}
 	console.log("No "+type.name);
 	return html``;
     }
 
-    _render_sensor(mapping_conf){
+    _render_sensor(mapping_conf,state){
 	if ('disabled' in mapping_conf && mapping_conf.disabled==true){
 	    return html``;
 	}
@@ -194,9 +205,14 @@ export default class RSDevice extends LitElement {
 	if ('label' in mapping_conf && mapping_conf.label!=false){
 	    label_name=mapping_conf.name;
 	}
+	let color=this.config.color;
+	if (! state){
+	    color=off_color;
+	}
+
         return html`
 <div class="${mapping_conf.name}">
-<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
 </div>
 `;
     }//end of function _render_sensor

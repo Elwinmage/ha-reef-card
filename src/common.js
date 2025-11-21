@@ -118,3 +118,4 @@ export function updateObj(obj,newVal){
     return;
 }
 
+export var off_color="150,150,150";

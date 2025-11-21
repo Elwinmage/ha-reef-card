@@ -66,7 +66,7 @@ export default class RSDose extends RSDevice{
     _render_head(head_id){
 	return html`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" />
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${this.is_on()}/>
 
 </div>
 `;
@@ -90,12 +90,17 @@ export default class RSDose extends RSDevice{
 	console.debug("rsdose.render");
 	this.update_config();
 	if (this.is_disabled()){
-	    console.log("DISABLED");
 	    return this._render_disabled();
 	}//if
+	let style=html``;
 	this._populate_entities_with_heads();
+	console.debug("device state: ",this.is_on());
+	if(!this.is_on()){
+	    style=html`<style>img{filter: grayscale(90%);}</style>`;
+	}
 	return html`
 	<div class="device_bg">
+        ${style}
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
         <div class="heads">
 	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
@@ -149,7 +154,6 @@ export default class RSDose extends RSDevice{
     editor(doc){
 	console.debug("rsdose.editor");
 	if(this.is_disabled()){
-	    console.debug("DISABLED");
 	    return html ``;
 	}
 	this._populate_entities_with_heads();

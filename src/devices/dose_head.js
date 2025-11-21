@@ -4,6 +4,8 @@ import RSDevice from "./device";
 import styles from "./dose_head.styles";
 import style_sensors from "./base/sensor.styles";
 
+import {off_color} from "../common.js";
+
 export default class DoseHead extends RSDevice{
 
     static styles = [styles,style_sensors];
@@ -13,17 +15,22 @@ export default class DoseHead extends RSDevice{
 	    entities: {},
 	    config: {},
 	    head_id:{},
+	    state_on:{},
 	}
     }
 
-    constructor(hass,entities,config){
+    constructor(hass,entities,config,state_on){
 	super();
     }
 
-    
     _pipe_path(){
+	let color=this.config.color;
+	if (! this.state_on ){
+	    color=off_color;
+	}
+	console.debug('color',color);
 	return html`
-		<svg viewBox="0 0 86 56" style="fill:rgb(${this.config.color});">
+		<svg viewBox="0 0 86 56" style="fill:rgb(${color});">
 		    <path d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"></path>
 		    <path d="m 62,0 1,39 c 0,2 1,3 2,5 2,2 2,1 4,2 2,0 4,0 6,-2 2,-2 1,-5 2,-7 l 6,-30 -8,0 -3,8 0,-28 z"></path>
 		</svg>
@@ -38,31 +45,14 @@ export default class DoseHead extends RSDevice{
 	let supplement=this.hass.states[this.entities['supplement'].entity_id];
 	let supplement_uid=this.hass.states[this.entities['supplement_uid'].entity_id];
 	let img=null;
-
-/*	switch (supplement_uid.state){
- 	case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-	    img=new URL('img/redsea_foundation_A.png',import.meta.url);
-	    break;
-	case "76830db3-a0bd-459a-9974-76a57d026893":
-	    img=new URL('img/redsea_foundation_B.png',import.meta.url);
-	    break;
-	case "f524734e-8651-496e-b09b-640b40fc8bab":
-	    img=new URL('img/redsea_foundation_C.png',import.meta.url);
-	    break;
-	case "bf9a7da3-741b-4c1d-8542-d9344a95fb70":
-	    img=new URL('img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.png',import.meta.url);
-	    break;
-	default:
-	    img=new URL('img/generic_container.png',import.meta.url); 
-	    break;
-	    }*/
-//	console.debug("base url",import.meta.url);
-	//img=new URL('img/'+supplement_uid.state+'.png',import.meta.url);
-	//img='https://ha-dev:8123/hacsfiles/ha-reef-card/'+supplement_uid.state+'.png';
 	img='/hacsfiles/ha-reef-card/'+supplement_uid.state+'.supplement.png';
-	
+	let style=html``;
+	if(!this.state_on){
+	    style=html`<style>img{filter: grayscale(90%);}</style>`;
+	}
 	return html`
 <div class="container">
+  ${style}
   <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
 </div>
 `;
@@ -75,8 +65,8 @@ export default class DoseHead extends RSDevice{
  		  ${this._pipe_path()}
 		</div>
 
-${this._render_actuators()}
-${this._render_sensors()}
+${this._render_actuators(this.state_on)}
+${this._render_sensors(this.state_on)}
    	    `;
     }
 };

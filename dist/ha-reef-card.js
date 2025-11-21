@@ -48,6 +48,8 @@ parcelRequire("6vZH1");
 parcelRequire("5T0tY");
 parcelRequire("258Ll");
 
+var $iXBpj = parcelRequire("iXBpj");
+
 var $37d5w = parcelRequire("37d5w");
 class RSDevice extends (0, $eGUNk.LitElement) {
     static styles = [
@@ -106,15 +108,15 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
         }
     }
+    is_on() {
+        return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
+    }
     _press(button) {
         console.log("button pressed: :" + this.entities[button.name].entity_id);
     //	this.hass.callService("button", "press", {entity_id: this.entities[button.name].entity_id});
     }
     _toggle(swtch) {
-        console.log(this.entities);
-        console.log(swtch);
         var entity_id = this.entities[swtch.name].entity_id;
-        console.log("toggle switch: " + entity_id);
         //	this.hass.callService("switch", "toggle", {entity_id: this.entities[swtch.name].entity_id});
         const actionConfig = {
             entity: entity_id,
@@ -147,31 +149,35 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     }
     ////////////////////////////////////////////////////////////////////////////////
     // ACTUATORS
-    _render_switch(mapping_conf) {
+    _render_switch(mapping_conf, state) {
         let label_name = '';
         // Don not display label
         if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        let color = this.config.color;
+        if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
 <div class="${mapping_conf.class}">
-<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
+<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
 </div>
 `;
     }
-    _render_button(mapping_conf) {
+    _render_button(mapping_conf, state) {
         let entity = this.entities[mapping_conf.name];
         let stateObject = this.hass.states[entity.entity_id];
+        let color = this.config.color;
+        if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
 <div class="${mapping_conf.class}">
-<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"</common-button>
 </div>
 	`;
     }
-    _render_actuators_type(type) {
-        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator))}`;
+    _render_actuators_type(type, state) {
+        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator, state))}`;
         console.log("No " + type.name);
         return (0, $l56HR.html)``;
     }
-    _render_actuators() {
+    _render_actuators(state) {
         let actuators = [
             {
                 "name": "buttons",
@@ -183,12 +189,12 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             }
         ];
         return (0, $l56HR.html)`
-                     ${actuators.map((type)=>this._render_actuators_type(type))}
+                     ${actuators.map((type)=>this._render_actuators_type(type, state))}
                       `;
     }
     ////////////////////////////////////////////////////////////////////////////////
     // SENSORS
-    _render_sensors() {
+    _render_sensors(state = true) {
         let sensors = [
             {
                 "name": "sensors",
@@ -196,22 +202,24 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             }
         ];
         return (0, $l56HR.html)`
-                     ${sensors.map((type)=>this._render_sensors_type(type))}
+                     ${sensors.map((type)=>this._render_sensors_type(type, state))}
                       `;
     }
-    _render_sensors_type(type) {
-        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor))}`;
+    _render_sensors_type(type, state) {
+        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor, state))}`;
         console.log("No " + type.name);
         return (0, $l56HR.html)``;
     }
-    _render_sensor(mapping_conf) {
+    _render_sensor(mapping_conf, state) {
         if ('disabled' in mapping_conf && mapping_conf.disabled == true) return (0, $l56HR.html)``;
         let label_name = '';
         // Don not display label
         if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        let color = this.config.color;
+        if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
 <div class="${mapping_conf.name}">
-<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${this.config.color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
 </div>
 `;
     }
@@ -1488,54 +1496,13 @@ var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 });
 
 
-parcelRegister("37d5w", function(module, exports) {
+parcelRegister("iXBpj", function(module, exports) {
 
-$parcel$export(module.exports, "default", () => $244c2d90fdd5377f$export$2e2bcd8739ae039);
-parcelRequire("j0ZcV");
-var $j8KxL = parcelRequire("j8KxL");
-var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-.device_bg{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    aspect-ratio: 1/1.2;
- //border: 2px solid red;
-    }
-
-.device_img{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    }
-
-.device_img_disabled{
-    position: relative;
-    top: 0;
-    left : 0;
-    width: 100%;
-    filter: grayscale(80%);
-    }
-
-.disabled_in_ha{
-  color: white;
-  text-align: center;
-  position : absolute;
-  width: 100%;
-  top:15%;
-  left: 0%;
-  background-color:rgba(255,0,0,0.5);
-}
-  
-`;
-
-});
-
-
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
-var $eGUNk = parcelRequire("eGUNk");
+$parcel$export(module.exports, "default", () => $038fea56b681b6a5$export$2e2bcd8739ae039);
+$parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e13ad4e1fa5);
+$parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
+$parcel$export(module.exports, "updateObj", () => $038fea56b681b6a5$export$6fb918aa09a6c9f0);
+$parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
 class $038fea56b681b6a5$export$2e2bcd8739ae039 {
     constructor(hass){
         this._hass = hass;
@@ -1624,8 +1591,60 @@ function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
     }
     return;
 }
+var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
+
+});
+
+parcelRegister("37d5w", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $244c2d90fdd5377f$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+.device_bg{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    aspect-ratio: 1/1.2;
+ //border: 2px solid red;
+    }
+
+.device_img{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    }
+
+.device_img_disabled{
+    position: relative;
+    top: 0;
+    left : 0;
+    width: 100%;
+    filter: grayscale(80%);
+    }
+
+.disabled_in_ha{
+  color: white;
+  text-align: center;
+  position : absolute;
+  width: 100%;
+  top:15%;
+  left: 0%;
+  background-color:rgba(255,0,0,0.5);
+}
+  
+`;
+
+});
 
 
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+
+var $iXBpj = parcelRequire("iXBpj");
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
@@ -1946,6 +1965,8 @@ left: 20%;
 
 
 var $ircx4 = parcelRequire("ircx4");
+
+var $iXBpj = parcelRequire("iXBpj");
 class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     static styles = [
         (0, $12c519d2fc52c039$export$2e2bcd8739ae039),
@@ -1955,15 +1976,19 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         return {
             entities: {},
             config: {},
-            head_id: {}
+            head_id: {},
+            state_on: {}
         };
     }
-    constructor(hass, entities, config){
+    constructor(hass, entities, config, state_on){
         super();
     }
     _pipe_path() {
+        let color = this.config.color;
+        if (!this.state_on) color = (0, $iXBpj.off_color);
+        console.debug('color', color);
         return (0, $l56HR.html)`
-		<svg viewBox="0 0 86 56" style="fill:rgb(${this.config.color});">
+		<svg viewBox="0 0 86 56" style="fill:rgb(${color});">
 		    <path d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"></path>
 		    <path d="m 62,0 1,39 c 0,2 1,3 2,5 2,2 2,1 4,2 2,0 4,0 6,-2 2,-2 1,-5 2,-7 l 6,-30 -8,0 -3,8 0,-28 z"></path>
 		</svg>
@@ -1976,28 +2001,12 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         let supplement = this.hass.states[this.entities['supplement'].entity_id];
         let supplement_uid = this.hass.states[this.entities['supplement_uid'].entity_id];
         let img = null;
-        /*	switch (supplement_uid.state){
- 	case "7d67412c-fde0-44d4-882a-dc8746fd4acb":
-	    img=new URL('img/redsea_foundation_A.png',import.meta.url);
-	    break;
-	case "76830db3-a0bd-459a-9974-76a57d026893":
-	    img=new URL('img/redsea_foundation_B.png',import.meta.url);
-	    break;
-	case "f524734e-8651-496e-b09b-640b40fc8bab":
-	    img=new URL('img/redsea_foundation_C.png',import.meta.url);
-	    break;
-	case "bf9a7da3-741b-4c1d-8542-d9344a95fb70":
-	    img=new URL('img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.png',import.meta.url);
-	    break;
-	default:
-	    img=new URL('img/generic_container.png',import.meta.url); 
-	    break;
-	    }*/ //	console.debug("base url",import.meta.url);
-        //img=new URL('img/'+supplement_uid.state+'.png',import.meta.url);
-        //img='https://ha-dev:8123/hacsfiles/ha-reef-card/'+supplement_uid.state+'.png';
         img = '/hacsfiles/ha-reef-card/' + supplement_uid.state + '.supplement.png';
+        let style = (0, $l56HR.html)``;
+        if (!this.state_on) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         return (0, $l56HR.html)`
 <div class="container">
+  ${style}
   <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
 </div>
 `;
@@ -2009,8 +2018,8 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
  		  ${this._pipe_path()}
 		</div>
 
-${this._render_actuators()}
-${this._render_sensors()}
+${this._render_actuators(this.state_on)}
+${this._render_sensors(this.state_on)}
    	    `;
     }
 }
@@ -2144,6 +2153,7 @@ var $37d5w = parcelRequire("37d5w");
 
 var $dPhcg = parcelRequire("dPhcg");
 
+var $iXBpj = parcelRequire("iXBpj");
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
@@ -2183,7 +2193,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _render_head(head_id) {
         return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" />
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${this.is_on()}/>
 
 </div>
 `;
@@ -2201,13 +2211,15 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     render() {
         console.debug("rsdose.render");
         this.update_config();
-        if (this.is_disabled()) {
-            console.log("DISABLED");
-            return this._render_disabled();
-        } //if
+        if (this.is_disabled()) return this._render_disabled();
+         //if
+        let style = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
+        console.debug("device state: ", this.is_on());
+        if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         return (0, $l56HR.html)`
 	<div class="device_bg">
+        ${style}
 	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
         <div class="heads">
 	${Array.from({
@@ -2219,7 +2231,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     _editor_head_color(head_id) {
         this.update_config();
-        let color = (0, $038fea56b681b6a5$export$34d09c4a771c46ef)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
+        let color = (0, $iXBpj.rgbToHex)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
         return (0, $l56HR.html)`
          <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
 <datalist id="RedSeaColors">
@@ -2248,7 +2260,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                         [this.current_device.device.name]: {
                             heads: {
                                 [changedEvent.target.id]: {
-                                    color: (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(hex)
+                                    color: (0, $iXBpj.hexToRgb)(hex)
                                 }
                             }
                         }
@@ -2258,9 +2270,9 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         };
         var newConfig = JSON.parse(JSON.stringify(this._config));
         try {
-            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $038fea56b681b6a5$export$5a544e13ad4e1fa5)(hex);
+            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $iXBpj.hexToRgb)(hex);
         } catch (error) {
-            (0, $038fea56b681b6a5$export$6fb918aa09a6c9f0)(newConfig, newVal);
+            (0, $iXBpj.updateObj)(newConfig, newVal);
         }
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
@@ -2273,10 +2285,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     editor(doc) {
         console.debug("rsdose.editor");
-        if (this.is_disabled()) {
-            console.debug("DISABLED");
-            return (0, $l56HR.html)``;
-        }
+        if (this.is_disabled()) return (0, $l56HR.html)``;
         this._populate_entities_with_heads();
         var element = doc.getElementById("heads_colors");
         if (element) element.reset();
@@ -2371,7 +2380,7 @@ ${(0, $9HhHn.default).render()}
     `;
     }
     init_devices() {
-        this.devices_list = new (0, $038fea56b681b6a5$export$2e2bcd8739ae039)(this.hass);
+        this.devices_list = new (0, $iXBpj.default)(this.hass);
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
@@ -2449,6 +2458,7 @@ var $j8KxL = parcelRequire("j8KxL");
 var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
 
+var $iXBpj = parcelRequire("iXBpj");
 
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
@@ -2481,7 +2491,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         this._config = config;
     }
     init_devices() {
-        this.devices_list = new (0, $038fea56b681b6a5$export$2e2bcd8739ae039)(this.hass);
+        this.devices_list = new (0, $iXBpj.default)(this.hass);
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
