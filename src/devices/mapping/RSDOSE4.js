@@ -10,6 +10,12 @@ export const config = {
 	    "label":false,
 	    "class":"on_off",
 	    "style": "switch",
+	    "tap_action": {
+		//"enabled": false,
+		//"domain": "switch",
+		// "action":"turn_on",
+		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
+	    }
 	}
     ],
     "heads": {

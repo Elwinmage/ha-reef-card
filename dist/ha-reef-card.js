@@ -86,7 +86,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     }
     update_config() {
         this.config = JSON.parse(JSON.stringify(this.initial_config));
-        console.debug("RSDevice.update_config for ", this.device);
         if ("conf" in this.user_config) {
             console.debug("User config detected: ", this.user_config.conf);
             console.debug("Initial config: ", this.initial_config);
@@ -159,9 +158,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
 `;
     }
     _render_button(mapping_conf) {
-        console.debug("devices.device._render_button", mapping_conf);
-        console.debug("devices.device._render_button entities", this.entities);
-        console.debug("devices.device._render_button states", this.hass.states);
         let entity = this.entities[mapping_conf.name];
         let stateObject = this.hass.states[entity.entity_id];
         return (0, $l56HR.html)`
@@ -945,10 +941,8 @@ class Switch extends (0, $1Um3j.default) {
         <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
-        else if (this.conf.style == "button") {
-            console.debug("switch conf: ", this.conf);
-            // background-color: rgba(${this.config.color},${this.config.alpha}); 
-            return (0, $l56HR.html)`
+        else if (this.conf.style == "button") // background-color: rgba(${this.config.color},${this.config.alpha}); 
+        return (0, $l56HR.html)`
  <style>
       #${this.conf.name}{
 background-color: rgba(${this.color},${this.alpha});
@@ -956,18 +950,51 @@ background-color: rgba(${this.color},${this.alpha});
 </style>
    	    <div class="switch_button"  id="${this.conf.name}">${eval(this.conf.label)}</div>
 `;
-        } else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
+        else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
+    }
+    async run_action(type, domain, action, data) {
+        let enabled = true;
+        if (this.conf[type]) {
+            let params = [
+                'enabled',
+                'domain',
+                'action',
+                'data'
+            ];
+            for (let param of params)if (param in this.conf[type]) eval(param + "=this.conf['" + type + "']['" + param + "'];");
+             //if - has domain
+             // for
+        }
+        if (enabled) {
+            if (domain == "__personnal__") switch(action){
+                case "message_box":
+                    this.msgbox(data);
+                    break;
+                default:
+                    let error_str = "Error: try to run unknown personnal action: " + action;
+                    this.msgbox(error_str);
+                    console.error(error_str);
+                    break;
+            } //switch
+            else {
+                console.debug("Call Service", domain, action, data);
+                this.hass.callService(domain, action, data);
+            } //else -- ha domain action
+        } //if -- enabled
     }
     async _click(e) {
-        console.debug("Click ", e.detail, " ", e.timeStamp);
-        console.debug("switch toggled:" + this.stateObj.entity_id);
-        this._toggle();
+        let data = {
+            'entity_id': this.stateObj.entity_id
+        };
+        this.run_action("tap_action", "switch", "toggle", data);
     }
     async _longclick(e) {
-        console.debug("Long Click");
+        let data = "Hold";
+        this.run_action("hold_action", "__personnal__", "message_box", data);
     }
     async _dblclick(e) {
-        console.debug("Double click");
+        let data = "Double Tap";
+        this.run_action("double_tap_action", "__personnal__", "message_box", data);
     }
     _config() {
         console.debug("devices.base.switch.config");
@@ -1168,13 +1195,10 @@ class $163c208f0715304f$export$2e2bcd8739ae039 extends (0, $eGUNk.LitElement) {
     hassAction(e) {}
     async _click_evt(e) {
         let timing = e.timeStamp - this.mouseDown;
-        if (e.timeStamp - this.mouseDown > 500) {
-            if (this.conf["invert_action"] == true) this._click(e);
-            else this._longclick(e);
-        } else {
+        if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
+        else {
             await this.sleep(300);
             if (this.doubleClick == true) this.doubleClick = false;
-            else if (this.conf["invert_action"] == true) this._longclick(e);
             else this._click(e);
         }
         this.mouseDown = e.timeStamp;
@@ -1421,7 +1445,6 @@ class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
         super(hass, conf, stateObj, color, alpha);
     }
     render() {
-        console.debug("Sensor render: ", this.stateObj);
         let value = this.stateObj.state;
         if (this.conf.force_integer) value = Math.floor(value);
         return (0, $l56HR.html)`
@@ -1712,7 +1735,9 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "type": "hacs",
             "label": false,
             "class": "on_off",
-            "style": "switch"
+            "style": "switch",
+            "tap_action": {
+            }
         }
     ],
     "heads": {

@@ -27,7 +27,6 @@ export class Switch extends  MyElement {
         </div>`;
 	}//if
 	else if (this.conf.style=="button"){
-	    console.debug("switch conf: ",this.conf);
 // background-color: rgba(${this.config.color},${this.config.alpha}); 
 	    return html`
  <style>
@@ -43,19 +42,51 @@ background-color: rgba(${this.color},${this.alpha});
 	}
     }//end of function render
 
-    async _click(e){
-	console.debug("Click ",e.detail," ",e.timeStamp);
-	console.debug("switch toggled:"+this.stateObj.entity_id);
 
-	this._toggle();
-    }
+    async run_action(type,domain,action,data){
+	let enabled=true;
+	if (this.conf[type]){
+	    let params=['enabled','domain','action','data'];
+	    for (let param of params){
+		if (param in this.conf[type]){
+		    eval(param+"=this.conf['"+type+"']['"+param+"'];");
+		}//if - has domain
+	    }// for
+	}
+	if (enabled){
+	    if(domain=="__personnal__"){
+		switch(action){
+		case "message_box":
+		    this.msgbox(data);
+		    break;
+		default:
+		    let error_str="Error: try to run unknown personnal action: "+action;
+		    this.msgbox(error_str);
+		    console.error(error_str);
+		    break;
+		}//switch
+	    }//if -- personnal domain
+	    else{
+		console.debug("Call Service",domain,action,data);
+		this.hass.callService(domain, action, data);
+	    }//else -- ha domain action
+	}//if -- enabled
+	
+    }//end of function -- run_action
+    
+    async _click(e){
+	let data={'entity_id':this.stateObj.entity_id};
+	this.run_action("tap_action","switch","toggle",data);
+    }//end of function _click
 
     async _longclick(e){
-	console.debug("Long Click");
+	let data="Hold";
+	this.run_action("hold_action","__personnal__","message_box",data);
     }//end of function longclick
     
     async _dblclick(e){
-	console.debug("Double click");
+	let data="Double Tap";
+	this.run_action("double_tap_action","__personnal__","message_box",data);
     }//end of function dblclick
 
     _config(){

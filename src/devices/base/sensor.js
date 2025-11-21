@@ -20,7 +20,6 @@ export class Sensor extends  MyElement {
     }//end of constructor
 
     render(){
-	console.debug("Sensor render: ",this.stateObj);
 	let value=this.stateObj.state;
 	if(this.conf.force_integer){
 	    value=Math.floor(value);

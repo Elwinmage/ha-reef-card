@@ -62,12 +62,7 @@ export default class MyElement extends LitElement{
     async _click_evt(e){
 	let timing = e.timeStamp-this.mouseDown;
 	if(e.timeStamp-this.mouseDown > 500){
-	    if (this.conf["invert_action"]==true){
-		this._click(e);
-	    }
-	    else{
 		this._longclick(e);
-	    }
 	}
 	else{
 	    await this.sleep(300);
@@ -75,12 +70,7 @@ export default class MyElement extends LitElement{
 		this.doubleClick=false;
 	    }
 	    else{
-		if (this.conf["invert_action"]==true){
-		    this._longclick(e);
-		}
-		else {
-		    this._click(e);
-		}
+		this._click(e);
 	    }
 	}
 	this.mouseDown=e.timeStamp;

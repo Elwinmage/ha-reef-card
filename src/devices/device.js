@@ -53,7 +53,6 @@ export default class RSDevice extends LitElement {
 
     update_config(){
 	this.config=JSON.parse(JSON.stringify(this.initial_config));
-	console.debug("RSDevice.update_config for ",this.device);
 	if ("conf" in this.user_config){
 	    console.debug("User config detected: ", this.user_config.conf);
 	    console.debug("Initial config: ", this.initial_config);
@@ -143,9 +142,6 @@ export default class RSDevice extends LitElement {
     }
 
     _render_button(mapping_conf){
-	console.debug("devices.device._render_button",mapping_conf);
-	console.debug("devices.device._render_button entities",this.entities);
-	console.debug("devices.device._render_button states",this.hass.states);
 	let entity=this.entities[mapping_conf.name];
 	let stateObject=this.hass.states[entity.entity_id];
 	return html`
