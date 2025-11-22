@@ -197,9 +197,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -790,8 +790,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 $parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
+$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -918,8 +918,7 @@ class Switch extends (0, $1Um3j.default) {
         <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
-        else if (this.conf.style == "button") // background-color: rgba(${this.config.color},${this.config.alpha}); 
-        return (0, $l56HR.html)`
+        else if (this.conf.style == "button") return (0, $l56HR.html)`
  <style>
       #${this.conf.name}{
 background-color: rgba(${this.color},${this.alpha});
@@ -1865,6 +1864,19 @@ top: 5%;
 left: 33%;
 }
 
+
+.pump_state_label{
+ position: absolute;
+ aspect-ratio: 1/1;
+ width: 55%;
+ border-radius: 50%;
+ top: 10%;
+ left: 35%;
+ color: white;
+font-weight: bolder;
+}
+
+
 .pump_state_head{
  position: absolute;
  aspect-ratio: 1/1;
@@ -1872,7 +1884,6 @@ left: 33%;
  border-radius: 50%;
  top: 10%;
  left: 35%;
-
 }
 
 .container{
@@ -2132,9 +2143,12 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         return entity.state;
     }
     _render_head(head_id) {
+        let schedule_state = this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
+        console.log("schedule state for head", head_id, schedule_state);
+        if (!this.is_on()) schedule_state = false;
         return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${this.is_on()}/>
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${schedule_state}/>
 
 </div>
 `;
@@ -2156,7 +2170,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
          //if
         let style = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
-        console.debug("device state: ", this.is_on());
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         return (0, $l56HR.html)`
 	<div class="device_bg">
@@ -2180,7 +2193,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 <option>#0081c5</option>
 <option>#008264</option>
 <option>#64a04b</option>
-<option>#A0A0A0</option>
+<option>#582900</option>
 <option>#f04e99</option>
 <option>#f14b4c</option>
 <option>#f08f37</option>

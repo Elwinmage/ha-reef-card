@@ -27,7 +27,6 @@ export class Switch extends  MyElement {
         </div>`;
 	}//if
 	else if (this.conf.style=="button"){
-// background-color: rgba(${this.config.color},${this.config.alpha}); 
 	    return html`
  <style>
       #${this.conf.name}{

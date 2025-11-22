@@ -63,9 +63,15 @@ export default class RSDose extends RSDevice{
     }
     
     _render_head(head_id){
+	
+	let schedule_state=(this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
+	console.log("schedule state for head",head_id,schedule_state);
+	if (!this.is_on()){
+	    schedule_state=false;
+	}
 	return html`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${this.is_on()}/>
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${schedule_state}/>
 
 </div>
 `;
@@ -93,7 +99,6 @@ export default class RSDose extends RSDevice{
 	}//if
 	let style=html``;
 	this._populate_entities_with_heads();
-	console.debug("device state: ",this.is_on());
 	if(!this.is_on()){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
 	}
@@ -119,7 +124,7 @@ export default class RSDose extends RSDevice{
 <option>#0081c5</option>
 <option>#008264</option>
 <option>#64a04b</option>
-<option>#A0A0A0</option>
+<option>#582900</option>
 <option>#f04e99</option>
 <option>#f14b4c</option>
 <option>#f08f37</option>

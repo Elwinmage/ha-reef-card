@@ -21,6 +21,19 @@ top: 5%;
 left: 33%;
 }
 
+
+.pump_state_label{
+ position: absolute;
+ aspect-ratio: 1/1;
+ width: 55%;
+ border-radius: 50%;
+ top: 10%;
+ left: 35%;
+ color: white;
+font-weight: bolder;
+}
+
+
 .pump_state_head{
  position: absolute;
  aspect-ratio: 1/1;
@@ -28,7 +41,6 @@ left: 33%;
  border-radius: 50%;
  top: 10%;
  left: 35%;
-
 }
 
 .container{

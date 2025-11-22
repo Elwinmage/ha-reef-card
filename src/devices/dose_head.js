@@ -16,6 +16,7 @@ export default class DoseHead extends RSDevice{
 	    config: {},
 	    head_id:{},
 	    state_on:{},
+	    
 	}
     }
 
