@@ -44,8 +44,18 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:bug" style="text-decoration:none">🐛</a>
     </td>
+  </tr>
 
   </tr>
+    <tr>
+    <td><a href="#reefcontrol">ReefControl</a></td>
+    <td>RSSENSE<br /> If you have one, you can contact me <a href="https://github.com/Elwinmage/ha-reefbeat-component/discussions/8">here</a> and I will add its support.</td><td>❌</td>
+    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSCONTROL.png"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+      </tr>  
   <tr>
     <td rowspan="2"><a href="#reefdose">ReefDose</a></td>
     <td>RSDOSE2</td>
