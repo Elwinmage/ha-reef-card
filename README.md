@@ -124,6 +124,7 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 - [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
 - [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
+- [ReefControl](https://github.com/Elwinmage/ha-reef-card/#reefcontrol)
 - [ReefDose](https://github.com/Elwinmage/ha-reef-card/#reefdose)
 - [ReefLED](https://github.com/Elwinmage/ha-reef-card/#reefled)
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
@@ -154,6 +155,10 @@ To remove device selection and force the device you want, set device parameter t
 # ReefATO
 Planned.
 
+You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# ReefControl
+Planned.
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefDose
