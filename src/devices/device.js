@@ -5,7 +5,7 @@ import i18n from "../translations/myi18n.js";
 import Switch from "./base/switch";
 import Button from "./base/button";
 import Sensor from "./base/sensor";
-
+import ProgressBar from "./base/progress_bar";
 import SensorTarget from "./base/sensor_target";
 
 import {off_color} from "../common.js";
@@ -151,7 +151,7 @@ export default class RSDevice extends LitElement {
     ////////////////////////////////////////////////////////////////////////////////
     // SENSORS
     _render_sensors(state=true,put_in=null){
-	let sensors=[{"name":"sensors","fn":this._render_sensor},{"name":"sensors_target","fn":this._render_sensor_target}];
+	let sensors=[{"name":"sensors","fn":this._render_sensor},{"name":"sensors_target","fn":this._render_sensor_target},{"name":"progress_bar","fn":this._render_progress_bar}];
 	return html `
                      ${sensors.map(type => this._render_sensors_type(type,state,put_in))}
                       `;
@@ -191,6 +191,33 @@ export default class RSDevice extends LitElement {
     }//end of function _render_sensor
 
 
+    _render_progress_bar(mapping_conf,state,put_in){
+	let sensor_put_in=null;
+	if ("put_in" in mapping_conf){
+	    sensor_put_in=mapping_conf.put_in;
+	}
+	if ( ('disabled' in mapping_conf && mapping_conf.disabled==true) || 
+	     (sensor_put_in!=put_in) ){
+	    return html``;
+	}
+	    
+	let label_name='';
+	// Don not display label
+	if ('label' in mapping_conf && mapping_conf.label!=false){;
+	    label_name=mapping_conf.name;
+	}
+	let color=this.config.color;
+	if (! state){
+	    color=off_color;
+	}
+	console.debug("Progress-bar:",this.hass.states[this.entities[mapping_conf.name].entity_id],this.hass.states[this.entities[mapping_conf.target].entity_id]);
+        return html`
+<div class=${mapping_conf.class}>
+<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></progress-bar>
+</div>
+`;
+    }//end of function _render_sensor
+
     _render_sensor_target(mapping_conf,state,put_in){
 	let sensor_put_in=null;
 	if ("put_in" in mapping_conf){
@@ -216,6 +243,7 @@ export default class RSDevice extends LitElement {
 </div>
 `;
     }//end of function _render_sensor
+
 }
 window.customElements.define('rs-device', RSDevice);
 

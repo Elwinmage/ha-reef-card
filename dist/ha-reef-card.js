@@ -47,6 +47,7 @@ var $dPhcg = parcelRequire("dPhcg");
 parcelRequire("6vZH1");
 parcelRequire("5T0tY");
 parcelRequire("258Ll");
+parcelRequire("M8QIC");
 parcelRequire("303dX");
 
 var $iXBpj = parcelRequire("iXBpj");
@@ -176,6 +177,10 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             {
                 "name": "sensors_target",
                 "fn": this._render_sensor_target
+            },
+            {
+                "name": "progress_bar",
+                "fn": this._render_progress_bar
             }
         ];
         return (0, $l56HR.html)`
@@ -198,6 +203,22 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         return (0, $l56HR.html)`
 <div class="${mapping_conf.class}">
 <common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+</div>
+`;
+    }
+    _render_progress_bar(mapping_conf, state, put_in) {
+        let sensor_put_in = null;
+        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
+        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
+        let label_name = '';
+        // Don not display label
+        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        let color = this.config.color;
+        if (!state) color = (0, $iXBpj.off_color);
+        console.debug("Progress-bar:", this.hass.states[this.entities[mapping_conf.name].entity_id], this.hass.states[this.entities[mapping_conf.target].entity_id]);
+        return (0, $l56HR.html)`
+<div class=${mapping_conf.class}>
+<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></progress-bar>
 </div>
 `;
     }
@@ -1526,6 +1547,80 @@ font-size: 0.6em;
 });
 
 
+parcelRegister("M8QIC", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $3wGyI = parcelRequire("3wGyI");
+
+var $1Um3j = parcelRequire("1Um3j");
+class $090b59188c607e58$export$c17561cb55d4db30 extends (0, $1Um3j.default) {
+    static styles = (0, $3wGyI.default);
+    static get properties() {
+        return {
+            stateObjTarget: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, stateObj, stateObjTarget, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, color, alpha);
+        this.stateObjTarget = stateObjTarget;
+    }
+    render() {
+        let value = this.stateObj.state;
+        let target = this.stateObjTarget.state;
+        let percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
+        let bar_class = this.conf.class;
+        let unit = "%";
+        return (0, $l56HR.html)`
+<style>
+div.progress{
+background-color: rgba(${this.color},0.8);
+}   
+</style>
+   	    <div class="bar" id="${this.conf.name}">
+       	      <div class="progress" id="${this.conf.name}" style="width:${percent}%;">${percent}${unit}</div>
+            </div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('progress-bar', $090b59188c607e58$export$c17561cb55d4db30);
+
+});
+parcelRegister("3wGyI", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $29155f8d556df6b9$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $29155f8d556df6b9$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+div.bar{
+border-radius: 20px;
+border: 1px solid black,
+}
+
+div.progress{
+font-size: 0.8em;
+border-radius: 20px;
+padding-left: 5px;
+font-weight: bold;
+}
+`;
+
+});
+
+
 parcelRegister("303dX", function(module, exports) {
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
@@ -1881,14 +1976,24 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "target": "daily_dose",
                     "force_integer": true,
                     "put_in": "pump_state_head",
-                    "class": "scheduler_label_middle"
+                    "class": "scheduler_label_middle",
+                    "type": "common-sensor-target"
                 },
                 {
                     "name": "doses_today",
                     "target": "daily_doses",
                     "force_integer": true,
                     "put_in": "pump_state_head",
-                    "class": "scheduler_label_bottom"
+                    "class": "scheduler_label_bottom",
+                    "type": "common-sensor-target"
+                }
+            ],
+            "progress_bar": [
+                {
+                    "name": "container_volume",
+                    "target": "save_initial_container_volume",
+                    "type": "progress-bar",
+                    "class": "pg-container"
                 }
             ],
             "switches": [
@@ -1926,6 +2031,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "force_integer": true
                 }
             ],
+            "progress_bar": [
+                {
+                    "name": "container_volume",
+                    "target": "save_initial_container_volume",
+                    "type": "progress-bar",
+                    "class": "pg-container"
+                }
+            ],
             "switches": [
                 {
                     "name": "schedule_enabled",
@@ -1953,6 +2066,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head_volume",
                     "force_integer": true
+                }
+            ],
+            "progress_bar": [
+                {
+                    "name": "container_volume",
+                    "target": "save_initial_container_volume",
+                    "type": "progress-bar",
+                    "class": "pg-container"
                 }
             ],
             "switches": [
@@ -2005,6 +2126,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "force_integer": true,
                     "put_in": "pump_state_head",
                     "class": "scheduler_label"
+                }
+            ],
+            "progress_bar": [
+                {
+                    "name": "container_volume",
+                    "target": "save_initial_container_volume",
+                    "type": "progress-bar",
+                    "class": "pg-container"
                 }
             ],
             "switches": [
@@ -2109,12 +2238,21 @@ top: 0%;
 left: 20%;
 }
 
+div.pg-container{
+  position: absolute;
+  transform: rotate(-90deg);
+  top: 67%;
+  left: -60%;
+   width: 140%;
+}
 
 `;
 
 
 
 var $ircx4 = parcelRequire("ircx4");
+parcelRequire("3wGyI");
+parcelRequire("M8QIC");
 
 var $iXBpj = parcelRequire("iXBpj");
 class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
@@ -2151,7 +2289,11 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         console.debug("uid", supplement_uid);
         img = '/hacsfiles/ha-reef-card/' + supplement_uid + '.supplement.png';
         let style = (0, $l56HR.html)``;
-        if (!this.state_on) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
+        let color = this.config.color;
+        if (!this.state_on) {
+            style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
+            color = (0, $iXBpj.off_color);
+        }
         return (0, $l56HR.html)`
 <div class="container">
   ${style}

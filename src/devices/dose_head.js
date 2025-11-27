@@ -3,7 +3,9 @@ import RSDevice from "./device";
 
 import styles from "./dose_head.styles";
 import style_sensors from "./base/sensor.styles";
+import style_progress_bar from "./base/progress_bar.styles";
 
+import {ProgressBar} from "./base/progress_bar";
 import {off_color} from "../common.js";
 
 export default class DoseHead extends RSDevice{
@@ -45,8 +47,10 @@ export default class DoseHead extends RSDevice{
 	console.debug("uid",supplement_uid);
 	img='/hacsfiles/ha-reef-card/'+supplement_uid+'.supplement.png';
 	let style=html``;
+	let color=this.config.color;
 	if(!this.state_on){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
+	    color=off_color;
 	}
 	return html`
 <div class="container">

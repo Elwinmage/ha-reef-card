@@ -47,6 +47,7 @@ export const config = {
 		    "force_integer": true,
 		    "put_in": "pump_state_head",
 		    "class": "scheduler_label_middle",
+		    "type":"common-sensor-target",
 		},
 		{
 		    "name": "doses_today",
@@ -54,6 +55,15 @@ export const config = {
 		    "force_integer": true,
 		    "put_in": "pump_state_head",
 		    "class": "scheduler_label_bottom",
+		    "type":"common-sensor-target",		    
+		}
+	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
 		}
 	    ],
 	    "switches" : [
@@ -91,6 +101,14 @@ export const config = {
 		    "force_integer": true,
 		}
 	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
+		}
+	    ],
 	    "switches" : [
 		{
 		    "name": "schedule_enabled",
@@ -122,6 +140,14 @@ export const config = {
 		    "force_integer": true,
 		}
 
+	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
+		}
 	    ],
 	    "switches" : [
 		{
@@ -176,6 +202,14 @@ export const config = {
 		    "force_integer": true,
 		    "put_in": "pump_state_head",
 		    "class": "scheduler_label",
+		}
+	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
 		}
 	    ],
 	    "switches" : [

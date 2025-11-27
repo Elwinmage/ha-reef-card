@@ -69,5 +69,12 @@ top: 0%;
 left: 20%;
 }
 
+div.pg-container{
+  position: absolute;
+  transform: rotate(-90deg);
+  top: 67%;
+  left: -60%;
+   width: 140%;
+}
 
 `;
