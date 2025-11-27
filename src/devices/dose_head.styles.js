@@ -21,19 +21,6 @@ top: 5%;
 left: 33%;
 }
 
-
-.pump_state_label{
- position: absolute;
- aspect-ratio: 1/1;
- width: 55%;
- border-radius: 50%;
- top: 10%;
- left: 35%;
- color: white;
-font-weight: bolder;
-}
-
-
 .pump_state_head{
  position: absolute;
  aspect-ratio: 1/1;
@@ -41,6 +28,13 @@ font-weight: bolder;
  border-radius: 50%;
  top: 10%;
  left: 35%;
+  display:grid;
+#grid-template-columns: repeat(1, 1fr);
+grid-template-columns: 1;
+grid-template-rows: 3;
+
+  grid-gap: 0px;
+//  grid-auto-rows: minmax(100px, auto);
 }
 
 .container{
@@ -74,4 +68,6 @@ width: 60%;
 top: 0%;
 left: 20%;
 }
+
+
 `;

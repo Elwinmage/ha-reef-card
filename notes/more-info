@@ -1,0 +1,15 @@
+	    entity: entity_id,
+	    tap_action: {
+		action: "more-info",
+	    },
+	};
+
+	// Open more info on tap action
+	const event = new Event("hass-action", {
+	    bubbles: true,
+	    composed: true,
+	});
+	event.detail = {
+	    config: actionConfig,
+	    action: "tap",
+	};

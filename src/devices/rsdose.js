@@ -63,9 +63,7 @@ export default class RSDose extends RSDevice{
     }
     
     _render_head(head_id){
-	
 	let schedule_state=(this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
-	console.log("schedule state for head",head_id,schedule_state);
 	if (!this.is_on()){
 	    schedule_state=false;
 	}
@@ -175,7 +173,6 @@ export default class RSDose extends RSDevice{
 	;
     }//end of function editor
 }
-
 
 window.customElements.define('rs-dose4', RSDose);
 

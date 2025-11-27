@@ -30,6 +30,30 @@ export const config = {
 		{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
+		},
+		{
+		    "name": "manual_dosed_today",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_top",
+		    "disabled_if": "value<1",
+		    "prefix": "+",
+		}
+	    ],
+	    "sensors_target": [
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_middle",
+		},
+		{
+		    "name": "doses_today",
+		    "target": "daily_doses",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_bottom",
 		}
 	    ],
 	    "switches" : [
@@ -130,8 +154,29 @@ export const config = {
 		{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
+		},
+		// {
+		//     "name": "doses_today",
+		//     "force_integer": true,
+		// },
+		// {
+		//     "name": "auto_dose_today",
+		//     "force_integer": true,
+		// },
+		// {
+		//     "name": "daily_dose",
+		//     "force_integer": true,
+		// },
+		// {
+		//     "name": "daily_doses",
+		//     "force_integer": true,
+		// },
+		{
+		    "name": "manual_dosed_today",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label",
 		}
-
 	    ],
 	    "switches" : [
 		{
@@ -139,6 +184,9 @@ export const config = {
 		    "type": "hacs",
 		    "class": "pump_state_head",
 		    "style": "button",
+		    "color": "0,0,0",
+		    "alpha": "0",
+		    //"label": "20mL",
 		}
 	    ],
 	    "buttons": [

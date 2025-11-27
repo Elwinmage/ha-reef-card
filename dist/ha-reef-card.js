@@ -47,6 +47,7 @@ var $dPhcg = parcelRequire("dPhcg");
 parcelRequire("6vZH1");
 parcelRequire("5T0tY");
 parcelRequire("258Ll");
+parcelRequire("303dX");
 
 var $iXBpj = parcelRequire("iXBpj");
 
@@ -122,12 +123,15 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     _render_switch(mapping_conf, state) {
         let label_name = '';
         // Don not display label
-        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        if ('label' in mapping_conf) {
+            if (typeof mapping_conf.label === 'string') label_name = mapping_conf.label;
+            else if (typeof mapping_conf.label === 'boolean' && mapping_conf.label != false) label_name = mapping_conf.name;
+        }
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
 <div class="${mapping_conf.class}">
-<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-switch>
+<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>
 </div>
 `;
     }
@@ -163,32 +167,52 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     }
     ////////////////////////////////////////////////////////////////////////////////
     // SENSORS
-    _render_sensors(state = true) {
+    _render_sensors(state = true, put_in = null) {
         let sensors = [
             {
                 "name": "sensors",
                 "fn": this._render_sensor
+            },
+            {
+                "name": "sensors_target",
+                "fn": this._render_sensor_target
             }
         ];
         return (0, $l56HR.html)`
-                     ${sensors.map((type)=>this._render_sensors_type(type, state))}
+                     ${sensors.map((type)=>this._render_sensors_type(type, state, put_in))}
                       `;
     }
-    _render_sensors_type(type, state) {
-        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor, state))}`;
-        console.log("No " + type.name);
+    _render_sensors_type(type, state, put_in) {
+        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor, state, put_in))}`;
         return (0, $l56HR.html)``;
     }
-    _render_sensor(mapping_conf, state) {
-        if ('disabled' in mapping_conf && mapping_conf.disabled == true) return (0, $l56HR.html)``;
+    _render_sensor(mapping_conf, state, put_in) {
+        let sensor_put_in = null;
+        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
+        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
         let label_name = '';
         // Don not display label
         if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.name}">
+<div class="${mapping_conf.class}">
 <common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
+</div>
+`;
+    }
+    _render_sensor_target(mapping_conf, state, put_in) {
+        let sensor_put_in = null;
+        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
+        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
+        let label_name = '';
+        // Don not display label
+        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
+        let color = this.config.color;
+        if (!state) color = (0, $iXBpj.off_color);
+        return (0, $l56HR.html)`
+<div class="${mapping_conf.class}">
+<common-sensor-target .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></common-sensor-target>
 </div>
 `;
     }
@@ -905,28 +929,37 @@ var $l56HR = parcelRequire("l56HR");
 var $ih117 = parcelRequire("ih117");
 
 var $1Um3j = parcelRequire("1Um3j");
-class Switch extends (0, $1Um3j.default) {
+class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
     static styles = (0, $ih117.default);
+    static get properties() {
+        return {
+            label: {}
+        };
+    }
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
+     */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1, label){
         super(hass, conf, stateObj, color, alpha);
+        this.label = label;
     }
     render() {
         if (this.conf.style == "switch") return (0, $l56HR.html)`
         <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
-        else if (this.conf.style == "button") return (0, $l56HR.html)`
+        else if (this.conf.style == "button") {
+            if ('color' in this.conf) this.color = this.conf.color;
+            if ('alpha' in this.conf) this.alpha = this.conf.alpha;
+            return (0, $l56HR.html)`
  <style>
       #${this.conf.name}{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="switch_button"  id="${this.conf.name}">${eval(this.conf.label)}</div>
+   	    <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
 `;
-        else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
+        } else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
     }
     async _click(e) {
         let data = {
@@ -943,7 +976,7 @@ background-color: rgba(${this.color},${this.alpha});
         this.run_action("double_tap_action", "__personnal__", "message_box", data);
     }
 } // end of class
-window.customElements.define('common-switch', Switch);
+window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
 
 });
 parcelRegister("ih117", function(module, exports) {
@@ -1386,13 +1419,16 @@ text-align: center;
 
 
 parcelRegister("258Ll", function(module, exports) {
+
+$parcel$export(module.exports, "Sensor", () => Sensor);
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 
 var $ircx4 = parcelRequire("ircx4");
 
 var $1Um3j = parcelRequire("1Um3j");
-class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
+parcelRequire("dPhcg");
+class Sensor extends (0, $1Um3j.default) {
     static styles = (0, $ircx4.default);
     /*
      * conf the conf in mapping file
@@ -1402,14 +1438,20 @@ class $1842d87d95211302$export$f5fe6b3a9dfe845b extends (0, $1Um3j.default) {
     }
     render() {
         let value = this.stateObj.state;
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         if (this.conf.force_integer) value = Math.floor(value);
+        let sensor_class = "sensor";
+        if ("class" in this.conf) sensor_class = this.conf.class;
+        let unit = '';
+        if ("unit" in this.conf) unit = eval(this.conf.unit);
+        else if ('unit_of_measurement' in this.stateObj.attributes) unit = this.stateObj.attributes.unit_of_measurement;
         return (0, $l56HR.html)`
 <style>
 .sensor{
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="sensor" id="${this.conf.name}">${value} ${this.stateObj.attributes.unit_of_measurement}</div>
+   	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
 `;
     }
     async _click(e) {
@@ -1422,7 +1464,7 @@ background-color: rgba(${this.color},${this.alpha});
         console.debug("Double click");
     }
 } // end of class
-window.customElements.define('common-sensor', $1842d87d95211302$export$f5fe6b3a9dfe845b);
+window.customElements.define('common-sensor', Sensor);
 
 });
 parcelRegister("ircx4", function(module, exports) {
@@ -1437,8 +1479,116 @@ var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
   text-align: center;
   padding-left: 5px;
   padding-right: 5px;
+  width: 60%;
+margin-left:10%;
 }
 
+sensor{
+  border-radius: 30px;
+  text-align: center;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.scheduler_label_top{
+  text-align: center;
+//border: 1px solid blue;
+grid-column: 1;
+grid-row: 1;
+color: rgb(250,230,130);
+font-weight: bold;
+}
+
+.scheduler_label_middle{
+text-align:center;
+ color: white;
+//border: 1px solid blue;
+grid-column: 1;
+grid-row: 2;
+font-weight: bold;
+}
+
+.scheduler_label_bottom{
+ color: white;
+text-align:center;
+//border: 1px solid blue;
+color: rgb(130,230,250);
+grid-column: 1;
+grid-row: 3;
+font-weight: bold;
+}
+
+span.unit{
+font-size: 0.6em;
+}
+`;
+
+});
+
+
+parcelRegister("303dX", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $hktH6 = parcelRequire("hktH6");
+
+var $258Ll = parcelRequire("258Ll");
+class SensorTarget extends (0, $258Ll.Sensor) {
+    static styles = (0, $hktH6.default);
+    static get properties() {
+        return {
+            stateObjTarget: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, stateObj, stateObjTarget, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, color, alpha);
+        this.stateObjTarget = stateObjTarget;
+    }
+    render() {
+        let value = this.stateObj.state;
+        let target = this.stateObjTarget.state;
+        if (this.conf.force_integer) {
+            value = Math.floor(value);
+            target = Math.floor(target);
+        }
+        let sensor_class = "sensor";
+        if ("class" in this.conf) sensor_class = this.conf.class;
+        let unit = this.stateObj.attributes.unit_of_measurement;
+        if ("unit" in this.conf) unit = eval(this.conf.unit);
+        return (0, $l56HR.html)`
+<style>
+.sensor{
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('common-sensor-target', SensorTarget);
+
+});
+parcelRegister("hktH6", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $c9db568cd005a8f3$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $c9db568cd005a8f3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+span.unit{
+font-size: 0.6em;
+}
 `;
 
 });
@@ -1614,7 +1764,6 @@ display: flex;
     position: absolute;
 }
 
-
 `;
 
 
@@ -1716,6 +1865,30 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head_volume",
                     "force_integer": true
+                },
+                {
+                    "name": "manual_dosed_today",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_top",
+                    "disabled_if": "value<1",
+                    "prefix": "+"
+                }
+            ],
+            "sensors_target": [
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_middle"
+                },
+                {
+                    "name": "doses_today",
+                    "target": "daily_doses",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_bottom"
                 }
             ],
             "switches": [
@@ -1810,6 +1983,28 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head_volume",
                     "force_integer": true
+                },
+                // {
+                //     "name": "doses_today",
+                //     "force_integer": true,
+                // },
+                // {
+                //     "name": "auto_dose_today",
+                //     "force_integer": true,
+                // },
+                // {
+                //     "name": "daily_dose",
+                //     "force_integer": true,
+                // },
+                // {
+                //     "name": "daily_doses",
+                //     "force_integer": true,
+                // },
+                {
+                    "name": "manual_dosed_today",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label"
                 }
             ],
             "switches": [
@@ -1817,7 +2012,9 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "schedule_enabled",
                     "type": "hacs",
                     "class": "pump_state_head",
-                    "style": "button"
+                    "style": "button",
+                    "color": "0,0,0",
+                    "alpha": "0"
                 }
             ],
             "buttons": [
@@ -1864,19 +2061,6 @@ top: 5%;
 left: 33%;
 }
 
-
-.pump_state_label{
- position: absolute;
- aspect-ratio: 1/1;
- width: 55%;
- border-radius: 50%;
- top: 10%;
- left: 35%;
- color: white;
-font-weight: bolder;
-}
-
-
 .pump_state_head{
  position: absolute;
  aspect-ratio: 1/1;
@@ -1884,6 +2068,13 @@ font-weight: bolder;
  border-radius: 50%;
  top: 10%;
  left: 35%;
+  display:grid;
+#grid-template-columns: repeat(1, 1fr);
+grid-template-columns: 1;
+grid-template-rows: 3;
+
+  grid-gap: 0px;
+//  grid-auto-rows: minmax(100px, auto);
 }
 
 .container{
@@ -1917,6 +2108,8 @@ width: 60%;
 top: 0%;
 left: 20%;
 }
+
+
 `;
 
 
@@ -1934,11 +2127,13 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             entities: {},
             config: {},
             head_id: {},
-            state_on: {}
+            state_on: {},
+            supplement: {}
         };
     }
     constructor(hass, entities, config, state_on){
         super();
+        this.supplement = null;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -1951,10 +2146,10 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 `;
     }
     _render_container() {
-        let supplement = this.hass.states[this.entities['supplement'].entity_id];
-        let supplement_uid = this.hass.states[this.entities['supplement_uid'].entity_id];
+        let supplement_uid = this.supplement.attributes.supplement.uid;
         let img = null;
-        img = '/hacsfiles/ha-reef-card/' + supplement_uid.state + '.supplement.png';
+        console.debug("uid", supplement_uid);
+        img = '/hacsfiles/ha-reef-card/' + supplement_uid + '.supplement.png';
         let style = (0, $l56HR.html)``;
         if (!this.state_on) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         return (0, $l56HR.html)`
@@ -1965,15 +2160,26 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 `;
     }
     render() {
-        return (0, $l56HR.html)`
+        this.supplement = this.hass.states[this.entities['supplement'].entity_id];
+        if (this.supplement.attributes.supplement.uid != 'null') {
+            let color = this.config.color + "," + this.config.alpha;
+            if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
+            return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" >
  		  ${this._pipe_path()}
 		</div>
-
-${this._render_actuators(this.state_on)}
+<!-- Render schedule background -->
+<div class="pump_state_head" style="background-color: rgba(${color});">
+${this._render_sensors(this.state_on, "pump_state_head")}
+</div>
+<!-- ${this._render_actuators(this.state_on)} -->
 ${this._render_sensors(this.state_on)}
    	    `;
+        } else // TODO: add button for new supplement
+        //  labels: enhancement rsdose
+        return (0, $l56HR.html)``;
+         //else
     }
 }
 window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae039);
@@ -2144,7 +2350,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     _render_head(head_id) {
         let schedule_state = this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
-        console.log("schedule state for head", head_id, schedule_state);
         if (!this.is_on()) schedule_state = false;
         return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">

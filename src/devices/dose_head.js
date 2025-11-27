@@ -16,12 +16,13 @@ export default class DoseHead extends RSDevice{
 	    config: {},
 	    head_id:{},
 	    state_on:{},
-	    
+	    supplement:{},
 	}
     }
 
     constructor(hass,entities,config,state_on){
 	super();
+	this.supplement=null;
     }
 
     _pipe_path(){
@@ -39,10 +40,10 @@ export default class DoseHead extends RSDevice{
     }
 
     _render_container(){
-	let supplement=this.hass.states[this.entities['supplement'].entity_id];
-	let supplement_uid=this.hass.states[this.entities['supplement_uid'].entity_id];
+	let supplement_uid=this.supplement.attributes.supplement.uid
 	let img=null;
-	img='/hacsfiles/ha-reef-card/'+supplement_uid.state+'.supplement.png';
+	console.debug("uid",supplement_uid);
+	img='/hacsfiles/ha-reef-card/'+supplement_uid+'.supplement.png';
 	let style=html``;
 	if(!this.state_on){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
@@ -56,15 +57,30 @@ export default class DoseHead extends RSDevice{
     }
 
     render(){
-	return html`
+	this.supplement=this.hass.states[this.entities['supplement'].entity_id];
+	if (this.supplement.attributes.supplement.uid!='null'){
+	    let color=this.config.color+","+this.config.alpha;
+	    if (! this.state_on ){
+		color=off_color+","+this.config.alpha;
+	    }
+	    return html`
                ${this._render_container()}
    	        <div class="pipe" >
  		  ${this._pipe_path()}
 		</div>
-
-${this._render_actuators(this.state_on)}
+<!-- Render schedule background -->
+<div class="pump_state_head" style="background-color: rgba(${color});">
+${this._render_sensors(this.state_on,"pump_state_head")}
+</div>
+<!-- ${this._render_actuators(this.state_on)} -->
 ${this._render_sensors(this.state_on)}
    	    `;
+	}//if
+	else {
+	    // TODO: add button for new supplement
+	    //  labels: enhancement rsdose
+	    return html``;
+	}//else
     }
 };
 

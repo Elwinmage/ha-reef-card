@@ -22,6 +22,5 @@ display: flex;
     position: absolute;
 }
 
-
 `;
 

@@ -1,43 +1,48 @@
 import { html } from "lit";
+import style_sensor_target from "./sensor_target.styles";
 
-import style_sensor from "./sensor.styles";
-import MyElement from "./element";
-import i18n from "../../translations/myi18n.js";
+
+//import MyElement from "./element";
+import {Sensor} from "./sensor";
 
 /*
- *  Sensor
+ *  SensorTarget
  */
-export class Sensor extends  MyElement {
+//export class SensorTarget extends  MyElement {
+export class SensorTarget extends  Sensor {
 
-    static styles = style_sensor;
-	
+    static styles = style_sensor_target;
+
+    static get properties(){
+	return {
+	    stateObjTarget: {},
+	};
+    }
+    
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
      */
-    constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
+    constructor(hass,conf,stateObj,stateObjTarget,color="255,255,255",alpha=1){
  	super(hass,conf,stateObj,color,alpha);
+	this.stateObjTarget=stateObjTarget;
     }//end of constructor
 
     render(){
+	
 	let value=this.stateObj.state;
-	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
-	    return html`<br />`;
-	}
-
+	let target=this.stateObjTarget.state;
 	if(this.conf.force_integer){
 	    value=Math.floor(value);
+	    target=Math.floor(target);
 	}
 	let sensor_class="sensor";
 	if ("class" in this.conf){
 	    sensor_class=this.conf.class;
 	}
-	let unit='';
+	let unit=this.stateObj.attributes.unit_of_measurement;
 	if("unit" in this.conf){
 	    unit=eval(this.conf.unit);
-	}
-	else if ('unit_of_measurement' in this.stateObj.attributes){
-	    unit=this.stateObj.attributes.unit_of_measurement;
 	}
 	return html`
 <style>
@@ -45,7 +50,7 @@ export class Sensor extends  MyElement {
 background-color: rgba(${this.color},${this.alpha});
 }   
 </style>
-   	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
+   	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
 `;
     }//end of function render
 
@@ -63,4 +68,4 @@ background-color: rgba(${this.color},${this.alpha});
     
 }// end of class
 
-window.customElements.define('common-sensor', Sensor);
+window.customElements.define('common-sensor-target', SensorTarget);
