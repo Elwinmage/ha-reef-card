@@ -15,6 +15,7 @@ jobs:
           AUTO_ASSIGN: "true"
           INSERT_ISSUE_URLS: "true"
           CLOSE_ISSUES: "true"
+          IGNORE: "*/ha-reef-card.js"
       - name: Set Git user
         run: |
           git config --global user.email "moranderic31@gmail.com"
