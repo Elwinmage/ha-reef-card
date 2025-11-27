@@ -2177,6 +2177,7 @@ ${this._render_sensors(this.state_on, "pump_state_head")}
 ${this._render_sensors(this.state_on)}
    	    `;
         } else // TODO: add button for new supplement
+               // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/23
         //  labels: enhancement rsdose
         return (0, $l56HR.html)``;
          //else

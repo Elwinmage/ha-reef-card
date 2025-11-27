@@ -78,6 +78,7 @@ ${this._render_sensors(this.state_on)}
 	}//if
 	else {
 	    // TODO: add button for new supplement
+	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
 	    //  labels: enhancement rsdose
 	    return html``;
 	}//else
