@@ -46,11 +46,6 @@ export class SensorTarget extends  Sensor {
 	    unit=eval(this.conf.unit);
 	}
 	return html`
-<style>
-.sensor{
-background-color: rgba(${this.color},${this.alpha});
-}   
-</style>
    	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
 `;
     }//end of function render

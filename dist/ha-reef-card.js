@@ -48,6 +48,7 @@ parcelRequire("6vZH1");
 parcelRequire("5T0tY");
 parcelRequire("258Ll");
 parcelRequire("M8QIC");
+parcelRequire("eW6Np");
 parcelRequire("303dX");
 
 var $iXBpj = parcelRequire("iXBpj");
@@ -219,12 +220,21 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
-        console.debug("Progress-bar:", this.hass.states[this.entities[mapping_conf.name].entity_id], this.hass.states[this.entities[mapping_conf.target].entity_id]);
-        return (0, $l56HR.html)`
+        let type = "progress-bar";
+        if ("type" in mapping_conf) type = mapping_conf.type;
+        switch(type){
+            case "progress-circle":
+                return (0, $l56HR.html)`<div class=${mapping_conf.class}>
+<progress-circle .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-circle>
+</div>`;
+            case "progress-bar":
+            default:
+                return (0, $l56HR.html)`
 <div class=${mapping_conf.class}>
 <progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
+        }
     }
     _render_sensor_target(mapping_conf, state, put_in) {
         let sensor_put_in = null;
@@ -915,7 +925,6 @@ class $a10d60b4def555b4$var$myi18n {
         this.d = (0, $hudnx.dict);
     }
     _(message, params = []) {
-        console.log("Translate " + message + " in " + this.lang);
         let res = this.d[this.lang][message];
         if (res == null) res = this.d[this.fallback][message];
         if (res == null) res = this._("canNotFindTranslation") + message;
@@ -1548,7 +1557,6 @@ font-weight: bold;
 }
 
 .scheduler_label_bottom{
- color: white;
 text-align:center;
 //border: 1px solid blue;
 color: rgb(130,230,250);
@@ -1752,6 +1760,78 @@ var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
 });
 
 
+parcelRegister("eW6Np", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $8UuCG = parcelRequire("8UuCG");
+
+var $dPhcg = parcelRequire("dPhcg");
+parcelRequire("iXBpj");
+
+var $1Um3j = parcelRequire("1Um3j");
+class ProgressCircle extends (0, $1Um3j.default) {
+    static styles = (0, $8UuCG.default);
+    static get properties() {
+        return {
+            stateObjTarget: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, stateObj, stateObjTarget, entities, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, entities, color, alpha);
+        this.stateObjTarget = stateObjTarget;
+    }
+    render() {
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
+        let iconv = (0, $dPhcg.default);
+        let value = this.stateObj.state;
+        let target = this.stateObjTarget.state;
+        let percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
+        let circle_class = this.conf.class;
+        let label = '';
+        if ('label' in this.conf) label = eval(this.conf.label);
+        let style = '';
+        console.debug("pgc", this.conf);
+        if ('no_value' in this.conf && this.conf.no_value) style = "visibility: hidden;";
+        let unit = "%";
+        let fill = percent - 2;
+        if (fill < 0) fill = 0;
+        // range 0 to 565 for 200x200
+        return (0, $l56HR.html)`
+   <svg width="70%" height="70%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+    <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
+    <circle r="90" cx="100" cy="100" stroke="rgb(${this.color})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565 - percent * 565 / 100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
+<text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
+  </svg>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('progress-circle', ProgressCircle);
+
+});
+parcelRegister("8UuCG", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $67cb4ebff6d1e8be$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $67cb4ebff6d1e8be$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+`;
+
+});
+
+
 parcelRegister("303dX", function(module, exports) {
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
@@ -1790,11 +1870,6 @@ class SensorTarget extends (0, $258Ll.Sensor) {
             unit = eval(this.conf.unit);
         }
         return (0, $l56HR.html)`
-<style>
-.sensor{
-background-color: rgba(${this.color},${this.alpha});
-}   
-</style>
    	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
 `;
     }
@@ -2033,6 +2108,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "pg-container",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "disabled_if": "this.get_entity('slm').state==false"
+                },
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "type": "progress-circle",
+                    "class": "today_dosing",
+                    "no_value": true
                 }
             ],
             "switches": [
@@ -2107,6 +2190,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "pg-container",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "disabled_if": "this.get_entity('slm').state==false"
+                },
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "type": "progress-circle",
+                    "class": "today_dosing",
+                    "no_value": true
                 }
             ],
             "switches": [
@@ -2169,6 +2260,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "pg-container",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "disabled_if": "this.get_entity('slm').state==false"
+                },
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "type": "progress-circle",
+                    "class": "today_dosing",
+                    "no_value": true
                 }
             ],
             "switches": [
@@ -2232,6 +2331,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "pg-container",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "disabled_if": "this.get_entity('slm').state=='off'"
+                },
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "type": "progress-circle",
+                    "class": "today_dosing",
+                    "no_value": true
                 }
             ],
             "switches": [
@@ -2360,6 +2467,16 @@ top: 60%;
     }
 }
 
+.today_dosing{
+position: absolute;
+top: 6%;
+left: 20%;
+aspect-ratio: 1/1;
+width:120%;
+
+
+}
+
 `;
 
 
@@ -2433,8 +2550,8 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 <div class="pump_state_head" style="background-color: rgba(${color});">
 ${this._render_sensors(this.state_on, "pump_state_head")}
 </div>
-${this._render_actuators(this.state_on)} 
 ${this._render_sensors(this.state_on)}
+${this._render_actuators(this.state_on)} 
 ${warning}
    	    `;
         } else // TODO: add button for new supplement

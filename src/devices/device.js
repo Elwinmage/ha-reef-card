@@ -6,6 +6,7 @@ import Switch from "./base/switch";
 import Button from "./base/button";
 import Sensor from "./base/sensor";
 import ProgressBar from "./base/progress_bar";
+import ProgressCircle from "./base/progress_circle";
 import SensorTarget from "./base/sensor_target";
 
 import {off_color} from "../common.js";
@@ -217,12 +218,25 @@ export default class RSDevice extends LitElement {
 	if (! state){
 	    color=off_color;
 	}
-	console.debug("Progress-bar:",this.hass.states[this.entities[mapping_conf.name].entity_id],this.hass.states[this.entities[mapping_conf.target].entity_id]);
-        return html`
+	let type="progress-bar";
+	if ( "type" in mapping_conf){
+	    type=mapping_conf.type;
+	}
+	switch (type){
+	case "progress-circle":
+	    return html`<div class=${mapping_conf.class}>
+<progress-circle .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-circle>
+</div>`;
+	    break;
+	case "progress-bar":
+	default:
+            return html`
 <div class=${mapping_conf.class}>
 <progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
+	    break;
+	}
     }//end of function _render_sensor
 
     _render_sensor_target(mapping_conf,state,put_in){

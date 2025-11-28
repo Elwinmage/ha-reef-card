@@ -63,7 +63,15 @@ export const config = {
 		    "class":"pg-container",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state==false",
-		}
+		},
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "type":"progress-circle",
+		    "class":"today_dosing",
+		    "no_value":true,
+		},
 	    ],
 	    "switches" : [
 		{
@@ -136,6 +144,14 @@ export const config = {
 		    "class":"pg-container",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state==false",
+		},
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "type":"progress-circle",
+		    "class":"today_dosing",
+		    "no_value":true,		    
 		}
 		],
 	    "switches" : [
@@ -199,6 +215,14 @@ export const config = {
 		    "class":"pg-container",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state==false",
+		},
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "type":"progress-circle",
+		    "class":"today_dosing",
+		    "no_value":true,
 		}
 	    ],
 	    "switches" : [
@@ -263,6 +287,14 @@ export const config = {
 		    "class":"pg-container",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state=='off'",
+		},
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "type":"progress-circle",
+		    "class":"today_dosing",
+		    "no_value":true,
 		}
 	    ],
 	    "switches" : [

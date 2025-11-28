@@ -98,4 +98,14 @@ top: 60%;
     }
 }
 
+.today_dosing{
+position: absolute;
+top: 6%;
+left: 20%;
+aspect-ratio: 1/1;
+width:120%;
+
+
+}
+
 `;

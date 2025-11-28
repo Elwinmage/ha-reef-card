@@ -9,7 +9,6 @@ class myi18n {
     }
 
     _(message,params=[]){
-	console.log("Translate "+message+" in "+this.lang);
 	let res=this.d[this.lang][message];
 	if (res == null){
 	    res=this.d[this.fallback][message];

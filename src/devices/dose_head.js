@@ -82,8 +82,8 @@ export default class DoseHead extends RSDevice{
 <div class="pump_state_head" style="background-color: rgba(${color});">
 ${this._render_sensors(this.state_on,"pump_state_head")}
 </div>
-${this._render_actuators(this.state_on)} 
 ${this._render_sensors(this.state_on)}
+${this._render_actuators(this.state_on)} 
 ${warning}
    	    `;
 	}//if

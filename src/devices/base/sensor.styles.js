@@ -37,7 +37,6 @@ font-weight: bold;
 }
 
 .scheduler_label_bottom{
- color: white;
 text-align:center;
 //border: 1px solid blue;
 color: rgb(130,230,250);
