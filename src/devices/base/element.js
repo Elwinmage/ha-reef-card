@@ -7,17 +7,19 @@ export default class MyElement extends LitElement{
 	    conf: {},
 	    stateObj: {},
 	    doubleClick: {type: Boolean},
-	    mouseDown: {}
+	    mouseDown: {},
+	    entities: {}
 	};
     }// end of get properties 
 
-    constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
+    constructor(hass,conf,stateObj,entities={},color="255,255,255",alpha=1){
 	super();
 	this.hass=hass;
 	this.conf=conf;
 	this.color=color;
 	this.alpha=alpha;
 	this.stateObj=stateObj;
+	this.entities=entities;
 	this.mouseDown=0;
 	this.mouseUp=0;
 	this.oldMouseUp=0;
@@ -29,6 +31,10 @@ export default class MyElement extends LitElement{
 	    this._handleClick(e);
 	})};
 
+    get_entity(entity_translation_value){
+	return this.hass.states[this.entities[entity_translation_value].entity_id];
+    }//end of function get_entity
+    
     _handleClick(e){		      
 	if(e.pointerType!="touch" ){
 	    if (e.detail === 1) {
@@ -56,6 +62,15 @@ export default class MyElement extends LitElement{
 	return new Promise(resolve => setTimeout(resolve, ms)); 
     }
 
+    render(){
+	let value=this.stateObj.state;
+
+	if ('disabled_if' in this.conf && eval(this.conf.disabled_if)){
+	    return html`<br />`;
+	}
+	return this._render()
+    }
+    
     async run_action(type,domain,action,data){
 	let enabled=true;
 	if (this.conf[type]){

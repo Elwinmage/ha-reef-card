@@ -12,6 +12,9 @@ import {off_color} from "../common.js";
 
 import style_common from "./common.styles";
 
+
+let iconv = i18n;
+
 /*
  * RSDose 
  */
@@ -42,6 +45,10 @@ export default class RSDevice extends LitElement {
 	this.first_init=true;
     }
 
+    get_entity(entity_translation_value){
+	return this.hass.states[this.entities[entity_translation_value].entity_id];
+    }//end of function get_entity
+    
     find_leaves(tree,path){
 	var keys = Object.keys(tree);
 	if (keys[0]=='0'){
@@ -213,7 +220,7 @@ export default class RSDevice extends LitElement {
 	console.debug("Progress-bar:",this.hass.states[this.entities[mapping_conf.name].entity_id],this.hass.states[this.entities[mapping_conf.target].entity_id]);
         return html`
 <div class=${mapping_conf.class}>
-<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></progress-bar>
+<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
     }//end of function _render_sensor

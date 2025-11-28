@@ -21,7 +21,7 @@ export class Button extends  MyElement {
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
 
-    render(){
+    _render(){
 	return html`
  <style>
 .button{

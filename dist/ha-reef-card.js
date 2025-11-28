@@ -53,6 +53,7 @@ parcelRequire("303dX");
 var $iXBpj = parcelRequire("iXBpj");
 
 var $37d5w = parcelRequire("37d5w");
+let iconv = (0, $dPhcg.default);
 class RSDevice extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $37d5w.default)
@@ -75,6 +76,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         this.user_config = user_config;
         this.entities = {};
         this.first_init = true;
+    }
+    get_entity(entity_translation_value) {
+        return this.hass.states[this.entities[entity_translation_value].entity_id];
     }
     find_leaves(tree, path) {
         var keys = Object.keys(tree);
@@ -218,7 +222,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         console.debug("Progress-bar:", this.hass.states[this.entities[mapping_conf.name].entity_id], this.hass.states[this.entities[mapping_conf.target].entity_id]);
         return (0, $l56HR.html)`
 <div class=${mapping_conf.class}>
-<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></progress-bar>
+<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
     }
@@ -930,13 +934,17 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         canNotFindTranslation: "Can not find translation string: ",
         disabledInHa: "Device disabled in HomeAssistant!",
         head: "Head",
-        heads_colors: "Heads Colors"
+        heads_colors: "Heads Colors",
+        doses: "Doses",
+        days_left: "Remaining Days"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
         disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!",
         head: "T\xeate",
-        heads_colors: "Couleur des t\xeates"
+        heads_colors: "Couleur des t\xeates",
+        doses: "Doses",
+        days_left: "Jours restant"
     }
 };
 
@@ -964,7 +972,7 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
         super(hass, conf, stateObj, color, alpha);
         this.label = label;
     }
-    render() {
+    _render() {
         if (this.conf.style == "switch") return (0, $l56HR.html)`
         <div class="switch_${this.stateObj.state}">
    	    <div class="switch_in_${this.stateObj.state}"></div>
@@ -1123,6 +1131,7 @@ parcelRegister("1Um3j", function(module, exports) {
 
 $parcel$export(module.exports, "default", () => MyElement);
 parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
 class MyElement extends (0, $eGUNk.LitElement) {
     static get properties() {
@@ -1133,16 +1142,18 @@ class MyElement extends (0, $eGUNk.LitElement) {
             doubleClick: {
                 type: Boolean
             },
-            mouseDown: {}
+            mouseDown: {},
+            entities: {}
         };
     }
-    constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
+    constructor(hass, conf, stateObj, entities = {}, color = "255,255,255", alpha = 1){
         super();
         this.hass = hass;
         this.conf = conf;
         this.color = color;
         this.alpha = alpha;
         this.stateObj = stateObj;
+        this.entities = entities;
         this.mouseDown = 0;
         this.mouseUp = 0;
         this.oldMouseUp = 0;
@@ -1163,6 +1174,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
             this._handleClick(e);
         });
     }
+    get_entity(entity_translation_value) {
+        return this.hass.states[this.entities[entity_translation_value].entity_id];
+    }
     _handleClick(e) {
         if (e.pointerType != "touch") {
             if (e.detail === 1) this._click_evt(e);
@@ -1180,6 +1194,11 @@ class MyElement extends (0, $eGUNk.LitElement) {
     }
     sleep(ms) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
+    }
+    render() {
+        let value = this.stateObj.state;
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
+        return this._render();
     }
     async run_action(type, domain, action, data) {
         let enabled = true;
@@ -1258,7 +1277,7 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super(hass, conf, stateObj, color, alpha);
     }
-    render() {
+    _render() {
         return (0, $l56HR.html)`
  <style>
 .button{
@@ -1457,9 +1476,8 @@ class Sensor extends (0, $1Um3j.default) {
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super(hass, conf, stateObj, color, alpha);
     }
-    render() {
+    _render() {
         let value = this.stateObj.state;
-        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         if (this.conf.force_integer) value = Math.floor(value);
         let sensor_class = "sensor";
         if ("class" in this.conf) sensor_class = this.conf.class;
@@ -1553,8 +1571,11 @@ var $l56HR = parcelRequire("l56HR");
 
 var $3wGyI = parcelRequire("3wGyI");
 
+var $dPhcg = parcelRequire("dPhcg");
+parcelRequire("iXBpj");
+
 var $1Um3j = parcelRequire("1Um3j");
-class $090b59188c607e58$export$c17561cb55d4db30 extends (0, $1Um3j.default) {
+class ProgressBar extends (0, $1Um3j.default) {
     static styles = (0, $3wGyI.default);
     static get properties() {
         return {
@@ -1564,16 +1585,22 @@ class $090b59188c607e58$export$c17561cb55d4db30 extends (0, $1Um3j.default) {
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, stateObj, stateObjTarget, color = "255,255,255", alpha = 1){
-        super(hass, conf, stateObj, color, alpha);
+     */ constructor(hass, conf, stateObj, stateObjTarget, entities, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, entities, color, alpha);
         this.stateObjTarget = stateObjTarget;
     }
     render() {
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
+        let iconv = (0, $dPhcg.default);
         let value = this.stateObj.state;
         let target = this.stateObjTarget.state;
         let percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
         let bar_class = this.conf.class;
+        let label = '';
+        if ('label' in this.conf) label = eval(this.conf.label);
         let unit = "%";
+        let fill = percent - 2;
+        if (fill < 0) fill = 0;
         return (0, $l56HR.html)`
 <style>
 div.progress{
@@ -1581,7 +1608,8 @@ background-color: rgba(${this.color},0.8);
 }   
 </style>
    	    <div class="bar" id="${this.conf.name}">
-       	      <div class="progress" id="${this.conf.name}" style="width:${percent}%;">${percent}${unit}</div>
+       	      <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
+              <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
             </div>
 `;
     }
@@ -1595,7 +1623,7 @@ background-color: rgba(${this.color},0.8);
         console.debug("Double click");
     }
 } // end of class
-window.customElements.define('progress-bar', $090b59188c607e58$export$c17561cb55d4db30);
+window.customElements.define('progress-bar', ProgressBar);
 
 });
 parcelRegister("3wGyI", function(module, exports) {
@@ -1607,87 +1635,25 @@ var $29155f8d556df6b9$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 div.bar{
 border-radius: 20px;
-border: 1px solid black,
+border: 1px solid white;
 }
 
 div.progress{
 font-size: 0.8em;
 border-radius: 20px;
-padding-left: 5px;
+border: 1px solid black;
 font-weight: bold;
 }
-`;
 
-});
-
-
-parcelRegister("303dX", function(module, exports) {
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
-
-var $hktH6 = parcelRequire("hktH6");
-
-var $258Ll = parcelRequire("258Ll");
-class SensorTarget extends (0, $258Ll.Sensor) {
-    static styles = (0, $hktH6.default);
-    static get properties() {
-        return {
-            stateObjTarget: {}
-        };
-    }
-    /*
-     * conf the conf in mapping file
-     * stateObj the hass element 
-     */ constructor(hass, conf, stateObj, stateObjTarget, color = "255,255,255", alpha = 1){
-        super(hass, conf, stateObj, color, alpha);
-        this.stateObjTarget = stateObjTarget;
-    }
-    render() {
-        let value = this.stateObj.state;
-        let target = this.stateObjTarget.state;
-        if (this.conf.force_integer) {
-            value = Math.floor(value);
-            target = Math.floor(target);
-        }
-        let sensor_class = "sensor";
-        if ("class" in this.conf) sensor_class = this.conf.class;
-        let unit = this.stateObj.attributes.unit_of_measurement;
-        if ("unit" in this.conf) unit = eval(this.conf.unit);
-        return (0, $l56HR.html)`
-<style>
-.sensor{
-background-color: rgba(${this.color},${this.alpha});
-}   
-</style>
-   	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
-`;
-    }
-    async _click(e) {
-        console.debug("Click ", e.detail, " ", e.timeStamp);
-    }
-    async _longclick(e) {
-        console.debug("Long Click");
-    }
-    async _dblclick(e) {
-        console.debug("Double click");
-    }
-} // end of class
-window.customElements.define('common-sensor-target', SensorTarget);
-
-});
-parcelRegister("hktH6", function(module, exports) {
-
-$parcel$export(module.exports, "default", () => $c9db568cd005a8f3$export$2e2bcd8739ae039);
-parcelRequire("j0ZcV");
-var $j8KxL = parcelRequire("j8KxL");
-var $c9db568cd005a8f3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-span.unit{
-font-size: 0.6em;
+label.progress-bar{
+position: absolute;
+top:0px;
+color: white;
+padding-left: 5px;
 }
 `;
 
 });
-
 
 parcelRegister("iXBpj", function(module, exports) {
 
@@ -1784,6 +1750,80 @@ function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
 var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
 
 });
+
+
+parcelRegister("303dX", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $hktH6 = parcelRequire("hktH6");
+
+var $dPhcg = parcelRequire("dPhcg");
+
+var $258Ll = parcelRequire("258Ll");
+class SensorTarget extends (0, $258Ll.Sensor) {
+    static styles = (0, $hktH6.default);
+    static get properties() {
+        return {
+            stateObjTarget: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf, stateObj, stateObjTarget, color = "255,255,255", alpha = 1){
+        super(hass, conf, stateObj, color, alpha);
+        this.stateObjTarget = stateObjTarget;
+    }
+    _render() {
+        let value = this.stateObj.state;
+        let target = this.stateObjTarget.state;
+        if (this.conf.force_integer) {
+            value = Math.floor(value);
+            target = Math.floor(target);
+        }
+        let sensor_class = "sensor";
+        if ("class" in this.conf) sensor_class = this.conf.class;
+        let unit = this.stateObj.attributes.unit_of_measurement;
+        if ("unit" in this.conf) {
+            let iconv = (0, $dPhcg.default);
+            unit = eval(this.conf.unit);
+        }
+        return (0, $l56HR.html)`
+<style>
+.sensor{
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+   	    <div class="${sensor_class}" id="${this.conf.name}">${value}/${target}<span class="unit">${unit}</span></div>
+`;
+    }
+    async _click(e) {
+        console.debug("Click ", e.detail, " ", e.timeStamp);
+    }
+    async _longclick(e) {
+        console.debug("Long Click");
+    }
+    async _dblclick(e) {
+        console.debug("Double click");
+    }
+} // end of class
+window.customElements.define('common-sensor-target', SensorTarget);
+
+});
+parcelRegister("hktH6", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $c9db568cd005a8f3$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $c9db568cd005a8f3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+span.unit{
+font-size: 0.6em;
+}
+`;
+
+});
+
 
 parcelRegister("37d5w", function(module, exports) {
 
@@ -1954,9 +1994,79 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "alpha": "0.4",
             "sensors": [
                 {
-                    "name": "supplement",
-                    "disabled": true
+                    "name": "manual_head_volume",
+                    "force_integer": true
                 },
+                {
+                    "name": "manual_dosed_today",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_top",
+                    "disabled_if": "value<1",
+                    "prefix": "+"
+                }
+            ],
+            "sensors_target": [
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_middle",
+                    "type": "common-sensor-target"
+                },
+                {
+                    "name": "doses_today",
+                    "target": "daily_doses",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_bottom",
+                    "type": "common-sensor-target",
+                    "unit": "iconv._('doses')"
+                }
+            ],
+            "progress_bar": [
+                {
+                    "name": "container_volume",
+                    "target": "save_initial_container_volume",
+                    "type": "progress-bar",
+                    "class": "pg-container",
+                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+                    "disabled_if": "this.get_entity('slm').state==false"
+                }
+            ],
+            "switches": [
+                {
+                    "name": "schedule_enabled",
+                    "type": "hacs",
+                    "class": "pump_state_head",
+                    "style": "button",
+                    "alpha": 0
+                }
+            ],
+            "buttons": [
+                {
+                    "name": "manual_head",
+                    "class": "manual_dose_head",
+                    "type": "hacs",
+                    "config": [
+                        "manua_head_volume",
+                        "manual_head"
+                    ],
+                    "invert_action": true
+                },
+                {
+                    "name": "supplement",
+                    "type": "ui",
+                    "class": "supplement_info",
+                    "disabled_if": "true"
+                }
+            ]
+        },
+        "head_2": {
+            "color": "0,129,197",
+            "alpha": "0.4",
+            "sensors": [
                 {
                     "name": "manual_head_volume",
                     "force_integer": true
@@ -1985,7 +2095,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "force_integer": true,
                     "put_in": "pump_state_head",
                     "class": "scheduler_label_bottom",
-                    "type": "common-sensor-target"
+                    "type": "common-sensor-target",
+                    "unit": "iconv._('doses')"
                 }
             ],
             "progress_bar": [
@@ -1993,54 +2104,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "container_volume",
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
-                    "class": "pg-container"
+                    "class": "pg-container",
+                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+                    "disabled_if": "this.get_entity('slm').state==false"
                 }
             ],
             "switches": [
                 {
-                    "name": "schedule_enabled",
-                    "type": "hacs",
-                    "class": "pump_state_head",
-                    "style": "button"
-                }
-            ],
-            "buttons": [
-                {
-                    "name": "manual_head",
-                    "class": "manual_dose_head",
-                    "type": "hacs",
-                    "config": [
-                        "manua_head_volume",
-                        "manual_head"
-                    ],
-                    "invert_action": true
-                },
-                {
-                    "name": "supplement",
-                    "type": "ui",
-                    "class": "supplement_info"
-                }
-            ]
-        },
-        "head_2": {
-            "color": "0,129,197",
-            "alpha": "0.4",
-            "sensors": [
-                {
-                    "name": "manual_head_volume",
-                    "force_integer": true
-                }
-            ],
-            "progress_bar": [
-                {
-                    "name": "container_volume",
-                    "target": "save_initial_container_volume",
-                    "type": "progress-bar",
-                    "class": "pg-container"
-                }
-            ],
-            "switches": [
-                {
+                    "alpha": 0,
                     "name": "schedule_enabled",
                     "type": "hacs",
                     "class": "pump_state_head",
@@ -2051,11 +2122,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head"
-                },
-                {
-                    "name": "supplement",
-                    "type": "ui",
-                    "class": "supplement_info"
                 }
             ]
         },
@@ -2066,6 +2132,33 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "name": "manual_head_volume",
                     "force_integer": true
+                },
+                {
+                    "name": "manual_dosed_today",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_top",
+                    "disabled_if": "value<1",
+                    "prefix": "+"
+                }
+            ],
+            "sensors_target": [
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_middle",
+                    "type": "common-sensor-target"
+                },
+                {
+                    "name": "doses_today",
+                    "target": "daily_doses",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_bottom",
+                    "type": "common-sensor-target",
+                    "unit": "iconv._('doses')"
                 }
             ],
             "progress_bar": [
@@ -2073,11 +2166,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "container_volume",
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
-                    "class": "pg-container"
+                    "class": "pg-container",
+                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+                    "disabled_if": "this.get_entity('slm').state==false"
                 }
             ],
             "switches": [
                 {
+                    "alpha": 0,
                     "name": "schedule_enabled",
                     "type": "hacs",
                     "class": "pump_state_head",
@@ -2089,11 +2185,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "manual_head",
                     "class": "manual_dose_head",
                     "type": "hacs"
-                },
-                {
-                    "name": "supplement",
-                    "type": "ui",
-                    "class": "supplement_info"
                 }
             ]
         },
@@ -2105,27 +2196,32 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "manual_head_volume",
                     "force_integer": true
                 },
-                // {
-                //     "name": "doses_today",
-                //     "force_integer": true,
-                // },
-                // {
-                //     "name": "auto_dose_today",
-                //     "force_integer": true,
-                // },
-                // {
-                //     "name": "daily_dose",
-                //     "force_integer": true,
-                // },
-                // {
-                //     "name": "daily_doses",
-                //     "force_integer": true,
-                // },
                 {
                     "name": "manual_dosed_today",
                     "force_integer": true,
                     "put_in": "pump_state_head",
-                    "class": "scheduler_label"
+                    "class": "scheduler_label_top",
+                    "disabled_if": "value<1",
+                    "prefix": "+"
+                }
+            ],
+            "sensors_target": [
+                {
+                    "name": "auto_dosed_today",
+                    "target": "daily_dose",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_middle",
+                    "type": "common-sensor-target"
+                },
+                {
+                    "name": "doses_today",
+                    "target": "daily_doses",
+                    "force_integer": true,
+                    "put_in": "pump_state_head",
+                    "class": "scheduler_label_bottom",
+                    "type": "common-sensor-target",
+                    "unit": "iconv._('doses')"
                 }
             ],
             "progress_bar": [
@@ -2133,7 +2229,9 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "container_volume",
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
-                    "class": "pg-container"
+                    "class": "pg-container",
+                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+                    "disabled_if": "this.get_entity('slm').state=='off'"
                 }
             ],
             "switches": [
@@ -2151,11 +2249,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "manual_head",
                     "class": "manual_dose_head",
                     "type": "hacs"
-                },
-                {
-                    "name": "supplement",
-                    "type": "ui",
-                    "class": "supplement_info"
                 }
             ]
         }
@@ -2241,9 +2334,30 @@ left: 20%;
 div.pg-container{
   position: absolute;
   transform: rotate(-90deg);
-  top: 67%;
+  top: 69%;
   left: -60%;
    width: 140%;
+}
+
+img.warning{
+width: 40%;
+position: absolute;
+left: 18%;
+top: 60%;
+    animation: blink 1s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 `;
@@ -2266,12 +2380,14 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             config: {},
             head_id: {},
             state_on: {},
-            supplement: {}
+            supplement: {},
+            stock_alert: {}
         };
     }
-    constructor(hass, entities, config, state_on){
+    constructor(hass, entities, config, state_on, stock_alert){
         super();
         this.supplement = null;
+        this.stock_alert = stock_alert;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -2306,6 +2422,8 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (this.supplement.attributes.supplement.uid != 'null') {
             let color = this.config.color + "," + this.config.alpha;
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
+            let warning = '';
+            if (this.get_entity('remaining_days').state < this.stock_alert && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/>"`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" >
@@ -2315,8 +2433,9 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 <div class="pump_state_head" style="background-color: rgba(${color});">
 ${this._render_sensors(this.state_on, "pump_state_head")}
 </div>
-<!-- ${this._render_actuators(this.state_on)} -->
+${this._render_actuators(this.state_on)} 
 ${this._render_sensors(this.state_on)}
+${warning}
    	    `;
         } else // TODO: add button for new supplement
         // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
@@ -2496,7 +2615,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (!this.is_on()) schedule_state = false;
         return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${schedule_state}/>
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
 
 </div>
 `;

@@ -27,7 +27,7 @@ export class Switch extends  MyElement {
 	this.label=label;
     }//end of constructor
 
-    render(){
+    _render(){
 	if (this.conf.style=="switch"){
 	    return html`
         <div class="switch_${this.stateObj.state}">

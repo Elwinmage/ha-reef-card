@@ -69,12 +69,11 @@ export default class RSDose extends RSDevice{
 	}
 	return html`
 <div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${schedule_state}/>
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
 
 </div>
 `;
     }
-
 
     is_disabled(){
 	let disabled=false;

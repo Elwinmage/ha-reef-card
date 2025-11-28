@@ -1,6 +1,6 @@
 import { html } from "lit";
 import style_sensor_target from "./sensor_target.styles";
-
+import i18n from "../../translations/myi18n.js";
 
 //import MyElement from "./element";
 import {Sensor} from "./sensor";
@@ -28,7 +28,7 @@ export class SensorTarget extends  Sensor {
 	this.stateObjTarget=stateObjTarget;
     }//end of constructor
 
-    render(){
+    _render(){
 	
 	let value=this.stateObj.state;
 	let target=this.stateObjTarget.state;
@@ -42,6 +42,7 @@ export class SensorTarget extends  Sensor {
 	}
 	let unit=this.stateObj.attributes.unit_of_measurement;
 	if("unit" in this.conf){
+	    let iconv = i18n;
 	    unit=eval(this.conf.unit);
 	}
 	return html`

@@ -72,9 +72,30 @@ left: 20%;
 div.pg-container{
   position: absolute;
   transform: rotate(-90deg);
-  top: 67%;
+  top: 69%;
   left: -60%;
    width: 140%;
+}
+
+img.warning{
+width: 40%;
+position: absolute;
+left: 18%;
+top: 60%;
+    animation: blink 1s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 `;

@@ -19,12 +19,14 @@ export default class DoseHead extends RSDevice{
 	    head_id:{},
 	    state_on:{},
 	    supplement:{},
+	    stock_alert: {},
 	}
     }
 
-    constructor(hass,entities,config,state_on){
+    constructor(hass,entities,config,state_on,stock_alert){
 	super();
 	this.supplement=null;
+	this.stock_alert=stock_alert;
     }
 
     _pipe_path(){
@@ -67,6 +69,10 @@ export default class DoseHead extends RSDevice{
 	    if (! this.state_on ){
 		color=off_color+","+this.config.alpha;
 	    }
+	    let warning='';
+	    if (this.get_entity('remaining_days').state<this.stock_alert && this.get_entity('slm').state=="on"){
+		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/>"`;
+	    }
 	    return html`
                ${this._render_container()}
    	        <div class="pipe" >
@@ -76,8 +82,9 @@ export default class DoseHead extends RSDevice{
 <div class="pump_state_head" style="background-color: rgba(${color});">
 ${this._render_sensors(this.state_on,"pump_state_head")}
 </div>
-<!-- ${this._render_actuators(this.state_on)} -->
+${this._render_actuators(this.state_on)} 
 ${this._render_sensors(this.state_on)}
+${warning}
    	    `;
 	}//if
 	else {

@@ -24,9 +24,141 @@ export const config = {
 	    "alpha": "0.4",
 	    "sensors": [
 		{
-		    "name": "supplement",
-		    "disabled": true,
+		    "name": "manual_head_volume",
+		    "force_integer": true,
 		},
+		{
+		    "name": "manual_dosed_today",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_top",
+		    "disabled_if": "value<1",
+		    "prefix": "+",
+		}
+	    ],
+	    "sensors_target": [
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_middle",
+		    "type":"common-sensor-target",
+		},
+		{
+		    "name": "doses_today",
+		    "target": "daily_doses",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_bottom",
+		    "type":"common-sensor-target",
+		    "unit": "iconv._('doses')",
+		}
+	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
+		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+		    "disabled_if": "this.get_entity('slm').state==false",
+		}
+	    ],
+	    "switches" : [
+		{
+		    "name": "schedule_enabled",
+		    "type": "hacs",
+		    "class": "pump_state_head",
+		    "style": "button",
+		    "alpha": 0,
+		}
+		
+	    ],
+	    "buttons": [
+		{
+		    "name": "manual_head",
+		    "class": "manual_dose_head",
+		    "type": "hacs",
+		    "config": ["manua_head_volume","manual_head"],
+		    "invert_action": true,
+		},
+		{
+		    "name": "supplement",
+		    "type": "ui",
+		    "class": "supplement_info",
+		    "disabled_if": "true",
+		}
+		
+	    ]
+	},
+	"head_2": {
+	    "color": "0,129,197",
+	    "alpha": "0.4",
+	    "sensors": [
+		{
+		    "name": "manual_head_volume",
+		    "force_integer": true,
+		},
+		{
+		    "name": "manual_dosed_today",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_top",
+		    "disabled_if": "value<1",
+		    "prefix": "+",
+		}
+	    ],
+	    "sensors_target": [
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_middle",
+		    "type":"common-sensor-target",
+		},
+		{
+		    "name": "doses_today",
+		    "target": "daily_doses",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_bottom",
+		    "type":"common-sensor-target",
+		    "unit": "iconv._('doses')",
+		}
+	    ],
+	    "progress_bar": [
+		{
+		    "name": "container_volume",
+		    "target": "save_initial_container_volume",
+		    "type": "progress-bar",
+		    "class":"pg-container",
+		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+		    "disabled_if": "this.get_entity('slm').state==false",
+		}
+		],
+	    "switches" : [
+		{
+		    "alpha": 0,
+		    "name": "schedule_enabled",
+		    "type": "hacs",
+		    "class": "pump_state_head",
+		    "style": "button",
+		}
+		
+	    ],
+	    "buttons": [
+		{
+		    "name": "manual_head",
+		    "class": "manual_dose_head",
+		}
+	    ]
+	},
+	"head_3": {
+	    "color": "0,130,100",
+	    "alpha": "0.4",
+	    "sensors": [
 		{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
@@ -56,6 +188,7 @@ export const config = {
 		    "put_in": "pump_state_head",
 		    "class": "scheduler_label_bottom",
 		    "type":"common-sensor-target",		    
+		    "unit": "iconv._('doses')",
 		}
 	    ],
 	    "progress_bar": [
@@ -64,10 +197,13 @@ export const config = {
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
 		    "class":"pg-container",
+		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+		    "disabled_if": "this.get_entity('slm').state==false",
 		}
 	    ],
 	    "switches" : [
 		{
+		    "alpha": 0,
 		    "name": "schedule_enabled",
 		    "type": "hacs",
 		    "class": "pump_state_head",
@@ -80,97 +216,7 @@ export const config = {
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
 		    "type": "hacs",
-		    "config": ["manua_head_volume","manual_head"],
-		    "invert_action": true,
-		    
-		},
-		{
-		    "name": "supplement",
-		    "type": "ui",
-		    "class": "supplement_info",
 		}
-		
-	    ]
-	},
-	"head_2": {
-	    "color": "0,129,197",
-	    "alpha": "0.4",
-	    "sensors": [
-		{
-		    "name": "manual_head_volume",
-		    "force_integer": true,
-		}
-	    ],
-	    "progress_bar": [
-		{
-		    "name": "container_volume",
-		    "target": "save_initial_container_volume",
-		    "type": "progress-bar",
-		    "class":"pg-container",
-		}
-	    ],
-	    "switches" : [
-		{
-		    "name": "schedule_enabled",
-		    "type": "hacs",
-		    "class": "pump_state_head",
-		    "style": "button",
-		}
-		
-	    ],
-	    "buttons": [
-		{
-		    "name": "manual_head",
-		    "class": "manual_dose_head",
-		},
-		{
-		    "name": "supplement",
-		    "type": "ui",
-		    "class": "supplement_info",
-		}
-
-	    ]
-	},
-	"head_3": {
-	    "color": "0,130,100",
-	    "alpha": "0.4",
-	    "sensors": [
-		{
-		    "name": "manual_head_volume",
-		    "force_integer": true,
-		}
-
-	    ],
-	    "progress_bar": [
-		{
-		    "name": "container_volume",
-		    "target": "save_initial_container_volume",
-		    "type": "progress-bar",
-		    "class":"pg-container",
-		}
-	    ],
-	    "switches" : [
-		{
-		    "name": "schedule_enabled",
-		    "type": "hacs",
-		    "class": "pump_state_head",
-		    "style": "button",
-		}
-		
-	    ],
-	    "buttons": [
-		{
-		    "name": "manual_head",
-		    "class": "manual_dose_head",
-		    "type": "hacs",
-		},
-		{
-		    "name": "supplement",
-		    "type": "ui",
-		    "class": "supplement_info",
-		}
-
-		
 	    ]
 	},
 	"head_4": {
@@ -181,27 +227,32 @@ export const config = {
 		    "name": "manual_head_volume",
 		    "force_integer": true,
 		},
-		// {
-		//     "name": "doses_today",
-		//     "force_integer": true,
-		// },
-		// {
-		//     "name": "auto_dose_today",
-		//     "force_integer": true,
-		// },
-		// {
-		//     "name": "daily_dose",
-		//     "force_integer": true,
-		// },
-		// {
-		//     "name": "daily_doses",
-		//     "force_integer": true,
-		// },
 		{
 		    "name": "manual_dosed_today",
 		    "force_integer": true,
 		    "put_in": "pump_state_head",
-		    "class": "scheduler_label",
+		    "class": "scheduler_label_top",
+		    "disabled_if": "value<1",
+		    "prefix": "+",
+		}
+	    ],
+	    "sensors_target": [
+		{
+		    "name": "auto_dosed_today",
+		    "target": "daily_dose",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_middle",
+		    "type":"common-sensor-target",
+		},
+		{
+		    "name": "doses_today",
+		    "target": "daily_doses",
+		    "force_integer": true,
+		    "put_in": "pump_state_head",
+		    "class": "scheduler_label_bottom",
+		    "type":"common-sensor-target",		    
+		    "unit": "iconv._('doses')",
 		}
 	    ],
 	    "progress_bar": [
@@ -210,6 +261,8 @@ export const config = {
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
 		    "class":"pg-container",
+		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+		    "disabled_if": "this.get_entity('slm').state=='off'",
 		}
 	    ],
 	    "switches" : [
@@ -228,14 +281,7 @@ export const config = {
 		    "name": "manual_head",
 		    "class": "manual_dose_head",
 		    "type": "hacs",
-		},
-		{
-		    "name": "supplement",
-		    "type": "ui",
-		    "class": "supplement_info",
 		}
-
-
 	    ]
 	}
     }

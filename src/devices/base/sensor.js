@@ -18,13 +18,9 @@ export class Sensor extends  MyElement {
     constructor(hass,conf,stateObj,color="255,255,255",alpha=1){
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
-
-    render(){
+    
+    _render(){
 	let value=this.stateObj.state;
-	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
-	    return html`<br />`;
-	}
-
 	if(this.conf.force_integer){
 	    value=Math.floor(value);
 	}
