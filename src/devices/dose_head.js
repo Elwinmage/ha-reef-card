@@ -70,7 +70,7 @@ export default class DoseHead extends RSDevice{
 		color=off_color+","+this.config.alpha;
 	    }
 	    let warning='';
-	    if (this.get_entity('remaining_days').state<this.stock_alert && this.get_entity('slm').state=="on"){
+	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on"){
 		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/>"`;
 	    }
 	    return html`

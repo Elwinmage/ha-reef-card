@@ -2540,7 +2540,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let color = this.config.color + "," + this.config.alpha;
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
             let warning = '';
-            if (this.get_entity('remaining_days').state < this.stock_alert && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/>"`;
+            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/>"`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" >
