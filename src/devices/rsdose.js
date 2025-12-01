@@ -104,9 +104,14 @@ export default class RSDose extends RSDevice{
 	    return this._render_disabled();
 	}//if
 	let style=html``;
+	let dosing_queue=html``;
 	this._populate_entities_with_heads();
 	if(!this.is_on()){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
+	}
+	let slots=(this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
+	if (slots>0){
+	    dosing_queue=html`<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>`;
 	}
 	return html`
 	<div class="device_bg">
@@ -115,7 +120,7 @@ export default class RSDose extends RSDevice{
         <div class="heads">
 	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
        </div>
-       <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
+${dosing_queue}
         ${this._render_actuators()}
 	</div>`;
 
