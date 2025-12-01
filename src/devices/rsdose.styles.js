@@ -116,5 +116,18 @@ background-color:rgba(250,0,0,0.5);
     }
 
 
-
+#dosing-queue{
+text-align:center;
+border: 1px solid black;
+border-radius:15px;
+background-color: rgb(200,200,200);
+position:absolute;
+width: 12%;
+height: 45%;
+left: 88%;
+top: 45%;
+font-size:x-small;
+overflow-x: hidden;
+overflow-y: auto;
+}
 `

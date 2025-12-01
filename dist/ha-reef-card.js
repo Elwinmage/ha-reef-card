@@ -945,7 +945,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         head: "Head",
         heads_colors: "Heads Colors",
         doses: "Doses",
-        days_left: "Remaining Days"
+        days_left: "Remaining Days",
+        empty: "Empty"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -953,7 +954,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         head: "T\xeate",
         heads_colors: "Couleur des t\xeates",
         doses: "Doses",
-        days_left: "Jours restant"
+        days_left: "Jours restant",
+        empty: "Vide"
     }
 };
 
@@ -1670,6 +1672,7 @@ $parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e
 $parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
 $parcel$export(module.exports, "updateObj", () => $038fea56b681b6a5$export$6fb918aa09a6c9f0);
 $parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
+$parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
 class $038fea56b681b6a5$export$2e2bcd8739ae039 {
     constructor(hass){
         this._hass = hass;
@@ -1756,6 +1759,12 @@ function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
     return;
 }
 var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
+function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
+    let seconds = time % 60;
+    let minutes = (time - seconds) / 60 % 60;
+    let hours = (time - seconds - minutes * 60) / 3600;
+    return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+}
 
 });
 
@@ -1794,7 +1803,6 @@ class ProgressCircle extends (0, $1Um3j.default) {
         let label = '';
         if ('label' in this.conf) label = eval(this.conf.label);
         let style = '';
-        console.debug("pgc", this.conf);
         if ('no_value' in this.conf && this.conf.no_value) style = "visibility: hidden;";
         let unit = "%";
         let fill = percent - 2;
@@ -2682,7 +2690,20 @@ background-color:rgba(250,0,0,0.5);
     }
 
 
-
+#dosing-queue{
+text-align:center;
+border: 1px solid black;
+border-radius:15px;
+background-color: rgb(200,200,200);
+position:absolute;
+width: 12%;
+height: 45%;
+left: 88%;
+top: 45%;
+font-size:x-small;
+overflow-x: hidden;
+overflow-y: auto;
+}
 `;
 
 
@@ -2692,6 +2713,64 @@ var $37d5w = parcelRequire("37d5w");
 var $dPhcg = parcelRequire("dPhcg");
 
 var $iXBpj = parcelRequire("iXBpj");
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+parcelRequire("dPhcg");
+
+var $1Um3j = parcelRequire("1Um3j");
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $df5b478fc79ba284$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+span.volume_dosing_queue{
+font-size: x-small;
+width: 100%;
+}
+
+.slot{
+color: white;
+}
+
+`;
+
+
+
+var $iXBpj = parcelRequire("iXBpj");
+class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
+    static styles = [
+        (0, $df5b478fc79ba284$export$2e2bcd8739ae039)
+    ];
+    static get properties() {
+        return {
+            state_on: {},
+            color_list: {}
+        };
+    }
+    constructor(hass, entities, config, state_on, stateObj, color_list){
+        super(hass, config, stateObj, entities);
+        this.state_on = state_on;
+        this.color_list = color_list;
+    }
+    _render_slot_schedule(slot) {
+        let bg_color = this.color_list[slot.head];
+        console.debug(slot.head, bg_color, this.color_list);
+        return (0, $l56HR.html)`
+<div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
+<span class="dosing_queue">
+${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${(0, $iXBpj.toTime)(slot.time)}</span></div>`;
+    }
+    render() {
+        this.schedule = this.stateObj.attributes.queue;
+        console.debug("Dosing queue", this.schedule);
+        if (this.state_on && this.schedule.length != 0) return (0, $l56HR.html)`
+${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
+   	    `;
+        else return (0, $l56HR.html)``;
+         //else
+    }
+}
+window.customElements.define('dosing-queue', $141b1a4597f6f7b2$export$2e2bcd8739ae039);
+
+
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
@@ -2701,8 +2780,14 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         (0, $37d5w.default)
     ];
     _heads = [];
+    static get properties() {
+        return {
+            supplement_color: {}
+        };
+    }
     constructor(hass, device, user_config){
         super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device, user_config);
+        this.supplement_color = {};
     }
     _populate_entities() {}
     _populate_entities_with_heads() {
@@ -2723,13 +2808,14 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         }
     }
     _get_val(head, entity_id) {
-        console.debug("rsdose._get_val: " + entity_id);
         let entity = this.hass.states[this.entities[head][entity_id].entity_id];
         return entity.state;
     }
     _render_head(head_id) {
         let schedule_state = this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
         if (!this.is_on()) schedule_state = false;
+        let short_name = this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
+        this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
         return (0, $l56HR.html)`
 <div class="head" id="head_${head_id}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
@@ -2748,7 +2834,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         return disabled;
     }
     render() {
-        console.debug("rsdose.render");
         this.update_config();
         if (this.is_disabled()) return this._render_disabled();
          //if
@@ -2764,6 +2849,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._render_head(head))}
        </div>
+       <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
         ${this._render_actuators()}
 	</div>`;
     }
@@ -2789,7 +2875,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
      `;
     }
     handleChangedEvent(changedEvent) {
-        console.debug("rsdose.handleChangedEvent ", changedEvent);
         const hex = changedEvent.currentTarget.value;
         var newVal = {
             conf: {
@@ -2822,7 +2907,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.dispatchEvent(messageEvent);
     }
     editor(doc) {
-        console.debug("rsdose.editor");
         if (this.is_disabled()) return (0, $l56HR.html)``;
         this._populate_entities_with_heads();
         var element = doc.getElementById("heads_colors");

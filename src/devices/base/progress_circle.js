@@ -42,7 +42,6 @@ export class ProgressCircle extends  MyElement {
 	    label=eval(this.conf.label);
 	}
 	let style='';
-	console.debug("pgc",this.conf);
 	if('no_value' in this.conf && this.conf.no_value){
 	    style="visibility: hidden;";
 	};

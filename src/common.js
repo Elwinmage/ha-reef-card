@@ -116,3 +116,12 @@ export function updateObj(obj,newVal){
 }
 
 export var off_color="150,150,150";
+
+
+// Time
+export function toTime(time){
+    let seconds=time%60;
+    let minutes=((time-seconds)/60)%60;
+    let hours=((time-seconds-minutes*60))/3600
+    return String(hours).padStart(2,'0')+":"+String(minutes).padStart(2,'0')+":"+String(seconds).padStart(2,'0');
+}

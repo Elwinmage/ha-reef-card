@@ -6,6 +6,7 @@ export const dict={
 	heads_colors: "Heads Colors",
 	doses: "Doses",
 	days_left: "Remaining Days",
+	empty: "Empty",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -14,5 +15,6 @@ export const dict={
 	heads_colors: "Couleur des têtes",	
 	doses: "Doses",
 	days_left: "Jours restant",
+	empty: "Vide",
     },
 }

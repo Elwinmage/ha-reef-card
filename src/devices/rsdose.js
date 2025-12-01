@@ -10,6 +10,8 @@ import i18n from "../translations/myi18n.js";
 
 import {rgbToHex,hexToRgb,updateObj} from "../common";
 
+import {DosingQueue} from "./dosing_queue";
+
 /*
  * RSDose 
  */
@@ -23,9 +25,16 @@ export default class RSDose extends RSDevice{
 //   labels: enhancement, rsdose
     static styles = [style_rsdose,style_common];
     _heads = [];
+
+    static get properties(){
+	return{
+	    supplement_color: {},
+	}
+    }
     
     constructor(hass,device,user_config){
 	super(config,hass,device,user_config);
+	this.supplement_color={};
     }// end of constructor
 
     _populate_entities(){
@@ -57,7 +66,6 @@ export default class RSDose extends RSDevice{
 	}
     }
     _get_val(head,entity_id){
-	console.debug("rsdose._get_val: "+entity_id);
 	let entity = this.hass.states[this.entities[head][entity_id].entity_id];
 	return entity.state;
     }
@@ -67,6 +75,8 @@ export default class RSDose extends RSDevice{
 	if (!this.is_on()){
 	    schedule_state=false;
 	}
+	let short_name=this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
+    	this.supplement_color[short_name]=this.config.heads['head_'+head_id].color;
 	return html`
 <div class="head" id="head_${head_id}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
@@ -89,7 +99,6 @@ export default class RSDose extends RSDevice{
 
     
     render(){
-	console.debug("rsdose.render");
 	this.update_config();
 	if (this.is_disabled()){
 	    return this._render_disabled();
@@ -106,6 +115,7 @@ export default class RSDose extends RSDevice{
         <div class="heads">
 	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
        </div>
+       <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
         ${this._render_actuators()}
 	</div>`;
 
@@ -134,7 +144,6 @@ export default class RSDose extends RSDevice{
     }//end of function _editor_head_color
 
     handleChangedEvent(changedEvent) {
-	console.debug("rsdose.handleChangedEvent ",changedEvent);
 	const hex=changedEvent.currentTarget.value;
 	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[changedEvent.target.id]:{color:hexToRgb(hex)}}}}}}};
 	var newConfig = JSON.parse(JSON.stringify(this._config));
@@ -153,7 +162,6 @@ export default class RSDose extends RSDevice{
     }// end of function handleChangedEvent
     
     editor(doc){
-	console.debug("rsdose.editor");
 	if(this.is_disabled()){
 	    return html ``;
 	}
@@ -168,8 +176,7 @@ export default class RSDose extends RSDevice{
 <form id="heads_colors">
    	${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._editor_head_color(head))}
 </form>
-`
-	;
+`;
     }//end of function editor
 }
 
