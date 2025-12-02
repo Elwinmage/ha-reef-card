@@ -42,7 +42,7 @@ export class ProgressBar extends  MyElement {
 	    label=eval(this.conf.label);
 	}
 	let unit="%"
-	let fill=percent-2;
+	let fill=percent-1;
 	if (fill<0){
 	    fill = 0;
 	}

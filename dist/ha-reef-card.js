@@ -1609,7 +1609,7 @@ class ProgressBar extends (0, $1Um3j.default) {
         let label = '';
         if ('label' in this.conf) label = eval(this.conf.label);
         let unit = "%";
-        let fill = percent - 2;
+        let fill = percent - 1;
         if (fill < 0) fill = 0;
         return (0, $l56HR.html)`
 <style>
