@@ -6,7 +6,7 @@ from supplements_list import SUPPLEMENTS
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-supplement_list="\n## Supplements\nHere is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).\n"
+supplement_list="## Supplements\nHere is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).\n"
 
 for supplement in SUPPLEMENTS:
     uid=supplement['uid']
@@ -17,13 +17,12 @@ for supplement in SUPPLEMENTS:
 
         supplement_list+="- ❌"
     supplement_list+=supplement['fullname']+"\n"
-supplement_list+="\n# ReefLed\n"
+supplement_list+="\n# ReefLed"
 
 with open (dir_path+"/../README.md") as f:
     data = f.read()
     d= re.sub(r"## Supplements([^\$]+)# ReefLed",supplement_list,data,re.M| re.DOTALL)
-print(d)   
-#with open (dir_path+"/../README.md","w") as f:
-#    f.write(d)
+with open (dir_path+"/../README.md","w") as f:
+    f.write(d)
 
 
