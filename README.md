@@ -176,8 +176,8 @@ You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-
   - [ ] Basic management (set manual & daily doses, display days left...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
   - [ ] Advanced schedule [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
 - Generic dosing pumps
-
-## Supplements
+ 
+## Supplements
 Here is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 - ❌Red Sea - Calcium (Powder)
 - ✅Red Sea - KH/Alkalinity (Foundation B)
