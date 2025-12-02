@@ -2752,7 +2752,6 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
     }
     _render_slot_schedule(slot) {
         let bg_color = this.color_list[slot.head];
-        console.debug(slot.head, bg_color, this.color_list);
         return (0, $l56HR.html)`
 <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
 <span class="dosing_queue">
@@ -2760,7 +2759,6 @@ ${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${(0, $iXBpj.toTime)(slot.tim
     }
     render() {
         this.schedule = this.stateObj.attributes.queue;
-        console.debug("Dosing queue", this.schedule);
         if (this.state_on && this.schedule.length != 0) return (0, $l56HR.html)`
 ${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
    	    `;

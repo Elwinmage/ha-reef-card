@@ -177,8 +177,100 @@ You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-
   - [ ] Advanced schedule [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
 - Generic dosing pumps
 
- 
+## Supplements
+Here is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+- ❌Red Sea - Calcium (Powder)
+- ✅Red Sea - KH/Alkalinity (Foundation B)
+- ❌Red Sea - KH/Alkalinity (Powder)
+- ✅Red Sea - Magnesium (Foundation C)
+- ❌Red Sea - Magnesium (Powder)
+- ✅Red Sea - Iodine (Colors A)
+- ✅Red Sea - Potassium (Colors B)
+- ✅Red Sea - Iron (Colors C)
+- ✅Red Sea - Bio Active (Colors D)
+- ✅Red Sea - NO3PO4-X
+- ✅Red Sea - Reef Energy Plus
+- ❌Aqua Forest - Calcium 
+- ❌Aqua Forest - Ca Plus
+- ❌Aqua Forest - Component 1+
+- ❌Aqua Forest - KH Buffer
+- ❌Aqua Forest - KH Plus
+- ❌Aqua Forest - Component 2+
+- ❌Aqua Forest - Magnesium
+- ❌Aqua Forest - Mg Plus
+- ❌Aqua Forest - Component 3+
+- ❌Tropic Marin - All-For-Reef
+- ❌Tropic Marin - Balling A
+- ❌Tropic Marin - Carbo Calcium
+- ❌Tropic Marin - Balling B
+- ❌Tropic Marin - Liquid Buffer
+- ❌Tropic Marin - Balling C
+- ❌Tropic Marin - Bio-Magnesium
+- ❌Tropic Marin - A Element
+- ❌Tropic Marin - K Element
+- ❌Tropic Marin - Elimi-NP
+- ❌Tropic Marin - Plus-NP
+- ❌Tropic Marin - NP-Bacto-Balance
+- ❌Tropic Marin - Amino Organic
+- ❌Seachem - Reef Calcium
+- ❌Seachem - Reef Fusion 1
+- ❌Seachem - Reef Complete
+- ❌Seachem - Reef Carbonate
+- ❌Seachem - Reef Fusion 2
+- ❌Seachem - Reef Iodine
+- ❌Seachem - Reef Strontium
+- ❌Seachem - Reef Trace
+- ❌Seachem - Reef Plus
+- ❌BRS - Liquid Calcium
+- ❌BRS - Liquid alkalinity
+- ❌BRS - Magnesium Mix
+- ❌BRS - Part C
+- ❌ESV - B-Ionic Component 2
+- ❌ESV - B-Ionic Component 1
+- ❌ESV - B-Ionic Magnesium
+- ❌ESV - Transition elements 
+- ❌ESV - Transition elements plus
+- ❌Fauna Marine - Balling light KH
+- ❌Fauna Marine - Balling light Ca
+- ❌Fauna Marine - Balling light Mg
+- ❌Fauna Marine - Balling light  trace 1
+- ❌Fauna Marine - Balling light  trace 2
+- ❌Fauna Marine - Balling light  trace 3
+- ❌Fauna Marine - Green trace elements
+- ❌Fauna Marine - Red trace elements
+- ❌Fauna Marine - Blue trace elements
+- ❌Fauna Marine - Amin
+- ❌Fauna Marine - Min S
+- ❌Brightwell - Reef Code A
+- ❌Brightwell - Liquid Reef
+- ❌Brightwell - Calcion
+- ❌Brightwell - Reef Code B
+- ❌Brightwell - Hydrate - MG
+- ❌Brightwell - Potassion
+- ❌Brightwell - Strontion
+- ❌Brightwell - Ferrion
+- ❌Brightwell - Koralcolor
+- ❌Brightwell - Replenish
+- ❌Brightwell - KoralAmino
+- ✅Red Sea - Calcium (Foundation A)
+- ❌Brightwell - Restore
+- ❌ATI - Essential Pro 1
+- ❌ATI - Essential Pro 2
+- ❌Quantum - Aragonite A
+- ❌Quantum - Aragonite B
+- ❌Quantum - Aragonite C
+- ❌Quantum - Bio enhance
+- ❌Quantum - Gbio Gen
+- ❌Quantum - Bio Kalium
+- ❌Quantum - Bio Metals
+- ❌Triton - Core7 elements 1
+- ❌Triton - Core7 elements 2
+- ❌Triton - Core7 elements 3A
+- ❌Triton - Core7 elements 3B
+- ❌Tropic Marin - Potassium
+
 # ReefLed
+
 Planned
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).

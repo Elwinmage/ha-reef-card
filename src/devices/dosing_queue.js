@@ -25,7 +25,6 @@ export default class DosingQueue extends MyElement{
 
     _render_slot_schedule(slot){
 	let bg_color=this.color_list[slot.head];
-	console.debug(slot.head,bg_color,this.color_list);
 	return html`
 <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
 <span class="dosing_queue">
@@ -35,7 +34,6 @@ ${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${toTime(slot.time)}</span></
 
     render(){
 	this.schedule=this.stateObj.attributes.queue;
-	console.debug("Dosing queue",this.schedule);
 	if(this.state_on && this.schedule.length != 0){
 	    return html`
 ${this.schedule.map(slot => this._render_slot_schedule(slot))}
