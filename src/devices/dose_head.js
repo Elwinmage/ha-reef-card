@@ -46,7 +46,6 @@ export default class DoseHead extends RSDevice{
     _render_container(){
 	let supplement_uid=this.supplement.attributes.supplement.uid
 	let img=null;
-	console.debug("uid",supplement_uid);
 	img='/hacsfiles/ha-reef-card/'+supplement_uid+'.supplement.png';
 	let style=html``;
 	let color=this.config.color;
@@ -91,7 +90,11 @@ ${warning}
 	    // TODO: add button for new supplement
 	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
 	    //  labels: enhancement rsdose
-	    return html``;
+
+	    return html`<div class="container">
+  <img src='${new URL("./img/add_container.png,import.meta.url")}' />
+</div>
+`;
 	}//else
     }
 };

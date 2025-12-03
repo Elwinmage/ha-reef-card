@@ -2527,7 +2527,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _render_container() {
         let supplement_uid = this.supplement.attributes.supplement.uid;
         let img = null;
-        console.debug("uid", supplement_uid);
         img = '/hacsfiles/ha-reef-card/' + supplement_uid + '.supplement.png';
         let style = (0, $l56HR.html)``;
         let color = this.config.color;
@@ -2565,7 +2564,10 @@ ${warning}
         } else // TODO: add button for new supplement
         // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
         //  labels: enhancement rsdose
-        return (0, $l56HR.html)``;
+        return (0, $l56HR.html)`<div class="container">
+  <img src='${new URL("./img/add_container.png,import.meta.url")}' />
+</div>
+`;
          //else
     }
 }
