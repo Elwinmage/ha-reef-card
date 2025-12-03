@@ -53,16 +53,16 @@ export class ReefCard extends LitElement {
 	}
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
-	    moreinfo.init(this.hass,this.shadowRoot);
+	    //moreinfo.init(this.hass,this.shadowRoot);
 	    return html`
 ${this.current_device}
-${moreinfo.render()}
+<!-- ${moreinfo.render()} -->
 `;
 	}
     return html`
           ${this.device_select()}
   ${this.current_device}
-${moreinfo.render()}
+<!-- ${moreinfo.render()} -->
     `;
     }
 

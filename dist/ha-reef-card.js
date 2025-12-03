@@ -1385,7 +1385,7 @@ var $1Um3j = parcelRequire("1Um3j");
         more_info.style.display = "flex";
     }
     render() {
-        console.debug("MoreInfo render: ");
+        //console.debug("MoreInfo render: ");
         return (0, $l56HR.html)`
           <div id="window-mask" hidden>
    	    <div id="moreinfo">
@@ -2565,7 +2565,7 @@ ${warning}
         // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
         //  labels: enhancement rsdose
         return (0, $l56HR.html)`<div class="container">
-  <img src='${new URL("./img/add_container.png,import.meta.url")}' />
+  <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' />
 </div>
 `;
          //else
@@ -2981,16 +2981,16 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         }
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-            (0, $9HhHn.default).init(this.hass, this.shadowRoot);
+            //moreinfo.init(this.hass,this.shadowRoot);
             return (0, $l56HR.html)`
 ${this.current_device}
-${(0, $9HhHn.default).render()}
+<!-- ${(0, $9HhHn.default).render()} -->
 `;
         }
         return (0, $l56HR.html)`
           ${this.device_select()}
   ${this.current_device}
-${(0, $9HhHn.default).render()}
+<!-- ${(0, $9HhHn.default).render()} -->
     `;
     }
     device_select() {

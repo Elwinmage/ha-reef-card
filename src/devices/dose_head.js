@@ -90,9 +90,8 @@ ${warning}
 	    // TODO: add button for new supplement
 	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
 	    //  labels: enhancement rsdose
-
 	    return html`<div class="container">
-  <img src='${new URL("./img/add_container.png,import.meta.url")}' />
+  <img src='${new URL("./img/container_add.png",import.meta.url)}' />
 </div>
 `;
 	}//else
