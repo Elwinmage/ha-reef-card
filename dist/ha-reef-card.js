@@ -1959,17 +1959,18 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "dosing_queue": {
         "css": {
             "text-align": "center",
-            "border": " 1px solid black",
+            "border": "1px solid black",
             "border-radius": "15px",
-            "background-color": " rgb(200,200,200)",
+            "background-color": "rgb(200,200,200)",
             "position": "absolute",
-            "width": " 12%",
-            "height": " 45%",
-            "left": " 88%",
-            "top": " 45%",
+            "width": "12%",
+            "height": "45%",
+            "left": "88%",
+            "top": "45%",
             "font-size": "x-small",
-            "overflow-x": " hidden",
-            "overflow-y": " auto"
+            "overflow-x": "hidden",
+            "overflow-y": "auto",
+            "scrollbar-color": "gray rgb(255,255,255,0)"
         }
     },
     "heads": {
