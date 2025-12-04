@@ -88,16 +88,15 @@ export function rgbToHex( orig ) {
 	// Extract RGB values
 	regex_rgb = new RegExp( /rgba?\([\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*([,\/][\t\s]*[0-9\.]{1,})?[\t\s]*\);?/gim );
 	matches = regex_rgb.exec( orig );
-	
 	if ( matches ) {
-		hex = 
-			'#' +
-			(matches[1] | 1 << 8).toString(16).slice(1) +
-			(matches[2] | 1 << 8).toString(16).slice(1) +
-			(matches[3] | 1 << 8).toString(16).slice(1);
-		return hex;
+	    hex = 
+		'#' +
+		(matches[1] | 1 << 8).toString(16).slice(1) +
+		(matches[2] | 1 << 8).toString(16).slice(1) +
+		(matches[3] | 1 << 8).toString(16).slice(1);
+	    return hex;
 	}else{
-		return orig;
+	    return orig;
 	}
 }
 
@@ -115,6 +114,17 @@ export function updateObj(obj,newVal){
     return;
 }
 
+/*
+export function mergeObj(base, update){
+    let newObj=structuredClone(base);
+    for (let attribute of Object.keys(update)){
+	let val=eval("base.css");
+	//	console.debug("MERGE", attribute,eval("update.css"));
+	console.debug("MERGE",update.css);
+    }
+    return newObj;
+}
+*/
 export var off_color="150,150,150";
 
 
@@ -125,3 +135,5 @@ export function toTime(time){
     let hours=((time-seconds-minutes*60))/3600
     return String(hours).padStart(2,'0')+":"+String(minutes).padStart(2,'0')+":"+String(seconds).padStart(2,'0');
 }
+
+

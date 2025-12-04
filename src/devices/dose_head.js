@@ -64,22 +64,31 @@ export default class DoseHead extends RSDevice{
     render(){
 	this.supplement=this.hass.states[this.entities['supplement'].entity_id];
 	if (this.supplement.attributes.supplement.uid!='null'){
+	    let warning='';
 	    let color=this.config.color+","+this.config.alpha;
+	    if (this.hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
+		this.state_on=false;
+		warning=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>"`;
+	    }
+	    
 	    if (! this.state_on ){
 		color=off_color+","+this.config.alpha;
 	    }
-	    let warning='';
 	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on"){
 		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/>"`;
 	    }
+	    console.debug("PIPE",this.config.pipe);
 	    return html`
                ${this._render_container()}
-   	        <div class="pipe" >
+   	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
  		  ${this._pipe_path()}
 		</div>
 <!-- Render schedule background -->
-<div class="pump_state_head" style="background-color: rgba(${color});">
+<div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
 ${this._render_sensors(this.state_on,"pump_state_head")}
+<div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
+${this._render_sensors(this.state_on,"pump_state_labels")}
+</div>
 </div>
 ${this._render_sensors(this.state_on)}
 ${this._render_actuators(this.state_on)} 

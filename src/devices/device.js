@@ -101,6 +101,15 @@ export default class RSDevice extends LitElement {
                           <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
                         </div">`;
     }//end of function _render_disabled
+
+
+    get_style(conf){
+	let style='';
+	if(conf && 'css' in conf){
+	    style=Object.entries(conf.css).map(([k, v]) => `${k}:${v}`).join(';');
+	}
+	return style;
+    }//end of function get_style
     
     ////////////////////////////////////////////////////////////////////////////////
     // ACTUATORS
@@ -120,8 +129,9 @@ export default class RSDevice extends LitElement {
 	if (! state){
 	    color=off_color;
 	}
+	console.debug("SWITCH", mapping_conf);
         return html`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>
 </div>
 `;
@@ -135,8 +145,8 @@ export default class RSDevice extends LitElement {
 	    color=off_color;
 	}
 	return html`
-<div class="${mapping_conf.class}">
-<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"</common-button>
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
 </div>
 	`;
     }
@@ -192,7 +202,7 @@ export default class RSDevice extends LitElement {
 	    color=off_color;
 	}
         return html`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
 </div>
 `;
@@ -224,14 +234,14 @@ export default class RSDevice extends LitElement {
 	}
 	switch (type){
 	case "progress-circle":
-	    return html`<div class=${mapping_conf.class}>
+	    return html`<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
 <progress-circle .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-circle>
 </div>`;
 	    break;
 	case "progress-bar":
 	default:
             return html`
-<div class=${mapping_conf.class}>
+<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
 <progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
@@ -259,7 +269,7 @@ export default class RSDevice extends LitElement {
 	    color=off_color;
 	}
         return html`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-sensor-target .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></common-sensor-target>
 </div>
 `;

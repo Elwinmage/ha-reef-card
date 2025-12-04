@@ -52,7 +52,7 @@ div.progress{
 background-color: rgba(${this.color},0.8);
 }   
 </style>
-   	    <div class="bar" id="${this.conf.name}">
+   	    <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
        	      <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
               <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
             </div>

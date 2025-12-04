@@ -124,6 +124,11 @@ class RSDevice extends (0, $eGUNk.LitElement) {
                           <p class='disabled_in_ha'>${(0, $dPhcg.default)._("disabledInHa")}</p>
                         </div">`;
     }
+    get_style(conf) {
+        let style = '';
+        if (conf && 'css' in conf) style = Object.entries(conf.css).map(([k, v])=>`${k}:${v}`).join(';');
+        return style;
+    }
     ////////////////////////////////////////////////////////////////////////////////
     // ACTUATORS
     _render_switch(mapping_conf, state) {
@@ -135,8 +140,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         }
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
+        console.debug("SWITCH", mapping_conf);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>
 </div>
 `;
@@ -147,8 +153,8 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}">
-<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"</common-button>
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
+<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
 </div>
 	`;
     }
@@ -206,7 +212,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
 </div>
 `;
@@ -224,13 +230,13 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         if ("type" in mapping_conf) type = mapping_conf.type;
         switch(type){
             case "progress-circle":
-                return (0, $l56HR.html)`<div class=${mapping_conf.class}>
+                return (0, $l56HR.html)`<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
 <progress-circle .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-circle>
 </div>`;
             case "progress-bar":
             default:
                 return (0, $l56HR.html)`
-<div class=${mapping_conf.class}>
+<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
 <progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
 </div>
 `;
@@ -246,7 +252,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}">
+<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-sensor-target .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></common-sensor-target>
 </div>
 `;
@@ -1540,33 +1546,6 @@ sensor{
   padding-right: 5px;
 }
 
-.scheduler_label_top{
-  text-align: center;
-//border: 1px solid blue;
-grid-column: 1;
-grid-row: 1;
-color: rgb(250,230,130);
-font-weight: bold;
-}
-
-.scheduler_label_middle{
-text-align:center;
- color: white;
-//border: 1px solid blue;
-grid-column: 1;
-grid-row: 2;
-font-weight: bold;
-}
-
-.scheduler_label_bottom{
-text-align:center;
-//border: 1px solid blue;
-color: rgb(130,230,250);
-grid-column: 1;
-grid-row: 3;
-font-weight: bold;
-}
-
 span.unit{
 font-size: 0.6em;
 }
@@ -1617,7 +1596,7 @@ div.progress{
 background-color: rgba(${this.color},0.8);
 }   
 </style>
-   	    <div class="bar" id="${this.conf.name}">
+   	    <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
        	      <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
               <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
             </div>
@@ -1809,7 +1788,7 @@ class ProgressCircle extends (0, $1Um3j.default) {
         if (fill < 0) fill = 0;
         // range 0 to 565 for 200x200
         return (0, $l56HR.html)`
-   <svg width="70%" height="70%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+   <svg width="100%" height="100%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
     <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
     <circle r="90" cx="100" cy="100" stroke="rgb(${this.color})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565 - percent * 565 / 100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
 <text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
@@ -1961,27 +1940,6 @@ var $iXBpj = parcelRequire("iXBpj");
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
-.popup{
-  background-color: rgba(175,175,175,0.9);
-position : absolute;
-left :100px;
-top: 100px;
-width: 400px;
-
-}
-
-.disable{
-  background-color: rgba(175,175,175,0.5);
-}
-
-div,img{
-
-display: flex;
-    flex: 0 0 auto;
-    position: absolute;
-}
-
 `;
 
 
@@ -2068,25 +2026,112 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "class": "on_off",
             "style": "switch",
             "tap_action": {
+            },
+            "css": {
+                "flex": "0 0 auto",
+                "position": "absolute",
+                "width": "5.5%",
+                "height": "2%",
+                "border-radius": "50%",
+                "top": "28%",
+                "left": "2%"
             }
         }
     ],
+    "dosing_queue": {
+        "css": {
+            "text-align": "center",
+            "border": " 1px solid black",
+            "border-radius": "15px",
+            "background-color": " rgb(200,200,200)",
+            "position": "absolute",
+            "width": " 12%",
+            "height": " 45%",
+            "left": " 88%",
+            "top": " 45%",
+            "font-size": "x-small",
+            "overflow-x": " hidden",
+            "overflow-y": " auto"
+        }
+    },
     "heads": {
-        "head_1": {
-            "color": "140,67,148",
-            "alpha": "0.4",
+        "common": {
+            "alpha": "0.6",
+            "css": {
+                "top": "0%",
+                "left": "50%",
+                "position": "absolute",
+                "flex": "0 0 auto",
+                "width": "31%",
+                "height": "100%"
+            },
+            "pump_state_head": {
+                "css": {
+                    "position": "absolute",
+                    "aspect-ratio": "1/1",
+                    "width": "55%",
+                    "border-radius": "50%",
+                    "top": "10%",
+                    "left": "35%"
+                }
+            },
+            "pump_state_labels": {
+                "css": {
+                    "aspect-ratio": "1/1",
+                    "width": "100%",
+                    "display": "grid",
+                    "grid-template-columns": "1",
+                    "grid-template-rows": "3",
+                    "grid-gap": "0px"
+                }
+            },
+            "pipe": {
+                "css": {
+                    "flex": " 0 0 auto",
+                    "position": " absolute",
+                    "width": " 70%",
+                    "top": " 32%",
+                    "left": " 30%;"
+                }
+            },
+            "calibration": {
+                "css": {
+                    "flex": "0 0 auto",
+                    "position": "absolute",
+                    "width": "50%",
+                    "top": "10%",
+                    "left": "35%",
+                    "filter": "none",
+                    "animation": "blink 1s",
+                    "animation-iteration-count": "infinite"
+                }
+            },
             "sensors": [
                 {
                     "name": "manual_head_volume",
-                    "force_integer": true
+                    "force_integer": true,
+                    "css": {
+                        "position": "absolute",
+                        "width": "60%",
+                        "top": "0%",
+                        "left": "20%"
+                    }
                 },
                 {
                     "name": "manual_dosed_today",
                     "force_integer": true,
-                    "put_in": "pump_state_head",
+                    "put_in": "pump_state_labels",
                     "class": "scheduler_label_top",
                     "disabled_if": "value<1",
-                    "prefix": "+"
+                    "prefix": "+",
+                    "css": {
+                        "text-align": "center",
+                        "grid-column": "1",
+                        "grid-row": "1",
+                        "color": "rgb(250,230,130)",
+                        "font-weight": "bold",
+                        "margin-top": "10%"
+                    }
                 }
             ],
             "sensors_target": [
@@ -2094,18 +2139,36 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "name": "auto_dosed_today",
                     "target": "daily_dose",
                     "force_integer": true,
-                    "put_in": "pump_state_head",
+                    "put_in": "pump_state_labels",
                     "class": "scheduler_label_middle",
-                    "type": "common-sensor-target"
+                    "type": "common-sensor-target",
+                    "css": {
+                        "text-align": "center",
+                        "color": "white",
+                        "grid-column": "1",
+                        "grid-row": "2",
+                        "font-weight": "bold",
+                        "font-size": "1.2em",
+                        "margin-top": "-25%"
+                    }
                 },
                 {
                     "name": "doses_today",
                     "target": "daily_doses",
                     "force_integer": true,
-                    "put_in": "pump_state_head",
+                    "put_in": "pump_state_labels",
                     "class": "scheduler_label_bottom",
                     "type": "common-sensor-target",
-                    "unit": "iconv._('doses')"
+                    "unit": "iconv._('doses')",
+                    "css": {
+                        "text-align": "center",
+                        "color": "rgb(130,230,250)",
+                        "grid-column": "1",
+                        "grid-row": "3",
+                        "font-weight": "bold",
+                        "font-size": "0.8em",
+                        "margin-top": "-25%"
+                    }
                 }
             ],
             "progress_bar": [
@@ -2115,7 +2178,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "type": "progress-bar",
                     "class": "pg-container",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state==false"
+                    "disabled_if": "this.get_entity('slm').state==false",
+                    "css": {
+                        "position": "absolute",
+                        "transform": "rotate(-90deg)",
+                        "top": "69%",
+                        "left": "-60%",
+                        "width": "140%"
+                    }
                 },
                 {
                     "name": "auto_dosed_today",
@@ -2123,249 +2193,72 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "force_integer": true,
                     "type": "progress-circle",
                     "class": "today_dosing",
-                    "no_value": true
+                    "put_in": "pump_state_labels",
+                    "no_value": true,
+                    "css": {
+                        "position": "absolute",
+                        "top": "-25%",
+                        "left": "-25%",
+                        "aspect-ratio": "1/1",
+                        "width": "140%"
+                    }
                 }
             ],
             "switches": [
                 {
+                    "alpha": 0,
                     "name": "schedule_enabled",
                     "type": "hacs",
                     "class": "pump_state_head",
                     "style": "button",
-                    "alpha": 0
+                    "css": {
+                        "position": "absolute",
+                        "aspect-ratio": "1/1",
+                        "width": "45%",
+                        "border-radius": "50%",
+                        "top": "10%",
+                        "left": "32.5%"
+                    }
                 }
             ],
             "buttons": [
                 {
                     "name": "manual_head",
                     "class": "manual_dose_head",
-                    "type": "hacs",
-                    "config": [
-                        "manua_head_volume",
-                        "manual_head"
-                    ],
-                    "invert_action": true
-                },
-                {
-                    "name": "supplement",
-                    "type": "ui",
-                    "class": "supplement_info",
-                    "disabled_if": "true"
+                    "css": {
+                        "position": " absolute",
+                        "aspect-ratio": " 1/1",
+                        "width": " 15%",
+                        "border-radius": " 50%",
+                        "top": " 5%",
+                        "left": " 33%;"
+                    }
                 }
             ]
+        },
+        "head_1": {
+            "color": "140,67,148",
+            "css": {
+                "left": "1%"
+            }
         },
         "head_2": {
             "color": "0,129,197",
-            "alpha": "0.4",
-            "sensors": [
-                {
-                    "name": "manual_head_volume",
-                    "force_integer": true
-                },
-                {
-                    "name": "manual_dosed_today",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_top",
-                    "disabled_if": "value<1",
-                    "prefix": "+"
-                }
-            ],
-            "sensors_target": [
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_middle",
-                    "type": "common-sensor-target"
-                },
-                {
-                    "name": "doses_today",
-                    "target": "daily_doses",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_bottom",
-                    "type": "common-sensor-target",
-                    "unit": "iconv._('doses')"
-                }
-            ],
-            "progress_bar": [
-                {
-                    "name": "container_volume",
-                    "target": "save_initial_container_volume",
-                    "type": "progress-bar",
-                    "class": "pg-container",
-                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state==false"
-                },
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "type": "progress-circle",
-                    "class": "today_dosing",
-                    "no_value": true
-                }
-            ],
-            "switches": [
-                {
-                    "alpha": 0,
-                    "name": "schedule_enabled",
-                    "type": "hacs",
-                    "class": "pump_state_head",
-                    "style": "button"
-                }
-            ],
-            "buttons": [
-                {
-                    "name": "manual_head",
-                    "class": "manual_dose_head"
-                }
-            ]
+            "css": {
+                "left": "22.5%"
+            }
         },
         "head_3": {
             "color": "0,130,100",
-            "alpha": "0.4",
-            "sensors": [
-                {
-                    "name": "manual_head_volume",
-                    "force_integer": true
-                },
-                {
-                    "name": "manual_dosed_today",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_top",
-                    "disabled_if": "value<1",
-                    "prefix": "+"
-                }
-            ],
-            "sensors_target": [
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_middle",
-                    "type": "common-sensor-target"
-                },
-                {
-                    "name": "doses_today",
-                    "target": "daily_doses",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_bottom",
-                    "type": "common-sensor-target",
-                    "unit": "iconv._('doses')"
-                }
-            ],
-            "progress_bar": [
-                {
-                    "name": "container_volume",
-                    "target": "save_initial_container_volume",
-                    "type": "progress-bar",
-                    "class": "pg-container",
-                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state==false"
-                },
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "type": "progress-circle",
-                    "class": "today_dosing",
-                    "no_value": true
-                }
-            ],
-            "switches": [
-                {
-                    "alpha": 0,
-                    "name": "schedule_enabled",
-                    "type": "hacs",
-                    "class": "pump_state_head",
-                    "style": "button"
-                }
-            ],
-            "buttons": [
-                {
-                    "name": "manual_head",
-                    "class": "manual_dose_head",
-                    "type": "hacs"
-                }
-            ]
+            "css": {
+                "left": "44%"
+            }
         },
         "head_4": {
             "color": "100,160,75",
-            "alpha": "0.4",
-            "sensors": [
-                {
-                    "name": "manual_head_volume",
-                    "force_integer": true
-                },
-                {
-                    "name": "manual_dosed_today",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_top",
-                    "disabled_if": "value<1",
-                    "prefix": "+"
-                }
-            ],
-            "sensors_target": [
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_middle",
-                    "type": "common-sensor-target"
-                },
-                {
-                    "name": "doses_today",
-                    "target": "daily_doses",
-                    "force_integer": true,
-                    "put_in": "pump_state_head",
-                    "class": "scheduler_label_bottom",
-                    "type": "common-sensor-target",
-                    "unit": "iconv._('doses')"
-                }
-            ],
-            "progress_bar": [
-                {
-                    "name": "container_volume",
-                    "target": "save_initial_container_volume",
-                    "type": "progress-bar",
-                    "class": "pg-container",
-                    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state=='off'"
-                },
-                {
-                    "name": "auto_dosed_today",
-                    "target": "daily_dose",
-                    "force_integer": true,
-                    "type": "progress-circle",
-                    "class": "today_dosing",
-                    "no_value": true
-                }
-            ],
-            "switches": [
-                {
-                    "name": "schedule_enabled",
-                    "type": "hacs",
-                    "class": "pump_state_head",
-                    "style": "button",
-                    "color": "0,0,0",
-                    "alpha": "0"
-                }
-            ],
-            "buttons": [
-                {
-                    "name": "manual_head",
-                    "class": "manual_dose_head",
-                    "type": "hacs"
-                }
-            ]
+            "css": {
+                "left": "65%"
+            }
         }
     }
 };
@@ -2379,41 +2272,6 @@ parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
-.supplement_info{
-position :absolute;
-aspect-ratio: 1/2.6;
-width : 62%;
-top: 49%;
-left: 2%;
-border-radius: 30px;
-}
-
-
-.manual_dose_head{
- position: absolute;
-aspect-ratio: 1/1;
-width: 15%;
-border-radius: 50%;
-top: 5%;
-left: 33%;
-}
-
-.pump_state_head{
- position: absolute;
- aspect-ratio: 1/1;
- width: 55%;
- border-radius: 50%;
- top: 10%;
- left: 35%;
-  display:grid;
-#grid-template-columns: repeat(1, 1fr);
-grid-template-columns: 1;
-grid-template-rows: 3;
-
-  grid-gap: 0px;
-//  grid-auto-rows: minmax(100px, auto);
-}
-
 .container{
 position: absolute;
 top: 41%;
@@ -2426,15 +2284,6 @@ img{
  width: 100%;
 }
 
-.pipe{
-  flex: 0 0 auto;
-  position: absolute;
-  width: 70%;
-  top: 32%;
-  left: 30%;
-//  border : 3px solid gray;
-  }
-
 svg{
 stroke: black;
 }
@@ -2444,14 +2293,6 @@ position: absolute;
 width: 60%;
 top: 0%;
 left: 20%;
-}
-
-div.pg-container{
-  position: absolute;
-  transform: rotate(-90deg);
-  top: 69%;
-  left: -60%;
-   width: 140%;
 }
 
 img.warning{
@@ -2473,16 +2314,6 @@ top: 60%;
     100% {
         opacity: 1;
     }
-}
-
-.today_dosing{
-position: absolute;
-top: 6%;
-left: 20%;
-aspect-ratio: 1/1;
-width:120%;
-
-
 }
 
 `;
@@ -2544,18 +2375,26 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     render() {
         this.supplement = this.hass.states[this.entities['supplement'].entity_id];
         if (this.supplement.attributes.supplement.uid != 'null') {
-            let color = this.config.color + "," + this.config.alpha;
-            if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
             let warning = '';
+            let color = this.config.color + "," + this.config.alpha;
+            if (this.hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
+                this.state_on = false;
+                warning = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>"`;
+            }
+            if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
             if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/>"`;
+            console.debug("PIPE", this.config.pipe);
             return (0, $l56HR.html)`
                ${this._render_container()}
-   	        <div class="pipe" >
+   	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
  		  ${this._pipe_path()}
 		</div>
 <!-- Render schedule background -->
-<div class="pump_state_head" style="background-color: rgba(${color});">
+<div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
 ${this._render_sensors(this.state_on, "pump_state_head")}
+<div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
+${this._render_sensors(this.state_on, "pump_state_labels")}
+</div>
 </div>
 ${this._render_sensors(this.state_on)}
 ${this._render_actuators(this.state_on)} 
@@ -2577,134 +2416,11 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-.on_off{
-flex: 0 0 auto;
- position: absolute;
-//aspect-ratio: 1/1;
-width: 5.5%;
-height: 2%;
-border-radius: 50%;
-top: 28%;
-left: 2%;
-}
 
-    .head{
+.head{
     flex: 0 0 auto;
     width: 31%;
-height: 100%;
-    }
-
-    #head_1{
-     left: 1%;
-     top: 0%;
-//     border: 4px solid red;
-     position: absolute;  
-    }
-
-    #head_2{
-     left: 23%;
-     top: 0%;
-//border: 4px solid magenta;
-position: absolute;
-    }
-
-    #head_3{
-   left: 44%;
-     top: 0%;
-//border: 4px solid green;
-position: absolute;
-    }
-
-    #head_4{
-left: 65%;
-     top: 0%;
-//border: 4px solid blue;
-position: absolute;
-    }
-
-    .container{
-    flex: 0 0 auto;
-    position: absolute;
-    }
-
-    .mask1{
-    flex: 0 0 auto;
-    width: 17%;
-    position: absolute;
-    top: 35%;
-    left: 10%;
-    }
-
-    .mask2{
-    flex: 0 0 auto;
-    width: 17%;
-    position: absolute;
-    top: 36%;
-    left: 28%;
-    transform: scale(1.1);
-    }
-
-    .mask3{
-    flex: 0 0 auto;
-    width: 17%;
-    position: absolute;
-    top: 37%;
-    left: 48%;
-    transform: scale(1.2);
-    }
-    
-    .mask4{
-    flex: 0 0 auto;
-    width: 17%;
-    position: absolute;
-    top: 38%;
-    left: 69%;
-    transform: scale(1.3);
-    }
-
-.button{
-    flex: 0 0 auto;
-    aspect-ratio: 1/1;
-    position:absolute;
-}
-
-.button:hover{
-background-color:rgba(250,0,0,0.5);
-}
-
-
-.sensor {
-    flex: 0 0 auto;
-    position: absolute;
-}
-
-
-    p.RSDOSE4{
-    color: red;
-    }
-
-    img.RSDOSE4 {
-    width: 200px;
-    }
-
-    svg {
-    stroke: black;
-    }
-
-
-#dosing-queue{
-text-align:center;
-border: 1px solid black;
-border-radius:15px;
-background-color: rgb(200,200,200);
-position:absolute;
-width: 12%;
-height: 45%;
-left: 88%;
-top: 45%;
-font-size:x-small;
-overflow-x: hidden;
-overflow-y: auto;
+    height: 100%;
 }
 `;
 
@@ -2715,6 +2431,33 @@ var $37d5w = parcelRequire("37d5w");
 var $dPhcg = parcelRequire("dPhcg");
 
 var $iXBpj = parcelRequire("iXBpj");
+/**
+ * Simple object check.
+ * @param item
+ * @returns {boolean}
+ */ function $ca8e12d540076a8f$export$a6cdc56e425d0d0a(item) {
+    return item && typeof item === 'object' && !Array.isArray(item);
+}
+function $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources) {
+    if (!sources.length) return target;
+    const source = sources.shift();
+    if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(target) && $ca8e12d540076a8f$export$a6cdc56e425d0d0a(source)) {
+        for(const key in source)if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(source[key])) {
+            if (!target[key]) Object.assign(target, {
+                [key]: {}
+            });
+            $ca8e12d540076a8f$export$dd702b3c8240390c(target[key], source[key]);
+        } else Object.assign(target, {
+            [key]: source[key]
+        });
+    }
+    return $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources);
+}
+function $ca8e12d540076a8f$export$4950aa0f605343fb(target, source) {
+    return $ca8e12d540076a8f$export$dd702b3c8240390c(structuredClone(target), source);
+}
+
+
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 parcelRequire("dPhcg");
@@ -2816,9 +2559,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (!this.is_on()) schedule_state = false;
         let short_name = this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
         this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
+        let new_conf = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(this.config.heads.common, this.config.heads["head_" + head_id]);
         return (0, $l56HR.html)`
-<div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_" + head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
+<div class="head" id="head_${head_id}" style=${this.get_style(new_conf)}">
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
 
 </div>
 `;
@@ -2842,7 +2586,13 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this._populate_entities_with_heads();
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
-        if (slots > 0) dosing_queue = (0, $l56HR.html)`<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>`;
+        if (slots > 0) {
+            console.debug("DOSING QUEUE", this.config);
+            dosing_queue = (0, $l56HR.html)`
+<div style="${this.get_style(this.config.dosing_queue)}">
+<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
+</div>`;
+        }
         return (0, $l56HR.html)`
 	<div class="device_bg">
         ${style}

@@ -9,6 +9,7 @@ import style_common from "./common.styles";
 import i18n from "../translations/myi18n.js";
 
 import {rgbToHex,hexToRgb,updateObj} from "../common";
+import {merge} from "../merge";
 
 import {DosingQueue} from "./dosing_queue";
 
@@ -77,9 +78,10 @@ export default class RSDose extends RSDevice{
 	}
 	let short_name=this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
     	this.supplement_color[short_name]=this.config.heads['head_'+head_id].color;
+	let new_conf=merge(this.config.heads.common,this.config.heads["head_"+head_id]);
 	return html`
-<div class="head" id="head_${head_id}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${this.config.heads["head_"+head_id]}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
+<div class="head" id="head_${head_id}" style=${this.get_style(new_conf)}">
+	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
 
 </div>
 `;
@@ -111,7 +113,11 @@ export default class RSDose extends RSDevice{
 	}
 	let slots=(this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
 	if (slots>0){
-	    dosing_queue=html`<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>`;
+	    console.debug("DOSING QUEUE",this.config);
+	    dosing_queue=html`
+<div style="${this.get_style(this.config.dosing_queue)}">
+<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
+</div>`;
 	}
 	return html`
 	<div class="device_bg">
