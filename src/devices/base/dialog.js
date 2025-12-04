@@ -20,7 +20,6 @@ export class Dialog extends  MyElement {
     }//end of constructor
 
     render(){
-	console.debug("Dialog render: ",this.stateObj);
 	return html`
 <style>
 .dialog{

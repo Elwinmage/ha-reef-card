@@ -7,7 +7,6 @@ export default css`
     left : 0;
     width: 100%;
     aspect-ratio: 1/1.2;
- //border: 2px solid red;
     }
 
 .device_img{

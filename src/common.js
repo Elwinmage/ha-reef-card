@@ -114,19 +114,7 @@ export function updateObj(obj,newVal){
     return;
 }
 
-/*
-export function mergeObj(base, update){
-    let newObj=structuredClone(base);
-    for (let attribute of Object.keys(update)){
-	let val=eval("base.css");
-	//	console.debug("MERGE", attribute,eval("update.css"));
-	console.debug("MERGE",update.css);
-    }
-    return newObj;
-}
-*/
 export var off_color="150,150,150";
-
 
 // Time
 export function toTime(time){

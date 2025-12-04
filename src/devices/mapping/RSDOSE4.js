@@ -54,14 +54,32 @@ export const config = {
 		"width": "31%",
 		"height": "100%",
 	    },
+	    "container":{
+		"css":{
+		    "position": "absolute",
+		    "top": "41%",
+		    "width": "68%",
+		    "aspect-ratio": "1/3",
+		},
+	    },
+	    "warning" :{
+		"css":{
+		    "width": "40%",
+		    "position": "absolute",
+		    "left": "18%",
+		    "top": "60%",
+		    "animation": "blink 1s",
+		    "animation-iteration-count": "infinite",
+		},
+	    },
 	    "pump_state_head":{
 		"css":{
 		    "position": "absolute",
 		    "aspect-ratio": "1/1",
 		    "width": "55%",
 		    "border-radius": "50%",
-		    "top": "10%",
-		    "left": "35%",
+		    "top": "9.5%",
+		    "left": "32%",
 		},
 	    },
 	    "pump_state_labels":{
@@ -186,8 +204,8 @@ export const config = {
 		    "no_value":true,
 		    "css":{
 			"position":"absolute",
-			"top":"-25%",
-			"left":"-25%",
+			"top":"-23%",
+			"left":"-23%",
 			"aspect-ratio":"1/1",
 			
 			"width":"140%",
@@ -231,25 +249,52 @@ export const config = {
 	    "color": "140,67,148",
 	    "css":{
 		"left":"1%",
+	    },
+	    "calibration":{
+		"css":{
+		    "left":"33%",
+		},
 	    }
 	},
 	"head_2": {
 	    "color": "0,129,197",
 	    "css":{
 		"left":"22.5%",
-	    }
+	    },
 	},
 	"head_3": {
 	    "color": "0,130,100",
 	    "css":{
 		"left":"44%",
+	    },
+	    "pump_state_head":{
+		"css":{
+		    "left": "37%",
+		},
+	    },
+	    "calibration":{
+		"css":{
+		    "left":"37%",
+		},
 	    }
+
 	},
 	"head_4": {
 	    "color": "100,160,75",
 	    "css":{
 		"left":"65%",
+	    },
+	    "pump_state_head":{
+		"css":{
+		    "left": "41%",
+		},
+	    },
+	    "calibration":{
+		"css":{
+		    "left":"41%",
+		},
 	    }
+	    
 	}
     }
 };

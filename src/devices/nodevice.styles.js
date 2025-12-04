@@ -6,7 +6,6 @@ export default css`
   top: 0;
   left : 0;
   width: 100%;
-//  border: 2px blue solid;
   aspect-ratio: 2/1;
 }
 
@@ -15,6 +14,5 @@ export default css`
   top: 0;
   left : 0;
   width: 100%;
-//  border: 1px black solid;
 }
 `

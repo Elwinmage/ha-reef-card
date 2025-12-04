@@ -66,8 +66,6 @@ export default class RSDevice extends LitElement {
     update_config(){
 	this.config=JSON.parse(JSON.stringify(this.initial_config));
 	if ("conf" in this.user_config){
-	    console.debug("User config detected: ", this.user_config.conf);
-	    console.debug("Initial config: ", this.initial_config);
 	    if (this.device.elements[0].model in this.user_config.conf){
 		let device_conf=this.user_config.conf[this.device.elements[0].model];
 		if ('common' in device_conf){
@@ -129,7 +127,6 @@ export default class RSDevice extends LitElement {
 	if (! state){
 	    color=off_color;
 	}
-	console.debug("SWITCH", mapping_conf);
         return html`
 <div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>

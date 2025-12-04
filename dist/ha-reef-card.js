@@ -96,8 +96,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     update_config() {
         this.config = JSON.parse(JSON.stringify(this.initial_config));
         if ("conf" in this.user_config) {
-            console.debug("User config detected: ", this.user_config.conf);
-            console.debug("Initial config: ", this.initial_config);
             if (this.device.elements[0].model in this.user_config.conf) {
                 let device_conf = this.user_config.conf[this.device.elements[0].model];
                 if ('common' in device_conf) this.find_leaves(device_conf['common'], "this.config");
@@ -140,7 +138,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         }
         let color = this.config.color;
         if (!state) color = (0, $iXBpj.off_color);
-        console.debug("SWITCH", mapping_conf);
         return (0, $l56HR.html)`
 <div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
 <common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>
@@ -1037,106 +1034,49 @@ cursor: pointer;
 }
 
 .switch_on{
-position :absolute;
-border-radius: 30px;
-background-color: rgba(255,10,10,0.5);
-border: 1px solid red;
-width: 100%;
-height: 100%;
+  position :absolute;
+  border-radius: 30px;
+  background-color: rgba(255,10,10,0.5);
+  border: 1px solid red;
+  width: 100%;
+  height: 100%;
 }
 
 .switch_off{
-position :absolute;
-border-radius: 30px;
-background-color: rgba(175,175,175,0.5);
-//border: 1px solid red;
-width: 100%;
-height: 100%;
+  position :absolute;
+  border-radius: 30px;
+  background-color: rgba(175,175,175,0.5);
+  width: 100%;
+  height: 100%;
 }
 
 .switch_in_on{
-position :absolute;
-left: 38%;
-top: -20%;
-aspect-ratio: 1/1;
-border-radius: 30px;
-background-color: rgba(250,250,250,1);
-//border: 1px solid red;
-width: 60%;
+  position :absolute;
+  left: 38%;
+  top: -20%;
+  aspect-ratio: 1/1;
+  border-radius: 30px;
+  background-color: rgba(250,250,250,1);
+  width: 60%;
 }
 
 .switch_in_off{
-position :absolute;
-left: 0%;
-top: -25%;
-aspect-ratio: 1/1;
-border-radius: 30px;
-background-color: rgba(255,20,20,1);
-//border: 1px solid red;
-width: 60%;
-}
-
-//RSDOSE
-.supplement_info{
-position :absolute;
-aspect-ratio: 1/2.6;
-width : 62%;
-top: 49%;
-left: 2%;
-border-radius: 30px;
-}
-
-
-.manual_dose_head{
- position: absolute;
-aspect-ratio: 1/1;
-width: 15%;
-border-radius: 50%;
-top: 5%;
-left: 33%;
-}
-
-.pump_state_head{
- position: absolute;
- aspect-ratio: 1/1;
- width: 55%;
- border-radius: 50%;
- top: 10%;
- left: 35%;
-}
-
-.container{
-position: absolute;
-top: 41%;
-width: 68%;
-aspect-ratio: 1/3;
-}
-
-img{
- position: absolute;
- width: 100%;
-}
-
-.pipe{
-  flex: 0 0 auto;
-  position: absolute;
-  width: 70%;
-  top: 32%;
-  left: 30%;
-//  border : 3px solid gray;
-  }
-
-svg{
-stroke: black;
+  position :absolute;
+  left: 0%;
+  top: -25%;
+  aspect-ratio: 1/1;
+  border-radius: 30px;
+  background-color: rgba(255,20,20,1);
+  width: 60%;
 }
 
 .switch_button{
-aspect-ratio: 1/1;
-width: 100%;
-height:100%;
- border-radius: 50%;
- color: white;
- text-align:center;
+  aspect-ratio: 1/1;
+  width: 100%;
+  height:100%;
+  border-radius: 50%;
+  color: white;
+  text-align:center;
 };
 
 
@@ -1330,15 +1270,13 @@ var $j8KxL = parcelRequire("j8KxL");
 var $afcc6ff40448b8c3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 :hover{
-cursor: pointer;
+  cursor: pointer;
 }
 
-
 .button{
-//aspect-ratio: 1/1;
-width:100%;
-height:100%;
-border-radius: 30px;
+  width:100%;
+  height:100%;
+  border-radius: 30px;
 }
 `;
 
@@ -1391,7 +1329,6 @@ var $1Um3j = parcelRequire("1Um3j");
         more_info.style.display = "flex";
     }
     render() {
-        //console.debug("MoreInfo render: ");
         return (0, $l56HR.html)`
           <div id="window-mask" hidden>
    	    <div id="moreinfo">
@@ -1530,16 +1467,7 @@ parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
-.sensor{
-  border-radius: 30px;
-  text-align: center;
-  padding-left: 5px;
-  padding-right: 5px;
-  width: 60%;
-margin-left:10%;
-}
-
-sensor{
+div#manual_head_volume{
   border-radius: 30px;
   text-align: center;
   padding-left: 5px;
@@ -1899,7 +1827,6 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
     left : 0;
     width: 100%;
     aspect-ratio: 1/1.2;
- //border: 2px solid red;
     }
 
 .device_img{
@@ -1962,7 +1889,6 @@ var $4161d82e68a13a1d$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
   top: 0;
   left : 0;
   width: 100%;
-//  border: 2px blue solid;
   aspect-ratio: 2/1;
 }
 
@@ -1971,7 +1897,6 @@ var $4161d82e68a13a1d$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
   top: 0;
   left : 0;
   width: 100%;
-//  border: 1px black solid;
 }
 `;
 
@@ -1987,17 +1912,10 @@ class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $5c2Je.default) {
         ]
     };
     constructor(hass, device){
-        //constructor(){
-        //var device={'elements':[{'model':'NODEVICE','name':''}]};
-        //super(hass,device,config);
         super((0, $0ef451c83bce80a0$export$e506a1d27d1eaa20), hass, device);
     }
     _populate_entities() {}
     render() {
-        console.log("pppppp");
-        console.log(this.hass);
-        console.log(this.device);
-        console.log("pppppp");
         return (0, $l56HR.html)`
 <p id="device_name">${this.config.name}</p>
 <div class="device_bg">
@@ -2065,14 +1983,32 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "width": "31%",
                 "height": "100%"
             },
+            "container": {
+                "css": {
+                    "position": "absolute",
+                    "top": "41%",
+                    "width": "68%",
+                    "aspect-ratio": "1/3"
+                }
+            },
+            "warning": {
+                "css": {
+                    "width": "40%",
+                    "position": "absolute",
+                    "left": "18%",
+                    "top": "60%",
+                    "animation": "blink 1s",
+                    "animation-iteration-count": "infinite"
+                }
+            },
             "pump_state_head": {
                 "css": {
                     "position": "absolute",
                     "aspect-ratio": "1/1",
                     "width": "55%",
                     "border-radius": "50%",
-                    "top": "10%",
-                    "left": "35%"
+                    "top": "9.5%",
+                    "left": "32%"
                 }
             },
             "pump_state_labels": {
@@ -2197,8 +2133,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "no_value": true,
                     "css": {
                         "position": "absolute",
-                        "top": "-25%",
-                        "left": "-25%",
+                        "top": "-23%",
+                        "left": "-23%",
                         "aspect-ratio": "1/1",
                         "width": "140%"
                     }
@@ -2240,6 +2176,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "color": "140,67,148",
             "css": {
                 "left": "1%"
+            },
+            "calibration": {
+                "css": {
+                    "left": "33%"
+                }
             }
         },
         "head_2": {
@@ -2252,12 +2193,32 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "color": "0,130,100",
             "css": {
                 "left": "44%"
+            },
+            "pump_state_head": {
+                "css": {
+                    "left": "37%"
+                }
+            },
+            "calibration": {
+                "css": {
+                    "left": "37%"
+                }
             }
         },
         "head_4": {
             "color": "100,160,75",
             "css": {
                 "left": "65%"
+            },
+            "pump_state_head": {
+                "css": {
+                    "left": "41%"
+                }
+            },
+            "calibration": {
+                "css": {
+                    "left": "41%"
+                }
             }
         }
     }
@@ -2272,13 +2233,6 @@ parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
-.container{
-position: absolute;
-top: 41%;
-width: 68%;
-aspect-ratio: 1/3;
-}
-
 img{
  position: absolute;
  width: 100%;
@@ -2286,22 +2240,6 @@ img{
 
 svg{
 stroke: black;
-}
-
-.manual_head_volume{
-position: absolute;
-width: 60%;
-top: 0%;
-left: 20%;
-}
-
-img.warning{
-width: 40%;
-position: absolute;
-left: 18%;
-top: 60%;
-    animation: blink 1s;
-    animation-iteration-count: infinite;
 }
 
 @keyframes blink {
@@ -2315,7 +2253,6 @@ top: 60%;
         opacity: 1;
     }
 }
-
 `;
 
 
@@ -2366,7 +2303,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             color = (0, $iXBpj.off_color);
         }
         return (0, $l56HR.html)`
-<div class="container">
+<div class="container" style="${this.get_style(this.config.container)}">
   ${style}
   <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
 </div>
@@ -2376,14 +2313,14 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.supplement = this.hass.states[this.entities['supplement'].entity_id];
         if (this.supplement.attributes.supplement.uid != 'null') {
             let warning = '';
+            let calibration = '';
             let color = this.config.color + "," + this.config.alpha;
             if (this.hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
-                warning = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>"`;
+                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
-            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/>"`;
-            console.debug("PIPE", this.config.pipe);
+            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}">`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
@@ -2399,6 +2336,7 @@ ${this._render_sensors(this.state_on, "pump_state_labels")}
 ${this._render_sensors(this.state_on)}
 ${this._render_actuators(this.state_on)} 
 ${warning}
+${calibration}
    	    `;
         } else // TODO: add button for new supplement
         // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
@@ -2416,12 +2354,6 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
-.head{
-    flex: 0 0 auto;
-    width: 31%;
-    height: 100%;
-}
 `;
 
 
@@ -2500,7 +2432,7 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
         return (0, $l56HR.html)`
 <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
 <span class="dosing_queue">
-${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${(0, $iXBpj.toTime)(slot.time)}</span></div>`;
+${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${(0, $iXBpj.toTime)(slot.time)}</span><hr /></div>`;
     }
     render() {
         this.schedule = this.stateObj.attributes.queue;
@@ -2561,7 +2493,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
         let new_conf = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(this.config.heads.common, this.config.heads["head_" + head_id]);
         return (0, $l56HR.html)`
-<div class="head" id="head_${head_id}" style=${this.get_style(new_conf)}">
+<div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
 	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
 
 </div>
@@ -2586,13 +2518,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this._populate_entities_with_heads();
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
-        if (slots > 0) {
-            console.debug("DOSING QUEUE", this.config);
-            dosing_queue = (0, $l56HR.html)`
+        if (slots > 0) dosing_queue = (0, $l56HR.html)`
 <div style="${this.get_style(this.config.dosing_queue)}">
 <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
 </div>`;
-        }
         return (0, $l56HR.html)`
 	<div class="device_bg">
         ${style}
@@ -2859,7 +2788,6 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         this.addEventListener('config-changed', this.render());
     }
     setConfig(config) {
-        console.debug("Loading config");
         this._config = config;
     }
     init_devices() {
@@ -2880,13 +2808,11 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             }
         `;
     render() {
-        console.debug("editor.render: ", this._config);
         if (this._config) {
             if (this.first_init == true) {
                 this.first_init = false;
                 this.init_devices();
             }
-            console.debug(this._config);
             return (0, $l56HR.html)`
             <div class="card-config">
                 <div class="tabs">
@@ -2908,7 +2834,6 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     device_conf() {
         if (this._config.device && this._config.device.length > 0) {
             var device = this.devices_list.get_by_name(this._config.device);
-            console.debug("device: ", device);
             var model = device.elements[0].model;
             var lit_device = null;
             switch(model){
@@ -2926,7 +2851,6 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         return ``;
     }
     handleChangedEvent(changedEvent) {
-        console.debug("editor.handleChangedEvent");
         // this._config is readonly, copy needed
         var newConfig = JSON.parse(JSON.stringify(this._config));
         var elt = this.shadowRoot.getElementById("device");

@@ -51,7 +51,6 @@ class MoreInfo extends  MyElement {
     }//end of function display
     
     render(){
-	//console.debug("MoreInfo render: ");
 	return html`
           <div id="window-mask" hidden>
    	    <div id="moreinfo">

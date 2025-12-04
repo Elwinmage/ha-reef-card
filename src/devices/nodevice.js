@@ -13,12 +13,7 @@ export class NoDevice extends RSDevice{
     static styles = styles;
     device={'elements':[{'model':'NODEVICE','name':''}]};
 
-
-
     constructor(hass,device){
-	//constructor(){
-	//var device={'elements':[{'model':'NODEVICE','name':''}]};
-	//super(hass,device,config);
 	super(config,hass,device);
     }
 
@@ -27,10 +22,6 @@ export class NoDevice extends RSDevice{
     }
     
     render(){
-	console.log("pppppp");
-	console.log(this.hass);
-	console.log(this.device);
-	console.log("pppppp");
 	return html`
 <p id="device_name">${this.config.name}</p>
 <div class="device_bg">

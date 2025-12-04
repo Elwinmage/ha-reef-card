@@ -26,7 +26,6 @@ export class ReefCardEditor extends LitElement {
     }
     
     setConfig(config) {
-	console.debug("Loading config");
         this._config = config;
     }// end of function setConfig
 
@@ -51,13 +50,11 @@ export class ReefCardEditor extends LitElement {
         `;
 
     render() {
-	console.debug("editor.render: ",this._config);
 	if(this._config){
 	    if (this.first_init==true){
 		this.first_init=false;
 		this.init_devices();
 	    }
-	    console.debug(this._config);
 	    return html`
             <div class="card-config">
                 <div class="tabs">
@@ -81,7 +78,6 @@ export class ReefCardEditor extends LitElement {
     device_conf(){
 	if (this._config.device && this._config.device.length > 0){
 	    var device=this.devices_list.get_by_name(this._config.device);
-	    console.debug("device: ",device);
 	    var model = device.elements[0].model;
 	    var lit_device=null;
 	    switch(model){
@@ -100,7 +96,6 @@ export class ReefCardEditor extends LitElement {
     }
     
     handleChangedEvent(changedEvent) {
-	console.debug("editor.handleChangedEvent");
         // this._config is readonly, copy needed
         var newConfig = JSON.parse(JSON.stringify(this._config)); 
 	var elt = this.shadowRoot.getElementById("device");

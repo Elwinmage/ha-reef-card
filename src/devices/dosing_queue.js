@@ -28,7 +28,7 @@ export default class DosingQueue extends MyElement{
 	return html`
 <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
 <span class="dosing_queue">
-${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${toTime(slot.time)}</span></div>`;
+${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${toTime(slot.time)}</span><hr /></div>`;
      }//end of function _render_slot_schedule
 
 
