@@ -259,7 +259,7 @@ export const config = {
 	"head_2": {
 	    "color": "0,129,197",
 	    "css":{
-		"left":"22.5%",
+		"left":"23%",
 	    },
 	},
 	"head_3": {

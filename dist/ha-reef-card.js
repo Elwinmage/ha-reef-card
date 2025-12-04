@@ -2186,7 +2186,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_2": {
             "color": "0,129,197",
             "css": {
-                "left": "22.5%"
+                "left": "23%"
             }
         },
         "head_3": {
