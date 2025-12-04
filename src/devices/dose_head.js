@@ -7,6 +7,7 @@ import style_progress_bar from "./base/progress_bar.styles";
 
 import {ProgressBar} from "./base/progress_bar";
 import {off_color} from "../common.js";
+import i18n from "../translations/myi18n.js";
 
 export default class DoseHead extends RSDevice{
 
@@ -76,7 +77,7 @@ export default class DoseHead extends RSDevice{
 		color=off_color+","+this.config.alpha;
 	    }
 	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on"){
-		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}">`;
+		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
 	    }
 	    return html`
                ${this._render_container()}

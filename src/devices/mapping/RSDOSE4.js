@@ -73,6 +73,21 @@ export const config = {
 		    "animation-iteration-count": "infinite",
 		},
 	    },
+	    "warning_label" :{
+		"css":{
+		    "width": "40%",
+		    "position": "absolute",
+		    "left": "18%",
+		    "top": "69%",
+		    "animation": "blink 1s",
+		    "animation-iteration-count": "infinite",
+		    "background-color": "#df1800",
+		    "text-align": "center",
+		    "border-radius": "20px",
+		    "color": "#ffff00",
+		    "font-weight": "bold",
+		},
+	    },
 	    "pump_state_head":{
 		"css":{
 		    "position": "absolute",

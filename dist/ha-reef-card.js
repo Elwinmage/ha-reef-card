@@ -2002,6 +2002,21 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "animation-iteration-count": "infinite"
                 }
             },
+            "warning_label": {
+                "css": {
+                    "width": "40%",
+                    "position": "absolute",
+                    "left": "18%",
+                    "top": "69%",
+                    "animation": "blink 1s",
+                    "animation-iteration-count": "infinite",
+                    "background-color": "#df1800",
+                    "text-align": "center",
+                    "border-radius": "20px",
+                    "color": "#ffff00",
+                    "font-weight": "bold"
+                }
+            },
             "pump_state_head": {
                 "css": {
                     "position": "absolute",
@@ -2263,6 +2278,8 @@ parcelRequire("3wGyI");
 parcelRequire("M8QIC");
 
 var $iXBpj = parcelRequire("iXBpj");
+
+var $dPhcg = parcelRequire("dPhcg");
 class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     static styles = [
         (0, $12c519d2fc52c039$export$2e2bcd8739ae039),
@@ -2321,7 +2338,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                 calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
-            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}">`;
+            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
