@@ -101,9 +101,10 @@ ${calibration}
 	    // TODO: add button for new supplement
 	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
 	    //  labels: enhancement rsdose
-	    return html`<div class="container">
-  <img src='${new URL("./img/container_add.png",import.meta.url)}' />
-</div>
+	    return html`
+   <div class="container" style="${this.get_style(this.config.container)}">
+     <img src='${new URL("./img/container_add.png",import.meta.url)}' />
+   </div>
 `;
 	}//else
     }
