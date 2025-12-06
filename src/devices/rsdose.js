@@ -99,7 +99,9 @@ export default class RSDose extends RSDevice{
 	return disabled;
     }//end of function is_disabled
 
-    
+    /* TODO: put disabled and mainteance view in common device.js part
+       labels: enhancement, all
+     */
     render(){
 	this.update_config();
 	if (this.is_disabled()){
@@ -108,6 +110,10 @@ export default class RSDose extends RSDevice{
 	let style=html``;
 	let dosing_queue=html``;
 	this._populate_entities_with_heads();
+	
+	if(this.hass.states[this.entities['maintenance'].entity_id].state=='on'){
+	    return this._render_disabled("maintenance"); 
+	}
 	if(!this.is_on()){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
 	}

@@ -93,10 +93,15 @@ export default class RSDevice extends LitElement {
 	return (this.hass.states[this.entities['device_state'].entity_id].state=='on');
     }
     
-    _render_disabled(){
+    _render_disabled(reason="disabledInHa"){
+	let maintenance_button=''
+	if (reason=="maintenance"){
+	    maintenance_button=this._render_switch(this.config.switches[1],true);
+	}
 	return html`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${i18n._("disabledInHa")}</p>
+                          <p class='disabled_in_ha'>${i18n._(reason)}</p>
+${maintenance_button}
                         </div">`;
     }//end of function _render_disabled
 

@@ -7,6 +7,7 @@ export const dict={
 	doses: "Doses",
 	days_left: "Remaining Days",
 	empty: "Empty",
+	maintenance: "Maintenance in progress..",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -16,5 +17,6 @@ export const dict={
 	doses: "Doses",
 	days_left: "Jours restant",
 	empty: "Vide",
+	maintenance: "Maintenance en cours...",
     },
 }

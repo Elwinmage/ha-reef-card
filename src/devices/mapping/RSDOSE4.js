@@ -25,6 +25,28 @@ export const config = {
 		"top": "28%",
 		"left": "2%",
 	    }
+	},
+	{
+	    "name": "maintenance",
+	    "type":"hacs",
+	    "label":false,
+	    "class":"on_off",
+	    "style": "switch",
+	    "tap_action": {
+		//"enabled": false,
+		//"domain": "switch",
+		//"action":"turn_on",
+		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
+	    },
+	    "css":{
+		"flex": "0 0 auto",
+		"position": "absolute",
+		"width": "5.5%",
+		"height": "2%",
+		"border-radius": "50%",
+		"top": "22%",
+		"left": "2%",
+	    }
 	}
     ],
     "dosing_queue":{

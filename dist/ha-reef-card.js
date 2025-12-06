@@ -116,10 +116,13 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     is_on() {
         return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
     }
-    _render_disabled() {
+    _render_disabled(reason = "disabledInHa") {
+        let maintenance_button = '';
+        if (reason == "maintenance") maintenance_button = this._render_switch(this.config.switches[1], true);
         return (0, $l56HR.html)`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._("disabledInHa")}</p>
+                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._(reason)}</p>
+${maintenance_button}
                         </div">`;
     }
     get_style(conf) {
@@ -949,7 +952,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         heads_colors: "Heads Colors",
         doses: "Doses",
         days_left: "Remaining Days",
-        empty: "Empty"
+        empty: "Empty",
+        maintenance: "Maintenance in progress.."
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -958,7 +962,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         heads_colors: "Couleur des t\xeates",
         doses: "Doses",
         days_left: "Jours restant",
-        empty: "Vide"
+        empty: "Vide",
+        maintenance: "Maintenance en cours..."
     }
 };
 
@@ -1954,6 +1959,24 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "top": "28%",
                 "left": "2%"
             }
+        },
+        {
+            "name": "maintenance",
+            "type": "hacs",
+            "label": false,
+            "class": "on_off",
+            "style": "switch",
+            "tap_action": {
+            },
+            "css": {
+                "flex": "0 0 auto",
+                "position": "absolute",
+                "width": "5.5%",
+                "height": "2%",
+                "border-radius": "50%",
+                "top": "22%",
+                "left": "2%"
+            }
         }
     ],
     "dosing_queue": {
@@ -2528,13 +2551,16 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
          // for
         return disabled;
     }
-    render() {
+    /* TODO: put disabled and mainteance view in common device.js part
+       labels: enhancement, all
+     */ render() {
         this.update_config();
         if (this.is_disabled()) return this._render_disabled();
          //if
         let style = (0, $l56HR.html)``;
         let dosing_queue = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
+        if (this.hass.states[this.entities['maintenance'].entity_id].state == 'on') return this._render_disabled("maintenance");
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
         if (slots > 0) dosing_queue = (0, $l56HR.html)`
