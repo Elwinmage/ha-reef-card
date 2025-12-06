@@ -100,6 +100,7 @@ export default class RSDose extends RSDevice{
     }//end of function is_disabled
 
     /* TODO: put disabled and mainteance view in common device.js part
+    Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/26
        labels: enhancement, all
      */
     render(){
