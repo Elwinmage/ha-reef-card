@@ -1098,14 +1098,12 @@ var $eGUNk = parcelRequire("eGUNk");
 class MyElement extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
-            hass: {},
-            conf: {},
+            //	    conf: {},
             stateObj: {},
             doubleClick: {
                 type: Boolean
             },
-            mouseDown: {},
-            entities: {}
+            mouseDown: {}
         };
     }
     constructor(hass, conf, stateObj, entities = {}, color = "255,255,255", alpha = 1){
@@ -1136,6 +1134,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
             this._handleClick(e);
         });
     }
+    // updated(changes){
+    // 	console.log("RE-RENDERED element");
+    // }
     get_entity(entity_translation_value) {
         return this.hass.states[this.entities[entity_translation_value].entity_id];
     }
@@ -1710,7 +1711,10 @@ class ProgressCircle extends (0, $1Um3j.default) {
         let iconv = (0, $dPhcg.default);
         let value = this.stateObj.state;
         let target = this.stateObjTarget.state;
-        let percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
+        let percent = 100;
+        console.debug("VALUE", value, target);
+        if (parseFloat(value) < parseFloat(target)) percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
+         //if
         let circle_class = this.conf.class;
         let label = '';
         if ('label' in this.conf) label = eval(this.conf.label);
@@ -2541,6 +2545,9 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 </div>
 `;
     }
+    // updated(changes){
+    // 	console.log("RE-RENDERED");
+    // }
     is_disabled() {
         let disabled = false;
         let sub_nb = this.device.elements.length;

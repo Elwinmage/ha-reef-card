@@ -87,6 +87,10 @@ export default class RSDose extends RSDevice{
 `;
     }
 
+    // updated(changes){
+    // 	console.log("RE-RENDERED");
+    // }
+    
     is_disabled(){
 	let disabled=false;
 	let sub_nb=this.device.elements.length;

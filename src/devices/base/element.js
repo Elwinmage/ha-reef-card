@@ -3,12 +3,11 @@ import { html, LitElement } from "lit";
 export default class MyElement extends LitElement{
     static get properties(){
 	return {
-	    hass: {},
-	    conf: {},
+//	    conf: {},
 	    stateObj: {},
 	    doubleClick: {type: Boolean},
 	    mouseDown: {},
-	    entities: {}
+//	    entities: {}
 	};
     }// end of get properties 
 
@@ -31,6 +30,11 @@ export default class MyElement extends LitElement{
 	    this._handleClick(e);
 	})};
 
+    // updated(changes){
+    // 	console.log("RE-RENDERED element");
+    // }
+
+    
     get_entity(entity_translation_value){
 	return this.hass.states[this.entities[entity_translation_value].entity_id];
     }//end of function get_entity
