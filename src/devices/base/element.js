@@ -5,6 +5,7 @@ export default class MyElement extends LitElement{
 	return {
 //	    conf: {},
 	    stateObj: {},
+	    color: {},
 	    doubleClick: {type: Boolean},
 	    mouseDown: {},
 //	    entities: {}

@@ -1100,6 +1100,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         return {
             //	    conf: {},
             stateObj: {},
+            color: {},
             doubleClick: {
                 type: Boolean
             },
