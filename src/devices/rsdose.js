@@ -90,34 +90,16 @@ export default class RSDose extends RSDevice{
     // updated(changes){
     // 	console.log("RE-RENDERED");
     // }
-    
-    is_disabled(){
-	let disabled=false;
-	let sub_nb=this.device.elements.length;
-	for( var i = 0; i<sub_nb; i++){
-	    if (this.device.elements[i].disabled_by!=null){
-		disabled=true;
-		break;
-	    }// if
-	}// for
-	return disabled;
-    }//end of function is_disabled
 
-    /* TODO: put disabled and mainteance view in common device.js part
-    Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/26
-       labels: enhancement, all
-     */
     render(){
 	this.update_config();
-	if (this.is_disabled()){
-	    return this._render_disabled();
-	}//if
 	let style=html``;
 	let dosing_queue=html``;
 	this._populate_entities_with_heads();
 	
-	if(this.hass.states[this.entities['maintenance'].entity_id].state=='on'){
-	    return this._render_disabled("maintenance"); 
+	let disabled=this._render_disabled();
+	if(disabled!=null){
+	    return disabled;
 	}
 	if(!this.is_on()){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;

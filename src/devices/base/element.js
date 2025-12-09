@@ -75,7 +75,7 @@ export default class MyElement extends LitElement{
 	}
 	return this._render()
     }
-    
+
     async run_action(type,domain,action,data){
 	let enabled=true;
 	if (this.conf[type]){
@@ -124,6 +124,9 @@ export default class MyElement extends LitElement{
     }
 
     _click(e){
+	if ("tap_action" in this.config){
+	    this.run_action(this.config.tap_action);
+	}
     }
 
     _longclick(e){

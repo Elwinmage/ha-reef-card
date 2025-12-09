@@ -113,12 +113,30 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
         }
     }
+    is_disabled() {
+        let disabled = false;
+        let sub_nb = this.device.elements.length;
+        for(var i = 0; i < sub_nb; i++)if (this.device.elements[i].disabled_by != null) {
+            disabled = true;
+            break;
+        } // if
+         // for
+        return disabled;
+    }
     is_on() {
         return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
     }
-    _render_disabled(reason = "disabledInHa") {
+    _render_disabled() {
+        let reason = null;
         let maintenance_button = '';
-        if (reason == "maintenance") maintenance_button = this._render_switch(this.config.switches[1], true);
+        if (this.is_disabled()) reason = "disabledInHa";
+        else if (this.hass.states[this.entities['maintenance'].entity_id].state == 'on') {
+            reason = "maintenance";
+            for (let swtch of this.config.switches)if (swtch.name == "maintenance") maintenance_button = this._render_switch(this.config.switches[1], true);
+             //if
+             //for
+        } // else if
+        if (reason == null) return reason;
         return (0, $l56HR.html)`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
                           <p class='disabled_in_ha'>${(0, $dPhcg.default)._(reason)}</p>
@@ -1204,7 +1222,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
         }
         this.mouseDown = e.timeStamp;
     }
-    _click(e) {}
+    _click(e) {
+        if ("tap_action" in this.config) this.run_action(this.config.tap_action);
+    }
     _longclick(e) {}
     _dblclick(e) {}
     msgbox(msg) {
@@ -2095,6 +2115,12 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "width": "60%",
                         "top": "0%",
                         "left": "20%"
+                    },
+                    "tap_action": {
+                        "enabled": true,
+                        "domain": "__personnal__",
+                        "action": "message_box",
+                        "data": "test"
                     }
                 },
                 {
@@ -2549,27 +2575,13 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // updated(changes){
     // 	console.log("RE-RENDERED");
     // }
-    is_disabled() {
-        let disabled = false;
-        let sub_nb = this.device.elements.length;
-        for(var i = 0; i < sub_nb; i++)if (this.device.elements[i].disabled_by != null) {
-            disabled = true;
-            break;
-        } // if
-         // for
-        return disabled;
-    }
-    /* TODO: put disabled and mainteance view in common device.js part
-    Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/26
-       labels: enhancement, all
-     */ render() {
+    render() {
         this.update_config();
-        if (this.is_disabled()) return this._render_disabled();
-         //if
         let style = (0, $l56HR.html)``;
         let dosing_queue = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
-        if (this.hass.states[this.entities['maintenance'].entity_id].state == 'on') return this._render_disabled("maintenance");
+        let disabled = this._render_disabled();
+        if (disabled != null) return disabled;
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
         if (slots > 0) dosing_queue = (0, $l56HR.html)`

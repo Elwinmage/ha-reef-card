@@ -17,7 +17,7 @@ import style_common from "./common.styles";
 let iconv = i18n;
 
 /*
- * RSDose 
+ * RSDevice
  */
 
 export default class RSDevice extends LitElement {
@@ -89,14 +89,40 @@ export default class RSDevice extends LitElement {
 	}
     }
 
+    is_disabled(){
+	let disabled=false;
+	let sub_nb=this.device.elements.length;
+	for( var i = 0; i<sub_nb; i++){
+	    if (this.device.elements[i].disabled_by!=null){
+		disabled=true;
+		break;
+	    }// if
+	}// for
+	return disabled;
+    }//end of function is_disabled
+
+
     is_on(){
 	return (this.hass.states[this.entities['device_state'].entity_id].state=='on');
     }
+
     
-    _render_disabled(reason="disabledInHa"){
-	let maintenance_button=''
-	if (reason=="maintenance"){
-	    maintenance_button=this._render_switch(this.config.switches[1],true);
+    _render_disabled(){
+	let reason =null;
+	let maintenance_button='';
+	if (this.is_disabled()){
+	    reason="disabledInHa";
+	}
+	else if (this.hass.states[this.entities['maintenance'].entity_id].state=='on'){
+	    reason="maintenance";
+	    for ( let swtch of this.config.switches){
+		if (swtch.name=="maintenance"){
+		    maintenance_button=this._render_switch(this.config.switches[1],true);
+		}//if
+	    }//for
+	}// else if
+	if (reason==null){
+	    return reason;
 	}
 	return html`<div class="device_bg">
                           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>

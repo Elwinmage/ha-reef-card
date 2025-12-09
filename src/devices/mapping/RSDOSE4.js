@@ -161,6 +161,12 @@ export const config = {
 			"top": "0%",
 			"left": "20%",
 		    },
+		    "tap_action": {
+			"enabled": true,
+			"domain": "__personnal__",
+			"action" : "message_box",
+			"data": "test"
+		    }
 		},
 		{
 		    "name": "manual_dosed_today",
