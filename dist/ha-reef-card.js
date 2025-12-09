@@ -54,6 +54,8 @@ parcelRequire("303dX");
 var $iXBpj = parcelRequire("iXBpj");
 
 var $37d5w = parcelRequire("37d5w");
+
+var $7Rfxy = parcelRequire("7Rfxy");
 let iconv = (0, $dPhcg.default);
 class RSDevice extends (0, $eGUNk.LitElement) {
     static styles = [
@@ -65,7 +67,8 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             config: {},
             initial_config: {},
             device: {},
-            user_config: {}
+            user_config: {},
+            _dialog_box: {}
         };
     }
     constructor(i_config, hass, device, user_config){
@@ -77,6 +80,13 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         this.user_config = user_config;
         this.entities = {};
         this.first_init = true;
+        this._dialog_box = null;
+    }
+    config_dialog_box() {
+        this._dialog_box = (0, $7Rfxy.default);
+        console.debug("config_dialog_box", this.config);
+        this._dialog_box.set_conf(this.config.dialogs);
+        this.hass['redsea_dialog_box'] = this._dialog_box;
     }
     get_entity(entity_translation_value) {
         return this.hass.states[this.entities[entity_translation_value].entity_id];
@@ -971,7 +981,10 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         doses: "Doses",
         days_left: "Remaining Days",
         empty: "Empty",
-        maintenance: "Maintenance in progress.."
+        maintenance: "Maintenance in progress..",
+        set_manual_head_volume: "Manual volume",
+        exit: "Done",
+        set_manual_head_volume: "Manual volume dosing"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -981,7 +994,10 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         doses: "Doses",
         days_left: "Jours restant",
         empty: "Vide",
-        maintenance: "Maintenance en cours..."
+        maintenance: "Maintenance en cours...",
+        set_manual_head_volume: "Volume manuel",
+        exit: "Terminer",
+        set_manual_head_volume: "Dosage du volume manuel"
     }
 };
 
@@ -1018,28 +1034,14 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
             if ('color' in this.conf) this.color = this.conf.color;
             if ('alpha' in this.conf) this.alpha = this.conf.alpha;
             return (0, $l56HR.html)`
- <style>
-      #${this.conf.name}{
-background-color: rgba(${this.color},${this.alpha});
-}   
-</style>
-   	    <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
+                     <style>
+                       #${this.conf.name}{
+                          background-color: rgba(${this.color},${this.alpha});
+                       }   
+                     </style>
+                     <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
 `;
         } else console.error("Switch style " + this.conf.style + " unknown for " + this.conf.name);
-    }
-    async _click(e) {
-        let data = {
-            'entity_id': this.stateObj.entity_id
-        };
-        this.run_action("tap_action", "switch", "toggle", data);
-    }
-    async _longclick(e) {
-        let data = "Hold";
-        this.run_action("hold_action", "__personnal__", "message_box", data);
-    }
-    async _dblclick(e) {
-        let data = "Double Tap";
-        this.run_action("double_tap_action", "__personnal__", "message_box", data);
     }
 } // end of class
 window.customElements.define('common-switch', $4be57e4249dc2092$export$b5d5cf8927ab7262);
@@ -1100,9 +1102,7 @@ cursor: pointer;
   border-radius: 50%;
   color: white;
   text-align:center;
-};
-
-
+}
 `;
 
 });
@@ -1178,37 +1178,35 @@ class MyElement extends (0, $eGUNk.LitElement) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
     }
     render() {
-        let value = this.stateObj.state;
+        let value = null;
+        if (this.stateObj != null) value = this.stateObj.state;
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         return this._render();
     }
-    async run_action(type, domain, action, data) {
-        let enabled = true;
-        if (this.conf[type]) {
-            let params = [
-                'enabled',
-                'domain',
-                'action',
-                'data'
-            ];
-            for (let param of params)if (param in this.conf[type]) eval(param + "=this.conf['" + type + "']['" + param + "'];");
-             //if - has domain
-             // for
-        }
-        if (enabled) {
-            if (domain == "__personnal__") switch(action){
+    async run_action(action) {
+        if (!("enabled" in action) || action.enabled) {
+            if (action.domain == "redsea_ui") switch(action.action){
+                case "dialog":
+                    this.hass.redsea_dialog_box.display(action.data.type, this);
+                    break;
+                case "exit-dialog":
+                    this.hass.redsea_dialog_box.quit();
+                    break;
                 case "message_box":
-                    this.msgbox(data);
+                    this.msgbox(action.data);
                     break;
                 default:
-                    let error_str = "Error: try to run unknown personnal action: " + action;
+                    let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
                     this.msgbox(error_str);
                     console.error(error_str);
                     break;
             } //switch
             else {
-                console.debug("Call Service", domain, action, data);
-                this.hass.callService(domain, action, data);
+                if (action.data == "default") action.data = {
+                    "entity_id": this.stateObj.entity_id
+                };
+                console.debug("Call Service", action.domain, action.action, action.data);
+                this.hass.callService(action.domain, action.action, action.data);
             } //else -- ha domain action
         } //if -- enabled
     }
@@ -1223,10 +1221,17 @@ class MyElement extends (0, $eGUNk.LitElement) {
         this.mouseDown = e.timeStamp;
     }
     _click(e) {
-        if ("tap_action" in this.config) this.run_action(this.config.tap_action);
+        if ('tap_action' in this.conf) this.run_action(this.conf.tap_action);
     }
-    _longclick(e) {}
-    _dblclick(e) {}
+    _longclick(e) {
+        if ("hold_action" in this.conf) this.run_action(this.conf.hold_action);
+    }
+    _dblclick(e) {
+        if ("double_tap_action" in this.conf) this.run_action(this.conf.double_tap_action);
+    }
+    dialog(type) {
+        this.hass.redsea_dialog_box.display(type);
+    }
     msgbox(msg) {
         this.dispatchEvent(new CustomEvent("hass-notification", {
             bubbles: true,
@@ -1262,28 +1267,18 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
         super(hass, conf, stateObj, color, alpha);
     }
     _render() {
+        let label = '';
+        let sclass = 'button';
+        if ('label' in this.conf) label = this.conf.label;
+        if ('class' in this.conf) sclass = this.conf.class;
         return (0, $l56HR.html)`
  <style>
 .button{
 background-color: rgba(${this.color},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}"></div>
+   	    <div class="${sclass}" id="${this.conf.name}">${label}</div>
 `;
-    }
-    async _click(e) {
-        let data = {
-            'entity_id': this.stateObj.entity_id
-        };
-        this.run_action("tap_action", "button", "press", data);
-    }
-    async _longclick(e) {
-        let data = "Hold";
-        this.run_action("hold_action", "__personnal__", "message_box", data);
-    }
-    async _dblclick(e) {
-        let data = "Double Tap";
-        this.run_action("double_tap_action", "__personnal__", "message_box", data);
     }
 } // end of class
 window.customElements.define('common-button', $4492769e229d8dfa$export$353f5b6fc5456de1);
@@ -1305,13 +1300,28 @@ var $afcc6ff40448b8c3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
   height:100%;
   border-radius: 30px;
 }
+
+.dialog_button:hover{
+  background-color: #006787;
+}
+
+.dialog_button{
+  border-radius: 20px;
+  background-color: #009ac7;
+  color: white;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display:inline-block;
+}
+.
 `;
 
 });
 
 parcelRegister("9HhHn", function(module, exports) {
-
-$parcel$export(module.exports, "default", () => $70f5dbc919a9d6f3$export$2e2bcd8739ae039);
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 
@@ -1474,15 +1484,6 @@ background-color: rgba(${this.color},${this.alpha});
    	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
 `;
     }
-    async _click(e) {
-        console.debug("Click ", e.detail, " ", e.timeStamp);
-    }
-    async _longclick(e) {
-        console.debug("Long Click");
-    }
-    async _dblclick(e) {
-        console.debug("Double click");
-    }
 } // end of class
 window.customElements.define('common-sensor', Sensor);
 
@@ -1493,6 +1494,10 @@ $parcel$export(module.exports, "default", () => $d6c47842c28a305f$export$2e2bcd8
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $d6c47842c28a305f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+:hover{
+cursor: pointer;
+}
 
 div#manual_head_volume{
   border-radius: 30px;
@@ -1733,7 +1738,6 @@ class ProgressCircle extends (0, $1Um3j.default) {
         let value = this.stateObj.state;
         let target = this.stateObjTarget.state;
         let percent = 100;
-        console.debug("VALUE", value, target);
         if (parseFloat(value) < parseFloat(target)) percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
          //if
         let circle_class = this.conf.class;
@@ -1888,6 +1892,228 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 });
 
+parcelRegister("7Rfxy", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $5b89899a4a720bff$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+
+var $dPhcg = parcelRequire("dPhcg");
+
+var $4DorC = parcelRequire("4DorC");
+parcelRequire("93DQX");
+
+var $kgVGZ = parcelRequire("kgVGZ");
+class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
+    static styles = [
+        (0, $4DorC.default),
+        (0, $kgVGZ.default)
+    ];
+    static get properties() {
+        return {
+            _hass: {},
+            _shadowRoot: {},
+            to_render: {},
+            elt: {}
+        };
+    }
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(){
+        super();
+        this._hass = null;
+        this._shadowRoot = null;
+        this.config = null;
+        this.elt = null;
+        this.to_render = null;
+    }
+    init(hass, shadowRoot) {
+        this._hass = hass;
+        this._shadowRoot = shadowRoot;
+    }
+    display(type, elt = null) {
+        let box = this._shadowRoot.querySelector("#window-mask");
+        this.elt = elt;
+        this.to_render = this.config[type];
+        this.render();
+        box.style.display = "flex";
+    }
+    quit() {
+        this._shadowRoot.querySelector("#window-mask").style.display = "none";
+        this.elt = null;
+        this.to_render = null;
+    }
+    set_conf(config) {
+        this.config = config;
+    }
+    render() {
+        console.debug("RENDER Dialog", this.to_render);
+        let close_conf = {
+            "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
+            "tap_action": {
+                "domain": "redsea_ui",
+                "action": "exit-dialog"
+            },
+            "label": (0, $dPhcg.default)._("exit"),
+            "class": "dialog_button"
+        };
+        if (this.to_render != null) this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
+        return (0, $l56HR.html)`
+          <div id="window-mask">
+   	    <div id="dialog">
+              <div id="dialog-close">
+                 <click-image .hass=${this._hass} .conf=${close_conf}></click-image>
+              </div>
+              <div id="dialog-title"></div>
+              <div id="dialog-content">Hello I'm here</div>
+              <div id="dialog-submit">
+                 <common-button .hass=${this._hass} .conf=${close_conf}/>
+              </div>
+            </div>
+         </div>
+`;
+    }
+} // end of class
+window.customElements.define('common-dialog', $5b89899a4a720bff$export$3ddf2d174ce01153);
+var $5b89899a4a720bff$var$dialog_box = new $5b89899a4a720bff$export$3ddf2d174ce01153();
+var $5b89899a4a720bff$export$2e2bcd8739ae039 = $5b89899a4a720bff$var$dialog_box;
+
+});
+parcelRegister("4DorC", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $35fdc4185dcd6737$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $35fdc4185dcd6737$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+
+#window-mask{
+position: absolute;
+top: 0px;
+left: 0px;
+width: 100%;
+height: 100%;
+//text-align:center;
+background-color: rgba(175,175,175,0.8);
+z-index:98;
+//display: flex hidden;
+display: none;
+justify-content: center;
+align-items: center;
+}
+
+#dialog{
+border: 1px solid gray;
+z-index:99;
+position:absolute;
+top:100px;
+//margin-left:35%;
+//margin-right:35%;
+//min-height: 200px;
+//min-width: 300px;
+width:28%;
+padding-left:15px;
+padding-right:15px;
+padding-top: 20px;
+padding-bottom: 10px;
+background-color: rgba(255,255,255,1);
+border-radius:15px;
+justify-content: center;
+align-items: center; 
+display: grid;
+grid-template-columns: 40px 90%;
+//grid-template-rows: 3;
+grid-gap: 10px;
+}
+
+#dialog-close{
+//border: 1px solid green;
+grid-column: 1;
+grid-row: 1;
+padding-left:5px;
+padding-right:5px;
+text-align:center;
+}
+
+#dialog-title{
+//border: 1px solid green;
+grid-column: 2/4;
+grid-row: 1;
+padding-left:5px;
+padding-right:5px;
+font-size: 1.5em;
+font-weight: bold;
+}
+
+#dialog-content{
+//border: 1px solid green;
+grid-column: 1/4;
+grid-row: 2;
+padding-left:5px;
+padding-right:5px;
+}
+
+#dialog-submit{
+//border: 1px solid green;
+grid-column: 1/4;
+grid-row: 3;
+text-align:right;
+}
+
+`;
+
+});
+
+parcelRegister("93DQX", function(module, exports) {
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+
+var $kgVGZ = parcelRequire("kgVGZ");
+
+var $1Um3j = parcelRequire("1Um3j");
+class $69834edd1b5d4a9e$export$de240ccfdb266acb extends (0, $1Um3j.default) {
+    static styles = (0, $kgVGZ.default);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf){
+        super(hass, conf, null, null);
+    }
+    _render() {
+        let sclass = "";
+        if ("class" in this.conf) sclass = this.conf.class;
+        return (0, $l56HR.html)`<img class="${sclass}" src=${this.conf.image} />`;
+    }
+} // end of class
+window.customElements.define('click-image', $69834edd1b5d4a9e$export$de240ccfdb266acb);
+
+});
+parcelRegister("kgVGZ", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $ec220dc7bbd7776a$export$2e2bcd8739ae039);
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $ec220dc7bbd7776a$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+
+img:hover{
+  cursor: pointer;
+  background-color: rgb(235,235,235);
+  border-radius: 30px
+}
+
+`;
+
+});
+
+
+
+
+parcelRegister("7YMQG", function(module, exports) {
+module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
+
+});
 
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
@@ -1966,6 +2192,19 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "model": "RSDOSE4",
     "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
+    "dialogs": {
+        "set_manual_head_volume": {
+            "title_key": "set_manual_head_volume",
+            "validate": [
+                {
+                    "action": {
+                        "domain": "redsea_ui",
+                        "action": "exit-dialog"
+                    }
+                }
+            ]
+        }
+    },
     "switches": [
         {
             "name": "device_state",
@@ -1974,6 +2213,9 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "class": "on_off",
             "style": "switch",
             "tap_action": {
+                "domain": "switch",
+                "action": "toggle",
+                "data": "default"
             },
             "css": {
                 "flex": "0 0 auto",
@@ -1992,6 +2234,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "class": "on_off",
             "style": "switch",
             "tap_action": {
+                "enabled": true,
+                "domain": "switch",
+                "action": "toggle",
+                "data": "default"
             },
             "css": {
                 "flex": "0 0 auto",
@@ -2117,10 +2363,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "left": "20%"
                     },
                     "tap_action": {
-                        "enabled": true,
-                        "domain": "__personnal__",
-                        "action": "message_box",
-                        "data": "test"
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "set_manual_head_volume"
+                        }
                     }
                 },
                 {
@@ -2224,6 +2471,12 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "border-radius": "50%",
                         "top": "10%",
                         "left": "32.5%"
+                    },
+                    "tap_action": {
+                        "enabled": true,
+                        "domain": "switch",
+                        "action": "toggle",
+                        "data": "default"
                     }
                 }
             ],
@@ -2238,6 +2491,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "border-radius": " 50%",
                         "top": " 5%",
                         "left": " 33%;"
+                    },
+                    "tap_action": {
+                        "domain": "button",
+                        "action": "press",
+                        "data": "default"
                     }
                 }
             ]
@@ -2519,6 +2777,7 @@ ${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
 window.customElements.define('dosing-queue', $141b1a4597f6f7b2$export$2e2bcd8739ae039);
 
 
+parcelRequire("7Rfxy");
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
@@ -2539,6 +2798,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     _populate_entities() {}
     _populate_entities_with_heads() {
+        this.config_dialog_box();
         for(let i = 0; i <= this.config.heads_nb; i++)this._heads.push({
             'entities': {}
         });
@@ -2674,13 +2934,13 @@ window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae03
 
 
 
-var $9HhHn = parcelRequire("9HhHn");
+var $7Rfxy = parcelRequire("7Rfxy");
 
-var $jMR4F = parcelRequire("jMR4F");
+var $4DorC = parcelRequire("4DorC");
 class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $040001cdf6cad6dd$export$2e2bcd8739ae039),
-        (0, $jMR4F.default)
+        (0, $4DorC.default)
     ];
     static get properties() {
         return {
@@ -2712,7 +2972,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             }
         ];
         this.first_init = true;
-        this.msg = null;
     }
     _set_current_device_from_name(dev, name) {
         if (dev['text'] == name) this._set_current_device(dev['value']);
@@ -2726,16 +2985,16 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         }
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-            //moreinfo.init(this.hass,this.shadowRoot);
+            (0, $7Rfxy.default).init(this.hass, this.shadowRoot);
             return (0, $l56HR.html)`
-${this.current_device}
-<!-- ${(0, $9HhHn.default).render()} -->
-`;
+                       ${this.current_device}
+                       ${(0, $7Rfxy.default).render()}
+                       `;
         }
         return (0, $l56HR.html)`
           ${this.device_select()}
-  ${this.current_device}
-<!-- ${(0, $9HhHn.default).render()} -->
+          ${this.current_device}
+          ${(0, $7Rfxy.default).render()}
     `;
     }
     device_select() {

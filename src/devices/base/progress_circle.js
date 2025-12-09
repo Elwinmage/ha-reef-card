@@ -36,7 +36,6 @@ export class ProgressCircle extends  MyElement {
 	let value=this.stateObj.state;
 	let target=this.stateObjTarget.state;
 	let percent=100
-	console.debug("VALUE",value,target);
 	if(parseFloat(value) < parseFloat(target)){
 	    percent=Math.floor(this.stateObj.state*100/this.stateObjTarget.state);
 	}//if

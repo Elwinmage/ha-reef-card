@@ -1,5 +1,7 @@
 import { html, LitElement } from "lit";
 
+//import dialog_box from "./dialog";
+
 export default class MyElement extends LitElement{
     static get properties(){
 	return {
@@ -68,40 +70,42 @@ export default class MyElement extends LitElement{
     }
 
     render(){
-	let value=this.stateObj.state;
-
+	let value=null;
+	if (this.stateObj!=null){
+	    value=this.stateObj.state;
+	}
 	if ('disabled_if' in this.conf && eval(this.conf.disabled_if)){
 	    return html`<br />`;
 	}
-	return this._render()
+	return this._render();
     }
 
-    async run_action(type,domain,action,data){
-	let enabled=true;
-	if (this.conf[type]){
-	    let params=['enabled','domain','action','data'];
-	    for (let param of params){
-		if (param in this.conf[type]){
-		    eval(param+"=this.conf['"+type+"']['"+param+"'];");
-		}//if - has domain
-	    }// for
-	}
-	if (enabled){
-	    if(domain=="__personnal__"){
-		switch(action){
+    async run_action(action){
+	if ( !("enabled" in action) || action.enabled){
+	    if(action.domain=="redsea_ui"){
+		switch(action.action){
+		case "dialog":
+		    this.hass.redsea_dialog_box.display(action.data.type,this);
+		    break;
+		case "exit-dialog":
+		    this.hass.redsea_dialog_box.quit();
+		    break;
 		case "message_box":
-		    this.msgbox(data);
+		    this.msgbox(action.data);
 		    break;
 		default:
-		    let error_str="Error: try to run unknown personnal action: "+action;
+		    let error_str="Error: try to run unknown redsea_ui action: "+action.action;
 		    this.msgbox(error_str);
 		    console.error(error_str);
 		    break;
 		}//switch
 	    }//if -- personnal domain
 	    else{
-		console.debug("Call Service",domain,action,data);
-		this.hass.callService(domain, action, data);
+		if(action.data=="default"){
+		    action.data={"entity_id":this.stateObj.entity_id};
+		}
+		console.debug("Call Service",action.domain,action.action,action.data);
+		this.hass.callService(action.domain, action.action, action.data);
 	    }//else -- ha domain action
 	}//if -- enabled
     }//end of function -- run_action
@@ -124,17 +128,27 @@ export default class MyElement extends LitElement{
     }
 
     _click(e){
-	if ("tap_action" in this.config){
-	    this.run_action(this.config.tap_action);
+	if ('tap_action' in this.conf){
+	    this.run_action(this.conf.tap_action);
 	}
     }
 
     _longclick(e){
+	if ("hold_action" in this.conf){
+	    this.run_action(this.conf.hold_action);
+	}
     }
 
     _dblclick(e){
+	if ("double_tap_action" in this.conf){
+	    this.run_action(this.conf.double_tap_action);
+	}
     }
 
+    dialog(type){
+	this.hass.redsea_dialog_box.display(type);
+    }
+    
     msgbox(msg){
 	this.dispatchEvent(
             new CustomEvent(

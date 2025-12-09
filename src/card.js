@@ -10,12 +10,12 @@ import style_card from './card.styles';
 import NoDevice from './devices/nodevice';
 import RSDose from './devices/rsdose';
 
-import moreinfo from './devices/base/more-info';
-import style_moreinfo from './devices/base/more-info.styles';
+import dialog_box from './devices/base/dialog';
+import style_dialog from './devices/base/dialog.styles';
 
 export class ReefCard extends LitElement {
 
-    static styles = [style_card,style_moreinfo];
+    static styles = [style_card,style_dialog];
     
     static get properties() {
 	return {
@@ -35,7 +35,6 @@ export class ReefCard extends LitElement {
 	this.version='v0.0.1';
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
-	this.msg=null;
     }
 
     _set_current_device_from_name(dev,name){
@@ -53,16 +52,16 @@ export class ReefCard extends LitElement {
 	}
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
-	    //moreinfo.init(this.hass,this.shadowRoot);
+	    dialog_box.init(this.hass,this.shadowRoot);
 	    return html`
-${this.current_device}
-<!-- ${moreinfo.render()} -->
-`;
+                       ${this.current_device}
+                       ${dialog_box.render()}
+                       `;
 	}
     return html`
           ${this.device_select()}
-  ${this.current_device}
-<!-- ${moreinfo.render()} -->
+          ${this.current_device}
+          ${dialog_box.render()}
     `;
     }
 

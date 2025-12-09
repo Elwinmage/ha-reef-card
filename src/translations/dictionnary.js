@@ -8,6 +8,9 @@ export const dict={
 	days_left: "Remaining Days",
 	empty: "Empty",
 	maintenance: "Maintenance in progress..",
+	set_manual_head_volume: "Manual volume",
+	exit: "Done",
+	set_manual_head_volume: "Manual volume dosing",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -18,5 +21,8 @@ export const dict={
 	days_left: "Jours restant",
 	empty: "Vide",
 	maintenance: "Maintenance en cours...",
+	set_manual_head_volume: "Volume manuel",
+	exit: "Terminer",
+	set_manual_head_volume: "Dosage du volume manuel",
     },
 }

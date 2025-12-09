@@ -3,6 +3,19 @@ export const config = {
     "model": "RSDOSE4",
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
+    "dialogs": {
+	"set_manual_head_volume":{
+	    "title_key": "set_manual_head_volume",
+	    "validate": [
+		{
+		    "action": {
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    }
+		}
+	    ]
+	}
+    },
     "switches": [
 	{
 	    "name": "device_state",
@@ -11,9 +24,9 @@ export const config = {
 	    "class":"on_off",
 	    "style": "switch",
 	    "tap_action": {
-		//"enabled": false,
-		//"domain": "switch",
-		//"action":"turn_on",
+		"domain": "switch",
+		"action":"toggle",
+		"data": "default",
 		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
 	    },
 	    "css":{
@@ -33,9 +46,10 @@ export const config = {
 	    "class":"on_off",
 	    "style": "switch",
 	    "tap_action": {
-		//"enabled": false,
-		//"domain": "switch",
-		//"action":"turn_on",
+		"enabled": true,
+		"domain": "switch",
+		"action":"toggle",
+		"data": "default",
 		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
 	    },
 	    "css":{
@@ -162,10 +176,9 @@ export const config = {
 			"left": "20%",
 		    },
 		    "tap_action": {
-			"enabled": true,
-			"domain": "__personnal__",
-			"action" : "message_box",
-			"data": "test"
+			"domain": "redsea_ui",
+			"action" : "dialog",
+			"data": {"type":"set_manual_head_volume"}
 		    }
 		},
 		{
@@ -271,8 +284,13 @@ export const config = {
 			"top":"10%",
 			"left":"32.5%",
 		    },
+		    "tap_action": {
+			"enabled": true,
+			"domain": "switch",
+			"action":"toggle",
+			"data": "default",
+		    }
 		}
-		
 	    ],
 	    "buttons": [
 		{
@@ -285,6 +303,11 @@ export const config = {
                         "border-radius":" 50%",
                         "top":" 5%",
                         "left":" 33%;",
+		    },
+		    "tap_action": {
+			"domain": "button",
+			"action":"press",
+			"data": "default",
 		    }
 		}
 	    ]

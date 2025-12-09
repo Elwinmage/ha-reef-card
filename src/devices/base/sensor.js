@@ -45,18 +45,6 @@ background-color: rgba(${this.color},${this.alpha});
 `;
     }//end of function render
 
-    async _click(e){
-	console.debug("Click ",e.detail," ",e.timeStamp);
-    }
-
-    async _longclick(e){
-	console.debug("Long Click");
-    }//end of function longclick
-    
-    async _dblclick(e){
-	console.debug("Double click");
-    }//end of function dblclick
-    
 }// end of class
 
 window.customElements.define('common-sensor', Sensor);

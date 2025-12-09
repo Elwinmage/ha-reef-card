@@ -11,4 +11,21 @@ export default css`
   height:100%;
   border-radius: 30px;
 }
+
+.dialog_button:hover{
+  background-color: #006787;
+}
+
+.dialog_button{
+  border-radius: 20px;
+  background-color: #009ac7;
+  color: white;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display:inline-block;
+}
+.
 `;

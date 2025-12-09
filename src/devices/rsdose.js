@@ -13,7 +13,7 @@ import {merge} from "../merge";
 
 import {DosingQueue} from "./dosing_queue";
 
-/*
+import dialog_box from "./base/dialog";/*
  * RSDose 
  */
 // TODO: RSDOSE Implement advanced schedule edition
@@ -43,6 +43,7 @@ export default class RSDose extends RSDevice{
     }
 
     _populate_entities_with_heads(){
+	this.config_dialog_box();
 	for (let i=0; i<=this.config.heads_nb;i++){
 	    this._heads.push({'entities':{}});
 	}

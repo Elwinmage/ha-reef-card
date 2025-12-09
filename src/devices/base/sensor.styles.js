@@ -2,6 +2,10 @@ import {css} from 'lit';
 
 export default css`
 
+:hover{
+cursor: pointer;
+}
+
 div#manual_head_volume{
   border-radius: 30px;
   text-align: center;

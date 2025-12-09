@@ -50,7 +50,5 @@ cursor: pointer;
   border-radius: 50%;
   color: white;
   text-align:center;
-};
-
-
+}
 `;

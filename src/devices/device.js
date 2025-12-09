@@ -13,6 +13,7 @@ import {off_color} from "../common.js";
 
 import style_common from "./common.styles";
 
+import dialog_box from "./base/dialog";
 
 let iconv = i18n;
 
@@ -31,7 +32,8 @@ export default class RSDevice extends LitElement {
 	    config: {},
 	    initial_config: {},
 	    device:{},
-	    user_config: {}
+	    user_config: {},
+	    _dialog_box: {}
 	}
     }
     
@@ -44,8 +46,16 @@ export default class RSDevice extends LitElement {
 	this.user_config=user_config;
 	this.entities={};
 	this.first_init=true;
+	this._dialog_box=null;
     }
 
+    config_dialog_box(){
+	this._dialog_box=dialog_box;
+	console.debug("config_dialog_box",this.config)
+	this._dialog_box.set_conf(this.config.dialogs);
+	this.hass['redsea_dialog_box']=this._dialog_box;
+    }
+    
     get_entity(entity_translation_value){
 	return this.hass.states[this.entities[entity_translation_value].entity_id];
     }//end of function get_entity

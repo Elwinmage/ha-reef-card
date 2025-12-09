@@ -22,32 +22,23 @@ export class Button extends  MyElement {
     }//end of constructor
 
     _render(){
+	let label='';
+	let sclass='button';
+	if ('label' in this.conf){
+	    label=this.conf.label;
+	}
+	if ('class' in this.conf){
+	    sclass=this.conf.class;
+	}
 	return html`
  <style>
 .button{
 background-color: rgba(${this.color},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}"></div>
+   	    <div class="${sclass}" id="${this.conf.name}">${label}</div>
 `;
     }//end of function render
-
-    async _click(e){
-	let data={'entity_id':this.stateObj.entity_id};
-	this.run_action("tap_action","button","press",data);
-    }
-
-    async _longclick(e){
-	let data="Hold";
-	this.run_action("hold_action","__personnal__","message_box",data);
-	
-    }//end of function longclick
-    
-    async _dblclick(e){
-	let data="Double Tap";
-	this.run_action("double_tap_action","__personnal__","message_box",data);
-	
-    }//end of function dblclick
 
 }// end of class
 

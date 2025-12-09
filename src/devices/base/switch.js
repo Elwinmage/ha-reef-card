@@ -42,12 +42,12 @@ export class Switch extends  MyElement {
 		this.alpha=this.conf.alpha;
 	    }
 	    return html`
- <style>
-      #${this.conf.name}{
-background-color: rgba(${this.color},${this.alpha});
-}   
-</style>
-   	    <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
+                     <style>
+                       #${this.conf.name}{
+                          background-color: rgba(${this.color},${this.alpha});
+                       }   
+                     </style>
+                     <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
 `;
 	}
 	else{
@@ -55,21 +55,6 @@ background-color: rgba(${this.color},${this.alpha});
 	}
     }//end of function render
 
-    async _click(e){
-	let data={'entity_id':this.stateObj.entity_id};
-	this.run_action("tap_action","switch","toggle",data);
-    }//end of function _click
-
-    async _longclick(e){
-	let data="Hold";
-	this.run_action("hold_action","__personnal__","message_box",data);
-    }//end of function longclick
-    
-    async _dblclick(e){
-	let data="Double Tap";
-	this.run_action("double_tap_action","__personnal__","message_box",data);
-    }//end of function dblclick
-    
 }// end of class
 
 window.customElements.define('common-switch', Switch);
