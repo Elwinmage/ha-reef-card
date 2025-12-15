@@ -7,92 +7,123 @@ import DeviceList from './common';
 
 import style_card from './card.styles';
 
+import RSDevice from './devices/device';
 import NoDevice from './devices/nodevice';
 import RSDose from './devices/rsdose';
 
 import dialog_box from './devices/base/dialog';
 import style_dialog from './devices/base/dialog.styles';
 
+/*
+ *  ReefCard. Implement a reefcard for HomeAssistant
+ */
 export class ReefCard extends LitElement {
 
     static styles = [style_card,style_dialog];
-    
+
+    // Card is updated when new device is selected or when hass is updated
     static get properties() {
 	return {
 	    hass: {},
-	    user_config: {},
-	    select_devices: {type: Array},
-	    current_device: {type: String},
-	    version: {type: String},
-	    progs: {type: Array},
-	    devices_list: {},
-	    current_device: html``
+	    current_device: {},
 	};
-    }
-    
+    }//end of reactives properties
+
+    /*
+     * CONSTRUCTOR
+     */
     constructor() {
 	super();
 	this.version='v0.0.1';
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
-    }
+    }//end of constructor
 
-    _set_current_device_from_name(dev,name){
-	if (dev['text']==name){
-	    this._set_current_device(dev['value']);
-	}
-    }
-    
+    /*
+     * Get user configuration
+     */
+    setConfig(config) {
+	this.user_config = config;
+    }//end of function - setConfig
+
+    /*
+     * RENDER
+     */
     render() {
+	console.debug("render main");
 	if(this.first_init==true){
 	    this.init_devices();
 	    this.first_init=false;
-	    this.no_device=html`<no-device id="device" hass="${this.hass}"/>`;
+	    this.no_device=RSDevice.create_device("redsea-nodevice",this.hass,null,null);
 	    this.current_device=this.no_device;
-	}
+	}//if
+	//Init conf and DOM for dialog box
+	dialog_box.init(this.hass,this.shadowRoot);
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
-	    dialog_box.init(this.hass,this.shadowRoot);
+	    //A specific device has been selected
 	    return html`
                        ${this.current_device}
                        ${dialog_box.render()}
                        `;
-	}
-    return html`
+	}//fi
+	// no secific device selected, display select form
+	return html`
           ${this.device_select()}
           ${this.current_device}
           ${dialog_box.render()}
     `;
-    }
+    }//end of render
 
+    /*
+     * display select form to choose wich device to display
+     */
     device_select(){
 	return html`
-        <select id="device" @change="${this.onChange}">
-            ${this.select_devices.map(option => html`
-            <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
-            `)}
-        </select>
-<div class="device">
+           <select id="device" @change="${this.onChange}">
+              ${this.select_devices.map(option => html`
+              <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
+              `)}
+          </select>
     `;
     }
 
+    /*
+     * Initialise available redsea devices list
+     */
     init_devices(){
 	this.devices_list=new DeviceList(this.hass);
 	for (var d of this.devices_list.main_devices){
 	    this.select_devices.push(d);
 	}// for
-    }
+    }//end of init_devices
 
+    /*
+     * Set the current device to display giving it's name
+     */
+    _set_current_device_from_name(dev,name){
+	if (dev['text']==name){
+	    this._set_current_device(dev['value']);
+	}
+    }//end of _set_current_device_from_name
+
+    /*
+     * Set the current device to display giving it's id
+     */
     _set_current_device(device_id){
+	//No device selected, display redsea logo
 	if (device_id=="unselected"){
 	    this.current_device=this.no_device;
 	    return;
 	}
+	
 	var device=this.devices_list.devices[device_id];
 	var model = device.elements[0].model;
-	    //TODO : Implement MAIN tank view support
-	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
-	    // labels: enhancement
+	this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this.hass,this.user_config,device);
+
+	//TODO : Implement MAIN tank view support
+	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
+	// labels: enhancement
 
 	switch(model){
 	    //TODO : Implement RSDOSE support
@@ -106,14 +137,12 @@ export class ReefCard extends LitElement {
 	    //TODO : Implement RSDOSE4 support
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
 	    // labels: enhancement, rsdose, rsdose4
-	    this.current_device=html`<rs-dose4 id="device" .hass="${this.hass}" .device="${device}" .user_config="${this.user_config}"/>`;
+	    
 	    break;
 	case "RSRUN":
 	    //TODO : Implement RSRUN support
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/7
 	    // labels: enhancement, rsrun
-
-	    //										this.current_device=new RSRun(this.hass,device);
 	    break;
 	case "RSWAVE":
 	    //TODO : Implement RSWAVE support
@@ -126,7 +155,6 @@ export class ReefCard extends LitElement {
 	    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
 	    // labels: enhancement, rsmat
 
-	    //										this.current_device=new RSMat(this.hass,device);
 	    break;
 	case "RSATO+":
 	    //TODO : Implement RSATO+ support
@@ -150,7 +178,10 @@ export class ReefCard extends LitElement {
 	}
 	
     }
-    
+
+    /*
+     * When SELECT form change, update the current redsea device to display.
+     */
     onChange(){
 	setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
@@ -163,19 +194,12 @@ export class ReefCard extends LitElement {
 		this._set_current_device(this.selected);
 	    }
 	},300)
-    }
+    }// end of onChange
 
-    // card configuration
+    /*
+     * Card editor
+     */
     static getConfigElement() {
         return document.createElement("reef-card-editor");
-    }
-
-    setConfig(config) {
-	// if (!config.entities) {
-	//   throw new Error("You need to define entities");
-	//   }
-	this.user_config = config;
-	
-    }
-
-}
+    }//end of getConfigElement
+}//end of class ReefCard

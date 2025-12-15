@@ -44,6 +44,7 @@ export class Dialog extends  LitElement {
 
     display(type,elt=null){
 	let box=this._shadowRoot.querySelector("#window-mask");
+	console.debug("ELEMENT",elt);
 	this.elt=elt;
 	this.to_render=this.config[type];
 	this.render();
@@ -60,6 +61,15 @@ export class Dialog extends  LitElement {
     set_conf(config){
 	this.config=config;
     }
+
+    _render_content(content_conf){
+	const r_element= customElements.get(content_conf.view);
+	const content= new r_element();
+	// translate from translation_key to entity_id
+	content.setConfig(content_conf.conf);
+	content.hass=this._hass;
+	return content;
+    }
     
     render(){
 	console.debug("RENDER Dialog",this.to_render);
@@ -72,9 +82,20 @@ export class Dialog extends  LitElement {
 	    "label": i18n._("exit"),
 	    "class": "dialog_button",
 	};
+	let content=html``;
 	if (this.to_render != null){
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML=i18n._(this.to_render.title_key);
+	    content=html`${this.to_render.content.map(c => this._render_content(c))}`;
 	}
+/*	const SsRow = customElements.get('hui-entities-card');
+	const sssor = new SsRow();
+	sssor.setConfig({type:"entities",entities:['switch.rsdose4_338229039_device_state']});
+	sssor.hass=this._hass;
+	const SRow = customElements.get('hui-toggle-entity-row');
+	const ssor = new SRow();
+	ssor.setConfig({type:'entity',entity:"switch.rsdose4_338229039_device_state"});
+	ssor.hass=this._hass;*/
+	
 	return html`
           <div id="window-mask">
    	    <div id="dialog">
@@ -82,7 +103,7 @@ export class Dialog extends  LitElement {
                  <click-image .hass=${this._hass} .conf=${close_conf}></click-image>
               </div>
               <div id="dialog-title"></div>
-              <div id="dialog-content">Hello I'm here</div>
+              <div id="dialog-content">${content}</div>
               <div id="dialog-submit">
                  <common-button .hass=${this._hass} .conf=${close_conf}/>
               </div>

@@ -87,13 +87,12 @@ export default class DoseHead extends RSDevice{
 		</div>
 <!-- Render schedule background -->
 <div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
-${this._render_sensors(this.state_on,"pump_state_head")}
+${this._render_elements(this.state_on,"pump_state_head")}
 <div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
-${this._render_sensors(this.state_on,"pump_state_labels")}
+${this._render_elements(this.state_on,"pump_state_labels")}
 </div>
 </div>
-${this._render_sensors(this.state_on)}
-${this._render_actuators(this.state_on)} 
+${this._render_elements(this.state_on)}
 ${warning}
 ${calibration}
    	    `;

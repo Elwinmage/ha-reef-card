@@ -1,6 +1,14 @@
 import {ReefCard} from "./card";
 import { ReefCardEditor } from "./editor";
 
+
+// import { loadHaComponents, DEFAULT_HA_COMPONENTS } from '@kipk/load-ha-components';
+
+// await loadHaComponents([
+//     'ha-form',
+//     'hui-sensor-entity-row'
+// ]);
+
 customElements.define("reef-card",ReefCard);
 customElements.define("reef-card-editor",ReefCardEditor);
 

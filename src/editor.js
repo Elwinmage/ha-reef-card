@@ -2,29 +2,36 @@ import { css, html, LitElement } from 'lit';
 
 import DeviceList from './common';
 
+import RSDevice from './devices/device';
 import RSDose from './devices/rsdose';
 
-
+/*
+ * ReefCard Editor for Home Assistant
+ */
 export class ReefCardEditor extends LitElement {
 
     static get properties() {
         return {
             hass: {},
             _config: { state: true },
-	    select_devices: {type: Array},
-	    devices_list: {},
 	    current_device: {},
-        };
+        };//end of reactives properties
     }
 
+    /*
+     * CONSTRUCTOR
+     */
     constructor(){
 	super();
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
 	this.current_device=null;
 	this.addEventListener('config-changed', this.render());
-    }
-    
+    }//end of constructor
+
+    /*
+     * Get user configuration
+     */
     setConfig(config) {
         this._config = config;
     }// end of function setConfig
@@ -49,6 +56,9 @@ export class ReefCardEditor extends LitElement {
             }
         `;
 
+    /*
+     * RENDER
+     */
     render() {
 	if(this._config){
 	    if (this.first_init==true){
@@ -74,27 +84,25 @@ export class ReefCardEditor extends LitElement {
 	   return html``;
     }// end of - render
 
-
+    /*
+     * Display specific configuration for selected device
+     */
     device_conf(){
 	if (this._config.device && this._config.device.length > 0){
 	    var device=this.devices_list.get_by_name(this._config.device);
 	    var model = device.elements[0].model;
-	    var lit_device=null;
-	    switch(model){
-	    case "RSDOSE4":
-		lit_device=new RSDose(this.hass,device,this._config);
-		break;
-	    default:
-		break;
-	    }//switch
+	    var lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this.hass,this._config,device);
 	    if (lit_device!=null && typeof lit_device['editor'] == 'function'){
 		this.current_device=lit_device;
 		return lit_device.editor(this.shadowRoot);
 	       }//if
 	}
 	return ``;
-    }
-    
+    }//end of function - device_conf
+
+    /*
+     * Send event when configuration changed
+     */
     handleChangedEvent(changedEvent) {
         // this._config is readonly, copy needed
         var newConfig = JSON.parse(JSON.stringify(this._config)); 
@@ -113,5 +121,6 @@ export class ReefCardEditor extends LitElement {
             composed: true,
         });
         this.dispatchEvent(messageEvent);
-    }
-}
+    }// end of function - handleChangedEvent
+    
+}// end of class ReefCardEditor

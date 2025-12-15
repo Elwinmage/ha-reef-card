@@ -44,14 +44,15 @@ var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
 
 var $dPhcg = parcelRequire("dPhcg");
+
+var $1Um3j = parcelRequire("1Um3j");
 parcelRequire("6vZH1");
 parcelRequire("5T0tY");
 parcelRequire("258Ll");
 parcelRequire("M8QIC");
 parcelRequire("eW6Np");
 parcelRequire("303dX");
-
-var $iXBpj = parcelRequire("iXBpj");
+parcelRequire("iXBpj");
 
 var $37d5w = parcelRequire("37d5w");
 
@@ -61,231 +62,169 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $37d5w.default)
     ];
+    // Device is updated when hass is updated
     static get properties() {
         return {
-            hass: {},
-            config: {},
-            initial_config: {},
-            device: {},
-            user_config: {},
-            _dialog_box: {}
+            hass: {}
         };
     }
-    constructor(i_config, hass, device, user_config){
+    /*
+     * Construct a new Redsea LitElement of type name
+     * @name: type of device: redsea-rsdose2, redsea-rswave...
+     * @hass: the homeassistant states
+     * @config: the user configuration file
+     * @device: the hass redsea device 
+     */ static create_device(name, hass, config, device) {
+        let Element = customElements.get(name);
+        if (typeof Element == "undefined") Element = customElements.get("redsea-nodevice");
+        let elt = new Element();
+        elt.hass = hass;
+        elt.user_config = config;
+        elt.device = device;
+        return elt;
+    }
+    /*
+     * CONSTRUCTOR
+     */ constructor(){
         super();
-        this.hass = hass;
-        this.device = device;
-        this.initial_config = i_config;
-        this.config = i_config;
-        this.user_config = user_config;
         this.entities = {};
         this.first_init = true;
         this._dialog_box = null;
     }
-    config_dialog_box() {
+    /*
+     * Load available dialog box for the current device
+     */ config_dialog_box() {
         this._dialog_box = (0, $7Rfxy.default);
-        console.debug("config_dialog_box", this.config);
         this._dialog_box.set_conf(this.config.dialogs);
         this.hass['redsea_dialog_box'] = this._dialog_box;
     }
-    get_entity(entity_translation_value) {
+    /*
+     * Return  the hass entity id according to it's translation key
+     * Entities list must be populate before with this._populate_entities()
+     * @entity_translation_value: a strign representation the translation key of the entity
+     */ get_entity(entity_translation_value) {
         return this.hass.states[this.entities[entity_translation_value].entity_id];
     }
-    find_leaves(tree, path) {
+    /*
+     * Find leaves on a json configuration object
+     * @tree: the current json object to search for
+     * @path: the path to search for leaves
+     */ find_leaves(tree, path) {
         var keys = Object.keys(tree);
         if (keys[0] == '0') {
             eval(path + '="' + tree + '"');
             return;
-        }
+        } //if
         for (var key of keys){
             let sep = '.';
             let ipath = path + sep + key;
             this.find_leaves(tree[key], ipath);
-        }
+        } //for
     }
-    update_config() {
+    /*
+     * Update default configuration with user values changes
+     */ update_config() {
         this.config = JSON.parse(JSON.stringify(this.initial_config));
-        if ("conf" in this.user_config) {
+        if (this.user_config && "conf" in this.user_config) {
             if (this.device.elements[0].model in this.user_config.conf) {
                 let device_conf = this.user_config.conf[this.device.elements[0].model];
                 if ('common' in device_conf) this.find_leaves(device_conf['common'], "this.config");
                  //if
-                if ('devices' in device_conf && this.device.name in device_conf.devices) {
-                    console.log(this.device.name);
-                    this.find_leaves(device_conf['devices'][this.device.name], "this.config");
-                }
+                if ('devices' in device_conf && this.device.name in device_conf.devices) this.find_leaves(device_conf['devices'][this.device.name], "this.config");
             } //if
         } //if
     }
-    _populate_entities() {
+    /*
+     * Get all entities linked to this redsea device
+     */ _populate_entities() {
         for(var entity_id in this.hass.entities){
             var entity = this.hass.entities[entity_id];
             if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
-        }
+             //if
+        } //for
     }
-    is_disabled() {
-        let disabled = false;
+    /*
+     * Check is the current device is disabled or not
+     */ is_disabled() {
+        let disabled1 = false;
         let sub_nb = this.device.elements.length;
         for(var i = 0; i < sub_nb; i++)if (this.device.elements[i].disabled_by != null) {
-            disabled = true;
+            disabled1 = true;
             break;
         } // if
          // for
-        return disabled;
+        return disabled1;
     }
-    is_on() {
+    /*
+     * Get the state of the device on or off.
+     */ is_on() {
         return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
     }
-    _render_disabled() {
+    /*
+     * Special render if the device is disabled or in maintenance mode in HA
+     */ _render_disabled() {
         let reason = null;
-        let maintenance_button = '';
+        let maintenance = '';
         if (this.is_disabled()) reason = "disabledInHa";
         else if (this.hass.states[this.entities['maintenance'].entity_id].state == 'on') {
             reason = "maintenance";
-            for (let swtch of this.config.switches)if (swtch.name == "maintenance") maintenance_button = this._render_switch(this.config.switches[1], true);
-             //if
+            // if in maintenance mode, display maintenance switch
+            for (let swtch of this.config.elements)if (swtch.name == "maintenance") {
+                let maintenance_button = (0, $1Um3j.default).create_element(this.hass, swtch, this.config.color, this.config.alpha, true, this.entities);
+                maintenance = (0, $l56HR.html)`
+                                    <div class="${swtch.class}" style="${this.get_style(swtch)}">
+                                      ${maintenance_button}
+                                    </div>
+                                    `;
+                break;
+            } //if
              //for
         } // else if
         if (reason == null) return reason;
         return (0, $l56HR.html)`<div class="device_bg">
-                          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                          <p class='disabled_in_ha'>${(0, $dPhcg.default)._(reason)}</p>
-${maintenance_button}
-                        </div">`;
+                      <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+                      <p class='disabled_in_ha'>${(0, $dPhcg.default)._(reason)}</p>
+                         ${maintenance}
+                    </div">`;
     }
-    get_style(conf) {
+    /*
+     * Build a css style string according to given json configuration
+     * @conf: the css definition
+     */ get_style(conf) {
         let style = '';
         if (conf && 'css' in conf) style = Object.entries(conf.css).map(([k, v])=>`${k}:${v}`).join(';');
         return style;
     }
-    ////////////////////////////////////////////////////////////////////////////////
-    // ACTUATORS
-    _render_switch(mapping_conf, state) {
-        let label_name = '';
-        // Don not display label
-        if ('label' in mapping_conf) {
-            if (typeof mapping_conf.label === 'string') label_name = mapping_conf.label;
-            else if (typeof mapping_conf.label === 'boolean' && mapping_conf.label != false) label_name = mapping_conf.name;
-        }
-        let color = this.config.color;
-        if (!state) color = (0, $iXBpj.off_color);
-        return (0, $l56HR.html)`
-<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
-<common-switch .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .label="${label_name}"></common-switch>
-</div>
-`;
-    }
-    _render_button(mapping_conf, state) {
-        let entity = this.entities[mapping_conf.name];
-        let stateObject = this.hass.states[entity.entity_id];
-        let color = this.config.color;
-        if (!state) color = (0, $iXBpj.off_color);
-        return (0, $l56HR.html)`
-<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
-<common-button .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${stateObject}"></common-button>
-</div>
-	`;
-    }
-    _render_actuators_type(type, state) {
-        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((actuator)=>type.fn.call(this, actuator, state))}`;
-        return (0, $l56HR.html)``;
-    }
-    _render_actuators(state) {
-        let actuators = [
-            {
-                "name": "buttons",
-                "fn": this._render_button
-            },
-            {
-                "name": "switches",
-                "fn": this._render_switch
-            }
-        ];
-        return (0, $l56HR.html)`
-                     ${actuators.map((type)=>this._render_actuators_type(type, state))}
-                      `;
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    // SENSORS
-    _render_sensors(state = true, put_in = null) {
-        let sensors = [
-            {
-                "name": "sensors",
-                "fn": this._render_sensor
-            },
-            {
-                "name": "sensors_target",
-                "fn": this._render_sensor_target
-            },
-            {
-                "name": "progress_bar",
-                "fn": this._render_progress_bar
-            }
-        ];
-        return (0, $l56HR.html)`
-                     ${sensors.map((type)=>this._render_sensors_type(type, state, put_in))}
-                      `;
-    }
-    _render_sensors_type(type, state, put_in) {
-        if (type.name in this.config) return (0, $l56HR.html)`${this.config[type.name].map((sensor)=>type.fn.call(this, sensor, state, put_in))}`;
-        return (0, $l56HR.html)``;
-    }
-    _render_sensor(mapping_conf, state, put_in) {
+    /*
+     * Render a sungle element: switch, sensor...
+     * @conf: the json configuration for the element
+     * @state: the state of the device on or off to adapt the render
+     * @put_in: a grouping div to put element on
+     */ _render_element(conf, state, put_in) {
         let sensor_put_in = null;
-        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
-        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
-        let label_name = '';
-        // Don not display label
-        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
-        let color = this.config.color;
-        if (!state) color = (0, $iXBpj.off_color);
+        //Element is groupped with others 
+        if ("put_in" in conf) sensor_put_in = conf.put_in;
+         //if
+        //Element is disabled or not i nthe requested group
+        if ('disabled' in conf && disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
+         //if
+        let element = (0, $1Um3j.default).create_element(this.hass, conf, this.config.color, this.config.alpha, state, this.entities);
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
-<common-sensor .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}"></common-sensor>
-</div>
-`;
+                     <div class="${conf.class}" style="${this.get_style(conf)}">
+                       ${element}
+                     </div>
+                     `;
     }
-    _render_progress_bar(mapping_conf, state, put_in) {
-        let sensor_put_in = null;
-        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
-        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
-        let label_name = '';
-        // Don not display label
-        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
-        let color = this.config.color;
-        if (!state) color = (0, $iXBpj.off_color);
-        let type = "progress-bar";
-        if ("type" in mapping_conf) type = mapping_conf.type;
-        switch(type){
-            case "progress-circle":
-                return (0, $l56HR.html)`<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
-<progress-circle .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-circle>
-</div>`;
-            case "progress-bar":
-            default:
-                return (0, $l56HR.html)`
-<div class=${mapping_conf.class} style="${this.get_style(mapping_conf)}">
-<progress-bar .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}" .entities="${this.entities}"></progress-bar>
-</div>
-`;
-        }
-    }
-    _render_sensor_target(mapping_conf, state, put_in) {
-        let sensor_put_in = null;
-        if ("put_in" in mapping_conf) sensor_put_in = mapping_conf.put_in;
-        if ('disabled' in mapping_conf && mapping_conf.disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
-        let label_name = '';
-        // Don not display label
-        if ('label' in mapping_conf && mapping_conf.label != false) label_name = mapping_conf.name;
-        let color = this.config.color;
-        if (!state) color = (0, $iXBpj.off_color);
+    /*
+     * Render all elements that are declared in the configuration of the device
+     * @state: the state of the device on or off to adapt the render
+     * @put_in: a grouping div to put element on
+     */ _render_elements(state, put_in = null) {
         return (0, $l56HR.html)`
-<div class="${mapping_conf.class}" style="${this.get_style(mapping_conf)}">
-<common-sensor-target .hass="${this.hass}" .conf="${mapping_conf}" .color="${color}" .alpha="${this.config.alpha}" .stateObj="${this.hass.states[this.entities[mapping_conf.name].entity_id]}" .stateObjTarget="${this.hass.states[this.entities[mapping_conf.target].entity_id]}"></common-sensor-target>
-</div>
-`;
+                     ${this.config.elements.map((conf)=>this._render_element(conf, state, put_in))}
+                     `;
     }
-}
+} //end of class RSDevice
 window.customElements.define('rs-device', RSDevice);
 
 });
@@ -1004,6 +943,273 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
 });
 
 
+parcelRegister("1Um3j", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => MyElement);
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+
+var $iXBpj = parcelRequire("iXBpj");
+class MyElement extends (0, $eGUNk.LitElement) {
+    static get properties() {
+        return {
+            //	    conf: {},
+            stateObj: {},
+            color: {},
+            doubleClick: {
+                type: Boolean
+            },
+            mouseDown: {}
+        };
+    }
+    constructor(){
+        super();
+        // this.hass=hass;
+        // this.conf=conf;
+        // this.color=color;
+        // this.alpha=alpha;
+        // this.stateObj=stateObj;
+        // this.entities=entities;
+        this.mouseDown = 0;
+        this.mouseUp = 0;
+        this.oldMouseUp = 0;
+        this.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+        });
+        this.addEventListener("mousedown", function(e) {
+            this.mouseDown = e.timeStamp;
+        });
+        this.addEventListener("touchstart", function(e) {
+            this.mouseDown = e.timeStamp;
+        });
+        this.addEventListener("touchend", function(e) {
+            this.mouseUp = e.timeStamp;
+            if (e.timeStamp - this.mouseDown > 500) this._click_evt(e);
+        });
+        this.addEventListener("click", function(e) {
+            this._handleClick(e);
+        });
+    }
+    // updated(changes){
+    // 	console.log("RE-RENDERED element");
+    // }
+    static create_element(hass, config, color, alpha, state, entities) {
+        let Element = customElements.get(config.type);
+        let label_name = '';
+        // Don not display label
+        if ('label' in config) {
+            if (typeof config.label === 'string') label_name = config.label;
+            else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
+        }
+        if (!state) color = (0, $iXBpj.off_color);
+        let elt = new Element();
+        elt.hass = hass;
+        elt.conf = config;
+        elt.color = color;
+        elt.alpha = alpha;
+        elt.stateObj = hass.states[entities[config.name].entity_id];
+        if ("target" in config) {
+            elt.stateObjTarget = hass.states[entities[config.target].entity_id];
+            elt.entities = entities;
+        }
+        elt.label = label_name;
+        return elt;
+    }
+    get_entity(entity_translation_value) {
+        return this.hass.states[this.entities[entity_translation_value].entity_id];
+    }
+    _handleClick(e) {
+        if (e.pointerType != "touch") {
+            if (e.detail === 1) this._click_evt(e);
+            else if (e.detail === 2) {
+                this.doubleClick = true;
+                this._dblclick(e);
+            }
+        } else {
+            if (this.mouseUp - this.oldMouseUp < 400) {
+                this.doubleClick = true;
+                this._dblclick(e);
+            } else this._click_evt(e);
+            this.oldMouseUp = this.mouseUp;
+        }
+    }
+    sleep(ms) {
+        return new Promise((resolve)=>setTimeout(resolve, ms));
+    }
+    render() {
+        let value = null;
+        if (this.stateObj != null) value = this.stateObj.state;
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
+        return this._render();
+    }
+    async run_action(action) {
+        if (!("enabled" in action) || action.enabled) {
+            if (action.domain == "redsea_ui") switch(action.action){
+                case "dialog":
+                    this.hass.redsea_dialog_box.display(action.data.type, this);
+                    break;
+                case "exit-dialog":
+                    this.hass.redsea_dialog_box.quit();
+                    break;
+                case "message_box":
+                    this.msgbox(action.data);
+                    break;
+                default:
+                    let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
+                    this.msgbox(error_str);
+                    console.error(error_str);
+                    break;
+            } //switch
+            else {
+                if (action.data == "default") action.data = {
+                    "entity_id": this.stateObj.entity_id
+                };
+                console.debug("Call Service", action.domain, action.action, action.data);
+                this.hass.callService(action.domain, action.action, action.data);
+            } //else -- ha domain action
+        } //if -- enabled
+    }
+    async _click_evt(e) {
+        let timing = e.timeStamp - this.mouseDown;
+        if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
+        else {
+            await this.sleep(300);
+            if (this.doubleClick == true) this.doubleClick = false;
+            else this._click(e);
+        }
+        this.mouseDown = e.timeStamp;
+    }
+    _click(e) {
+        if ('tap_action' in this.conf) this.run_action(this.conf.tap_action);
+    }
+    _longclick(e) {
+        if ("hold_action" in this.conf) this.run_action(this.conf.hold_action);
+    }
+    _dblclick(e) {
+        if ("double_tap_action" in this.conf) this.run_action(this.conf.double_tap_action);
+    }
+    dialog(type) {
+        this.hass.redsea_dialog_box.display(type);
+    }
+    msgbox(msg) {
+        this.dispatchEvent(new CustomEvent("hass-notification", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                message: msg
+            }
+        }));
+        return;
+    }
+}
+window.customElements.define('my-element', MyElement);
+
+});
+parcelRegister("iXBpj", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $038fea56b681b6a5$export$2e2bcd8739ae039);
+$parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e13ad4e1fa5);
+$parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
+$parcel$export(module.exports, "updateObj", () => $038fea56b681b6a5$export$6fb918aa09a6c9f0);
+$parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
+$parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
+class $038fea56b681b6a5$export$2e2bcd8739ae039 {
+    constructor(hass){
+        this._hass = hass;
+        this.main_devices = [];
+        this.devices = {};
+        this.init_devices();
+    }
+    device_compare(a, b) {
+        if (a.text < b.text) return -1;
+        else if (a.text > b.text) return 1;
+         // else
+        return 0;
+    }
+    get_by_name(name) {
+        for (var id of this.main_devices){
+            if (id.text == name) return this.devices[id.value];
+             //if
+        } //for
+    }
+    init_devices() {
+        for(var device_id in this._hass.devices){
+            let dev = this._hass.devices[device_id];
+            let dev_id = dev.identifiers[0];
+            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
+                // dev.lenght==2 to get only main device, not sub
+                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
+                    value: dev.primary_config_entry,
+                    text: dev.name
+                });
+                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
+                    value: {
+                        name: dev.name,
+                        elements: [
+                            dev
+                        ]
+                    }
+                });
+                else {
+                    this.devices[dev.primary_config_entry].elements.push(dev);
+                    // Change main device name with main device
+                    if (dev_id.length == 2) this.devices[dev.primary_config_entry].name = dev.name;
+                     //if
+                } //else
+            }
+        } //for
+        this.main_devices.sort(this.device_compare);
+    }
+}
+function $038fea56b681b6a5$export$5a544e13ad4e1fa5(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    var rgb = parseInt(result[1], 16) + "," + parseInt(result[2], 16) + "," + parseInt(result[3], 16);
+    /*    return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+    } : null;*/ return rgb;
+}
+function $038fea56b681b6a5$export$34d09c4a771c46ef(orig) {
+    var regex_hex, regex_trim, color, regex_rgb, matches, hex;
+    // Remove whitespace
+    regex_trim = new RegExp(/[^#0-9a-f\.\(\)rgba]+/gim);
+    color = orig.replace(regex_trim, ' ').trim();
+    // Check if already hex
+    regex_hex = new RegExp(/#(([0-9a-f]{1})([0-9a-f]{1})([0-9a-f]{1}))|(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}))/gi);
+    if (regex_hex.exec(color)) return color;
+    // Extract RGB values
+    regex_rgb = new RegExp(/rgba?\([\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*([,\/][\t\s]*[0-9\.]{1,})?[\t\s]*\);?/gim);
+    matches = regex_rgb.exec(orig);
+    if (matches) {
+        hex = '#' + (matches[1] | 256).toString(16).slice(1) + (matches[2] | 256).toString(16).slice(1) + (matches[3] | 256).toString(16).slice(1);
+        return hex;
+    } else return orig;
+}
+function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
+    var keys = Object.keys(newVal);
+    var n = obj;
+    if (keys.length > 0) {
+        if (!(keys[0] in obj)) {
+            obj[keys[0]] = newVal[keys[0]];
+            return;
+        }
+        $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj[keys[0]], newVal[keys[0]]);
+    }
+    return;
+}
+var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
+function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
+    let seconds = time % 60;
+    let minutes = (time - seconds) / 60 % 60;
+    let hours = (time - seconds - minutes * 60) / 3600;
+    return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+}
+
+});
+
+
 parcelRegister("6vZH1", function(module, exports) {
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
@@ -1107,146 +1313,6 @@ cursor: pointer;
 
 });
 
-parcelRegister("1Um3j", function(module, exports) {
-
-$parcel$export(module.exports, "default", () => MyElement);
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
-var $eGUNk = parcelRequire("eGUNk");
-class MyElement extends (0, $eGUNk.LitElement) {
-    static get properties() {
-        return {
-            //	    conf: {},
-            stateObj: {},
-            color: {},
-            doubleClick: {
-                type: Boolean
-            },
-            mouseDown: {}
-        };
-    }
-    constructor(hass, conf, stateObj, entities = {}, color = "255,255,255", alpha = 1){
-        super();
-        this.hass = hass;
-        this.conf = conf;
-        this.color = color;
-        this.alpha = alpha;
-        this.stateObj = stateObj;
-        this.entities = entities;
-        this.mouseDown = 0;
-        this.mouseUp = 0;
-        this.oldMouseUp = 0;
-        this.addEventListener("contextmenu", function(e) {
-            e.preventDefault();
-        });
-        this.addEventListener("mousedown", function(e) {
-            this.mouseDown = e.timeStamp;
-        });
-        this.addEventListener("touchstart", function(e) {
-            this.mouseDown = e.timeStamp;
-        });
-        this.addEventListener("touchend", function(e) {
-            this.mouseUp = e.timeStamp;
-            if (e.timeStamp - this.mouseDown > 500) this._click_evt(e);
-        });
-        this.addEventListener("click", function(e) {
-            this._handleClick(e);
-        });
-    }
-    // updated(changes){
-    // 	console.log("RE-RENDERED element");
-    // }
-    get_entity(entity_translation_value) {
-        return this.hass.states[this.entities[entity_translation_value].entity_id];
-    }
-    _handleClick(e) {
-        if (e.pointerType != "touch") {
-            if (e.detail === 1) this._click_evt(e);
-            else if (e.detail === 2) {
-                this.doubleClick = true;
-                this._dblclick(e);
-            }
-        } else {
-            if (this.mouseUp - this.oldMouseUp < 400) {
-                this.doubleClick = true;
-                this._dblclick(e);
-            } else this._click_evt(e);
-            this.oldMouseUp = this.mouseUp;
-        }
-    }
-    sleep(ms) {
-        return new Promise((resolve)=>setTimeout(resolve, ms));
-    }
-    render() {
-        let value = null;
-        if (this.stateObj != null) value = this.stateObj.state;
-        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
-        return this._render();
-    }
-    async run_action(action) {
-        if (!("enabled" in action) || action.enabled) {
-            if (action.domain == "redsea_ui") switch(action.action){
-                case "dialog":
-                    this.hass.redsea_dialog_box.display(action.data.type, this);
-                    break;
-                case "exit-dialog":
-                    this.hass.redsea_dialog_box.quit();
-                    break;
-                case "message_box":
-                    this.msgbox(action.data);
-                    break;
-                default:
-                    let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
-                    this.msgbox(error_str);
-                    console.error(error_str);
-                    break;
-            } //switch
-            else {
-                if (action.data == "default") action.data = {
-                    "entity_id": this.stateObj.entity_id
-                };
-                console.debug("Call Service", action.domain, action.action, action.data);
-                this.hass.callService(action.domain, action.action, action.data);
-            } //else -- ha domain action
-        } //if -- enabled
-    }
-    async _click_evt(e) {
-        let timing = e.timeStamp - this.mouseDown;
-        if (e.timeStamp - this.mouseDown > 500) this._longclick(e);
-        else {
-            await this.sleep(300);
-            if (this.doubleClick == true) this.doubleClick = false;
-            else this._click(e);
-        }
-        this.mouseDown = e.timeStamp;
-    }
-    _click(e) {
-        if ('tap_action' in this.conf) this.run_action(this.conf.tap_action);
-    }
-    _longclick(e) {
-        if ("hold_action" in this.conf) this.run_action(this.conf.hold_action);
-    }
-    _dblclick(e) {
-        if ("double_tap_action" in this.conf) this.run_action(this.conf.double_tap_action);
-    }
-    dialog(type) {
-        this.hass.redsea_dialog_box.display(type);
-    }
-    msgbox(msg) {
-        this.dispatchEvent(new CustomEvent("hass-notification", {
-            bubbles: true,
-            composed: true,
-            detail: {
-                message: msg
-            }
-        }));
-        return;
-    }
-}
-window.customElements.define('my-element', MyElement);
-
-});
-
 
 parcelRegister("5T0tY", function(module, exports) {
 parcelRequire("j0ZcV");
@@ -1277,7 +1343,7 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
 background-color: rgba(${this.color},${this.alpha});
 }
 </style>
-   	    <div class="${sclass}" id="${this.conf.name}">${label}</div>
+   	    <div class="button" id="${this.conf.name}">${label}</div>
 `;
     }
 } // end of class
@@ -1604,109 +1670,6 @@ padding-left: 5px;
 
 });
 
-parcelRegister("iXBpj", function(module, exports) {
-
-$parcel$export(module.exports, "default", () => $038fea56b681b6a5$export$2e2bcd8739ae039);
-$parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e13ad4e1fa5);
-$parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
-$parcel$export(module.exports, "updateObj", () => $038fea56b681b6a5$export$6fb918aa09a6c9f0);
-$parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
-$parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
-class $038fea56b681b6a5$export$2e2bcd8739ae039 {
-    constructor(hass){
-        this._hass = hass;
-        this.main_devices = [];
-        this.devices = {};
-        this.init_devices();
-    }
-    device_compare(a, b) {
-        if (a.text < b.text) return -1;
-        else if (a.text > b.text) return 1;
-         // else
-        return 0;
-    }
-    get_by_name(name) {
-        for (var id of this.main_devices){
-            if (id.text == name) return this.devices[id.value];
-             //if
-        } //for
-    }
-    init_devices() {
-        for(var device_id in this._hass.devices){
-            let dev = this._hass.devices[device_id];
-            let dev_id = dev.identifiers[0];
-            if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
-                // dev.lenght==2 to get only main device, not sub
-                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
-                    value: dev.primary_config_entry,
-                    text: dev.name
-                });
-                if (!Object.getOwnPropertyNames(this.devices).includes(dev.primary_config_entry)) Object.defineProperty(this.devices, dev.primary_config_entry, {
-                    value: {
-                        name: dev.name,
-                        elements: [
-                            dev
-                        ]
-                    }
-                });
-                else {
-                    this.devices[dev.primary_config_entry].elements.push(dev);
-                    // Change main device name with main device
-                    if (dev_id.length == 2) this.devices[dev.primary_config_entry].name = dev.name;
-                     //if
-                } //else
-            }
-        } //for
-        this.main_devices.sort(this.device_compare);
-    }
-}
-function $038fea56b681b6a5$export$5a544e13ad4e1fa5(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    var rgb = parseInt(result[1], 16) + "," + parseInt(result[2], 16) + "," + parseInt(result[3], 16);
-    /*    return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-    } : null;*/ return rgb;
-}
-function $038fea56b681b6a5$export$34d09c4a771c46ef(orig) {
-    var regex_hex, regex_trim, color, regex_rgb, matches, hex;
-    // Remove whitespace
-    regex_trim = new RegExp(/[^#0-9a-f\.\(\)rgba]+/gim);
-    color = orig.replace(regex_trim, ' ').trim();
-    // Check if already hex
-    regex_hex = new RegExp(/#(([0-9a-f]{1})([0-9a-f]{1})([0-9a-f]{1}))|(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}))/gi);
-    if (regex_hex.exec(color)) return color;
-    // Extract RGB values
-    regex_rgb = new RegExp(/rgba?\([\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*([,\/][\t\s]*[0-9\.]{1,})?[\t\s]*\);?/gim);
-    matches = regex_rgb.exec(orig);
-    if (matches) {
-        hex = '#' + (matches[1] | 256).toString(16).slice(1) + (matches[2] | 256).toString(16).slice(1) + (matches[3] | 256).toString(16).slice(1);
-        return hex;
-    } else return orig;
-}
-function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
-    var keys = Object.keys(newVal);
-    var n = obj;
-    if (keys.length > 0) {
-        if (!(keys[0] in obj)) {
-            obj[keys[0]] = newVal[keys[0]];
-            return;
-        }
-        $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj[keys[0]], newVal[keys[0]]);
-    }
-    return;
-}
-var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
-function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
-    let seconds = time % 60;
-    let minutes = (time - seconds) / 60 % 60;
-    let hours = (time - seconds - minutes * 60) / 3600;
-    return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
-}
-
-});
-
 
 parcelRegister("eW6Np", function(module, exports) {
 parcelRequire("j0ZcV");
@@ -1935,6 +1898,7 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
     }
     display(type, elt = null) {
         let box = this._shadowRoot.querySelector("#window-mask");
+        console.debug("ELEMENT", elt);
         this.elt = elt;
         this.to_render = this.config[type];
         this.render();
@@ -1948,6 +1912,14 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
     set_conf(config) {
         this.config = config;
     }
+    _render_content(content_conf) {
+        const r_element = customElements.get(content_conf.view);
+        const content = new r_element();
+        // translate from translation_key to entity_id
+        content.setConfig(content_conf.conf);
+        content.hass = this._hass;
+        return content;
+    }
     render() {
         console.debug("RENDER Dialog", this.to_render);
         let close_conf = {
@@ -1959,15 +1931,26 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
             "label": (0, $dPhcg.default)._("exit"),
             "class": "dialog_button"
         };
-        if (this.to_render != null) this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
-        return (0, $l56HR.html)`
+        let content = (0, $l56HR.html)``;
+        if (this.to_render != null) {
+            this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
+            content = (0, $l56HR.html)`${this.to_render.content.map((c)=>this._render_content(c))}`;
+        }
+        /*	const SsRow = customElements.get('hui-entities-card');
+	const sssor = new SsRow();
+	sssor.setConfig({type:"entities",entities:['switch.rsdose4_338229039_device_state']});
+	sssor.hass=this._hass;
+	const SRow = customElements.get('hui-toggle-entity-row');
+	const ssor = new SRow();
+	ssor.setConfig({type:'entity',entity:"switch.rsdose4_338229039_device_state"});
+	ssor.hass=this._hass;*/ return (0, $l56HR.html)`
           <div id="window-mask">
    	    <div id="dialog">
               <div id="dialog-close">
                  <click-image .hass=${this._hass} .conf=${close_conf}></click-image>
               </div>
               <div id="dialog-title"></div>
-              <div id="dialog-content">Hello I'm here</div>
+              <div id="dialog-content">${content}</div>
               <div id="dialog-submit">
                  <common-button .hass=${this._hass} .conf=${close_conf}/>
               </div>
@@ -2126,6 +2109,8 @@ var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 `;
 
 
+
+var $5c2Je = parcelRequire("5c2Je");
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 
@@ -2167,20 +2152,22 @@ class $020e09b811cd87ab$export$942630849b5196f4 extends (0, $5c2Je.default) {
             }
         ]
     };
-    constructor(hass, device){
-        super((0, $0ef451c83bce80a0$export$e506a1d27d1eaa20), hass, device);
+    constructor(){
+        super();
+        this.initial_config = (0, $0ef451c83bce80a0$export$e506a1d27d1eaa20);
     }
     _populate_entities() {}
     render() {
+        this.update_config();
         return (0, $l56HR.html)`
-<p id="device_name">${this.config.name}</p>
-<div class="device_bg">
-<img class="device_img" src="${this.config.background_img}"/>
-</div>
-`;
+                     <p id="device_name">${this.config.name}</p>
+                     <div class="device_bg">
+                       <img class="device_img" src="${this.config.background_img}"/>
+                     </div>
+                     `;
     }
 }
-window.customElements.define('no-device', $020e09b811cd87ab$export$942630849b5196f4);
+window.customElements.define('redsea-nodevice', $020e09b811cd87ab$export$942630849b5196f4);
 
 
 parcelRequire("j0ZcV");
@@ -2195,6 +2182,17 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "dialogs": {
         "set_manual_head_volume": {
             "title_key": "set_manual_head_volume",
+            "content": [
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "entities": [
+                            "manual_head_volume",
+                            "manual_head"
+                        ]
+                    }
+                }
+            ],
             "validate": [
                 {
                     "action": {
@@ -2205,10 +2203,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             ]
         }
     },
-    "switches": [
+    "elements": [
         {
             "name": "device_state",
-            "type": "hacs",
+            "type": "common-switch",
             "label": false,
             "class": "on_off",
             "style": "switch",
@@ -2229,7 +2227,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         {
             "name": "maintenance",
-            "type": "hacs",
+            "type": "common-switch",
             "label": false,
             "class": "on_off",
             "style": "switch",
@@ -2352,10 +2350,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "animation-iteration-count": "infinite"
                 }
             },
-            "sensors": [
+            "elements": [
                 {
                     "name": "manual_head_volume",
                     "force_integer": true,
+                    "type": "common-sensor",
                     "css": {
                         "position": "absolute",
                         "width": "60%",
@@ -2372,6 +2371,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 },
                 {
                     "name": "manual_dosed_today",
+                    "type": "common-sensor",
                     "force_integer": true,
                     "put_in": "pump_state_labels",
                     "class": "scheduler_label_top",
@@ -2385,11 +2385,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "font-weight": "bold",
                         "margin-top": "10%"
                     }
-                }
-            ],
-            "sensors_target": [
+                },
                 {
                     "name": "auto_dosed_today",
+                    "type": "common-sensor",
                     "target": "daily_dose",
                     "force_integer": true,
                     "put_in": "pump_state_labels",
@@ -2422,9 +2421,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "font-size": "0.8em",
                         "margin-top": "-25%"
                     }
-                }
-            ],
-            "progress_bar": [
+                },
                 {
                     "name": "container_volume",
                     "target": "save_initial_container_volume",
@@ -2455,13 +2452,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "aspect-ratio": "1/1",
                         "width": "140%"
                     }
-                }
-            ],
-            "switches": [
+                },
                 {
                     "alpha": 0,
                     "name": "schedule_enabled",
-                    "type": "hacs",
+                    "type": "common-switch",
                     "class": "pump_state_head",
                     "style": "button",
                     "css": {
@@ -2478,11 +2473,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "action": "toggle",
                         "data": "default"
                     }
-                }
-            ],
-            "buttons": [
+                },
                 {
                     "name": "manual_head",
+                    "type": "common-button",
                     "class": "manual_dose_head",
                     "css": {
                         "position": " absolute",
@@ -2658,13 +2652,12 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
 		</div>
 <!-- Render schedule background -->
 <div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
-${this._render_sensors(this.state_on, "pump_state_head")}
+${this._render_elements(this.state_on, "pump_state_head")}
 <div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
-${this._render_sensors(this.state_on, "pump_state_labels")}
+${this._render_elements(this.state_on, "pump_state_labels")}
 </div>
 </div>
-${this._render_sensors(this.state_on)}
-${this._render_actuators(this.state_on)} 
+${this._render_elements(this.state_on)}
 ${warning}
 ${calibration}
    	    `;
@@ -2792,12 +2785,14 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             supplement_color: {}
         };
     }
-    constructor(hass, device, user_config){
-        super((0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20), hass, device, user_config);
+    constructor(){
+        super();
         this.supplement_color = {};
+        this.initial_config = (0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20);
     }
     _populate_entities() {}
     _populate_entities_with_heads() {
+        this.update_config();
         this.config_dialog_box();
         for(let i = 0; i <= this.config.heads_nb; i++)this._heads.push({
             'entities': {}
@@ -2826,11 +2821,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
         let new_conf = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(this.config.heads.common, this.config.heads["head_" + head_id]);
         return (0, $l56HR.html)`
-<div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
-	<dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
-
-</div>
-`;
+                    <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
+                      <dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
+                    </div>
+                    `;
     }
     // updated(changes){
     // 	console.log("RE-RENDERED");
@@ -2845,39 +2839,39 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
         if (slots > 0) dosing_queue = (0, $l56HR.html)`
-<div style="${this.get_style(this.config.dosing_queue)}">
-<dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
-</div>`;
+                 <div style="${this.get_style(this.config.dosing_queue)}">
+                    <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
+                 </div>`;
         return (0, $l56HR.html)`
-	<div class="device_bg">
-        ${style}
-	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
-        <div class="heads">
-	${Array.from({
+             	<div class="device_bg">
+                  ${style}
+          	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
+                  <div class="heads">
+                     ${Array.from({
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._render_head(head))}
-       </div>
-${dosing_queue}
-        ${this._render_actuators()}
-	</div>`;
+                 </div>
+                 ${dosing_queue}
+                 ${this._render_elements()}
+               </div>`;
     }
     _editor_head_color(head_id) {
         this.update_config();
         let color = (0, $iXBpj.rgbToHex)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
         return (0, $l56HR.html)`
          <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
-<datalist id="RedSeaColors">
-<option>#8c4394</option>
-<option>#0081c5</option>
-<option>#008264</option>
-<option>#64a04b</option>
-<option>#582900</option>
-<option>#f04e99</option>
-<option>#f14b4c</option>
-<option>#f08f37</option>
-<option>#d9d326</option>
-<option>#FFFFFF</option>
-</datalist>
+         <datalist id="RedSeaColors">
+            <option>#8c4394</option>
+            <option>#0081c5</option>
+            <option>#008264</option>
+            <option>#64a04b</option>
+            <option>#582900</option>
+            <option>#f04e99</option>
+            <option>#f14b4c</option>
+            <option>#f08f37</option>
+            <option>#d9d326</option>
+            <option>#FFFFFF</option>
+         </datalist>
          <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
          <br />
      `;
@@ -2920,17 +2914,16 @@ ${dosing_queue}
         var element = doc.getElementById("heads_colors");
         if (element) element.reset();
         return (0, $l56HR.html)`
-<hr />
-<h1>${(0, $dPhcg.default)._("heads_colors")}</h1>
-<form id="heads_colors">
-   	${Array.from({
+                 <hr />
+                 <h1>${(0, $dPhcg.default)._("heads_colors")}</h1>
+                 <form id="heads_colors">
+                   ${Array.from({
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._editor_head_color(head))}
-</form>
-`;
+                </form>`;
     }
 }
-window.customElements.define('rs-dose4', $205242e0eaceda90$export$2e2bcd8739ae039);
+window.customElements.define('redsea-rsdose4', $205242e0eaceda90$export$2e2bcd8739ae039);
 
 
 
@@ -2942,27 +2935,16 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         (0, $040001cdf6cad6dd$export$2e2bcd8739ae039),
         (0, $4DorC.default)
     ];
+    // Card is updated when new device is selected or when hass is updated
     static get properties() {
         return {
             hass: {},
-            user_config: {},
-            select_devices: {
-                type: Array
-            },
-            current_device: {
-                type: String
-            },
-            version: {
-                type: String
-            },
-            progs: {
-                type: Array
-            },
-            devices_list: {},
-            current_device: (0, $l56HR.html)``
+            current_device: {}
         };
     }
-    constructor(){
+    /*
+     * CONSTRUCTOR
+     */ constructor(){
         super();
         this.version = 'v0.0.1';
         this.select_devices = [
@@ -2973,52 +2955,72 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         ];
         this.first_init = true;
     }
-    _set_current_device_from_name(dev, name) {
-        if (dev['text'] == name) this._set_current_device(dev['value']);
+    /*
+     * Get user configuration
+     */ setConfig(config) {
+        this.user_config = config;
     }
-    render() {
+    /*
+     * RENDER
+     */ render() {
+        console.debug("render main");
         if (this.first_init == true) {
             this.init_devices();
             this.first_init = false;
-            this.no_device = (0, $l56HR.html)`<no-device id="device" hass="${this.hass}"/>`;
+            this.no_device = (0, $5c2Je.default).create_device("redsea-nodevice", this.hass, null, null);
             this.current_device = this.no_device;
-        }
+        } //if
+        //Init conf and DOM for dialog box
+        (0, $7Rfxy.default).init(this.hass, this.shadowRoot);
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
-            (0, $7Rfxy.default).init(this.hass, this.shadowRoot);
+            //A specific device has been selected
             return (0, $l56HR.html)`
                        ${this.current_device}
                        ${(0, $7Rfxy.default).render()}
                        `;
-        }
+        } //fi
+        // no secific device selected, display select form
         return (0, $l56HR.html)`
           ${this.device_select()}
           ${this.current_device}
           ${(0, $7Rfxy.default).render()}
     `;
     }
-    device_select() {
+    /*
+     * display select form to choose wich device to display
+     */ device_select() {
         return (0, $l56HR.html)`
-        <select id="device" @change="${this.onChange}">
-            ${this.select_devices.map((option)=>(0, $l56HR.html)`
-            <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
-            `)}
-        </select>
-<div class="device">
+           <select id="device" @change="${this.onChange}">
+              ${this.select_devices.map((option)=>(0, $l56HR.html)`
+              <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
+              `)}
+          </select>
     `;
     }
-    init_devices() {
+    /*
+     * Initialise available redsea devices list
+     */ init_devices() {
         this.devices_list = new (0, $iXBpj.default)(this.hass);
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
-    _set_current_device(device_id) {
+    /*
+     * Set the current device to display giving it's name
+     */ _set_current_device_from_name(dev, name) {
+        if (dev['text'] == name) this._set_current_device(dev['value']);
+    }
+    /*
+     * Set the current device to display giving it's id
+     */ _set_current_device(device_id) {
+        //No device selected, display redsea logo
         if (device_id == "unselected") {
             this.current_device = this.no_device;
             return;
         }
         var device = this.devices_list.devices[device_id];
         var model = device.elements[0].model;
+        this.current_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this.hass, this.user_config, device);
         //TODO : Implement MAIN tank view support
         //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
         // labels: enhancement
@@ -3031,10 +3033,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/9
             // labels: enhancement, rsdose, rsdose2
             case "RSDOSE4":
-                //TODO : Implement RSDOSE4 support
-                //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
-                // labels: enhancement, rsdose, rsdose4
-                this.current_device = (0, $l56HR.html)`<rs-dose4 id="device" .hass="${this.hass}" .device="${device}" .user_config="${this.user_config}"/>`;
                 break;
             case "RSRUN":
                 break;
@@ -3058,7 +3056,9 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
                 console.log("Unknow device type: " + model);
         }
     }
-    onChange() {
+    /*
+     * When SELECT form change, update the current redsea device to display.
+     */ onChange() {
         setTimeout(()=>{
             this.selected = this.shadowRoot.querySelector('#device').value;
             this.current_device = this.no_device;
@@ -3066,17 +3066,12 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             else this._set_current_device(this.selected);
         }, 300);
     }
-    // card configuration
-    static getConfigElement() {
+    /*
+     * Card editor
+     */ static getConfigElement() {
         return document.createElement("reef-card-editor");
     }
-    setConfig(config) {
-        // if (!config.entities) {
-        //   throw new Error("You need to define entities");
-        //   }
-        this.user_config = config;
-    }
-}
+} //end of class ReefCard
 
 
 parcelRequire("j0ZcV");
@@ -3086,6 +3081,8 @@ var $eGUNk = parcelRequire("eGUNk");
 
 var $iXBpj = parcelRequire("iXBpj");
 
+var $5c2Je = parcelRequire("5c2Je");
+
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
@@ -3093,14 +3090,12 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
             _config: {
                 state: true
             },
-            select_devices: {
-                type: Array
-            },
-            devices_list: {},
             current_device: {}
-        };
+        }; //end of reactives properties
     }
-    constructor(){
+    /*
+     * CONSTRUCTOR
+     */ constructor(){
         super();
         this.select_devices = [
             {
@@ -3112,7 +3107,9 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         this.current_device = null;
         this.addEventListener('config-changed', this.render());
     }
-    setConfig(config) {
+    /*
+     * Get user configuration
+     */ setConfig(config) {
         this._config = config;
     }
     init_devices() {
@@ -3132,7 +3129,9 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
                 padding: 0.5em;
             }
         `;
-    render() {
+    /*
+     * RENDER
+     */ render() {
         if (this._config) {
             if (this.first_init == true) {
                 this.first_init = false;
@@ -3156,18 +3155,13 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         }
         return (0, $l56HR.html)``;
     }
-    device_conf() {
+    /*
+     * Display specific configuration for selected device
+     */ device_conf() {
         if (this._config.device && this._config.device.length > 0) {
             var device = this.devices_list.get_by_name(this._config.device);
             var model = device.elements[0].model;
-            var lit_device = null;
-            switch(model){
-                case "RSDOSE4":
-                    lit_device = new (0, $205242e0eaceda90$export$2e2bcd8739ae039)(this.hass, device, this._config);
-                    break;
-                default:
-                    break;
-            } //switch
+            var lit_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this.hass, this._config, device);
             if (lit_device != null && typeof lit_device['editor'] == 'function') {
                 this.current_device = lit_device;
                 return lit_device.editor(this.shadowRoot);
@@ -3175,7 +3169,9 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         }
         return ``;
     }
-    handleChangedEvent(changedEvent) {
+    /*
+     * Send event when configuration changed
+     */ handleChangedEvent(changedEvent) {
         // this._config is readonly, copy needed
         var newConfig = JSON.parse(JSON.stringify(this._config));
         var elt = this.shadowRoot.getElementById("device");
@@ -3194,9 +3190,14 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         });
         this.dispatchEvent(messageEvent);
     }
-}
+} // end of class ReefCardEditor
 
 
+// import { loadHaComponents, DEFAULT_HA_COMPONENTS } from '@kipk/load-ha-components';
+// await loadHaComponents([
+//     'ha-form',
+//     'hui-sensor-entity-row'
+// ]);
 customElements.define("reef-card", (0, $bf513b85805031e6$export$8a2b7dacab8abd83));
 customElements.define("reef-card-editor", (0, $fc7d6e547b6fcb14$export$d7c6282dbee77504));
 window.customCards = window.customCards || [];

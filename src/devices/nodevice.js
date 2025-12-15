@@ -13,22 +13,23 @@ export class NoDevice extends RSDevice{
     static styles = styles;
     device={'elements':[{'model':'NODEVICE','name':''}]};
 
-    constructor(hass,device){
-	super(config,hass,device);
+    constructor(){
+	super();
+	this.initial_config=config;
     }
-
 
     _populate_entities(){
     }
     
     render(){
+	this.update_config();
 	return html`
-<p id="device_name">${this.config.name}</p>
-<div class="device_bg">
-<img class="device_img" src="${this.config.background_img}"/>
-</div>
-`
+                     <p id="device_name">${this.config.name}</p>
+                     <div class="device_bg">
+                       <img class="device_img" src="${this.config.background_img}"/>
+                     </div>
+                     `;
     }
 }
 
-window.customElements.define('no-device', NoDevice);
+window.customElements.define('redsea-nodevice', NoDevice);

@@ -1,0 +1,19 @@
+
+// import { loadHaComponents, DEFAULT_HA_COMPONENTS } from '@kipk/load-ha-components';
+
+// await loadHaComponents([
+//     'ha-form',
+//     'hui-sensor-entity-row'
+// ]);
+
+let m_config={type:'entity',entity:"sensor.rsdose4_338229039_dosing_queue"}
+let s_config={type:'entity',entity:"switch.rsdose4_338229039_device_state"};
+const SensorRow = customElements.get('hui-sensor-entity-row')
+const sensor = new SensorRow()
+sensor.setConfig(m_config)
+sensor.hass=this.hass;
+const SRow = customElements.get('hui-toggle-entity-row')
+const ssor = new SRow()
+ssor.setConfig(s_config)
+ssor.hass=this.hass;
+hmlt` ${sensor} ${ssor}`;

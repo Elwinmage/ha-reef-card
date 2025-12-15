@@ -6,6 +6,9 @@ export const config = {
     "dialogs": {
 	"set_manual_head_volume":{
 	    "title_key": "set_manual_head_volume",
+	    "content":[
+		{"view":"hui-entities-card","conf":{"entities":["manual_head_volume","manual_head"]}},
+	    ],
 	    "validate": [
 		{
 		    "action": {
@@ -16,10 +19,10 @@ export const config = {
 	    ]
 	}
     },
-    "switches": [
+    "elements": [
 	{
 	    "name": "device_state",
-	    "type":"hacs",
+	    "type":"common-switch",
 	    "label":false,
 	    "class":"on_off",
 	    "style": "switch",
@@ -41,7 +44,7 @@ export const config = {
 	},
 	{
 	    "name": "maintenance",
-	    "type":"hacs",
+	    "type":"common-switch",
 	    "label":false,
 	    "class":"on_off",
 	    "style": "switch",
@@ -165,10 +168,11 @@ export const config = {
 		    "animation-iteration-count": "infinite",
 		}
 	    },
-	    "sensors": [
+	    "elements": [
 		{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
+		    "type": "common-sensor",
 		    "css":{
 			"position": "absolute",
 			"width": "60%",
@@ -183,6 +187,7 @@ export const config = {
 		},
 		{
 		    "name": "manual_dosed_today",
+		    "type": "common-sensor",
 		    "force_integer": true,
 		    "put_in": "pump_state_labels",
 		    "class": "scheduler_label_top",
@@ -196,11 +201,10 @@ export const config = {
 			"font-weight": "bold",
 			"margin-top":"10%",
 		    },
-		}
-	    ],
-	    "sensors_target": [
+		},
 		{
 		    "name": "auto_dosed_today",
+		    "type": "common-sensor",
 		    "target": "daily_dose",
 		    "force_integer": true,
 		    "put_in": "pump_state_labels",
@@ -233,9 +237,7 @@ export const config = {
 			"font-size":"0.8em",
 			"margin-top":"-25%",
 		    },
-		}
-	    ],
-	    "progress_bar": [
+		},
 		{
 		    "name": "container_volume",
 		    "target": "save_initial_container_volume",
@@ -267,13 +269,11 @@ export const config = {
 			
 			"width":"140%",
 		    },
-		}
-		],
-	    "switches" : [
+		},
 		{
 		    "alpha": 0,
 		    "name": "schedule_enabled",
-		    "type": "hacs",
+		    "type": "common-switch",
 		    "class": "pump_state_head",
 		    "style": "button",
 		    "css":{
@@ -290,11 +290,10 @@ export const config = {
 			"action":"toggle",
 			"data": "default",
 		    }
-		}
-	    ],
-	    "buttons": [
+		},
 		{
 		    "name": "manual_head",
+		    "type": "common-button",
 		    "class": "manual_dose_head",
 		    "css":{
 			"position":" absolute",

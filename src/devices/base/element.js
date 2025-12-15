@@ -1,6 +1,6 @@
 import { html, LitElement } from "lit";
 
-//import dialog_box from "./dialog";
+import {off_color} from "../../common.js";
 
 export default class MyElement extends LitElement{
     static get properties(){
@@ -14,14 +14,14 @@ export default class MyElement extends LitElement{
 	};
     }// end of get properties 
 
-    constructor(hass,conf,stateObj,entities={},color="255,255,255",alpha=1){
+    constructor(){//hass,conf,stateObj,entities={},color="255,255,255",alpha=1){
 	super();
-	this.hass=hass;
-	this.conf=conf;
-	this.color=color;
-	this.alpha=alpha;
-	this.stateObj=stateObj;
-	this.entities=entities;
+	// this.hass=hass;
+	// this.conf=conf;
+	// this.color=color;
+	// this.alpha=alpha;
+	// this.stateObj=stateObj;
+	// this.entities=entities;
 	this.mouseDown=0;
 	this.mouseUp=0;
 	this.oldMouseUp=0;
@@ -37,6 +37,36 @@ export default class MyElement extends LitElement{
     // 	console.log("RE-RENDERED element");
     // }
 
+
+    static create_element(hass,config,color,alpha,state,entities){
+	let Element=customElements.get(config.type);
+	let label_name='';
+	// Don not display label
+	if ('label' in config){
+	    if (typeof config.label === 'string' ){
+		label_name=config.label;
+	    }
+	    else if(typeof config.label === 'boolean' && config.label!=false){ 
+		label_name=config.name;
+	    }
+	}
+	if (! state){
+	    color=off_color;
+	}
+	let elt=new Element();
+	elt.hass=hass;
+	elt.conf=config;
+	elt.color=color;
+	elt.alpha=alpha;
+	elt.stateObj=hass.states[entities[config.name].entity_id];
+	if ("target" in config){
+	    elt.stateObjTarget=hass.states[entities[config.target].entity_id];
+	    elt.entities=entities;
+	}
+	elt.label=label_name;
+	return elt;
+	
+    }//end of function - create_element
     
     get_entity(entity_translation_value){
 	return this.hass.states[this.entities[entity_translation_value].entity_id];
