@@ -121,8 +121,7 @@ export default class RSDevice extends LitElement {
      * Get all entities linked to this redsea device
      */
     _populate_entities(){
-	for (var entity_id in this.hass.entities){
-	    var entity=this.hass.entities[entity_id];
+	for (var entity of this.hass.entities){
 	    if(entity.device_id == this.device.elements[0].id){
 		this.entities[entity.translation_key]=entity;
 	    }//if
