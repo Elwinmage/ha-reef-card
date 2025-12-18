@@ -12,8 +12,11 @@ import {rgbToHex,hexToRgb,updateObj} from "../common";
 import {merge} from "../merge";
 
 import {DosingQueue} from "./dosing_queue";
+import MyElement from "./base/element";
 
-import dialog_box from "./base/dialog";/*
+import dialog_box from "./base/dialog";
+
+/*
  * RSDose 
  */
 // TODO: RSDOSE Implement advanced schedule edition
@@ -30,6 +33,7 @@ export default class RSDose extends RSDevice{
     static get properties(){
 	return{
 	    supplement_color: {},
+	    to_render: false,
 	}
     }
     
@@ -37,8 +41,32 @@ export default class RSDose extends RSDevice{
 	super();
 	this.supplement_color={};
 	this.initial_config=config;
+	this.dosing_queue=null;
     }// end of constructor
 
+    set hass(obj){
+	this._hass=obj;
+	let re_render=false
+	for (let element in this._elements){
+	    let elt = this._elements[element];
+	    if(elt.has_changed(obj)){
+		re_render=true;
+	    }
+	    elt.hass=obj;
+	}
+	if(re_render){
+	    this.to_render=true;
+	}
+	for (let head of this._heads){
+	    if ('dose_head' in head){
+		head.dose_head.hass=obj;
+	    }
+	}
+	if(this.dosing_queue){
+	    this.dosing_queue.hass=obj;
+	}
+    }
+    
     _populate_entities(){
 	
     }
@@ -49,8 +77,8 @@ export default class RSDose extends RSDevice{
 	for (let i=0; i<=this.config.heads_nb;i++){
 	    this._heads.push({'entities':{}});
 	}
-	for (var entity_id in this.hass.entities){
-	    var entity=this.hass.entities[entity_id];
+	for (var entity_id in this._hass.entities){
+	    var entity=this._hass.entities[entity_id];
 	    for (var d of this.device.elements){
 		var fname=d['name'].split("_");
 		var head_id=0;
@@ -71,21 +99,39 @@ export default class RSDose extends RSDevice{
     }
 
     _get_val(head,entity_id){
-	let entity = this.hass.states[this.entities[head][entity_id].entity_id];
+	let entity = this._hass.states[this.entities[head][entity_id].entity_id];
 	return entity.state;
     }
     
     _render_head(head_id){
-	let schedule_state=(this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
+	let dose_head=null;
+	let new_conf=merge(this.config.heads.common,this.config.heads["head_"+head_id]);
+	let schedule_state=(this._hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
 	if (!this.is_on()){
 	    schedule_state=false;
 	}
-	let short_name=this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
+	let short_name=this._hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
     	this.supplement_color[short_name]=this.config.heads['head_'+head_id].color;
-	let new_conf=merge(this.config.heads.common,this.config.heads["head_"+head_id]);
+
+	if ( "dose_head" in this._heads[head_id]){
+	    dose_head=this._heads[head_id]["dose_head"];
+	    dose_head.state_on=schedule_state;
+	    dose_head.hass=this._hass;
+	}
+	else
+	{
+	    dose_head=RSDevice.create_device('dose-head',this._hass,new_conf,null);
+	    dose_head.entities=this._heads[head_id].entities;
+	    dose_head.stock_alert=this.get_entity('stock_alert_days').state;
+	    dose_head.state_on=schedule_state;
+	    this._heads[head_id]['dose_head']=dose_head;
+	    dose_head.config=new_conf;
+	}
+	
 	return html`
                     <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
-                      <dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
+${dose_head.render()}
+<!--                       <dose-head class="head" head_id="head_${head_id}" hass="${this._hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/> -->
                     </div>
                     `;
     }
@@ -95,9 +141,10 @@ export default class RSDose extends RSDevice{
     // }
 
     render(){
+	this.to_render=false;
+	console.debug("Render rsdose");
 	this.update_config();
 	let style=html``;
-	let dosing_queue=html``;
 	this._populate_entities_with_heads();
 	
 	let disabled=this._render_disabled();
@@ -107,13 +154,19 @@ export default class RSDose extends RSDevice{
 	if(!this.is_on()){
 	    style=html`<style>img{filter: grayscale(90%);}</style>`;
 	}
-	let slots=(this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
-	if (slots>0){
-	    dosing_queue=html`
-                 <div style="${this.get_style(this.config.dosing_queue)}">
-                    <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
-                 </div>`;
+	if (this.dosing_queue==null){
+	    this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,null,null,this.is_on(),this.entities);
+	    this.dosing_queue.color_list=this.supplement_color;
 	}
+/*	let d_queue=html``;
+	let slots=(this._hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
+	if (slots>0){
+	    d_queue=html`
+                 <div style="${this.get_style(this.config.dosing_queue)}">
+                    ${this.dosing_queue}
+<!--                     <dosing-queue id="dosing-queue" .hass="${this._hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this._hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue> -->
+                 </div>`;
+	}*/
 	return html`
              	<div class="device_bg">
                   ${style}
@@ -121,7 +174,9 @@ export default class RSDose extends RSDevice{
                   <div class="heads">
                      ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
                  </div>
-                 ${dosing_queue}
+<!--                  <div style="${this.get_style(this.config.dosing_queue)}"> -->
+                   ${this.dosing_queue}
+<!--                 </div> -->
                  ${this._render_elements()}
                </div>`;
     }//end of function render
@@ -143,7 +198,7 @@ export default class RSDose extends RSDevice{
             <option>#d9d326</option>
             <option>#FFFFFF</option>
          </datalist>
-         <label class="tab-label">${i18n._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
+         <label class="tab-label">${i18n._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
          <br />
      `;
     }//end of function _editor_head_color

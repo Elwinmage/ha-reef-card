@@ -33,7 +33,7 @@ export class Button extends  MyElement {
 	return html`
  <style>
 .button{
-background-color: rgba(${this.color},${this.alpha});
+background-color: rgba(${this.c},${this.alpha});
 }
 </style>
    	    <div class="button" id="${this.conf.name}">${label}</div>

@@ -38,7 +38,7 @@ export class Sensor extends  MyElement {
 	return html`
 <style>
 .sensor{
-background-color: rgba(${this.color},${this.alpha});
+background-color: rgba(${this.c},${this.alpha});
 }   
 </style>
    	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>

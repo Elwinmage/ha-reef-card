@@ -28,7 +28,7 @@ export class ProgressCircle extends  MyElement {
 	this.stateObjTarget=stateObjTarget;
     }//end of constructor
 
-    render(){
+    _render(){
 	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
 	    return html`<br />`;
 	}
@@ -55,11 +55,11 @@ export class ProgressCircle extends  MyElement {
 	}
 	// range 0 to 565 for 200x200
 	return html`
-   <svg width="100%" height="100%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
-    <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
-    <circle r="90" cx="100" cy="100" stroke="rgb(${this.color})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565-percent*565/100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
-<text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
-  </svg>
+              <svg width="100%" height="100%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+                <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
+                <circle r="90" cx="100" cy="100" stroke="rgb(${this.c})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565-percent*565/100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
+                <text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
+               </svg>
 `;
     }//end of function render
 

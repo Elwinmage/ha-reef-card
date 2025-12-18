@@ -24,10 +24,11 @@ export default class DoseHead extends RSDevice{
 	}
     }
 
-    constructor(hass,entities,config,state_on,stock_alert){
+    constructor(){//hass,entities,config,state_on,stock_alert){
 	super();
 	this.supplement=null;
-	this.stock_alert=stock_alert;
+	this.stock_alert=null;//stock_alert;
+	
     }
 
     _pipe_path(){
@@ -41,7 +42,6 @@ export default class DoseHead extends RSDevice{
 		    <path d="m 62,0 1,39 c 0,2 1,3 2,5 2,2 2,1 4,2 2,0 4,0 6,-2 2,-2 1,-5 2,-7 l 6,-30 -8,0 -3,8 0,-28 z"></path>
 		</svg>
 `;
-
     }
 
     _render_container(){
@@ -51,25 +51,26 @@ export default class DoseHead extends RSDevice{
 	let style=html``;
 	let color=this.config.color;
 	if(!this.state_on){
-	    style=html`<style>img{filter: grayscale(90%);}</style>`;
+	    style=html`<style>img#${supplement_uid}{filter: grayscale(90%);}</style>`;
 	    color=off_color;
 	}
 	return html`
 <div class="container" style="${this.get_style(this.config.container)}">
   ${style}
-  <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
+  <img id=${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
 </div>
 `;
     }
 
     render(){
-	this.supplement=this.hass.states[this.entities['supplement'].entity_id];
+	console.debug("Render dose_head n°",this.config.id,this.state_on);
+	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
 	if (this.supplement.attributes.supplement.uid!='null'){
 	    let warning='';
 	    let calibration='';
 	    let color=this.config.color+","+this.config.alpha;
 	    
-	    if (this.hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
+	    if (this._hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
 		this.state_on=false;
 		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
 	    }
@@ -85,16 +86,15 @@ export default class DoseHead extends RSDevice{
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
  		  ${this._pipe_path()}
 		</div>
-<!-- Render schedule background -->
-<div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
-${this._render_elements(this.state_on,"pump_state_head")}
-<div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
-${this._render_elements(this.state_on,"pump_state_labels")}
-</div>
-</div>
-${this._render_elements(this.state_on)}
-${warning}
-${calibration}
+                <div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
+                  ${this._render_elements(this.state_on,"pump_state_head")}
+                  <div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
+                    ${this._render_elements(this.state_on,"pump_state_labels")}
+                  </div>
+              </div>
+              ${this._render_elements(this.state_on)}
+              ${warning}
+              ${calibration}
    	    `;
 	}//if
 	else {

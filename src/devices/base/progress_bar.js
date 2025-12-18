@@ -28,7 +28,7 @@ export class ProgressBar extends  MyElement {
 	this.stateObjTarget=stateObjTarget;
     }//end of constructor
 
-    render(){
+    _render(){
 	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
 	    return html`<br />`;
 	}
@@ -47,16 +47,16 @@ export class ProgressBar extends  MyElement {
 	    fill = 0;
 	}
 	return html`
-<style>
-div.progress{
-background-color: rgba(${this.color},0.8);
-}   
-</style>
-   	    <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
-       	      <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
-              <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
-            </div>
-`;
+            <style>
+             div.progress{
+               background-color: rgba(${this.c},0.8);
+              }   
+            </style>
+              <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
+       	        <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
+                <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
+              </div>
+             `;
     }//end of function render
 
     async _click(e){

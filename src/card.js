@@ -24,7 +24,7 @@ export class ReefCard extends LitElement {
     // Card is updated when new device is selected or when hass is updated
     static get properties() {
 	return {
-	    hass: {},
+	    _hass: {},
 	    current_device: {},
 	};
     }//end of reactives properties
@@ -46,6 +46,17 @@ export class ReefCard extends LitElement {
 	this.user_config = config;
     }//end of function - setConfig
 
+
+    set hass(obj){
+	if(this.first_init==true){
+	    this._hass=obj;
+	}
+	else {
+	    this.current_device.hass=obj;
+	}
+
+    }
+    
     /*
      * RENDER
      */
@@ -54,13 +65,18 @@ export class ReefCard extends LitElement {
 	if(this.first_init==true){
 	    this.init_devices();
 	    this.first_init=false;
-	    this.no_device=RSDevice.create_device("redsea-nodevice",this.hass,null,null);
+	    this.no_device=RSDevice.create_device("redsea-nodevice",this._hass,null,null);
 	    this.current_device=this.no_device;
 	}//if
+	else {
+	    this.current_device.hass=this._hass;
+	    return;
+	}
 	//Init conf and DOM for dialog box
-	dialog_box.init(this.hass,this.shadowRoot);
+	dialog_box.init(this._hass,this.shadowRoot);
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
+	    this.current_device.hass=this._hass;
 	    //A specific device has been selected
 	    return html`
                        ${this.current_device}
@@ -92,7 +108,7 @@ export class ReefCard extends LitElement {
      * Initialise available redsea devices list
      */
     init_devices(){
-	this.devices_list=new DeviceList(this.hass);
+	this.devices_list=new DeviceList(this._hass);
 	for (var d of this.devices_list.main_devices){
 	    this.select_devices.push(d);
 	}// for
@@ -117,9 +133,15 @@ export class ReefCard extends LitElement {
 	    return;
 	}
 	
+	if (this.current_device.device != null &&
+            this.current_device.device.elements[0].primary_config_entry ==device_id){
+            console.debug("current device not updated",this.current_device.device.name);
+            return;
+        }
+	
 	var device=this.devices_list.devices[device_id];
 	var model = device.elements[0].model;
-	this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this.hass,this.user_config,device);
+	this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this.user_config,device);
 
 	//TODO : Implement MAIN tank view support
 	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11

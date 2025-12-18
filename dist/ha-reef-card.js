@@ -65,7 +65,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     // Device is updated when hass is updated
     static get properties() {
         return {
-            hass: {}
         };
     }
     /*
@@ -88,22 +87,30 @@ class RSDevice extends (0, $eGUNk.LitElement) {
      */ constructor(){
         super();
         this.entities = {};
+        this._elements = [];
         this.first_init = true;
         this._dialog_box = null;
+    }
+    set hass(obj) {
+        this._hass = obj;
+        for(let element in this._elements){
+            let elt = this._elements[element];
+            elt.hass = obj;
+        }
     }
     /*
      * Load available dialog box for the current device
      */ config_dialog_box() {
         this._dialog_box = (0, $7Rfxy.default);
         this._dialog_box.set_conf(this.config.dialogs);
-        this.hass['redsea_dialog_box'] = this._dialog_box;
+        this._hass['redsea_dialog_box'] = this._dialog_box;
     }
     /*
      * Return  the hass entity id according to it's translation key
      * Entities list must be populate before with this._populate_entities()
      * @entity_translation_value: a strign representation the translation key of the entity
      */ get_entity(entity_translation_value) {
-        return this.hass.states[this.entities[entity_translation_value].entity_id];
+        return this._hass.states[this.entities[entity_translation_value].entity_id];
     }
     /*
      * Find leaves on a json configuration object
@@ -137,11 +144,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     /*
      * Get all entities linked to this redsea device
      */ _populate_entities() {
-        for(var entity_id in this.hass.entities){
-            var entity = this.hass.entities[entity_id];
-            if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
-             //if
-        } //for
+        for (var entity of this._hass.entities)if (entity.device_id == this.device.elements[0].id) this.entities[entity.translation_key] = entity;
+         //if
+         //for
     }
     /*
      * Check is the current device is disabled or not
@@ -158,7 +163,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     /*
      * Get the state of the device on or off.
      */ is_on() {
-        return this.hass.states[this.entities['device_state'].entity_id].state == 'on';
+        return this._hass.states[this.entities['device_state'].entity_id].state == 'on';
     }
     /*
      * Special render if the device is disabled or in maintenance mode in HA
@@ -166,15 +171,13 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let reason = null;
         let maintenance = '';
         if (this.is_disabled()) reason = "disabledInHa";
-        else if (this.hass.states[this.entities['maintenance'].entity_id].state == 'on') {
+        else if (this._hass.states[this.entities['maintenance'].entity_id].state == 'on') {
             reason = "maintenance";
             // if in maintenance mode, display maintenance switch
             for (let swtch of this.config.elements)if (swtch.name == "maintenance") {
-                let maintenance_button = (0, $1Um3j.default).create_element(this.hass, swtch, this.config.color, this.config.alpha, true, this.entities);
+                let maintenance_button = (0, $1Um3j.default).create_element(this._hass, swtch, this.config.color, this.config.alpha, true, this.entities);
                 maintenance = (0, $l56HR.html)`
-                                    <div class="${swtch.class}" style="${this.get_style(swtch)}">
                                       ${maintenance_button}
-                                    </div>
                                     `;
                 break;
             } //if
@@ -208,11 +211,17 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         //Element is disabled or not i nthe requested group
         if ('disabled' in conf && disabled == true || sensor_put_in != put_in) return (0, $l56HR.html)``;
          //if
-        let element = (0, $1Um3j.default).create_element(this.hass, conf, this.config.color, this.config.alpha, state, this.entities);
+        let element = null;
+        if (conf.name in this._elements) {
+            element = this._elements[conf.type + '.' + conf.name];
+            element.state_on = state;
+        } else {
+            element = (0, $1Um3j.default).create_element(this._hass, conf, this.config.color, this.config.alpha, state, this.entities);
+            this._elements[conf.type + '.' + conf.name] = element;
+            console.debug(this._elements);
+        }
         return (0, $l56HR.html)`
-                     <div class="${conf.class}" style="${this.get_style(conf)}">
                        ${element}
-                     </div>
                      `;
     }
     /*
@@ -954,26 +963,17 @@ var $iXBpj = parcelRequire("iXBpj");
 class MyElement extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
-            //	    conf: {},
             stateObj: {},
-            color: {},
-            doubleClick: {
-                type: Boolean
-            },
-            mouseDown: {}
+            stateOn: {}
         };
     }
     constructor(){
         super();
-        // this.hass=hass;
-        // this.conf=conf;
-        // this.color=color;
-        // this.alpha=alpha;
-        // this.stateObj=stateObj;
-        // this.entities=entities;
         this.mouseDown = 0;
         this.mouseUp = 0;
         this.oldMouseUp = 0;
+        this._hass = null;
+        this.stateOn = false;
         this.addEventListener("contextmenu", function(e) {
             e.preventDefault();
         });
@@ -994,6 +994,35 @@ class MyElement extends (0, $eGUNk.LitElement) {
     // updated(changes){
     // 	console.log("RE-RENDERED element");
     // }
+    set state_on(state) {
+        if (state != this.stateOn) this.stateOn = state;
+    }
+    has_changed(hass) {
+        let res = false;
+        if (this.stateObj) {
+            let so = hass.states[this.stateObj.entity_id];
+            if (this.stateObj.state != so.state) res = true;
+            else if ("target" in this.conf) {
+                let sot = hass.states[this.stateObjTarget.entity_id];
+                if (this.stateObjTarget.state != sot.state) res = true;
+            }
+        }
+        return res;
+    }
+    set hass(obj) {
+        this._hass = obj;
+        if (this.stateObj) {
+            let so = this._hass.states[this.stateObj.entity_id];
+            if (this.stateObj.state != so.state) this.stateObj = so;
+            else if (this.conf && "target" in this.conf) {
+                let sot = this._hass.states[this.stateObjTarget.entity_id];
+                if (this.stateObjTarget.state != sot.state) {
+                    this.stateObjTarget = sot;
+                    this.stateObj = so; // force render
+                }
+            }
+        }
+    }
     static create_element(hass, config, color, alpha, state, entities) {
         let Element = customElements.get(config.type);
         let label_name = '';
@@ -1002,8 +1031,10 @@ class MyElement extends (0, $eGUNk.LitElement) {
             if (typeof config.label === 'string') label_name = config.label;
             else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
         }
-        if (!state) color = (0, $iXBpj.off_color);
-        let elt = new Element();
+        /*	if (! state){
+	    color=off_color;
+	}*/ let elt = new Element();
+        elt.stateOn = state;
         elt.hass = hass;
         elt.conf = config;
         elt.color = color;
@@ -1016,8 +1047,16 @@ class MyElement extends (0, $eGUNk.LitElement) {
         elt.label = label_name;
         return elt;
     }
+    /*
+     * Build a css style string according to given json configuration
+     * @conf: the css definition
+     */ get_style() {
+        let style = '';
+        if (this.conf && 'css' in this.conf) style = Object.entries(this.conf.css).map(([k, v])=>`${k}:${v}`).join(';');
+        return style;
+    }
     get_entity(entity_translation_value) {
-        return this.hass.states[this.entities[entity_translation_value].entity_id];
+        return this._hass.states[this.entities[entity_translation_value].entity_id];
     }
     _handleClick(e) {
         if (e.pointerType != "touch") {
@@ -1038,19 +1077,27 @@ class MyElement extends (0, $eGUNk.LitElement) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
     }
     render() {
+        if (this.stateObj) console.debug("render element", this.stateObj.entity_id);
+        else console.debug("render element", this.conf.name);
         let value = null;
         if (this.stateObj != null) value = this.stateObj.state;
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
-        return this._render();
+        if (!this.stateOn) this.c = (0, $iXBpj.off_color);
+        else this.c = this.color;
+        return (0, $l56HR.html)`
+     	    <div class="${this.conf.class}" style="${this.get_style()}"> 
+	     ${this._render()}
+            </div>
+           `;
     }
     async run_action(action) {
         if (!("enabled" in action) || action.enabled) {
             if (action.domain == "redsea_ui") switch(action.action){
                 case "dialog":
-                    this.hass.redsea_dialog_box.display(action.data.type, this);
+                    this._hass.redsea_dialog_box.display(action.data.type, this);
                     break;
                 case "exit-dialog":
-                    this.hass.redsea_dialog_box.quit();
+                    this._hass.redsea_dialog_box.quit();
                     break;
                 case "message_box":
                     this.msgbox(action.data);
@@ -1066,7 +1113,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
                     "entity_id": this.stateObj.entity_id
                 };
                 console.debug("Call Service", action.domain, action.action, action.data);
-                this.hass.callService(action.domain, action.action, action.data);
+                this._hass.callService(action.domain, action.action, action.data);
             } //else -- ha domain action
         } //if -- enabled
     }
@@ -1090,7 +1137,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         if ("double_tap_action" in this.conf) this.run_action(this.conf.double_tap_action);
     }
     dialog(type) {
-        this.hass.redsea_dialog_box.display(type);
+        this._hass.redsea_dialog_box.display(type);
     }
     msgbox(msg) {
         this.dispatchEvent(new CustomEvent("hass-notification", {
@@ -1340,7 +1387,7 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
         return (0, $l56HR.html)`
  <style>
 .button{
-background-color: rgba(${this.color},${this.alpha});
+background-color: rgba(${this.c},${this.alpha});
 }
 </style>
    	    <div class="button" id="${this.conf.name}">${label}</div>
@@ -1544,7 +1591,7 @@ class Sensor extends (0, $1Um3j.default) {
         return (0, $l56HR.html)`
 <style>
 .sensor{
-background-color: rgba(${this.color},${this.alpha});
+background-color: rgba(${this.c},${this.alpha});
 }   
 </style>
    	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
@@ -1604,7 +1651,7 @@ class ProgressBar extends (0, $1Um3j.default) {
         super(hass, conf, stateObj, entities, color, alpha);
         this.stateObjTarget = stateObjTarget;
     }
-    render() {
+    _render() {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         let iconv = (0, $dPhcg.default);
         let value = this.stateObj.state;
@@ -1617,16 +1664,16 @@ class ProgressBar extends (0, $1Um3j.default) {
         let fill = percent - 1;
         if (fill < 0) fill = 0;
         return (0, $l56HR.html)`
-<style>
-div.progress{
-background-color: rgba(${this.color},0.8);
-}   
-</style>
-   	    <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
-       	      <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
-              <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
-            </div>
-`;
+            <style>
+             div.progress{
+               background-color: rgba(${this.c},0.8);
+              }   
+            </style>
+              <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
+       	        <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
+                <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
+              </div>
+             `;
     }
     async _click(e) {
         console.debug("Click ", e.detail, " ", e.timeStamp);
@@ -1695,7 +1742,7 @@ class ProgressCircle extends (0, $1Um3j.default) {
         super(hass, conf, stateObj, entities, color, alpha);
         this.stateObjTarget = stateObjTarget;
     }
-    render() {
+    _render() {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         let iconv = (0, $dPhcg.default);
         let value = this.stateObj.state;
@@ -1713,11 +1760,11 @@ class ProgressCircle extends (0, $1Um3j.default) {
         if (fill < 0) fill = 0;
         // range 0 to 565 for 200x200
         return (0, $l56HR.html)`
-   <svg width="100%" height="100%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
-    <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
-    <circle r="90" cx="100" cy="100" stroke="rgb(${this.color})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565 - percent * 565 / 100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
-<text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
-  </svg>
+              <svg width="100%" height="100%" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+                <circle r="90" cx="100" cy="100" fill="transparent" stroke="rgba(150,150,150,0.6)" stroke-width="16px"></circle>
+                <circle r="90" cx="100" cy="100" stroke="rgb(${this.c})" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="${565 - percent * 565 / 100}px" fill="transparent" stroke-dasharray="565.48px"></circle>
+                <text x="71px" y="115px" fill="#6bdba7" font-size="52px" font-weight="bold" style="${style} transform:rotate(90deg) translate(0px, -196px)">${percent}</text>
+               </svg>
 `;
     }
     async _click(e) {
@@ -2249,6 +2296,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         }
     ],
     "dosing_queue": {
+        "type": "dosing-queue",
+        "name": "dosing_queue",
         "css": {
             "text-align": "center",
             "border": "1px solid black",
@@ -2401,7 +2450,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "grid-row": "2",
                         "font-weight": "bold",
                         "font-size": "1.2em",
-                        "margin-top": "-25%"
+                        "margin-top": "-20%"
                     }
                 },
                 {
@@ -2419,7 +2468,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "grid-row": "3",
                         "font-weight": "bold",
                         "font-size": "0.8em",
-                        "margin-top": "-25%"
+                        "margin-top": "-20%"
                     }
                 },
                 {
@@ -2495,6 +2544,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             ]
         },
         "head_1": {
+            "id": 1,
             "color": "140,67,148",
             "css": {
                 "left": "1%"
@@ -2506,12 +2556,14 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             }
         },
         "head_2": {
+            "id": 2,
             "color": "0,129,197",
             "css": {
                 "left": "23%"
             }
         },
         "head_3": {
+            "id": 3,
             "color": "0,130,100",
             "css": {
                 "left": "44%"
@@ -2528,6 +2580,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             }
         },
         "head_4": {
+            "id": 4,
             "color": "100,160,75",
             "css": {
                 "left": "65%"
@@ -2559,22 +2612,6 @@ img{
  position: absolute;
  width: 100%;
 }
-
-svg{
-stroke: black;
-}
-
-@keyframes blink {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
 `;
 
 
@@ -2601,10 +2638,10 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             stock_alert: {}
         };
     }
-    constructor(hass, entities, config, state_on, stock_alert){
+    constructor(){
         super();
         this.supplement = null;
-        this.stock_alert = stock_alert;
+        this.stock_alert = null; //stock_alert;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -2623,23 +2660,24 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         let style = (0, $l56HR.html)``;
         let color = this.config.color;
         if (!this.state_on) {
-            style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
+            style = (0, $l56HR.html)`<style>img#${supplement_uid}{filter: grayscale(90%);}</style>`;
             color = (0, $iXBpj.off_color);
         }
         return (0, $l56HR.html)`
 <div class="container" style="${this.get_style(this.config.container)}">
   ${style}
-  <img src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'"/>
+  <img id=${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
 </div>
 `;
     }
     render() {
-        this.supplement = this.hass.states[this.entities['supplement'].entity_id];
+        console.debug("Render dose_head n\xb0", this.config.id, this.state_on);
+        this.supplement = this._hass.states[this.entities['supplement'].entity_id];
         if (this.supplement.attributes.supplement.uid != 'null') {
             let warning = '';
             let calibration = '';
             let color = this.config.color + "," + this.config.alpha;
-            if (this.hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
+            if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
                 calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
             }
@@ -2650,16 +2688,15 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
  		  ${this._pipe_path()}
 		</div>
-<!-- Render schedule background -->
-<div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
-${this._render_elements(this.state_on, "pump_state_head")}
-<div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
-${this._render_elements(this.state_on, "pump_state_labels")}
-</div>
-</div>
-${this._render_elements(this.state_on)}
-${warning}
-${calibration}
+                <div class="pump_state_head" style="${this.get_style(this.config.pump_state_head)};background-color:rgba(${color});">
+                  ${this._render_elements(this.state_on, "pump_state_head")}
+                  <div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
+                    ${this._render_elements(this.state_on, "pump_state_labels")}
+                  </div>
+              </div>
+              ${this._render_elements(this.state_on)}
+              ${warning}
+              ${calibration}
    	    `;
         } else // TODO: add button for new supplement
         // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
@@ -2678,6 +2715,22 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+svg{
+stroke: black;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 `;
 
 
@@ -2742,34 +2795,50 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
     ];
     static get properties() {
         return {
-            state_on: {},
-            color_list: {}
+            state_on: {}
         };
     }
     constructor(hass, entities, config, state_on, stateObj, color_list){
         super(hass, config, stateObj, entities);
         this.state_on = state_on;
         this.color_list = color_list;
+        this.schdedule = null;
     }
     _render_slot_schedule(slot) {
         let bg_color = this.color_list[slot.head];
         return (0, $l56HR.html)`
-<div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
-<span class="dosing_queue">
-${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${(0, $iXBpj.toTime)(slot.time)}</span><hr /></div>`;
+           <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
+             <span class="dosing_queue">
+              ${slot.head}<br />
+              ${slot.volume.toFixed(1)}mL<br />
+              ${(0, $iXBpj.toTime)(slot.time)}
+             </span><hr />
+          </div>`;
+    }
+    set hass(obj) {
+        if (this.stateObj && this.stateObj.attributes.queue != obj.states[this.stateObj.entity_id].attributes.queue) {
+            this._hass = obj;
+            this.stateObj = obj.states[this.stateObj.entity_id];
+        }
     }
     render() {
         this.schedule = this.stateObj.attributes.queue;
-        if (this.state_on && this.schedule.length != 0) return (0, $l56HR.html)`
-${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
+        if (this.stateOn && this.schedule.length != 0) {
+            console.debug("render dosing-queue");
+            return (0, $l56HR.html)`
+                  <div style="${this.get_style(this.config)}">
+                    ${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
+                  </div>
    	    `;
-        else return (0, $l56HR.html)``;
+        } else return (0, $l56HR.html)``;
          //else
     }
 }
 window.customElements.define('dosing-queue', $141b1a4597f6f7b2$export$2e2bcd8739ae039);
 
 
+
+var $1Um3j = parcelRequire("1Um3j");
 parcelRequire("7Rfxy");
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
@@ -2782,13 +2851,27 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _heads = [];
     static get properties() {
         return {
-            supplement_color: {}
+            supplement_color: {},
+            to_render: false
         };
     }
     constructor(){
         super();
         this.supplement_color = {};
         this.initial_config = (0, $49eb2fac1cfe7013$export$e506a1d27d1eaa20);
+        this.dosing_queue = null;
+    }
+    set hass(obj) {
+        this._hass = obj;
+        let re_render = false;
+        for(let element in this._elements){
+            let elt = this._elements[element];
+            if (elt.has_changed(obj)) re_render = true;
+            elt.hass = obj;
+        }
+        if (re_render) this.to_render = true;
+        for (let head of this._heads)if ('dose_head' in head) head.dose_head.hass = obj;
+        if (this.dosing_queue) this.dosing_queue.hass = obj;
     }
     _populate_entities() {}
     _populate_entities_with_heads() {
@@ -2797,8 +2880,8 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         for(let i = 0; i <= this.config.heads_nb; i++)this._heads.push({
             'entities': {}
         });
-        for(var entity_id in this.hass.entities){
-            var entity = this.hass.entities[entity_id];
+        for(var entity_id in this._hass.entities){
+            var entity = this._hass.entities[entity_id];
             for (var d of this.device.elements){
                 var fname = d['name'].split("_");
                 var head_id = 0;
@@ -2811,18 +2894,32 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         }
     }
     _get_val(head, entity_id) {
-        let entity = this.hass.states[this.entities[head][entity_id].entity_id];
+        let entity = this._hass.states[this.entities[head][entity_id].entity_id];
         return entity.state;
     }
     _render_head(head_id) {
-        let schedule_state = this.hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
-        if (!this.is_on()) schedule_state = false;
-        let short_name = this.hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
-        this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
+        let dose_head = null;
         let new_conf = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(this.config.heads.common, this.config.heads["head_" + head_id]);
+        let schedule_state = this._hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
+        if (!this.is_on()) schedule_state = false;
+        let short_name = this._hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
+        this.supplement_color[short_name] = this.config.heads['head_' + head_id].color;
+        if ("dose_head" in this._heads[head_id]) {
+            dose_head = this._heads[head_id]["dose_head"];
+            dose_head.state_on = schedule_state;
+            dose_head.hass = this._hass;
+        } else {
+            dose_head = (0, $5c2Je.default).create_device('dose-head', this._hass, new_conf, null);
+            dose_head.entities = this._heads[head_id].entities;
+            dose_head.stock_alert = this.get_entity('stock_alert_days').state;
+            dose_head.state_on = schedule_state;
+            this._heads[head_id]['dose_head'] = dose_head;
+            dose_head.config = new_conf;
+        }
         return (0, $l56HR.html)`
                     <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
-                      <dose-head class="head" head_id="head_${head_id}" hass="${this.hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/>
+${dose_head.render()}
+<!--                       <dose-head class="head" head_id="head_${head_id}" hass="${this._hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/> -->
                     </div>
                     `;
     }
@@ -2830,19 +2927,27 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // 	console.log("RE-RENDERED");
     // }
     render() {
+        this.to_render = false;
+        console.debug("Render rsdose");
         this.update_config();
         let style = (0, $l56HR.html)``;
-        let dosing_queue = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
         let disabled = this._render_disabled();
         if (disabled != null) return disabled;
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
-        let slots = this.hass.states[this.entities['dosing_queue'].entity_id].attributes.queue.length;
-        if (slots > 0) dosing_queue = (0, $l56HR.html)`
+        if (this.dosing_queue == null) {
+            this.dosing_queue = (0, $1Um3j.default).create_element(this._hass, this.config.dosing_queue, null, null, this.is_on(), this.entities);
+            this.dosing_queue.color_list = this.supplement_color;
+        }
+        /*	let d_queue=html``;
+	let slots=(this._hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
+	if (slots>0){
+	    d_queue=html`
                  <div style="${this.get_style(this.config.dosing_queue)}">
-                    <dosing-queue id="dosing-queue" .hass="${this.hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this.hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue>
+                    ${this.dosing_queue}
+<!--                     <dosing-queue id="dosing-queue" .hass="${this._hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this._hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue> -->
                  </div>`;
-        return (0, $l56HR.html)`
+	}*/ return (0, $l56HR.html)`
              	<div class="device_bg">
                   ${style}
           	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -2851,7 +2956,9 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._render_head(head))}
                  </div>
-                 ${dosing_queue}
+<!--                  <div style="${this.get_style(this.config.dosing_queue)}"> -->
+                   ${this.dosing_queue}
+<!--                 </div> -->
                  ${this._render_elements()}
                </div>`;
     }
@@ -2872,7 +2979,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             <option>#d9d326</option>
             <option>#FFFFFF</option>
          </datalist>
-         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this.hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
+         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
          <br />
      `;
     }
@@ -2938,7 +3045,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     // Card is updated when new device is selected or when hass is updated
     static get properties() {
         return {
-            hass: {},
+            _hass: {},
             current_device: {}
         };
     }
@@ -2960,6 +3067,10 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
      */ setConfig(config) {
         this.user_config = config;
     }
+    set hass(obj) {
+        if (this.first_init == true) this._hass = obj;
+        else this.current_device.hass = obj;
+    }
     /*
      * RENDER
      */ render() {
@@ -2967,13 +3078,17 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         if (this.first_init == true) {
             this.init_devices();
             this.first_init = false;
-            this.no_device = (0, $5c2Je.default).create_device("redsea-nodevice", this.hass, null, null);
+            this.no_device = (0, $5c2Je.default).create_device("redsea-nodevice", this._hass, null, null);
             this.current_device = this.no_device;
-        } //if
+        } else {
+            this.current_device.hass = this._hass;
+            return;
+        }
         //Init conf and DOM for dialog box
-        (0, $7Rfxy.default).init(this.hass, this.shadowRoot);
+        (0, $7Rfxy.default).init(this._hass, this.shadowRoot);
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
+            this.current_device.hass = this._hass;
             //A specific device has been selected
             return (0, $l56HR.html)`
                        ${this.current_device}
@@ -3001,7 +3116,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     /*
      * Initialise available redsea devices list
      */ init_devices() {
-        this.devices_list = new (0, $iXBpj.default)(this.hass);
+        this.devices_list = new (0, $iXBpj.default)(this._hass);
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
@@ -3018,9 +3133,13 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             this.current_device = this.no_device;
             return;
         }
+        if (this.current_device.device != null && this.current_device.device.elements[0].primary_config_entry == device_id) {
+            console.debug("current device not updated", this.current_device.device.name);
+            return;
+        }
         var device = this.devices_list.devices[device_id];
         var model = device.elements[0].model;
-        this.current_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this.hass, this.user_config, device);
+        this.current_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this._hass, this.user_config, device);
         //TODO : Implement MAIN tank view support
         //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
         // labels: enhancement

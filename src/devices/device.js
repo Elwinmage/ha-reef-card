@@ -1,5 +1,4 @@
 import { html,LitElement } from "lit";
-
 import i18n from "../translations/myi18n.js";
 
 import MyElement from "./base/element";
@@ -29,7 +28,7 @@ export default class RSDevice extends LitElement {
     // Device is updated when hass is updated
    static get properties() {
 	return {
-	    hass: {},
+	    //_hass: {},
 	}
     }// end of reactives properties
 
@@ -58,9 +57,18 @@ export default class RSDevice extends LitElement {
     constructor(){
 	super();
 	this.entities={};
+	this._elements=[];
 	this.first_init=true;
 	this._dialog_box=null;
     }//end of constructor
+
+    set hass(obj){
+	this._hass=obj;
+	for (let element in this._elements){
+	    let elt = this._elements[element];
+	    elt.hass=obj;
+	}
+    }
 
     /*
      * Load available dialog box for the current device
@@ -68,7 +76,7 @@ export default class RSDevice extends LitElement {
     config_dialog_box(){
 	this._dialog_box=dialog_box;
 	this._dialog_box.set_conf(this.config.dialogs);
-	this.hass['redsea_dialog_box']=this._dialog_box;
+	this._hass['redsea_dialog_box']=this._dialog_box;
     }// end of config_dialog_box
 
     /*
@@ -77,7 +85,7 @@ export default class RSDevice extends LitElement {
      * @entity_translation_value: a strign representation the translation key of the entity
      */
     get_entity(entity_translation_value){
-	return this.hass.states[this.entities[entity_translation_value].entity_id];
+	return this._hass.states[this.entities[entity_translation_value].entity_id];
     }//end of function get_entity
 
 
@@ -121,7 +129,7 @@ export default class RSDevice extends LitElement {
      * Get all entities linked to this redsea device
      */
     _populate_entities(){
-	for (var entity of this.hass.entities){
+	for (var entity of this._hass.entities){
 	    if(entity.device_id == this.device.elements[0].id){
 		this.entities[entity.translation_key]=entity;
 	    }//if
@@ -148,7 +156,7 @@ export default class RSDevice extends LitElement {
      * Get the state of the device on or off.
      */
     is_on(){
-	return (this.hass.states[this.entities['device_state'].entity_id].state=='on');
+	return (this._hass.states[this.entities['device_state'].entity_id].state=='on');
     }//end of function - is_on
 
     /*
@@ -160,16 +168,14 @@ export default class RSDevice extends LitElement {
 	if (this.is_disabled()){
 	    reason="disabledInHa";
 	}
-	else if (this.hass.states[this.entities['maintenance'].entity_id].state=='on'){
+	else if (this._hass.states[this.entities['maintenance'].entity_id].state=='on'){
 	    reason="maintenance";
 	    // if in maintenance mode, display maintenance switch
 	    for ( let swtch of this.config.elements){
 		if (swtch.name=="maintenance"){
-		    let maintenance_button=MyElement.create_element(this.hass,swtch,this.config.color,this.config.alpha,true,this.entities);
+		    let maintenance_button=MyElement.create_element(this._hass,swtch,this.config.color,this.config.alpha,true,this.entities);
 		    maintenance=html`
-                                    <div class="${swtch.class}" style="${this.get_style(swtch)}">
                                       ${maintenance_button}
-                                    </div>
                                     `;
 		    break;
 		}//if
@@ -205,7 +211,6 @@ export default class RSDevice extends LitElement {
      */
     _render_element(conf,state,put_in){
 	let sensor_put_in=null;
-
 	//Element is groupped with others 
 	if ("put_in" in conf){
 	    sensor_put_in=conf.put_in;
@@ -217,11 +222,18 @@ export default class RSDevice extends LitElement {
 	    return html``;
 	}//if
 	
-	let element=MyElement.create_element(this.hass,conf,this.config.color,this.config.alpha,state,this.entities);
+	let element = null;
+	if (conf.name in this._elements){
+	    element= this._elements[conf.type+'.'+conf.name];
+	    element.state_on=state;
+	}
+	else {
+	    element=MyElement.create_element(this._hass,conf,this.config.color,this.config.alpha,state,this.entities);
+	    this._elements[conf.type+'.'+conf.name]=element;
+	    console.debug(this._elements);
+	}
         return html`
-                     <div class="${conf.class}" style="${this.get_style(conf)}">
                        ${element}
-                     </div>
                      `;
     }//end of function - _render_actuator
 

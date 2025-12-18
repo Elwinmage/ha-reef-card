@@ -5,26 +5,20 @@ import {off_color} from "../../common.js";
 export default class MyElement extends LitElement{
     static get properties(){
 	return {
-//	    conf: {},
 	    stateObj: {},
-	    color: {},
-	    doubleClick: {type: Boolean},
-	    mouseDown: {},
-//	    entities: {}
+	    stateOn: {}
+	    /*	    doubleClick: {type: Boolean},
+	    mouseDown: {},*/
 	};
     }// end of get properties 
 
     constructor(){//hass,conf,stateObj,entities={},color="255,255,255",alpha=1){
 	super();
-	// this.hass=hass;
-	// this.conf=conf;
-	// this.color=color;
-	// this.alpha=alpha;
-	// this.stateObj=stateObj;
-	// this.entities=entities;
 	this.mouseDown=0;
 	this.mouseUp=0;
 	this.oldMouseUp=0;
+	this._hass=null;
+	this.stateOn=false;
 	this.addEventListener("contextmenu", function(e) {e.preventDefault();});
 	this.addEventListener("mousedown", function (e) {this.mouseDown=e.timeStamp;});
 	this.addEventListener("touchstart", function (e) {this.mouseDown=e.timeStamp;});
@@ -38,6 +32,46 @@ export default class MyElement extends LitElement{
     // }
 
 
+    set state_on(state){
+	if (state!= this.stateOn){
+	    this.stateOn=state;
+	}
+    }
+    
+    has_changed(hass){
+	let res=false;
+	if (this.stateObj){
+	    let so=hass.states[this.stateObj.entity_id];
+	    if(this.stateObj.state!=so.state){
+		res=true;
+	    }
+	    else if("target" in this.conf){
+		let sot=hass.states[this.stateObjTarget.entity_id];
+		if(this.stateObjTarget.state!=sot.state){
+		    res=true;
+		}
+	    }
+	}
+	return res;
+    }
+    
+    set hass(obj){
+	this._hass=obj;
+	if (this.stateObj){
+	    let so=this._hass.states[this.stateObj.entity_id];
+	    if(this.stateObj.state!=so.state){
+		this.stateObj=so;
+	    }
+	    else if(this.conf && "target" in this.conf){
+		let sot=this._hass.states[this.stateObjTarget.entity_id];
+		if(this.stateObjTarget.state!=sot.state){
+		    this.stateObjTarget=sot;
+		    this.stateObj=so; // force render
+		}
+	    }
+	}
+    }
+    
     static create_element(hass,config,color,alpha,state,entities){
 	let Element=customElements.get(config.type);
 	let label_name='';
@@ -50,10 +84,11 @@ export default class MyElement extends LitElement{
 		label_name=config.name;
 	    }
 	}
-	if (! state){
+/*	if (! state){
 	    color=off_color;
-	}
+	}*/
 	let elt=new Element();
+	elt.stateOn=state;
 	elt.hass=hass;
 	elt.conf=config;
 	elt.color=color;
@@ -65,11 +100,23 @@ export default class MyElement extends LitElement{
 	}
 	elt.label=label_name;
 	return elt;
-	
     }//end of function - create_element
+
+    /*
+     * Build a css style string according to given json configuration
+     * @conf: the css definition
+     */
+    get_style(){
+	let style='';
+	if(this.conf && 'css' in this.conf){
+	    style=Object.entries(this.conf.css).map(([k, v]) => `${k}:${v}`).join(';');
+	}
+	return style;
+    }//end of function get_style
+
     
     get_entity(entity_translation_value){
-	return this.hass.states[this.entities[entity_translation_value].entity_id];
+	return this._hass.states[this.entities[entity_translation_value].entity_id];
     }//end of function get_entity
     
     _handleClick(e){		      
@@ -100,6 +147,12 @@ export default class MyElement extends LitElement{
     }
 
     render(){
+	if (this.stateObj){
+	    console.debug("render element",this.stateObj.entity_id);
+	}
+	else {
+	    console.debug("render element",this.conf.name);
+	}
 	let value=null;
 	if (this.stateObj!=null){
 	    value=this.stateObj.state;
@@ -107,7 +160,17 @@ export default class MyElement extends LitElement{
 	if ('disabled_if' in this.conf && eval(this.conf.disabled_if)){
 	    return html`<br />`;
 	}
-	return this._render();
+	if(!this.stateOn){
+	    this.c=off_color;
+	}
+	else{
+	    this.c=this.color;
+	}
+	return html`
+     	    <div class="${this.conf.class}" style="${this.get_style()}"> 
+	     ${this._render()}
+            </div>
+           `;
     }
 
     async run_action(action){
@@ -115,10 +178,10 @@ export default class MyElement extends LitElement{
 	    if(action.domain=="redsea_ui"){
 		switch(action.action){
 		case "dialog":
-		    this.hass.redsea_dialog_box.display(action.data.type,this);
+		    this._hass.redsea_dialog_box.display(action.data.type,this);
 		    break;
 		case "exit-dialog":
-		    this.hass.redsea_dialog_box.quit();
+		    this._hass.redsea_dialog_box.quit();
 		    break;
 		case "message_box":
 		    this.msgbox(action.data);
@@ -135,7 +198,7 @@ export default class MyElement extends LitElement{
 		    action.data={"entity_id":this.stateObj.entity_id};
 		}
 		console.debug("Call Service",action.domain,action.action,action.data);
-		this.hass.callService(action.domain, action.action, action.data);
+		this._hass.callService(action.domain, action.action, action.data);
 	    }//else -- ha domain action
 	}//if -- enabled
     }//end of function -- run_action
@@ -176,7 +239,7 @@ export default class MyElement extends LitElement{
     }
 
     dialog(type){
-	this.hass.redsea_dialog_box.display(type);
+	this._hass.redsea_dialog_box.display(type);
     }
     
     msgbox(msg){

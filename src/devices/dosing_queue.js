@@ -13,7 +13,7 @@ export default class DosingQueue extends MyElement{
     static get properties() {
 	return {
 	    state_on:{},
-	    color_list: {},
+//	    color_list: {},
 	}
     }
 
@@ -21,22 +21,38 @@ export default class DosingQueue extends MyElement{
 	super(hass,config,stateObj,entities);
 	this.state_on=state_on;
 	this.color_list=color_list;
+	this.schdedule=null;
     }
 
     _render_slot_schedule(slot){
 	let bg_color=this.color_list[slot.head];
 	return html`
-<div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
-<span class="dosing_queue">
-${slot.head}<br />${slot.volume.toFixed(1)}mL<br />${toTime(slot.time)}</span><hr /></div>`;
+           <div class="slot" style="background-color: rgb(${this.color_list[slot.head]})">
+             <span class="dosing_queue">
+              ${slot.head}<br />
+              ${slot.volume.toFixed(1)}mL<br />
+              ${toTime(slot.time)}
+             </span><hr />
+          </div>`;
      }//end of function _render_slot_schedule
 
 
+
+    set hass(obj){
+	if (this.stateObj && this.stateObj.attributes.queue != obj.states[this.stateObj.entity_id].attributes.queue){
+	    this._hass=obj;
+	    this.stateObj=obj.states[this.stateObj.entity_id];
+	}
+    }
+    
     render(){
 	this.schedule=this.stateObj.attributes.queue;
-	if(this.state_on && this.schedule.length != 0){
+	if(this.stateOn && this.schedule.length != 0){
+	    console.debug("render dosing-queue");
 	    return html`
-${this.schedule.map(slot => this._render_slot_schedule(slot))}
+                  <div style="${this.get_style(this.config)}">
+                    ${this.schedule.map(slot => this._render_slot_schedule(slot))}
+                  </div>
    	    `;
 	}//if
 	else {

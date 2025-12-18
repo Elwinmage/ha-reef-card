@@ -53,7 +53,6 @@ export const config = {
 		"domain": "switch",
 		"action":"toggle",
 		"data": "default",
-		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
 	    },
 	    "css":{
 		"flex": "0 0 auto",
@@ -64,9 +63,11 @@ export const config = {
 		"top": "22%",
 		"left": "2%",
 	    }
-	}
+	},
     ],
     "dosing_queue":{
+	"type": "dosing-queue",
+	"name": "dosing_queue",
 	"css":{
 	    "text-align": "center",
             "border": "1px solid black",
@@ -217,7 +218,7 @@ export const config = {
 			"grid-row": "2",
 			"font-weight": "bold",
 			"font-size":"1.2em",
-			"margin-top":"-25%",
+			"margin-top":"-20%",
 		    },
 		},
 		{
@@ -235,7 +236,7 @@ export const config = {
 			"grid-row": "3",
 			"font-weight": "bold",
 			"font-size":"0.8em",
-			"margin-top":"-25%",
+			"margin-top":"-20%",
 		    },
 		},
 		{
@@ -312,6 +313,7 @@ export const config = {
 	    ]
 	},
 	"head_1": {
+	    "id" : 1,
 	    "color": "140,67,148",
 	    "css":{
 		"left":"1%",
@@ -323,12 +325,14 @@ export const config = {
 	    }
 	},
 	"head_2": {
+	    "id" : 2,
 	    "color": "0,129,197",
 	    "css":{
 		"left":"23%",
 	    },
 	},
 	"head_3": {
+	    "id" : 3,
 	    "color": "0,130,100",
 	    "css":{
 		"left":"44%",
@@ -346,6 +350,7 @@ export const config = {
 
 	},
 	"head_4": {
+	    "id" : 4,
 	    "color": "100,160,75",
 	    "css":{
 		"left":"65%",
