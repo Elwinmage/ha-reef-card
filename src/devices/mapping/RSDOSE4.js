@@ -22,6 +22,7 @@ export const config = {
     "elements": [
 	{
 	    "name": "device_state",
+	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"common-switch",
 	    "label":false,
 	    "class":"on_off",
@@ -45,6 +46,7 @@ export const config = {
 	{
 	    "name": "maintenance",
 	    "type":"common-switch",
+	    "master": true,
 	    "label":false,
 	    "class":"on_off",
 	    "style": "switch",
@@ -274,6 +276,7 @@ export const config = {
 		{
 		    "alpha": 0,
 		    "name": "schedule_enabled",
+		    "master": true,
 		    "type": "common-switch",
 		    "class": "pump_state_head",
 		    "style": "button",

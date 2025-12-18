@@ -15,12 +15,14 @@ export default class DoseHead extends RSDevice{
 
     static get properties() {
 	return {
-	    entities: {},
+/*	    entities: {},
 	    config: {},
-	    head_id:{},
+	    head_id:{},*/
 	    state_on:{},
+	    device_state:{},
+	    /*
 	    supplement:{},
-	    stock_alert: {},
+	    stock_alert: {},*/
 	}
     }
 
@@ -30,6 +32,7 @@ export default class DoseHead extends RSDevice{
 	this.stock_alert=null;//stock_alert;
 	
     }
+
 
     _pipe_path(){
 	let color=this.config.color;
@@ -51,19 +54,39 @@ export default class DoseHead extends RSDevice{
 	let style=html``;
 	let color=this.config.color;
 	if(!this.state_on){
-	    style=html`<style>img#${supplement_uid}{filter: grayscale(90%);}</style>`;
+	    style=html`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
 	    color=off_color;
 	}
 	return html`
-<div class="container" style="${this.get_style(this.config.container)}">
-  ${style}
-  <img id=${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
-</div>
-`;
+              <div class="container" style="${this.get_style(this.config.container)}">
+                ${style}
+                <img id=id_${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
+              </div>
+            `;
     }
 
-    render(){
-	console.debug("Render dose_head n°",this.config.id,this.state_on);
+    is_on(){
+	let res=true;
+
+	if( 'head_state' in this.entities && ( this._hass.states[this.entities['head_state'].entity_id].state=="not-setup" ||
+					       !this.device_state ||
+					      (this._hass.states[this.entities['schedule_enabled'].entity_id].state=='off'))){
+	    res=false;
+	}
+	return res;
+    }
+
+    set hass(obj){
+	this._setting_hass(obj);
+	if(this.is_on() != this.state_on){
+	    this.state_on=this.is_on();
+	}
+    }
+    
+    _render(){
+	this.to_render=false;
+	this.state_on=this.is_on();
+	console.debug("Render dose_head n°",this.config.id);
 	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
 	if (this.supplement.attributes.supplement.uid!='null'){
 	    let warning='';

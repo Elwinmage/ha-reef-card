@@ -28,7 +28,7 @@ export default class RSDevice extends LitElement {
     // Device is updated when hass is updated
    static get properties() {
 	return {
-	    //_hass: {},
+	    to_render: {type: Boolean},
 	}
     }// end of reactives properties
 
@@ -58,16 +58,36 @@ export default class RSDevice extends LitElement {
 	super();
 	this.entities={};
 	this._elements=[];
+	this.to_render = false;
 	this.first_init=true;
 	this._dialog_box=null;
     }//end of constructor
 
-    set hass(obj){
+
+    _setting_hass(obj){
 	this._hass=obj;
+	let re_render=false;
 	for (let element in this._elements){
 	    let elt = this._elements[element];
+	    if ('master' in elt.conf && elt.conf.master){
+		if(elt.has_changed(obj)){
+		    re_render=true;
+		}
+	    }
 	    elt.hass=obj;
 	}
+	if(re_render){
+	    this.to_render=true;
+	    this.render();
+	}
+    }
+
+    render(){
+	return this._render();
+    }
+    
+    set hass(obj){
+	this._setting_hass(obj);
     }
 
     /*
@@ -230,13 +250,15 @@ export default class RSDevice extends LitElement {
 	else {
 	    element=MyElement.create_element(this._hass,conf,this.config.color,this.config.alpha,state,this.entities);
 	    this._elements[conf.type+'.'+conf.name]=element;
-	    console.debug(this._elements);
 	}
         return html`
                        ${element}
                      `;
     }//end of function - _render_actuator
 
+
+    
+    
     /*
      * Render all elements that are declared in the configuration of the device
      * @state: the state of the device on or off to adapt the render

@@ -33,7 +33,6 @@ export default class RSDose extends RSDevice{
     static get properties(){
 	return{
 	    supplement_color: {},
-	    to_render: false,
 	}
     }
     
@@ -45,18 +44,7 @@ export default class RSDose extends RSDevice{
     }// end of constructor
 
     set hass(obj){
-	this._hass=obj;
-	let re_render=false
-	for (let element in this._elements){
-	    let elt = this._elements[element];
-	    if(elt.has_changed(obj)){
-		re_render=true;
-	    }
-	    elt.hass=obj;
-	}
-	if(re_render){
-	    this.to_render=true;
-	}
+	this._setting_hass(obj);
 	for (let head of this._heads){
 	    if ('dose_head' in head){
 		head.dose_head.hass=obj;
@@ -116,7 +104,9 @@ export default class RSDose extends RSDevice{
 	if ( "dose_head" in this._heads[head_id]){
 	    dose_head=this._heads[head_id]["dose_head"];
 	    dose_head.state_on=schedule_state;
+	    dose_head.device_state=this.is_on();
 	    dose_head.hass=this._hass;
+	    
 	}
 	else
 	{
@@ -124,14 +114,14 @@ export default class RSDose extends RSDevice{
 	    dose_head.entities=this._heads[head_id].entities;
 	    dose_head.stock_alert=this.get_entity('stock_alert_days').state;
 	    dose_head.state_on=schedule_state;
+	    dose_head.device_state=this.is_on();
 	    this._heads[head_id]['dose_head']=dose_head;
 	    dose_head.config=new_conf;
 	}
 	
 	return html`
                     <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
-${dose_head.render()}
-<!--                       <dose-head class="head" head_id="head_${head_id}" hass="${this._hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/> -->
+                       ${dose_head}
                     </div>
                     `;
     }
@@ -140,7 +130,7 @@ ${dose_head.render()}
     // 	console.log("RE-RENDERED");
     // }
 
-    render(){
+    _render(){
 	this.to_render=false;
 	console.debug("Render rsdose");
 	this.update_config();
@@ -158,15 +148,6 @@ ${dose_head.render()}
 	    this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,null,null,this.is_on(),this.entities);
 	    this.dosing_queue.color_list=this.supplement_color;
 	}
-/*	let d_queue=html``;
-	let slots=(this._hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
-	if (slots>0){
-	    d_queue=html`
-                 <div style="${this.get_style(this.config.dosing_queue)}">
-                    ${this.dosing_queue}
-<!--                     <dosing-queue id="dosing-queue" .hass="${this._hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this._hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue> -->
-                 </div>`;
-	}*/
 	return html`
              	<div class="device_bg">
                   ${style}
@@ -174,9 +155,7 @@ ${dose_head.render()}
                   <div class="heads">
                      ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
                  </div>
-<!--                  <div style="${this.get_style(this.config.dosing_queue)}"> -->
                    ${this.dosing_queue}
-<!--                 </div> -->
                  ${this._render_elements()}
                </div>`;
     }//end of function render

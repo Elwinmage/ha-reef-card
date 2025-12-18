@@ -65,6 +65,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     // Device is updated when hass is updated
     static get properties() {
         return {
+            to_render: {
+                type: Boolean
+            }
         };
     }
     /*
@@ -88,15 +91,30 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         super();
         this.entities = {};
         this._elements = [];
+        this.to_render = false;
         this.first_init = true;
         this._dialog_box = null;
     }
-    set hass(obj) {
+    _setting_hass(obj) {
         this._hass = obj;
+        let re_render = false;
         for(let element in this._elements){
             let elt = this._elements[element];
+            if ('master' in elt.conf && elt.conf.master) {
+                if (elt.has_changed(obj)) re_render = true;
+            }
             elt.hass = obj;
         }
+        if (re_render) {
+            this.to_render = true;
+            this.render();
+        }
+    }
+    render() {
+        return this._render();
+    }
+    set hass(obj) {
+        this._setting_hass(obj);
     }
     /*
      * Load available dialog box for the current device
@@ -218,7 +236,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         } else {
             element = (0, $1Um3j.default).create_element(this._hass, conf, this.config.color, this.config.alpha, state, this.entities);
             this._elements[conf.type + '.' + conf.name] = element;
-            console.debug(this._elements);
         }
         return (0, $l56HR.html)`
                        ${element}
@@ -2253,6 +2270,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "elements": [
         {
             "name": "device_state",
+            "master": true,
             "type": "common-switch",
             "label": false,
             "class": "on_off",
@@ -2275,6 +2293,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         {
             "name": "maintenance",
             "type": "common-switch",
+            "master": true,
             "label": false,
             "class": "on_off",
             "style": "switch",
@@ -2505,6 +2524,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 {
                     "alpha": 0,
                     "name": "schedule_enabled",
+                    "master": true,
                     "type": "common-switch",
                     "class": "pump_state_head",
                     "style": "button",
@@ -2607,6 +2627,21 @@ var $5c2Je = parcelRequire("5c2Je");
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $12c519d2fc52c039$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+svg{
+stroke: black;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
 
 img{
  position: absolute;
@@ -2630,12 +2665,10 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     ];
     static get properties() {
         return {
-            entities: {},
-            config: {},
-            head_id: {},
-            state_on: {},
-            supplement: {},
-            stock_alert: {}
+            /*	    entities: {},
+	    config: {},
+	    head_id:{},*/ state_on: {},
+            device_state: {}
         };
     }
     constructor(){
@@ -2660,18 +2693,29 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         let style = (0, $l56HR.html)``;
         let color = this.config.color;
         if (!this.state_on) {
-            style = (0, $l56HR.html)`<style>img#${supplement_uid}{filter: grayscale(90%);}</style>`;
+            style = (0, $l56HR.html)`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
             color = (0, $iXBpj.off_color);
         }
         return (0, $l56HR.html)`
-<div class="container" style="${this.get_style(this.config.container)}">
-  ${style}
-  <img id=${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
-</div>
-`;
+              <div class="container" style="${this.get_style(this.config.container)}">
+                ${style}
+                <img id=id_${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
+              </div>
+            `;
     }
-    render() {
-        console.debug("Render dose_head n\xb0", this.config.id, this.state_on);
+    is_on() {
+        let res = true;
+        if ('head_state' in this.entities && (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup" || !this.device_state || this._hass.states[this.entities['schedule_enabled'].entity_id].state == 'off')) res = false;
+        return res;
+    }
+    set hass(obj) {
+        this._setting_hass(obj);
+        if (this.is_on() != this.state_on) this.state_on = this.is_on();
+    }
+    _render() {
+        this.to_render = false;
+        this.state_on = this.is_on();
+        console.debug("Render dose_head n\xb0", this.config.id);
         this.supplement = this._hass.states[this.entities['supplement'].entity_id];
         if (this.supplement.attributes.supplement.uid != 'null') {
             let warning = '';
@@ -2715,21 +2759,6 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-svg{
-stroke: black;
-}
-
-@keyframes blink {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
 
 `;
 
@@ -2851,8 +2880,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _heads = [];
     static get properties() {
         return {
-            supplement_color: {},
-            to_render: false
+            supplement_color: {}
         };
     }
     constructor(){
@@ -2862,14 +2890,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.dosing_queue = null;
     }
     set hass(obj) {
-        this._hass = obj;
-        let re_render = false;
-        for(let element in this._elements){
-            let elt = this._elements[element];
-            if (elt.has_changed(obj)) re_render = true;
-            elt.hass = obj;
-        }
-        if (re_render) this.to_render = true;
+        this._setting_hass(obj);
         for (let head of this._heads)if ('dose_head' in head) head.dose_head.hass = obj;
         if (this.dosing_queue) this.dosing_queue.hass = obj;
     }
@@ -2907,26 +2928,27 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if ("dose_head" in this._heads[head_id]) {
             dose_head = this._heads[head_id]["dose_head"];
             dose_head.state_on = schedule_state;
+            dose_head.device_state = this.is_on();
             dose_head.hass = this._hass;
         } else {
             dose_head = (0, $5c2Je.default).create_device('dose-head', this._hass, new_conf, null);
             dose_head.entities = this._heads[head_id].entities;
             dose_head.stock_alert = this.get_entity('stock_alert_days').state;
             dose_head.state_on = schedule_state;
+            dose_head.device_state = this.is_on();
             this._heads[head_id]['dose_head'] = dose_head;
             dose_head.config = new_conf;
         }
         return (0, $l56HR.html)`
                     <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
-${dose_head.render()}
-<!--                       <dose-head class="head" head_id="head_${head_id}" hass="${this._hass}" entities="${this._heads[head_id].entities}" config="${new_conf}" state_on=${schedule_state} stock_alert="${this.get_entity('stock_alert_days').state}"/> -->
+                       ${dose_head}
                     </div>
                     `;
     }
     // updated(changes){
     // 	console.log("RE-RENDERED");
     // }
-    render() {
+    _render() {
         this.to_render = false;
         console.debug("Render rsdose");
         this.update_config();
@@ -2939,15 +2961,7 @@ ${dose_head.render()}
             this.dosing_queue = (0, $1Um3j.default).create_element(this._hass, this.config.dosing_queue, null, null, this.is_on(), this.entities);
             this.dosing_queue.color_list = this.supplement_color;
         }
-        /*	let d_queue=html``;
-	let slots=(this._hass.states[this.entities['dosing_queue'].entity_id].attributes.queue).length;
-	if (slots>0){
-	    d_queue=html`
-                 <div style="${this.get_style(this.config.dosing_queue)}">
-                    ${this.dosing_queue}
-<!--                     <dosing-queue id="dosing-queue" .hass="${this._hass}" .state_on="${this.is_on()}" .config=null .entities="${this.entities}" .stateObj="${this._hass.states[this.entities['dosing_queue'].entity_id]}" .color_list="${this.supplement_color}"></dosing-queue> -->
-                 </div>`;
-	}*/ return (0, $l56HR.html)`
+        return (0, $l56HR.html)`
              	<div class="device_bg">
                   ${style}
           	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
@@ -2956,9 +2970,7 @@ ${dose_head.render()}
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._render_head(head))}
                  </div>
-<!--                  <div style="${this.get_style(this.config.dosing_queue)}"> -->
                    ${this.dosing_queue}
-<!--                 </div> -->
                  ${this._render_elements()}
                </div>`;
     }
