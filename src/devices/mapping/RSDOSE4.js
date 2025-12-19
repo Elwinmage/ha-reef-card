@@ -26,7 +26,7 @@ export const config = {
 			    {
 				"domain": "redsea_ui",
 				"action" : "message_box",
-				"data": "Dosing 2mL"
+				"data": "i18n._('dosing')+ ' 2mL'"
 			    }
 			],
 			"css":{
@@ -58,7 +58,7 @@ export const config = {
 			    {
 				"domain": "redsea_ui",
 				"action" : "message_box",
-				"data": "Dosing 5mL"
+				"data": "i18n._('dosing')+' 5mL'"
 			    }
 			],
 			"css":{
@@ -91,7 +91,7 @@ export const config = {
 			    {
 				"domain": "redsea_ui",
 				"action" : "message_box",
-				"data": "Dosing 10mL"
+				"data": "i18n._('dosing')+ ' 10mL'"
 			    }
 			],
 			"css":{
@@ -124,7 +124,7 @@ export const config = {
 			    {
 				"domain": "redsea_ui",
 				"action" : "message_box",
-				"data": "Dosing 16mL"
+				"data": "i18n._('dosing')+' 16mL'"
 			    }
 			],
 			"css":{
@@ -156,7 +156,7 @@ export const config = {
 			    {
 				"domain": "redsea_ui",
 				"action" : "message_box",
-				"data": "Dosing 20mL"
+				"data": "i18n._('dosing')+' 20mL'"
 			    }
 			],
 			"css":{

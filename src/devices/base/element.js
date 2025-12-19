@@ -2,6 +2,8 @@ import { html, LitElement } from "lit";
 
 import {off_color} from "../../common.js";
 
+import { default as _i18n } from "../../translations/myi18n.js";
+
 export default class MyElement extends LitElement{
     static get properties(){
 	return {
@@ -178,6 +180,7 @@ export default class MyElement extends LitElement{
     }
 
     async run_actions(actions){
+	let i18n=_i18n;
 	console.log("-> ",typeof actions,actions,actions.length);
 	if (!actions.length){
 	    actions=[actions];
@@ -194,7 +197,14 @@ export default class MyElement extends LitElement{
 			this._hass.redsea_dialog_box.quit();
 			break;
 		    case "message_box":
-			this.msgbox(action.data);
+			let str='';
+			try{
+			    str=eval(action.data);
+			}
+			catch{
+			    str=action.data;
+			}
+			this.msgbox(str);
 			break;
 		    default:
 			let error_str="Error: try to run unknown redsea_ui action: "+action.action;

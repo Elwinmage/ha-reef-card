@@ -11,6 +11,7 @@ export const dict={
 	set_manual_head_volume: "Manual volume",
 	exit: "Done",
 	set_manual_head_volume: "Manual volume dosing",
+	dosing: "Dosing",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -24,5 +25,6 @@ export const dict={
 	set_manual_head_volume: "Volume manuel",
 	exit: "Terminer",
 	set_manual_head_volume: "Dosage du volume manuel",
+	dosing: "Distribution de",
     },
 }

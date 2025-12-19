@@ -949,7 +949,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         maintenance: "Maintenance in progress..",
         set_manual_head_volume: "Manual volume",
         exit: "Done",
-        set_manual_head_volume: "Manual volume dosing"
+        set_manual_head_volume: "Manual volume dosing",
+        dosing: "Dosing"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -962,7 +963,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         maintenance: "Maintenance en cours...",
         set_manual_head_volume: "Volume manuel",
         exit: "Terminer",
-        set_manual_head_volume: "Dosage du volume manuel"
+        set_manual_head_volume: "Dosage du volume manuel",
+        dosing: "Distribution de"
     }
 };
 
@@ -977,6 +979,8 @@ var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
 
 var $iXBpj = parcelRequire("iXBpj");
+
+var $dPhcg = parcelRequire("dPhcg");
 class MyElement extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
@@ -1109,6 +1113,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
            `;
     }
     async run_actions(actions) {
+        let i18n = (0, $dPhcg.default);
         console.log("-> ", typeof actions, actions, actions.length);
         if (!actions.length) actions = [
             actions
@@ -1124,7 +1129,13 @@ class MyElement extends (0, $eGUNk.LitElement) {
                         this._hass.redsea_dialog_box.quit();
                         break;
                     case "message_box":
-                        this.msgbox(action.data);
+                        let str = '';
+                        try {
+                            str = eval(action.data);
+                        } catch  {
+                            str = action.data;
+                        }
+                        this.msgbox(str);
                         break;
                     default:
                         let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
@@ -2296,7 +2307,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             {
                                 "domain": "redsea_ui",
                                 "action": "message_box",
-                                "data": "Dosing 2mL"
+                                "data": "i18n._('dosing')+ ' 2mL'"
                             }
                         ],
                         "css": {
@@ -2333,7 +2344,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             {
                                 "domain": "redsea_ui",
                                 "action": "message_box",
-                                "data": "Dosing 5mL"
+                                "data": "i18n._('dosing')+' 5mL'"
                             }
                         ],
                         "css": {
@@ -2370,7 +2381,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             {
                                 "domain": "redsea_ui",
                                 "action": "message_box",
-                                "data": "Dosing 10mL"
+                                "data": "i18n._('dosing')+ ' 10mL'"
                             }
                         ],
                         "css": {
@@ -2407,7 +2418,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             {
                                 "domain": "redsea_ui",
                                 "action": "message_box",
-                                "data": "Dosing 16mL"
+                                "data": "i18n._('dosing')+' 16mL'"
                             }
                         ],
                         "css": {
@@ -2444,7 +2455,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             {
                                 "domain": "redsea_ui",
                                 "action": "message_box",
-                                "data": "Dosing 20mL"
+                                "data": "i18n._('dosing')+' 20mL'"
                             }
                         ],
                         "css": {
