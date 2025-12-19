@@ -56,6 +56,10 @@ export class Dialog extends  LitElement {
 	this.to_render=null;
     }
 
+    set hass(obj){
+	this._hass=obj;
+	this.render();
+    }
 
     set_conf(config){
 	this.config=config;
@@ -79,6 +83,7 @@ export class Dialog extends  LitElement {
 	content.setConfig(clone);
 //	content.setConfig({type:"entities",entities:[{entity:'number.simu_rsdose4_1210347614_head_1_manual_volume',name:{type:"entity"}}, 'button.simu_rsdose4_1210347614_head_1_manual_dosing']});
 	content.hass=this._hass;
+	content.entities=this.elt.entities;
 	this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     
@@ -93,7 +98,8 @@ export class Dialog extends  LitElement {
 	    "class": "dialog_button",
 	};
 	if(this.to_render!=null){
-	    this._shadowRoot.querySelector("#dialog-close").innerHTML='';
+	    console.debug("Render dialog");
+	     this._shadowRoot.querySelector("#dialog-close").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-content").innerHTML='';
 	    // Closing cross

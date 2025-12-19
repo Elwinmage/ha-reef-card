@@ -1040,6 +1040,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
             }
         }
     }
+    setConfig(conf) {
+        this.conf = conf;
+    }
     static create_element(hass, config, color, alpha, state, entities) {
         let Element = customElements.get(config.type);
         let label_name = '';
@@ -1105,31 +1108,39 @@ class MyElement extends (0, $eGUNk.LitElement) {
             </div>
            `;
     }
-    async run_action(action) {
-        if (!("enabled" in action) || action.enabled) {
-            if (action.domain == "redsea_ui") switch(action.action){
-                case "dialog":
-                    this._hass.redsea_dialog_box.display(action.data.type, this);
-                    break;
-                case "exit-dialog":
-                    this._hass.redsea_dialog_box.quit();
-                    break;
-                case "message_box":
-                    this.msgbox(action.data);
-                    break;
-                default:
-                    let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
-                    this.msgbox(error_str);
-                    console.error(error_str);
-                    break;
-            } //switch
-            else {
-                if (action.data == "default") action.data = {
-                    "entity_id": this.stateObj.entity_id
-                };
-                console.debug("Call Service", action.domain, action.action, action.data);
-                this._hass.callService(action.domain, action.action, action.data);
-            } //else -- ha domain action
+    async run_actions(actions) {
+        console.log("-> ", typeof actions, actions, actions.length);
+        if (!actions.length) actions = [
+            actions
+        ];
+        for (let action of actions){
+            console.debug(action);
+            if (!("enabled" in action) || action.enabled) {
+                if (action.domain == "redsea_ui") switch(action.action){
+                    case "dialog":
+                        this._hass.redsea_dialog_box.display(action.data.type, this);
+                        break;
+                    case "exit-dialog":
+                        this._hass.redsea_dialog_box.quit();
+                        break;
+                    case "message_box":
+                        this.msgbox(action.data);
+                        break;
+                    default:
+                        let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
+                        this.msgbox(error_str);
+                        console.error(error_str);
+                        break;
+                } //switch
+                else {
+                    if (action.data == "default") action.data = {
+                        "entity_id": this.stateObj.entity_id
+                    };
+                    else if ("entity_id" in action.data) action.data.entity_id = this.get_entity(action.data.entity_id).entity_id;
+                    console.debug("Call Service", action.domain, action.action, action.data);
+                    this._hass.callService(action.domain, action.action, action.data);
+                } //else -- ha domain action
+            }
         } //if -- enabled
     }
     async _click_evt(e) {
@@ -1143,13 +1154,13 @@ class MyElement extends (0, $eGUNk.LitElement) {
         this.mouseDown = e.timeStamp;
     }
     _click(e) {
-        if ('tap_action' in this.conf) this.run_action(this.conf.tap_action);
+        if ('tap_action' in this.conf) this.run_actions(this.conf.tap_action);
     }
     _longclick(e) {
-        if ("hold_action" in this.conf) this.run_action(this.conf.hold_action);
+        if ("hold_action" in this.conf) this.run_actions(this.conf.hold_action);
     }
     _dblclick(e) {
-        if ("double_tap_action" in this.conf) this.run_action(this.conf.double_tap_action);
+        if ("double_tap_action" in this.conf) this.run_actions(this.conf.double_tap_action);
     }
     dialog(type) {
         this._hass.redsea_dialog_box.display(type);
@@ -1970,6 +1981,10 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
         this.elt = null;
         this.to_render = null;
     }
+    set hass(obj) {
+        this._hass = obj;
+        this.render();
+    }
     set_conf(config) {
         this.config = config;
     }
@@ -1985,6 +2000,7 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
         content.setConfig(clone);
         //	content.setConfig({type:"entities",entities:[{entity:'number.simu_rsdose4_1210347614_head_1_manual_volume',name:{type:"entity"}}, 'button.simu_rsdose4_1210347614_head_1_manual_dosing']});
         content.hass = this._hass;
+        content.entities = this.elt.entities;
         this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
@@ -1998,6 +2014,7 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
             "class": "dialog_button"
         };
         if (this.to_render != null) {
+            console.debug("Render dialog");
             this._shadowRoot.querySelector("#dialog-close").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-title").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-content").innerHTML = '';
@@ -2257,6 +2274,191 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "close_cross": true,
             "content": [
                 {
+                    "view": "common-button",
+                    "conf": {
+                        "label": "2mL",
+                        "tap_action": [
+                            {
+                                "domain": "number",
+                                "action": "set_value",
+                                "data": {
+                                    "entity_id": "manual_head_volume",
+                                    "value": 2
+                                }
+                            },
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "manual_head"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "message_box",
+                                "data": "Dosing 2mL"
+                            }
+                        ],
+                        "css": {
+                            "display": "inline-block",
+                            "border": "1px solid gray",
+                            "border-radius": "15px",
+                            "padding-left": "10px",
+                            "padding-right": "10px",
+                            "margin-bottom": "20px",
+                            "background-color": "rgb(220,220,220)"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "label": "5mL",
+                        "tap_action": [
+                            {
+                                "domain": "number",
+                                "action": "set_value",
+                                "data": {
+                                    "entity_id": "manual_head_volume",
+                                    "value": 5
+                                }
+                            },
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "manual_head"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "message_box",
+                                "data": "Dosing 5mL"
+                            }
+                        ],
+                        "css": {
+                            "display": "inline-block",
+                            "border": "1px solid gray",
+                            "border-radius": "15px",
+                            "padding-left": "10px",
+                            "padding-right": "10px",
+                            "margin-bottom": "20px",
+                            "background-color": "rgb(220,220,220)"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "label": "10mL",
+                        "tap_action": [
+                            {
+                                "domain": "number",
+                                "action": "set_value",
+                                "data": {
+                                    "entity_id": "manual_head_volume",
+                                    "value": 10
+                                }
+                            },
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "manual_head"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "message_box",
+                                "data": "Dosing 10mL"
+                            }
+                        ],
+                        "css": {
+                            "display": "inline-block",
+                            "border": "1px solid gray",
+                            "border-radius": "15px",
+                            "padding-left": "10px",
+                            "padding-right": "10px",
+                            "margin-bottom": "20px",
+                            "background-color": "rgb(220,220,220)"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "label": "16mL",
+                        "tap_action": [
+                            {
+                                "domain": "number",
+                                "action": "set_value",
+                                "data": {
+                                    "entity_id": "manual_head_volume",
+                                    "value": 16
+                                }
+                            },
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "manual_head"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "message_box",
+                                "data": "Dosing 16mL"
+                            }
+                        ],
+                        "css": {
+                            "display": "inline-block",
+                            "border": "1px solid gray",
+                            "border-radius": "15px",
+                            "padding-left": "10px",
+                            "padding-right": "10px",
+                            "margin-bottom": "20px",
+                            "background-color": "rgb(220,220,220)"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "label": "20mL",
+                        "tap_action": [
+                            {
+                                "domain": "number",
+                                "action": "set_value",
+                                "data": {
+                                    "entity_id": "manual_head_volume",
+                                    "value": 20
+                                }
+                            },
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "manual_head"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "message_box",
+                                "data": "Dosing 20mL"
+                            }
+                        ],
+                        "css": {
+                            "display": "inline-block",
+                            "border": "1px solid gray",
+                            "border-radius": "15px",
+                            "padding-left": "10px",
+                            "padding-right": "10px",
+                            "background-color": "rgb(220,220,220)",
+                            "margin-bottom": "20px"
+                        }
+                    }
+                },
+                {
                     "view": "hui-entities-card",
                     "conf": {
                         "type": "entities",
@@ -2429,7 +2631,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "position": " absolute",
                     "width": " 70%",
                     "top": " 32%",
-                    "left": " 30%;"
+                    "left": " 30%"
                 }
             },
             "calibration": {
@@ -3109,7 +3311,10 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     }
     set hass(obj) {
         if (this.first_init == true) this._hass = obj;
-        else this.current_device.hass = obj;
+        else {
+            this.current_device.hass = obj;
+            (0, $7Rfxy.default).hass = obj;
+        }
     }
     /*
      * RENDER

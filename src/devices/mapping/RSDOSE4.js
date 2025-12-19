@@ -8,6 +8,168 @@ export const config = {
 	    "title_key": "set_manual_head_volume",
 	    "close_cross": true,
 	    "content":[
+		{
+		    "view":"common-button",
+		    "conf":{
+			"label":"2mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":2}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "Dosing 2mL"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "margin-bottom": "20px",			    
+			    "background-color": "rgb(220,220,220)",
+			}
+		    }
+		},
+		{
+		    "view":"common-button",
+		    "conf":{
+			"label":"5mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":5}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "Dosing 5mL"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "margin-bottom": "20px", 
+			    "background-color": "rgb(220,220,220)",
+			}
+			
+		    }
+		},
+		{
+		    "view":"common-button",
+		    "conf":{
+			"label":"10mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":10}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "Dosing 10mL"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "margin-bottom": "20px",
+			    "background-color": "rgb(220,220,220)",
+			}
+			
+		    }
+		},
+		{
+		    "view":"common-button",
+		    "conf":{
+			"label":"16mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":16}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "Dosing 16mL"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "margin-bottom": "20px",			    
+			    "background-color": "rgb(220,220,220)",
+			}
+		    }
+		},
+		{
+		    "view":"common-button",
+		    "conf":{
+			"label":"20mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":20}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "Dosing 20mL"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "background-color": "rgb(220,220,220)",
+			    "margin-bottom": "20px",
+			}
+		    }
+		},
 		{"view":"hui-entities-card",
 		 "conf":{
 		     "type":"entities",
@@ -166,7 +328,7 @@ export const config = {
                     "position":" absolute",
                     "width":" 70%",
                     "top":" 32%",
-                    "left":" 30%;",
+                    "left":" 30%",
 		},
 	    },
 	    "calibration": {

@@ -71,6 +71,10 @@ export default class MyElement extends LitElement{
 	    }
 	}
     }
+
+    setConfig(conf){
+	this.conf=conf;
+    }
     
     static create_element(hass,config,color,alpha,state,entities){
 	let Element=customElements.get(config.type);
@@ -173,35 +177,45 @@ export default class MyElement extends LitElement{
            `;
     }
 
-    async run_action(action){
-	if ( !("enabled" in action) || action.enabled){
-	    if(action.domain=="redsea_ui"){
-		switch(action.action){
-		case "dialog":
-		    this._hass.redsea_dialog_box.display(action.data.type,this);
-		    break;
-		case "exit-dialog":
-		    this._hass.redsea_dialog_box.quit();
-		    break;
-		case "message_box":
-		    this.msgbox(action.data);
-		    break;
-		default:
-		    let error_str="Error: try to run unknown redsea_ui action: "+action.action;
-		    this.msgbox(error_str);
-		    console.error(error_str);
-		    break;
-		}//switch
-	    }//if -- personnal domain
-	    else{
-		if(action.data=="default"){
-		    action.data={"entity_id":this.stateObj.entity_id};
-		}
-		console.debug("Call Service",action.domain,action.action,action.data);
-		this._hass.callService(action.domain, action.action, action.data);
-	    }//else -- ha domain action
+    async run_actions(actions){
+	console.log("-> ",typeof actions,actions,actions.length);
+	if (!actions.length){
+	    actions=[actions];
+	}
+	for(let action of actions){
+	    console.debug(action);
+	    if ( !("enabled" in action) || action.enabled){
+		if(action.domain=="redsea_ui"){
+		    switch(action.action){
+		    case "dialog":
+			this._hass.redsea_dialog_box.display(action.data.type,this);
+			break;
+		    case "exit-dialog":
+			this._hass.redsea_dialog_box.quit();
+			break;
+		    case "message_box":
+			this.msgbox(action.data);
+			break;
+		    default:
+			let error_str="Error: try to run unknown redsea_ui action: "+action.action;
+			this.msgbox(error_str);
+			console.error(error_str);
+			break;
+		    }//switch
+		}//if -- personnal domain
+		else{
+		    if(action.data=="default"){
+			action.data={"entity_id":this.stateObj.entity_id};
+		    }
+		    else if("entity_id" in action.data){
+			action.data.entity_id=this.get_entity(action.data.entity_id).entity_id;
+		    }
+		    console.debug("Call Service",action.domain,action.action,action.data);
+		    this._hass.callService(action.domain, action.action, action.data);
+		}//else -- ha domain action
+	    }
 	}//if -- enabled
-    }//end of function -- run_action
+    }//end of function -- run_actions
 
     async _click_evt(e){
 	let timing = e.timeStamp-this.mouseDown;
@@ -222,19 +236,19 @@ export default class MyElement extends LitElement{
 
     _click(e){
 	if ('tap_action' in this.conf){
-	    this.run_action(this.conf.tap_action);
+	    this.run_actions(this.conf.tap_action);
 	}
     }
 
     _longclick(e){
 	if ("hold_action" in this.conf){
-	    this.run_action(this.conf.hold_action);
+	    this.run_actions(this.conf.hold_action);
 	}
     }
 
     _dblclick(e){
 	if ("double_tap_action" in this.conf){
-	    this.run_action(this.conf.double_tap_action);
+	    this.run_actions(this.conf.double_tap_action);
 	}
     }
 

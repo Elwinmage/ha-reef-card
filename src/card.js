@@ -53,6 +53,7 @@ export class ReefCard extends LitElement {
 	}
 	else {
 	    this.current_device.hass=obj;
+	    dialog_box.hass=obj;
 	}
 
     }
