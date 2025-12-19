@@ -11,7 +11,7 @@ width: 100%;
 height: 100%;
 //text-align:center;
 background-color: rgba(175,175,175,0.8);
-z-index:98;
+z-index:6;
 //display: flex hidden;
 display: none;
 justify-content: center;
@@ -20,7 +20,7 @@ align-items: center;
 
 #dialog{
 border: 1px solid gray;
-z-index:99;
+z-index:7;
 position:absolute;
 top:100px;
 //margin-left:35%;
@@ -67,6 +67,8 @@ grid-column: 1/4;
 grid-row: 2;
 padding-left:5px;
 padding-right:5px;
+width:90%;
+margin-left: 5%;
 }
 
 #dialog-submit{
@@ -74,6 +76,7 @@ padding-right:5px;
 grid-column: 1/4;
 grid-row: 3;
 text-align:right;
+margin-right: 2%;
 }
 
 `;

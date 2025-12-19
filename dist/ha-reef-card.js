@@ -1057,10 +1057,8 @@ class MyElement extends (0, $eGUNk.LitElement) {
         elt.color = color;
         elt.alpha = alpha;
         elt.stateObj = hass.states[entities[config.name].entity_id];
-        if ("target" in config) {
-            elt.stateObjTarget = hass.states[entities[config.target].entity_id];
-            elt.entities = entities;
-        }
+        if ("target" in config) elt.stateObjTarget = hass.states[entities[config.target].entity_id];
+        elt.entities = entities;
         elt.label = label_name;
         return elt;
     }
@@ -1962,7 +1960,6 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
     }
     display(type, elt = null) {
         let box = this._shadowRoot.querySelector("#window-mask");
-        console.debug("ELEMENT", elt);
         this.elt = elt;
         this.to_render = this.config[type];
         this.render();
@@ -1980,12 +1977,17 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
         const r_element = customElements.get(content_conf.view);
         const content = new r_element();
         // translate from translation_key to entity_id
-        content.setConfig(content_conf.conf);
+        const clone = structuredClone(content_conf.conf);
+        if ("entities" in content_conf.conf) {
+            for(let pos in content_conf.conf.entities)if (typeof clone.entities[pos] == "string") clone.entities[pos] = this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
+            else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
+        }
+        content.setConfig(clone);
+        //	content.setConfig({type:"entities",entities:[{entity:'number.simu_rsdose4_1210347614_head_1_manual_volume',name:{type:"entity"}}, 'button.simu_rsdose4_1210347614_head_1_manual_dosing']});
         content.hass = this._hass;
-        return content;
+        this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
-        console.debug("RENDER Dialog", this.to_render);
         let close_conf = {
             "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
             "tap_action": {
@@ -1995,26 +1997,29 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
             "label": (0, $dPhcg.default)._("exit"),
             "class": "dialog_button"
         };
-        let content = (0, $l56HR.html)``;
         if (this.to_render != null) {
+            this._shadowRoot.querySelector("#dialog-close").innerHTML = '';
+            this._shadowRoot.querySelector("#dialog-title").innerHTML = '';
+            this._shadowRoot.querySelector("#dialog-content").innerHTML = '';
+            // Closing cross
+            if (!("close_cross" in this.to_render && !this.to_render.close_cross)) {
+                let close_cross_class = customElements.get("click-image");
+                let close_cross = new close_cross_class();
+                close_cross.conf = close_conf;
+                close_cross.hass = this._hass;
+                this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
+            }
+            // Title
             this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
-            content = (0, $l56HR.html)`${this.to_render.content.map((c)=>this._render_content(c))}`;
+            // Content
+            this.to_render.content.map((c)=>this._render_content(c));
         }
-        /*	const SsRow = customElements.get('hui-entities-card');
-	const sssor = new SsRow();
-	sssor.setConfig({type:"entities",entities:['switch.rsdose4_338229039_device_state']});
-	sssor.hass=this._hass;
-	const SRow = customElements.get('hui-toggle-entity-row');
-	const ssor = new SRow();
-	ssor.setConfig({type:'entity',entity:"switch.rsdose4_338229039_device_state"});
-	ssor.hass=this._hass;*/ return (0, $l56HR.html)`
+        return (0, $l56HR.html)`
           <div id="window-mask">
    	    <div id="dialog">
-              <div id="dialog-close">
-                 <click-image .hass=${this._hass} .conf=${close_conf}></click-image>
-              </div>
+              <div id="dialog-close"></div>
               <div id="dialog-title"></div>
-              <div id="dialog-content">${content}</div>
+              <div id="dialog-content"></div>
               <div id="dialog-submit">
                  <common-button .hass=${this._hass} .conf=${close_conf}/>
               </div>
@@ -2044,7 +2049,7 @@ width: 100%;
 height: 100%;
 //text-align:center;
 background-color: rgba(175,175,175,0.8);
-z-index:98;
+z-index:6;
 //display: flex hidden;
 display: none;
 justify-content: center;
@@ -2053,7 +2058,7 @@ align-items: center;
 
 #dialog{
 border: 1px solid gray;
-z-index:99;
+z-index:7;
 position:absolute;
 top:100px;
 //margin-left:35%;
@@ -2100,6 +2105,8 @@ grid-column: 1/4;
 grid-row: 2;
 padding-left:5px;
 padding-right:5px;
+width:90%;
+margin-left: 5%;
 }
 
 #dialog-submit{
@@ -2107,6 +2114,7 @@ padding-right:5px;
 grid-column: 1/4;
 grid-row: 3;
 text-align:right;
+margin-right: 2%;
 }
 
 `;
@@ -2246,13 +2254,31 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "dialogs": {
         "set_manual_head_volume": {
             "title_key": "set_manual_head_volume",
+            "close_cross": true,
             "content": [
                 {
                     "view": "hui-entities-card",
                     "conf": {
+                        "type": "entities",
                         "entities": [
-                            "manual_head_volume",
-                            "manual_head"
+                            {
+                                "entity": "supplement",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "manual_head_volume",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "manual_head",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
                         ]
                     }
                 }
@@ -2668,7 +2694,8 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             /*	    entities: {},
 	    config: {},
 	    head_id:{},*/ state_on: {},
-            device_state: {}
+            device_state: {},
+            head_state: {}
         };
     }
     constructor(){
@@ -2711,6 +2738,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     set hass(obj) {
         this._setting_hass(obj);
         if (this.is_on() != this.state_on) this.state_on = this.is_on();
+        if (this.entites && this.head_state != this.entities['head_state'].state) this.head_state = this.entities['head_state'].state;
     }
     _render() {
         this.to_render = false;

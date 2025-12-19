@@ -20,6 +20,7 @@ export default class DoseHead extends RSDevice{
 	    head_id:{},*/
 	    state_on:{},
 	    device_state:{},
+	    head_state:{},
 	    /*
 	    supplement:{},
 	    stock_alert: {},*/
@@ -80,6 +81,9 @@ export default class DoseHead extends RSDevice{
 	this._setting_hass(obj);
 	if(this.is_on() != this.state_on){
 	    this.state_on=this.is_on();
+	}
+	if(this.entites && this.head_state!=this.entities['head_state'].state){
+	    this.head_state=this.entities['head_state'].state;
 	}
     }
     

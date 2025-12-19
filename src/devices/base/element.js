@@ -96,8 +96,8 @@ export default class MyElement extends LitElement{
 	elt.stateObj=hass.states[entities[config.name].entity_id];
 	if ("target" in config){
 	    elt.stateObjTarget=hass.states[entities[config.target].entity_id];
-	    elt.entities=entities;
 	}
+	elt.entities=entities;
 	elt.label=label_name;
 	return elt;
     }//end of function - create_element

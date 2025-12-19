@@ -6,8 +6,18 @@ export const config = {
     "dialogs": {
 	"set_manual_head_volume":{
 	    "title_key": "set_manual_head_volume",
+	    "close_cross": true,
 	    "content":[
-		{"view":"hui-entities-card","conf":{"entities":["manual_head_volume","manual_head"]}},
+		{"view":"hui-entities-card",
+		 "conf":{
+		     "type":"entities",
+		     "entities":[
+			 {"entity":"supplement","name":{"type":"entity"}},
+			 {"entity":"manual_head_volume","name":{"type":"entity"}},
+			 {"entity":"manual_head","name":{"type":"entity"}},
+			 //"manual_head", can also be only a string but display name is full
+		     ]}
+		},
 	    ],
 	    "validate": [
 		{
