@@ -102,10 +102,10 @@ export default class MyElement extends LitElement{
      * Build a css style string according to given json configuration
      * @conf: the css definition
      */
-    get_style(){
+    get_style(css_level='css'){
 	let style='';
-	if(this.conf && 'css' in this.conf){
-	    style=Object.entries(this.conf.css).map(([k, v]) => `${k}:${v}`).join(';');
+	if(this.conf && css_level in this.conf){
+	    style=Object.entries(this.conf[css_level]).map(([k, v]) => `${k}:${v}`).join(';');
 	}
 	return style;
     }//end of function get_style
@@ -164,19 +164,17 @@ export default class MyElement extends LitElement{
 	}
 	return html`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
-	     ${this._render()}
+	     ${this._render(this.get_style('elt.css'))}
             </div>
            `;
     }
 
     async run_actions(actions){
 	let i18n=_i18n;
-	console.log("-> ",typeof actions,actions,actions.length);
 	if (!actions.length){
 	    actions=[actions];
 	}
 	for(let action of actions){
-	    console.debug(action);
 	    if ( !("enabled" in action) || action.enabled){
 		if(action.domain=="redsea_ui"){
 		    switch(action.action){

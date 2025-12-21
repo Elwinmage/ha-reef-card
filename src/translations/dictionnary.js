@@ -13,6 +13,7 @@ export const dict={
 	set_manual_head_volume: "Manual volume dosing",
 	dosing: "Dosing",
 	heads_shortcuts: "Manual Shorcut Doses",
+	set_auto_dose : "Auto daily volume",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -28,5 +29,6 @@ export const dict={
 	set_manual_head_volume: "Dosage du volume manuel",
 	dosing: "Distribution de",
 	heads_shortcuts: "Raccourcis doses manuelles",
+	set_auto_dose : "Dose automatique journalière",
     },
 }

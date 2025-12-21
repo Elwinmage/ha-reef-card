@@ -27,6 +27,27 @@ export const config = {
 		    }
 		}
 	    ]
+	},
+	"auto_dose":{
+	    "title_key": "set_auto_dose",
+	    "close_cross": true,
+	    "content":[
+		{"view":"hui-entities-card",
+		 "conf":{
+		     "type":"entities",
+		     "entities":[
+			 {"entity":"daily_dose","name":{"type":"entity"}},
+		     ]}
+		},
+	    ],
+	    "validate": [
+		{
+		    "action": {
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    }
+		}
+	    ]
 	}
     },
     "elements": [
@@ -184,6 +205,19 @@ export const config = {
 	    },
 	    "elements": [
 		{
+		    "name": "supplement",
+		    "type": "common-sensor",
+		    "put_in":"supplement_info",
+		    "elt.css":{
+			"position": "absolute",
+			"width": "60%",
+			"top": "30%",
+			"left": "30%",
+			"color": "white",
+			"background-color": "rgba(0,0,0,0)",
+		    }
+		},
+		{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
 		    "type": "common-sensor",
@@ -299,11 +333,16 @@ export const config = {
 			"top":"10%",
 			"left":"32.5%",
 		    },
-		    "tap_action": {
+		    "hold_action": {
 			"enabled": true,
 			"domain": "switch",
 			"action":"toggle",
 			"data": "default",
+		    },
+		    "tap_action": {
+			"domain": "redsea_ui",
+			"action":"dialog",
+			"data": {"type":"auto_dose"}
 		    }
 		},
 		{

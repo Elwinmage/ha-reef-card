@@ -25,6 +25,7 @@ export default class DoseHead extends RSDevice{
 	super();
 	this.supplement=null;
 	this.stock_alert=null;
+	this.supplement_info=false;
     }
     _pipe_path(){
 	let color=this.config.color;
@@ -43,6 +44,15 @@ export default class DoseHead extends RSDevice{
 	let supplement_uid=this.supplement.attributes.supplement.uid
 	let img=null;
 	img='/hacsfiles/ha-reef-card/'+supplement_uid+'.supplement.png';
+	
+	var http = new XMLHttpRequest();
+	http.open('HEAD', img, false);
+	http.send();
+	if(http.status == 404){
+	    img='/hacsfiles/ha-reef-card/generic_container.supplement.png'
+	    this.supplement_info=true;
+	}
+	
 	let style=html``;
 	let color=this.config.color;
 	if(!this.state_on){
@@ -52,9 +62,16 @@ export default class DoseHead extends RSDevice{
 	return html`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
-                <img id=id_${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
+                <img id=id_${supplement_uid} src='${img}' width="100%" />
+                ${this._render_supplement_info()}
               </div>
             `;
+    }
+
+    _render_supplement_info(){
+	if (this.supplement_info){
+	    return html`${this._render_elements(true,"supplement_info")}`;
+	}
     }
 
     is_on(){

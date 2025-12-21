@@ -951,7 +951,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         exit: "Done",
         set_manual_head_volume: "Manual volume dosing",
         dosing: "Dosing",
-        heads_shortcuts: "Manual Shorcut Doses"
+        heads_shortcuts: "Manual Shorcut Doses",
+        set_auto_dose: "Auto daily volume"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -966,7 +967,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         exit: "Terminer",
         set_manual_head_volume: "Dosage du volume manuel",
         dosing: "Distribution de",
-        heads_shortcuts: "Raccourcis doses manuelles"
+        heads_shortcuts: "Raccourcis doses manuelles",
+        set_auto_dose: "Dose automatique journali\xe8re"
     }
 };
 
@@ -1069,9 +1071,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
     /*
      * Build a css style string according to given json configuration
      * @conf: the css definition
-     */ get_style() {
+     */ get_style(css_level = 'css') {
         let style = '';
-        if (this.conf && 'css' in this.conf) style = Object.entries(this.conf.css).map(([k, v])=>`${k}:${v}`).join(';');
+        if (this.conf && css_level in this.conf) style = Object.entries(this.conf[css_level]).map(([k, v])=>`${k}:${v}`).join(';');
         return style;
     }
     get_entity(entity_translation_value) {
@@ -1105,52 +1107,49 @@ class MyElement extends (0, $eGUNk.LitElement) {
         else this.c = this.color;
         return (0, $l56HR.html)`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
-	     ${this._render()}
+	     ${this._render(this.get_style('elt.css'))}
             </div>
            `;
     }
     async run_actions(actions) {
         let i18n = (0, $dPhcg.default);
-        console.log("-> ", typeof actions, actions, actions.length);
         if (!actions.length) actions = [
             actions
         ];
-        for (let action of actions){
-            console.debug(action);
-            if (!("enabled" in action) || action.enabled) {
-                if (action.domain == "redsea_ui") switch(action.action){
-                    case "dialog":
-                        this._hass.redsea_dialog_box.display(action.data.type, this);
-                        break;
-                    case "exit-dialog":
-                        this._hass.redsea_dialog_box.quit();
-                        break;
-                    case "message_box":
-                        let str = '';
-                        try {
-                            str = eval(action.data);
-                        } catch  {
-                            str = action.data;
-                        }
-                        this.msgbox(str);
-                        break;
-                    default:
-                        let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
-                        this.msgbox(error_str);
-                        console.error(error_str);
-                        break;
-                } //switch
-                else {
-                    let a_data = structuredClone(action.data);
-                    if (a_data == "default") a_data = {
-                        "entity_id": this.stateObj.entity_id
-                    };
-                    else if ("entity_id" in a_data) a_data.entity_id = this.get_entity(action.data.entity_id).entity_id;
-                    console.debug("Call Service", action.domain, action.action, a_data);
-                    this._hass.callService(action.domain, action.action, a_data);
-                } //else -- ha domain action
-            }
-        } //if -- enabled
+        for (let action of actions)if (!("enabled" in action) || action.enabled) {
+            if (action.domain == "redsea_ui") switch(action.action){
+                case "dialog":
+                    this._hass.redsea_dialog_box.display(action.data.type, this);
+                    break;
+                case "exit-dialog":
+                    this._hass.redsea_dialog_box.quit();
+                    break;
+                case "message_box":
+                    let str = '';
+                    try {
+                        str = eval(action.data);
+                    } catch  {
+                        str = action.data;
+                    }
+                    this.msgbox(str);
+                    break;
+                default:
+                    let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
+                    this.msgbox(error_str);
+                    console.error(error_str);
+                    break;
+            } //switch
+            else {
+                let a_data = structuredClone(action.data);
+                if (a_data == "default") a_data = {
+                    "entity_id": this.stateObj.entity_id
+                };
+                else if ("entity_id" in a_data) a_data.entity_id = this.get_entity(action.data.entity_id).entity_id;
+                console.debug("Call Service", action.domain, action.action, a_data);
+                this._hass.callService(action.domain, action.action, a_data);
+            } //else -- ha domain action
+        }
+         //if -- enabled
     }
     async _click_evt(e) {
         let timing = e.timeStamp - this.mouseDown;
@@ -1602,7 +1601,7 @@ class Sensor extends (0, $1Um3j.default) {
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super(hass, conf, stateObj, color, alpha);
     }
-    _render() {
+    _render(style = null) {
         let value = this.stateObj.state;
         if (this.conf.force_integer) value = Math.floor(value);
         let sensor_class = "sensor";
@@ -1611,12 +1610,12 @@ class Sensor extends (0, $1Um3j.default) {
         if ("unit" in this.conf) unit = eval(this.conf.unit);
         else if ('unit_of_measurement' in this.stateObj.attributes) unit = this.stateObj.attributes.unit_of_measurement;
         return (0, $l56HR.html)`
-<style>
-.sensor{
-background-color: rgba(${this.c},${this.alpha});
-}   
-</style>
-   	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
+          <style>
+           .sensor{
+              background-color: rgba(${this.c},${this.alpha});
+           }   
+          </style>
+   	    <div class="${sensor_class}" id="${this.conf.name}" style=${style}>${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
 `;
     }
 } // end of class
@@ -2346,6 +2345,34 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     }
                 }
             ]
+        },
+        "auto_dose": {
+            "title_key": "set_auto_dose",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "daily_dose",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "validate": [
+                {
+                    "action": {
+                        "domain": "redsea_ui",
+                        "action": "exit-dialog"
+                    }
+                }
+            ]
         }
     },
     "elements": [
@@ -2502,6 +2529,19 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             },
             "elements": [
                 {
+                    "name": "supplement",
+                    "type": "common-sensor",
+                    "put_in": "supplement_info",
+                    "elt.css": {
+                        "position": "absolute",
+                        "width": "60%",
+                        "top": "30%",
+                        "left": "30%",
+                        "color": "white",
+                        "background-color": "rgba(0,0,0,0)"
+                    }
+                },
+                {
                     "name": "manual_head_volume",
                     "force_integer": true,
                     "type": "common-sensor",
@@ -2618,11 +2658,18 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "top": "10%",
                         "left": "32.5%"
                     },
-                    "tap_action": {
+                    "hold_action": {
                         "enabled": true,
                         "domain": "switch",
                         "action": "toggle",
                         "data": "default"
+                    },
+                    "tap_action": {
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "auto_dose"
+                        }
                     }
                 },
                 {
@@ -2756,6 +2803,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         super();
         this.supplement = null;
         this.stock_alert = null;
+        this.supplement_info = false;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -2771,6 +2819,13 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         let supplement_uid = this.supplement.attributes.supplement.uid;
         let img = null;
         img = '/hacsfiles/ha-reef-card/' + supplement_uid + '.supplement.png';
+        var http = new XMLHttpRequest();
+        http.open('HEAD', img, false);
+        http.send();
+        if (http.status == 404) {
+            img = '/hacsfiles/ha-reef-card/generic_container.supplement.png';
+            this.supplement_info = true;
+        }
         let style = (0, $l56HR.html)``;
         let color = this.config.color;
         if (!this.state_on) {
@@ -2780,9 +2835,13 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         return (0, $l56HR.html)`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
-                <img id=id_${supplement_uid} src='${img}' onerror="this.onerror=null; this.src='/hacsfiles/ha-reef-card/generic_container.supplement.png'" width="100%" />
+                <img id=id_${supplement_uid} src='${img}' width="100%" />
+                ${this._render_supplement_info()}
               </div>
             `;
+    }
+    _render_supplement_info() {
+        if (this.supplement_info) return (0, $l56HR.html)`${this._render_elements(true, "supplement_info")}`;
     }
     is_on() {
         let res = true;

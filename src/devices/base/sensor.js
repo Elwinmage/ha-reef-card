@@ -19,7 +19,7 @@ export class Sensor extends  MyElement {
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
     
-    _render(){
+    _render(style=null){
 	let value=this.stateObj.state;
 	if(this.conf.force_integer){
 	    value=Math.floor(value);
@@ -36,12 +36,12 @@ export class Sensor extends  MyElement {
 	    unit=this.stateObj.attributes.unit_of_measurement;
 	}
 	return html`
-<style>
-.sensor{
-background-color: rgba(${this.c},${this.alpha});
-}   
-</style>
-   	    <div class="${sensor_class}" id="${this.conf.name}">${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
+          <style>
+           .sensor{
+              background-color: rgba(${this.c},${this.alpha});
+           }   
+          </style>
+   	    <div class="${sensor_class}" id="${this.conf.name}" style=${style}>${this.conf.prefix}${value}<span class="unit">${unit}</span></div>
 `;
     }//end of function render
 
