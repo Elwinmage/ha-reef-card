@@ -1049,13 +1049,9 @@ class MyElement extends (0, $eGUNk.LitElement) {
         this.conf = conf;
     }
     static create_element(hass, config, device) {
+        let iconv = (0, $dPhcg.default);
         let Element = customElements.get(config.type);
         let label_name = '';
-        // Do not display label
-        if ('label' in config) {
-            if (typeof config.label === 'string') label_name = config.label;
-            else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
-        }
         let elt = new Element();
         elt.device = device;
         elt.stateOn = elt.device.is_on();
@@ -1064,6 +1060,12 @@ class MyElement extends (0, $eGUNk.LitElement) {
         elt.color = elt.device.config.color;
         elt.alpha = elt.device.config.alpha;
         elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
+        // Do not display label
+        if ('label' in config) {
+            if (typeof config.label === 'string') /*elt.label_str=config.label;
+		  label_name=eval(config.label);*/ label_name = config.label;
+            else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
+        }
         if ("target" in config) elt.stateObjTarget = hass.states[elt.device.entities[config.target].entity_id];
         elt.label = label_name;
         return elt;
@@ -1603,6 +1605,7 @@ class Sensor extends (0, $1Um3j.default) {
     }
     _render(style = null) {
         let value = this.stateObj.state;
+        if ("label" in this.conf) value = eval(this.label);
         if (this.conf.force_integer) value = Math.floor(value);
         let sensor_class = "sensor";
         if ("class" in this.conf) sensor_class = this.conf.class;
@@ -1673,14 +1676,14 @@ class ProgressBar extends (0, $1Um3j.default) {
         this.stateObjTarget = null; //stateObjTarget;
     }
     _render() {
-        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         let iconv = (0, $dPhcg.default);
+        if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         let value = this.stateObj.state;
         let target = this.stateObjTarget.state;
         let percent = Math.floor(this.stateObj.state * 100 / this.stateObjTarget.state);
         let bar_class = this.conf.class;
         let label = '';
-        if ('label' in this.conf) label = eval(this.conf.label);
+        if ('label' in this.conf) label = eval(this.label);
         let unit = "%";
         let fill = percent - 1;
         if (fill < 0) fill = 0;
@@ -2530,6 +2533,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "elements": [
                 {
                     "name": "supplement",
+                    "label": "this.stateObj.attributes.supplement.brand_name+': ' +this.stateObj.state",
                     "type": "common-sensor",
                     "put_in": "supplement_info",
                     "elt.css": {
@@ -2617,6 +2621,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
                     "class": "pg-container",
+                    //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "disabled_if": "this.get_entity('slm').state==false",
                     "css": {

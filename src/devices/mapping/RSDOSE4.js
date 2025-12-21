@@ -206,6 +206,7 @@ export const config = {
 	    "elements": [
 		{
 		    "name": "supplement",
+		    "label": "this.stateObj.attributes.supplement.brand_name+': ' +this.stateObj.state",
 		    "type": "common-sensor",
 		    "put_in":"supplement_info",
 		    "elt.css":{
@@ -291,6 +292,7 @@ export const config = {
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
 		    "class":"pg-container",
+		    //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state==false",
 		    "css":{

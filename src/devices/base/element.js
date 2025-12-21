@@ -72,17 +72,9 @@ export default class MyElement extends LitElement{
     }
     
     static create_element(hass,config,device){
+	let iconv= _i18n;
 	let Element=customElements.get(config.type);
 	let label_name='';
-	// Do not display label
-	if ('label' in config){
-	    if (typeof config.label === 'string' ){
-		label_name=config.label;
-	    }
-	    else if(typeof config.label === 'boolean' && config.label!=false){ 
-		label_name=config.name;
-	    }
-	}
 	let elt=new Element();
 	elt.device=device;
 	elt.stateOn=elt.device.is_on();
@@ -91,6 +83,17 @@ export default class MyElement extends LitElement{
 	elt.color=elt.device.config.color;
 	elt.alpha=elt.device.config.alpha;
 	elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
+	// Do not display label
+	if ('label' in config){
+	    if (typeof config.label === 'string' ){
+		/*elt.label_str=config.label;
+		  label_name=eval(config.label);*/
+		label_name=config.label;
+	    }
+	    else if(typeof config.label === 'boolean' && config.label!=false){ 
+		label_name=config.name;
+	    }
+	}
 	if ("target" in config){
 	    elt.stateObjTarget=hass.states[elt.device.entities[config.target].entity_id];
 	}

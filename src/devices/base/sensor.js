@@ -21,6 +21,9 @@ export class Sensor extends  MyElement {
     
     _render(style=null){
 	let value=this.stateObj.state;
+	if ("label" in this.conf){
+	    value=eval(this.label);
+	}
 	if(this.conf.force_integer){
 	    value=Math.floor(value);
 	}

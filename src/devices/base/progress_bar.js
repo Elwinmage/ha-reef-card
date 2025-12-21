@@ -29,17 +29,18 @@ export class ProgressBar extends  MyElement {
     }//end of constructor
 
     _render(){
+	let iconv = i18n;
 	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
 	    return html`<br />`;
 	}
-	let iconv= i18n;
+
 	let value=this.stateObj.state;
 	let target=this.stateObjTarget.state;
 	let percent=Math.floor(this.stateObj.state*100/this.stateObjTarget.state);
 	let bar_class=this.conf.class;
 	let label='';
 	if('label' in this.conf){
-	    label=eval(this.conf.label);
+	    label=eval(this.label);
 	}
 	let unit="%"
 	let fill=percent-1;
