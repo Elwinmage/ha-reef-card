@@ -23,9 +23,9 @@ export class ProgressCircle extends  MyElement {
      * conf the conf in mapping file
      * stateObj the hass element 
      */
-    constructor(hass,conf,stateObj,stateObjTarget,entities,color="255,255,255",alpha=1){
- 	super(hass,conf,stateObj,entities,color,alpha);
-	this.stateObjTarget=stateObjTarget;
+    constructor(){//hass,conf,device){
+ 	super();//hass,conf,device);
+	this.stateObjTarget=null;
     }//end of constructor
 
     _render(){

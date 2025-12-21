@@ -9,12 +9,10 @@ export default class MyElement extends LitElement{
 	return {
 	    stateObj: {},
 	    stateOn: {}
-	    /*	    doubleClick: {type: Boolean},
-	    mouseDown: {},*/
 	};
     }// end of get properties 
 
-    constructor(){//hass,conf,stateObj,entities={},color="255,255,255",alpha=1){
+    constructor(){
 	super();
 	this.mouseDown=0;
 	this.mouseUp=0;
@@ -28,11 +26,6 @@ export default class MyElement extends LitElement{
 	this.addEventListener("click", function (e) {
 	    this._handleClick(e);
 	})};
-
-    // updated(changes){
-    // 	console.log("RE-RENDERED element");
-    // }
-
 
     set state_on(state){
 	if (state!= this.stateOn){
@@ -78,10 +71,10 @@ export default class MyElement extends LitElement{
 	this.conf=conf;
     }
     
-    static create_element(hass,config,color,alpha,state,entities){
+    static create_element(hass,config,device){
 	let Element=customElements.get(config.type);
 	let label_name='';
-	// Don not display label
+	// Do not display label
 	if ('label' in config){
 	    if (typeof config.label === 'string' ){
 		label_name=config.label;
@@ -90,20 +83,17 @@ export default class MyElement extends LitElement{
 		label_name=config.name;
 	    }
 	}
-/*	if (! state){
-	    color=off_color;
-	}*/
 	let elt=new Element();
-	elt.stateOn=state;
+	elt.device=device;
+	elt.stateOn=elt.device.is_on();
 	elt.hass=hass;
 	elt.conf=config;
-	elt.color=color;
-	elt.alpha=alpha;
-	elt.stateObj=hass.states[entities[config.name].entity_id];
+	elt.color=elt.device.config.color;
+	elt.alpha=elt.device.config.alpha;
+	elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
 	if ("target" in config){
-	    elt.stateObjTarget=hass.states[entities[config.target].entity_id];
+	    elt.stateObjTarget=hass.states[elt.device.entities[config.target].entity_id];
 	}
-	elt.entities=entities;
 	elt.label=label_name;
 	return elt;
     }//end of function - create_element
@@ -122,7 +112,7 @@ export default class MyElement extends LitElement{
 
     
     get_entity(entity_translation_value){
-	return this._hass.states[this.entities[entity_translation_value].entity_id];
+	return this._hass.states[this.device.entities[entity_translation_value].entity_id];
     }//end of function get_entity
     
     _handleClick(e){		      
@@ -214,14 +204,15 @@ export default class MyElement extends LitElement{
 		    }//switch
 		}//if -- personnal domain
 		else{
-		    if(action.data=="default"){
-			action.data={"entity_id":this.stateObj.entity_id};
+		    let a_data=structuredClone(action.data);
+		    if(a_data=="default"){
+			a_data={"entity_id":this.stateObj.entity_id};
 		    }
-		    else if("entity_id" in action.data){
-			action.data.entity_id=this.get_entity(action.data.entity_id).entity_id;
+		    else if("entity_id" in a_data){
+			a_data.entity_id=this.get_entity(action.data.entity_id).entity_id;
 		    }
-		    console.debug("Call Service",action.domain,action.action,action.data);
-		    this._hass.callService(action.domain, action.action, action.data);
+		    console.debug("Call Service",action.domain,action.action,a_data);
+		    this._hass.callService(action.domain, action.action, a_data);
 		}//else -- ha domain action
 	    }
 	}//if -- enabled
@@ -262,10 +253,10 @@ export default class MyElement extends LitElement{
 	}
     }
 
-    dialog(type){
+/*    dialog(type){
 	this._hass.redsea_dialog_box.display(type);
     }
-    
+  */  
     msgbox(msg){
 	this.dispatchEvent(
             new CustomEvent(

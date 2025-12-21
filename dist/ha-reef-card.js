@@ -193,7 +193,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             reason = "maintenance";
             // if in maintenance mode, display maintenance switch
             for (let swtch of this.config.elements)if (swtch.name == "maintenance") {
-                let maintenance_button = (0, $1Um3j.default).create_element(this._hass, swtch, this.config.color, this.config.alpha, true, this.entities);
+                let maintenance_button = (0, $1Um3j.default).create_element(this._hass, swtch, this);
                 maintenance = (0, $l56HR.html)`
                                       ${maintenance_button}
                                     `;
@@ -234,7 +234,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
             element = this._elements[conf.type + '.' + conf.name];
             element.state_on = state;
         } else {
-            element = (0, $1Um3j.default).create_element(this._hass, conf, this.config.color, this.config.alpha, state, this.entities);
+            element = (0, $1Um3j.default).create_element(this._hass, conf, this);
             this._elements[conf.type + '.' + conf.name] = element;
         }
         return (0, $l56HR.html)`
@@ -950,7 +950,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         set_manual_head_volume: "Manual volume",
         exit: "Done",
         set_manual_head_volume: "Manual volume dosing",
-        dosing: "Dosing"
+        dosing: "Dosing",
+        heads_shortcuts: "Manual Shorcut Doses"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -964,7 +965,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         set_manual_head_volume: "Volume manuel",
         exit: "Terminer",
         set_manual_head_volume: "Dosage du volume manuel",
-        dosing: "Distribution de"
+        dosing: "Distribution de",
+        heads_shortcuts: "Raccourcis doses manuelles"
     }
 };
 
@@ -1012,9 +1014,6 @@ class MyElement extends (0, $eGUNk.LitElement) {
             this._handleClick(e);
         });
     }
-    // updated(changes){
-    // 	console.log("RE-RENDERED element");
-    // }
     set state_on(state) {
         if (state != this.stateOn) this.stateOn = state;
     }
@@ -1047,25 +1046,23 @@ class MyElement extends (0, $eGUNk.LitElement) {
     setConfig(conf) {
         this.conf = conf;
     }
-    static create_element(hass, config, color, alpha, state, entities) {
+    static create_element(hass, config, device) {
         let Element = customElements.get(config.type);
         let label_name = '';
-        // Don not display label
+        // Do not display label
         if ('label' in config) {
             if (typeof config.label === 'string') label_name = config.label;
             else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
         }
-        /*	if (! state){
-	    color=off_color;
-	}*/ let elt = new Element();
-        elt.stateOn = state;
+        let elt = new Element();
+        elt.device = device;
+        elt.stateOn = elt.device.is_on();
         elt.hass = hass;
         elt.conf = config;
-        elt.color = color;
-        elt.alpha = alpha;
-        elt.stateObj = hass.states[entities[config.name].entity_id];
-        if ("target" in config) elt.stateObjTarget = hass.states[entities[config.target].entity_id];
-        elt.entities = entities;
+        elt.color = elt.device.config.color;
+        elt.alpha = elt.device.config.alpha;
+        elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
+        if ("target" in config) elt.stateObjTarget = hass.states[elt.device.entities[config.target].entity_id];
         elt.label = label_name;
         return elt;
     }
@@ -1078,7 +1075,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         return style;
     }
     get_entity(entity_translation_value) {
-        return this._hass.states[this.entities[entity_translation_value].entity_id];
+        return this._hass.states[this.device.entities[entity_translation_value].entity_id];
     }
     _handleClick(e) {
         if (e.pointerType != "touch") {
@@ -1144,12 +1141,13 @@ class MyElement extends (0, $eGUNk.LitElement) {
                         break;
                 } //switch
                 else {
-                    if (action.data == "default") action.data = {
+                    let a_data = structuredClone(action.data);
+                    if (a_data == "default") a_data = {
                         "entity_id": this.stateObj.entity_id
                     };
-                    else if ("entity_id" in action.data) action.data.entity_id = this.get_entity(action.data.entity_id).entity_id;
-                    console.debug("Call Service", action.domain, action.action, action.data);
-                    this._hass.callService(action.domain, action.action, action.data);
+                    else if ("entity_id" in a_data) a_data.entity_id = this.get_entity(action.data.entity_id).entity_id;
+                    console.debug("Call Service", action.domain, action.action, a_data);
+                    this._hass.callService(action.domain, action.action, a_data);
                 } //else -- ha domain action
             }
         } //if -- enabled
@@ -1173,10 +1171,10 @@ class MyElement extends (0, $eGUNk.LitElement) {
     _dblclick(e) {
         if ("double_tap_action" in this.conf) this.run_actions(this.conf.double_tap_action);
     }
-    dialog(type) {
-        this._hass.redsea_dialog_box.display(type);
+    /*    dialog(type){
+	this._hass.redsea_dialog_box.display(type);
     }
-    msgbox(msg) {
+  */ msgbox(msg) {
         this.dispatchEvent(new CustomEvent("hass-notification", {
             bubbles: true,
             composed: true,
@@ -1195,7 +1193,6 @@ parcelRegister("iXBpj", function(module, exports) {
 $parcel$export(module.exports, "default", () => $038fea56b681b6a5$export$2e2bcd8739ae039);
 $parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e13ad4e1fa5);
 $parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
-$parcel$export(module.exports, "updateObj", () => $038fea56b681b6a5$export$6fb918aa09a6c9f0);
 $parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
 $parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
 class $038fea56b681b6a5$export$2e2bcd8739ae039 {
@@ -1270,18 +1267,6 @@ function $038fea56b681b6a5$export$34d09c4a771c46ef(orig) {
         hex = '#' + (matches[1] | 256).toString(16).slice(1) + (matches[2] | 256).toString(16).slice(1) + (matches[3] | 256).toString(16).slice(1);
         return hex;
     } else return orig;
-}
-function $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj, newVal) {
-    var keys = Object.keys(newVal);
-    var n = obj;
-    if (keys.length > 0) {
-        if (!(keys[0] in obj)) {
-            obj[keys[0]] = newVal[keys[0]];
-            return;
-        }
-        $038fea56b681b6a5$export$6fb918aa09a6c9f0(obj[keys[0]], newVal[keys[0]]);
-    }
-    return;
 }
 var $038fea56b681b6a5$export$b0583e47501ff17b = "150,150,150";
 function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
@@ -1684,9 +1669,9 @@ class ProgressBar extends (0, $1Um3j.default) {
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, stateObj, stateObjTarget, entities, color = "255,255,255", alpha = 1){
-        super(hass, conf, stateObj, entities, color, alpha);
-        this.stateObjTarget = stateObjTarget;
+     */ constructor(){
+        super(); //hass,conf,device);
+        this.stateObjTarget = null; //stateObjTarget;
     }
     _render() {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
@@ -1775,9 +1760,9 @@ class ProgressCircle extends (0, $1Um3j.default) {
     /*
      * conf the conf in mapping file
      * stateObj the hass element 
-     */ constructor(hass, conf, stateObj, stateObjTarget, entities, color = "255,255,255", alpha = 1){
-        super(hass, conf, stateObj, entities, color, alpha);
-        this.stateObjTarget = stateObjTarget;
+     */ constructor(){
+        super(); //hass,conf,device);
+        this.stateObjTarget = null;
     }
     _render() {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
@@ -2009,9 +1994,8 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
             else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
         }
         content.setConfig(clone);
-        //	content.setConfig({type:"entities",entities:[{entity:'number.simu_rsdose4_1210347614_head_1_manual_volume',name:{type:"entity"}}, 'button.simu_rsdose4_1210347614_head_1_manual_dosing']});
         content.hass = this._hass;
-        content.entities = this.elt.entities;
+        content.device = this.elt.device;
         this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
@@ -2039,6 +2023,49 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
             }
             // Title
             this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
+            //special contnet for rsdose manual 
+            if (this.to_render.title_key == "set_manual_head_volume" && this.elt.device.config.shortcut) for (let shortcut of this.elt.device.config.shortcut.split(',')){
+                const r_element = customElements.get("common-button");
+                const content = new r_element();
+                let conf = {
+                    "label": shortcut + "mL",
+                    "tap_action": [
+                        {
+                            "domain": "number",
+                            "action": "set_value",
+                            "data": {
+                                "entity_id": "manual_head_volume",
+                                "value": shortcut
+                            }
+                        },
+                        {
+                            "domain": "button",
+                            "action": "press",
+                            "data": {
+                                "entity_id": "manual_head"
+                            }
+                        },
+                        {
+                            "domain": "redsea_ui",
+                            "action": "message_box",
+                            "data": "i18n._('dosing')+ ' " + shortcut + "mL'"
+                        }
+                    ],
+                    "css": {
+                        "display": "inline-block",
+                        "border": "1px solid gray",
+                        "border-radius": "15px",
+                        "padding-left": "10px",
+                        "padding-right": "10px",
+                        "margin-bottom": "20px",
+                        "background-color": "rgb(220,220,220)"
+                    }
+                };
+                content.setConfig(conf);
+                content.device = this.elt.device;
+                content.hass = this._hass;
+                this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+            }
             // Content
             this.to_render.content.map((c)=>this._render_content(c));
         }
@@ -2285,191 +2312,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "close_cross": true,
             "content": [
                 {
-                    "view": "common-button",
-                    "conf": {
-                        "label": "2mL",
-                        "tap_action": [
-                            {
-                                "domain": "number",
-                                "action": "set_value",
-                                "data": {
-                                    "entity_id": "manual_head_volume",
-                                    "value": 2
-                                }
-                            },
-                            {
-                                "domain": "button",
-                                "action": "press",
-                                "data": {
-                                    "entity_id": "manual_head"
-                                }
-                            },
-                            {
-                                "domain": "redsea_ui",
-                                "action": "message_box",
-                                "data": "i18n._('dosing')+ ' 2mL'"
-                            }
-                        ],
-                        "css": {
-                            "display": "inline-block",
-                            "border": "1px solid gray",
-                            "border-radius": "15px",
-                            "padding-left": "10px",
-                            "padding-right": "10px",
-                            "margin-bottom": "20px",
-                            "background-color": "rgb(220,220,220)"
-                        }
-                    }
-                },
-                {
-                    "view": "common-button",
-                    "conf": {
-                        "label": "5mL",
-                        "tap_action": [
-                            {
-                                "domain": "number",
-                                "action": "set_value",
-                                "data": {
-                                    "entity_id": "manual_head_volume",
-                                    "value": 5
-                                }
-                            },
-                            {
-                                "domain": "button",
-                                "action": "press",
-                                "data": {
-                                    "entity_id": "manual_head"
-                                }
-                            },
-                            {
-                                "domain": "redsea_ui",
-                                "action": "message_box",
-                                "data": "i18n._('dosing')+' 5mL'"
-                            }
-                        ],
-                        "css": {
-                            "display": "inline-block",
-                            "border": "1px solid gray",
-                            "border-radius": "15px",
-                            "padding-left": "10px",
-                            "padding-right": "10px",
-                            "margin-bottom": "20px",
-                            "background-color": "rgb(220,220,220)"
-                        }
-                    }
-                },
-                {
-                    "view": "common-button",
-                    "conf": {
-                        "label": "10mL",
-                        "tap_action": [
-                            {
-                                "domain": "number",
-                                "action": "set_value",
-                                "data": {
-                                    "entity_id": "manual_head_volume",
-                                    "value": 10
-                                }
-                            },
-                            {
-                                "domain": "button",
-                                "action": "press",
-                                "data": {
-                                    "entity_id": "manual_head"
-                                }
-                            },
-                            {
-                                "domain": "redsea_ui",
-                                "action": "message_box",
-                                "data": "i18n._('dosing')+ ' 10mL'"
-                            }
-                        ],
-                        "css": {
-                            "display": "inline-block",
-                            "border": "1px solid gray",
-                            "border-radius": "15px",
-                            "padding-left": "10px",
-                            "padding-right": "10px",
-                            "margin-bottom": "20px",
-                            "background-color": "rgb(220,220,220)"
-                        }
-                    }
-                },
-                {
-                    "view": "common-button",
-                    "conf": {
-                        "label": "16mL",
-                        "tap_action": [
-                            {
-                                "domain": "number",
-                                "action": "set_value",
-                                "data": {
-                                    "entity_id": "manual_head_volume",
-                                    "value": 16
-                                }
-                            },
-                            {
-                                "domain": "button",
-                                "action": "press",
-                                "data": {
-                                    "entity_id": "manual_head"
-                                }
-                            },
-                            {
-                                "domain": "redsea_ui",
-                                "action": "message_box",
-                                "data": "i18n._('dosing')+' 16mL'"
-                            }
-                        ],
-                        "css": {
-                            "display": "inline-block",
-                            "border": "1px solid gray",
-                            "border-radius": "15px",
-                            "padding-left": "10px",
-                            "padding-right": "10px",
-                            "margin-bottom": "20px",
-                            "background-color": "rgb(220,220,220)"
-                        }
-                    }
-                },
-                {
-                    "view": "common-button",
-                    "conf": {
-                        "label": "20mL",
-                        "tap_action": [
-                            {
-                                "domain": "number",
-                                "action": "set_value",
-                                "data": {
-                                    "entity_id": "manual_head_volume",
-                                    "value": 20
-                                }
-                            },
-                            {
-                                "domain": "button",
-                                "action": "press",
-                                "data": {
-                                    "entity_id": "manual_head"
-                                }
-                            },
-                            {
-                                "domain": "redsea_ui",
-                                "action": "message_box",
-                                "data": "i18n._('dosing')+' 20mL'"
-                            }
-                        ],
-                        "css": {
-                            "display": "inline-block",
-                            "border": "1px solid gray",
-                            "border-radius": "15px",
-                            "padding-left": "10px",
-                            "padding-right": "10px",
-                            "background-color": "rgb(220,220,220)",
-                            "margin-bottom": "20px"
-                        }
-                    }
-                },
-                {
                     "view": "hui-entities-card",
                     "conf": {
                         "type": "entities",
@@ -2575,6 +2417,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "heads": {
         "common": {
             "alpha": "0.6",
+            "shortcuts=": "",
             "css": {
                 "top": "0%",
                 "left": "50%",
@@ -2904,9 +2747,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     ];
     static get properties() {
         return {
-            /*	    entities: {},
-	    config: {},
-	    head_id:{},*/ state_on: {},
+            state_on: {},
             device_state: {},
             head_state: {}
         };
@@ -2914,7 +2755,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     constructor(){
         super();
         this.supplement = null;
-        this.stock_alert = null; //stock_alert;
+        this.stock_alert = null;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -3000,7 +2841,6 @@ window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae0
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $9e31fe09da958909$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
 `;
 
 
@@ -3068,10 +2908,10 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
             state_on: {}
         };
     }
-    constructor(hass, entities, config, state_on, stateObj, color_list){
-        super(hass, config, stateObj, entities);
-        this.state_on = state_on;
-        this.color_list = color_list;
+    constructor(){
+        super(); //hass,config,stateObj,entities);
+        //this.state_on=state_on;
+        //	this.color_list=color_list;
         this.schdedule = null;
     }
     _render_slot_schedule(slot) {
@@ -3199,7 +3039,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (disabled != null) return disabled;
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
         if (this.dosing_queue == null) {
-            this.dosing_queue = (0, $1Um3j.default).create_element(this._hass, this.config.dosing_queue, null, null, this.is_on(), this.entities);
+            this.dosing_queue = (0, $1Um3j.default).create_element(this._hass, this.config.dosing_queue, this);
             this.dosing_queue.color_list = this.supplement_color;
         }
         return (0, $l56HR.html)`
@@ -3218,34 +3058,43 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _editor_head_color(head_id) {
         this.update_config();
         let color = (0, $iXBpj.rgbToHex)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
+        let shortcuts = this.config.heads["head_" + head_id].shortcut;
         return (0, $l56HR.html)`
-         <input type="color" id="head_${head_id}" name="head_${head_id}" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
-         <datalist id="RedSeaColors">
-            <option>#8c4394</option>
-            <option>#0081c5</option>
-            <option>#008264</option>
-            <option>#64a04b</option>
-            <option>#582900</option>
-            <option>#f04e99</option>
-            <option>#f14b4c</option>
-            <option>#f08f37</option>
-            <option>#d9d326</option>
-            <option>#FFFFFF</option>
-         </datalist>
-         <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
-         <br />
-     `;
+             <tr>
+               <td class="config_color">
+                 <input type="color" id="head_${head_id}-color" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
+                 <datalist id="RedSeaColors">
+                   <option>#8c4394</option>
+                   <option>#0081c5</option>
+                   <option>#008264</option>
+                   <option>#64a04b</option>
+                   <option>#582900</option>
+                   <option>#f04e99</option>
+                   <option>#f14b4c</option>
+                   <option>#f08f37</option>
+                   <option>#d9d326</option>
+                   <option>#FFFFFF</option>
+                </datalist>
+                <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
+              </td>
+              <td>
+                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @input="${this.handleChangedEvent}"></input>
+              </td>
+           </tr>`;
     }
     handleChangedEvent(changedEvent) {
-        const hex = changedEvent.currentTarget.value;
+        let i_val = changedEvent.currentTarget.value;
+        const head = changedEvent.target.id.split('-')[0];
+        const field = changedEvent.target.id.split('-')[1];
+        if (field == "color") i_val = (0, $iXBpj.hexToRgb)(i_val);
         var newVal = {
             conf: {
                 [this.current_device.config.model]: {
                     devices: {
                         [this.current_device.device.name]: {
                             heads: {
-                                [changedEvent.target.id]: {
-                                    color: (0, $iXBpj.hexToRgb)(hex)
+                                [head]: {
+                                    [field]: i_val
                                 }
                             }
                         }
@@ -3255,9 +3104,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         };
         var newConfig = JSON.parse(JSON.stringify(this._config));
         try {
-            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.id].color = (0, $iXBpj.hexToRgb)(hex);
+            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
         } catch (error) {
-            (0, $iXBpj.updateObj)(newConfig, newVal);
+            newConfig = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(newConfig, newVal);
+            console.debug("merged", newConfig, newVal);
         }
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
@@ -3275,12 +3125,17 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         if (element) element.reset();
         return (0, $l56HR.html)`
                  <hr />
-                 <h1>${(0, $dPhcg.default)._("heads_colors")}</h1>
-                 <form id="heads_colors">
-                   ${Array.from({
+                 <table>
+                   <tr>
+                     <td class="config_header">${(0, $dPhcg.default)._("heads_colors")}</td>
+                     <td>${(0, $dPhcg.default)._("heads_shortcuts")}</td>
+                   </tr>
+                   <form id="heads_colors">
+                     ${Array.from({
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._editor_head_color(head))}
-                </form>`;
+                   </form>
+                 </table>`;
     }
 }
 window.customElements.define('redsea-rsdose4', $205242e0eaceda90$export$2e2bcd8739ae039);

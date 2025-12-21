@@ -100,20 +100,6 @@ export function rgbToHex( orig ) {
 	}
 }
 
-//ajoute un attribut avec son chemin complet
-export function updateObj(obj,newVal){
-    var keys = Object.keys(newVal);
-    var n = obj;
-    if ( keys.length > 0){
-	if (!(keys[0] in obj)){
-	    obj[keys[0]]=newVal[keys[0]];
-	    return;
-	}
-	updateObj(obj[keys[0]],newVal[keys[0]]);
-    }
-    return;
-}
-
 export var off_color="150,150,150";
 
 // Time

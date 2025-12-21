@@ -193,7 +193,7 @@ export default class RSDevice extends LitElement {
 	    // if in maintenance mode, display maintenance switch
 	    for ( let swtch of this.config.elements){
 		if (swtch.name=="maintenance"){
-		    let maintenance_button=MyElement.create_element(this._hass,swtch,this.config.color,this.config.alpha,true,this.entities);
+		    let maintenance_button=MyElement.create_element(this._hass,swtch,this);
 		    maintenance=html`
                                       ${maintenance_button}
                                     `;
@@ -248,7 +248,7 @@ export default class RSDevice extends LitElement {
 	    element.state_on=state;
 	}
 	else {
-	    element=MyElement.create_element(this._hass,conf,this.config.color,this.config.alpha,state,this.entities);
+	    element=MyElement.create_element(this._hass,conf,this);
 	    this._elements[conf.type+'.'+conf.name]=element;
 	}
         return html`

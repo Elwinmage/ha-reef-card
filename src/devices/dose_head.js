@@ -15,26 +15,17 @@ export default class DoseHead extends RSDevice{
 
     static get properties() {
 	return {
-/*	    entities: {},
-	    config: {},
-	    head_id:{},*/
 	    state_on:{},
 	    device_state:{},
 	    head_state:{},
-	    /*
-	    supplement:{},
-	    stock_alert: {},*/
 	}
     }
 
-    constructor(){//hass,entities,config,state_on,stock_alert){
+    constructor(){
 	super();
 	this.supplement=null;
-	this.stock_alert=null;//stock_alert;
-	
+	this.stock_alert=null;
     }
-
-
     _pipe_path(){
 	let color=this.config.color;
 	if (! this.state_on ){

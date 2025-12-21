@@ -17,10 +17,10 @@ export default class DosingQueue extends MyElement{
 	}
     }
 
-    constructor(hass,entities,config,state_on,stateObj,color_list){
-	super(hass,config,stateObj,entities);
-	this.state_on=state_on;
-	this.color_list=color_list;
+    constructor(){//hass,entities,config,state_on,stateObj,color_list){
+	super();//hass,config,stateObj,entities);
+	//this.state_on=state_on;
+//	this.color_list=color_list;
 	this.schdedule=null;
     }
 

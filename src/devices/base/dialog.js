@@ -81,9 +81,8 @@ export class Dialog extends  LitElement {
 	    }
 	}
 	content.setConfig(clone);
-//	content.setConfig({type:"entities",entities:[{entity:'number.simu_rsdose4_1210347614_head_1_manual_volume',name:{type:"entity"}}, 'button.simu_rsdose4_1210347614_head_1_manual_dosing']});
 	content.hass=this._hass;
-	content.entities=this.elt.entities;
+	content.device=this.elt.device;
 	this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     
@@ -112,6 +111,46 @@ export class Dialog extends  LitElement {
 	    }
 	    // Title
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML=i18n._(this.to_render.title_key);
+	    //special contnet for rsdose manual 
+	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
+		for(let shortcut of this.elt.device.config.shortcut.split(',')){
+		    const r_element= customElements.get("common-button");
+		    const content= new r_element();
+		    let conf={
+			"label": shortcut+"mL",
+			"tap_action": [
+			    {
+				"domain": "number",
+				"action" : "set_value",
+				"data":{"entity_id":"manual_head_volume","value":shortcut}
+			    },
+			    {
+				"domain": "button",
+				"action" : "press",
+				"data": {"entity_id":"manual_head"},
+			    },
+			    {
+				"domain": "redsea_ui",
+				"action" : "message_box",
+				"data": "i18n._('dosing')+ ' "+shortcut+"mL'"
+			    }
+			],
+			"css":{
+			    "display": "inline-block",
+			    "border":"1px solid gray",
+			    "border-radius": "15px",
+			    "padding-left":"10px",
+			    "padding-right":"10px",
+			    "margin-bottom": "20px",			    
+			    "background-color": "rgb(220,220,220)",
+			}
+		    };
+		    content.setConfig(conf);
+		    content.device=this.elt.device;
+		    content.hass=this._hass;
+		    this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+		}
+	    }
 	    // Content
 	    this.to_render.content.map(c => this._render_content(c));
 	}
