@@ -52,6 +52,46 @@ export const config = {
     },
     "elements": [
 	{
+	    "name": "last_message",
+	    "master": true, // If true, the change of state of this element force a device redraw
+	    "type":"redsea-messages",
+	    "css":{
+		"flex": "0 0 auto",
+		"position": "absolute",
+		"width": "100%",
+		"height": "15px",
+		"top": "33%",
+		"left": "0px",
+	    },
+	    "elt.css":{
+		"background-color": "rgba(220,220,220,0.7)",
+	    }
+	},
+	{
+	    "name": "last_alert_message",
+	    "master": true, // If true, the change of state of this element force a device redraw
+	    "type":"redsea-messages",
+	    "label":"⚠",
+	    /*	    "tap_action": {
+		"domain": "switch",
+		"action":"toggle",
+		"data": "default",
+		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
+	    },*/
+	    "css":{
+		"color": "red",
+		"flex": "0 0 auto",
+		"position": "absolute",
+		"width": "100%",
+		"height": "20px",
+		"top": "37%",
+		"left": "0px",
+	    },
+	    "elt.css":{
+		"background-color": "rgba(240,200,200,0.7)",
+	    }
+	},
+	{
 	    "name": "device_state",
 	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"common-switch",

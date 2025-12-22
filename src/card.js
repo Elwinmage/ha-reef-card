@@ -12,6 +12,7 @@ import NoDevice from './devices/nodevice';
 import RSDose from './devices/rsdose';
 
 import dialog_box from './devices/base/dialog';
+
 import style_dialog from './devices/base/dialog.styles';
 
 /*
@@ -80,6 +81,7 @@ export class ReefCard extends LitElement {
 	    this.current_device.hass=this._hass;
 	    //A specific device has been selected
 	    return html`
+                       ${this.messages}
                        ${this.current_device}
                        ${dialog_box.render()}
                        `;

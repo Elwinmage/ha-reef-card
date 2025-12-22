@@ -13,6 +13,7 @@ import {merge} from "../merge";
 
 import {DosingQueue} from "./dosing_queue";
 import MyElement from "./base/element";
+import RSMessages from './base/messages';
 
 import dialog_box from "./base/dialog";
 

@@ -2382,6 +2382,45 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     },
     "elements": [
         {
+            "name": "last_message",
+            "master": true,
+            "type": "redsea-messages",
+            "css": {
+                "flex": "0 0 auto",
+                "position": "absolute",
+                "width": "100%",
+                "height": "15px",
+                "top": "33%",
+                "left": "0px"
+            },
+            "elt.css": {
+                "background-color": "rgba(220,220,220,0.7)"
+            }
+        },
+        {
+            "name": "last_alert_message",
+            "master": true,
+            "type": "redsea-messages",
+            "label": "\u26A0",
+            /*	    "tap_action": {
+		"domain": "switch",
+		"action":"toggle",
+		"data": "default",
+		//"data": {"entity_id":"switch.simu_rsdose4_4647319427_head_4_schedule_enabled"},
+	    },*/ "css": {
+                "color": "red",
+                "flex": "0 0 auto",
+                "position": "absolute",
+                "width": "100%",
+                "height": "20px",
+                "top": "37%",
+                "left": "0px"
+            },
+            "elt.css": {
+                "background-color": "rgba(240,200,200,0.7)"
+            }
+        },
+        {
             "name": "device_state",
             "master": true,
             "type": "common-switch",
@@ -3031,6 +3070,39 @@ window.customElements.define('dosing-queue', $141b1a4597f6f7b2$export$2e2bcd8739
 
 
 var $1Um3j = parcelRequire("1Um3j");
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+parcelRequire("j0ZcV");
+var $j8KxL = parcelRequire("j8KxL");
+var $3aa79127a930b57d$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
+`;
+
+
+
+var $1Um3j = parcelRequire("1Um3j");
+class $af5325ece54e327c$export$b931e564db01e286 extends (0, $1Um3j.default) {
+    static styles = (0, $3aa79127a930b57d$export$2e2bcd8739ae039);
+    /*
+     * conf the conf in mapping file
+     * stateObj the hass element 
+     */ constructor(hass, conf){
+        super(hass, conf, null, null);
+    }
+    _render() {
+        let sclass = "";
+        let style = this.get_style("elt.css");
+        if ("class" in this.conf) sclass = this.conf.class;
+        let value = this.stateObj.state;
+        if (value == "unavailable") {
+            value = '';
+            style = '';
+        } else if ('label' in this.conf) value = this.conf.label + value + this.conf.label;
+        return (0, $l56HR.html)`<div style=${style}><marquee class="${sclass}">${value}</marquee></div>`;
+    }
+} // end of class
+window.customElements.define('redsea-messages', $af5325ece54e327c$export$b931e564db01e286);
+
+
 parcelRequire("7Rfxy");
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
@@ -3284,6 +3356,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             this.current_device.hass = this._hass;
             //A specific device has been selected
             return (0, $l56HR.html)`
+                       ${this.messages}
                        ${this.current_device}
                        ${(0, $7Rfxy.default).render()}
                        `;
