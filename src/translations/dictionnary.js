@@ -14,6 +14,7 @@ export const dict={
 	dosing: "Dosing",
 	heads_shortcuts: "Manual Shorcut Doses",
 	set_auto_dose : "Auto daily volume",
+	ask_add_supplement : "Ask for picture",
     },
     fr:{
 	canNotFindTranslation: "Traduction introuvable pour: ",
@@ -30,5 +31,6 @@ export const dict={
 	dosing: "Distribution de",
 	heads_shortcuts: "Raccourcis doses manuelles",
 	set_auto_dose : "Dose automatique journalière",
+	ask_add_supplement : "Demande d'image",
     },
 }

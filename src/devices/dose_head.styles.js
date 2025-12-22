@@ -5,6 +5,17 @@ svg{
 stroke: black;
 }
 
+.addSupplement{
+  color:red;
+  position:absolute;
+  width:60%;
+  bottom:15%;
+  left:30%;
+  text-align:center;
+  text-decoration: none;
+  animation:blink 1s linear infinite;;
+}
+
 @keyframes blink {
     0% {
         opacity: 1;

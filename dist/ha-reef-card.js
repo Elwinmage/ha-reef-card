@@ -952,7 +952,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         set_manual_head_volume: "Manual volume dosing",
         dosing: "Dosing",
         heads_shortcuts: "Manual Shorcut Doses",
-        set_auto_dose: "Auto daily volume"
+        set_auto_dose: "Auto daily volume",
+        ask_add_supplement: "Ask for picture"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -968,7 +969,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         set_manual_head_volume: "Dosage du volume manuel",
         dosing: "Distribution de",
         heads_shortcuts: "Raccourcis doses manuelles",
-        set_auto_dose: "Dose automatique journali\xe8re"
+        set_auto_dose: "Dose automatique journali\xe8re",
+        ask_add_supplement: "Demande d'image"
     }
 };
 
@@ -2765,6 +2767,17 @@ svg{
 stroke: black;
 }
 
+.addSupplement{
+  color:red;
+  position:absolute;
+  width:60%;
+  bottom:15%;
+  left:30%;
+  text-align:center;
+  text-decoration: none;
+  animation:blink 1s linear infinite;;
+}
+
 @keyframes blink {
     0% {
         opacity: 1;
@@ -2846,7 +2859,12 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             `;
     }
     _render_supplement_info() {
-        if (this.supplement_info) return (0, $l56HR.html)`${this._render_elements(true, "supplement_info")}`;
+        if (this.supplement_info) {
+            let ask = '';
+            if (!this.supplement.attributes.supplement.is_name_editable) ask = (0, $l56HR.html)`<a class="addSupplement" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ', '+')}+${this.supplement.attributes.supplement.name.replace(' ', '+')}&body=uid:${this.supplement.attributes.supplement.uid}'>+${(0, $dPhcg.default)._("ask_add_supplement")}+</a>`;
+             //if
+            return (0, $l56HR.html)`${this._render_elements(true, "supplement_info")} ${ask}`;
+        } //if
     }
     is_on() {
         let res = true;
