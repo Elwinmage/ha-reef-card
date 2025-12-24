@@ -82,12 +82,15 @@ export default class MyElement extends LitElement{
 	elt.conf=config;
 	elt.color=elt.device.config.color;
 	elt.alpha=elt.device.config.alpha;
-	elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
+	if('stateObj' in config && !config.stateObj){
+	    elt.satteObj=null;
+	}
+	else {
+	    elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
+	}
 	// Do not display label
 	if ('label' in config){
 	    if (typeof config.label === 'string' ){
-		/*elt.label_str=config.label;
-		  label_name=eval(config.label);*/
 		label_name=config.label;
 	    }
 	    else if(typeof config.label === 'boolean' && config.label!=false){ 
@@ -254,10 +257,6 @@ export default class MyElement extends LitElement{
 	}
     }
 
-/*    dialog(type){
-	this._hass.redsea_dialog_box.display(type);
-    }
-  */  
     msgbox(msg){
 	this.dispatchEvent(
             new CustomEvent(

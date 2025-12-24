@@ -953,7 +953,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         dosing: "Dosing",
         heads_shortcuts: "Manual Shorcut Doses",
         set_auto_dose: "Auto daily volume",
-        ask_add_supplement: "Ask for picture"
+        ask_add_supplement: "Ask for picture",
+        dialog_add_supplement_title: "Add new supplement to head"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -970,7 +971,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         dosing: "Distribution de",
         heads_shortcuts: "Raccourcis doses manuelles",
         set_auto_dose: "Dose automatique journali\xe8re",
-        ask_add_supplement: "Demande d'image"
+        ask_add_supplement: "Demande d'image",
+        dialog_add_supplement_title: "Nouveau Suppl\xe9ment poru la t\xeate"
     }
 };
 
@@ -1061,11 +1063,11 @@ class MyElement extends (0, $eGUNk.LitElement) {
         elt.conf = config;
         elt.color = elt.device.config.color;
         elt.alpha = elt.device.config.alpha;
-        elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
+        if ('stateObj' in config && !config.stateObj) elt.satteObj = null;
+        else elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
         // Do not display label
         if ('label' in config) {
-            if (typeof config.label === 'string') /*elt.label_str=config.label;
-		  label_name=eval(config.label);*/ label_name = config.label;
+            if (typeof config.label === 'string') label_name = config.label;
             else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
         }
         if ("target" in config) elt.stateObjTarget = hass.states[elt.device.entities[config.target].entity_id];
@@ -1174,10 +1176,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
     _dblclick(e) {
         if ("double_tap_action" in this.conf) this.run_actions(this.conf.double_tap_action);
     }
-    /*    dialog(type){
-	this._hass.redsea_dialog_box.display(type);
-    }
-  */ msgbox(msg) {
+    msgbox(msg) {
         this.dispatchEvent(new CustomEvent("hass-notification", {
             bubbles: true,
             composed: true,
@@ -1930,6 +1929,7 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 parcelRegister("7Rfxy", function(module, exports) {
 
+$parcel$export(module.exports, "Dialog", () => Dialog);
 $parcel$export(module.exports, "default", () => $5b89899a4a720bff$export$2e2bcd8739ae039);
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
@@ -1941,7 +1941,7 @@ var $4DorC = parcelRequire("4DorC");
 parcelRequire("93DQX");
 
 var $kgVGZ = parcelRequire("kgVGZ");
-class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
+class Dialog extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $4DorC.default),
         (0, $kgVGZ.default)
@@ -1996,13 +1996,15 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
         if ("entities" in content_conf.conf) {
             for(let pos in content_conf.conf.entities)if (typeof clone.entities[pos] == "string") clone.entities[pos] = this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
             else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
-        }
+        } else if ("entity" in content_conf.conf) clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
+        console.debug("HEAD", this.elt.device.config.id);
         content.setConfig(clone);
         content.hass = this._hass;
         content.device = this.elt.device;
         this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
+        let iconv = (0, $dPhcg.default);
         let close_conf = {
             "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
             "tap_action": {
@@ -2026,7 +2028,7 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
                 this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
             }
             // Title
-            this._shadowRoot.querySelector("#dialog-title").innerHTML = (0, $dPhcg.default)._(this.to_render.title_key);
+            this._shadowRoot.querySelector("#dialog-title").innerHTML = eval(this.to_render.title_key); //;i18n._(this.to_render.title_key);
             //special contnet for rsdose manual 
             if (this.to_render.title_key == "set_manual_head_volume" && this.elt.device.config.shortcut) for (let shortcut of this.elt.device.config.shortcut.split(',')){
                 const r_element = customElements.get("common-button");
@@ -2087,9 +2089,9 @@ class $5b89899a4a720bff$export$3ddf2d174ce01153 extends (0, $eGUNk.LitElement) {
 `;
     }
 } // end of class
-window.customElements.define('common-dialog', $5b89899a4a720bff$export$3ddf2d174ce01153);
-var $5b89899a4a720bff$var$dialog_box = new $5b89899a4a720bff$export$3ddf2d174ce01153();
-var $5b89899a4a720bff$export$2e2bcd8739ae039 = $5b89899a4a720bff$var$dialog_box;
+window.customElements.define('common-dialog', Dialog);
+var dialog_box = new Dialog();
+var $5b89899a4a720bff$export$2e2bcd8739ae039 = dialog_box;
 
 });
 parcelRegister("4DorC", function(module, exports) {
@@ -2195,10 +2197,10 @@ class $69834edd1b5d4a9e$export$de240ccfdb266acb extends (0, $1Um3j.default) {
      */ constructor(hass, conf){
         super(hass, conf, null, null);
     }
-    _render() {
+    _render(style = null) {
         let sclass = "";
         if ("class" in this.conf) sclass = this.conf.class;
-        return (0, $l56HR.html)`<img class="${sclass}" src=${this.conf.image} />`;
+        return (0, $l56HR.html)`<img class="${sclass}" src=${this.conf.image} style=${style} />`;
     }
 } // end of class
 window.customElements.define('click-image', $69834edd1b5d4a9e$export$de240ccfdb266acb);
@@ -2311,8 +2313,37 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
+        "add_supplement": {
+            "title_key": "iconv._('dialog_add_supplement_title') +' n\xb0'+ this.elt.device.config.id",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "supplements",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "validate": [
+                {
+                    "action": {
+                        "label": "iconv._('set')",
+                        "domain": "redsea_ui",
+                        "action": "exit-dialog"
+                    }
+                }
+            ]
+        },
         "set_manual_head_volume": {
-            "title_key": "set_manual_head_volume",
+            "title_key": "iconf._('set_manual_head_volume')",
             "close_cross": true,
             "content": [
                 {
@@ -2844,6 +2875,8 @@ parcelRequire("M8QIC");
 var $iXBpj = parcelRequire("iXBpj");
 
 var $dPhcg = parcelRequire("dPhcg");
+
+var $1Um3j = parcelRequire("1Um3j");
 class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     static styles = [
         (0, $12c519d2fc52c039$export$2e2bcd8739ae039),
@@ -2945,15 +2978,34 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
               ${warning}
               ${calibration}
    	    `;
-        } else // TODO: add button for new supplement
-        // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
-        //  labels: enhancement rsdose
-        return (0, $l56HR.html)`
+        } else {
+            // TODO: add button for new supplement
+            // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
+            //  labels: enhancement rsdose
+            let conf = {
+                "type": "click-image",
+                "stateObj": false,
+                "image": new URL("container_add.d3b2ec21.png", import.meta.url),
+                "class": "container",
+                "tap_action": {
+                    "domain": "redsea_ui",
+                    "action": "dialog",
+                    "data": {
+                        "type": "add_supplement"
+                    }
+                },
+                "elt.css": {
+                    "width": "100%"
+                }
+            };
+            let add_img = (0, $1Um3j.default).create_element(this._hass, conf, this);
+            return (0, $l56HR.html)`
    <div class="container" style="${this.get_style(this.config.container)}">
-     <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' />
+<!--      <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' /> -->
+${add_img}
    </div>
 `;
-         //else
+        } //else
     }
 }
 window.customElements.define('dose-head', $52ce4b1a72fac8d0$export$2e2bcd8739ae039);

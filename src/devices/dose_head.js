@@ -8,6 +8,7 @@ import style_progress_bar from "./base/progress_bar.styles";
 import {ProgressBar} from "./base/progress_bar";
 import {off_color} from "../common.js";
 import i18n from "../translations/myi18n.js";
+import MyElement from "./base/element";
 
 export default class DoseHead extends RSDevice{
 
@@ -140,9 +141,26 @@ export default class DoseHead extends RSDevice{
 	    // TODO: add button for new supplement
 	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
 	    //  labels: enhancement rsdose
+	    let conf={
+		"type": "click-image",
+		"stateObj": false,
+		"image":new URL("./img/container_add.png",import.meta.url),
+		"class": "container",
+		"tap_action":{
+		    "domain": "redsea_ui",
+		    "action": "dialog",
+		    "data": {"type": "add_supplement"}
+		},
+		"elt.css":{
+		    "width": "100%",
+		}
+		
+	    };
+	    let add_img=MyElement.create_element(this._hass,conf,this);
 	    return html`
    <div class="container" style="${this.get_style(this.config.container)}">
-     <img src='${new URL("./img/container_add.png",import.meta.url)}' />
+<!--      <img src='${new URL("./img/container_add.png",import.meta.url)}' /> -->
+${add_img}
    </div>
 `;
 	}//else

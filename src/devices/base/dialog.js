@@ -80,6 +80,10 @@ export class Dialog extends  LitElement {
 		}
 	    }
 	}
+	else if("entity" in content_conf.conf){
+	    clone.entity=this.elt.get_entity(content_conf.conf.entity).entity_id;
+	}
+	console.debug("HEAD",this.elt.device.config.id);
 	content.setConfig(clone);
 	content.hass=this._hass;
 	content.device=this.elt.device;
@@ -87,6 +91,7 @@ export class Dialog extends  LitElement {
     }
     
     render(){
+	let iconv=i18n;
 	let close_conf={
 	    "image": new URL('../img/close_cross.svg',import.meta.url),
 	    "tap_action":{
@@ -110,7 +115,7 @@ export class Dialog extends  LitElement {
 		this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
 	    }
 	    // Title
-	    this._shadowRoot.querySelector("#dialog-title").innerHTML=i18n._(this.to_render.title_key);
+	    this._shadowRoot.querySelector("#dialog-title").innerHTML=eval(this.to_render.title_key);//;i18n._(this.to_render.title_key);
 	    //special contnet for rsdose manual 
 	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
 		for(let shortcut of this.elt.device.config.shortcut.split(',')){

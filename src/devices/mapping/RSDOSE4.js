@@ -4,8 +4,32 @@ export const config = {
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
     "dialogs": {
-	"set_manual_head_volume":{
-	    "title_key": "set_manual_head_volume",
+	"add_supplement":{
+	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
+	    "close_cross": true,
+	    "content":[
+		{
+		    "view": "hui-entities-card",
+		    "conf":{
+			"type":"entities",
+			"entities": [
+			    {"entity":"supplements","name":{"type":"entity"}},
+			]
+		    }
+		}
+	    ],
+	    "validate": [
+		{
+		    "action": {
+			"label": "iconv._('set')",
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    }
+		}
+	    ]
+	},
+ 	"set_manual_head_volume":{
+	    "title_key": "iconf._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
 		{"view":"hui-entities-card",

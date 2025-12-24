@@ -19,12 +19,13 @@ export class ClickImage extends  MyElement {
  	super(hass,conf,null,null);
     }//end of constructor
 
-    _render(){
+    _render(style=null){
 	let sclass="";
 	if ("class" in this.conf){
 	    sclass=this.conf.class;
 	}
-	return html`<img class="${sclass}" src=${this.conf.image} />`;
+	
+	return html`<img class="${sclass}" src=${this.conf.image} style=${style} />`;
     }//end of function render
 
 }// end of class
