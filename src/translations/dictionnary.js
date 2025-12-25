@@ -33,6 +33,6 @@ export const dict={
 	heads_shortcuts: "Raccourcis doses manuelles",
 	set_auto_dose : "Dose automatique journalière",
 	ask_add_supplement : "Demande d'image",
-	dialog_add_supplement_title: "Nouveau Supplément poru la tête",
+	dialog_add_supplement_title: "Nouveau Supplément pour la tête",
     },
 }

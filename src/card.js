@@ -38,6 +38,7 @@ export class ReefCard extends LitElement {
 	this.version='v0.0.1';
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
+	this.re_render=false;
     }//end of constructor
 
     /*
@@ -72,7 +73,10 @@ export class ReefCard extends LitElement {
 	}//if
 	else {
 	    this.current_device.hass=this._hass;
-	    return;
+	    console.log("GEN__");
+	    if(!this.re_render){
+		return;
+	    }
 	}
 	//Init conf and DOM for dialog box
 	dialog_box.init(this._hass,this.shadowRoot);
@@ -89,6 +93,7 @@ export class ReefCard extends LitElement {
 	// no secific device selected, display select form
 	return html`
           ${this.device_select()}
+          ${this.messages}
           ${this.current_device}
           ${dialog_box.render()}
     `;
@@ -130,6 +135,7 @@ export class ReefCard extends LitElement {
      * Set the current device to display giving it's id
      */
     _set_current_device(device_id){
+	console.debug("Current device",device_id);
 	//No device selected, display redsea logo
 	if (device_id=="unselected"){
 	    this.current_device=this.no_device;
@@ -218,6 +224,7 @@ export class ReefCard extends LitElement {
             else{
 		this._set_current_device(this.selected);
 	    }
+	    this.re_render=true;
 	},300)
     }// end of onChange
 
