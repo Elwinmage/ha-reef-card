@@ -15,7 +15,7 @@
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
 # Supported Languages: [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reef-card) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reef-card) 
 <!-- You want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
-
+Your language is not supported yet, you want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md).
 # Overview
 **Reef card** for home assistant help you to manage your reef tank. 
 
