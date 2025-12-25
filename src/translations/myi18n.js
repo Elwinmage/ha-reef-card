@@ -9,7 +9,13 @@ class myi18n {
     }
 
     _(message,params=[]){
-	let res=this.d[this.lang][message];
+	let res=null;
+	try {
+	    res=this.d[this.lang][message];
+	}
+	catch {
+	    res=null;
+	}
 	if (res == null){
 	    res=this.d[this.fallback][message];
 	}

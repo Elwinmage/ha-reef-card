@@ -29,7 +29,7 @@ export const config = {
 	    ]
 	},
  	"set_manual_head_volume":{
-	    "title_key": "iconf._('set_manual_head_volume')",
+	    "title_key": "iconv._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
 		{"view":"hui-entities-card",

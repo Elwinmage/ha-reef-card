@@ -924,7 +924,12 @@ class $a10d60b4def555b4$var$myi18n {
         this.d = (0, $hudnx.dict);
     }
     _(message, params = []) {
-        let res = this.d[this.lang][message];
+        let res = null;
+        try {
+            res = this.d[this.lang][message];
+        } catch  {
+            res = null;
+        }
         if (res == null) res = this.d[this.fallback][message];
         if (res == null) res = this._("canNotFindTranslation") + message;
         return res;
@@ -2343,7 +2348,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             ]
         },
         "set_manual_head_volume": {
-            "title_key": "iconf._('set_manual_head_volume')",
+            "title_key": "iconv._('set_manual_head_volume')",
             "close_cross": true,
             "content": [
                 {
