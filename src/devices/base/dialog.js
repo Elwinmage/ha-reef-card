@@ -7,6 +7,11 @@ import style_dialog from "./dialog.styles";
 import ClickImage from "./click_image";
 import style_click_image from "./click_image.styles";
 
+import {
+    set_manual_head_volume,
+    add_supplement
+} from "../dose_head.dialog"
+
 /*
  *  Dialog
  */
@@ -116,45 +121,17 @@ export class Dialog extends  LitElement {
 	    }
 	    // Title
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML=eval(this.to_render.title_key);//;i18n._(this.to_render.title_key);
-	    //special contnet for rsdose manual 
-	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
-		for(let shortcut of this.elt.device.config.shortcut.split(',')){
-		    const r_element= customElements.get("common-button");
-		    const content= new r_element();
-		    let conf={
-			"label": shortcut+"mL",
-			"tap_action": [
-			    {
-				"domain": "number",
-				"action" : "set_value",
-				"data":{"entity_id":"manual_head_volume","value":shortcut}
-			    },
-			    {
-				"domain": "button",
-				"action" : "press",
-				"data": {"entity_id":"manual_head"},
-			    },
-			    {
-				"domain": "redsea_ui",
-				"action" : "message_box",
-				"data": "i18n._('dosing')+ ' "+shortcut+"mL'"
-			    }
-			],
-			"css":{
-			    "display": "inline-block",
-			    "border":"1px solid gray",
-			    "border-radius": "15px",
-			    "padding-left":"10px",
-			    "padding-right":"10px",
-			    "margin-bottom": "20px",			    
-			    "background-color": "rgb(220,220,220)",
-			}
-		    };
-		    content.setConfig(conf);
-		    content.device=this.elt.device;
-		    content.hass=this._hass;
-		    this._shadowRoot.querySelector("#dialog-content").appendChild(content);
-		}
+	    //special content for rsdose manual
+	    //	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
+	    switch (this.to_render.name) {
+	    case "set_manual_head_volume":
+		set_manual_head_volume(this.elt,this._hass,this._shadowRoot);
+		break;
+	    case "add_supplement":
+		add_supplement(this.elt,this._hass,this._shadowRoot);
+		break;
+	    default:
+		break;
 	    }
 	    // Content
 	    this.to_render.content.map(c => this._render_content(c));

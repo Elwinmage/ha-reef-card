@@ -27,7 +27,7 @@ top:100px;
 //margin-right:35%;
 //min-height: 200px;
 //min-width: 300px;
-width:28%;
+//width:28%;
 padding-left:15px;
 padding-right:15px;
 padding-top: 20px;

@@ -1,0 +1,82 @@
+import { html } from "lit";
+import supplements_list from "./supplements";
+
+import i18n from "../translations/myi18n";
+
+export function set_manual_head_volume(elt,hass,shadowRoot){
+    if (elt.device.config.shortcut){
+	for(let shortcut of elt.device.config.shortcut.split(',')){
+	    const r_element= customElements.get("common-button");
+	    const content= new r_element();
+	    let conf={
+		"label": shortcut+"mL",
+		"tap_action": [
+		    {
+			"domain": "number",
+			"action" : "set_value",
+			"data":{"entity_id":"manual_head_volume","value":shortcut}
+		    },
+		    {
+			"domain": "button",
+			"action" : "press",
+			"data": {"entity_id":"manual_head"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action" : "message_box",
+			"data": "i18n._('dosing')+ ' "+shortcut+"mL'"
+		    }
+		],
+		"css":{
+		    "display": "inline-block",
+		    "border":"1px solid gray",
+		    "border-radius": "15px",
+		    "padding-left":"10px",
+		    "padding-right":"10px",
+		    "margin-bottom": "20px",			    
+		    "background-color": "rgb(220,220,220)",
+		}
+	    };
+	    content.setConfig(conf);
+	    content.device=elt.device;
+	    content.hass=hass;
+	    shadowRoot.querySelector("#dialog-content").appendChild(content);
+	}
+    }
+}
+
+export function add_supplement(elt,hass,shadowRoot){
+    let selected_supplement=elt.device.get_entity("supplements").state;
+    let supplement = supplements_list.get_supplement(selected_supplement);
+    let img='/hacsfiles/ha-reef-card/'+supplement.uid+'.supplement.png';
+    var http = new XMLHttpRequest();
+    http.open('HEAD', img, false);
+    http.send();
+    if(http.status == 404){
+	img='/hacsfiles/ha-reef-card/generic_container.supplement.png'
+    }
+    const r_element=customElements.get("click-image");
+    const content= new r_element();
+    let conf={"image":img,"css":{"display": "inline-block","width":"20%"},"elt.css":{"width":"100%"}}
+    content.setConfig(conf);
+    console.debug("Rendering new supplement:",img);
+    let div=document.createElement("div");
+    div.style.cssText = "display: inline-block";
+    shadowRoot.querySelector("#dialog-content").appendChild(div);
+    div.appendChild(content);
+    let infos=document.createElement("div");
+    
+    infos.innerHTML ="<h1 style='text-decoration:underline'>"+supplement.fullname+"</h1>";
+    infos.innerHTML+="<h2 style='color:#009ac7'><span style='text-decoration:underline'>"+i18n._("name")+":</span> "+supplement.name+"</h2>";
+    infos.innerHTML+="<h2 style='color:#d32625'><span style='text-decoration:underline'>"+i18n._("brand_name")+":</span> "+supplement.brand_name+"</h2>";
+    infos.innerHTML+="<h2 style='color:rgb(175,50,175)'><span style='text-decoration:underline'>"+i18n._("display_name")+":</span> "+supplement.display_name+"</h2>";
+    infos.innerHTML+="<h2 style='color:rgb(70,170,70)'><span style='text-decoration:underline'>"+i18n._("short_name")+":</span> "+supplement.short_name+"</h2>";
+    infos.innerHTML+="<h3 style='color:rgb(190,190,190)'><span style='text-decoration:underline'>UID:</span> "+supplement.uid+"</h3>";
+    //
+    if ("sizes" in supplement && supplement.sizes.length>0){
+	//
+    }
+    
+    infos.style.cssText = "display: inline-block;width: 70%";
+    div.appendChild(infos);
+}

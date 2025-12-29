@@ -5,6 +5,7 @@ export const config = {
     "heads_nb": 4,
     "dialogs": {
 	"add_supplement":{
+	    "name": "add_supplement",
 	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
 	    "content":[
@@ -29,6 +30,7 @@ export const config = {
 	    ]
 	},
  	"set_manual_head_volume":{
+	    "name": "set_manual_head_volume",
 	    "title_key": "iconv._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
@@ -54,6 +56,7 @@ export const config = {
 	},
 	"auto_dose":{
 	    "title_key": "set_auto_dose",
+	    "name": "auto_dose",
 	    "close_cross": true,
 	    "content":[
 		{"view":"hui-entities-card",

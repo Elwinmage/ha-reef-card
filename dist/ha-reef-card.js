@@ -949,7 +949,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         head: "Head",
         heads_colors: "Heads Colors",
         doses: "Doses",
-        days_left: "Remaining Days",
+        days_left: "Days Left",
         empty: "Empty",
         maintenance: "Maintenance in progress..",
         set_manual_head_volume: "Manual volume",
@@ -959,7 +959,12 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         heads_shortcuts: "Manual Shorcut Doses",
         set_auto_dose: "Auto daily volume",
         ask_add_supplement: "Ask for picture",
-        dialog_add_supplement_title: "Add new supplement to head"
+        dialog_add_supplement_title: "Add new supplement to head",
+        name: "Name",
+        brand_name: "Brand Name",
+        display_name: "Display Name",
+        short_name: "Short Name",
+        sizes: "Sizes"
     },
     fr: {
         canNotFindTranslation: "Traduction introuvable pour: ",
@@ -977,7 +982,12 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         heads_shortcuts: "Raccourcis doses manuelles",
         set_auto_dose: "Dose automatique journali\xe8re",
         ask_add_supplement: "Demande d'image",
-        dialog_add_supplement_title: "Nouveau Suppl\xe9ment pour la t\xeate"
+        dialog_add_supplement_title: "Nouveau Suppl\xe9ment pour la t\xeate",
+        name: "Nom",
+        brand_name: "Marque",
+        display_name: "Nom d'affichage",
+        short_name: "Nom court",
+        sizes: "Tailles"
     }
 };
 
@@ -1946,6 +1956,8 @@ var $4DorC = parcelRequire("4DorC");
 parcelRequire("93DQX");
 
 var $kgVGZ = parcelRequire("kgVGZ");
+
+var $2jsWu = parcelRequire("2jsWu");
 class Dialog extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $4DorC.default),
@@ -2034,48 +2046,17 @@ class Dialog extends (0, $eGUNk.LitElement) {
             }
             // Title
             this._shadowRoot.querySelector("#dialog-title").innerHTML = eval(this.to_render.title_key); //;i18n._(this.to_render.title_key);
-            //special contnet for rsdose manual 
-            if (this.to_render.title_key == "set_manual_head_volume" && this.elt.device.config.shortcut) for (let shortcut of this.elt.device.config.shortcut.split(',')){
-                const r_element = customElements.get("common-button");
-                const content = new r_element();
-                let conf = {
-                    "label": shortcut + "mL",
-                    "tap_action": [
-                        {
-                            "domain": "number",
-                            "action": "set_value",
-                            "data": {
-                                "entity_id": "manual_head_volume",
-                                "value": shortcut
-                            }
-                        },
-                        {
-                            "domain": "button",
-                            "action": "press",
-                            "data": {
-                                "entity_id": "manual_head"
-                            }
-                        },
-                        {
-                            "domain": "redsea_ui",
-                            "action": "message_box",
-                            "data": "i18n._('dosing')+ ' " + shortcut + "mL'"
-                        }
-                    ],
-                    "css": {
-                        "display": "inline-block",
-                        "border": "1px solid gray",
-                        "border-radius": "15px",
-                        "padding-left": "10px",
-                        "padding-right": "10px",
-                        "margin-bottom": "20px",
-                        "background-color": "rgb(220,220,220)"
-                    }
-                };
-                content.setConfig(conf);
-                content.device = this.elt.device;
-                content.hass = this._hass;
-                this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+            //special content for rsdose manual
+            //	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
+            switch(this.to_render.name){
+                case "set_manual_head_volume":
+                    (0, $2jsWu.set_manual_head_volume)(this.elt, this._hass, this._shadowRoot);
+                    break;
+                case "add_supplement":
+                    (0, $2jsWu.add_supplement)(this.elt, this._hass, this._shadowRoot);
+                    break;
+                default:
+                    break;
             }
             // Content
             this.to_render.content.map((c)=>this._render_content(c));
@@ -2131,7 +2112,7 @@ top:100px;
 //margin-right:35%;
 //min-height: 200px;
 //min-width: 300px;
-width:28%;
+//width:28%;
 padding-left:15px;
 padding-right:15px;
 padding-top: 20px;
@@ -2229,6 +2210,1211 @@ img:hover{
 });
 
 
+parcelRegister("2jsWu", function(module, exports) {
+
+$parcel$export(module.exports, "set_manual_head_volume", () => $1af3ce7daff10017$export$d68cb382792d9a29);
+$parcel$export(module.exports, "add_supplement", () => $1af3ce7daff10017$export$7ab8c25a3e35dc72);
+parcelRequire("j0ZcV");
+
+var $bOVIO = parcelRequire("bOVIO");
+
+var $dPhcg = parcelRequire("dPhcg");
+function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
+    if (elt.device.config.shortcut) for (let shortcut of elt.device.config.shortcut.split(',')){
+        const r_element = customElements.get("common-button");
+        const content = new r_element();
+        let conf = {
+            "label": shortcut + "mL",
+            "tap_action": [
+                {
+                    "domain": "number",
+                    "action": "set_value",
+                    "data": {
+                        "entity_id": "manual_head_volume",
+                        "value": shortcut
+                    }
+                },
+                {
+                    "domain": "button",
+                    "action": "press",
+                    "data": {
+                        "entity_id": "manual_head"
+                    }
+                },
+                {
+                    "domain": "redsea_ui",
+                    "action": "message_box",
+                    "data": "i18n._('dosing')+ ' " + shortcut + "mL'"
+                }
+            ],
+            "css": {
+                "display": "inline-block",
+                "border": "1px solid gray",
+                "border-radius": "15px",
+                "padding-left": "10px",
+                "padding-right": "10px",
+                "margin-bottom": "20px",
+                "background-color": "rgb(220,220,220)"
+            }
+        };
+        content.setConfig(conf);
+        content.device = elt.device;
+        content.hass = hass;
+        shadowRoot.querySelector("#dialog-content").appendChild(content);
+    }
+}
+function $1af3ce7daff10017$export$7ab8c25a3e35dc72(elt, hass, shadowRoot) {
+    let selected_supplement = elt.device.get_entity("supplements").state;
+    let supplement = (0, $bOVIO.default).get_supplement(selected_supplement);
+    let img = '/hacsfiles/ha-reef-card/' + supplement.uid + '.supplement.png';
+    var http = new XMLHttpRequest();
+    http.open('HEAD', img, false);
+    http.send();
+    if (http.status == 404) img = '/hacsfiles/ha-reef-card/generic_container.supplement.png';
+    const r_element = customElements.get("click-image");
+    const content = new r_element();
+    let conf = {
+        "image": img,
+        "css": {
+            "display": "inline-block",
+            "width": "20%"
+        },
+        "elt.css": {
+            "width": "100%"
+        }
+    };
+    content.setConfig(conf);
+    console.debug("Rendering new supplement:", img);
+    let div = document.createElement("div");
+    div.style.cssText = "display: inline-block";
+    shadowRoot.querySelector("#dialog-content").appendChild(div);
+    div.appendChild(content);
+    let infos = document.createElement("div");
+    infos.innerHTML = "<h1 style='text-decoration:underline'>" + supplement.fullname + "</h1>";
+    infos.innerHTML += "<h2 style='color:#009ac7'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("name") + ":</span> " + supplement.name + "</h2>";
+    infos.innerHTML += "<h2 style='color:#d32625'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("brand_name") + ":</span> " + supplement.brand_name + "</h2>";
+    infos.innerHTML += "<h2 style='color:rgb(175,50,175)'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("display_name") + ":</span> " + supplement.display_name + "</h2>";
+    infos.innerHTML += "<h2 style='color:rgb(70,170,70)'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("short_name") + ":</span> " + supplement.short_name + "</h2>";
+    infos.innerHTML += "<h3 style='color:rgb(190,190,190)'><span style='text-decoration:underline'>UID:</span> " + supplement.uid + "</h3>";
+    //
+    "sizes" in supplement && supplement.sizes.length;
+    infos.style.cssText = "display: inline-block;width: 70%";
+    div.appendChild(infos);
+}
+
+});
+parcelRegister("bOVIO", function(module, exports) {
+
+$parcel$export(module.exports, "default", () => $89b1239629be3b04$export$2e2bcd8739ae039);
+
+var $e1ZXh = parcelRequire("e1ZXh");
+class $89b1239629be3b04$var$Supplements {
+    constructor(){
+        this._list = (0, $e1ZXh.SUPPLEMENTS);
+    }
+    get_supplement(name) {
+        let supplement = null;
+        for (supplement of this._list){
+            if (supplement.fullname == name) return supplement;
+        } //for
+        return supplement;
+    }
+}
+var $89b1239629be3b04$var$supplements_list = new $89b1239629be3b04$var$Supplements();
+var $89b1239629be3b04$export$2e2bcd8739ae039 = $89b1239629be3b04$var$supplements_list;
+
+});
+parcelRegister("e1ZXh", function(module, exports) {
+
+$parcel$export(module.exports, "SUPPLEMENTS", () => $a37137b55fc2fd8c$export$fffcd8c072562b8f);
+const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
+    {
+        "uid": "0e63ba83-3ec4-445e-a3dd-7f2dbdc7f964",
+        "name": "Calcium (Powder)",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Calcium (Powder)"
+    },
+    {
+        "uid": "76830db3-a0bd-459a-9974-76a57d026893",
+        "name": "KH/Alkalinity (Foundation B)",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - KH/Alkalinity (Foundation B)",
+        "sizes": [
+            5000,
+            1000,
+            500,
+            250
+        ]
+    },
+    {
+        "uid": "b703fc33-e777-418f-935c-319d3e0ec3c0",
+        "name": "KH/Alkalinity (Powder)",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - KH/Alkalinity (Powder)"
+    },
+    {
+        "uid": "f524734e-8651-496e-b09b-640b40fc8bab",
+        "name": "Magnesium (Foundation C)",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Magnesium (Foundation C)",
+        "sizes": [
+            5000,
+            1000,
+            500,
+            250
+        ]
+    },
+    {
+        "uid": "14dbb6eb-4424-4530-a94f-466fd04d07ed",
+        "name": "Magnesium (Powder)",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Magnesium (Powder)"
+    },
+    {
+        "uid": "93e742b0-67c9-4800-9aa9-212e52532343",
+        "name": "Iodine (Colors A)",
+        "display_name": "Iodine",
+        "short_name": "I",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Iodine (Colors A)",
+        "sizes": [
+            500,
+            100
+        ]
+    },
+    {
+        "uid": "2f386917-54bd-4dd4-aa8b-9d1fea37edc5",
+        "name": "Potassium (Colors B)",
+        "display_name": "Potassium",
+        "short_name": "K ",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Potassium (Colors B)",
+        "sizes": [
+            500,
+            100
+        ]
+    },
+    {
+        "uid": "c7a26034-8e40-41bb-bfb5-169089470f1e",
+        "name": "Iron (Colors C)",
+        "display_name": "Iron",
+        "short_name": "Fe",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Iron (Colors C)",
+        "sizes": [
+            500,
+            100
+        ]
+    },
+    {
+        "uid": "7af9b16b-9e63-488e-8c86-261ef8c4a1ce",
+        "name": "Bio Active (Colors D)",
+        "display_name": "Trace",
+        "short_name": "TE",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Bio Active (Colors D)",
+        "sizes": [
+            500,
+            100
+        ]
+    },
+    {
+        "uid": "ffaf6ff8-bc6d-44eb-9e4b-e679943dc835",
+        "name": "NO3PO4-X",
+        "display_name": "Nutrient control",
+        "short_name": "NPX",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - NO3PO4-X",
+        "sizes": [
+            5000,
+            1000,
+            500
+        ]
+    },
+    {
+        "uid": "bf9a7da3-741b-4c1d-8542-d9344a95fb70",
+        "name": "Reef Energy Plus",
+        "display_name": "Coral food",
+        "short_name": "RE+",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Reef Energy Plus",
+        "sizes": [
+            5000,
+            1000,
+            500,
+            250
+        ]
+    },
+    {
+        "uid": "345a8f18-1787-47cd-87b2-a8da3a6531bc",
+        "name": "Calcium ",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Calcium "
+    },
+    {
+        "uid": "9ea6c9f2-b6f3-41ee-9370-06457f286fe5",
+        "name": "Ca Plus",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Ca Plus"
+    },
+    {
+        "uid": "77ce68ff-e849-499d-82c1-af8282f1af13",
+        "name": "Component 1+",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Component 1+"
+    },
+    {
+        "uid": "67fb654a-e8ba-468f-b5fd-56aa04fe1f47",
+        "name": "KH Buffer",
+        "display_name": "Alkalinity",
+        "short_name": "KH",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - KH Buffer"
+    },
+    {
+        "uid": "e391e8d1-0d4c-4355-8887-9231500703ef",
+        "name": "KH Plus",
+        "display_name": "Alkalinity",
+        "short_name": "KH",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - KH Plus"
+    },
+    {
+        "uid": "4cb24357-8911-412e-a6a5-77d6ee2972fd",
+        "name": "Component 2+",
+        "display_name": "Alkalinity",
+        "short_name": "KH",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Component 2+"
+    },
+    {
+        "uid": "45f40592-3db0-467d-9ae8-52897ff84623",
+        "name": "Magnesium",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Magnesium"
+    },
+    {
+        "uid": "deb3a943-68a5-40a9-860b-e6d259eee947",
+        "name": "Mg Plus",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Mg Plus"
+    },
+    {
+        "uid": "e493e6a7-2c84-4410-8c22-85fd4faa6c8f",
+        "name": "Component 3+",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Aqua Forest",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Aqua Forest - Component 3+"
+    },
+    {
+        "uid": "aff00331-3c23-4357-b6d4-6609dbc4fed1",
+        "name": "All-For-Reef",
+        "display_name": "All",
+        "short_name": "All",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - All-For-Reef"
+    },
+    {
+        "uid": "e7ad867a-3950-43e4-844e-e71ce73c20b9",
+        "name": "Balling A",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Balling A"
+    },
+    {
+        "uid": "8cdabb9f-ebcf-4675-a10f-f9020941928f",
+        "name": "Carbo Calcium",
+        "display_name": "Calcium & KH",
+        "short_name": "Ca & KH",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Carbo Calcium"
+    },
+    {
+        "uid": "c8955615-5414-43ef-987f-07a0efa1cf8b",
+        "name": "Balling B",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Balling B"
+    },
+    {
+        "uid": "4a6f1b6c-32af-46cb-bfc9-55a4f42f05ed",
+        "name": "Liquid Buffer",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Liquid Buffer"
+    },
+    {
+        "uid": "2e65687a-0570-4571-bef5-7e18ac6581c1",
+        "name": "Balling C",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Balling C"
+    },
+    {
+        "uid": "2f04f694-3743-4e12-a45f-a3eb63aef806",
+        "name": "Bio-Magnesium",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Bio-Magnesium"
+    },
+    {
+        "uid": "84c9b4b6-e055-471f-acdf-f9122ac685b8",
+        "name": "A Element",
+        "display_name": "Trace elements +",
+        "short_name": "TE",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - A Element"
+    },
+    {
+        "uid": "8afdd5cf-9c3a-45f5-b579-3e7c17d04671",
+        "name": "K Element",
+        "display_name": "Trace elements -",
+        "short_name": "TE",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - K Element"
+    },
+    {
+        "uid": "68af4707-6766-4792-9380-f199b790eb81",
+        "name": "Elimi-NP",
+        "display_name": "Nutrient control",
+        "short_name": "NP",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Elimi-NP"
+    },
+    {
+        "uid": "7a680713-a8d3-496b-8081-a694ce2a1f31",
+        "name": "Plus-NP",
+        "display_name": "Nutrient control",
+        "short_name": "NP+",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Plus-NP"
+    },
+    {
+        "uid": "43b51c1f-0363-4ef5-be89-f129e512e25b",
+        "name": "NP-Bacto-Balance",
+        "display_name": "Nutrient control",
+        "short_name": "NP-Bal",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - NP-Bacto-Balance"
+    },
+    {
+        "uid": "fddbe0a4-02eb-4903-969b-6c27c805bf6b",
+        "name": "Amino Organic",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Amino Organic"
+    },
+    {
+        "uid": "20d65a7e-d12c-4185-a809-97aac782aca1",
+        "name": "Reef Calcium",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Calcium"
+    },
+    {
+        "uid": "7711655c-fd34-4fa3-99e8-ac76403248b1",
+        "name": "Reef Fusion 1",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Fusion 1"
+    },
+    {
+        "uid": "4e3badc4-cd5b-4e79-9d91-8382ced88c17",
+        "name": "Reef Complete",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Complete"
+    },
+    {
+        "uid": "a3fb3879-ff35-4da8-b331-c0b1b673fa6b",
+        "name": "Reef Carbonate",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Carbonate"
+    },
+    {
+        "uid": "622118c6-0a11-4c1d-86de-49c92683bc2d",
+        "name": "Reef Fusion 2",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Fusion 2"
+    },
+    {
+        "uid": "59bce33d-a6e0-4753-9049-edae4c0df753",
+        "name": "Reef Iodine",
+        "display_name": "Iodine",
+        "short_name": "Iod",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Iodine"
+    },
+    {
+        "uid": "c6ef7fdf-53eb-440e-bef4-d3f0fb8b6245",
+        "name": "Reef Strontium",
+        "display_name": "Strontium",
+        "short_name": "Sr",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Strontium"
+    },
+    {
+        "uid": "4981b4d6-4321-46ca-8659-4f8e3f554563",
+        "name": "Reef Trace",
+        "display_name": "Trace elements ",
+        "short_name": "TE",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Trace"
+    },
+    {
+        "uid": "668eb67c-1ba7-464f-9d0c-434cc8738a47",
+        "name": "Reef Plus",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Seachem",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Seachem - Reef Plus"
+    },
+    {
+        "uid": "a12f1d90-51f2-4c45-a414-6a6232b37bef",
+        "name": "Liquid Calcium",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "BRS",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "BRS - Liquid Calcium"
+    },
+    {
+        "uid": "c137a36e-69db-4934-837e-45fbc2cd56aa",
+        "name": "Liquid alkalinity",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "BRS",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "BRS - Liquid alkalinity"
+    },
+    {
+        "uid": "6397201b-ba2a-40eb-ab08-abb953222850",
+        "name": "Magnesium Mix",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "BRS",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "BRS - Magnesium Mix"
+    },
+    {
+        "uid": "4fb80be0-d3e4-498b-baba-83c57da8935c",
+        "name": "Part C",
+        "display_name": "Trace elements ",
+        "short_name": "TE",
+        "brand_name": "BRS",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "BRS - Part C"
+    },
+    {
+        "uid": "d89c7032-29c9-49d1-a0ca-294dc621cefb",
+        "name": "B-Ionic Component 2",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "ESV",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ESV - B-Ionic Component 2"
+    },
+    {
+        "uid": "4760a92c-0974-484c-9586-e13727a8f442",
+        "name": "B-Ionic Component 1",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "ESV",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ESV - B-Ionic Component 1"
+    },
+    {
+        "uid": "a9ec8c96-6715-4e6e-9601-1f12675ad475",
+        "name": "B-Ionic Magnesium",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "ESV",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ESV - B-Ionic Magnesium"
+    },
+    {
+        "uid": "7bf0df73-50aa-4d27-8d28-2fc9c4068596",
+        "name": "Transition elements ",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "ESV",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ESV - Transition elements "
+    },
+    {
+        "uid": "73c23d0c-a891-4729-8474-4f809829d925",
+        "name": "Transition elements plus",
+        "display_name": "Nutrient control",
+        "short_name": "NP",
+        "brand_name": "ESV",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ESV - Transition elements plus"
+    },
+    {
+        "uid": "19c1c766-407f-47e3-a4ea-71cecd4c0d31",
+        "name": "Balling light KH",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light KH"
+    },
+    {
+        "uid": "b6f58928-69dc-49c6-b121-9c9091b29ddd",
+        "name": "Balling light Ca",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light Ca"
+    },
+    {
+        "uid": "06dd7de9-dcf6-421c-8c44-424a71269a3e",
+        "name": "Balling light Mg",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light Mg"
+    },
+    {
+        "uid": "dfb30bb0-0114-43dd-8e00-44d5324bbc0b",
+        "name": "Balling light  trace 1",
+        "display_name": "Trace elements",
+        "short_name": "Fe",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light  trace 1"
+    },
+    {
+        "uid": "6bd27f62-ecb9-461b-823e-fadc74d200d6",
+        "name": "Balling light  trace 2",
+        "display_name": "Trace elements",
+        "short_name": "K",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light  trace 2"
+    },
+    {
+        "uid": "d9305644-c4d5-4dfe-9aa2-305fed32bb46",
+        "name": "Balling light  trace 3",
+        "display_name": "Trace elements",
+        "short_name": "Sr",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Balling light  trace 3"
+    },
+    {
+        "uid": "fbbfb246-da02-4d06-bb9d-5ee2b8d503fa",
+        "name": "Green trace elements",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Green trace elements"
+    },
+    {
+        "uid": "aace8f7d-50d2-4adb-b419-2dc729ecb775",
+        "name": "Red trace elements",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Red trace elements"
+    },
+    {
+        "uid": "2ad8680e-e426-4265-8c03-9180ca658bcc",
+        "name": "Blue trace elements",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Blue trace elements"
+    },
+    {
+        "uid": "8fb383e0-d194-4bd4-95f6-17210f4a85cc",
+        "name": "Amin",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Amin"
+    },
+    {
+        "uid": "7df1b60e-9c66-4601-ba65-3ad952610f03",
+        "name": "Min S",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Fauna Marine",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Fauna Marine - Min S"
+    },
+    {
+        "uid": "c857b721-1652-4b89-8c68-d14c3f14f08e",
+        "name": "Reef Code A",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Reef Code A"
+    },
+    {
+        "uid": "3485b1a7-b21c-45a0-9c9d-f4d951aab16c",
+        "name": "Liquid Reef",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Liquid Reef"
+    },
+    {
+        "uid": "fca74872-947b-4968-9687-e3c4a43723e1",
+        "name": "Calcion",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Calcion"
+    },
+    {
+        "uid": "fb5347b5-9764-445e-ac6a-513700f6740d",
+        "name": "Reef Code B",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Reef Code B"
+    },
+    {
+        "uid": "a72f14b4-7a0d-4582-b043-f0c0f9cb51eb",
+        "name": "Hydrate - MG",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Hydrate - MG"
+    },
+    {
+        "uid": "2033a72f-1d00-4974-b1f5-bc7ee38858c4",
+        "name": "Potassion",
+        "display_name": "Potassium",
+        "short_name": "K",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Potassion"
+    },
+    {
+        "uid": "a7b45d32-e879-4bf8-9779-2d39933d104b",
+        "name": "Strontion",
+        "display_name": "Stromtium",
+        "short_name": "Sr",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Strontion"
+    },
+    {
+        "uid": "bd79c239-f189-4684-9ca9-8d0ca8a9bab5",
+        "name": "Ferrion",
+        "display_name": "Iron",
+        "short_name": "Fe",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Ferrion"
+    },
+    {
+        "uid": "4bad5f8d-3094-496c-abf6-7c773cf7f4ed",
+        "name": "Koralcolor",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Koralcolor"
+    },
+    {
+        "uid": "0b2f70cb-34cf-4b0f-b238-df38ea3d1809",
+        "name": "Replenish",
+        "display_name": "Trace elements",
+        "short_name": "TE",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Replenish"
+    },
+    {
+        "uid": "9f2292c0-6681-4805-a94a-4a9168095674",
+        "name": "KoralAmino",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - KoralAmino"
+    },
+    {
+        "uid": "7d67412c-fde0-44d4-882a-dc8746fd4acb",
+        "name": "Calcium (Foundation A)",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Red Sea",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "Red Sea - Calcium (Foundation A)",
+        "sizes": [
+            5000,
+            1000,
+            500,
+            250
+        ]
+    },
+    {
+        "uid": "f1b4e562-f31a-4d71-ad04-80837511dc50",
+        "name": "Restore",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Brightwell",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Brightwell - Restore"
+    },
+    {
+        "uid": "69692902-dcf9-4f41-b104-402154dc348a",
+        "name": "Essential Pro 1",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "ATI",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ATI - Essential Pro 1"
+    },
+    {
+        "uid": "e1dbec89-2396-4269-8f28-ab7534cb2d7d",
+        "name": "Essential Pro 2",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "ATI",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "ATI - Essential Pro 2"
+    },
+    {
+        "uid": "322c1c47-7259-4fd9-9050-f6157036ea36",
+        "name": "Aragonite A",
+        "display_name": "Calcium",
+        "short_name": "Ca",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Aragonite A"
+    },
+    {
+        "uid": "e6537278-0e0a-4fd7-8146-566334bb74ed",
+        "name": "Aragonite B",
+        "display_name": "KH",
+        "short_name": "KH",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Aragonite B"
+    },
+    {
+        "uid": "5f491b59-4f54-4572-bbce-aa9b708ccb51",
+        "name": "Aragonite C",
+        "display_name": "Magnesium",
+        "short_name": "Mg",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Aragonite C"
+    },
+    {
+        "uid": "fd8dee42-f3da-4660-b491-880d7dac869a",
+        "name": "Bio enhance",
+        "display_name": "Coral food",
+        "short_name": "Food",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Bio enhance"
+    },
+    {
+        "uid": "26a4f030-e78c-459c-90cb-5c6099de10fd",
+        "name": "Gbio Gen",
+        "display_name": "Iodie",
+        "short_name": "I",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Gbio Gen"
+    },
+    {
+        "uid": "8fec18b0-adf6-4dfa-b923-c7226a6fb87d",
+        "name": "Bio Kalium",
+        "display_name": "Potassium",
+        "short_name": "K",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Bio Kalium"
+    },
+    {
+        "uid": "a1d797e3-4679-4be4-9219-22e35822ab97",
+        "name": "Bio Metals",
+        "display_name": "Iron",
+        "short_name": "Fe",
+        "brand_name": "Quantum",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Quantum - Bio Metals"
+    },
+    {
+        "uid": "901b2e5e-45dd-417d-afe9-f92e1ae0bb67",
+        "name": "Core7 elements 1",
+        "display_name": null,
+        "short_name": "1",
+        "brand_name": "Triton",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Triton - Core7 elements 1"
+    },
+    {
+        "uid": "db995e31-fba1-4b65-966c-afe533937400",
+        "name": "Core7 elements 2",
+        "display_name": null,
+        "short_name": "2",
+        "brand_name": "Triton",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Triton - Core7 elements 2"
+    },
+    {
+        "uid": "b505ab85-7d5d-4122-adb3-56044342ad7a",
+        "name": "Core7 elements 3A",
+        "display_name": null,
+        "short_name": "3A",
+        "brand_name": "Triton",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Triton - Core7 elements 3A"
+    },
+    {
+        "uid": "4752c0aa-35b7-45cf-8bcb-89ab11feb98e",
+        "name": "Core7 elements 3B",
+        "display_name": null,
+        "short_name": "3B",
+        "brand_name": "Triton",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Triton - Core7 elements 3B"
+    },
+    {
+        "uid": "964e897e-9668-4fc8-9cd9-e8c42a27cf85",
+        "name": "Potassium",
+        "display_name": null,
+        "short_name": "K",
+        "brand_name": "Tropic Marin",
+        "type": null,
+        "concentration": null,
+        "made_by_redsea": false,
+        "fullname": "Tropic Marin - Potassium"
+    },
+    {
+        "uid": "redsea-reefcare",
+        "name": "ReefCare",
+        "display_name": null,
+        "short_name": "Care",
+        "brand_name": "Red Sea",
+        "type": "Bundle",
+        "bundle": {
+            "1": {
+                "supplement": {
+                    "uid": "6b7d2c15-0d25-4447-b089-854ef6ba99f2",
+                    "name": "Part 1: Calcium & Magnesium",
+                    "display_name": "Part 1",
+                    "short_name": "P1",
+                    "brand_name": "Red Sea",
+                    "made_by_redsea": true
+                },
+                "ratio": 1.0
+            },
+            "2": {
+                "supplement": {
+                    "uid": "6f6a53db-0985-47f4-92bd-cef092d97d22",
+                    "name": "Part 2: KH/Alkalinity &PH stabilizer",
+                    "display_name": "Part 2",
+                    "short_name": "P2",
+                    "brand_name": "Red Sea",
+                    "made_by_redsea": true
+                },
+                "ratio": 2.0
+            },
+            "3": {
+                "supplement": {
+                    "uid": "18c5a293-f14d-4d40-ad43-0420e54f9a45",
+                    "name": "Part 3: Iodine & Potassium",
+                    "display_name": "Part 3",
+                    "short_name": "P3",
+                    "brand_name": "Red Sea",
+                    "made_by_redsea": true
+                },
+                "ratio": 0.5
+            },
+            "4": {
+                "supplement": {
+                    "uid": "bb73e4c2-e366-4304-aaeb-50e4b52fa10f",
+                    "name": "Part 4: Iron & Bioactive elements",
+                    "display_name": "Part 4",
+                    "short_name": "P4",
+                    "brand_name": "Red Sea",
+                    "made_by_redsea": true
+                },
+                "ratio": 0.5
+            }
+        },
+        "concentration": null,
+        "made_by_redsea": true,
+        "fullname": "RedSea - ReefCare Program"
+    }
+];
+
+});
+
+
+
 
 
 parcelRegister("7YMQG", function(module, exports) {
@@ -2319,6 +3505,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "heads_nb": 4,
     "dialogs": {
         "add_supplement": {
+            "name": "add_supplement",
             "title_key": "iconv._('dialog_add_supplement_title') +' n\xb0'+ this.elt.device.config.id",
             "close_cross": true,
             "content": [
@@ -2348,6 +3535,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             ]
         },
         "set_manual_head_volume": {
+            "name": "set_manual_head_volume",
             "title_key": "iconv._('set_manual_head_volume')",
             "close_cross": true,
             "content": [
@@ -2389,6 +3577,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         "auto_dose": {
             "title_key": "set_auto_dose",
+            "name": "auto_dose",
             "close_cross": true,
             "content": [
                 {
