@@ -2266,40 +2266,73 @@ function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
 function $1af3ce7daff10017$export$7ab8c25a3e35dc72(elt, hass, shadowRoot) {
     let selected_supplement = elt.device.get_entity("supplements").state;
     let supplement = (0, $bOVIO.default).get_supplement(selected_supplement);
-    let img = '/hacsfiles/ha-reef-card/' + supplement.uid + '.supplement.png';
-    var http = new XMLHttpRequest();
-    http.open('HEAD', img, false);
-    http.send();
-    if (http.status == 404) img = '/hacsfiles/ha-reef-card/generic_container.supplement.png';
-    const r_element = customElements.get("click-image");
-    const content = new r_element();
-    let conf = {
-        "image": img,
-        "css": {
-            "display": "inline-block",
-            "width": "20%"
-        },
-        "elt.css": {
-            "width": "100%"
-        }
-    };
-    content.setConfig(conf);
-    console.debug("Rendering new supplement:", img);
-    let div = document.createElement("div");
-    div.style.cssText = "display: inline-block";
-    shadowRoot.querySelector("#dialog-content").appendChild(div);
-    div.appendChild(content);
-    let infos = document.createElement("div");
-    infos.innerHTML = "<h1 style='text-decoration:underline'>" + supplement.fullname + "</h1>";
-    infos.innerHTML += "<h2 style='color:#009ac7'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("name") + ":</span> " + supplement.name + "</h2>";
-    infos.innerHTML += "<h2 style='color:#d32625'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("brand_name") + ":</span> " + supplement.brand_name + "</h2>";
-    infos.innerHTML += "<h2 style='color:rgb(175,50,175)'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("display_name") + ":</span> " + supplement.display_name + "</h2>";
-    infos.innerHTML += "<h2 style='color:rgb(70,170,70)'><span style='text-decoration:underline'>" + (0, $dPhcg.default)._("short_name") + ":</span> " + supplement.short_name + "</h2>";
-    infos.innerHTML += "<h3 style='color:rgb(190,190,190)'><span style='text-decoration:underline'>UID:</span> " + supplement.uid + "</h3>";
-    //
-    "sizes" in supplement && supplement.sizes.length;
-    infos.style.cssText = "display: inline-block;width: 70%";
-    div.appendChild(infos);
+    let img = '/hacsfiles/ha-reef-card/generic_container.supplement.png';
+    if (supplement) {
+        let t_img = '/hacsfiles/ha-reef-card/' + supplement.uid + '.supplement.png';
+        var http = new XMLHttpRequest();
+        http.open('HEAD', t_img, false);
+        http.send();
+        if (http.status != 404) img = t_img;
+        const r_element = customElements.get("click-image");
+        const content = new r_element();
+        let conf = {
+            "image": img,
+            "css": {
+                "display": "inline-block",
+                "width": "20%"
+            },
+            "elt.css": {
+                "width": "100%"
+            }
+        };
+        content.setConfig(conf);
+        let div = document.createElement("div");
+        div.style.cssText = "display: inline-block";
+        shadowRoot.querySelector("#dialog-content").appendChild(div);
+        div.appendChild(content);
+        let infos = document.createElement("div");
+        infos.innerHTML = "<h1 style='text-decoration:underline'>" + supplement.fullname + "</h1>";
+        infos.innerHTML += "<h2><span style='color:#009ac7'>" + (0, $dPhcg.default)._("name") + ":</span> " + supplement.name + "</h2>";
+        infos.innerHTML += "<h2><span style='color:#d32625'>" + (0, $dPhcg.default)._("brand_name") + ":</span> " + supplement.brand_name + "</h2>";
+        infos.innerHTML += "<h2><span style='color:rgb(175,50,175)'>" + (0, $dPhcg.default)._("display_name") + ":</span> " + supplement.display_name + "</h2>";
+        infos.innerHTML += "<h2><span style='color:rgb(70,170,70)'>" + (0, $dPhcg.default)._("short_name") + ":</span> " + supplement.short_name + "</h2>";
+        if ("sizes" in supplement && supplement.sizes.length > 0) infos.innerHTML += "<h2><span style='color:#c3d737'>" + (0, $dPhcg.default)._("sizes") + ":</span> " + supplement.sizes + " mL</h2>";
+        infos.innerHTML += "<h3><span style='color:rgb(190,190,190)'>UID:</span> " + supplement.uid + "</h3>";
+        //
+        infos.style.cssText = "display: inline-block;width: 70%;position:relative;";
+        div.appendChild(infos);
+    } else {
+        // unkown supplement
+        const r_element = customElements.get("hui-entities-card");
+        const content = new r_element();
+        let conf = {
+            "type": "entities",
+            "entities": [
+                {
+                    "entity": elt.get_entity("new_supplement_brand_name").entity_id,
+                    "name": {
+                        "type": "entity"
+                    }
+                },
+                {
+                    "entity": elt.get_entity("new_supplement_name").entity_id,
+                    "name": {
+                        "type": "entity"
+                    }
+                },
+                {
+                    "entity": elt.get_entity("new_supplement_short_name").entity_id,
+                    "name": {
+                        "type": "entity"
+                    }
+                }
+            ]
+        };
+        content.setConfig(conf);
+        content.hass = hass;
+        content.device = elt.device;
+        shadowRoot.querySelector("#dialog-content").appendChild(content);
+    }
 }
 
 });
@@ -2317,7 +2350,7 @@ class $89b1239629be3b04$var$Supplements {
         for (supplement of this._list){
             if (supplement.fullname == name) return supplement;
         } //for
-        return supplement;
+        return null;
     }
 }
 var $89b1239629be3b04$var$supplements_list = new $89b1239629be3b04$var$Supplements();

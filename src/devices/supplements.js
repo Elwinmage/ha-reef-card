@@ -6,7 +6,6 @@ class Supplements{
 	this._list = SUPPLEMENTS;
     }//end of constructor
 
-
     get_supplement(name){
 	let supplement=null;
 	for ( supplement of this._list){
@@ -14,7 +13,7 @@ class Supplements{
 		return supplement;
 	    }
 	}//for
-	return supplement;
+	return null;
     }//end of function get_supplement
     
 }
