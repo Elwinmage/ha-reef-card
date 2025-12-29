@@ -83,7 +83,7 @@ export default class MyElement extends LitElement{
 	elt.color=elt.device.config.color;
 	elt.alpha=elt.device.config.alpha;
 	if('stateObj' in config && !config.stateObj){
-	    elt.satteObj=null;
+	    elt.stateObj=null;
 	}
 	else {
 	    elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];

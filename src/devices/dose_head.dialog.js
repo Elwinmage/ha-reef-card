@@ -3,6 +3,9 @@ import supplements_list from "./supplements";
 
 import i18n from "../translations/myi18n";
 
+//import Icon from '@mdi/react';
+import { mdiDeleteEmpty } from '@mdi/js';
+
 export function set_manual_head_volume(elt,hass,shadowRoot){
     if (elt.device.config.shortcut){
 	for(let shortcut of elt.device.config.shortcut.split(',')){

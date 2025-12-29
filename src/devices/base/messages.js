@@ -21,20 +21,45 @@ export class RSMessages extends  MyElement {
 
     _render(){
 	let sclass="";
+	let trash=null;
 	let style=this.get_style("elt.css");
 	if ("class" in this.conf){
 	    sclass=this.conf.class;
 	}
 	let value=this.stateObj.state;
-	if (value=="unavailable"){
+	if (value=="unavailable" || value.length==0){
 	    value='';
 	    style='';
+	    trash='';
 	}
-	else if('label' in this.conf){
-	    value=this.conf.label+value+this.conf.label;
+	else {
+	    if('label' in this.conf){
+		value=this.conf.label+value+this.conf.label;
+	    }
+	    /*const r_element=customElements.get("click-image");
+	    trash = new r_element();*/
+	    console.debug("MSG",this.device.device,this.conf.name);
+	    let conf={
+		"type": "click-image",
+		"stateObj": null,
+		"image":'/hacsfiles/ha-reef-card/trash.svg',
+		"tap_action":{
+		    "domain":"redsea",
+		    "action":"clean_message",
+		    "data":{
+			"device_id":this.device.device.elements[0].primary_config_entry,
+			"msg_type":this.conf.name,
+		    }
+		},
+		"css": {
+		    "display": "inline-block",
+		    "position": "absolute",
+		    "right": "0px"
+		}
+	    };
+	    trash=MyElement.create_element(this._hass,conf,this.device);
 	}
-	
-	return html`<div style=${style}><marquee class="${sclass}">${value}</marquee></div>`;
+	return html`<div style=${style}><marquee class="${sclass}">${value}</marquee>${trash}</div>`;
     }//end of function render
 
 }// end of class

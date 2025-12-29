@@ -1078,7 +1078,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         elt.conf = config;
         elt.color = elt.device.config.color;
         elt.alpha = elt.device.config.alpha;
-        if ('stateObj' in config && !config.stateObj) elt.satteObj = null;
+        if ('stateObj' in config && !config.stateObj) elt.stateObj = null;
         else elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
         // Do not display label
         if ('label' in config) {
@@ -2219,6 +2219,7 @@ parcelRequire("j0ZcV");
 var $bOVIO = parcelRequire("bOVIO");
 
 var $dPhcg = parcelRequire("dPhcg");
+
 function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
     if (elt.device.config.shortcut) for (let shortcut of elt.device.config.shortcut.split(',')){
         const r_element = customElements.get("common-button");
@@ -4369,14 +4370,39 @@ class $af5325ece54e327c$export$b931e564db01e286 extends (0, $1Um3j.default) {
     }
     _render() {
         let sclass = "";
+        let trash = null;
         let style = this.get_style("elt.css");
         if ("class" in this.conf) sclass = this.conf.class;
         let value = this.stateObj.state;
-        if (value == "unavailable") {
+        if (value == "unavailable" || value.length == 0) {
             value = '';
             style = '';
-        } else if ('label' in this.conf) value = this.conf.label + value + this.conf.label;
-        return (0, $l56HR.html)`<div style=${style}><marquee class="${sclass}">${value}</marquee></div>`;
+            trash = '';
+        } else {
+            if ('label' in this.conf) value = this.conf.label + value + this.conf.label;
+            /*const r_element=customElements.get("click-image");
+	    trash = new r_element();*/ console.debug("MSG", this.device.device, this.conf.name);
+            let conf = {
+                "type": "click-image",
+                "stateObj": null,
+                "image": '/hacsfiles/ha-reef-card/trash.svg',
+                "tap_action": {
+                    "domain": "redsea",
+                    "action": "clean_message",
+                    "data": {
+                        "device_id": this.device.device.elements[0].primary_config_entry,
+                        "msg_type": this.conf.name
+                    }
+                },
+                "css": {
+                    "display": "inline-block",
+                    "position": "absolute",
+                    "right": "0px"
+                }
+            };
+            trash = (0, $1Um3j.default).create_element(this._hass, conf, this.device);
+        }
+        return (0, $l56HR.html)`<div style=${style}><marquee class="${sclass}">${value}</marquee>${trash}</div>`;
     }
 } // end of class
 window.customElements.define('redsea-messages', $af5325ece54e327c$export$b931e564db01e286);
