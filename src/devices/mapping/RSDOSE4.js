@@ -19,15 +19,30 @@ export const config = {
 		    }
 		}
 	    ],
-	    "validate": [
-		{
-		    "action": {
-			"label": "iconv._('set')",
+	    "validate": {
+		"label": "iconv._('next')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain": "button",
+			"action": "press",
+			"data": {"entity_id":"set_supplement"},
+		    },
+		    {
 			"domain": "redsea_ui",
-			"action": "exit-dialog",
-		    }
-		}
-	    ]
+			"action": "dialog",
+			"data": {"type":"set_container_volume"},
+		    } 
+		]
+	    }
+	},
+	"set_container_volume":{
+	    "name":"set_container_volume",
+	    "close_cross": true,
+	    "title_key": "iconv._('set_container_volume')",
+	    "content":[],
 	},
  	"set_manual_head_volume":{
 	    "name": "set_manual_head_volume",
@@ -45,14 +60,6 @@ export const config = {
 		     ]}
 		},
 	    ],
-	    "validate": [
-		{
-		    "action": {
-			"domain": "redsea_ui",
-			"action": "exit-dialog",
-		    }
-		}
-	    ]
 	},
 	"auto_dose":{
 	    "title_key": "set_auto_dose",
@@ -67,14 +74,12 @@ export const config = {
 		     ]}
 		},
 	    ],
-	    "validate": [
-		{
-		    "action": {
-			"domain": "redsea_ui",
-			"action": "exit-dialog",
-		    }
+	    "validate": {
+		"tap_action": {
+		    "domain": "redsea_ui",
+		    "action": "exit-dialog",
 		}
-	    ]
+	    }
 	}
     },
     "elements": [

@@ -7,6 +7,8 @@ import style_dialog from "./dialog.styles";
 import ClickImage from "./click_image";
 import style_click_image from "./click_image.styles";
 
+import MyElement from "./element";
+
 import {
     set_manual_head_volume,
     add_supplement
@@ -99,18 +101,33 @@ export class Dialog extends  LitElement {
 	let iconv=i18n;
 	let close_conf={
 	    "image": new URL('../img/close_cross.svg',import.meta.url),
+	    "type": "common-button",
+	    "stateObj": null,
 	    "tap_action":{
 		"domain":"redsea_ui",
 		"action":"exit-dialog",
 	    },
 	    "label": i18n._("exit"),
 	    "class": "dialog_button",
+	    "elt.css":{
+		"background-color":"rgb(0,0,0,0)",
+	    }
 	};
+//	let validate=html`<common-button .hass=${this._hass} .conf=${close_conf}/>`;
+
+
 	if(this.to_render!=null){
-	    console.debug("Render dialog");
-	     this._shadowRoot.querySelector("#dialog-close").innerHTML='';
+	    console.debug("Render dialog",this.to_render);
+	    let submit_conf=close_conf;
+	    if("validate" in this.to_render){
+		//validate=html`<common-button .hass=${this._hass} .conf=${this.to_render.validate} test=toto/>`;
+		submit_conf=this.to_render.validate;
+	    }
+
+	    this._shadowRoot.querySelector("#dialog-close").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-content").innerHTML='';
+	    this._shadowRoot.querySelector("#dialog-submit").innerHTML='';
 	    // Closing cross
 	    if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
 		let close_cross_class=customElements.get("click-image");
@@ -135,6 +152,13 @@ export class Dialog extends  LitElement {
 	    }
 	    // Content
 	    this.to_render.content.map(c => this._render_content(c));
+	    // Submit
+//	    let submit_button_class=customElements.get("common-button");
+	    let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
+	    /*submit_button.setConfig(submit_conf);
+	    submit_button.hass=this._hass;
+	    submit_button.device=this.elt;*/
+	    this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);	    
 	}
 	return html`
           <div id="window-mask">
@@ -142,9 +166,7 @@ export class Dialog extends  LitElement {
               <div id="dialog-close"></div>
               <div id="dialog-title"></div>
               <div id="dialog-content"></div>
-              <div id="dialog-submit">
-                 <common-button .hass=${this._hass} .conf=${close_conf}/>
-              </div>
+              <div id="dialog-submit"></div>
             </div>
          </div>
 `;

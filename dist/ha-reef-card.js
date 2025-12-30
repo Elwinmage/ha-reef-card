@@ -944,48 +944,50 @@ parcelRegister("hudnx", function(module, exports) {
 $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
+        ask_add_supplement: "Ask for picture",
+        brand_name: "Brand Name",
         canNotFindTranslation: "Can not find translation string: ",
+        days_left: "Days Left",
+        dialog_add_supplement_title: "Add new supplement to head",
         disabledInHa: "Device disabled in HomeAssistant!",
+        display_name: "Display Name",
+        doses: "Doses",
+        dosing: "Dosing",
+        empty: "Empty",
+        exit: "Done",
         head: "Head",
         heads_colors: "Heads Colors",
-        doses: "Doses",
-        days_left: "Days Left",
-        empty: "Empty",
-        maintenance: "Maintenance in progress..",
-        set_manual_head_volume: "Manual volume",
-        exit: "Done",
-        set_manual_head_volume: "Manual volume dosing",
-        dosing: "Dosing",
         heads_shortcuts: "Manual Shorcut Doses",
-        set_auto_dose: "Auto daily volume",
-        ask_add_supplement: "Ask for picture",
-        dialog_add_supplement_title: "Add new supplement to head",
+        maintenance: "Maintenance in progress..",
         name: "Name",
-        brand_name: "Brand Name",
-        display_name: "Display Name",
+        next: "Next",
+        set_auto_dose: "Auto daily volume",
+        set_container_volume: "Container Volume",
+        set_manual_head_volume: "Manual volume",
         short_name: "Short Name",
         sizes: "Sizes"
     },
     fr: {
+        ask_add_supplement: "Demande d'image",
+        brand_name: "Marque",
         canNotFindTranslation: "Traduction introuvable pour: ",
+        days_left: "Jours restant",
+        dialog_add_supplement_title: "Nouveau Suppl\xe9ment pour la t\xeate",
         disabledInHa: "P\xe9riph\xe9rique d\xe9sactiv\xe9 dans HomeAssistant!",
+        display_name: "Nom d'affichage",
+        doses: "Doses",
+        dosing: "Distribution de",
+        empty: "Vide",
+        exit: "Terminer",
         head: "T\xeate",
         heads_colors: "Couleur des t\xeates",
-        doses: "Doses",
-        days_left: "Jours restant",
-        empty: "Vide",
-        maintenance: "Maintenance en cours...",
-        set_manual_head_volume: "Volume manuel",
-        exit: "Terminer",
-        set_manual_head_volume: "Dosage du volume manuel",
-        dosing: "Distribution de",
         heads_shortcuts: "Raccourcis doses manuelles",
-        set_auto_dose: "Dose automatique journali\xe8re",
-        ask_add_supplement: "Demande d'image",
-        dialog_add_supplement_title: "Nouveau Suppl\xe9ment pour la t\xeate",
+        maintenance: "Maintenance en cours...",
         name: "Nom",
-        brand_name: "Marque",
-        display_name: "Nom d'affichage",
+        next: "Suivant",
+        set_auto_dose: "Dose automatique journali\xe8re",
+        set_container_volume: "Volume du suppl\xe9ment",
+        set_manual_head_volume: "Volume manuel",
         short_name: "Nom court",
         sizes: "Tailles"
     }
@@ -1082,7 +1084,11 @@ class MyElement extends (0, $eGUNk.LitElement) {
         else elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
         // Do not display label
         if ('label' in config) {
-            if (typeof config.label === 'string') label_name = config.label;
+            if (typeof config.label === 'string') try {
+                label_name = eval(config.label);
+            } catch  {
+                label_name = config.label;
+            }
             else if (typeof config.label === 'boolean' && config.label != false) label_name = config.name;
         }
         if ("target" in config) elt.stateObjTarget = hass.states[elt.device.entities[config.target].entity_id];
@@ -1126,6 +1132,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         if (!this.stateOn) this.c = (0, $iXBpj.off_color);
         else this.c = this.color;
+        console.log("ELT.CSS", this.get_style('elt.css'));
         return (0, $l56HR.html)`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
 	     ${this._render(this.get_style('elt.css'))}
@@ -1133,7 +1140,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
            `;
     }
     async run_actions(actions) {
-        let i18n = (0, $dPhcg.default);
+        let iconv = (0, $dPhcg.default);
         if (!actions.length) actions = [
             actions
         ];
@@ -1418,18 +1425,17 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
      */ constructor(hass, conf, stateObj, color = "255,255,255", alpha = 1){
         super(hass, conf, stateObj, color, alpha);
     }
-    _render() {
-        let label = '';
+    _render(style = null) {
         let sclass = 'button';
-        if ('label' in this.conf) label = this.conf.label;
         if ('class' in this.conf) sclass = this.conf.class;
+        console.log("ELT STYLE", this.label, style);
         return (0, $l56HR.html)`
  <style>
 .button{
 background-color: rgba(${this.c},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}">${label}</div>
+   	    <div class="button" id="${this.conf.name}" style=${style}>${this.label}</div>
 `;
     }
 } // end of class
@@ -1957,6 +1963,8 @@ parcelRequire("93DQX");
 
 var $kgVGZ = parcelRequire("kgVGZ");
 
+var $1Um3j = parcelRequire("1Um3j");
+
 var $2jsWu = parcelRequire("2jsWu");
 class Dialog extends (0, $eGUNk.LitElement) {
     static styles = [
@@ -2024,18 +2032,28 @@ class Dialog extends (0, $eGUNk.LitElement) {
         let iconv = (0, $dPhcg.default);
         let close_conf = {
             "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
+            "type": "common-button",
+            "stateObj": null,
             "tap_action": {
                 "domain": "redsea_ui",
                 "action": "exit-dialog"
             },
             "label": (0, $dPhcg.default)._("exit"),
-            "class": "dialog_button"
+            "class": "dialog_button",
+            "elt.css": {
+                "background-color": "rgb(0,0,0,0)"
+            }
         };
+        //	let validate=html`<common-button .hass=${this._hass} .conf=${close_conf}/>`;
         if (this.to_render != null) {
-            console.debug("Render dialog");
+            console.debug("Render dialog", this.to_render);
+            let submit_conf = close_conf;
+            if ("validate" in this.to_render) //validate=html`<common-button .hass=${this._hass} .conf=${this.to_render.validate} test=toto/>`;
+            submit_conf = this.to_render.validate;
             this._shadowRoot.querySelector("#dialog-close").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-title").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-content").innerHTML = '';
+            this._shadowRoot.querySelector("#dialog-submit").innerHTML = '';
             // Closing cross
             if (!("close_cross" in this.to_render && !this.to_render.close_cross)) {
                 let close_cross_class = customElements.get("click-image");
@@ -2060,6 +2078,12 @@ class Dialog extends (0, $eGUNk.LitElement) {
             }
             // Content
             this.to_render.content.map((c)=>this._render_content(c));
+            // Submit
+            //	    let submit_button_class=customElements.get("common-button");
+            let submit_button = (0, $1Um3j.default).create_element(this._hass, submit_conf, this.elt.device);
+            /*submit_button.setConfig(submit_conf);
+	    submit_button.hass=this._hass;
+	    submit_button.device=this.elt;*/ this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
         }
         return (0, $l56HR.html)`
           <div id="window-mask">
@@ -2067,9 +2091,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
               <div id="dialog-close"></div>
               <div id="dialog-title"></div>
               <div id="dialog-content"></div>
-              <div id="dialog-submit">
-                 <common-button .hass=${this._hass} .conf=${close_conf}/>
-              </div>
+              <div id="dialog-submit"></div>
             </div>
          </div>
 `;
@@ -2220,12 +2242,15 @@ var $bOVIO = parcelRequire("bOVIO");
 
 var $dPhcg = parcelRequire("dPhcg");
 
+var $1Um3j = parcelRequire("1Um3j");
+
 function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
     if (elt.device.config.shortcut) for (let shortcut of elt.device.config.shortcut.split(',')){
-        const r_element = customElements.get("common-button");
-        const content = new r_element();
-        let conf = {
+        /*const r_element= customElements.get("common-button");
+	    const content= new r_element();*/ let conf = {
             "label": shortcut + "mL",
+            "type": "common-button",
+            "stateObj": null,
             "tap_action": [
                 {
                     "domain": "number",
@@ -2245,7 +2270,7 @@ function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
                 {
                     "domain": "redsea_ui",
                     "action": "message_box",
-                    "data": "i18n._('dosing')+ ' " + shortcut + "mL'"
+                    "data": "iconv._('dosing')+ ' " + shortcut + "mL'"
                 }
             ],
             "css": {
@@ -2255,12 +2280,14 @@ function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
                 "padding-left": "10px",
                 "padding-right": "10px",
                 "margin-bottom": "20px",
-                "background-color": "rgb(220,220,220)"
+                "background-color": "rgb(" + elt.device.config.color + ")",
+                "color": "white"
             }
         };
-        content.setConfig(conf);
-        content.device = elt.device;
-        content.hass = hass;
+        console.log("COLOR", elt.device.config);
+        /*content.setConfig(conf);
+	    content.device=elt.device;
+	    content.hass=hass;*/ let content = (0, $1Um3j.default).create_element(hass, conf, elt.device);
         shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
 }
@@ -3558,15 +3585,34 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     }
                 }
             ],
-            "validate": [
-                {
-                    "action": {
-                        "label": "iconv._('set')",
+            "validate": {
+                "label": "iconv._('next')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "button",
+                        "action": "press",
+                        "data": {
+                            "entity_id": "set_supplement"
+                        }
+                    },
+                    {
                         "domain": "redsea_ui",
-                        "action": "exit-dialog"
+                        "action": "dialog",
+                        "data": {
+                            "type": "set_container_volume"
+                        }
                     }
-                }
-            ]
+                ]
+            }
+        },
+        "set_container_volume": {
+            "name": "set_container_volume",
+            "close_cross": true,
+            "title_key": "iconv._('set_container_volume')",
+            "content": []
         },
         "set_manual_head_volume": {
             "name": "set_manual_head_volume",
@@ -3599,14 +3645,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         ]
                     }
                 }
-            ],
-            "validate": [
-                {
-                    "action": {
-                        "domain": "redsea_ui",
-                        "action": "exit-dialog"
-                    }
-                }
             ]
         },
         "auto_dose": {
@@ -3629,14 +3667,12 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     }
                 }
             ],
-            "validate": [
-                {
-                    "action": {
-                        "domain": "redsea_ui",
-                        "action": "exit-dialog"
-                    }
+            "validate": {
+                "tap_action": {
+                    "domain": "redsea_ui",
+                    "action": "exit-dialog"
                 }
-            ]
+            }
         }
     },
     "elements": [

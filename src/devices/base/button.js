@@ -21,22 +21,19 @@ export class Button extends  MyElement {
  	super(hass,conf,stateObj,color,alpha);
     }//end of constructor
 
-    _render(){
-	let label='';
+    _render(style=null){
 	let sclass='button';
-	if ('label' in this.conf){
-	    label=this.conf.label;
-	}
 	if ('class' in this.conf){
 	    sclass=this.conf.class;
 	}
+	console.log("ELT STYLE",this.label,style);
 	return html`
  <style>
 .button{
 background-color: rgba(${this.c},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}">${label}</div>
+   	    <div class="button" id="${this.conf.name}" style=${style}>${this.label}</div>
 `;
     }//end of function render
 

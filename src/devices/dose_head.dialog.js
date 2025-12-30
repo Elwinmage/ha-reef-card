@@ -3,16 +3,20 @@ import supplements_list from "./supplements";
 
 import i18n from "../translations/myi18n";
 
+import MyElement from "./base/element";
+
 //import Icon from '@mdi/react';
 import { mdiDeleteEmpty } from '@mdi/js';
 
 export function set_manual_head_volume(elt,hass,shadowRoot){
     if (elt.device.config.shortcut){
 	for(let shortcut of elt.device.config.shortcut.split(',')){
-	    const r_element= customElements.get("common-button");
-	    const content= new r_element();
+	    /*const r_element= customElements.get("common-button");
+	    const content= new r_element();*/
 	    let conf={
 		"label": shortcut+"mL",
+		"type":"common-button",
+		"stateObj":null,
 		"tap_action": [
 		    {
 			"domain": "number",
@@ -27,7 +31,7 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 		    {
 			"domain": "redsea_ui",
 			"action" : "message_box",
-			"data": "i18n._('dosing')+ ' "+shortcut+"mL'"
+			"data": "iconv._('dosing')+ ' "+shortcut+"mL'"
 		    }
 		],
 		"css":{
@@ -37,12 +41,15 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 		    "padding-left":"10px",
 		    "padding-right":"10px",
 		    "margin-bottom": "20px",			    
-		    "background-color": "rgb(220,220,220)",
+		    "background-color": "rgb("+elt.device.config.color+")",
+		    "color": "white",
 		}
 	    };
-	    content.setConfig(conf);
+	    console.log("COLOR",elt.device.config);
+	    /*content.setConfig(conf);
 	    content.device=elt.device;
-	    content.hass=hass;
+	    content.hass=hass;*/
+	    let content=MyElement.create_element(hass,conf,elt.device);
 	    shadowRoot.querySelector("#dialog-content").appendChild(content);
 	}
     }

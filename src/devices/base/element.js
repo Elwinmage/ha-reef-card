@@ -82,7 +82,7 @@ export default class MyElement extends LitElement{
 	elt.conf=config;
 	elt.color=elt.device.config.color;
 	elt.alpha=elt.device.config.alpha;
-	if('stateObj' in config && !config.stateObj){
+	if( ('stateObj' in config && !config.stateObj) ){
 	    elt.stateObj=null;
 	}
 	else {
@@ -91,7 +91,13 @@ export default class MyElement extends LitElement{
 	// Do not display label
 	if ('label' in config){
 	    if (typeof config.label === 'string' ){
-		label_name=config.label;
+		try {
+		    label_name=eval(config.label);
+		}
+		catch{
+		    label_name=config.label;
+		}
+		  
 	    }
 	    else if(typeof config.label === 'boolean' && config.label!=false){ 
 		label_name=config.name;
@@ -168,6 +174,7 @@ export default class MyElement extends LitElement{
 	else{
 	    this.c=this.color;
 	}
+	console.log("ELT.CSS",this.get_style('elt.css'));
 	return html`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
 	     ${this._render(this.get_style('elt.css'))}
@@ -176,7 +183,7 @@ export default class MyElement extends LitElement{
     }
 
     async run_actions(actions){
-	let i18n=_i18n;
+	let iconv=_i18n;
 	if (!actions.length){
 	    actions=[actions];
 	}
