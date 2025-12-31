@@ -3617,7 +3617,40 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "name": "set_container_volume",
             "close_cross": true,
             "title_key": "iconv._('set_container_volume')",
-            "content": []
+            "content": [
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "daily_dose",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "slm",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "save_initial_container_volume",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "container_volume",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
         },
         "set_manual_head_volume": {
             "name": "set_manual_head_volume",
