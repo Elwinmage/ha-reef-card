@@ -174,7 +174,6 @@ export default class MyElement extends LitElement{
 	else{
 	    this.c=this.color;
 	}
-	console.log("ELT.CSS",this.get_style('elt.css'));
 	return html`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
 	     ${this._render(this.get_style('elt.css'))}
@@ -192,10 +191,32 @@ export default class MyElement extends LitElement{
 		if(action.domain=="redsea_ui"){
 		    switch(action.action){
 		    case "dialog":
-			this._hass.redsea_dialog_box.display(action.data.type,this);
+			this.dispatchEvent(
+			    new CustomEvent(
+				"display-dialog",
+				{
+				    bubbles: true,
+				    composed: true,
+				    detail: {
+					type: action.data.type,
+					elt: this,
+				    }
+				}
+			    )
+			)
 			break;
 		    case "exit-dialog":
-			this._hass.redsea_dialog_box.quit();
+			this.dispatchEvent(
+			    new CustomEvent(
+				"quit-dialog",
+				{
+				    bubbles: true,
+				    composed: true,
+				    detail: {
+				    }
+				}
+			    )
+			)
 			break;
 		    case "message_box":
 			let str='';

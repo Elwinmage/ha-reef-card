@@ -15,8 +15,6 @@ import {DosingQueue} from "./dosing_queue";
 import MyElement from "./base/element";
 import RSMessages from './base/messages';
 
-import dialog_box from "./base/dialog";
-
 /*
  * RSDose 
  */
@@ -62,7 +60,6 @@ export default class RSDose extends RSDevice{
 
     _populate_entities_with_heads(){
 	this.update_config();
-	this.config_dialog_box();
 	for (let i=0; i<=this.config.heads_nb;i++){
 	    this._heads.push({'entities':{}});
 	}

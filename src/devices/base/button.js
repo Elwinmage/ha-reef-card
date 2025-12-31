@@ -26,7 +26,6 @@ export class Button extends  MyElement {
 	if ('class' in this.conf){
 	    sclass=this.conf.class;
 	}
-	console.log("ELT STYLE",this.label,style);
 	return html`
  <style>
 .button{

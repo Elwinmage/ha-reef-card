@@ -45,7 +45,6 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 		    "color": "white",
 		}
 	    };
-	    console.log("COLOR",elt.device.config);
 	    /*content.setConfig(conf);
 	    content.device=elt.device;
 	    content.hass=hass;*/

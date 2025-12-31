@@ -175,5 +175,5 @@ export class Dialog extends  LitElement {
 
 window.customElements.define('common-dialog', Dialog);
 
-var dialog_box = new Dialog();
-export default dialog_box;
+/*var dialog_box = new Dialog();
+export default dialog_box;*/

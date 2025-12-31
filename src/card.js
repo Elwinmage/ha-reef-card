@@ -10,8 +10,7 @@ import style_card from './card.styles';
 import RSDevice from './devices/device';
 import NoDevice from './devices/nodevice';
 import RSDose from './devices/rsdose';
-
-import dialog_box from './devices/base/dialog';
+import {Dialog} from './devices/base/dialog';
 
 import style_dialog from './devices/base/dialog.styles';
 
@@ -39,6 +38,10 @@ export class ReefCard extends LitElement {
 	this.select_devices=[{value:'unselected',text:"Select a device"}];
 	this.first_init=true;
 	this.re_render=false;
+	this._dialog_box=null;
+	this.addEventListener("display-dialog", function(e) {this._handle_display_dialog(e);});
+	this.addEventListener("config-dialog", function(e) {this._dialog_box.set_conf(e.detail.config);});
+	this.addEventListener("quit-dialog", function(e) {this._dialog_box.quit();});
     }//end of constructor
 
     /*
@@ -55,10 +58,13 @@ export class ReefCard extends LitElement {
 	}
 	else {
 	    this.current_device.hass=obj;
-	    dialog_box.hass=obj;
+	    this._dialog_box.hass=obj;
 	}
-
     }
+
+    _handle_display_dialog(event){
+	this._dialog_box.display(event.detail.type,event.detail.elt);
+    }//end of function - _handle_display_dialog
     
     /*
      * RENDER
@@ -70,16 +76,16 @@ export class ReefCard extends LitElement {
 	    this.first_init=false;
 	    this.no_device=RSDevice.create_device("redsea-nodevice",this._hass,null,null);
 	    this.current_device=this.no_device;
+	    this._dialog_box=new Dialog();
+	    this._dialog_box.init(this._hass,this.shadowRoot);
 	}//if
 	else {
 	    this.current_device.hass=this._hass;
-	    console.log("GEN__");
 	    if(!this.re_render){
 		return;
 	    }
 	}
-	//Init conf and DOM for dialog box
-	dialog_box.init(this._hass,this.shadowRoot);
+	
 	if(this.user_config['device']){
 	    this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
 	    this.current_device.hass=this._hass;
@@ -87,7 +93,7 @@ export class ReefCard extends LitElement {
 	    return html`
                        ${this.messages}
                        ${this.current_device}
-                       ${dialog_box.render()}
+                       ${this._dialog_box.render()}
                        `;
 	}//fi
 	// no secific device selected, display select form
@@ -95,7 +101,7 @@ export class ReefCard extends LitElement {
           ${this.device_select()}
           ${this.messages}
           ${this.current_device}
-          ${dialog_box.render()}
+          ${this._dialog_box.render()}
     `;
     }//end of render
 
@@ -151,7 +157,6 @@ export class ReefCard extends LitElement {
 	var device=this.devices_list.devices[device_id];
 	var model = device.elements[0].model;
 	this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this.user_config,device);
-
 	//TODO : Implement MAIN tank view support
 	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
 	// labels: enhancement

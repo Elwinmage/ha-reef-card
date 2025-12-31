@@ -55,8 +55,6 @@ parcelRequire("303dX");
 parcelRequire("iXBpj");
 
 var $37d5w = parcelRequire("37d5w");
-
-var $7Rfxy = parcelRequire("7Rfxy");
 let iconv = (0, $dPhcg.default);
 class RSDevice extends (0, $eGUNk.LitElement) {
     static styles = [
@@ -93,7 +91,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         this._elements = [];
         this.to_render = false;
         this.first_init = true;
-        this._dialog_box = null;
     }
     _setting_hass(obj) {
         this._hass = obj;
@@ -115,13 +112,6 @@ class RSDevice extends (0, $eGUNk.LitElement) {
     }
     set hass(obj) {
         this._setting_hass(obj);
-    }
-    /*
-     * Load available dialog box for the current device
-     */ config_dialog_box() {
-        this._dialog_box = (0, $7Rfxy.default);
-        this._dialog_box.set_conf(this.config.dialogs);
-        this._hass['redsea_dialog_box'] = this._dialog_box;
     }
     /*
      * Return  the hass entity id according to it's translation key
@@ -158,6 +148,15 @@ class RSDevice extends (0, $eGUNk.LitElement) {
                 if ('devices' in device_conf && this.device.name in device_conf.devices) this.find_leaves(device_conf['devices'][this.device.name], "this.config");
             } //if
         } //if
+        // send dialogs conf
+        if (this.config.dialogs) this.dispatchEvent(new CustomEvent("config-dialog", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                config: this.config.dialogs
+            }
+        }));
+         //if
     }
     /*
      * Get all entities linked to this redsea device
@@ -1132,7 +1131,6 @@ class MyElement extends (0, $eGUNk.LitElement) {
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
         if (!this.stateOn) this.c = (0, $iXBpj.off_color);
         else this.c = this.color;
-        console.log("ELT.CSS", this.get_style('elt.css'));
         return (0, $l56HR.html)`
      	    <div class="${this.conf.class}" style="${this.get_style()}"> 
 	     ${this._render(this.get_style('elt.css'))}
@@ -1147,10 +1145,21 @@ class MyElement extends (0, $eGUNk.LitElement) {
         for (let action of actions)if (!("enabled" in action) || action.enabled) {
             if (action.domain == "redsea_ui") switch(action.action){
                 case "dialog":
-                    this._hass.redsea_dialog_box.display(action.data.type, this);
+                    this.dispatchEvent(new CustomEvent("display-dialog", {
+                        bubbles: true,
+                        composed: true,
+                        detail: {
+                            type: action.data.type,
+                            elt: this
+                        }
+                    }));
                     break;
                 case "exit-dialog":
-                    this._hass.redsea_dialog_box.quit();
+                    this.dispatchEvent(new CustomEvent("quit-dialog", {
+                        bubbles: true,
+                        composed: true,
+                        detail: {}
+                    }));
                     break;
                 case "message_box":
                     let str = '';
@@ -1428,7 +1437,6 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
     _render(style = null) {
         let sclass = 'button';
         if ('class' in this.conf) sclass = this.conf.class;
-        console.log("ELT STYLE", this.label, style);
         return (0, $l56HR.html)`
  <style>
 .button{
@@ -1948,10 +1956,10 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 
 });
 
+
 parcelRegister("7Rfxy", function(module, exports) {
 
 $parcel$export(module.exports, "Dialog", () => Dialog);
-$parcel$export(module.exports, "default", () => $5b89899a4a720bff$export$2e2bcd8739ae039);
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 var $eGUNk = parcelRequire("eGUNk");
@@ -2097,9 +2105,8 @@ class Dialog extends (0, $eGUNk.LitElement) {
 `;
     }
 } // end of class
-window.customElements.define('common-dialog', Dialog);
-var dialog_box = new Dialog();
-var $5b89899a4a720bff$export$2e2bcd8739ae039 = dialog_box;
+window.customElements.define('common-dialog', Dialog); /*var dialog_box = new Dialog();
+export default dialog_box;*/ 
 
 });
 parcelRegister("4DorC", function(module, exports) {
@@ -2284,7 +2291,6 @@ function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
                 "color": "white"
             }
         };
-        console.log("COLOR", elt.device.config);
         /*content.setConfig(conf);
 	    content.device=elt.device;
 	    content.hass=hass;*/ let content = (0, $1Um3j.default).create_element(hass, conf, elt.device);
@@ -3477,7 +3483,6 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
 
 
 
-
 parcelRegister("7YMQG", function(module, exports) {
 module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
 
@@ -4444,7 +4449,6 @@ class $af5325ece54e327c$export$b931e564db01e286 extends (0, $1Um3j.default) {
 window.customElements.define('redsea-messages', $af5325ece54e327c$export$b931e564db01e286);
 
 
-parcelRequire("7Rfxy");
 class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     // TODO: RSDOSE Implement basic services
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
@@ -4473,7 +4477,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _populate_entities() {}
     _populate_entities_with_heads() {
         this.update_config();
-        this.config_dialog_box();
         for(let i = 0; i <= this.config.heads_nb; i++)this._heads.push({
             'entities': {}
         });
@@ -4665,6 +4668,16 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         ];
         this.first_init = true;
         this.re_render = false;
+        this._dialog_box = null;
+        this.addEventListener("display-dialog", function(e) {
+            this._handle_display_dialog(e);
+        });
+        this.addEventListener("config-dialog", function(e) {
+            this._dialog_box.set_conf(e.detail.config);
+        });
+        this.addEventListener("quit-dialog", function(e) {
+            this._dialog_box.quit();
+        });
     }
     /*
      * Get user configuration
@@ -4675,8 +4688,11 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         if (this.first_init == true) this._hass = obj;
         else {
             this.current_device.hass = obj;
-            (0, $7Rfxy.default).hass = obj;
+            this._dialog_box.hass = obj;
         }
+    }
+    _handle_display_dialog(event) {
+        this._dialog_box.display(event.detail.type, event.detail.elt);
     }
     /*
      * RENDER
@@ -4687,13 +4703,12 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             this.first_init = false;
             this.no_device = (0, $5c2Je.default).create_device("redsea-nodevice", this._hass, null, null);
             this.current_device = this.no_device;
+            this._dialog_box = new (0, $7Rfxy.Dialog)();
+            this._dialog_box.init(this._hass, this.shadowRoot);
         } else {
             this.current_device.hass = this._hass;
-            console.log("GEN__");
             if (!this.re_render) return;
         }
-        //Init conf and DOM for dialog box
-        (0, $7Rfxy.default).init(this._hass, this.shadowRoot);
         if (this.user_config['device']) {
             this.select_devices.map((dev)=>this._set_current_device_from_name(dev, this.user_config.device));
             this.current_device.hass = this._hass;
@@ -4701,7 +4716,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             return (0, $l56HR.html)`
                        ${this.messages}
                        ${this.current_device}
-                       ${(0, $7Rfxy.default).render()}
+                       ${this._dialog_box.render()}
                        `;
         } //fi
         // no secific device selected, display select form
@@ -4709,7 +4724,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
           ${this.device_select()}
           ${this.messages}
           ${this.current_device}
-          ${(0, $7Rfxy.default).render()}
+          ${this._dialog_box.render()}
     `;
     }
     /*

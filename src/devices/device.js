@@ -14,8 +14,6 @@ import {off_color} from "../common.js";
 
 import style_common from "./common.styles";
 
-import dialog_box from "./base/dialog";
-
 let iconv = i18n;
 
 /*
@@ -60,7 +58,6 @@ export default class RSDevice extends LitElement {
 	this._elements=[];
 	this.to_render = false;
 	this.first_init=true;
-	this._dialog_box=null;
     }//end of constructor
 
 
@@ -89,15 +86,6 @@ export default class RSDevice extends LitElement {
     set hass(obj){
 	this._setting_hass(obj);
     }
-
-    /*
-     * Load available dialog box for the current device
-     */
-    config_dialog_box(){
-	this._dialog_box=dialog_box;
-	this._dialog_box.set_conf(this.config.dialogs);
-	this._hass['redsea_dialog_box']=this._dialog_box;
-    }// end of config_dialog_box
 
     /*
      * Return  the hass entity id according to it's translation key
@@ -143,6 +131,22 @@ export default class RSDevice extends LitElement {
 		}
 	    }//if
 	}//if
+	// send dialogs conf
+	if (this.config.dialogs){
+	    this.dispatchEvent(
+		new CustomEvent(
+		    "config-dialog",
+		    {
+			bubbles: true,
+			composed: true,
+			detail: {
+			    config: this.config.dialogs,
+			}
+		    }
+		)
+	    )
+	}//if
+
     }//end of function update_config
     
     /*
