@@ -30,9 +30,10 @@ export class Switch extends  MyElement {
     _render(){
 	if (this.conf.style=="switch"){
 	    return html`
-        <div class="switch_${this.stateObj.state}">
-   	    <div class="switch_in_${this.stateObj.state}"></div>
-        </div>`;
+            <div class="switch_${this.stateObj.state}">
+              <div class="switch_in_${this.stateObj.state}"></div>
+            </div>`;
+//	    return html`<ha-entity-toggle .stateObj="${this.stateObj}"></ha-entity-toggle>` ;
 	}//if
 	else if (this.conf.style=="button"){
 	    if ('color' in this.conf){

@@ -10,6 +10,7 @@ import ProgressBar from "./base/progress_bar";
 import ProgressCircle from "./base/progress_circle";
 import SensorTarget from "./base/sensor_target";
 
+import {merge} from "../merge";
 import {off_color} from "../common.js";
 
 import style_common from "./common.styles";
@@ -66,11 +67,11 @@ export default class RSDevice extends LitElement {
 	let re_render=false;
 	for (let element in this._elements){
 	    let elt = this._elements[element];
-	    if ('master' in elt.conf && elt.conf.master){
+	    /*if ('master' in elt.conf && elt.conf.master){
 		if(elt.has_changed(obj)){
 		    re_render=true;
 		}
-	    }
+	    }*/
 	    elt.hass=obj;
 	}
 	if(re_render){
@@ -127,7 +128,7 @@ export default class RSDevice extends LitElement {
 		    this.find_leaves(device_conf['common'],"this.config");
 		}//if
 		if ('devices' in device_conf && this.device.name in device_conf.devices){
-		    this.find_leaves(device_conf['devices'][this.device.name],"this.config");
+		    this.config=merge(this.config,this.user_config.conf[this.device.elements[0].model]['devices'][this.device.name]);
 		}
 	    }//if
 	}//if
@@ -195,7 +196,12 @@ export default class RSDevice extends LitElement {
 	else if (this._hass.states[this.entities['maintenance'].entity_id].state=='on'){
 	    reason="maintenance";
 	    // if in maintenance mode, display maintenance switch
-	    for ( let swtch of this.config.elements){
+	    let elements=[];
+	    for(var i in this.config.elements){
+		elements.push(this.config.elements[i]);
+	    }
+
+	    for ( let swtch of elements){
 		if (swtch.name=="maintenance"){
 		    let maintenance_button=MyElement.create_element(this._hass,swtch,this);
 		    maintenance=html`
@@ -259,9 +265,6 @@ export default class RSDevice extends LitElement {
                        ${element}
                      `;
     }//end of function - _render_actuator
-
-
-    
     
     /*
      * Render all elements that are declared in the configuration of the device
@@ -269,8 +272,13 @@ export default class RSDevice extends LitElement {
      * @put_in: a grouping div to put element on
      */
     _render_elements(state,put_in=null){
+	let elements=[];
+	for(var i in this.config.elements){
+	    elements.push(this.config.elements[i]);
+	}
+	//${this.config.elements.map(conf => this._render_element(conf,state,put_in))}
 	return html `
-                     ${this.config.elements.map(conf => this._render_element(conf,state,put_in))}
+                     ${elements.map(conf => this._render_element(conf,state,put_in))} 
                      `;
     }//end of function - _render_elements
     

@@ -15,7 +15,7 @@
     "devDependencies": {
         "@gatsbyjs/parcel-namer-relative-to-cwd": "^2.14.0",
         "@parcel/transformer-inline-string": "^2.15.4",
-         "parcel": "^2.15.4"
+        "parcel": "^2.15.4"
     },
     "dependencies": {
         "@mdi/js": "^7.4.47",

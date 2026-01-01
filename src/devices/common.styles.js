@@ -33,6 +33,5 @@ export default css`
   left: 0%;
   background-color:rgba(255,0,0,0.5);
 }
-  
 `
 ;

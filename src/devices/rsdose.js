@@ -146,6 +146,11 @@ export default class RSDose extends RSDevice{
 	    this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this);
 	    this.dosing_queue.color_list=this.supplement_color;
 	}
+	////
+	/*let cc=customElements.get("ha-entity-toggle");
+	let ccc = new cc();
+	ccc.stateObj=this.get_entity("device_state");*/
+	////
 	return html`
              	<div class="device_bg">
                   ${style}
@@ -159,7 +164,7 @@ export default class RSDose extends RSDevice{
     }//end of function render
     
     _editor_head_color(head_id){
-	this.update_config();
+//	this.update_config();
 	let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
 	let shortcuts=this.config.heads["head_"+head_id].shortcut;
 	return html `
@@ -186,6 +191,33 @@ export default class RSDose extends RSDevice{
            </tr>`;
     }//end of function _editor_head_color
 
+    handleChangedDeviceEvent(changedEvent) {
+	console.log("EVENT",changedEvent,changedEvent.currentTarget.checked);
+	/*if(changedEvent.returnValue){
+	  }*/
+	let value= (changedEvent.currentTarget.checked);
+	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
+	var newConfig = JSON.parse(JSON.stringify(this._config));
+	try{
+	    console.debug("updated",newConfig);
+	    console.debug("updated",newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if,value);
+	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
+	    console.debug("updated",newConfig);
+	}
+	catch (error){
+	    newConfig=merge(newConfig,newVal);
+	    console.debug("merged",newConfig,newVal);
+	}
+        const messageEvent = new CustomEvent("config-changed", {
+            detail: { config: newConfig },
+            bubbles: true,
+            composed: true,
+        });
+        this.dispatchEvent(messageEvent);
+	console.log("DISPATCH",messageEvent);
+    }
+    
+    //head
     handleChangedEvent(changedEvent) {
 	let i_val=changedEvent.currentTarget.value;
 	const head=changedEvent.target.id.split('-')[0];
@@ -210,6 +242,34 @@ export default class RSDose extends RSDevice{
         this.dispatchEvent(messageEvent);
     }// end of function handleChangedEvent
 
+    is_checked(id){
+	var result=false;
+	if("disabled_if" in this.config.elements[id]){
+	    result=this.config.elements[id].disabled_if;
+	}
+	console.log("ischecked",id,result);
+	if(result){
+	    return html`
+                   <label class="switch">
+                      <input type="checkbox" id="${id}" @change="${this.handleChangedDeviceEvent}" checked />
+                      <span class="slider round"></span>
+                   </label>
+                   <label>${i18n._(id)}</label>                   
+`;
+	}
+	else{
+	    return html`
+                   <label class="switch">
+                      <input type="checkbox" id="${id}"  @change="${this.handleChangedDeviceEvent}" />
+                      <span class="slider round"></span>
+                   </label>
+                   <label>${i18n._(id)}</label>                   
+`;
+	}
+
+//	return result;
+    }//end of function is_checked
+    
     editor(doc){
 	if(this.is_disabled()){
 	    return html ``;
@@ -219,17 +279,91 @@ export default class RSDose extends RSDevice{
 	if (element){
 	    element.reset();
 	}
+	this.update_config();
+	console.log("RENDER",this.config,this.user_config);
 	return html`
                  <hr />
-                 <table>
+                 <style>
+                   /* The switch - the box around the slider */
+                   .switch {
+                     position: relative;
+                     display: inline-block;
+                     width: 30px;
+                     height: 17px;
+
+                   }
+
+                   /* Hide default HTML checkbox */
+                   .switch input {
+                     opacity: 0;
+                     width: 0;
+                     height: 0;
+                   }
+                   
+                   /* The slider */
+                   .slider {
+                     position: absolute;
+                     cursor: pointer;
+                     top: 0;
+                     left: 0;
+                     right: 0;
+                     bottom: 0;
+                     background-color: #ccc;
+                     -webkit-transition: .4s;
+                     transition: .4s;
+                   }
+                   
+                   .slider:before {
+                     position: absolute;
+                     content: "";
+                     height: 13px;
+                     width: 13px;
+                     left: 2px;
+                     bottom: 2px;
+                     background-color: white;
+                     -webkit-transition: .4s;
+                     transition: .4s;
+                   }
+                   
+                   input:checked + .slider {
+                     background-color: #2196F3;
+                   }
+                   
+                   input:focus + .slider {
+                     box-shadow: 0 0 1px #2196F3;
+                   }
+                   
+                   input:checked + .slider:before {
+                     -webkit-transform: translateX(13px);
+                     -ms-transform: translateX(13px);
+                     transform: translateX(13px);
+                   }
+                   
+                   /* Rounded sliders */
+                   .slider.round {
+                     border-radius: 17px;
+                   }
+                   
+                   .slider.round:before {
+                     border-radius: 50%;
+                   }
+
+                 </style>
+                   <form id="heads_colors">
+                   <table>
+                   <tr><td>
+${this.is_checked("last_message")}
+                   </td><td>
+${this.is_checked("last_alert_message")}
+                   </td></tr>
                    <tr>
                      <td class="config_header">${i18n._("heads_colors")}</td>
                      <td>${i18n._("heads_shortcuts")}</td>
                    </tr>
-                   <form id="heads_colors">
                      ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._editor_head_color(head))}
-                   </form>
-                 </table>`;
+                 </table>
+                   </form>`;
+	
     }//end of function editor
 }
 

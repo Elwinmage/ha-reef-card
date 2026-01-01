@@ -96,8 +96,8 @@ export const config = {
 	    }
 	}
     },
-    "elements": [
-	{
+    "elements": {
+	"last_message":{
 	    "name": "last_message",
 	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"redsea-messages",
@@ -113,7 +113,7 @@ export const config = {
 		"background-color": "rgba(220,220,220,0.7)",
 	    }
 	},
-	{
+	"last_alert_message":{
 	    "name": "last_alert_message",
 	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"redsea-messages",
@@ -137,7 +137,25 @@ export const config = {
 		"background-color": "rgba(240,200,200,0.7)",
 	    }
 	},
-	{
+/*	"device_state2":{
+	    "name": "device_state",
+	    "master": true, // If true, the change of state of this element force a device redraw
+	    "type":"ha-entity-toggle",
+	    "stateObj":"device_state",
+	    "label":false,
+	    "class":"on_off",
+	    "style": "switch",
+	    "css":{
+		"flex": "0 0 auto",
+		"position": "absolute",
+		"width": "5.5%",
+		"height": "2%",
+		"border-radius": "50%",
+		"top": "28%",
+		"left": "2%",
+	    }
+	},*/
+	"device_state":{
 	    "name": "device_state",
 	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"common-switch",
@@ -160,7 +178,7 @@ export const config = {
 		"left": "2%",
 	    }
 	},
-	{
+	"maintenance":{
 	    "name": "maintenance",
 	    "type":"common-switch",
 	    "master": true,
@@ -183,7 +201,7 @@ export const config = {
 		"left": "2%",
 	    }
 	},
-    ],
+    },
     "dosing_queue":{
 	"type": "dosing-queue",
 	"name": "dosing_queue",
@@ -289,8 +307,8 @@ export const config = {
 		    "animation-iteration-count": "infinite",
 		}
 	    },
-	    "elements": [
-		{
+	    "elements": {
+		"supplement":{
 		    "name": "supplement",
 		    "label": "this.stateObj.attributes.supplement.brand_name+': ' +this.stateObj.state",
 		    "type": "common-sensor",
@@ -304,7 +322,7 @@ export const config = {
 			"background-color": "rgba(0,0,0,0)",
 		    }
 		},
-		{
+		"manual_head_volume":{
 		    "name": "manual_head_volume",
 		    "force_integer": true,
 		    "type": "common-sensor",
@@ -320,7 +338,7 @@ export const config = {
 			"data": {"type":"set_manual_head_volume"}
 		    }
 		},
-		{
+		"manual_dosed_today":{
 		    "name": "manual_dosed_today",
 		    "type": "common-sensor",
 		    "force_integer": true,
@@ -337,7 +355,7 @@ export const config = {
 			"margin-top":"10%",
 		    },
 		},
-		{
+		"auto_dosed_today":{
 		    "name": "auto_dosed_today",
 		    "type": "common-sensor",
 		    "target": "daily_dose",
@@ -355,7 +373,7 @@ export const config = {
 			"margin-top":"-20%",
 		    },
 		},
-		{
+		"doses_today":{
 		    "name": "doses_today",
 		    "target": "daily_doses",
 		    "force_integer": true,
@@ -373,7 +391,7 @@ export const config = {
 			"margin-top":"-20%",
 		    },
 		},
-		{
+		"container_volume":{
 		    "name": "container_volume",
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
@@ -389,7 +407,7 @@ export const config = {
 			"width":"140%",
 		    },
 		},
-		{
+		"auto_dosed_today":{
 		    "name": "auto_dosed_today",
 		    "target": "daily_dose",
 		    "force_integer": true,
@@ -406,7 +424,7 @@ export const config = {
 			"width":"140%",
 		    },
 		},
-		{
+		"schedule_enabled":{
 		    "alpha": 0,
 		    "name": "schedule_enabled",
 		    "master": true,
@@ -433,7 +451,7 @@ export const config = {
 			"data": {"type":"auto_dose"}
 		    }
 		},
-		{
+		"manual_head":{
 		    "name": "manual_head",
 		    "type": "common-button",
 		    "class": "manual_dose_head",
@@ -451,7 +469,7 @@ export const config = {
 			"data": "default",
 		    }
 		}
-	    ]
+	    }
 	},
 	"head_1": {
 	    "id" : 1,

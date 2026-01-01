@@ -12,7 +12,7 @@ export class ReefCardEditor extends LitElement {
 
     static get properties() {
         return {
-            hass: {},
+            _hass: {},
             _config: { state: true },
 	    current_device: {},
         };//end of reactives properties
@@ -33,11 +33,16 @@ export class ReefCardEditor extends LitElement {
      * Get user configuration
      */
     setConfig(config) {
+	console.log("setConfig CARD");
         this._config = config;
     }// end of function setConfig
 
+    set hass(obj){
+	this._hass=obj;
+    }
+    
     init_devices(){
-	this.devices_list=new DeviceList(this.hass);
+	this.devices_list=new DeviceList(this._hass);
 	for (var d of this.devices_list.main_devices){
 	    this.select_devices.push(d);
 	}// for
@@ -60,7 +65,9 @@ export class ReefCardEditor extends LitElement {
      * RENDER
      */
     render() {
+	console.log("rerender");
 	if(this._config){
+	    console.log("yes");
 	    if (this.first_init==true){
 		this.first_init=false;
 		this.init_devices();
@@ -91,7 +98,7 @@ export class ReefCardEditor extends LitElement {
 	if (this._config.device && this._config.device.length > 0){
 	    var device=this.devices_list.get_by_name(this._config.device);
 	    var model = device.elements[0].model;
-	    var lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this.hass,this._config,device);
+	    var lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this._config,device);
 	    if (lit_device!=null && typeof lit_device['editor'] == 'function'){
 		this.current_device=lit_device;
 		return lit_device.editor(this.shadowRoot);

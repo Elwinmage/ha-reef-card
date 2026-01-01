@@ -52,6 +52,8 @@ parcelRequire("258Ll");
 parcelRequire("M8QIC");
 parcelRequire("eW6Np");
 parcelRequire("303dX");
+
+var $hoc72 = parcelRequire("hoc72");
 parcelRequire("iXBpj");
 
 var $37d5w = parcelRequire("37d5w");
@@ -97,10 +99,11 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let re_render = false;
         for(let element in this._elements){
             let elt = this._elements[element];
-            if ('master' in elt.conf && elt.conf.master) {
-                if (elt.has_changed(obj)) re_render = true;
-            }
-            elt.hass = obj;
+            /*if ('master' in elt.conf && elt.conf.master){
+		if(elt.has_changed(obj)){
+		    re_render=true;
+		}
+	    }*/ elt.hass = obj;
         }
         if (re_render) {
             this.to_render = true;
@@ -145,7 +148,7 @@ class RSDevice extends (0, $eGUNk.LitElement) {
                 let device_conf = this.user_config.conf[this.device.elements[0].model];
                 if ('common' in device_conf) this.find_leaves(device_conf['common'], "this.config");
                  //if
-                if ('devices' in device_conf && this.device.name in device_conf.devices) this.find_leaves(device_conf['devices'][this.device.name], "this.config");
+                if ('devices' in device_conf && this.device.name in device_conf.devices) this.config = (0, $hoc72.merge)(this.config, this.user_config.conf[this.device.elements[0].model]['devices'][this.device.name]);
             } //if
         } //if
         // send dialogs conf
@@ -191,7 +194,9 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         else if (this._hass.states[this.entities['maintenance'].entity_id].state == 'on') {
             reason = "maintenance";
             // if in maintenance mode, display maintenance switch
-            for (let swtch of this.config.elements)if (swtch.name == "maintenance") {
+            let elements = [];
+            for(var i in this.config.elements)elements.push(this.config.elements[i]);
+            for (let swtch of elements)if (swtch.name == "maintenance") {
                 let maintenance_button = (0, $1Um3j.default).create_element(this._hass, swtch, this);
                 maintenance = (0, $l56HR.html)`
                                       ${maintenance_button}
@@ -245,8 +250,11 @@ class RSDevice extends (0, $eGUNk.LitElement) {
      * @state: the state of the device on or off to adapt the render
      * @put_in: a grouping div to put element on
      */ _render_elements(state, put_in = null) {
+        let elements = [];
+        for(var i in this.config.elements)elements.push(this.config.elements[i]);
+        //${this.config.elements.map(conf => this._render_element(conf,state,put_in))}
         return (0, $l56HR.html)`
-                     ${this.config.elements.map((conf)=>this._render_element(conf, state, put_in))}
+                     ${elements.map((conf)=>this._render_element(conf, state, put_in))} 
                      `;
     }
 } //end of class RSDevice
@@ -957,6 +965,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         head: "Head",
         heads_colors: "Heads Colors",
         heads_shortcuts: "Manual Shorcut Doses",
+        last_message: "Hide Last Message",
+        last_alert_message: "Hide Last Alert Message",
         maintenance: "Maintenance in progress..",
         name: "Name",
         next: "Next",
@@ -981,6 +991,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         head: "T\xeate",
         heads_colors: "Couleur des t\xeates",
         heads_shortcuts: "Raccourcis doses manuelles",
+        last_message: "Cacher le dernier message",
+        last_alert_message: "Cacher le dernier message d'alerte",
         maintenance: "Maintenance en cours...",
         name: "Nom",
         next: "Suivant",
@@ -1335,9 +1347,9 @@ class $4be57e4249dc2092$export$b5d5cf8927ab7262 extends (0, $1Um3j.default) {
     }
     _render() {
         if (this.conf.style == "switch") return (0, $l56HR.html)`
-        <div class="switch_${this.stateObj.state}">
-   	    <div class="switch_in_${this.stateObj.state}"></div>
-        </div>`;
+            <div class="switch_${this.stateObj.state}">
+              <div class="switch_in_${this.stateObj.state}"></div>
+            </div>`;
         else if (this.conf.style == "button") {
             if ('color' in this.conf) this.color = this.conf.color;
             if ('alpha' in this.conf) this.alpha = this.conf.alpha;
@@ -1913,6 +1925,37 @@ font-size: 0.6em;
 });
 
 
+parcelRegister("hoc72", function(module, exports) {
+
+$parcel$export(module.exports, "merge", () => $ca8e12d540076a8f$export$4950aa0f605343fb);
+/**
+ * Simple object check.
+ * @param item
+ * @returns {boolean}
+ */ function $ca8e12d540076a8f$export$a6cdc56e425d0d0a(item) {
+    return item && typeof item === 'object' && !Array.isArray(item);
+}
+function $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources) {
+    if (!sources.length) return target;
+    const source = sources.shift();
+    if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(target) && $ca8e12d540076a8f$export$a6cdc56e425d0d0a(source)) {
+        for(const key in source)if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(source[key])) {
+            if (!target[key]) Object.assign(target, {
+                [key]: {}
+            });
+            $ca8e12d540076a8f$export$dd702b3c8240390c(target[key], source[key]);
+        } else Object.assign(target, {
+            [key]: source[key]
+        });
+    }
+    return $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources);
+}
+function $ca8e12d540076a8f$export$4950aa0f605343fb(target, source) {
+    return $ca8e12d540076a8f$export$dd702b3c8240390c(structuredClone(target), source);
+}
+
+});
+
 parcelRegister("37d5w", function(module, exports) {
 
 $parcel$export(module.exports, "default", () => $244c2d90fdd5377f$export$2e2bcd8739ae039);
@@ -1951,7 +1994,6 @@ var $244c2d90fdd5377f$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
   left: 0%;
   background-color:rgba(255,0,0,0.5);
 }
-  
 `;
 
 });
@@ -3713,8 +3755,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             }
         }
     },
-    "elements": [
-        {
+    "elements": {
+        "last_message": {
             "name": "last_message",
             "master": true,
             "type": "redsea-messages",
@@ -3730,7 +3772,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "background-color": "rgba(220,220,220,0.7)"
             }
         },
-        {
+        "last_alert_message": {
             "name": "last_alert_message",
             "master": true,
             "type": "redsea-messages",
@@ -3753,7 +3795,24 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "background-color": "rgba(240,200,200,0.7)"
             }
         },
-        {
+        /*	"device_state2":{
+	    "name": "device_state",
+	    "master": true, // If true, the change of state of this element force a device redraw
+	    "type":"ha-entity-toggle",
+	    "stateObj":"device_state",
+	    "label":false,
+	    "class":"on_off",
+	    "style": "switch",
+	    "css":{
+		"flex": "0 0 auto",
+		"position": "absolute",
+		"width": "5.5%",
+		"height": "2%",
+		"border-radius": "50%",
+		"top": "28%",
+		"left": "2%",
+	    }
+	},*/ "device_state": {
             "name": "device_state",
             "master": true,
             "type": "common-switch",
@@ -3775,7 +3834,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "left": "2%"
             }
         },
-        {
+        "maintenance": {
             "name": "maintenance",
             "type": "common-switch",
             "master": true,
@@ -3798,7 +3857,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 "left": "2%"
             }
         }
-    ],
+    },
     "dosing_queue": {
         "type": "dosing-queue",
         "name": "dosing_queue",
@@ -3904,8 +3963,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "animation-iteration-count": "infinite"
                 }
             },
-            "elements": [
-                {
+            "elements": {
+                "supplement": {
                     "name": "supplement",
                     "label": "this.stateObj.attributes.supplement.brand_name+': ' +this.stateObj.state",
                     "type": "common-sensor",
@@ -3919,7 +3978,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "background-color": "rgba(0,0,0,0)"
                     }
                 },
-                {
+                "manual_head_volume": {
                     "name": "manual_head_volume",
                     "force_integer": true,
                     "type": "common-sensor",
@@ -3937,7 +3996,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         }
                     }
                 },
-                {
+                "manual_dosed_today": {
                     "name": "manual_dosed_today",
                     "type": "common-sensor",
                     "force_integer": true,
@@ -3954,7 +4013,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "margin-top": "10%"
                     }
                 },
-                {
+                "auto_dosed_today": {
                     "name": "auto_dosed_today",
                     "type": "common-sensor",
                     "target": "daily_dose",
@@ -3972,7 +4031,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "margin-top": "-20%"
                     }
                 },
-                {
+                "doses_today": {
                     "name": "doses_today",
                     "target": "daily_doses",
                     "force_integer": true,
@@ -3990,7 +4049,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "margin-top": "-20%"
                     }
                 },
-                {
+                "container_volume": {
                     "name": "container_volume",
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
@@ -4006,7 +4065,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "width": "140%"
                     }
                 },
-                {
+                "auto_dosed_today": {
                     "name": "auto_dosed_today",
                     "target": "daily_dose",
                     "force_integer": true,
@@ -4022,7 +4081,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "width": "140%"
                     }
                 },
-                {
+                "schedule_enabled": {
                     "alpha": 0,
                     "name": "schedule_enabled",
                     "master": true,
@@ -4051,7 +4110,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         }
                     }
                 },
-                {
+                "manual_head": {
                     "name": "manual_head",
                     "type": "common-button",
                     "class": "manual_dose_head",
@@ -4069,7 +4128,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "data": "default"
                     }
                 }
-            ]
+            }
         },
         "head_1": {
             "id": 1,
@@ -4325,33 +4384,8 @@ var $37d5w = parcelRequire("37d5w");
 var $dPhcg = parcelRequire("dPhcg");
 
 var $iXBpj = parcelRequire("iXBpj");
-/**
- * Simple object check.
- * @param item
- * @returns {boolean}
- */ function $ca8e12d540076a8f$export$a6cdc56e425d0d0a(item) {
-    return item && typeof item === 'object' && !Array.isArray(item);
-}
-function $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources) {
-    if (!sources.length) return target;
-    const source = sources.shift();
-    if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(target) && $ca8e12d540076a8f$export$a6cdc56e425d0d0a(source)) {
-        for(const key in source)if ($ca8e12d540076a8f$export$a6cdc56e425d0d0a(source[key])) {
-            if (!target[key]) Object.assign(target, {
-                [key]: {}
-            });
-            $ca8e12d540076a8f$export$dd702b3c8240390c(target[key], source[key]);
-        } else Object.assign(target, {
-            [key]: source[key]
-        });
-    }
-    return $ca8e12d540076a8f$export$dd702b3c8240390c(target, ...sources);
-}
-function $ca8e12d540076a8f$export$4950aa0f605343fb(target, source) {
-    return $ca8e12d540076a8f$export$dd702b3c8240390c(structuredClone(target), source);
-}
 
-
+var $hoc72 = parcelRequire("hoc72");
 parcelRequire("j0ZcV");
 var $l56HR = parcelRequire("l56HR");
 parcelRequire("dPhcg");
@@ -4532,7 +4566,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     _render_head(head_id) {
         let dose_head = null;
-        let new_conf = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(this.config.heads.common, this.config.heads["head_" + head_id]);
+        let new_conf = (0, $hoc72.merge)(this.config.heads.common, this.config.heads["head_" + head_id]);
         let schedule_state = this._hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state == 'on';
         if (!this.is_on()) schedule_state = false;
         let short_name = this._hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
@@ -4573,6 +4607,10 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             this.dosing_queue = (0, $1Um3j.default).create_element(this._hass, this.config.dosing_queue, this);
             this.dosing_queue.color_list = this.supplement_color;
         }
+        ////
+        /*let cc=customElements.get("ha-entity-toggle");
+	let ccc = new cc();
+	ccc.stateObj=this.get_entity("device_state");*/ ////
         return (0, $l56HR.html)`
              	<div class="device_bg">
                   ${style}
@@ -4587,7 +4625,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                </div>`;
     }
     _editor_head_color(head_id) {
-        this.update_config();
+        //	this.update_config();
         let color = (0, $iXBpj.rgbToHex)("rgb\(" + this.config.heads["head_" + head_id].color + "\);");
         let shortcuts = this.config.heads["head_" + head_id].shortcut;
         return (0, $l56HR.html)`
@@ -4613,6 +4651,46 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
               </td>
            </tr>`;
     }
+    handleChangedDeviceEvent(changedEvent) {
+        console.log("EVENT", changedEvent, changedEvent.currentTarget.checked);
+        /*if(changedEvent.returnValue){
+	  }*/ let value = changedEvent.currentTarget.checked;
+        var newVal = {
+            conf: {
+                [this.current_device.config.model]: {
+                    devices: {
+                        [this.current_device.device.name]: {
+                            elements: {
+                                [changedEvent.target.id]: {
+                                    disabled_if: value
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        var newConfig = JSON.parse(JSON.stringify(this._config));
+        try {
+            console.debug("updated", newConfig);
+            console.debug("updated", newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if, value);
+            newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
+            console.debug("updated", newConfig);
+        } catch (error) {
+            newConfig = (0, $hoc72.merge)(newConfig, newVal);
+            console.debug("merged", newConfig, newVal);
+        }
+        const messageEvent = new CustomEvent("config-changed", {
+            detail: {
+                config: newConfig
+            },
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(messageEvent);
+        console.log("DISPATCH", messageEvent);
+    }
+    //head
     handleChangedEvent(changedEvent) {
         let i_val = changedEvent.currentTarget.value;
         const head = changedEvent.target.id.split('-')[0];
@@ -4637,7 +4715,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         try {
             newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
         } catch (error) {
-            newConfig = (0, $ca8e12d540076a8f$export$4950aa0f605343fb)(newConfig, newVal);
+            newConfig = (0, $hoc72.merge)(newConfig, newVal);
             console.debug("merged", newConfig, newVal);
         }
         const messageEvent = new CustomEvent("config-changed", {
@@ -4649,24 +4727,117 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         });
         this.dispatchEvent(messageEvent);
     }
+    is_checked(id) {
+        var result = false;
+        if ("disabled_if" in this.config.elements[id]) result = this.config.elements[id].disabled_if;
+        console.log("ischecked", id, result);
+        if (result) return (0, $l56HR.html)`
+                   <label class="switch">
+                      <input type="checkbox" id="${id}" @change="${this.handleChangedDeviceEvent}" checked />
+                      <span class="slider round"></span>
+                   </label>
+                   <label>${(0, $dPhcg.default)._(id)}</label>                   
+`;
+        else return (0, $l56HR.html)`
+                   <label class="switch">
+                      <input type="checkbox" id="${id}"  @change="${this.handleChangedDeviceEvent}" />
+                      <span class="slider round"></span>
+                   </label>
+                   <label>${(0, $dPhcg.default)._(id)}</label>                   
+`;
+    //	return result;
+    }
     editor(doc) {
         if (this.is_disabled()) return (0, $l56HR.html)``;
         this._populate_entities_with_heads();
         var element = doc.getElementById("heads_colors");
         if (element) element.reset();
+        this.update_config();
+        console.log("RENDER", this.config, this.user_config);
         return (0, $l56HR.html)`
                  <hr />
-                 <table>
+                 <style>
+                   /* The switch - the box around the slider */
+                   .switch {
+                     position: relative;
+                     display: inline-block;
+                     width: 30px;
+                     height: 17px;
+
+                   }
+
+                   /* Hide default HTML checkbox */
+                   .switch input {
+                     opacity: 0;
+                     width: 0;
+                     height: 0;
+                   }
+                   
+                   /* The slider */
+                   .slider {
+                     position: absolute;
+                     cursor: pointer;
+                     top: 0;
+                     left: 0;
+                     right: 0;
+                     bottom: 0;
+                     background-color: #ccc;
+                     -webkit-transition: .4s;
+                     transition: .4s;
+                   }
+                   
+                   .slider:before {
+                     position: absolute;
+                     content: "";
+                     height: 13px;
+                     width: 13px;
+                     left: 2px;
+                     bottom: 2px;
+                     background-color: white;
+                     -webkit-transition: .4s;
+                     transition: .4s;
+                   }
+                   
+                   input:checked + .slider {
+                     background-color: #2196F3;
+                   }
+                   
+                   input:focus + .slider {
+                     box-shadow: 0 0 1px #2196F3;
+                   }
+                   
+                   input:checked + .slider:before {
+                     -webkit-transform: translateX(13px);
+                     -ms-transform: translateX(13px);
+                     transform: translateX(13px);
+                   }
+                   
+                   /* Rounded sliders */
+                   .slider.round {
+                     border-radius: 17px;
+                   }
+                   
+                   .slider.round:before {
+                     border-radius: 50%;
+                   }
+
+                 </style>
+                   <form id="heads_colors">
+                   <table>
+                   <tr><td>
+${this.is_checked("last_message")}
+                   </td><td>
+${this.is_checked("last_alert_message")}
+                   </td></tr>
                    <tr>
                      <td class="config_header">${(0, $dPhcg.default)._("heads_colors")}</td>
                      <td>${(0, $dPhcg.default)._("heads_shortcuts")}</td>
                    </tr>
-                   <form id="heads_colors">
                      ${Array.from({
             length: this.config.heads_nb
         }, (x, i)=>i + 1).map((head)=>this._editor_head_color(head))}
-                   </form>
-                 </table>`;
+                 </table>
+                   </form>`;
     }
 }
 window.customElements.define('redsea-rsdose4', $205242e0eaceda90$export$2e2bcd8739ae039);
@@ -4865,7 +5036,7 @@ var $5c2Je = parcelRequire("5c2Je");
 class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     static get properties() {
         return {
-            hass: {},
+            _hass: {},
             _config: {
                 state: true
             },
@@ -4889,10 +5060,14 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     /*
      * Get user configuration
      */ setConfig(config) {
+        console.log("setConfig CARD");
         this._config = config;
     }
+    set hass(obj) {
+        this._hass = obj;
+    }
     init_devices() {
-        this.devices_list = new (0, $iXBpj.default)(this.hass);
+        this.devices_list = new (0, $iXBpj.default)(this._hass);
         for (var d of this.devices_list.main_devices)this.select_devices.push(d);
          // for
     }
@@ -4911,7 +5086,9 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
     /*
      * RENDER
      */ render() {
+        console.log("rerender");
         if (this._config) {
+            console.log("yes");
             if (this.first_init == true) {
                 this.first_init = false;
                 this.init_devices();
@@ -4940,7 +5117,7 @@ class $fc7d6e547b6fcb14$export$d7c6282dbee77504 extends (0, $eGUNk.LitElement) {
         if (this._config.device && this._config.device.length > 0) {
             var device = this.devices_list.get_by_name(this._config.device);
             var model = device.elements[0].model;
-            var lit_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this.hass, this._config, device);
+            var lit_device = (0, $5c2Je.default).create_device("redsea-" + model.toLowerCase(), this._hass, this._config, device);
             if (lit_device != null && typeof lit_device['editor'] == 'function') {
                 this.current_device = lit_device;
                 return lit_device.editor(this.shadowRoot);
