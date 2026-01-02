@@ -262,9 +262,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -855,8 +855,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 $parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
+$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -2081,7 +2081,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
     render() {
         let iconv = (0, $dPhcg.default);
         let close_conf = {
-            "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
+            "image": new URL("close_cross.svg", import.meta.url),
             "type": "common-button",
             "stateObj": null,
             "tap_action": {
@@ -3525,8 +3525,8 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
 
 
 
-parcelRegister("7YMQG", function(module, exports) {
-module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
+parcelRegister("hXmGm", function(module, exports) {
+module.exports = new URL("close_cross.svg", import.meta.url).toString();
 
 });
 
@@ -3550,7 +3550,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
+    "background_img": new URL("NODEVICE.png", import.meta.url)
 };
 
 
@@ -3609,7 +3609,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
         "add_supplement": {
@@ -4056,7 +4056,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "class": "pg-container",
                     //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state==false",
+                    "disabled_if": "this.get_entity('slm').state=='off'",
                     "css": {
                         "position": "absolute",
                         "transform": "rotate(-90deg)",
@@ -4320,10 +4320,10 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let color = this.config.color + "," + this.config.alpha;
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
-                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
+                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.png", import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
-            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
+            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
@@ -4346,7 +4346,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let conf = {
                 "type": "click-image",
                 "stateObj": false,
-                "image": new URL("container_add.d3b2ec21.png", import.meta.url),
+                "image": new URL("container_add.png", import.meta.url),
                 "class": "container",
                 "tap_action": {
                     "domain": "redsea_ui",
@@ -4362,7 +4362,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let add_img = (0, $1Um3j.default).create_element(this._hass, conf, this);
             return (0, $l56HR.html)`
    <div class="container" style="${this.get_style(this.config.container)}">
-<!--      <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' /> -->
+<!--      <img src='${new URL("container_add.png", import.meta.url)}' /> -->
 ${add_img}
    </div>
 `;

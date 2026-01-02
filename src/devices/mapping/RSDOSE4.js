@@ -398,7 +398,7 @@ export const config = {
 		    "class":"pg-container",
 		    //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-		    "disabled_if": "this.get_entity('slm').state==false",
+		    "disabled_if": "this.get_entity('slm').state=='off'",
 		    "css":{
 			"position":"absolute",
 			"transform":"rotate(-90deg)",
