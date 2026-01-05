@@ -8,6 +8,7 @@ export const config = {
 	    "name": "add_supplement",
 	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
+	    "extend":"dose_head_dialog",
 	    "content":[
 		{
 		    "view": "hui-entities-card",
@@ -60,6 +61,7 @@ export const config = {
 	},
  	"set_manual_head_volume":{
 	    "name": "set_manual_head_volume",
+	    "extend":"dose_head_dialog",
 	    "title_key": "iconv._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
@@ -357,7 +359,6 @@ export const config = {
 		},
 		"auto_dosed_today":{
 		    "name": "auto_dosed_today",
-		    "type": "common-sensor",
 		    "target": "daily_dose",
 		    "force_integer": true,
 		    "put_in": "pump_state_labels",
@@ -407,7 +408,7 @@ export const config = {
 			"width":"140%",
 		    },
 		},
-		"auto_dosed_today":{
+		"auto_dosed_today_circle":{
 		    "name": "auto_dosed_today",
 		    "target": "daily_dose",
 		    "force_integer": true,

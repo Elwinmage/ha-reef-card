@@ -9,10 +9,7 @@ import style_click_image from "./click_image.styles";
 
 import MyElement from "./element";
 
-import {
-    set_manual_head_volume,
-    add_supplement
-} from "../dose_head.dialog"
+import * as dhd from "../dose_head.dialog";
 
 /*
  *  Dialog
@@ -113,14 +110,11 @@ export class Dialog extends  LitElement {
 		"background-color":"rgb(0,0,0,0)",
 	    }
 	};
-//	let validate=html`<common-button .hass=${this._hass} .conf=${close_conf}/>`;
-
 
 	if(this.to_render!=null){
 	    console.debug("Render dialog",this.to_render);
 	    let submit_conf=close_conf;
 	    if("validate" in this.to_render){
-		//validate=html`<common-button .hass=${this._hass} .conf=${this.to_render.validate} test=toto/>`;
 		submit_conf=this.to_render.validate;
 	    }
 
@@ -137,27 +131,17 @@ export class Dialog extends  LitElement {
 		this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
 	    }
 	    // Title
-	    this._shadowRoot.querySelector("#dialog-title").innerHTML=eval(this.to_render.title_key);//;i18n._(this.to_render.title_key);
-	    //special content for rsdose manual
-	    //	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
-	    switch (this.to_render.name) {
-	    case "set_manual_head_volume":
-		set_manual_head_volume(this.elt,this._hass,this._shadowRoot);
-		break;
-	    case "add_supplement":
-		add_supplement(this.elt,this._hass,this._shadowRoot);
-		break;
-	    default:
-		break;
+	    this._shadowRoot.querySelector("#dialog-title").innerHTML=eval(this.to_render.title_key);
+	    //special content for rsdose 
+	    let dose_head_dialog=dhd;
+	    if("extend" in this.to_render){
+		var cmd=this.to_render.extend+'.'+this.to_render.name+"(this.elt,this._hass,this._shadowRoot)";
+		eval(cmd);
 	    }
 	    // Content
 	    this.to_render.content.map(c => this._render_content(c));
 	    // Submit
-//	    let submit_button_class=customElements.get("common-button");
 	    let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
-	    /*submit_button.setConfig(submit_conf);
-	    submit_button.hass=this._hass;
-	    submit_button.device=this.elt;*/
 	    this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);	    
 	}
 	return html`
@@ -174,6 +158,3 @@ export class Dialog extends  LitElement {
 }// end of class
 
 window.customElements.define('common-dialog', Dialog);
-
-/*var dialog_box = new Dialog();
-export default dialog_box;*/

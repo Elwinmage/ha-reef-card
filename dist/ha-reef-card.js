@@ -262,9 +262,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -855,8 +855,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 $parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
+$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -2081,7 +2081,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
     render() {
         let iconv = (0, $dPhcg.default);
         let close_conf = {
-            "image": new URL("close_cross.svg", import.meta.url),
+            "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
             "type": "common-button",
             "stateObj": null,
             "tap_action": {
@@ -2094,12 +2094,10 @@ class Dialog extends (0, $eGUNk.LitElement) {
                 "background-color": "rgb(0,0,0,0)"
             }
         };
-        //	let validate=html`<common-button .hass=${this._hass} .conf=${close_conf}/>`;
         if (this.to_render != null) {
             console.debug("Render dialog", this.to_render);
             let submit_conf = close_conf;
-            if ("validate" in this.to_render) //validate=html`<common-button .hass=${this._hass} .conf=${this.to_render.validate} test=toto/>`;
-            submit_conf = this.to_render.validate;
+            if ("validate" in this.to_render) submit_conf = this.to_render.validate;
             this._shadowRoot.querySelector("#dialog-close").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-title").innerHTML = '';
             this._shadowRoot.querySelector("#dialog-content").innerHTML = '';
@@ -2113,27 +2111,18 @@ class Dialog extends (0, $eGUNk.LitElement) {
                 this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
             }
             // Title
-            this._shadowRoot.querySelector("#dialog-title").innerHTML = eval(this.to_render.title_key); //;i18n._(this.to_render.title_key);
-            //special content for rsdose manual
-            //	    if (this.to_render.title_key=="set_manual_head_volume" && this.elt.device.config.shortcut){
-            switch(this.to_render.name){
-                case "set_manual_head_volume":
-                    (0, $2jsWu.set_manual_head_volume)(this.elt, this._hass, this._shadowRoot);
-                    break;
-                case "add_supplement":
-                    (0, $2jsWu.add_supplement)(this.elt, this._hass, this._shadowRoot);
-                    break;
-                default:
-                    break;
+            this._shadowRoot.querySelector("#dialog-title").innerHTML = eval(this.to_render.title_key);
+            //special content for rsdose 
+            let dose_head_dialog = $2jsWu;
+            if ("extend" in this.to_render) {
+                var cmd = this.to_render.extend + '.' + this.to_render.name + "(this.elt,this._hass,this._shadowRoot)";
+                eval(cmd);
             }
             // Content
             this.to_render.content.map((c)=>this._render_content(c));
             // Submit
-            //	    let submit_button_class=customElements.get("common-button");
             let submit_button = (0, $1Um3j.default).create_element(this._hass, submit_conf, this.elt.device);
-            /*submit_button.setConfig(submit_conf);
-	    submit_button.hass=this._hass;
-	    submit_button.device=this.elt;*/ this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
+            this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
         }
         return (0, $l56HR.html)`
           <div id="window-mask">
@@ -2147,8 +2136,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
 `;
     }
 } // end of class
-window.customElements.define('common-dialog', Dialog); /*var dialog_box = new Dialog();
-export default dialog_box;*/ 
+window.customElements.define('common-dialog', Dialog);
 
 });
 parcelRegister("4DorC", function(module, exports) {
@@ -3525,8 +3513,8 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
 
 
 
-parcelRegister("hXmGm", function(module, exports) {
-module.exports = new URL("close_cross.svg", import.meta.url).toString();
+parcelRegister("7YMQG", function(module, exports) {
+module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
 
 });
 
@@ -3550,7 +3538,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.png", import.meta.url)
+    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
 };
 
 
@@ -3609,13 +3597,14 @@ var $5c2Je = parcelRequire("5c2Je");
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
         "add_supplement": {
             "name": "add_supplement",
             "title_key": "iconv._('dialog_add_supplement_title') +' n\xb0'+ this.elt.device.config.id",
             "close_cross": true,
+            "extend": "dose_head_dialog",
             "content": [
                 {
                     "view": "hui-entities-card",
@@ -3696,6 +3685,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         "set_manual_head_volume": {
             "name": "set_manual_head_volume",
+            "extend": "dose_head_dialog",
             "title_key": "iconv._('set_manual_head_volume')",
             "close_cross": true,
             "content": [
@@ -4015,7 +4005,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                 },
                 "auto_dosed_today": {
                     "name": "auto_dosed_today",
-                    "type": "common-sensor",
                     "target": "daily_dose",
                     "force_integer": true,
                     "put_in": "pump_state_labels",
@@ -4065,7 +4054,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "width": "140%"
                     }
                 },
-                "auto_dosed_today": {
+                "auto_dosed_today_circle": {
                     "name": "auto_dosed_today",
                     "target": "daily_dose",
                     "force_integer": true,
@@ -4320,10 +4309,10 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let color = this.config.color + "," + this.config.alpha;
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
-                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.png", import.meta.url)}'/>`;
+                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
-            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
+            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on") warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
@@ -4346,7 +4335,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let conf = {
                 "type": "click-image",
                 "stateObj": false,
-                "image": new URL("container_add.png", import.meta.url),
+                "image": new URL("container_add.d3b2ec21.png", import.meta.url),
                 "class": "container",
                 "tap_action": {
                     "domain": "redsea_ui",
@@ -4362,7 +4351,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let add_img = (0, $1Um3j.default).create_element(this._hass, conf, this);
             return (0, $l56HR.html)`
    <div class="container" style="${this.get_style(this.config.container)}">
-<!--      <img src='${new URL("container_add.png", import.meta.url)}' /> -->
+<!--      <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' /> -->
 ${add_img}
    </div>
 `;
