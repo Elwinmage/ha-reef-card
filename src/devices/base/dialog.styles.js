@@ -73,10 +73,17 @@ margin-left: 5%;
 
 #dialog-submit{
 //border: 1px solid green;
-grid-column: 1/4;
+grid-column: 2/4;
 grid-row: 3;
 text-align:right;
 margin-right: 2%;
+}
+#dialog-cancel{
+//border: 1px solid green;
+grid-column: 1/3;
+grid-row: 3;
+text-align:left;
+margin-left: 2%;
 }
 
 `;

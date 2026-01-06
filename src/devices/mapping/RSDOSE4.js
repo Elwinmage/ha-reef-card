@@ -4,6 +4,68 @@ export const config = {
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
     "dialogs": {
+	"edit_container":{
+	    "name":"edit_container",
+	    "title_key":"iconv._('dialog_edit_container') +' n°'+ this.elt.device.config.id",
+	    "close_cross": false,
+	    "content":[
+		{
+		    "view": "hui-entities-card",
+		    "conf":{
+			"type":"entities",
+			"entities": [
+			    {"entity":"slm","name":{"type":"entity"}},
+			    {"entity":"save_initial_container_volume","name":{"type":"entity"}},
+			    {"entity":"container_volume","name":{"type":"entity"}},
+			]
+		    }
+		},
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/trash.svg',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[
+			    {
+				"domain": "redsea_ui",
+				"action": "dialog",
+				"data": {"type":"delete_container"},
+			    } 
+			],
+			"elt.css":{
+			    "position":"absolute",
+			    "top":"7%",
+			    "right": "5%",
+			}
+		    }
+		},
+	    ],
+	},
+	"delete_container":{
+	    "name": "delete_container",
+	    "title_key":"iconv._('dialog_delete_supplement_title') +' n°'+ this.elt.device.config.id",
+	    "close_cross": false,
+	    "content":[],
+	    "validate": {
+		"label": "iconv._('delete')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain": "button",
+			"action": "press",
+			"data": {"entity_id":"delete_supplement"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    },
+		]
+	    },
+	    "cancel":true,
+	},
 	"add_supplement":{
 	    "name": "add_supplement",
 	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
@@ -43,6 +105,7 @@ export const config = {
 	    "name":"set_container_volume",
 	    "close_cross": true,
 	    "title_key": "iconv._('set_container_volume')",
+	    "extend":"dose_head_dialog",
 	    "content":[
 		{
 		    "view": "hui-entities-card",
@@ -322,6 +385,22 @@ export const config = {
 			"left": "30%",
 			"color": "white",
 			"background-color": "rgba(0,0,0,0)",
+		    }
+		},
+		"supplement_bottle":{
+		    "name": "supplement_bottle",
+		    "label": null,
+		    "type": "common-button",
+		    "put_in":"supplement",
+		    "stateObj":null,
+		    "elt.css":{
+			"position": "absolute",
+			"background-color": "rgba(0,0,0,0)",
+		    },
+		    "tap_action":{
+			"domain": "redsea_ui",
+			"action" : "dialog",
+			"data": {"type":"edit_container"}
 		    }
 		},
 		"manual_head_volume":{

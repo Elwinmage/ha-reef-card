@@ -101,7 +101,7 @@ export function rgbToHex( orig ) {
 }
 
 export var off_color="150,150,150";
-
+export var button_color="0,60,78";
 // Time
 export function toTime(time){
     let seconds=time%60;

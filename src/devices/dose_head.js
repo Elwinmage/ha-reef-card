@@ -19,6 +19,8 @@ export default class DoseHead extends RSDevice{
 	    state_on:{},
 	    device_state:{},
 	    head_state:{},
+	    supplement:{},
+	    force_render:false,
 	}
     }
 
@@ -64,6 +66,7 @@ export default class DoseHead extends RSDevice{
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
                 <img id=id_${supplement_uid} src='${img}' width="100%" />
+                ${this._render_elements(true,"supplement")}
                 ${this._render_supplement_info()}
               </div>
             `;
@@ -98,6 +101,9 @@ export default class DoseHead extends RSDevice{
 	if(this.entites && this.head_state!=this.entities['head_state'].state){
 	    this.head_state=this.entities['head_state'].state;
 	}
+	if(this.entities['supplement'] && this._hass.states[this.entities['supplement'].entity_id].attributes.supplement.uid != this.supplement.attributes.supplement.uid){
+	    this.supplement=this._hass.states[this.entities['supplement'].entity_id];
+	}
     }
     
     _render(){
@@ -118,7 +124,7 @@ export default class DoseHead extends RSDevice{
 	    if (! this.state_on ){
 		color=off_color+","+this.config.alpha;
 	    }
-	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on"){
+	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on" && this.get_entity('daily_dose').state > 0){
 		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
 	    }
 	    return html`

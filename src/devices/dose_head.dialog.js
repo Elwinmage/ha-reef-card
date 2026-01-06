@@ -5,14 +5,11 @@ import i18n from "../translations/myi18n";
 
 import MyElement from "./base/element";
 
-//import Icon from '@mdi/react';
 import { mdiDeleteEmpty } from '@mdi/js';
 
 export function set_manual_head_volume(elt,hass,shadowRoot){
     if (elt.device.config.shortcut){
 	for(let shortcut of elt.device.config.shortcut.split(',')){
-	    /*const r_element= customElements.get("common-button");
-	    const content= new r_element();*/
 	    let conf={
 		"label": shortcut+"mL",
 		"type":"common-button",
@@ -45,9 +42,6 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 		    "color": "white",
 		}
 	    };
-	    /*content.setConfig(conf);
-	    content.device=elt.device;
-	    content.hass=hass;*/
 	    let content=MyElement.create_element(hass,conf,elt.device);
 	    shadowRoot.querySelector("#dialog-content").appendChild(content);
 	}
@@ -108,5 +102,61 @@ export function add_supplement(elt,hass,shadowRoot){
 	content.device=elt.device;
 	shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
+}
 
+
+export function set_container_volume(elt,hass,shadowRoot){
+    let selected_supplement=elt.device.get_entity("supplement").state;
+    let supplement = supplements_list.get_supplement(selected_supplement);
+    if(!supplement){
+	selected_supplement=elt.device.get_entity("supplements").state;
+	supplement = supplements_list.get_supplement(selected_supplement);
+    }
+    if (supplement && supplement.sizes){
+	for (let size of supplement.sizes){
+	    let label=size+"mL";
+	    if(size>= 1000){
+		label=size/1000+"L";   
+	    }
+	    let conf={
+		"label": label,
+		"type":"common-button",
+		"stateObj":null,
+		"tap_action": [
+		    {
+			"domain": "switch",
+			"action" : "turn_on",
+			"data":{"entity_id":"slm"}
+		    },
+		    {
+			"domain": "number",
+			"action" : "set_value",
+			"data":{"entity_id":"container_volume","value":size}
+		    },
+		    {
+			"domain": "number",
+			"action" : "set_value",
+			"data":{"entity_id":"save_initial_container_volume","value":size}
+		    },
+		],
+		"css":{
+		    "display": "inline-block",
+		    "border":"1px solid gray",
+		    "border-radius": "15px",
+		    "padding-left":"10px",
+		    "padding-right":"10px",
+		    "margin-bottom": "20px",			    
+		    "background-color": "rgb("+elt.device.config.color+")",
+		    "color": "white",
+		},
+		"elt.css":{
+		    "background-color": "rgb("+elt.device.config.color+")",
+		    "color": "white",
+		}
+		
+	    };
+	    let content=MyElement.create_element(hass,conf,elt.device);
+	    shadowRoot.querySelector("#dialog-content").appendChild(content);
+	}//for
+    }
 }

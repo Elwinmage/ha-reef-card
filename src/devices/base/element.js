@@ -73,6 +73,7 @@ export default class MyElement extends LitElement{
     
     static create_element(hass,config,device){
 	let iconv= _i18n;
+	console.log("create element",config.type,config);
 	let Element=customElements.get(config.type);
 	let label_name='';
 	let elt=new Element();

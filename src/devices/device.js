@@ -61,13 +61,12 @@ export default class RSDevice extends LitElement {
 	this.first_init=true;
     }//end of constructor
 
-
     _setting_hass(obj){
 	this._hass=obj;
 	let re_render=false;
 	for (let element in this._elements){
 	    let elt = this._elements[element];
-	    /*if ('master' in elt.conf && elt.conf.master){
+/*	    if ('master' in elt.conf && elt.conf.master){
 		if(elt.has_changed(obj)){
 		    re_render=true;
 		}

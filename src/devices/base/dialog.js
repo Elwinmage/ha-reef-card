@@ -58,6 +58,7 @@ export class Dialog extends  LitElement {
 	this._shadowRoot.querySelector("#window-mask").style.display="none";
 	this.elt=null;
 	this.to_render=null;
+	
     }
 
     set hass(obj){
@@ -114,13 +115,21 @@ export class Dialog extends  LitElement {
 	if(this.to_render!=null){
 	    console.debug("Render dialog",this.to_render);
 	    let submit_conf=close_conf;
+	    let cancel_conf=null;
 	    if("validate" in this.to_render){
 		submit_conf=this.to_render.validate;
+	    }
+	    if("cancel" in this.to_render && this.to_render.cancel){
+		cancel_conf=close_conf;
+		cancel_conf.label=i18n._("cancel");
+		cancel_conf.css={left:"-30%"};
+				
 	    }
 
 	    this._shadowRoot.querySelector("#dialog-close").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-content").innerHTML='';
+	    this._shadowRoot.querySelector("#dialog-cancel").innerHTML='';
 	    this._shadowRoot.querySelector("#dialog-submit").innerHTML='';
 	    // Closing cross
 	    if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
@@ -142,7 +151,13 @@ export class Dialog extends  LitElement {
 	    this.to_render.content.map(c => this._render_content(c));
 	    // Submit
 	    let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
-	    this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);	    
+	    this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
+	    //Cancel
+	    if(cancel_conf){
+		console.log("display cancel");
+		let cancel_button=MyElement.create_element(this._hass,cancel_conf,this.elt.device);
+		this._shadowRoot.querySelector("#dialog-cancel").appendChild(cancel_button);
+	    }
 	}
 	return html`
           <div id="window-mask">
@@ -150,6 +165,7 @@ export class Dialog extends  LitElement {
               <div id="dialog-close"></div>
               <div id="dialog-title"></div>
               <div id="dialog-content"></div>
+              <div id="dialog-cancel"></div>
               <div id="dialog-submit"></div>
             </div>
          </div>
