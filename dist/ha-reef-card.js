@@ -4060,20 +4060,20 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             },
             "warning": {
                 "css": {
-                    "width": "40%",
+                    "width": "58%",
                     "position": "absolute",
-                    "left": "18%",
-                    "top": "60%",
+                    "left": "28%",
+                    "top": "30%",
                     "animation": "blink 1s",
                     "animation-iteration-count": "infinite"
                 }
             },
             "warning_label": {
                 "css": {
-                    "width": "40%",
+                    "width": "58%",
                     "position": "absolute",
-                    "left": "18%",
-                    "top": "69%",
+                    "left": "28%",
+                    "top": "47%",
                     "animation": "blink 1s",
                     "animation-iteration-count": "infinite",
                     "background-color": "#df1800",
@@ -4147,7 +4147,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "stateObj": null,
                     "elt.css": {
                         "position": "absolute",
-                        "background-color": "rgba(0,0,0,0)"
+                        "background-color": "rgba(0,80,120,0)"
                     },
                     "tap_action": {
                         "domain": "redsea_ui",
@@ -4449,6 +4449,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     _render_container() {
         let supplement_uid = this.supplement.attributes.supplement.uid;
         let img = null;
+        let warning = '';
         img = '/hacsfiles/ha-reef-card/' + supplement_uid + '.supplement.png';
         var http = new XMLHttpRequest();
         http.open('HEAD', img, false);
@@ -4463,22 +4464,27 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             style = (0, $l56HR.html)`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
             color = (0, $iXBpj.off_color);
         }
+        if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
         return (0, $l56HR.html)`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
                 <img id=id_${supplement_uid} src='${img}' width="100%" />
-                ${this._render_elements(true, "supplement")}
+                ${warning}
                 ${this._render_supplement_info()}
+                ${this._render_elements(true, "supplement")}
+                ${this._render_ask()}
               </div>
             `;
     }
     _render_supplement_info() {
-        if (this.supplement_info) {
-            let ask = '';
-            if (!this.supplement.attributes.supplement.is_name_editable) ask = (0, $l56HR.html)`<a class="addSupplement" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ', '+')}+${this.supplement.attributes.supplement.name.replace(' ', '+')}&body=uid:${this.supplement.attributes.supplement.uid}'>+${(0, $dPhcg.default)._("ask_add_supplement")}+</a>`;
-             //if
-            return (0, $l56HR.html)`${this._render_elements(true, "supplement_info")} ${ask}`;
-        } //if
+        if (this.supplement_info) return (0, $l56HR.html)`${this._render_elements(true, "supplement_info")}`;
+         //if
+    }
+    _render_ask() {
+        let ask = '';
+        if (this.supplement_info && !this.supplement.attributes.supplement.is_name_editable) ask = (0, $l56HR.html)`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ', '+')}+${this.supplement.attributes.supplement.name.replace(' ', '+')}&body=${JSON.stringify(this.supplement.attributes.supplement, null, "%0D%0A")}'>+${(0, $dPhcg.default)._("ask_add_supplement")}+</a>`;
+         //if
+        return (0, $l56HR.html)`${ask}`;
     }
     is_on() {
         let res = true;
@@ -4497,7 +4503,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         console.debug("Render dose_head n\xb0", this.config.id);
         this.supplement = this._hass.states[this.entities['supplement'].entity_id];
         if (this.supplement.attributes.supplement.uid != 'null') {
-            let warning = '';
             let calibration = '';
             let color = this.config.color + "," + this.config.alpha;
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
@@ -4505,7 +4510,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                 calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
-            if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
             return (0, $l56HR.html)`
                ${this._render_container()}
    	        <div class="pipe" style="${this.get_style(this.config.pipe)}">
@@ -4518,7 +4522,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                   </div>
               </div>
               ${this._render_elements(this.state_on)}
-              ${warning}
               ${calibration}
    	    `;
         } else {
@@ -4829,7 +4832,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                 <label class="tab-label">${(0, $dPhcg.default)._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
               </td>
               <td>
-                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @input="${this.handleChangedEvent}"></input>
+                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @change="${this.handleChangedEvent}" ></input>
               </td>
            </tr>`;
     }
@@ -4898,7 +4901,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
         } catch (error) {
             newConfig = (0, $hoc72.merge)(newConfig, newVal);
-            console.debug("merged", newConfig, newVal);
         }
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
@@ -5002,7 +5004,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                    .slider.round:before {
                      border-radius: 50%;
                    }
-
                  </style>
                    <form id="heads_colors">
                    <table>

@@ -308,20 +308,20 @@ export const config = {
 	    },
 	    "warning" :{
 		"css":{
-		    "width": "40%",
+		    "width": "58%",
 		    "position": "absolute",
-		    "left": "18%",
-		    "top": "60%",
+		    "left": "28%",
+		    "top": "30%",
 		    "animation": "blink 1s",
 		    "animation-iteration-count": "infinite",
 		},
 	    },
 	    "warning_label" :{
 		"css":{
-		    "width": "40%",
+		    "width": "58%",
 		    "position": "absolute",
-		    "left": "18%",
-		    "top": "69%",
+		    "left": "28%",
+		    "top": "47%",
 		    "animation": "blink 1s",
 		    "animation-iteration-count": "infinite",
 		    "background-color": "#df1800",
@@ -395,7 +395,7 @@ export const config = {
 		    "stateObj":null,
 		    "elt.css":{
 			"position": "absolute",
-			"background-color": "rgba(0,0,0,0)",
+			"background-color": "rgba(0,80,120,0)",
 		    },
 		    "tap_action":{
 			"domain": "redsea_ui",

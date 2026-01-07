@@ -46,6 +46,8 @@ export default class DoseHead extends RSDevice{
     _render_container(){
 	let supplement_uid=this.supplement.attributes.supplement.uid
 	let img=null;
+	let warning='';
+
 	img='/hacsfiles/ha-reef-card/'+supplement_uid+'.supplement.png';
 	
 	var http = new XMLHttpRequest();
@@ -62,26 +64,38 @@ export default class DoseHead extends RSDevice{
 	    style=html`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
 	    color=off_color;
 	}
+
+	if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on" && this.get_entity('daily_dose').state > 0){
+	    warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
+	    }
+
 	return html`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
                 <img id=id_${supplement_uid} src='${img}' width="100%" />
-                ${this._render_elements(true,"supplement")}
+                ${warning}
                 ${this._render_supplement_info()}
+                ${this._render_elements(true,"supplement")}
+                ${this._render_ask()}
               </div>
             `;
     }
 
     _render_supplement_info(){
 	if (this.supplement_info){
-	    let ask='';
-	    if (!this.supplement.attributes.supplement.is_name_editable){
-		ask=html`<a class="addSupplement" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=uid:${this.supplement.attributes.supplement.uid}'>+${i18n._("ask_add_supplement")}+</a>`;
-	    }//if
-	    return html`${this._render_elements(true,"supplement_info")} ${ask}`;
+
+	    return html`${this._render_elements(true,"supplement_info")}`;
 	}//if
     }
 
+    _render_ask() {
+	    let ask='';
+	    if ( this.supplement_info && !this.supplement.attributes.supplement.is_name_editable){
+		ask=html`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;
+	    }//if
+	return html`${ask}`;
+    }
+    
     is_on(){
 	let res=true;
 
@@ -112,7 +126,6 @@ export default class DoseHead extends RSDevice{
 	console.debug("Render dose_head n°",this.config.id);
 	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
 	if (this.supplement.attributes.supplement.uid!='null'){
-	    let warning='';
 	    let calibration='';
 	    let color=this.config.color+","+this.config.alpha;
 	    
@@ -123,9 +136,6 @@ export default class DoseHead extends RSDevice{
 	    
 	    if (! this.state_on ){
 		color=off_color+","+this.config.alpha;
-	    }
-	    if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on" && this.get_entity('daily_dose').state > 0){
-		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
 	    }
 	    return html`
                ${this._render_container()}
@@ -139,7 +149,6 @@ export default class DoseHead extends RSDevice{
                   </div>
               </div>
               ${this._render_elements(this.state_on)}
-              ${warning}
               ${calibration}
    	    `;
 	}//if
