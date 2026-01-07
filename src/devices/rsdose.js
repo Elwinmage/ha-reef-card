@@ -186,7 +186,7 @@ export default class RSDose extends RSDevice{
                 <label class="tab-label">${i18n._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
               </td>
               <td>
-                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @input="${this.handleChangedEvent}"></input>
+                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @change="${this.handleChangedEvent}" ></input>
               </td>
            </tr>`;
     }//end of function _editor_head_color
@@ -227,12 +227,12 @@ export default class RSDose extends RSDevice{
 	}
 	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[head]:{[field]:i_val}}}}}}};
 	var newConfig = JSON.parse(JSON.stringify(this._config));
+	
 	try{
 	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
 	}
 	catch (error){
 	    newConfig=merge(newConfig,newVal);
-	    console.debug("merged",newConfig,newVal);
 	}
         const messageEvent = new CustomEvent("config-changed", {
             detail: { config: newConfig },
@@ -347,7 +347,6 @@ export default class RSDose extends RSDevice{
                    .slider.round:before {
                      border-radius: 50%;
                    }
-
                  </style>
                    <form id="heads_colors">
                    <table>
