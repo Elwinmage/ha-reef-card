@@ -4,7 +4,66 @@ export const config = {
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
     "dialogs": {
+	"head_configuration":{
+	    "name":"head_configuration",
+	    "title_key":"iconv._('head_configuration') +' n°'+ this.elt.device.config.id",
+	    "close_cross": true,
+	    "content":[
+		{
+		    "view": "common-button",
+		    "conf": {
+			"type": "common-button",
+			"stateObj": null,
+			"icon": "mdi:cup-water",
+			"tap_action":{
+			    "domain":"redsea_ui",
+			    "action":"dialog",
+			    "data":{"type":"priming"}
+			},
+			"label": "iconv._('priming')",
+			"class": "dialog_button",
+			"css":{
+			    
+			    "margin-bottom":"5px",
+			    "text-align":"center",
+			},
+			"elt.css":{
+			    "background-color":"rgba(0,0,0,0)",
+			}
+		    },
+		},	
+		{
+		    "view": "common-button",
+		    "conf": {
+			"type": "common-button",
+			"stateObj": null,
+			"icon": "mdi:cog-outline",
+			"tap_action":{
+			    "domain":"redsea_ui",
+			    "action":"dialog",
+			    "data":{"type":"head_calibration"}
+			},
+			"label": "iconv._('calibration')",
+			"class": "dialog_button",
+			"css":{
+			},
+			"elt.css":{
+			    "background-color":"rgba(0,0,0,0)",
+			}
+		    },
+		},
+		{
+		    "view": "hui-entities-card",
+		    "conf":{
+			"type":"entities",
+			"entities": [
+			    {"entity":"daily_dose","name":{"type":"entity"}},
+			]
+		    }
+		},
 	
+	    ],
+	},
 	"head_calibration":{
 	    "name":"head_calibration",
 	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
@@ -18,9 +77,8 @@ export const config = {
 			"stateObj":null,
 			"tap_action":[],
 			"elt.css":{
-			    "position":"absolute",
-			    "top":"7%",
-			    "right": "5%",
+			    "width":"30%",
+			    "margin-left":"35%",
 			}
 		    }
 		},
@@ -52,9 +110,8 @@ export const config = {
 			"stateObj":null,
 			"tap_action":[],
 			"elt.css":{
-			    "position":"absolute",
-			    "top":"7%",
-			    "right": "5%",
+			    "width":"30%",
+			    "margin-left":"35%",
 			}
 		    }
 		},
@@ -82,7 +139,6 @@ export const config = {
 		    } 
 		]
 	    }
-	    
 	},
  	"edit_container":{
 	    "name":"edit_container",
@@ -622,7 +678,7 @@ export const config = {
 		    "tap_action": {
 			"domain": "redsea_ui",
 			"action":"dialog",
-			"data": {"type":"auto_dose"}
+			"data": {"type":"head_configuration"}
 		    }
 		},
 		"manual_head":{

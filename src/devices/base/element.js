@@ -90,6 +90,7 @@ export default class MyElement extends LitElement{
 	    elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
 	}
 	// Do not display label
+	console.log("LABEL",config);
 	if ('label' in config){
 	    if (typeof config.label === 'string' ){
 		try {

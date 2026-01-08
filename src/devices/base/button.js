@@ -23,8 +23,12 @@ export class Button extends  MyElement {
 
     _render(style=null){
 	let sclass='button';
+	let icon=null;
 	if ('class' in this.conf){
 	    sclass=this.conf.class;
+	}
+	if('icon' in this.conf){
+	    icon=html`<ha-icon icon="${this.conf.icon}"><ha-icon>`;
 	}
 	return html`
  <style>
@@ -32,7 +36,7 @@ export class Button extends  MyElement {
 background-color: rgba(${this.c},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}" style=${style}>${this.label}</div>
+	    <div class="button" id="${this.conf.name}" style=${style}>${icon}${this.label}</div>
 `;
     }//end of function render
 

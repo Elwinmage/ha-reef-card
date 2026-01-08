@@ -2,6 +2,7 @@ export const dict={
     en:{
 	ask_add_supplement : "Ask for picture",
 	brand_name:"Brand Name",
+	calibration:"Calibration",
 	cancel:"Cancel",
 	canNotFindTranslation: "Can not find translation string: ",
 	days_left: "Days Left",
@@ -16,6 +17,7 @@ export const dict={
 	empty: "Empty",
 	exit: "Done",
 	head: "Head",
+	head_configuration:"Configuration head",
 	heads_colors: "Heads Colors",
 	heads_shortcuts: "Manual Shorcut Doses",
 	last_message: "Hide Last Message",
@@ -33,6 +35,7 @@ export const dict={
     fr:{
 	ask_add_supplement : "Demande d'image",
 	brand_name:"Marque",
+	calibration:"Calibration",
 	cancel:"Annuler",
 	canNotFindTranslation: "Traduction introuvable pour: ",
 	days_left: "Jours restant",
@@ -47,6 +50,7 @@ export const dict={
 	empty: "Vide",
 	exit: "Terminer",
 	head: "Tête",
+	head_configuration:"Configuration tête",
 	heads_colors: "Couleur des têtes",	
 	heads_shortcuts: "Raccourcis doses manuelles",
 	last_message: "Cacher le dernier message",

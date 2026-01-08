@@ -131,7 +131,23 @@ export default class DoseHead extends RSDevice{
 	    
 	    if (this._hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
 		this.state_on=false;
-		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
+		console.log("CALIBRATION",this.config.calibration);
+		let conf={
+		    "image":new URL("./img/configuration.png",import.meta.url),
+		    "type": "click-image",
+		    "class":"calibration",
+		    "stateObj":null,
+		    "tap_action":[
+			{
+			    "domain": "redsea_ui",
+			    "action": "dialog",
+			    "data": {"type":"head_configuration"},
+			} 
+		    ],
+		    "elt.css":this.config.calibration.css
+		};
+		calibration=MyElement.create_element(this._hass,conf,this);
+//		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
 	    }
 	    
 	    if (! this.state_on ){

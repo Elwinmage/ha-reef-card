@@ -262,9 +262,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -855,8 +855,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 $parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
+$parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -953,6 +953,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
         ask_add_supplement: "Ask for picture",
         brand_name: "Brand Name",
+        calibration: "Calibration",
         cancel: "Cancel",
         canNotFindTranslation: "Can not find translation string: ",
         days_left: "Days Left",
@@ -967,6 +968,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         empty: "Empty",
         exit: "Done",
         head: "Head",
+        head_configuration: "Configuration head",
         heads_colors: "Heads Colors",
         heads_shortcuts: "Manual Shorcut Doses",
         last_message: "Hide Last Message",
@@ -984,6 +986,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     fr: {
         ask_add_supplement: "Demande d'image",
         brand_name: "Marque",
+        calibration: "Calibration",
         cancel: "Annuler",
         canNotFindTranslation: "Traduction introuvable pour: ",
         days_left: "Jours restant",
@@ -998,6 +1001,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         empty: "Vide",
         exit: "Terminer",
         head: "T\xeate",
+        head_configuration: "Configuration t\xeate",
         heads_colors: "Couleur des t\xeates",
         heads_shortcuts: "Raccourcis doses manuelles",
         last_message: "Cacher le dernier message",
@@ -1105,6 +1109,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
         if ('stateObj' in config && !config.stateObj) elt.stateObj = null;
         else elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
         // Do not display label
+        console.log("LABEL", config);
         if ('label' in config) {
             if (typeof config.label === 'string') try {
                 label_name = eval(config.label);
@@ -1460,14 +1465,16 @@ class $4492769e229d8dfa$export$353f5b6fc5456de1 extends (0, $1Um3j.default) {
     }
     _render(style = null) {
         let sclass = 'button';
+        let icon = null;
         if ('class' in this.conf) sclass = this.conf.class;
+        if ('icon' in this.conf) icon = (0, $l56HR.html)`<ha-icon icon="${this.conf.icon}"><ha-icon>`;
         return (0, $l56HR.html)`
  <style>
 .button{
 background-color: rgba(${this.c},${this.alpha});
 }
 </style>
-   	    <div class="button" id="${this.conf.name}" style=${style}>${this.label}</div>
+	    <div class="button" id="${this.conf.name}" style=${style}>${icon}${this.label}</div>
 `;
     }
 } // end of class
@@ -2076,24 +2083,28 @@ class Dialog extends (0, $eGUNk.LitElement) {
         this.config = config;
     }
     _render_content(content_conf) {
-        const r_element = customElements.get(content_conf.view);
-        const content = new r_element();
-        // translate from translation_key to entity_id
-        const clone = structuredClone(content_conf.conf);
-        if ("entities" in content_conf.conf) {
-            for(let pos in content_conf.conf.entities)if (typeof clone.entities[pos] == "string") clone.entities[pos] = this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
-            else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
-        } else if ("entity" in content_conf.conf) clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
-        console.debug("HEAD", this.elt.device.config.id);
-        content.setConfig(clone);
-        content.hass = this._hass;
-        content.device = this.elt.device;
+        var content = null;
+        if (content_conf.view == "common-button") content = (0, $1Um3j.default).create_element(this._hass, content_conf.conf, this.elt.device);
+        else {
+            const r_element = customElements.get(content_conf.view);
+            content = new r_element();
+            // translate from translation_key to entity_id
+            const clone = structuredClone(content_conf.conf);
+            if ("entities" in content_conf.conf) {
+                for(let pos in content_conf.conf.entities)if (typeof clone.entities[pos] == "string") clone.entities[pos] = this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
+                else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
+            } else if ("entity" in content_conf.conf) clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
+            console.debug("HEAD", this.elt.device.config.id);
+            content.setConfig(clone);
+            content.hass = this._hass;
+            content.device = this.elt.device;
+        }
         this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
         let iconv = (0, $dPhcg.default);
         let close_conf = {
-            "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
+            "image": new URL("close_cross.svg", import.meta.url),
             "type": "common-button",
             "stateObj": null,
             "tap_action": {
@@ -3613,8 +3624,8 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
 
 
 
-parcelRegister("7YMQG", function(module, exports) {
-module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
+parcelRegister("hXmGm", function(module, exports) {
+module.exports = new URL("close_cross.svg", import.meta.url).toString();
 
 });
 
@@ -3638,7 +3649,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
+    "background_img": new URL("NODEVICE.png", import.meta.url)
 };
 
 
@@ -3697,9 +3708,75 @@ var $5c2Je = parcelRequire("5c2Je");
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
+        "head_configuration": {
+            "name": "head_configuration",
+            "title_key": "iconv._('head_configuration') +' n\xb0'+ this.elt.device.config.id",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "type": "common-button",
+                        "stateObj": null,
+                        "icon": "mdi:cup-water",
+                        "tap_action": {
+                            "domain": "redsea_ui",
+                            "action": "dialog",
+                            "data": {
+                                "type": "priming"
+                            }
+                        },
+                        "label": "iconv._('priming')",
+                        "class": "dialog_button",
+                        "css": {
+                            "margin-bottom": "5px",
+                            "text-align": "center"
+                        },
+                        "elt.css": {
+                            "background-color": "rgba(0,0,0,0)"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "type": "common-button",
+                        "stateObj": null,
+                        "icon": "mdi:cog-outline",
+                        "tap_action": {
+                            "domain": "redsea_ui",
+                            "action": "dialog",
+                            "data": {
+                                "type": "head_calibration"
+                            }
+                        },
+                        "label": "iconv._('calibration')",
+                        "class": "dialog_button",
+                        "css": {},
+                        "elt.css": {
+                            "background-color": "rgba(0,0,0,0)"
+                        }
+                    }
+                },
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "daily_dose",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "head_calibration": {
             "name": "head_calibration",
             "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
@@ -3713,9 +3790,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "stateObj": null,
                         "tap_action": [],
                         "elt.css": {
-                            "position": "absolute",
-                            "top": "7%",
-                            "right": "5%"
+                            "width": "30%",
+                            "margin-left": "35%"
                         }
                     }
                 },
@@ -3772,9 +3848,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "stateObj": null,
                         "tap_action": [],
                         "elt.css": {
-                            "position": "absolute",
-                            "top": "7%",
-                            "right": "5%"
+                            "width": "30%",
+                            "margin-left": "35%"
                         }
                     }
                 },
@@ -4426,7 +4501,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "domain": "redsea_ui",
                         "action": "dialog",
                         "data": {
-                            "type": "auto_dose"
+                            "type": "head_configuration"
                         }
                     }
                 },
@@ -4606,7 +4681,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             style = (0, $l56HR.html)`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
             color = (0, $iXBpj.off_color);
         }
-        if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
+        if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
         return (0, $l56HR.html)`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
@@ -4649,7 +4724,25 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let color = this.config.color + "," + this.config.alpha;
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
-                calibration = (0, $l56HR.html)`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("configuration.b5dbcf16.png", import.meta.url)}'/>`;
+                console.log("CALIBRATION", this.config.calibration);
+                let conf = {
+                    "image": new URL("configuration.png", import.meta.url),
+                    "type": "click-image",
+                    "class": "calibration",
+                    "stateObj": null,
+                    "tap_action": [
+                        {
+                            "domain": "redsea_ui",
+                            "action": "dialog",
+                            "data": {
+                                "type": "head_configuration"
+                            }
+                        }
+                    ],
+                    "elt.css": this.config.calibration.css
+                };
+                calibration = (0, $1Um3j.default).create_element(this._hass, conf, this);
+            //		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
             return (0, $l56HR.html)`
@@ -4673,7 +4766,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let conf = {
                 "type": "click-image",
                 "stateObj": false,
-                "image": new URL("container_add.d3b2ec21.png", import.meta.url),
+                "image": new URL("container_add.png", import.meta.url),
                 "class": "container",
                 "tap_action": {
                     "domain": "redsea_ui",
@@ -4689,7 +4782,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let add_img = (0, $1Um3j.default).create_element(this._hass, conf, this);
             return (0, $l56HR.html)`
    <div class="container" style="${this.get_style(this.config.container)}">
-<!--      <img src='${new URL("container_add.d3b2ec21.png", import.meta.url)}' /> -->
+<!--      <img src='${new URL("container_add.png", import.meta.url)}' /> -->
 ${add_img}
    </div>
 `;
