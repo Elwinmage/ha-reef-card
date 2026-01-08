@@ -160,3 +160,8 @@ export function set_container_volume(elt,hass,shadowRoot){
 	}//for
     }
 }
+
+export function edit_container(elt,hass,shadowRoot){
+    set_container_volume(elt,hass,shadowRoot);
+    
+}

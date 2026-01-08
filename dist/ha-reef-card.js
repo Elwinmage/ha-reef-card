@@ -974,6 +974,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         maintenance: "Maintenance in progress..",
         name: "Name",
         next: "Next",
+        priming: "Priming",
         set_auto_dose: "Auto daily volume",
         set_container_volume: "Container Volume",
         set_manual_head_volume: "Manual volume",
@@ -1004,6 +1005,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         maintenance: "Maintenance en cours...",
         name: "Nom",
         next: "Suivant",
+        priming: "Amor\xe7age",
         set_auto_dose: "Dose automatique journali\xe8re",
         set_container_volume: "Volume du suppl\xe9ment",
         set_manual_head_volume: "Volume manuel",
@@ -2101,14 +2103,19 @@ class Dialog extends (0, $eGUNk.LitElement) {
             "label": (0, $dPhcg.default)._("exit"),
             "class": "dialog_button",
             "elt.css": {
-                "background-color": "rgb(0,0,0,0)"
+                "background-color": "rgba(0,0,0,0)"
             }
         };
         if (this.to_render != null) {
             console.debug("Render dialog", this.to_render);
             let submit_conf = close_conf;
             let cancel_conf = null;
-            if ("validate" in this.to_render) submit_conf = this.to_render.validate;
+            if ("validate" in this.to_render) {
+                this.to_render.validate['elt.css'] = {
+                    "background-color": "rgba(0,0,0,0)"
+                };
+                submit_conf = this.to_render.validate;
+            }
             if ("cancel" in this.to_render && this.to_render.cancel) {
                 cancel_conf = close_conf;
                 cancel_conf.label = (0, $dPhcg.default)._("cancel");
@@ -2307,6 +2314,7 @@ parcelRegister("2jsWu", function(module, exports) {
 $parcel$export(module.exports, "set_manual_head_volume", () => $1af3ce7daff10017$export$d68cb382792d9a29);
 $parcel$export(module.exports, "add_supplement", () => $1af3ce7daff10017$export$7ab8c25a3e35dc72);
 $parcel$export(module.exports, "set_container_volume", () => $1af3ce7daff10017$export$baf1f126b5020b70);
+$parcel$export(module.exports, "edit_container", () => $1af3ce7daff10017$export$e2579b4ad0cd2fb2);
 parcelRequire("j0ZcV");
 
 var $bOVIO = parcelRequire("bOVIO");
@@ -2486,6 +2494,9 @@ function $1af3ce7daff10017$export$baf1f126b5020b70(elt, hass, shadowRoot) {
         let content = (0, $1Um3j.default).create_element(hass, conf, elt.device);
         shadowRoot.querySelector("#dialog-content").appendChild(content);
     } //for
+}
+function $1af3ce7daff10017$export$e2579b4ad0cd2fb2(elt, hass, shadowRoot) {
+    $1af3ce7daff10017$export$baf1f126b5020b70(elt, hass, shadowRoot);
 }
 
 });
@@ -3689,8 +3700,124 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
+        "head_calibration": {
+            "name": "head_calibration",
+            "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "click-image",
+                    "conf": {
+                        "image": '/hacsfiles/ha-reef-card/head_calibration.png',
+                        "type": "clic-_image",
+                        "stateObj": null,
+                        "tap_action": [],
+                        "elt.css": {
+                            "position": "absolute",
+                            "top": "7%",
+                            "right": "5%"
+                        }
+                    }
+                },
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "start_calibration",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "calibration_dose_value",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "set_calibration_value",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "test_calibration",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "end_calibration",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "priming": {
+            "name": "priming",
+            "title_key": "iconv._('priming') +' n\xb0'+ this.elt.device.config.id",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "click-image",
+                    "conf": {
+                        "image": '/hacsfiles/ha-reef-card/priming.png',
+                        "type": "clic-_image",
+                        "stateObj": null,
+                        "tap_action": [],
+                        "elt.css": {
+                            "position": "absolute",
+                            "top": "7%",
+                            "right": "5%"
+                        }
+                    }
+                },
+                {
+                    "view": "hui-entities-card",
+                    "conf": {
+                        "type": "entities",
+                        "entities": [
+                            {
+                                "entity": "start_priming",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            },
+                            {
+                                "entity": "stop_priming",
+                                "name": {
+                                    "type": "entity"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "validate": {
+                "label": "iconv._('next')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "head_calibration"
+                        }
+                    }
+                ]
+            }
+        },
         "edit_container": {
             "name": "edit_container",
+            "extend": "dose_head_dialog",
             "title_key": "iconv._('dialog_edit_container') +' n\xb0'+ this.elt.device.config.id",
             "close_cross": false,
             "content": [
@@ -3852,7 +3979,22 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         ]
                     }
                 }
-            ]
+            ],
+            "validate": {
+                "label": "iconv._('next')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "priming"
+                        }
+                    }
+                ]
+            }
         },
         "set_manual_head_volume": {
             "name": "set_manual_head_volume",

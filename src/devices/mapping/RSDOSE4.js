@@ -4,8 +4,89 @@ export const config = {
     "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
     "heads_nb": 4,
     "dialogs": {
-	"edit_container":{
+	
+	"head_calibration":{
+	    "name":"head_calibration",
+	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "close_cross": true,
+	    "content":[
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/head_calibration.png',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[],
+			"elt.css":{
+			    "position":"absolute",
+			    "top":"7%",
+			    "right": "5%",
+			}
+		    }
+		},
+		{
+		    "view": "hui-entities-card",
+		    "conf":{
+			"type":"entities",
+			"entities": [
+			    {"entity":"start_calibration","name":{"type":"entity"}},
+			    {"entity":"calibration_dose_value","name":{"type":"entity"}},
+			    {"entity":"set_calibration_value","name":{"type":"entity"}},
+			    {"entity":"test_calibration","name":{"type":"entity"}},
+			    {"entity":"end_calibration","name":{"type":"entity"}},
+			]
+		    }
+		},
+	    ],
+	},
+ 	"priming":{
+	    "name":"priming",
+	    "title_key":"iconv._('priming') +' n°'+ this.elt.device.config.id",
+	    "close_cross": true,
+	    "content":[
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/priming.png',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[],
+			"elt.css":{
+			    "position":"absolute",
+			    "top":"7%",
+			    "right": "5%",
+			}
+		    }
+		},
+		{
+		    "view": "hui-entities-card",
+		    "conf":{
+			"type":"entities",
+			"entities": [
+			    {"entity":"start_priming","name":{"type":"entity"}},
+			    {"entity":"stop_priming","name":{"type":"entity"}},
+			]
+		    }
+		},
+	    ],
+	    "validate": {
+		"label": "iconv._('next')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain": "redsea_ui",
+			"action": "dialog",
+			"data": {"type":"head_calibration"},
+		    } 
+		]
+	    }
+	    
+	},
+ 	"edit_container":{
 	    "name":"edit_container",
+	    "extend":"dose_head_dialog",
 	    "title_key":"iconv._('dialog_edit_container') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[
@@ -119,8 +200,21 @@ export const config = {
 			]
 		    }
 		}
-
 	    ],
+	    "validate": {
+		"label": "iconv._('next')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain": "redsea_ui",
+			"action": "dialog",
+			"data": {"type":"priming"},
+		    } 
+		]
+	    }
+	    
 	},
  	"set_manual_head_volume":{
 	    "name": "set_manual_head_volume",

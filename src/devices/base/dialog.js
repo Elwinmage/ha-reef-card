@@ -108,7 +108,7 @@ export class Dialog extends  LitElement {
 	    "label": i18n._("exit"),
 	    "class": "dialog_button",
 	    "elt.css":{
-		"background-color":"rgb(0,0,0,0)",
+		"background-color":"rgba(0,0,0,0)",
 	    }
 	};
 
@@ -117,6 +117,7 @@ export class Dialog extends  LitElement {
 	    let submit_conf=close_conf;
 	    let cancel_conf=null;
 	    if("validate" in this.to_render){
+		this.to_render.validate['elt.css']={"background-color":"rgba(0,0,0,0)"};
 		submit_conf=this.to_render.validate;
 	    }
 	    if("cancel" in this.to_render && this.to_render.cancel){
