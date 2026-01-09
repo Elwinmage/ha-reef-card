@@ -1178,6 +1178,7 @@ class MyElement extends (0, $eGUNk.LitElement) {
                         composed: true,
                         detail: {
                             type: action.data.type,
+                            overload_quit: action.data.overload_quit,
                             elt: this
                         }
                     }));
@@ -2058,22 +2059,32 @@ class Dialog extends (0, $eGUNk.LitElement) {
         this.config = null;
         this.elt = null;
         this.to_render = null;
+        this.overload_quit = null;
     }
     init(hass, shadowRoot) {
         this._hass = hass;
         this._shadowRoot = shadowRoot;
     }
-    display(type, elt = null) {
+    display(conf) {
         let box = this._shadowRoot.querySelector("#window-mask");
-        this.elt = elt;
-        this.to_render = this.config[type];
+        this.elt = conf.elt;
+        this.to_render = this.config[conf.type];
+        this.overload_quit = conf.overload_quit;
         this.render();
         box.style.display = "flex";
     }
     quit() {
-        this._shadowRoot.querySelector("#window-mask").style.display = "none";
-        this.elt = null;
-        this.to_render = null;
+        if (this.overload_quit) {
+            var event = {
+                type: this.overload_quit,
+                elt: this.elt
+            };
+            this.display(event);
+        } else {
+            this._shadowRoot.querySelector("#window-mask").style.display = "none";
+            this.elt = null;
+            this.to_render = null;
+        }
     }
     set hass(obj) {
         this._hass = obj;
@@ -3714,7 +3725,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_configuration": {
             "name": "head_configuration",
             "title_key": "iconv._('head_configuration') +' n\xb0'+ this.elt.device.config.id",
-            "close_cross": true,
+            "close_cross": false,
             "content": [
                 {
                     "view": "common-button",
@@ -3726,7 +3737,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             "domain": "redsea_ui",
                             "action": "dialog",
                             "data": {
-                                "type": "priming"
+                                "type": "priming",
+                                "overload_quit": "head_configuration"
                             }
                         },
                         "label": "iconv._('priming')",
@@ -3750,7 +3762,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             "domain": "redsea_ui",
                             "action": "dialog",
                             "data": {
-                                "type": "head_calibration"
+                                "type": "head_calibration",
+                                "overload_quit": "head_configuration"
                             }
                         },
                         "label": "iconv._('calibration')",
@@ -3780,7 +3793,7 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         "head_calibration": {
             "name": "head_calibration",
             "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
-            "close_cross": true,
+            "close_cross": false,
             "content": [
                 {
                     "view": "click-image",
@@ -4449,9 +4462,8 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "target": "save_initial_container_volume",
                     "type": "progress-bar",
                     "class": "pg-container",
-                    //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
                     "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-                    "disabled_if": "this.get_entity('slm').state=='off'",
+                    "disabled_if": "this.get_entity('slm').state=='off' ||this.get_entity('daily_dose').state==0",
                     "css": {
                         "position": "absolute",
                         "transform": "rotate(-90deg)",
@@ -4742,7 +4754,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
                     "elt.css": this.config.calibration.css
                 };
                 calibration = (0, $1Um3j.default).create_element(this._hass, conf, this);
-            //		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
             }
             if (!this.state_on) color = (0, $iXBpj.off_color) + "," + this.config.alpha;
             return (0, $l56HR.html)`
@@ -4760,9 +4771,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
               ${calibration}
    	    `;
         } else {
-            // TODO: add button for new supplement
-            // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
-            //  labels: enhancement rsdose
             let conf = {
                 "type": "click-image",
                 "stateObj": false,
@@ -4781,11 +4789,9 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             };
             let add_img = (0, $1Um3j.default).create_element(this._hass, conf, this);
             return (0, $l56HR.html)`
-   <div class="container" style="${this.get_style(this.config.container)}">
-<!--      <img src='${new URL("container_add.png", import.meta.url)}' /> -->
-${add_img}
-   </div>
-`;
+                   <div class="container" style="${this.get_style(this.config.container)}">
+                     ${add_img}
+                   </div>`;
         } //else
     }
 }
@@ -5314,7 +5320,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         }
     }
     _handle_display_dialog(event) {
-        this._dialog_box.display(event.detail.type, event.detail.elt);
+        this._dialog_box.display(event.detail);
     }
     /*
      * RENDER

@@ -147,7 +147,6 @@ export default class DoseHead extends RSDevice{
 		    "elt.css":this.config.calibration.css
 		};
 		calibration=MyElement.create_element(this._hass,conf,this);
-//		calibration=html`<img class='calibration' style="${this.get_style(this.config.calibration)}" src='${new URL("./img/configuration.png",import.meta.url)}'/>`;
 	    }
 	    
 	    if (! this.state_on ){
@@ -169,9 +168,7 @@ export default class DoseHead extends RSDevice{
    	    `;
 	}//if
 	else {
-	    // TODO: add button for new supplement
-	    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/24
-	    //  labels: enhancement rsdose
+
 	    let conf={
 		"type": "click-image",
 		"stateObj": false,
@@ -189,11 +186,9 @@ export default class DoseHead extends RSDevice{
 	    };
 	    let add_img=MyElement.create_element(this._hass,conf,this);
 	    return html`
-   <div class="container" style="${this.get_style(this.config.container)}">
-<!--      <img src='${new URL("./img/container_add.png",import.meta.url)}' /> -->
-${add_img}
-   </div>
-`;
+                   <div class="container" style="${this.get_style(this.config.container)}">
+                     ${add_img}
+                   </div>`;
 	}//else
     }
 };

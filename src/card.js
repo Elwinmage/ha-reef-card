@@ -63,7 +63,7 @@ export class ReefCard extends LitElement {
     }
 
     _handle_display_dialog(event){
-	this._dialog_box.display(event.detail.type,event.detail.elt);
+	this._dialog_box.display(event.detail);
     }//end of function - _handle_display_dialog
     
     /*

@@ -38,6 +38,7 @@ export class Dialog extends  LitElement {
 	this.config=null;
 	this.elt=null;
 	this.to_render=null;
+	this.overload_quit=null;
     }//end of constructor
 
     init(hass,shadowRoot){
@@ -46,19 +47,25 @@ export class Dialog extends  LitElement {
     }
     
 
-    display(type,elt=null){
+    display(conf){
 	let box=this._shadowRoot.querySelector("#window-mask");
-	this.elt=elt;
-	this.to_render=this.config[type];
+	this.elt=conf.elt;
+	this.to_render=this.config[conf.type];
+	this.overload_quit=conf.overload_quit;
 	this.render();
 	box.style.display="flex";
     }
 
     quit(){
-	this._shadowRoot.querySelector("#window-mask").style.display="none";
-	this.elt=null;
-	this.to_render=null;
-	
+	if (this.overload_quit){
+	    var event={type:this.overload_quit,elt:this.elt};
+	    this.display(event);
+	}
+	else {
+	    this._shadowRoot.querySelector("#window-mask").style.display="none";
+	    this.elt=null;
+	    this.to_render=null;
+	}
     }
 
     set hass(obj){

@@ -201,6 +201,7 @@ export default class MyElement extends LitElement{
 				    composed: true,
 				    detail: {
 					type: action.data.type,
+					overload_quit:action.data.overload_quit,
 					elt: this,
 				    }
 				}

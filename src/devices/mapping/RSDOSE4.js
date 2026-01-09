@@ -7,7 +7,7 @@ export const config = {
 	"head_configuration":{
 	    "name":"head_configuration",
 	    "title_key":"iconv._('head_configuration') +' n°'+ this.elt.device.config.id",
-	    "close_cross": true,
+	    "close_cross": false,
 	    "content":[
 		{
 		    "view": "common-button",
@@ -18,19 +18,21 @@ export const config = {
 			"tap_action":{
 			    "domain":"redsea_ui",
 			    "action":"dialog",
-			    "data":{"type":"priming"}
+			    "data":{
+				"type":"priming",
+				"overload_quit": "head_configuration",
+				},
 			},
 			"label": "iconv._('priming')",
 			"class": "dialog_button",
 			"css":{
-			    
 			    "margin-bottom":"5px",
 			    "text-align":"center",
 			},
 			"elt.css":{
 			    "background-color":"rgba(0,0,0,0)",
 			}
-		    },
+		    }
 		},	
 		{
 		    "view": "common-button",
@@ -41,7 +43,10 @@ export const config = {
 			"tap_action":{
 			    "domain":"redsea_ui",
 			    "action":"dialog",
-			    "data":{"type":"head_calibration"}
+			    "data":{
+				"type":"head_calibration",
+				"overload_quit": "head_configuration",
+			    }
 			},
 			"label": "iconv._('calibration')",
 			"class": "dialog_button",
@@ -67,7 +72,7 @@ export const config = {
 	"head_calibration":{
 	    "name":"head_calibration",
 	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
-	    "close_cross": true,
+	    "close_cross": false,
 	    "content":[
 		{
 		    "view": "click-image",
@@ -626,9 +631,8 @@ export const config = {
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
 		    "class":"pg-container",
-		    //		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
 		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
-		    "disabled_if": "this.get_entity('slm').state=='off'",
+		    "disabled_if": "this.get_entity('slm').state=='off' ||this.get_entity('daily_dose').state==0",
 		    "css":{
 			"position":"absolute",
 			"transform":"rotate(-90deg)",
