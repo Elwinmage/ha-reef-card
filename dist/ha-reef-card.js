@@ -99,11 +99,10 @@ class RSDevice extends (0, $eGUNk.LitElement) {
         let re_render = false;
         for(let element in this._elements){
             let elt = this._elements[element];
-            /*	    if ('master' in elt.conf && elt.conf.master){
-		if(elt.has_changed(obj)){
-		    re_render=true;
-		}
-	    }*/ elt.hass = obj;
+            if ('master' in elt.conf && elt.conf.master) {
+                if (elt.has_changed(obj)) re_render = true;
+            }
+            elt.hass = obj;
         }
         if (re_render) {
             this.to_render = true;
@@ -956,6 +955,14 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         calibration: "Calibration",
         cancel: "Cancel",
         canNotFindTranslation: "Can not find translation string: ",
+        day_1: 'Monday',
+        day_2: 'Tuesday',
+        day_3: 'Wednesday',
+        day_4: 'Thrusday',
+        day_5: 'Friday',
+        day_6: 'Saturday',
+        day_7: 'Sunday',
+        days: "Days",
         days_left: "Days Left",
         delete: "Delete",
         dialog_add_supplement_title: "Add new supplement to head",
@@ -974,14 +981,29 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         last_message: "Hide Last Message",
         last_alert_message: "Hide Last Alert Message",
         maintenance: "Maintenance in progress..",
+        min: "Minimum",
+        minutes: "min",
         name: "Name",
         next: "Next",
         priming: "Priming",
         set_auto_dose: "Auto daily volume",
         set_container_volume: "Container Volume",
         set_manual_head_volume: "Manual volume",
+        schedule: "Schedule type",
         short_name: "Short Name",
-        sizes: "Sizes"
+        sizes: "Sizes",
+        speed: "Speed",
+        whisper: "Whisper",
+        regular: "Regular",
+        quick: "Quick",
+        single: "Single",
+        custom: "Custom",
+        hourly: "Hourly",
+        timer: "Timer",
+        hour: "Hour",
+        st: "Start",
+        end: "End",
+        nd: "Number of doses"
     },
     fr: {
         ask_add_supplement: "Demande d'image",
@@ -989,6 +1011,14 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         calibration: "Calibration",
         cancel: "Annuler",
         canNotFindTranslation: "Traduction introuvable pour: ",
+        day_1: 'Lundi',
+        day_2: 'Mardi',
+        day_3: 'Mercredi',
+        day_4: 'Jeudi',
+        day_5: 'Vendredi',
+        day_6: 'Samedi',
+        day_7: 'Dimanche',
+        days: "Jours",
         days_left: "Jours restant",
         delete: "Supprimer",
         dialog_add_supplement_title: "Nouveau Suppl\xe9ment pour la t\xeate",
@@ -1007,14 +1037,29 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         last_message: "Cacher le dernier message",
         last_alert_message: "Cacher le dernier message d'alerte",
         maintenance: "Maintenance en cours...",
+        min: "Minimum",
+        minutes: "min",
         name: "Nom",
         next: "Suivant",
         priming: "Amor\xe7age",
         set_auto_dose: "Dose automatique journali\xe8re",
         set_container_volume: "Volume du suppl\xe9ment",
         set_manual_head_volume: "Volume manuel",
+        schedule: "Type de plannification",
         short_name: "Nom court",
-        sizes: "Tailles"
+        sizes: "Tailles",
+        speed: "Vitesse",
+        st: "D\xe9but",
+        end: "Fin",
+        whisper: "Silencieux",
+        regular: "Standard",
+        quick: "Turbo",
+        single: "Unique",
+        custom: "Personnalid\xe9",
+        hourly: "Horaire",
+        timer: "Minuteur",
+        hour: "Heure",
+        nd: "Nombre de doses"
     }
 };
 
@@ -1096,7 +1141,6 @@ class MyElement extends (0, $eGUNk.LitElement) {
     }
     static create_element(hass, config, device) {
         let iconv = (0, $dPhcg.default);
-        console.log("create element", config.type, config);
         let Element = customElements.get(config.type);
         let label_name = '';
         let elt = new Element();
@@ -1109,7 +1153,6 @@ class MyElement extends (0, $eGUNk.LitElement) {
         if ('stateObj' in config && !config.stateObj) elt.stateObj = null;
         else elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
         // Do not display label
-        console.log("LABEL", config);
         if ('label' in config) {
             if (typeof config.label === 'string') try {
                 label_name = eval(config.label);
@@ -1152,8 +1195,6 @@ class MyElement extends (0, $eGUNk.LitElement) {
         return new Promise((resolve)=>setTimeout(resolve, ms));
     }
     render() {
-        if (this.stateObj) console.debug("render element", this.stateObj.entity_id);
-        else console.debug("render element", this.conf.name);
         let value = null;
         if (this.stateObj != null) value = this.stateObj.state;
         if ('disabled_if' in this.conf && eval(this.conf.disabled_if)) return (0, $l56HR.html)`<br />`;
@@ -1257,6 +1298,10 @@ $parcel$export(module.exports, "hexToRgb", () => $038fea56b681b6a5$export$5a544e
 $parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c4a771c46ef);
 $parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
 $parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
+$parcel$export(module.exports, "create_select", () => $038fea56b681b6a5$export$21409bb9e51c5265);
+$parcel$export(module.exports, "create_hour", () => $038fea56b681b6a5$export$abdf5bd531775bef);
+
+var $dPhcg = parcelRequire("dPhcg");
 class $038fea56b681b6a5$export$2e2bcd8739ae039 {
     constructor(hass){
         this._hass = hass;
@@ -1337,6 +1382,41 @@ function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
     let minutes = (time - seconds) / 60 % 60;
     let hours = (time - seconds - minutes * 60) / 3600;
     return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+}
+function $038fea56b681b6a5$export$21409bb9e51c5265(shadowRoot, id, options, selected = null, translation = true, suffix = '') {
+    var div = shadowRoot.createElement('div');
+    var label = shadowRoot.createElement('label');
+    label.htmlFor = id;
+    label.innerHTML = (0, $dPhcg.default)._(id);
+    var node = shadowRoot.createElement("SELECT");
+    node.id = id;
+    for (let option of options){
+        var opt = document.createElement('option');
+        opt.value = option;
+        if (translation) opt.innerHTML = (0, $dPhcg.default)._(option) + suffix;
+        else opt.innerHTML = option + suffix;
+        if (selected != null && selected == option) opt.selected = true;
+        node.appendChild(opt);
+    } //for
+    div.appendChild(label);
+    div.appendChild(node);
+    return div;
+}
+function $038fea56b681b6a5$var$timeToString(time) {
+    return String(Math.floor(time / 60)).padStart(2, '0') + ':' + String(Math.floor(time % 60)).padStart(2, "0");
+}
+function $038fea56b681b6a5$export$abdf5bd531775bef(shadowRoot, id, hour = 0) {
+    var div = shadowRoot.createElement('div');
+    var label = shadowRoot.createElement('label');
+    label.htmlFor = id;
+    label.innerHTML = (0, $dPhcg.default)._(id);
+    var node = shadowRoot.createElement("input");
+    node.type = "time";
+    node.id = id;
+    node.value = $038fea56b681b6a5$var$timeToString(hour);
+    div.appendChild(label);
+    div.appendChild(node);
+    return div;
 }
 
 });
@@ -1429,8 +1509,10 @@ cursor: pointer;
   top: -25%;
   aspect-ratio: 1/1;
   border-radius: 30px;
-  background-color: rgba(255,20,20,1);
+  background-color: rgba(250,250,250,1);
+//  background-color: rgba(255,20,20,1);
   width: 60%;
+
 }
 
 .switch_button{
@@ -2043,7 +2125,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
     ];
     static get properties() {
         return {
-            _hass: {},
+            //	    _hass:{},
             _shadowRoot: {},
             to_render: {},
             elt: {}
@@ -2058,6 +2140,8 @@ class Dialog extends (0, $eGUNk.LitElement) {
         this._shadowRoot = null;
         this.config = null;
         this.elt = null;
+        this.elts = [];
+        this.extends_to_re_render = [];
         this.to_render = null;
         this.overload_quit = null;
     }
@@ -2088,7 +2172,12 @@ class Dialog extends (0, $eGUNk.LitElement) {
     }
     set hass(obj) {
         this._hass = obj;
-        this.render();
+        if (this.elts) for (let elt of this.elts)elt.hass = obj;
+        if (this.extends_to_re_render) {
+            let dose_head_dialog = $2jsWu;
+            for (let elt of this.extends_to_re_render)eval(elt);
+        }
+    //	this.render();
     }
     set_conf(config) {
         this.config = config;
@@ -2096,7 +2185,13 @@ class Dialog extends (0, $eGUNk.LitElement) {
     _render_content(content_conf) {
         var content = null;
         if (content_conf.view == "common-button") content = (0, $1Um3j.default).create_element(this._hass, content_conf.conf, this.elt.device);
-        else {
+        else if (content_conf.view == "extend") {
+            let dose_head_dialog = $2jsWu;
+            var cmd = content_conf.extend + '.' + this.to_render.name + "(this.elt,this._hass,this._shadowRoot)";
+            eval(cmd);
+            if (content_conf.re_render) this.extends_to_re_render.push(cmd);
+            return;
+        } else {
             const r_element = customElements.get(content_conf.view);
             content = new r_element();
             // translate from translation_key to entity_id
@@ -2105,11 +2200,11 @@ class Dialog extends (0, $eGUNk.LitElement) {
                 for(let pos in content_conf.conf.entities)if (typeof clone.entities[pos] == "string") clone.entities[pos] = this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
                 else clone.entities[pos].entity = this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
             } else if ("entity" in content_conf.conf) clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
-            console.debug("HEAD", this.elt.device.config.id);
             content.setConfig(clone);
             content.hass = this._hass;
             content.device = this.elt.device;
         }
+        this.elts.push(content);
         this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     render() {
@@ -2129,7 +2224,6 @@ class Dialog extends (0, $eGUNk.LitElement) {
             }
         };
         if (this.to_render != null) {
-            console.debug("Render dialog", this.to_render);
             let submit_conf = close_conf;
             let cancel_conf = null;
             if ("validate" in this.to_render) {
@@ -2160,20 +2254,15 @@ class Dialog extends (0, $eGUNk.LitElement) {
             }
             // Title
             this._shadowRoot.querySelector("#dialog-title").innerHTML = eval(this.to_render.title_key);
-            //special content for rsdose 
-            let dose_head_dialog = $2jsWu;
-            if ("extend" in this.to_render) {
-                var cmd = this.to_render.extend + '.' + this.to_render.name + "(this.elt,this._hass,this._shadowRoot)";
-                eval(cmd);
-            }
             // Content
+            this.elts = [];
+            this.extends_to_re_render = [];
             this.to_render.content.map((c)=>this._render_content(c));
             // Submit
             let submit_button = (0, $1Um3j.default).create_element(this._hass, submit_conf, this.elt.device);
             this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
             //Cancel
             if (cancel_conf) {
-                console.log("display cancel");
                 let cancel_button = (0, $1Um3j.default).create_element(this._hass, cancel_conf, this.elt.device);
                 this._shadowRoot.querySelector("#dialog-cancel").appendChild(cancel_button);
             }
@@ -2285,6 +2374,52 @@ text-align:left;
 margin-left: 2%;
 }
 
+form.schedule{
+  margin-top:10px;
+  padding-left:5px;
+  padding-right: 5px;
+  padding-top:5px;
+  padding-bottom:5px;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+}
+
+p.schedule_header{
+  font-weight: bold;
+}
+
+select{
+}
+
+.days{
+    margin-left:0px;
+    margin-right:0px;
+    width: 2em;
+    height: 2em;
+    background-color: white;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+}
+.days:checked{
+  background-color:#2196F3;
+}
+
+label.days{
+  position: relative;
+  left: 19px;
+  top: 2px;
+  background-color: rgba(0,0,0,0);
+  border: none;
+}
+
+label.days:hover{
+cursor:pointer;
+}
 `;
 
 });
@@ -2333,19 +2468,22 @@ img:hover{
 
 parcelRegister("2jsWu", function(module, exports) {
 
-$parcel$export(module.exports, "set_manual_head_volume", () => $1af3ce7daff10017$export$d68cb382792d9a29);
-$parcel$export(module.exports, "add_supplement", () => $1af3ce7daff10017$export$7ab8c25a3e35dc72);
-$parcel$export(module.exports, "set_container_volume", () => $1af3ce7daff10017$export$baf1f126b5020b70);
-$parcel$export(module.exports, "edit_container", () => $1af3ce7daff10017$export$e2579b4ad0cd2fb2);
+$parcel$export(module.exports, "set_manual_head_volume", () => set_manual_head_volume);
+$parcel$export(module.exports, "add_supplement", () => add_supplement);
+$parcel$export(module.exports, "set_container_volume", () => set_container_volume);
+$parcel$export(module.exports, "edit_container", () => edit_container);
+$parcel$export(module.exports, "head_configuration", () => head_configuration);
 parcelRequire("j0ZcV");
 
 var $bOVIO = parcelRequire("bOVIO");
 
 var $dPhcg = parcelRequire("dPhcg");
 
+var $iXBpj = parcelRequire("iXBpj");
+
 var $1Um3j = parcelRequire("1Um3j");
 
-function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
+function set_manual_head_volume(elt, hass, shadowRoot) {
     if (elt.device.config.shortcut) for (let shortcut of elt.device.config.shortcut.split(',')){
         let conf = {
             "label": shortcut + "mL",
@@ -2388,10 +2526,12 @@ function $1af3ce7daff10017$export$d68cb382792d9a29(elt, hass, shadowRoot) {
         shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
 }
-function $1af3ce7daff10017$export$7ab8c25a3e35dc72(elt, hass, shadowRoot) {
+function add_supplement(elt, hass, shadowRoot) {
     let selected_supplement = elt.device.get_entity("supplements").state;
     let supplement = (0, $bOVIO.default).get_supplement(selected_supplement);
     let img = '/hacsfiles/ha-reef-card/generic_container.supplement.png';
+    let cc = shadowRoot.querySelector("#add-supplement");
+    if (cc != null) cc.remove();
     if (supplement) {
         let t_img = '/hacsfiles/ha-reef-card/' + supplement.uid + '.supplement.png';
         var http = new XMLHttpRequest();
@@ -2413,6 +2553,7 @@ function $1af3ce7daff10017$export$7ab8c25a3e35dc72(elt, hass, shadowRoot) {
         content.setConfig(conf);
         let div = document.createElement("div");
         div.style.cssText = "display: inline-block";
+        div.id = "add-supplement";
         shadowRoot.querySelector("#dialog-content").appendChild(div);
         div.appendChild(content);
         let infos = document.createElement("div");
@@ -2456,10 +2597,13 @@ function $1af3ce7daff10017$export$7ab8c25a3e35dc72(elt, hass, shadowRoot) {
         content.setConfig(conf);
         content.hass = hass;
         content.device = elt.device;
-        shadowRoot.querySelector("#dialog-content").appendChild(content);
+        let div = document.createElement("div");
+        div.id = "add-supplement";
+        div.appendChild(content);
+        shadowRoot.querySelector("#dialog-content").appendChild(div);
     }
 }
-function $1af3ce7daff10017$export$baf1f126b5020b70(elt, hass, shadowRoot) {
+function set_container_volume(elt, hass, shadowRoot) {
     let selected_supplement = elt.device.get_entity("supplement").state;
     let supplement = (0, $bOVIO.default).get_supplement(selected_supplement);
     if (!supplement) {
@@ -2517,8 +2661,108 @@ function $1af3ce7daff10017$export$baf1f126b5020b70(elt, hass, shadowRoot) {
         shadowRoot.querySelector("#dialog-content").appendChild(content);
     } //for
 }
-function $1af3ce7daff10017$export$e2579b4ad0cd2fb2(elt, hass, shadowRoot) {
-    $1af3ce7daff10017$export$baf1f126b5020b70(elt, hass, shadowRoot);
+function edit_container(elt, hass, shadowRoot) {
+    set_container_volume(elt, hass, shadowRoot);
+}
+function head_configuration(elt, hass, shadowRoot, schedule = null) {
+    var content = null;
+    if (schedule == null || schedule.type == elt.device.get_entity('schedule_head').attributes.schedule.type) schedule = elt.device.get_entity('schedule_head').attributes.schedule;
+    var form = shadowRoot.querySelector("#schedule");
+    if (form) form.remove();
+    form = shadowRoot.createElement("form");
+    form.className = "schedule";
+    form.id = "schedule";
+    var schedule_type = $iXBpj.create_select(shadowRoot, 'schedule', [
+        'single',
+        'custom',
+        'hourly',
+        'timer'
+    ], schedule.type);
+    schedule_type.addEventListener("change", function(event) {
+        handle_schedule_type_change(event, elt, hass, shadowRoot);
+    });
+    form.appendChild(schedule_type);
+    content = eval("head_configuration_schedule_" + schedule.type + "(schedule,elt,hass,shadowRoot,form);");
+    shadowRoot.querySelector("#dialog-content").appendChild(content);
+}
+function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, form) {
+    var node = null;
+    //header
+    node = shadowRoot.createElement("label");
+    node.innerHTML = (0, $dPhcg.default)._("days");
+    form.appendChild(node);
+    //days
+    for(let day = 1; day < 8; day++){
+        let name = "day_" + String(day);
+        node = shadowRoot.createElement("input");
+        node.className = "days";
+        node.type = "checkbox";
+        node.value = name;
+        node.id = name;
+        node.checked = true;
+        let label = shadowRoot.createElement("label");
+        label.innerHTML = (0, $dPhcg.default)._("day_" + String(day))[0];
+        label.className = "days";
+        label.htmlFor = name;
+        form.appendChild(label);
+        form.appendChild(node);
+    }
+    //time
+    form.appendChild($iXBpj.create_hour(shadowRoot, 'hour', schedule.time));
+    //mode
+    form.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
+        'whisper',
+        'regular',
+        'quick'
+    ], schedule.mode));
+    return form;
+}
+function head_configuration_schedule_custom(schedule, elt, hass, shadowRoot, form) {
+    console.log("INTERVALS", schedule.intervals);
+    if (!schedule.intervals) schedule.intervals = [
+        {
+            st: 0,
+            end: 1440,
+            nd: 10,
+            mode: 'regular'
+        }
+    ];
+    for (var interval of schedule.intervals)head_configuration_intervals(shadowRoot, interval, form);
+    return form;
+}
+function head_configuration_intervals(shadowRoot, interval, form) {
+    let start = $iXBpj.create_hour(shadowRoot, 'st', interval.st);
+    let end = $iXBpj.create_hour(shadowRoot, 'end', interval.nd);
+    let nd = $iXBpj.create_select(shadowRoot, 'nd', Array(24).fill().map((x, i)=>i + 1), interval.nd, false);
+    form.appendChild(start);
+    form.appendChild(end);
+    form.appendChild(nd);
+    form.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
+        'whisper',
+        'regular',
+        'quick'
+    ], interval.mode));
+}
+function head_configuration_schedule_hourly(schedule, elt, hass, shadowRoot, form) {
+    //let min=com.create_select(shadowRoot,'min', [0,10,20,30,40,50],schedule.min,false,"min");
+    let min = $iXBpj.create_select(shadowRoot, 'min', Array(6).fill().map((x, i)=>i * 10), schedule.min, false, "min");
+    form.appendChild(min);
+    //mode
+    form.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
+        'whisper',
+        'regular',
+        'quick'
+    ], schedule.mode));
+    return form;
+}
+function head_configuration_schedule_timer(schedule, elt, hass, shadowRoot, form) {
+    return form;
+}
+function handle_schedule_type_change(event, elt, hass, shadowRoot) {
+    var schedule = {
+        type: event.target.value
+    };
+    head_configuration(elt, hass, shadowRoot, schedule);
 }
 
 });
@@ -3787,6 +4031,10 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             }
                         ]
                     }
+                },
+                {
+                    "view": "extend",
+                    "extend": "dose_head_dialog"
                 }
             ]
         },
@@ -3905,10 +4153,13 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         "edit_container": {
             "name": "edit_container",
-            "extend": "dose_head_dialog",
             "title_key": "iconv._('dialog_edit_container') +' n\xb0'+ this.elt.device.config.id",
             "close_cross": false,
             "content": [
+                {
+                    "view": "extend",
+                    "extend": "dose_head_dialog"
+                },
                 {
                     "view": "hui-entities-card",
                     "conf": {
@@ -3989,7 +4240,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "name": "add_supplement",
             "title_key": "iconv._('dialog_add_supplement_title') +' n\xb0'+ this.elt.device.config.id",
             "close_cross": true,
-            "extend": "dose_head_dialog",
             "content": [
                 {
                     "view": "hui-entities-card",
@@ -4004,6 +4254,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                             }
                         ]
                     }
+                },
+                {
+                    "view": "extend",
+                    "extend": "dose_head_dialog",
+                    "re_render": true
                 }
             ],
             "validate": {
@@ -4033,8 +4288,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
             "name": "set_container_volume",
             "close_cross": true,
             "title_key": "iconv._('set_container_volume')",
-            "extend": "dose_head_dialog",
             "content": [
+                {
+                    "view": "extend",
+                    "extend": "dose_head_dialog"
+                },
                 {
                     "view": "hui-entities-card",
                     "conf": {
@@ -4086,10 +4344,13 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         "set_manual_head_volume": {
             "name": "set_manual_head_volume",
-            "extend": "dose_head_dialog",
             "title_key": "iconv._('set_manual_head_volume')",
             "close_cross": true,
             "content": [
+                {
+                    "view": "extend",
+                    "extend": "dose_head_dialog"
+                },
                 {
                     "view": "hui-entities-card",
                     "conf": {
@@ -4149,7 +4410,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "elements": {
         "last_message": {
             "name": "last_message",
-            "master": true,
             "type": "redsea-messages",
             "css": {
                 "flex": "0 0 auto",
@@ -4165,7 +4425,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
         },
         "last_alert_message": {
             "name": "last_alert_message",
-            "master": true,
             "type": "redsea-messages",
             "label": "\u26A0",
             /*	    "tap_action": {
@@ -4736,7 +4995,6 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let color = this.config.color + "," + this.config.alpha;
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
-                console.log("CALIBRATION", this.config.calibration);
                 let conf = {
                     "image": new URL("configuration.png", import.meta.url),
                     "type": "click-image",
@@ -4844,9 +5102,7 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
         };
     }
     constructor(){
-        super(); //hass,config,stateObj,entities);
-        //this.state_on=state_on;
-        //	this.color_list=color_list;
+        super();
         this.schdedule = null;
     }
     _render_slot_schedule(slot) {
@@ -4868,14 +5124,12 @@ class $141b1a4597f6f7b2$export$2e2bcd8739ae039 extends (0, $1Um3j.default) {
     }
     render() {
         this.schedule = this.stateObj.attributes.queue;
-        if (this.stateOn && this.schedule.length != 0) {
-            console.debug("render dosing-queue");
-            return (0, $l56HR.html)`
+        if (this.stateOn && this.schedule.length != 0) return (0, $l56HR.html)`
                   <div style="${this.get_style(this.config)}">
                     ${this.schedule.map((slot)=>this._render_slot_schedule(slot))}
                   </div>
    	    `;
-        } else return (0, $l56HR.html)``;
+        else return (0, $l56HR.html)``;
          //else
     }
 }
@@ -4914,8 +5168,6 @@ class $af5325ece54e327c$export$b931e564db01e286 extends (0, $1Um3j.default) {
             trash = '';
         } else {
             if ('label' in this.conf) value = this.conf.label + value + this.conf.label;
-            /*const r_element=customElements.get("click-image");
-	    trash = new r_element();*/ console.debug("MSG", this.device.device, this.conf.name);
             let conf = {
                 "type": "click-image",
                 "stateObj": null,

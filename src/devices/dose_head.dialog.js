@@ -2,6 +2,7 @@ import { html } from "lit";
 import supplements_list from "./supplements";
 
 import i18n from "../translations/myi18n";
+import * as com from '../common';
 
 import MyElement from "./base/element";
 
@@ -53,6 +54,11 @@ export function add_supplement(elt,hass,shadowRoot){
     let supplement = supplements_list.get_supplement(selected_supplement);
 
     let img='/hacsfiles/ha-reef-card/generic_container.supplement.png';
+    let cc=shadowRoot.querySelector("#add-supplement");
+    if(cc != null){
+	cc.remove();
+    }
+    
     if (supplement){
 	let t_img='/hacsfiles/ha-reef-card/'+supplement.uid+'.supplement.png';
 	var http = new XMLHttpRequest();
@@ -67,6 +73,7 @@ export function add_supplement(elt,hass,shadowRoot){
 	content.setConfig(conf);
 	let div=document.createElement("div");
 	div.style.cssText = "display: inline-block";
+	div.id="add-supplement";
 	shadowRoot.querySelector("#dialog-content").appendChild(div);
 	div.appendChild(content);
 	let infos=document.createElement("div");
@@ -100,7 +107,11 @@ export function add_supplement(elt,hass,shadowRoot){
 	content.setConfig(conf);
 	content.hass=hass;
 	content.device=elt.device;
-	shadowRoot.querySelector("#dialog-content").appendChild(content);
+	let div=document.createElement("div");
+	div.id="add-supplement";
+	div.appendChild(content);
+
+	shadowRoot.querySelector("#dialog-content").appendChild(div);
     }
 }
 
@@ -163,5 +174,100 @@ export function set_container_volume(elt,hass,shadowRoot){
 
 export function edit_container(elt,hass,shadowRoot){
     set_container_volume(elt,hass,shadowRoot);
+}
+
+export function head_configuration(elt,hass,shadowRoot,schedule=null){
+    var content=null;
+    if(schedule==null || schedule.type==elt.device.get_entity('schedule_head').attributes.schedule.type){
+	schedule=elt.device.get_entity('schedule_head').attributes.schedule;
+    }
     
+    var form=shadowRoot.querySelector("#schedule");
+    if(form){
+	form.remove();
+    }
+    form=shadowRoot.createElement("form");
+    form.className="schedule";
+    form.id="schedule";
+    var schedule_type=com.create_select(shadowRoot,'schedule',['single','custom','hourly','timer'],schedule.type);
+    schedule_type.addEventListener("change",function(event) {handle_schedule_type_change(event,elt,hass,shadowRoot)});
+    form.appendChild(schedule_type);
+    content=eval("head_configuration_schedule_"+schedule.type+"(schedule,elt,hass,shadowRoot,form);");
+    shadowRoot.querySelector("#dialog-content").appendChild(content);
+}
+
+function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
+    var node=null;
+    //header
+    node=shadowRoot.createElement("label");
+    node.innerHTML=i18n._("days");
+    form.appendChild(node);
+    //days
+    for(let day=1;day<8;day++ ){
+	let name="day_"+String(day);
+	node=shadowRoot.createElement("input");
+	node.className=("days");
+	node.type="checkbox";
+	node.value=name;
+	node.id=name;
+	node.checked=true;
+	let label=shadowRoot.createElement("label");
+	label.innerHTML=i18n._("day_"+String(day))[0];
+	label.className="days";
+	label.htmlFor=name;
+	form.appendChild(label);
+	form.appendChild(node);
+    }
+    //time
+    form.appendChild(com.create_hour(shadowRoot,'hour',schedule.time));
+    //mode
+    form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
+    return form;
+}
+
+function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
+    console.log("INTERVALS",schedule.intervals);
+    if(!schedule.intervals){
+	schedule.intervals=[{
+	    st: 0,
+            end: 1440,
+            nd: 10,
+            mode: 'regular',
+	}];
+    }
+    for(var interval of schedule.intervals){
+	head_configuration_intervals(shadowRoot,interval,form);
+    }
+    return form;
+}
+
+
+function head_configuration_intervals(shadowRoot,interval,form){
+    let start=com.create_hour(shadowRoot,'st',interval.st);
+    let end=com.create_hour(shadowRoot,'end',interval.nd);
+    let nd=com.create_select(shadowRoot,'nd', Array(24).fill().map((x,i)=>i+1),interval.nd,false);
+    form.appendChild(start);
+    form.appendChild(end);
+    form.appendChild(nd);
+    form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],interval.mode));
+}
+
+function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
+    //let min=com.create_select(shadowRoot,'min', [0,10,20,30,40,50],schedule.min,false,"min");
+    let min=com.create_select(shadowRoot,'min', Array(6).fill().map((x,i)=>i*10),schedule.min,false,"min");
+    form.appendChild(min);
+    
+    //mode
+    form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
+    return form;
+
+}
+
+function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
+    return form;
+}
+
+function handle_schedule_type_change(event,elt,hass,shadowRoot){
+    var schedule={type:event.target.value};
+    head_configuration(elt,hass,shadowRoot,schedule);
 }

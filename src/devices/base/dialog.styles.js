@@ -1,5 +1,6 @@
 import {css} from 'lit';
 
+
 export default css`
 
 
@@ -86,4 +87,50 @@ text-align:left;
 margin-left: 2%;
 }
 
+form.schedule{
+  margin-top:10px;
+  padding-left:5px;
+  padding-right: 5px;
+  padding-top:5px;
+  padding-bottom:5px;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+}
+
+p.schedule_header{
+  font-weight: bold;
+}
+
+select{
+}
+
+.days{
+    margin-left:0px;
+    margin-right:0px;
+    width: 2em;
+    height: 2em;
+    background-color: white;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+}
+.days:checked{
+  background-color:#2196F3;
+}
+
+label.days{
+  position: relative;
+  left: 19px;
+  top: 2px;
+  background-color: rgba(0,0,0,0);
+  border: none;
+}
+
+label.days:hover{
+cursor:pointer;
+}
 `;

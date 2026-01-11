@@ -39,8 +39,10 @@ cursor: pointer;
   top: -25%;
   aspect-ratio: 1/1;
   border-radius: 30px;
-  background-color: rgba(255,20,20,1);
+  background-color: rgba(250,250,250,1);
+//  background-color: rgba(255,20,20,1);
   width: 60%;
+
 }
 
 .switch_button{

@@ -131,7 +131,6 @@ export default class DoseHead extends RSDevice{
 	    
 	    if (this._hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
 		this.state_on=false;
-		console.log("CALIBRATION",this.config.calibration);
 		let conf={
 		    "image":new URL("./img/configuration.png",import.meta.url),
 		    "type": "click-image",

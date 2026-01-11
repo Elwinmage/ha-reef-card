@@ -66,6 +66,10 @@ export const config = {
 			]
 		    }
 		},
+		{
+		    "view":"extend",
+		    "extend":"dose_head_dialog",
+		}
 	
 	    ],
 	},
@@ -147,10 +151,13 @@ export const config = {
 	},
  	"edit_container":{
 	    "name":"edit_container",
-	    "extend":"dose_head_dialog",
 	    "title_key":"iconv._('dialog_edit_container') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[
+		{
+		    "view":"extend",
+		    "extend":"dose_head_dialog",
+		},
 		{
 		    "view": "hui-entities-card",
 		    "conf":{
@@ -212,7 +219,6 @@ export const config = {
 	    "name": "add_supplement",
 	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
-	    "extend":"dose_head_dialog",
 	    "content":[
 		{
 		    "view": "hui-entities-card",
@@ -221,8 +227,14 @@ export const config = {
 			"entities": [
 			    {"entity":"supplements","name":{"type":"entity"}},
 			]
-		    }
-		}
+		    },
+		},
+		{
+		    "view":"extend",
+		    "extend":"dose_head_dialog",
+		    "re_render": true,
+		},
+		
 	    ],
 	    "validate": {
 		"label": "iconv._('next')",
@@ -247,8 +259,11 @@ export const config = {
 	    "name":"set_container_volume",
 	    "close_cross": true,
 	    "title_key": "iconv._('set_container_volume')",
-	    "extend":"dose_head_dialog",
 	    "content":[
+		{
+		    "view":"extend",
+		    "extend":"dose_head_dialog",
+		},
 		{
 		    "view": "hui-entities-card",
 		    "conf":{
@@ -279,10 +294,13 @@ export const config = {
 	},
  	"set_manual_head_volume":{
 	    "name": "set_manual_head_volume",
-	    "extend":"dose_head_dialog",
 	    "title_key": "iconv._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
+		{
+		    "view":"extend",
+		    "extend":"dose_head_dialog",
+		},
 		{"view":"hui-entities-card",
 		 "conf":{
 		     "type":"entities",
@@ -319,7 +337,6 @@ export const config = {
     "elements": {
 	"last_message":{
 	    "name": "last_message",
-	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"redsea-messages",
 	    "css":{
 		"flex": "0 0 auto",
@@ -335,7 +352,6 @@ export const config = {
 	},
 	"last_alert_message":{
 	    "name": "last_alert_message",
-	    "master": true, // If true, the change of state of this element force a device redraw
 	    "type":"redsea-messages",
 	    "label":"⚠",
 	    /*	    "tap_action": {

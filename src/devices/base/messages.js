@@ -36,9 +36,6 @@ export class RSMessages extends  MyElement {
 	    if('label' in this.conf){
 		value=this.conf.label+value+this.conf.label;
 	    }
-	    /*const r_element=customElements.get("click-image");
-	    trash = new r_element();*/
-	    console.debug("MSG",this.device.device,this.conf.name);
 	    let conf={
 		"type": "click-image",
 		"stateObj": null,

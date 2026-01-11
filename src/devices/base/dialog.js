@@ -20,10 +20,12 @@ export class Dialog extends  LitElement {
 
     static get properties(){
 	return {
-	    _hass:{},
+//	    _hass:{},
 	    _shadowRoot:{},
 	    to_render: {},
 	    elt: {},
+/*	    elts: [],
+	    extends_to_re_render:[],*/
 	};
     }
 	
@@ -37,6 +39,8 @@ export class Dialog extends  LitElement {
 	this._shadowRoot=null;
 	this.config=null;
 	this.elt=null;
+	this.elts=[];
+	this.extends_to_re_render=[];
 	this.to_render=null;
 	this.overload_quit=null;
     }//end of constructor
@@ -70,7 +74,18 @@ export class Dialog extends  LitElement {
 
     set hass(obj){
 	this._hass=obj;
-	this.render();
+	if(this.elts){
+	    for (let elt of this.elts){
+		elt.hass=obj;
+	    }
+	}
+	if(this.extends_to_re_render){
+	    let dose_head_dialog=dhd;
+	    for(let elt of this.extends_to_re_render){
+		eval(elt);
+	    }
+	}
+	//	this.render();
     }
 
     set_conf(config){
@@ -81,6 +96,15 @@ export class Dialog extends  LitElement {
 	var content=null;
 	if(content_conf.view=="common-button"){
 	    content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
+	}
+	else if(content_conf.view=="extend"){
+	    let dose_head_dialog=dhd;
+	    var cmd=content_conf.extend+'.'+this.to_render.name+"(this.elt,this._hass,this._shadowRoot)";
+	    eval(cmd);
+	    if (content_conf.re_render){
+		this.extends_to_re_render.push(cmd);
+	    }
+	    return;
 	}
 	else{
 	    const r_element= customElements.get(content_conf.view);
@@ -100,11 +124,11 @@ export class Dialog extends  LitElement {
 	    else if("entity" in content_conf.conf){
 		clone.entity=this.elt.get_entity(content_conf.conf.entity).entity_id;
 	    }
-	    console.debug("HEAD",this.elt.device.config.id);
 	    content.setConfig(clone);
 	    content.hass=this._hass;
 	    content.device=this.elt.device;
 	}
+	this.elts.push(content);
 	this._shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
     
@@ -126,7 +150,6 @@ export class Dialog extends  LitElement {
 	};
 
 	if(this.to_render!=null){
-	    console.debug("Render dialog",this.to_render);
 	    let submit_conf=close_conf;
 	    let cancel_conf=null;
 	    if("validate" in this.to_render){
@@ -155,20 +178,15 @@ export class Dialog extends  LitElement {
 	    }
 	    // Title
 	    this._shadowRoot.querySelector("#dialog-title").innerHTML=eval(this.to_render.title_key);
-	    //special content for rsdose 
-	    let dose_head_dialog=dhd;
-	    if("extend" in this.to_render){
-		var cmd=this.to_render.extend+'.'+this.to_render.name+"(this.elt,this._hass,this._shadowRoot)";
-		eval(cmd);
-	    }
 	    // Content
+	    this.elts=[];
+	    this.extends_to_re_render=[];
 	    this.to_render.content.map(c => this._render_content(c));
 	    // Submit
 	    let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
 	    this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
 	    //Cancel
 	    if(cancel_conf){
-		console.log("display cancel");
 		let cancel_button=MyElement.create_element(this._hass,cancel_conf,this.elt.device);
 		this._shadowRoot.querySelector("#dialog-cancel").appendChild(cancel_button);
 	    }

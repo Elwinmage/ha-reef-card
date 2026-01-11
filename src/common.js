@@ -1,3 +1,5 @@
+import i18n from "./translations/myi18n";
+
 export default class DeviceList {
 
     constructor(hass){
@@ -110,4 +112,47 @@ export function toTime(time){
     return String(hours).padStart(2,'0')+":"+String(minutes).padStart(2,'0')+":"+String(seconds).padStart(2,'0');
 }
 
+export function create_select(shadowRoot,id,options,selected=null,translation=true,suffix=''){
+    var div=shadowRoot.createElement('div');
+    var label=shadowRoot.createElement('label');
+    label.htmlFor=id;
+    label.innerHTML=i18n._(id);
+    var node=shadowRoot.createElement("SELECT");
+    node.id=id;
+    for(let option of options){
+	var opt = document.createElement('option');
+	opt.value = option;
+	if(translation){
+	    opt.innerHTML = i18n._(option)+suffix;
+	}//if
+	else{
+	    opt.innerHTML = option+suffix;
+	}
 
+	if (selected!=null && selected==option){
+	    opt.selected=true;
+	}
+	node.appendChild(opt);
+    }//for
+    div.appendChild(label);
+    div.appendChild(node);
+    return div;
+}
+
+function timeToString(time){
+    return String(Math.floor(time/60)).padStart(2,'0')+':'+String(Math.floor(time%60)).padStart(2,"0");
+}
+
+export function create_hour(shadowRoot,id, hour=0){
+    var div=shadowRoot.createElement('div');
+    var label=shadowRoot.createElement('label');
+    label.htmlFor=id;
+    label.innerHTML=i18n._(id);
+    var node=shadowRoot.createElement("input");
+    node.type="time";
+    node.id=id;
+    node.value=timeToString(hour);
+    div.appendChild(label);
+    div.appendChild(node);
+    return div;
+}

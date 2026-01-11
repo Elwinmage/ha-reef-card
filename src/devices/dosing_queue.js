@@ -13,14 +13,11 @@ export default class DosingQueue extends MyElement{
     static get properties() {
 	return {
 	    state_on:{},
-//	    color_list: {},
 	}
     }
 
-    constructor(){//hass,entities,config,state_on,stateObj,color_list){
-	super();//hass,config,stateObj,entities);
-	//this.state_on=state_on;
-//	this.color_list=color_list;
+    constructor(){
+	super();
 	this.schdedule=null;
     }
 
@@ -48,7 +45,6 @@ export default class DosingQueue extends MyElement{
     render(){
 	this.schedule=this.stateObj.attributes.queue;
 	if(this.stateOn && this.schedule.length != 0){
-	    console.debug("render dosing-queue");
 	    return html`
                   <div style="${this.get_style(this.config)}">
                     ${this.schedule.map(slot => this._render_slot_schedule(slot))}

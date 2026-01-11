@@ -73,7 +73,6 @@ export default class MyElement extends LitElement{
     
     static create_element(hass,config,device){
 	let iconv= _i18n;
-	console.log("create element",config.type,config);
 	let Element=customElements.get(config.type);
 	let label_name='';
 	let elt=new Element();
@@ -90,7 +89,6 @@ export default class MyElement extends LitElement{
 	    elt.stateObj=hass.states[elt.device.entities[config.name].entity_id];
 	}
 	// Do not display label
-	console.log("LABEL",config);
 	if ('label' in config){
 	    if (typeof config.label === 'string' ){
 		try {
@@ -157,12 +155,6 @@ export default class MyElement extends LitElement{
     }
 
     render(){
-	if (this.stateObj){
-	    console.debug("render element",this.stateObj.entity_id);
-	}
-	else {
-	    console.debug("render element",this.conf.name);
-	}
 	let value=null;
 	if (this.stateObj!=null){
 	    value=this.stateObj.state;
