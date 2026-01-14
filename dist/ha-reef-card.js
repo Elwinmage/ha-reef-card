@@ -950,7 +950,8 @@ parcelRegister("hudnx", function(module, exports) {
 $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
-        volume: "Volume (mL)",
+        total_volume: "Total volume: ",
+        volume_unit: " mL",
         can_not_save: "Can not save schedule: ",
         at_least_30m_between: "Between start and end should be at least 30 minutes",
         end_earlier_than_start: "End time cannot be earlier than start time",
@@ -1069,7 +1070,8 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         at_least_30m_between: "Il faut au moins 30 minimum entre l'heure de d\xe9but et de fin",
         end_earlier_than_start: "L'heure de fin ne peut pas \xeatre plus t\xf4t que celle du d\xe9but.",
         can_not_save: "Impossible de sauvegarder la plannification: ",
-        volume: "Volume (mL)"
+        total_volume: "Volume total ",
+        volume_unit: " mL"
     }
 };
 
@@ -3041,7 +3043,7 @@ function update_instant_dd(shadowRoot) {
     var total_volume = shadowRoot.querySelector("#instant_dd");
     var total = 0;
     for (var volume of shadowRoot.querySelectorAll(".volume"))total += parseFloat(volume.value);
-    total_volume.innerHTML = total;
+    total_volume.innerHTML = (0, $dPhcg.default)._("total_volume") + total + (0, $dPhcg.default)._("volume_unit");
 }
 
 });

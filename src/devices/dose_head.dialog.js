@@ -508,5 +508,5 @@ function update_instant_dd(shadowRoot){
     for (var volume of shadowRoot.querySelectorAll(".volume")){
 	total += parseFloat(volume.value);
     }
-    total_volume.innerHTML=total;
+    total_volume.innerHTML=i18n._("total_volume")+total+i18n._("volume_unit");
 }

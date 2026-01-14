@@ -1,6 +1,7 @@
 export const dict={
     en:{
-	volume:"Volume (mL)",
+	total_volume:"Total volume: ",
+	volume_unit:" mL",
 	can_not_save:"Can not save schedule: ",
 	at_least_30m_between:"Between start and end should be at least 30 minutes",
 	end_earlier_than_start:"End time cannot be earlier than start time",
@@ -119,6 +120,7 @@ export const dict={
 	at_least_30m_between:"Il faut au moins 30 minimum entre l'heure de début et de fin",
 	end_earlier_than_start:"L'heure de fin ne peut pas être plus tôt que celle du début.",
 	can_not_save:"Impossible de sauvegarder la plannification: ",
-	volume:"Volume (mL)",
+	total_volume:"Volume total ",
+	volume_unit:" mL",
     },
 }
