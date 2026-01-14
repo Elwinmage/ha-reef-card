@@ -950,6 +950,16 @@ parcelRegister("hudnx", function(module, exports) {
 $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
+        test_calibration_validation: "Is the value equal to 4 mL +/- (0.05mL)?",
+        test_calibration: "Test calibration",
+        no: "No",
+        yes: "Yes",
+        test_calibration_description: "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'",
+        test_calibration: "Test Calibration",
+        calibration_step_2: "What value are you reading?",
+        set_calibration: "Set calibration value",
+        start_calibration: "Start Calibration",
+        calibration_step_1: "Place the empty graduated container at the outlet of the head",
         min_dose: "The minimal dose for this type of schedule is 5mL",
         daily_dose: "Daily dose (mL)",
         schedule_saved: "Schedule saved",
@@ -974,6 +984,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         days: "Days",
         days_left: "Days Left",
         delete: "Delete",
+        delete_wait: "Deletion in progress",
         dialog_add_supplement_title: "Add new supplement to head",
         dialog_delete_supplement_title: "Delete supplement for head",
         dialog_edit_container: "Edit Container",
@@ -1013,6 +1024,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         hour: "Hour",
         st: "Start",
         end: "End",
+        finish: "Finish",
         nd: "Number of doses"
     },
     fr: {
@@ -1079,7 +1091,19 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         schedule_saved: "Planning sauvegard\xe9",
         daily_dose: "Dose journali\xe8re (mL)",
         volume: "Volume (mL)",
-        min_dose: "La dose minimale pour cette planification est de  5ml"
+        min_dose: "La dose minimale pour cette planification est de  5ml",
+        delete_wait: "Suppression en cours",
+        calibration_step_1: "Placez le r\xe9cipient gradu\xe9 vide \xe0 la sortie de la t\xeate",
+        calibration_step_2: "Quelle valeur lisez vous?",
+        start_calibration: "D\xe9marrer la Calibration",
+        finish: "Fin",
+        set_calibration: "Valider la valeur",
+        test_calibration: "Tester la calibration",
+        test_calibration_description: "Placez le r\xe9cipient gradu\xe9 vide \xe0 la sortie de la t\xeate et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'",
+        test_calibration_validation: "La valeur est elle \xe9gale \xe0 4 mL +/- (0.05mL)?",
+        test_calibration: "Testez la calibration",
+        no: 'Non',
+        yes: 'Oui'
     }
 };
 
@@ -2144,6 +2168,7 @@ var $kgVGZ = parcelRequire("kgVGZ");
 var $1Um3j = parcelRequire("1Um3j");
 
 var $2jsWu = parcelRequire("2jsWu");
+var iconv = (0, $dPhcg.default);
 class Dialog extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $4DorC.default),
@@ -2211,7 +2236,15 @@ class Dialog extends (0, $eGUNk.LitElement) {
     _render_content(content_conf) {
         var content = null;
         if (content_conf.view == "common-button") content = (0, $1Um3j.default).create_element(this._hass, content_conf.conf, this.elt.device);
-        else if (content_conf.view == "extend") {
+        else if (content_conf.view == "text") {
+            content = this._shadowRoot.createElement("p");
+            try {
+                content.innerHTML = eval(content_conf.value);
+            } catch (error) {
+                console.error("ERROR", error);
+                content.innerHTML = content_conf.value;
+            }
+        } else if (content_conf.view == "extend") {
             let dose_head_dialog = $2jsWu;
             var cmd = content_conf.extend + '.' + this.to_render.name + "(this.elt,this._hass,this._shadowRoot)";
             eval(cmd);
@@ -2889,6 +2922,7 @@ function save_schedule(event, shadowRoot, form, elt, hass) {
             access_path: "/head/" + elt.device.config.id + "/settings",
             method: "put",
             data: {
+                schedule_enabled: true,
                 schedule: to_schedule
             },
             device_id: elt.device.device.device.elements[0].primary_config_entry
@@ -4366,36 +4400,62 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     }
                 },
                 {
+                    "view": "text",
+                    "value": "iconv._('calibration_step_1')"
+                }
+            ],
+            "validate": {
+                "label": "iconv._('start_calibration')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "button",
+                        "action": "press",
+                        "data": {
+                            "entity_id": "start_calibration"
+                        }
+                    },
+                    {
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "head_calibration_step_2"
+                        }
+                    }
+                ]
+            }
+        },
+        "head_calibration_step_2": {
+            "name": "head_calibration_step_2",
+            "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
+            "close_cross": true,
+            "content": [
+                {
+                    "view": "text",
+                    "value": "iconv._('calibration_step_2')"
+                },
+                {
+                    "view": "click-image",
+                    "conf": {
+                        "image": '/hacsfiles/ha-reef-card/read_graduated.jpg',
+                        "type": "clic-_image",
+                        "stateObj": null,
+                        "tap_action": [],
+                        "elt.css": {
+                            "width": "30%",
+                            "margin-left": "35%"
+                        }
+                    }
+                },
+                {
                     "view": "hui-entities-card",
                     "conf": {
                         "type": "entities",
                         "entities": [
                             {
-                                "entity": "start_calibration",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            },
-                            {
                                 "entity": "calibration_dose_value",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            },
-                            {
-                                "entity": "set_calibration_value",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            },
-                            {
-                                "entity": "test_calibration",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            },
-                            {
-                                "entity": "end_calibration",
                                 "name": {
                                     "type": "entity"
                                 }
@@ -4403,7 +4463,178 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         ]
                     }
                 }
-            ]
+            ],
+            "validate": {
+                "label": "iconv._('set_calibration')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "button",
+                        "action": "press",
+                        "data": {
+                            "entity_id": "set_calibration_value"
+                        }
+                    },
+                    {
+                        "domain": "redsea_ui",
+                        "action": "dialog",
+                        "data": {
+                            "type": "head_calibration_step_3"
+                        }
+                    }
+                ]
+            }
+        },
+        "test_calibration": {
+            "name": "test_calibration",
+            "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
+            "content": [
+                {
+                    "view": "text",
+                    "value": "iconv._('test_calibration_validation')"
+                },
+                {
+                    "view": "click-image",
+                    "conf": {
+                        "image": '/hacsfiles/ha-reef-card/read_graduated.jpg',
+                        "type": "clic-_image",
+                        "stateObj": null,
+                        "tap_action": [],
+                        "elt.css": {
+                            "width": "30%",
+                            "margin-left": "35%"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "type": "common-button",
+                        "stateObj": null,
+                        "tap_action": [
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "end_calibration"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "dialog",
+                                "data": {
+                                    "type": "head_calibration"
+                                }
+                            }
+                        ],
+                        "label": "iconv._('no')",
+                        "class": "dialog_button",
+                        "css": {
+                            "margin-bottom": "5px",
+                            "text-align": "center"
+                        },
+                        "elt.css": {
+                            "background-color": "rgba(0,0,0,0)"
+                        }
+                    }
+                }
+            ],
+            "validate": {
+                "label": "iconv._('yes')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "button",
+                        "action": "press",
+                        "data": {
+                            "entity_id": "end_calibration"
+                        }
+                    },
+                    {
+                        "domain": "redsea_ui",
+                        "action": "exit-dialog"
+                    }
+                ]
+            }
+        },
+        "head_calibration_step_3": {
+            "name": "head_calibration_step_3",
+            "title_key": "iconv._('calibration') +' n\xb0'+ this.elt.device.config.id",
+            "content": [
+                {
+                    "view": "text",
+                    "value": "iconv._('test_calibration_description')"
+                },
+                {
+                    "view": "click-image",
+                    "conf": {
+                        "image": '/hacsfiles/ha-reef-card/head_calibration.png',
+                        "type": "clic-_image",
+                        "stateObj": null,
+                        "tap_action": [],
+                        "elt.css": {
+                            "width": "20%",
+                            "margin-left": "35%"
+                        }
+                    }
+                },
+                {
+                    "view": "common-button",
+                    "conf": {
+                        "type": "common-button",
+                        "stateObj": null,
+                        "icon": "mdi:test-tube",
+                        "tap_action": [
+                            {
+                                "domain": "button",
+                                "action": "press",
+                                "data": {
+                                    "entity_id": "test_calibration"
+                                }
+                            },
+                            {
+                                "domain": "redsea_ui",
+                                "action": "dialog",
+                                "data": {
+                                    "type": "test_calibration"
+                                }
+                            }
+                        ],
+                        "label": "iconv._('test_calibration')",
+                        "class": "dialog_button",
+                        "css": {
+                            "margin-bottom": "5px",
+                            "text-align": "center"
+                        },
+                        "elt.css": {
+                            "background-color": "rgba(0,0,0,0)"
+                        }
+                    }
+                }
+            ],
+            "validate": {
+                "label": "iconv._('finish')",
+                "class": "dialog_button",
+                "type": "common-button",
+                "stateObj": null,
+                "tap_action": [
+                    {
+                        "domain": "button",
+                        "action": "press",
+                        "data": {
+                            "entity_id": "end_calibration"
+                        }
+                    },
+                    {
+                        "domain": "redsea_ui",
+                        "action": "exit-dialog"
+                    }
+                ]
+            }
         },
         "priming": {
             "name": "priming",
@@ -4539,6 +4770,11 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     },
                     {
                         "domain": "redsea_ui",
+                        "action": "message_box",
+                        "data": "iconv._('delete_wait')"
+                    },
+                    {
+                        "domain": "redsea_ui",
                         "action": "exit-dialog"
                     }
                 ]
@@ -4607,12 +4843,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                     "conf": {
                         "type": "entities",
                         "entities": [
-                            {
-                                "entity": "daily_dose",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            },
                             {
                                 "entity": "slm",
                                 "name": {
@@ -5866,6 +6096,7 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         });
         this.addEventListener("quit-dialog", function(e) {
             this._dialog_box.quit();
+            this.render(); /* force rerender*/ 
         });
     }
     /*

@@ -11,6 +11,8 @@ import MyElement from "./element";
 
 import * as dhd from "../dose_head.dialog";
 
+var iconv=i18n;
+
 /*
  *  Dialog
  */
@@ -96,6 +98,16 @@ export class Dialog extends  LitElement {
 	var content=null;
 	if(content_conf.view=="common-button"){
 	    content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
+	}
+	else if(content_conf.view=="text"){
+	    content=this._shadowRoot.createElement("p");
+	    try {
+		content.innerHTML=eval(content_conf.value);
+	    }
+	    catch (error){
+		console.error("ERROR",error);
+		content.innerHTML=content_conf.value;
+	    }
 	}
 	else if(content_conf.view=="extend"){
 	    let dose_head_dialog=dhd;

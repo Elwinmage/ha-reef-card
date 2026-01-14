@@ -83,19 +83,224 @@ export const config = {
 		    }
 		},
 		{
+		    "view": "text",
+		    "value": "iconv._('calibration_step_1')"
+		},
+	    ],
+	    "validate": {
+		"label": "iconv._('start_calibration')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain":"button",
+			"action":"press",
+			"data": {"entity_id":"start_calibration"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action": "dialog",
+			"data": {"type":"head_calibration_step_2"},
+		    } 
+		]
+	    }
+	    
+	},
+	"head_calibration_step_2":{
+	    "name":"head_calibration_step_2",
+	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "close_cross": true,
+	    "content":[
+		{
+		    "view": "text",
+		    "value": "iconv._('calibration_step_2')"
+		},
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/read_graduated.jpg',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[],
+			"elt.css":{
+			    "width":"30%",
+			    "margin-left":"35%",
+			}
+		    }
+		},
+		
+		{
 		    "view": "hui-entities-card",
 		    "conf":{
 			"type":"entities",
 			"entities": [
-			    {"entity":"start_calibration","name":{"type":"entity"}},
 			    {"entity":"calibration_dose_value","name":{"type":"entity"}},
-			    {"entity":"set_calibration_value","name":{"type":"entity"}},
-			    {"entity":"test_calibration","name":{"type":"entity"}},
-			    {"entity":"end_calibration","name":{"type":"entity"}},
 			]
 		    }
 		},
 	    ],
+	    "validate": {
+		"label": "iconv._('set_calibration')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain":"button",
+			"action":"press",
+			"data": {"entity_id":"set_calibration_value"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action": "dialog",
+			"data": {"type":"head_calibration_step_3"},
+		    } 
+		]
+	    }
+	},
+	"test_calibration":{
+	    "name": "test_calibration",
+	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "content":[
+		{
+		    "view": "text",
+		    "value": "iconv._('test_calibration_validation')"
+		},
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/read_graduated.jpg',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[],
+			"elt.css":{
+			    "width":"30%",
+			    "margin-left":"35%",
+			}
+		    }
+		},
+		{
+		    "view": "common-button",
+		    "conf": {
+			"type": "common-button",
+			"stateObj": null,
+			"tap_action":[
+			    {
+				"domain":"button",
+				"action":"press",
+				"data": {"entity_id":"end_calibration"}
+			    },
+			    {
+				"domain":"redsea_ui",
+				"action":"dialog",
+				"data":{"type": "head_calibration"},
+			    },
+			],
+			"label": "iconv._('no')",
+			"class": "dialog_button",
+			"css":{
+			    "margin-bottom":"5px",
+			    "text-align":"center",
+			},
+			"elt.css":{
+			    "background-color":"rgba(0,0,0,0)",
+			}
+		    }
+		},	
+	    ],
+	    "validate": {
+		"label": "iconv._('yes')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain":"button",
+			"action":"press",
+			"data": {"entity_id":"end_calibration"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    } 
+		]
+	    }
+	    
+	},
+	"head_calibration_step_3":{
+	    "name":"head_calibration_step_3",
+	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "content":[
+		{
+		    "view": "text",
+		    "value": "iconv._('test_calibration_description')"
+		},
+		{
+		    "view": "click-image",
+		    "conf":{
+			"image":'/hacsfiles/ha-reef-card/head_calibration.png',
+			"type": "clic-_image",
+			"stateObj":null,
+			"tap_action":[],
+			"elt.css":{
+			    "width":"20%",
+			    "margin-left":"35%",
+			}
+		    }
+		},
+		{
+		    "view": "common-button",
+		    "conf": {
+			"type": "common-button",
+			"stateObj": null,
+			"icon": "mdi:test-tube",
+			"tap_action":[
+			    {
+			    "domain":"button",
+			    "action":"press",
+			    "data":{
+				"entity_id":"test_calibration",
+				},
+			    },
+			    {
+			    "domain":"redsea_ui",
+			    "action":"dialog",
+			    "data":{
+				"type":"test_calibration",
+				},
+			    },
+			],
+			"label": "iconv._('test_calibration')",
+			"class": "dialog_button",
+			"css":{
+			    "margin-bottom":"5px",
+			    "text-align":"center",
+			},
+			"elt.css":{
+			    "background-color":"rgba(0,0,0,0)",
+			}
+		    }
+		},	
+	    ],
+	    "validate": {
+		"label": "iconv._('finish')",
+		"class": "dialog_button",
+		"type": "common-button",
+		"stateObj":null,
+		"tap_action":[
+		    {
+			"domain":"button",
+			"action":"press",
+			"data": {"entity_id":"end_calibration"},
+		    },
+		    {
+			"domain": "redsea_ui",
+			"action": "exit-dialog",
+		    } 
+		]
+	    }
+	    
 	},
  	"priming":{
 	    "name":"priming",
@@ -200,6 +405,11 @@ export const config = {
 		    },
 		    {
 			"domain": "redsea_ui",
+			"action": "message_box",
+			"data":"iconv._('delete_wait')",
+		    },
+		    {
+			"domain": "redsea_ui",
 			"action": "exit-dialog",
 		    },
 		]
@@ -260,7 +470,6 @@ export const config = {
 		    "conf":{
 			"type":"entities",
 			"entities": [
-			    {"entity":"daily_dose","name":{"type":"entity"}},
 			    {"entity":"slm","name":{"type":"entity"}},
 			    {"entity":"save_initial_container_volume","name":{"type":"entity"}},
 			    {"entity":"container_volume","name":{"type":"entity"}},

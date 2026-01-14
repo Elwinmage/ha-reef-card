@@ -41,7 +41,7 @@ export class ReefCard extends LitElement {
 	this._dialog_box=null;
 	this.addEventListener("display-dialog", function(e) {this._handle_display_dialog(e);});
 	this.addEventListener("config-dialog", function(e) {this._dialog_box.set_conf(e.detail.config);});
-	this.addEventListener("quit-dialog", function(e) {this._dialog_box.quit();});
+	this.addEventListener("quit-dialog", function(e) {this._dialog_box.quit();this.render(); /* force rerender*/ ;});
     }//end of constructor
 
     /*

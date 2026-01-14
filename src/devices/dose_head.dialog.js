@@ -323,7 +323,7 @@ function save_schedule(event,shadowRoot,form,elt,hass){
 	var data={
 	    access_path: "/head/"+elt.device.config.id+"/settings",
 	    method: "put",
-	    data: {schedule:to_schedule},
+	    data: {schedule_enabled:true,schedule:to_schedule},
 	    device_id: elt.device.device.device.elements[0].primary_config_entry,
 	}    
 	console.debug("Call service", data);
