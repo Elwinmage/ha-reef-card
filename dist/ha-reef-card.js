@@ -261,9 +261,9 @@ window.customElements.define('rs-device', RSDevice);
 
 });
 parcelRegister("j0ZcV", function(module, exports) {
+$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "LitElement", () => (parcelRequire("eGUNk")).LitElement);
-$parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 parcelRequire("2emM7");
 parcelRequire("l56HR");
 parcelRequire("eGUNk");
@@ -854,8 +854,8 @@ parcelRegister("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
 $parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
-$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 $parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
+$parcel$export(module.exports, "render", () => (parcelRequire("l56HR")).render);
 
 $parcel$export(module.exports, "LitElement", () => $ab210b2da7b39b9d$export$3f2f9f5909897157);
 
@@ -950,6 +950,10 @@ parcelRegister("hudnx", function(module, exports) {
 $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
+        volume: "Volume (mL)",
+        can_not_save: "Can not save schedule: ",
+        at_least_30m_between: "Between start and end should be at least 30 minutes",
+        end_earlier_than_start: "End time cannot be earlier than start time",
         ask_add_supplement: "Ask for picture",
         brand_name: "Brand Name",
         calibration: "Calibration",
@@ -986,6 +990,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         name: "Name",
         next: "Next",
         priming: "Priming",
+        save_schedule: "Save schedule",
         set_auto_dose: "Auto daily volume",
         set_container_volume: "Container Volume",
         set_manual_head_volume: "Manual volume",
@@ -1042,6 +1047,7 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         name: "Nom",
         next: "Suivant",
         priming: "Amor\xe7age",
+        save_schedule: "Save schedule",
         set_auto_dose: "Dose automatique journali\xe8re",
         set_container_volume: "Volume du suppl\xe9ment",
         set_manual_head_volume: "Volume manuel",
@@ -1059,7 +1065,11 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         hourly: "Horaire",
         timer: "Minuteur",
         hour: "Heure",
-        nd: "Nombre de doses"
+        nd: "Nombre de doses",
+        at_least_30m_between: "Il faut au moins 30 minimum entre l'heure de d\xe9but et de fin",
+        end_earlier_than_start: "L'heure de fin ne peut pas \xeatre plus t\xf4t que celle du d\xe9but.",
+        can_not_save: "Impossible de sauvegarder la plannification: ",
+        volume: "Volume (mL)"
     }
 };
 
@@ -1299,6 +1309,7 @@ $parcel$export(module.exports, "rgbToHex", () => $038fea56b681b6a5$export$34d09c
 $parcel$export(module.exports, "off_color", () => $038fea56b681b6a5$export$b0583e47501ff17b);
 $parcel$export(module.exports, "toTime", () => $038fea56b681b6a5$export$d33f79e3ffc3dc83);
 $parcel$export(module.exports, "create_select", () => $038fea56b681b6a5$export$21409bb9e51c5265);
+$parcel$export(module.exports, "stringToTime", () => $038fea56b681b6a5$export$6648b452708ed0bf);
 $parcel$export(module.exports, "create_hour", () => $038fea56b681b6a5$export$abdf5bd531775bef);
 
 var $dPhcg = parcelRequire("dPhcg");
@@ -1383,13 +1394,13 @@ function $038fea56b681b6a5$export$d33f79e3ffc3dc83(time) {
     let hours = (time - seconds - minutes * 60) / 3600;
     return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
 }
-function $038fea56b681b6a5$export$21409bb9e51c5265(shadowRoot, id, options, selected = null, translation = true, suffix = '') {
+function $038fea56b681b6a5$export$21409bb9e51c5265(shadowRoot, id, options, selected = null, translation = true, suffix = '', id_suffix = 1) {
     var div = shadowRoot.createElement('div');
     var label = shadowRoot.createElement('label');
     label.htmlFor = id;
     label.innerHTML = (0, $dPhcg.default)._(id);
     var node = shadowRoot.createElement("SELECT");
-    node.id = id;
+    node.id = id + '_' + id_suffix;
     for (let option of options){
         var opt = document.createElement('option');
         opt.value = option;
@@ -1405,14 +1416,18 @@ function $038fea56b681b6a5$export$21409bb9e51c5265(shadowRoot, id, options, sele
 function $038fea56b681b6a5$var$timeToString(time) {
     return String(Math.floor(time / 60)).padStart(2, '0') + ':' + String(Math.floor(time % 60)).padStart(2, "0");
 }
-function $038fea56b681b6a5$export$abdf5bd531775bef(shadowRoot, id, hour = 0) {
+function $038fea56b681b6a5$export$6648b452708ed0bf(string) {
+    var s_time = string.split(":");
+    return parseInt(s_time[0] * 60) + parseInt(s_time[1]);
+}
+function $038fea56b681b6a5$export$abdf5bd531775bef(shadowRoot, id, hour = 0, id_suffix = 1) {
     var div = shadowRoot.createElement('div');
     var label = shadowRoot.createElement('label');
     label.htmlFor = id;
     label.innerHTML = (0, $dPhcg.default)._(id);
     var node = shadowRoot.createElement("input");
     node.type = "time";
-    node.id = id;
+    node.id = id + '_' + id_suffix;
     node.value = $038fea56b681b6a5$var$timeToString(hour);
     div.appendChild(label);
     div.appendChild(node);
@@ -1584,6 +1599,7 @@ var $afcc6ff40448b8c3$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
 .dialog_button:hover{
   background-color: #006787;
 }
+
 
 .dialog_button{
   border-radius: 20px;
@@ -2210,7 +2226,7 @@ class Dialog extends (0, $eGUNk.LitElement) {
     render() {
         let iconv = (0, $dPhcg.default);
         let close_conf = {
-            "image": new URL("close_cross.svg", import.meta.url),
+            "image": new URL("close_cross.73f7b69c.svg", import.meta.url),
             "type": "common-button",
             "stateObj": null,
             "tap_action": {
@@ -2420,6 +2436,54 @@ label.days{
 label.days:hover{
 cursor:pointer;
 }
+
+.interval{
+  font-weight: bolder;
+  text-align: center;
+  border-radius: 20px;
+  display: flex;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  background-color: aliceblue;
+  border: 1px solid lightgray;
+}
+
+input {
+  border-radius:20px;
+  border: 1px solid #009ac7;
+}
+
+select{
+  border-radius:20px;
+  border: 1px solid #009ac7;
+}
+
+button{
+  border-radius: 20px;
+  background-color: #009ac7;
+  color: white;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display:inline-block;
+  margin-top:5px;
+  margin-bott: 5px;
+  border:none;
+}
+
+button:hover{
+cursor:pointer;
+}
+
+button.delete_button{
+ background-color:red;
+ background: url('/hacsfiles/ha-reef-card/trash.svg');
+ background-position:center;
+ background-repeat:no-repeat;
+}
+
 `;
 
 });
@@ -2664,9 +2728,9 @@ function set_container_volume(elt, hass, shadowRoot) {
 function edit_container(elt, hass, shadowRoot) {
     set_container_volume(elt, hass, shadowRoot);
 }
-function head_configuration(elt, hass, shadowRoot, schedule = null) {
+function head_configuration(elt, hass, shadowRoot, saved_schedule = null) {
     var content = null;
-    if (schedule == null || schedule.type == elt.device.get_entity('schedule_head').attributes.schedule.type) schedule = elt.device.get_entity('schedule_head').attributes.schedule;
+    if (saved_schedule == null || saved_schedule.type == elt.device.get_entity('schedule_head').attributes.schedule.type) saved_schedule = elt.device.get_entity('schedule_head').attributes.schedule;
     var form = shadowRoot.querySelector("#schedule");
     if (form) form.remove();
     form = shadowRoot.createElement("form");
@@ -2677,17 +2741,14 @@ function head_configuration(elt, hass, shadowRoot, schedule = null) {
         'custom',
         'hourly',
         'timer'
-    ], schedule.type);
+    ], saved_schedule.type);
     schedule_type.addEventListener("change", function(event) {
         handle_schedule_type_change(event, elt, hass, shadowRoot);
     });
     form.appendChild(schedule_type);
-    content = eval("head_configuration_schedule_" + schedule.type + "(schedule,elt,hass,shadowRoot,form);");
-    shadowRoot.querySelector("#dialog-content").appendChild(content);
-}
-function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, form) {
+    content = eval("head_configuration_schedule_" + saved_schedule.type + "(saved_schedule,elt,hass,shadowRoot,form);");
+    //header days
     var node = null;
-    //header
     node = shadowRoot.createElement("label");
     node.innerHTML = (0, $dPhcg.default)._("days");
     form.appendChild(node);
@@ -2699,7 +2760,8 @@ function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, for
         node.type = "checkbox";
         node.value = name;
         node.id = name;
-        node.checked = true;
+        if (saved_schedule && saved_schedule.days && !saved_schedule.days.includes(day)) node.checked = false;
+        else node.checked = true;
         let label = shadowRoot.createElement("label");
         label.innerHTML = (0, $dPhcg.default)._("day_" + String(day))[0];
         label.className = "days";
@@ -2707,6 +2769,18 @@ function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, for
         form.appendChild(label);
         form.appendChild(node);
     }
+    var save_button = shadowRoot.createElement("button");
+    save_button.innerHTML = (0, $dPhcg.default)._('save_schedule');
+    save_button.style.width = "100%", save_button.addEventListener("click", function(e) {
+        e.preventDefault();
+        save_schedule(e, shadowRoot, form, elt, hass);
+    }, false);
+    form.appendChild(save_button);
+    shadowRoot.querySelector("#dialog-content").appendChild(content);
+}
+function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, form) {
+    var dd = shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility = "visible";
     //time
     form.appendChild($iXBpj.create_hour(shadowRoot, 'hour', schedule.time));
     //mode
@@ -2718,33 +2792,235 @@ function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, for
     return form;
 }
 function head_configuration_schedule_custom(schedule, elt, hass, shadowRoot, form) {
-    console.log("INTERVALS", schedule.intervals);
+    var dd = shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility = "visible";
+    const default_interval = {
+        st: 0,
+        end: 1440,
+        nd: 10,
+        mode: 'regular'
+    };
     if (!schedule.intervals) schedule.intervals = [
-        {
-            st: 0,
-            end: 1440,
-            nd: 10,
-            mode: 'regular'
-        }
+        default_interval
     ];
-    for (var interval of schedule.intervals)head_configuration_intervals(shadowRoot, interval, form);
+    var intervals = shadowRoot.createElement("div");
+    for (var interval of schedule.intervals)head_configuration_intervals_custom(shadowRoot, interval, intervals);
+    //add interval button
+    form.appendChild(intervals);
+    var add_button = shadowRoot.createElement("button");
+    add_button.innerHTML = '+';
+    add_button.style.width = "100%", add_button.addEventListener("click", function(e) {
+        e.preventDefault();
+        head_configuration_intervals_custom(shadowRoot, default_interval, intervals);
+    }, false);
+    form.appendChild(add_button);
     return form;
 }
-function head_configuration_intervals(shadowRoot, interval, form) {
-    let start = $iXBpj.create_hour(shadowRoot, 'st', interval.st);
-    let end = $iXBpj.create_hour(shadowRoot, 'end', interval.nd);
-    let nd = $iXBpj.create_select(shadowRoot, 'nd', Array(24).fill().map((x, i)=>i + 1), interval.nd, false);
-    form.appendChild(start);
-    form.appendChild(end);
-    form.appendChild(nd);
-    form.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
+function head_configuration_schedule_timer(schedule, elt, hass, shadowRoot, form) {
+    const default_interval = {
+        st: 0,
+        volume: 1,
+        mode: 'regular'
+    };
+    if (!schedule.intervals) schedule.intervals = [
+        default_interval
+    ];
+    //remove daily dose input number
+    var dd = shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility = "hidden";
+    var instant_dd = shadowRoot.createElement("p");
+    instant_dd.id = "instant_dd";
+    instant_dd.innerHTML = "0";
+    form.appendChild(instant_dd);
+    var intervals = shadowRoot.createElement("div");
+    for (var interval of schedule.intervals)head_configuration_intervals_timer(shadowRoot, interval, intervals);
+    //add interval button
+    form.appendChild(intervals);
+    var add_button = shadowRoot.createElement("button");
+    add_button.innerHTML = '+';
+    add_button.style.width = "100%", add_button.addEventListener("click", function(e) {
+        e.preventDefault();
+        head_configuration_intervals_timer(shadowRoot, default_interval, intervals);
+    }, false);
+    form.appendChild(add_button);
+    update_instant_dd(form);
+    return form;
+}
+function save_schedule(event, shadowRoot, form, elt, hass) {
+    var schedule = {};
+    schedule.type = shadowRoot.querySelector("#schedule_1").value;
+    //    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.days = [];
+    for(var day = 1; day < 8; day++){
+        var day_id = "#day_" + String(day);
+        if (shadowRoot.querySelector(day_id).checked) schedule.days.push(day);
+    }
+    var to_schedule = eval("save_schedule_" + schedule.type + "(shadowRoot,elt,hass,schedule)");
+    if (to_schedule != null) {
+        var data = {
+            access_path: "/head/" + elt.device.config.id + "/settings",
+            method: "put",
+            data: {
+                schedule: to_schedule
+            },
+            device_id: elt.device.device.device.elements[0].primary_config_entry
+        };
+        console.debug("Call service", data);
+        hass.callService("redsea", "request", data);
+    } else console.error("Can not save schedule", data);
+}
+function save_schedule_single(shadowRoot, elt, hass, schedule) {
+    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.time = (0, $iXBpj.stringToTime)(shadowRoot.querySelector("#hour_1").value);
+    schedule.mode = shadowRoot.querySelector("#speed_1").value;
+    return schedule;
+}
+function save_schedule_hourly(shadowRoot, elt, hass, schedule) {
+    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.min = parseInt(shadowRoot.querySelector("#min_1").value);
+    schedule.mode = shadowRoot.querySelector("#speed_1").value;
+    return schedule;
+}
+function save_schedule_custom(shadowRoot, elt, hass, schedule) {
+    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.intervals = [];
+    for (var interval of shadowRoot.querySelectorAll(".interval")){
+        var s_id = interval.id.split("_");
+        var position = s_id[s_id.length - 1];
+        var start = (0, $iXBpj.stringToTime)(interval.querySelector("#st_" + position).value);
+        var end = (0, $iXBpj.stringToTime)(interval.querySelector("#end_" + position).value);
+        if (end - start < 30) {
+            var msg = "at_least_30m_between";
+            if (end - start < 0) msg = "end_earlier_than_start";
+            shadowRoot.dispatchEvent(new CustomEvent("hass-notification", {
+                bubbles: true,
+                composed: true,
+                detail: {
+                    message: (0, $dPhcg.default)._("can_not_save") + (0, $dPhcg.default)._(msg)
+                }
+            }));
+            return null;
+        }
+        var nd = parseInt(interval.querySelector("#nd_" + position).value);
+        var speed = interval.querySelector("#speed_" + position).value;
+        var json_interval = {
+            st: start,
+            end: end,
+            nd: nd,
+            mode: speed
+        };
+        schedule.intervals.push(json_interval);
+    } //for
+    schedule.intervals.sort(compare_interval);
+    schedule.type = shadowRoot.querySelector("#schedule_1").value;
+    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    return schedule;
+}
+function compare_interval(a, b) {
+    if (a.st < b.st) return -1;
+    if (a.st > b.st) return 1;
+    return 0;
+}
+function save_schedule_timer(shadowRoot, elt, hass, schedule) {
+    schedule.intervals = [];
+    for (var interval of shadowRoot.querySelectorAll(".interval")){
+        var s_id = interval.id.split("_");
+        var position = s_id[s_id.length - 1];
+        var start = (0, $iXBpj.stringToTime)(interval.querySelector("#st_" + position).value);
+        var volume = parseFloat(interval.querySelector("#volume_" + position).value);
+        var speed = interval.querySelector("#speed_" + position).value;
+        var json_interval = {
+            st: start,
+            volume: volume,
+            mode: speed
+        };
+        schedule.intervals.push(json_interval);
+    } //for
+    schedule.intervals.sort(compare_interval);
+    schedule.type = shadowRoot.querySelector("#schedule_1").value;
+    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    return schedule;
+}
+function head_configuration_intervals_custom(shadowRoot, interval, form) {
+    let div = shadowRoot.createElement('div');
+    var position = 0;
+    for(position = 0; position < 100; position++){
+        var c_elt = form.querySelector("#interval_" + position);
+        if (c_elt == null) break;
+    }
+    div.className = "interval";
+    div.id = "interval_" + position;
+    let start = $iXBpj.create_hour(shadowRoot, 'st', interval.st, position);
+    let end = $iXBpj.create_hour(shadowRoot, 'end', interval.end, position);
+    let nd = $iXBpj.create_select(shadowRoot, 'nd', Array(24).fill().map((x, i)=>i + 1), interval.nd, false, '', position);
+    div.appendChild(start);
+    div.appendChild(end);
+    div.appendChild(nd);
+    div.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
         'whisper',
         'regular',
         'quick'
-    ], interval.mode));
+    ], interval.mode, true, '', position));
+    let delete_button = shadowRoot.createElement("button");
+    delete_button.className = "delete_button";
+    if (position == 0) delete_button.style.visibility = "hidden";
+    delete_button.addEventListener("click", function(e) {
+        e.preventDefault();
+        head_configuration_delete_interval(position, form);
+    }, false);
+    div.appendChild(delete_button);
+    form.appendChild(div);
+}
+function head_configuration_intervals_timer(shadowRoot, interval, form) {
+    let div = shadowRoot.createElement('div');
+    var position = 0;
+    for(position = 0; position < 100; position++){
+        var c_elt = form.querySelector("#interval_" + position);
+        if (c_elt == null) break;
+    }
+    div.className = "interval";
+    div.id = "interval_" + position;
+    let start = $iXBpj.create_hour(shadowRoot, 'st', interval.st, position);
+    //header days
+    var node = null;
+    node = shadowRoot.createElement("label");
+    node.innerHTML = (0, $dPhcg.default)._("volume");
+    let volume = shadowRoot.createElement("input");
+    volume.type = "number";
+    volume.min = 0.1;
+    volume.max = 300;
+    volume.id = "volume_" + position;
+    volume.value = "1";
+    volume.className = "volume";
+    volume.addEventListener("change", (event)=>{
+        update_instant_dd(shadowRoot);
+    });
+    //
+    div.appendChild(start);
+    div.appendChild(node);
+    div.appendChild(volume);
+    div.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
+        'whisper',
+        'regular',
+        'quick'
+    ], interval.mode, true, '', position));
+    let delete_button = shadowRoot.createElement("button");
+    delete_button.className = "delete_button";
+    if (position == 0) delete_button.style.visibility = "hidden";
+    delete_button.addEventListener("click", function(e) {
+        e.preventDefault();
+        head_configuration_delete_interval(position, form);
+    }, false);
+    div.appendChild(delete_button);
+    form.appendChild(div);
+}
+function head_configuration_delete_interval(position, intervals) {
+    var interval = intervals.querySelector("#interval_" + position);
+    interval.remove();
 }
 function head_configuration_schedule_hourly(schedule, elt, hass, shadowRoot, form) {
-    //let min=com.create_select(shadowRoot,'min', [0,10,20,30,40,50],schedule.min,false,"min");
+    var dd = shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility = "visible";
     let min = $iXBpj.create_select(shadowRoot, 'min', Array(6).fill().map((x, i)=>i * 10), schedule.min, false, "min");
     form.appendChild(min);
     //mode
@@ -2755,14 +3031,17 @@ function head_configuration_schedule_hourly(schedule, elt, hass, shadowRoot, for
     ], schedule.mode));
     return form;
 }
-function head_configuration_schedule_timer(schedule, elt, hass, shadowRoot, form) {
-    return form;
-}
 function handle_schedule_type_change(event, elt, hass, shadowRoot) {
     var schedule = {
         type: event.target.value
     };
     head_configuration(elt, hass, shadowRoot, schedule);
+}
+function update_instant_dd(shadowRoot) {
+    var total_volume = shadowRoot.querySelector("#instant_dd");
+    var total = 0;
+    for (var volume of shadowRoot.querySelectorAll(".volume"))total += parseFloat(volume.value);
+    total_volume.innerHTML = total;
 }
 
 });
@@ -3879,8 +4158,8 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
 
 
 
-parcelRegister("hXmGm", function(module, exports) {
-module.exports = new URL("close_cross.svg", import.meta.url).toString();
+parcelRegister("7YMQG", function(module, exports) {
+module.exports = new URL("close_cross.73f7b69c.svg?" + Date.now(), import.meta.url).toString();
 
 });
 
@@ -3904,7 +4183,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $0ef451c83bce80a0$export$e506a1d27d1eaa20 = {
     "name": '',
     "model": "NODEVICE",
-    "background_img": new URL("NODEVICE.png", import.meta.url)
+    "background_img": new URL("NODEVICE.b93b676a.png", import.meta.url)
 };
 
 
@@ -3963,7 +4242,7 @@ var $5c2Je = parcelRequire("5c2Je");
 const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
     "name": null,
     "model": "RSDOSE4",
-    "background_img": new URL("RSDOSE4.png", import.meta.url),
+    "background_img": new URL("RSDOSE4.d62c95e6.png", import.meta.url),
     "heads_nb": 4,
     "dialogs": {
         "head_configuration": {
@@ -4952,7 +5231,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             style = (0, $l56HR.html)`<style>img#id_${supplement_uid}{filter: grayscale(90%);}</style>`;
             color = (0, $iXBpj.off_color);
         }
-        if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
+        if (parseInt(this.get_entity('remaining_days').state) < parseInt(this.stock_alert) && this.get_entity('slm').state == "on" && this.get_entity('daily_dose').state > 0) warning = (0, $l56HR.html)`<img class='warning' src='${new URL("warning.db773b32.svg", import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${(0, $dPhcg.default)._("empty")}</div>`;
         return (0, $l56HR.html)`
               <div class="container" style="${this.get_style(this.config.container)}">
                 ${style}
@@ -4996,7 +5275,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             if (this._hass.states[this.entities['head_state'].entity_id].state == "not-setup") {
                 this.state_on = false;
                 let conf = {
-                    "image": new URL("configuration.png", import.meta.url),
+                    "image": new URL("configuration.b5dbcf16.png", import.meta.url),
                     "type": "click-image",
                     "class": "calibration",
                     "stateObj": null,
@@ -5032,7 +5311,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             let conf = {
                 "type": "click-image",
                 "stateObj": false,
-                "image": new URL("container_add.png", import.meta.url),
+                "image": new URL("container_add.d3b2ec21.png", import.meta.url),
                 "class": "container",
                 "tap_action": {
                     "domain": "redsea_ui",
@@ -5255,7 +5534,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             dose_head.device_state = this.is_on();
             dose_head.hass = this._hass;
         } else {
-            dose_head = (0, $5c2Je.default).create_device('dose-head', this._hass, new_conf, null);
+            dose_head = (0, $5c2Je.default).create_device('dose-head', this._hass, new_conf, this);
             dose_head.entities = this._heads[head_id].entities;
             dose_head.stock_alert = this.get_entity('stock_alert_days').state;
             dose_head.state_on = schedule_state;

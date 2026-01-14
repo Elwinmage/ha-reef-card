@@ -16,6 +16,7 @@ export default css`
   background-color: #006787;
 }
 
+
 .dialog_button{
   border-radius: 20px;
   background-color: #009ac7;

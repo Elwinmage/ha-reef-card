@@ -1,5 +1,9 @@
 export const dict={
     en:{
+	volume:"Volume (mL)",
+	can_not_save:"Can not save schedule: ",
+	at_least_30m_between:"Between start and end should be at least 30 minutes",
+	end_earlier_than_start:"End time cannot be earlier than start time",
 	ask_add_supplement : "Ask for picture",
 	brand_name:"Brand Name",
 	calibration:"Calibration",
@@ -36,6 +40,7 @@ export const dict={
 	name:"Name",
 	next:"Next",
 	priming:"Priming",
+	save_schedule:"Save schedule",
 	set_auto_dose : "Auto daily volume",
 	set_container_volume: "Container Volume",
 	set_manual_head_volume: "Manual volume",
@@ -92,6 +97,7 @@ export const dict={
 	name:"Nom",
 	next:"Suivant",
 	priming:"Amorçage",
+	save_schedule:"Save schedule",
 	set_auto_dose : "Dose automatique journalière",
 	set_container_volume: "Volume du supplément",
 	set_manual_head_volume: "Volume manuel",
@@ -110,5 +116,9 @@ export const dict={
 	timer:"Minuteur",
 	hour:"Heure",
 	nd:"Nombre de doses",
+	at_least_30m_between:"Il faut au moins 30 minimum entre l'heure de début et de fin",
+	end_earlier_than_start:"L'heure de fin ne peut pas être plus tôt que celle du début.",
+	can_not_save:"Impossible de sauvegarder la plannification: ",
+	volume:"Volume (mL)",
     },
 }

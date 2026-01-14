@@ -8,6 +8,8 @@ import MyElement from "./base/element";
 
 import { mdiDeleteEmpty } from '@mdi/js';
 
+import { stringToTime } from '../common'
+
 export function set_manual_head_volume(elt,hass,shadowRoot){
     if (elt.device.config.shortcut){
 	for(let shortcut of elt.device.config.shortcut.split(',')){
@@ -176,10 +178,10 @@ export function edit_container(elt,hass,shadowRoot){
     set_container_volume(elt,hass,shadowRoot);
 }
 
-export function head_configuration(elt,hass,shadowRoot,schedule=null){
+export function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
     var content=null;
-    if(schedule==null || schedule.type==elt.device.get_entity('schedule_head').attributes.schedule.type){
-	schedule=elt.device.get_entity('schedule_head').attributes.schedule;
+    if(saved_schedule==null ||saved_schedule.type==elt.device.get_entity('schedule_head').attributes.schedule.type){
+	saved_schedule=elt.device.get_entity('schedule_head').attributes.schedule;
     }
     
     var form=shadowRoot.querySelector("#schedule");
@@ -189,16 +191,12 @@ export function head_configuration(elt,hass,shadowRoot,schedule=null){
     form=shadowRoot.createElement("form");
     form.className="schedule";
     form.id="schedule";
-    var schedule_type=com.create_select(shadowRoot,'schedule',['single','custom','hourly','timer'],schedule.type);
+    var schedule_type=com.create_select(shadowRoot,'schedule',['single','custom','hourly','timer'],saved_schedule.type);
     schedule_type.addEventListener("change",function(event) {handle_schedule_type_change(event,elt,hass,shadowRoot)});
     form.appendChild(schedule_type);
-    content=eval("head_configuration_schedule_"+schedule.type+"(schedule,elt,hass,shadowRoot,form);");
-    shadowRoot.querySelector("#dialog-content").appendChild(content);
-}
-
-function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
+    content=eval("head_configuration_schedule_"+saved_schedule.type+"(saved_schedule,elt,hass,shadowRoot,form);");
+    //header days
     var node=null;
-    //header
     node=shadowRoot.createElement("label");
     node.innerHTML=i18n._("days");
     form.appendChild(node);
@@ -210,7 +208,12 @@ function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
 	node.type="checkbox";
 	node.value=name;
 	node.id=name;
-	node.checked=true;
+	if(saved_schedule && saved_schedule.days && !saved_schedule.days.includes(day)){
+	    node.checked=false;
+	}
+	else{
+	    node.checked=true;
+	}
 	let label=shadowRoot.createElement("label");
 	label.innerHTML=i18n._("day_"+String(day))[0];
 	label.className="days";
@@ -218,6 +221,17 @@ function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
 	form.appendChild(label);
 	form.appendChild(node);
     }
+    var save_button=shadowRoot.createElement("button");
+    save_button.innerHTML=i18n._('save_schedule');
+    save_button.style.width="100%",
+    save_button.addEventListener("click", function(e) {e.preventDefault();save_schedule(e,shadowRoot,form,elt,hass)},false);
+    form.appendChild(save_button);
+    shadowRoot.querySelector("#dialog-content").appendChild(content);
+}
+
+function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
+    var dd=shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility="visible";
     //time
     form.appendChild(com.create_hour(shadowRoot,'hour',schedule.time));
     //mode
@@ -225,49 +239,274 @@ function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
     return form;
 }
 
+
 function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
-    console.log("INTERVALS",schedule.intervals);
-    if(!schedule.intervals){
-	schedule.intervals=[{
+    var dd=shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility="visible";
+    const default_interval={
 	    st: 0,
             end: 1440,
             nd: 10,
             mode: 'regular',
-	}];
+    };
+    if(!schedule.intervals){
+	schedule.intervals=[default_interval];
     }
+    var intervals=shadowRoot.createElement("div");
     for(var interval of schedule.intervals){
-	head_configuration_intervals(shadowRoot,interval,form);
+	head_configuration_intervals_custom(shadowRoot,interval,intervals);
     }
+    //add interval button
+    form.appendChild(intervals);
+    var add_button=shadowRoot.createElement("button");
+    add_button.innerHTML='+';
+    add_button.style.width="100%",
+    add_button.addEventListener("click", function(e) {e.preventDefault();head_configuration_intervals_custom(shadowRoot,default_interval,intervals);},false);
+    form.appendChild(add_button);
     return form;
 }
 
 
-function head_configuration_intervals(shadowRoot,interval,form){
-    let start=com.create_hour(shadowRoot,'st',interval.st);
-    let end=com.create_hour(shadowRoot,'end',interval.nd);
-    let nd=com.create_select(shadowRoot,'nd', Array(24).fill().map((x,i)=>i+1),interval.nd,false);
-    form.appendChild(start);
-    form.appendChild(end);
-    form.appendChild(nd);
-    form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],interval.mode));
+function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
+    const default_interval={
+	    st: 0,
+            volume: 1,
+            mode: 'regular',
+    };
+    if(!schedule.intervals){
+	schedule.intervals=[default_interval];
+    }
+    //remove daily dose input number
+    var dd=shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility="hidden";
+
+    var instant_dd=shadowRoot.createElement("p");
+    instant_dd.id="instant_dd";
+    instant_dd.innerHTML="0";
+    form.appendChild(instant_dd);
+    
+    var intervals=shadowRoot.createElement("div");
+    for(var interval of schedule.intervals){
+	head_configuration_intervals_timer(shadowRoot,interval,intervals);
+    }
+    //add interval button
+    form.appendChild(intervals);
+    var add_button=shadowRoot.createElement("button");
+    add_button.innerHTML='+';
+    add_button.style.width="100%",
+    add_button.addEventListener("click", function(e) {e.preventDefault();head_configuration_intervals_timer(shadowRoot,default_interval,intervals);},false);
+    form.appendChild(add_button);
+    update_instant_dd(form);;
+    return form;
+}
+
+function save_schedule(event,shadowRoot,form,elt,hass){
+    var schedule={};
+    schedule.type=shadowRoot.querySelector("#schedule_1").value;
+    //    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.days=[];
+    for (var day=1;day<8;day++){
+	var day_id="#day_"+String(day);
+	if(shadowRoot.querySelector(day_id).checked){
+	    schedule.days.push(day);
+	}
+    }
+    var to_schedule=eval("save_schedule_"+schedule.type+"(shadowRoot,elt,hass,schedule)");
+    if(to_schedule!=null){
+	var data={
+	    access_path: "/head/"+elt.device.config.id+"/settings",
+	    method: "put",
+	    data: {schedule:to_schedule},
+	    device_id: elt.device.device.device.elements[0].primary_config_entry,
+	}    
+	console.debug("Call service", data);
+	hass.callService("redsea","request", data);
+    }
+    else {
+	console.error("Can not save schedule", data);
+    }
+}
+
+function save_schedule_single(shadowRoot,elt,hass,schedule){
+    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.time=stringToTime(shadowRoot.querySelector("#hour_1").value);
+    schedule.mode=shadowRoot.querySelector("#speed_1").value;
+    return schedule;
+}
+
+function save_schedule_hourly(shadowRoot,elt,hass,schedule){
+    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.min=parseInt(shadowRoot.querySelector("#min_1").value);
+    schedule.mode=shadowRoot.querySelector("#speed_1").value;
+    return schedule;
+}
+
+function save_schedule_custom(shadowRoot,elt,hass,schedule){
+    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.intervals=[];
+    for (var interval of shadowRoot.querySelectorAll(".interval")){
+	var s_id=interval.id.split("_");
+	var position = s_id[s_id.length-1];
+	var start=stringToTime(interval.querySelector("#st_"+position).value);
+	var end=stringToTime(interval.querySelector("#end_"+position).value);
+	if (end-start < 30){
+	    var msg="at_least_30m_between";
+	    if (end-start < 0){
+		msg="end_earlier_than_start";
+	    }
+	    shadowRoot.dispatchEvent(
+		new CustomEvent(
+		    "hass-notification",
+		    {
+			bubbles: true,
+			composed: true,
+			detail: {
+			    message: i18n._("can_not_save")+i18n._(msg)
+			}
+		    }
+		)
+	    );
+	    return null;
+	}
+	var nd=parseInt(interval.querySelector("#nd_"+position).value);
+	var speed=interval.querySelector("#speed_"+position).value;
+	var json_interval={st:start,end:end,nd:nd,mode:speed};
+	schedule.intervals.push(json_interval);
+    }//for
+    schedule.intervals.sort(compare_interval) ;
+    schedule.type=shadowRoot.querySelector("#schedule_1").value;
+    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    return schedule;
+}
+
+
+function compare_interval( a, b ) {
+    if (a.st < b.st){
+	return -1;
+    }
+    if(a.st > b.st){
+	return 1;
+    }
+    return 0;
+}
+
+
+function save_schedule_timer(shadowRoot,elt,hass,schedule){
+    schedule.intervals=[];
+    for (var interval of shadowRoot.querySelectorAll(".interval")){
+	var s_id=interval.id.split("_");
+	var position = s_id[s_id.length-1];
+	var start=stringToTime(interval.querySelector("#st_"+position).value);
+	var volume=parseFloat(interval.querySelector("#volume_"+position).value);
+	var speed=interval.querySelector("#speed_"+position).value;
+	var json_interval={st:start,volume:volume,mode:speed};
+	schedule.intervals.push(json_interval);
+    }//for
+    schedule.intervals.sort(compare_interval) ;
+    schedule.type=shadowRoot.querySelector("#schedule_1").value;
+    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    return schedule;
+}
+
+
+function head_configuration_intervals_custom(shadowRoot,interval,form){
+    let div=shadowRoot.createElement('div');
+    var position=0;
+    for (position=0;position<100;position++){
+	var c_elt=form.querySelector("#interval_"+position);
+	if(c_elt==null){
+	    break;
+	}
+    }
+    div.className="interval";
+    div.id="interval_"+position;
+    let start=com.create_hour(shadowRoot,'st',interval.st,position);
+    let end=com.create_hour(shadowRoot,'end',interval.end,position);
+    let nd=com.create_select(shadowRoot,'nd', Array(24).fill().map((x,i)=>i+1),interval.nd,false,'',position);
+    div.appendChild(start);
+    div.appendChild(end);
+    div.appendChild(nd);
+    div.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],interval.mode,true,'',position));
+
+    let delete_button=shadowRoot.createElement("button");
+    delete_button.className="delete_button";
+    if(position==0){
+	delete_button.style.visibility="hidden";
+    }
+    delete_button.addEventListener("click", function(e) {e.preventDefault();head_configuration_delete_interval(position,form);},false);
+    div.appendChild(delete_button);
+    form.appendChild(div);
+}
+
+function head_configuration_intervals_timer(shadowRoot,interval,form){
+    let div=shadowRoot.createElement('div');
+    var position=0;
+    for (position=0;position<100;position++){
+	var c_elt=form.querySelector("#interval_"+position);
+	if(c_elt==null){
+	    break;
+	}
+    }
+    div.className="interval";
+    div.id="interval_"+position;
+    let start=com.create_hour(shadowRoot,'st',interval.st,position);
+    //header days
+    var node=null;
+    node=shadowRoot.createElement("label");
+    node.innerHTML=i18n._("volume");
+
+    let volume=shadowRoot.createElement("input");
+    volume.type="number";
+    volume.min=0.1;
+    volume.max=300;
+    volume.id="volume_"+position;
+    volume.value="1";
+    volume.className="volume";
+    volume.addEventListener("change", (event) => { update_instant_dd(shadowRoot)})
+    //
+    div.appendChild(start);
+    div.appendChild(node);
+    div.appendChild(volume);
+    div.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],interval.mode,true,'',position));
+
+    let delete_button=shadowRoot.createElement("button");
+    delete_button.className="delete_button";
+    if(position==0){
+	delete_button.style.visibility="hidden";
+    }
+    delete_button.addEventListener("click", function(e) {e.preventDefault();head_configuration_delete_interval(position,form);},false);
+    div.appendChild(delete_button);
+    form.appendChild(div);
+}
+
+function head_configuration_delete_interval(position,intervals){
+    var interval=intervals.querySelector("#interval_"+position);
+    interval.remove();
 }
 
 function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
-    //let min=com.create_select(shadowRoot,'min', [0,10,20,30,40,50],schedule.min,false,"min");
+    var dd=shadowRoot.querySelector("hui-entities-card");
+    dd.style.visibility="visible";
+
     let min=com.create_select(shadowRoot,'min', Array(6).fill().map((x,i)=>i*10),schedule.min,false,"min");
     form.appendChild(min);
-    
     //mode
     form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
     return form;
 
 }
 
-function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
-    return form;
-}
 
 function handle_schedule_type_change(event,elt,hass,shadowRoot){
     var schedule={type:event.target.value};
     head_configuration(elt,hass,shadowRoot,schedule);
+}
+
+function update_instant_dd(shadowRoot){
+    var total_volume=shadowRoot.querySelector("#instant_dd");
+    var total=0;
+    for (var volume of shadowRoot.querySelectorAll(".volume")){
+	total += parseFloat(volume.value);
+    }
+    total_volume.innerHTML=total;
 }

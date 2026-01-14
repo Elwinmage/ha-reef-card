@@ -133,4 +133,52 @@ label.days{
 label.days:hover{
 cursor:pointer;
 }
+
+.interval{
+  font-weight: bolder;
+  text-align: center;
+  border-radius: 20px;
+  display: flex;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  background-color: aliceblue;
+  border: 1px solid lightgray;
+}
+
+input {
+  border-radius:20px;
+  border: 1px solid #009ac7;
+}
+
+select{
+  border-radius:20px;
+  border: 1px solid #009ac7;
+}
+
+button{
+  border-radius: 20px;
+  background-color: #009ac7;
+  color: white;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display:inline-block;
+  margin-top:5px;
+  margin-bott: 5px;
+  border:none;
+}
+
+button:hover{
+cursor:pointer;
+}
+
+button.delete_button{
+ background-color:red;
+ background: url('/hacsfiles/ha-reef-card/trash.svg');
+ background-position:center;
+ background-repeat:no-repeat;
+}
+
 `;

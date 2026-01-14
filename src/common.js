@@ -112,13 +112,13 @@ export function toTime(time){
     return String(hours).padStart(2,'0')+":"+String(minutes).padStart(2,'0')+":"+String(seconds).padStart(2,'0');
 }
 
-export function create_select(shadowRoot,id,options,selected=null,translation=true,suffix=''){
+export function create_select(shadowRoot,id,options,selected=null,translation=true,suffix='',id_suffix=1){
     var div=shadowRoot.createElement('div');
     var label=shadowRoot.createElement('label');
     label.htmlFor=id;
     label.innerHTML=i18n._(id);
     var node=shadowRoot.createElement("SELECT");
-    node.id=id;
+    node.id=id+'_'+id_suffix;
     for(let option of options){
 	var opt = document.createElement('option');
 	opt.value = option;
@@ -143,14 +143,19 @@ function timeToString(time){
     return String(Math.floor(time/60)).padStart(2,'0')+':'+String(Math.floor(time%60)).padStart(2,"0");
 }
 
-export function create_hour(shadowRoot,id, hour=0){
+export function stringToTime(string){
+    var s_time=string.split(":");
+    return parseInt(s_time[0]*60)+parseInt(s_time[1]);
+}
+
+export function create_hour(shadowRoot,id, hour=0,id_suffix=1){
     var div=shadowRoot.createElement('div');
     var label=shadowRoot.createElement('label');
     label.htmlFor=id;
     label.innerHTML=i18n._(id);
     var node=shadowRoot.createElement("input");
     node.type="time";
-    node.id=id;
+    node.id=id+'_'+id_suffix;
     node.value=timeToString(hour);
     div.appendChild(label);
     div.appendChild(node);
