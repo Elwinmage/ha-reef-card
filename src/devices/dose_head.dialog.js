@@ -194,7 +194,23 @@ export function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
     var schedule_type=com.create_select(shadowRoot,'schedule',['single','custom','hourly','timer'],saved_schedule.type);
     schedule_type.addEventListener("change",function(event) {handle_schedule_type_change(event,elt,hass,shadowRoot)});
     form.appendChild(schedule_type);
+    //daily dose
+    var node=null;
+    node=shadowRoot.createElement("label");
+    node.innerHTML=i18n._("daily_dose");
+    form.appendChild(node);
+    var dd=shadowRoot.createElement("input");
+    dd.type="number";
+    dd.id="dailydose";
+    dd.min=0.1;
+    dd.step=0.1;
+    dd.max=300;
+    dd.value=elt.device.get_entity("daily_dose").state;
+    form.appendChild(dd);
+
+    //Type specific
     content=eval("head_configuration_schedule_"+saved_schedule.type+"(saved_schedule,elt,hass,shadowRoot,form);");
+    
     //header days
     var node=null;
     node=shadowRoot.createElement("label");
@@ -230,8 +246,6 @@ export function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
 }
 
 function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
-    var dd=shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility="visible";
     //time
     form.appendChild(com.create_hour(shadowRoot,'hour',schedule.time));
     //mode
@@ -241,8 +255,6 @@ function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
 
 
 function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
-    var dd=shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility="visible";
     const default_interval={
 	    st: 0,
             end: 1440,
@@ -277,14 +289,9 @@ function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
 	schedule.intervals=[default_interval];
     }
     //remove daily dose input number
-    var dd=shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility="hidden";
+    var dd=form.querySelector("#dailydose");
+    dd.disabled=true;
 
-    var instant_dd=shadowRoot.createElement("p");
-    instant_dd.id="instant_dd";
-    instant_dd.innerHTML="0";
-    form.appendChild(instant_dd);
-    
     var intervals=shadowRoot.createElement("div");
     for(var interval of schedule.intervals){
 	head_configuration_intervals_timer(shadowRoot,interval,intervals);
@@ -296,14 +303,14 @@ function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
     add_button.style.width="100%",
     add_button.addEventListener("click", function(e) {e.preventDefault();head_configuration_intervals_timer(shadowRoot,default_interval,intervals);},false);
     form.appendChild(add_button);
-    update_instant_dd(form);;
+    update_dd(form);;
     return form;
 }
 
 function save_schedule(event,shadowRoot,form,elt,hass){
     var schedule={};
     schedule.type=shadowRoot.querySelector("#schedule_1").value;
-    //    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+//    schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.days=[];
     for (var day=1;day<8;day++){
 	var day_id="#day_"+String(day);
@@ -321,6 +328,18 @@ function save_schedule(event,shadowRoot,form,elt,hass){
 	}    
 	console.debug("Call service", data);
 	hass.callService("redsea","request", data);
+	shadowRoot.dispatchEvent(
+	    new CustomEvent(
+		"hass-notification",
+		{
+		    bubbles: true,
+		    composed: true,
+			detail: {
+			    message: i18n._("schedule_saved")
+			}
+		}
+	    )
+	);
     }
     else {
 	console.error("Can not save schedule", data);
@@ -328,21 +347,36 @@ function save_schedule(event,shadowRoot,form,elt,hass){
 }
 
 function save_schedule_single(shadowRoot,elt,hass,schedule){
-    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.time=stringToTime(shadowRoot.querySelector("#hour_1").value);
     schedule.mode=shadowRoot.querySelector("#speed_1").value;
     return schedule;
 }
 
 function save_schedule_hourly(shadowRoot,elt,hass,schedule){
-    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
+    if (schedule.dd<5.0){
+	shadowRoot.dispatchEvent(
+	    new CustomEvent(
+		"hass-notification",
+		    {
+			bubbles: true,
+			composed: true,
+			detail: {
+			    message: i18n._("can_not_save")+i18n._("min_dose")
+			}
+		    }
+	    )
+	);
+	return null;
+    }//fi
     schedule.min=parseInt(shadowRoot.querySelector("#min_1").value);
     schedule.mode=shadowRoot.querySelector("#speed_1").value;
     return schedule;
 }
 
 function save_schedule_custom(shadowRoot,elt,hass,schedule){
-    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.intervals=[];
     for (var interval of shadowRoot.querySelectorAll(".interval")){
 	var s_id=interval.id.split("_");
@@ -375,7 +409,6 @@ function save_schedule_custom(shadowRoot,elt,hass,schedule){
     }//for
     schedule.intervals.sort(compare_interval) ;
     schedule.type=shadowRoot.querySelector("#schedule_1").value;
-    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
     return schedule;
 }
 
@@ -404,7 +437,6 @@ function save_schedule_timer(shadowRoot,elt,hass,schedule){
     }//for
     schedule.intervals.sort(compare_interval) ;
     schedule.type=shadowRoot.querySelector("#schedule_1").value;
-    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
     return schedule;
 }
 
@@ -451,6 +483,7 @@ function head_configuration_intervals_timer(shadowRoot,interval,form){
     div.id="interval_"+position;
     let start=com.create_hour(shadowRoot,'st',interval.st,position);
     //header days
+    var vol=shadowRoot.createElement('div');
     var node=null;
     node=shadowRoot.createElement("label");
     node.innerHTML=i18n._("volume");
@@ -458,15 +491,18 @@ function head_configuration_intervals_timer(shadowRoot,interval,form){
     let volume=shadowRoot.createElement("input");
     volume.type="number";
     volume.min=0.1;
+    volume.set=0.1;
     volume.max=300;
     volume.id="volume_"+position;
     volume.value="1";
     volume.className="volume";
-    volume.addEventListener("change", (event) => { update_instant_dd(shadowRoot)})
+    volume.addEventListener("change", (event) => { update_dd(shadowRoot)})
+    vol.appendChild(node);
+    vol.appendChild(volume);
+
     //
     div.appendChild(start);
-    div.appendChild(node);
-    div.appendChild(volume);
+    div.appendChild(vol);
     div.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],interval.mode,true,'',position));
 
     let delete_button=shadowRoot.createElement("button");
@@ -485,9 +521,6 @@ function head_configuration_delete_interval(position,intervals){
 }
 
 function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
-    var dd=shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility="visible";
-
     let min=com.create_select(shadowRoot,'min', Array(6).fill().map((x,i)=>i*10),schedule.min,false,"min");
     form.appendChild(min);
     //mode
@@ -502,11 +535,11 @@ function handle_schedule_type_change(event,elt,hass,shadowRoot){
     head_configuration(elt,hass,shadowRoot,schedule);
 }
 
-function update_instant_dd(shadowRoot){
-    var total_volume=shadowRoot.querySelector("#instant_dd");
+function update_dd(shadowRoot){
+    var total_volume=shadowRoot.querySelector("#dailydose");
     var total=0;
     for (var volume of shadowRoot.querySelectorAll(".volume")){
 	total += parseFloat(volume.value);
     }
-    total_volume.innerHTML=i18n._("total_volume")+total+i18n._("volume_unit");
+    total_volume.value=total;
 }

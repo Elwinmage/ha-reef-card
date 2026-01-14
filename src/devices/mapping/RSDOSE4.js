@@ -58,15 +58,6 @@ export const config = {
 		    },
 		},
 		{
-		    "view": "hui-entities-card",
-		    "conf":{
-			"type":"entities",
-			"entities": [
-			    {"entity":"daily_dose","name":{"type":"entity"}},
-			]
-		    }
-		},
-		{
 		    "view":"extend",
 		    "extend":"dose_head_dialog",
 		}

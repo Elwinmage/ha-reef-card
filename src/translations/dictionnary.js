@@ -1,6 +1,10 @@
 export const dict={
     en:{
+	min_dose:"The minimal dose for this type of schedule is 5mL",
+	daily_dose:"Daily dose (mL)",
+	schedule_saved:"Schedule saved",
 	total_volume:"Total volume: ",
+	volume:"Volume (mL)",
 	volume_unit:" mL",
 	can_not_save:"Can not save schedule: ",
 	at_least_30m_between:"Between start and end should be at least 30 minutes",
@@ -122,5 +126,9 @@ export const dict={
 	can_not_save:"Impossible de sauvegarder la plannification: ",
 	total_volume:"Volume total ",
 	volume_unit:" mL",
+	schedule_saved:"Planning sauvegardé",
+	daily_dose:"Dose journalière (mL)",
+	volume:"Volume (mL)",
+	min_dose:"La dose minimale pour cette planification est de  5ml",
     },
 }

@@ -181,4 +181,16 @@ button.delete_button{
  background-repeat:no-repeat;
 }
 
+label{
+margin-right: 5px;
+}
+
+input{
+margin-right: 5px;
+}
+
+:disabled{
+background-color: rgb(200,200,200);
+}
+
 `;

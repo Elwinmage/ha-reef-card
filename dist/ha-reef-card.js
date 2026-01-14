@@ -950,7 +950,11 @@ parcelRegister("hudnx", function(module, exports) {
 $parcel$export(module.exports, "dict", () => $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e);
 const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
     en: {
+        min_dose: "The minimal dose for this type of schedule is 5mL",
+        daily_dose: "Daily dose (mL)",
+        schedule_saved: "Schedule saved",
         total_volume: "Total volume: ",
+        volume: "Volume (mL)",
         volume_unit: " mL",
         can_not_save: "Can not save schedule: ",
         at_least_30m_between: "Between start and end should be at least 30 minutes",
@@ -1071,7 +1075,11 @@ const $cbaf9dbf0c4a89d3$export$b7eef48498bbd53e = {
         end_earlier_than_start: "L'heure de fin ne peut pas \xeatre plus t\xf4t que celle du d\xe9but.",
         can_not_save: "Impossible de sauvegarder la plannification: ",
         total_volume: "Volume total ",
-        volume_unit: " mL"
+        volume_unit: " mL",
+        schedule_saved: "Planning sauvegard\xe9",
+        daily_dose: "Dose journali\xe8re (mL)",
+        volume: "Volume (mL)",
+        min_dose: "La dose minimale pour cette planification est de  5ml"
     }
 };
 
@@ -2486,6 +2494,18 @@ button.delete_button{
  background-repeat:no-repeat;
 }
 
+label{
+margin-right: 5px;
+}
+
+input{
+margin-right: 5px;
+}
+
+:disabled{
+background-color: rgb(200,200,200);
+}
+
 `;
 
 });
@@ -2748,6 +2768,20 @@ function head_configuration(elt, hass, shadowRoot, saved_schedule = null) {
         handle_schedule_type_change(event, elt, hass, shadowRoot);
     });
     form.appendChild(schedule_type);
+    //daily dose
+    var node = null;
+    node = shadowRoot.createElement("label");
+    node.innerHTML = (0, $dPhcg.default)._("daily_dose");
+    form.appendChild(node);
+    var dd = shadowRoot.createElement("input");
+    dd.type = "number";
+    dd.id = "dailydose";
+    dd.min = 0.1;
+    dd.step = 0.1;
+    dd.max = 300;
+    dd.value = elt.device.get_entity("daily_dose").state;
+    form.appendChild(dd);
+    //Type specific
     content = eval("head_configuration_schedule_" + saved_schedule.type + "(saved_schedule,elt,hass,shadowRoot,form);");
     //header days
     var node = null;
@@ -2781,8 +2815,6 @@ function head_configuration(elt, hass, shadowRoot, saved_schedule = null) {
     shadowRoot.querySelector("#dialog-content").appendChild(content);
 }
 function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, form) {
-    var dd = shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility = "visible";
     //time
     form.appendChild($iXBpj.create_hour(shadowRoot, 'hour', schedule.time));
     //mode
@@ -2794,8 +2826,6 @@ function head_configuration_schedule_single(schedule, elt, hass, shadowRoot, for
     return form;
 }
 function head_configuration_schedule_custom(schedule, elt, hass, shadowRoot, form) {
-    var dd = shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility = "visible";
     const default_interval = {
         st: 0,
         end: 1440,
@@ -2828,12 +2858,8 @@ function head_configuration_schedule_timer(schedule, elt, hass, shadowRoot, form
         default_interval
     ];
     //remove daily dose input number
-    var dd = shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility = "hidden";
-    var instant_dd = shadowRoot.createElement("p");
-    instant_dd.id = "instant_dd";
-    instant_dd.innerHTML = "0";
-    form.appendChild(instant_dd);
+    var dd = form.querySelector("#dailydose");
+    dd.disabled = true;
     var intervals = shadowRoot.createElement("div");
     for (var interval of schedule.intervals)head_configuration_intervals_timer(shadowRoot, interval, intervals);
     //add interval button
@@ -2845,13 +2871,13 @@ function head_configuration_schedule_timer(schedule, elt, hass, shadowRoot, form
         head_configuration_intervals_timer(shadowRoot, default_interval, intervals);
     }, false);
     form.appendChild(add_button);
-    update_instant_dd(form);
+    update_dd(form);
     return form;
 }
 function save_schedule(event, shadowRoot, form, elt, hass) {
     var schedule = {};
     schedule.type = shadowRoot.querySelector("#schedule_1").value;
-    //    schedule.dd=parseFloat(elt.device.get_entity("daily_dose").state);
+    //    schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.days = [];
     for(var day = 1; day < 8; day++){
         var day_id = "#day_" + String(day);
@@ -2869,22 +2895,39 @@ function save_schedule(event, shadowRoot, form, elt, hass) {
         };
         console.debug("Call service", data);
         hass.callService("redsea", "request", data);
+        shadowRoot.dispatchEvent(new CustomEvent("hass-notification", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                message: (0, $dPhcg.default)._("schedule_saved")
+            }
+        }));
     } else console.error("Can not save schedule", data);
 }
 function save_schedule_single(shadowRoot, elt, hass, schedule) {
-    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd = parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.time = (0, $iXBpj.stringToTime)(shadowRoot.querySelector("#hour_1").value);
     schedule.mode = shadowRoot.querySelector("#speed_1").value;
     return schedule;
 }
 function save_schedule_hourly(shadowRoot, elt, hass, schedule) {
-    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd = parseFloat(shadowRoot.querySelector("#dailydose").value);
+    if (schedule.dd < 5.0) {
+        shadowRoot.dispatchEvent(new CustomEvent("hass-notification", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                message: (0, $dPhcg.default)._("can_not_save") + (0, $dPhcg.default)._("min_dose")
+            }
+        }));
+        return null;
+    } //fi
     schedule.min = parseInt(shadowRoot.querySelector("#min_1").value);
     schedule.mode = shadowRoot.querySelector("#speed_1").value;
     return schedule;
 }
 function save_schedule_custom(shadowRoot, elt, hass, schedule) {
-    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
+    schedule.dd = parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.intervals = [];
     for (var interval of shadowRoot.querySelectorAll(".interval")){
         var s_id = interval.id.split("_");
@@ -2915,7 +2958,6 @@ function save_schedule_custom(shadowRoot, elt, hass, schedule) {
     } //for
     schedule.intervals.sort(compare_interval);
     schedule.type = shadowRoot.querySelector("#schedule_1").value;
-    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
     return schedule;
 }
 function compare_interval(a, b) {
@@ -2940,7 +2982,6 @@ function save_schedule_timer(shadowRoot, elt, hass, schedule) {
     } //for
     schedule.intervals.sort(compare_interval);
     schedule.type = shadowRoot.querySelector("#schedule_1").value;
-    schedule.dd = parseFloat(elt.device.get_entity("daily_dose").state);
     return schedule;
 }
 function head_configuration_intervals_custom(shadowRoot, interval, form) {
@@ -2984,23 +3025,26 @@ function head_configuration_intervals_timer(shadowRoot, interval, form) {
     div.id = "interval_" + position;
     let start = $iXBpj.create_hour(shadowRoot, 'st', interval.st, position);
     //header days
+    var vol = shadowRoot.createElement('div');
     var node = null;
     node = shadowRoot.createElement("label");
     node.innerHTML = (0, $dPhcg.default)._("volume");
     let volume = shadowRoot.createElement("input");
     volume.type = "number";
     volume.min = 0.1;
+    volume.set = 0.1;
     volume.max = 300;
     volume.id = "volume_" + position;
     volume.value = "1";
     volume.className = "volume";
     volume.addEventListener("change", (event)=>{
-        update_instant_dd(shadowRoot);
+        update_dd(shadowRoot);
     });
+    vol.appendChild(node);
+    vol.appendChild(volume);
     //
     div.appendChild(start);
-    div.appendChild(node);
-    div.appendChild(volume);
+    div.appendChild(vol);
     div.appendChild($iXBpj.create_select(shadowRoot, 'speed', [
         'whisper',
         'regular',
@@ -3021,8 +3065,6 @@ function head_configuration_delete_interval(position, intervals) {
     interval.remove();
 }
 function head_configuration_schedule_hourly(schedule, elt, hass, shadowRoot, form) {
-    var dd = shadowRoot.querySelector("hui-entities-card");
-    dd.style.visibility = "visible";
     let min = $iXBpj.create_select(shadowRoot, 'min', Array(6).fill().map((x, i)=>i * 10), schedule.min, false, "min");
     form.appendChild(min);
     //mode
@@ -3039,11 +3081,11 @@ function handle_schedule_type_change(event, elt, hass, shadowRoot) {
     };
     head_configuration(elt, hass, shadowRoot, schedule);
 }
-function update_instant_dd(shadowRoot) {
-    var total_volume = shadowRoot.querySelector("#instant_dd");
+function update_dd(shadowRoot) {
+    var total_volume = shadowRoot.querySelector("#dailydose");
     var total = 0;
     for (var volume of shadowRoot.querySelectorAll(".volume"))total += parseFloat(volume.value);
-    total_volume.innerHTML = (0, $dPhcg.default)._("total_volume") + total + (0, $dPhcg.default)._("volume_unit");
+    total_volume.value = total;
 }
 
 });
@@ -4297,20 +4339,6 @@ const $49eb2fac1cfe7013$export$e506a1d27d1eaa20 = {
                         "elt.css": {
                             "background-color": "rgba(0,0,0,0)"
                         }
-                    }
-                },
-                {
-                    "view": "hui-entities-card",
-                    "conf": {
-                        "type": "entities",
-                        "entities": [
-                            {
-                                "entity": "daily_dose",
-                                "name": {
-                                    "type": "entity"
-                                }
-                            }
-                        ]
                     }
                 },
                 {
