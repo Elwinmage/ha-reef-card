@@ -12,6 +12,17 @@ class Supplements{
 	    if (supplement.fullname==name){
 		return supplement;
 	    }
+	    if(supplement.type=="Bundle"){
+		console.log("BUNDLE",supplement.bundle);
+		for ( var supp of Object.keys(supplement.bundle)){
+		    var bundle_supplement=supplement.bundle[supp];
+		    console.log("SUPP",bundle_supplement);
+		    if (bundle_supplement.supplement.name==name){
+			bundle_supplement.supplement.sizes=supplement.sizes.map(function(x) { return x * bundle_supplement.ratio; });
+			return bundle_supplement.supplement;
+		    }
+		}
+	    }//if
 	}//for
 	return null;
     }//end of function get_supplement

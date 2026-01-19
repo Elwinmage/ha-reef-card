@@ -29,7 +29,9 @@ export default class DoseHead extends RSDevice{
 	this.supplement=null;
 	this.stock_alert=null;
 	this.supplement_info=false;
+	this.bundle=false;
     }
+    
     _pipe_path(){
 	let color=this.config.color;
 	if (! this.state_on ){

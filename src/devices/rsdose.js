@@ -104,6 +104,7 @@ export default class RSDose extends RSDevice{
 	    dose_head.state_on=schedule_state;
 	    dose_head.device_state=this.is_on();
 	    dose_head.hass=this._hass;
+	    dose_head.bundle=this.bundle;
 	    
 	}
 	else
@@ -115,6 +116,7 @@ export default class RSDose extends RSDevice{
 	    dose_head.device_state=this.is_on();
 	    this._heads[head_id]['dose_head']=dose_head;
 	    dose_head.config=new_conf;
+	    dose_head.bundle=this.bundle;
 	}
 	
 	return html`
@@ -131,9 +133,12 @@ export default class RSDose extends RSDevice{
     _render(){
 	this.to_render=false;
 	console.debug("Render rsdose");
+
+
 	this.update_config();
 	let style=html``;
 	this._populate_entities_with_heads();
+	this.bundle=this.get_entity('bundled_heads').state=="on";
 	
 	let disabled=this._render_disabled();
 	if(disabled!=null){
@@ -192,21 +197,16 @@ export default class RSDose extends RSDevice{
     }//end of function _editor_head_color
 
     handleChangedDeviceEvent(changedEvent) {
-	console.log("EVENT",changedEvent,changedEvent.currentTarget.checked);
 	/*if(changedEvent.returnValue){
 	  }*/
 	let value= (changedEvent.currentTarget.checked);
 	var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
 	var newConfig = JSON.parse(JSON.stringify(this._config));
 	try{
-	    console.debug("updated",newConfig);
-	    console.debug("updated",newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if,value);
 	    newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
-	    console.debug("updated",newConfig);
 	}
 	catch (error){
 	    newConfig=merge(newConfig,newVal);
-	    console.debug("merged",newConfig,newVal);
 	}
         const messageEvent = new CustomEvent("config-changed", {
             detail: { config: newConfig },
@@ -214,7 +214,6 @@ export default class RSDose extends RSDevice{
             composed: true,
         });
         this.dispatchEvent(messageEvent);
-	console.log("DISPATCH",messageEvent);
     }
     
     //head
@@ -247,7 +246,6 @@ export default class RSDose extends RSDevice{
 	if("disabled_if" in this.config.elements[id]){
 	    result=this.config.elements[id].disabled_if;
 	}
-	console.log("ischecked",id,result);
 	if(result){
 	    return html`
                    <label class="switch">
@@ -280,7 +278,6 @@ export default class RSDose extends RSDevice{
 	    element.reset();
 	}
 	this.update_config();
-	console.log("RENDER",this.config,this.user_config);
 	return html`
                  <hr />
                  <style>

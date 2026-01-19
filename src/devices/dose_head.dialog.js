@@ -117,7 +117,6 @@ export function add_supplement(elt,hass,shadowRoot){
     }
 }
 
-
 export function set_container_volume(elt,hass,shadowRoot){
     let selected_supplement=elt.device.get_entity("supplement").state;
     let supplement = supplements_list.get_supplement(selected_supplement);
@@ -125,6 +124,7 @@ export function set_container_volume(elt,hass,shadowRoot){
 	selected_supplement=elt.device.get_entity("supplements").state;
 	supplement = supplements_list.get_supplement(selected_supplement);
     }
+    console.debug("SUPPLEMENT",supplement);
     if (supplement && supplement.sizes){
 	for (let size of supplement.sizes){
 	    let label=size+"mL";
@@ -179,6 +179,10 @@ export function edit_container(elt,hass,shadowRoot){
 }
 
 export function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
+    // bundle, do no schedule if it's not head n°1
+    if(elt.device.bundle && elt.device.config.id>1){
+	return;
+    }
     var content=null;
     if(saved_schedule==null ||saved_schedule.type==elt.device.get_entity('schedule_head').attributes.schedule.type){
 	saved_schedule=elt.device.get_entity('schedule_head').attributes.schedule;

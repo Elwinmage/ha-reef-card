@@ -2729,6 +2729,7 @@ function set_container_volume(elt, hass, shadowRoot) {
         selected_supplement = elt.device.get_entity("supplements").state;
         supplement = (0, $bOVIO.default).get_supplement(selected_supplement);
     }
+    console.debug("SUPPLEMENT", supplement);
     if (supplement && supplement.sizes) for (let size of supplement.sizes){
         let label = size + "mL";
         if (size >= 1000) label = size / 1000 + "L";
@@ -2784,6 +2785,8 @@ function edit_container(elt, hass, shadowRoot) {
     set_container_volume(elt, hass, shadowRoot);
 }
 function head_configuration(elt, hass, shadowRoot, saved_schedule = null) {
+    // bundle, do no schedule if it's not head n°1
+    if (elt.device.bundle && elt.device.config.id > 1) return;
     var content = null;
     if (saved_schedule == null || saved_schedule.type == elt.device.get_entity('schedule_head').attributes.schedule.type) saved_schedule = elt.device.get_entity('schedule_head').attributes.schedule;
     var form = shadowRoot.querySelector("#schedule");
@@ -3136,6 +3139,19 @@ class $89b1239629be3b04$var$Supplements {
         let supplement = null;
         for (supplement of this._list){
             if (supplement.fullname == name) return supplement;
+            if (supplement.type == "Bundle") {
+                console.log("BUNDLE", supplement.bundle);
+                for (var supp of Object.keys(supplement.bundle)){
+                    var bundle_supplement = supplement.bundle[supp];
+                    console.log("SUPP", bundle_supplement);
+                    if (bundle_supplement.supplement.name == name) {
+                        bundle_supplement.supplement.sizes = supplement.sizes.map(function(x) {
+                            return x * bundle_supplement.ratio;
+                        });
+                        return bundle_supplement.supplement;
+                    }
+                }
+            } //if
         } //for
         return null;
     }
@@ -4179,6 +4195,11 @@ const $a37137b55fc2fd8c$export$fffcd8c072562b8f = [
         "short_name": "Care",
         "brand_name": "Red Sea",
         "type": "Bundle",
+        "sizes": [
+            500,
+            1000,
+            2000
+        ],
         "bundle": {
             "1": {
                 "supplement": {
@@ -5462,6 +5483,7 @@ class $52ce4b1a72fac8d0$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.supplement = null;
         this.stock_alert = null;
         this.supplement_info = false;
+        this.bundle = false;
     }
     _pipe_path() {
         let color = this.config.color;
@@ -5793,6 +5815,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             dose_head.state_on = schedule_state;
             dose_head.device_state = this.is_on();
             dose_head.hass = this._hass;
+            dose_head.bundle = this.bundle;
         } else {
             dose_head = (0, $5c2Je.default).create_device('dose-head', this._hass, new_conf, this);
             dose_head.entities = this._heads[head_id].entities;
@@ -5801,6 +5824,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             dose_head.device_state = this.is_on();
             this._heads[head_id]['dose_head'] = dose_head;
             dose_head.config = new_conf;
+            dose_head.bundle = this.bundle;
         }
         return (0, $l56HR.html)`
                     <div class="head" id="head_${head_id}" style="${this.get_style(new_conf)}">
@@ -5817,6 +5841,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         this.update_config();
         let style = (0, $l56HR.html)``;
         this._populate_entities_with_heads();
+        this.bundle = this.get_entity('bundled_heads').state == "on";
         let disabled = this._render_disabled();
         if (disabled != null) return disabled;
         if (!this.is_on()) style = (0, $l56HR.html)`<style>img{filter: grayscale(90%);}</style>`;
@@ -5869,7 +5894,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
            </tr>`;
     }
     handleChangedDeviceEvent(changedEvent) {
-        console.log("EVENT", changedEvent, changedEvent.currentTarget.checked);
         /*if(changedEvent.returnValue){
 	  }*/ let value = changedEvent.currentTarget.checked;
         var newVal = {
@@ -5889,13 +5913,9 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         };
         var newConfig = JSON.parse(JSON.stringify(this._config));
         try {
-            console.debug("updated", newConfig);
-            console.debug("updated", newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if, value);
             newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
-            console.debug("updated", newConfig);
         } catch (error) {
             newConfig = (0, $hoc72.merge)(newConfig, newVal);
-            console.debug("merged", newConfig, newVal);
         }
         const messageEvent = new CustomEvent("config-changed", {
             detail: {
@@ -5905,7 +5925,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
             composed: true
         });
         this.dispatchEvent(messageEvent);
-        console.log("DISPATCH", messageEvent);
     }
     //head
     handleChangedEvent(changedEvent) {
@@ -5946,7 +5965,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     is_checked(id) {
         var result = false;
         if ("disabled_if" in this.config.elements[id]) result = this.config.elements[id].disabled_if;
-        console.log("ischecked", id, result);
         if (result) return (0, $l56HR.html)`
                    <label class="switch">
                       <input type="checkbox" id="${id}" @change="${this.handleChangedDeviceEvent}" checked />
@@ -5969,7 +5987,6 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         var element = doc.getElementById("heads_colors");
         if (element) element.reset();
         this.update_config();
-        console.log("RENDER", this.config, this.user_config);
         return (0, $l56HR.html)`
                  <hr />
                  <style>
