@@ -7,9 +7,9 @@
         }
     },
     "scripts": {
-        "prewatch": "ls /config/www/community/ha-reef-card/ha-reef-card.js &> /dev/null; [ $? -ne 0 ] && mount -o loop /config/git/ha-reef-card/dist /config/www/community/ha-reef-card; kill -9 `ps |grep node|grep -v 'grep node' |head  -n 1|sed s/'^[ ]*'// |cut -d ' ' -f 1` &> /dev/null;date; cp src/devices/img/*.supplement.png src/devices/img/*.svg src/devices/img/priming.png src/devices/img/head_calibration.png src/devices/img/read_graduated.jpg dist; /config/git/ha-reef-card/scripts/update_supplements_list.sh",
+        "prewatch": "ls /config/www/community/ha-reef-card/ha-reef-card.js &> /dev/null; [ $? -ne 0 ] && mount -o loop /config/git/ha-reef-card/dist /config/www/community/ha-reef-card; kill -9 `ps |grep node|grep -v 'grep node' |head  -n 1|sed s/'^[ ]*'// |cut -d ' ' -f 1` &> /dev/null;date; cp src/devices/img/*.supplement.png src/devices/img/*.svg src/devices/img/priming.png src/devices/img/head_calibration.png src/devices/img/read_graduated.jpg src/devices/img/waiting.gif dist; /config/git/ha-reef-card/scripts/update_supplements_list.sh",
         "watch": "parcel watch --no-cache --no-autoinstall",
-        "prebuild": "ls /config/www/community/ha-reef-card/ha-reef-card.js &> /dev/null; [ $? -ne 0 ] && mount -o loop /config/git/ha-reef-card/dist /config/www/community/ha-reef-card; date; cp src/devices/img/*.svg src/devices/img/*.supplement.png dist; /config/git/ha-reef-card/scripts/update_supplements_list.sh",
+        "prebuild": "ls /config/www/community/ha-reef-card/ha-reef-card.js &> /dev/null; [ $? -ne 0 ] && mount -o loop /config/git/ha-reef-card/dist /config/www/community/ha-reef-card; date; cp src/devices/img/*.svg src/devices/img/*.supplement.png src/devices/img/waiting.gif dist; /config/git/ha-reef-card/scripts/update_supplements_list.sh",
         "build": "parcel build "
     },
     "devDependencies": {

@@ -124,7 +124,6 @@ export function set_container_volume(elt,hass,shadowRoot){
 	selected_supplement=elt.device.get_entity("supplements").state;
 	supplement = supplements_list.get_supplement(selected_supplement);
     }
-    console.debug("SUPPLEMENT",supplement);
     if (supplement && supplement.sizes){
 	for (let size of supplement.sizes){
 	    let label=size+"mL";
