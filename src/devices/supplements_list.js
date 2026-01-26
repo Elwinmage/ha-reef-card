@@ -1,5 +1,4 @@
-export const SUPPLEMENTS = [
-    {
+export const SUPPLEMENTS = [    {
         "uid": "0e63ba83-3ec4-445e-a3dd-7f2dbdc7f964",
         "name": "Calcium (Powder)",
         "display_name": "Calcium",

@@ -14,6 +14,7 @@ else
     wget ${ONLINE_LIST} -O ${CURRENT_LIST}
 fi
 
-echo -n "export const " > ${JS_LIST}
-cat ${CURRENT_LIST}  |sed s/'None'/'null'/g |sed s/'True'/'true'/g| sed s/'False'/'false'/g >> ${JS_LIST}
+echo -n "export const SUPPLEMENTS = [" > ${JS_LIST}
+start_const=`grep -n SUPPLEMENTS ${CURRENT_LIST}|cut -d ':' -f 1`
+tail -n +$((${start_const}+1)) ${CURRENT_LIST} |sed s/'None'/'null'/g |sed s/'True'/'true'/g| sed s/'False'/'false'/g >> ${JS_LIST}
 echo ";" >>  ${JS_LIST}  

@@ -4269,27 +4269,6 @@ var $iXBpj = parcelRequire("iXBpj");
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $040001cdf6cad6dd$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
-.loader {
-  width: 50px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  padding: 6px;
-  background:
-    conic-gradient(from 135deg at top,currentColor 90deg, #0000 0) 0 calc(50% - 4px)/17px 8.5px,
-    radial-gradient(farthest-side at bottom left,#0000 calc(100% - 6px),currentColor calc(100% - 5px) 99%,#0000) top right/50%  50% content-box content-box,
-    radial-gradient(farthest-side at top        ,#0000 calc(100% - 6px),currentColor calc(100% - 5px) 99%,#0000) bottom   /100% 50% content-box content-box;
-  background-repeat: no-repeat;
-  animation: l11 1s infinite linear;
-
-}
-
-@keyframes l11{
-
-  100%{transform: rotate(1turn)}
-
-}
-
 `;
 
 
@@ -6097,54 +6076,8 @@ window.customElements.define('redsea-rsdose4', $205242e0eaceda90$export$2e2bcd87
 
 
 var $7Rfxy = parcelRequire("7Rfxy");
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
-parcelRequire("j0ZcV");
-var $j8KxL = parcelRequire("j8KxL");
-var $ad429b0f540e3321$export$2e2bcd8739ae039 = (0, $j8KxL.css)`
-
-`;
-
-
-
-var $1Um3j = parcelRequire("1Um3j");
-class $f7dfd7a177b6e36c$export$fd1f5457e885dfc6 extends (0, $1Um3j.default) {
-    static styles = (0, $ad429b0f540e3321$export$2e2bcd8739ae039);
-    /*
-     * conf the conf in mapping file
-     * stateObj the hass element 
-     */ constructor(hass, conf){
-        super(hass, conf, null, null);
-    }
-    init(hass, shadowRoot) {
-        this._hass = hass;
-        this._shadowRoot = shadowRoot;
-        this.conf = {
-            "class": "waiting-mask",
-            "css": {
-                "position": "absolute",
-                "width": "100%",
-                "height": "100%",
-                "top": "0px",
-                "left": "0px"
-            }
-        };
-    }
-    _render(style = null) {
-        let sclass = "";
-        if ("class" in this.conf) sclass = this.conf.class;
-        return (0, $l56HR.html)`
-  <div id="waiting" class="loader"></div>
-`;
-    }
-} // end of class
-window.customElements.define('waiting-animation', $f7dfd7a177b6e36c$export$fd1f5457e885dfc6);
-
-
-parcelRequire("93DQX");
 
 var $4DorC = parcelRequire("4DorC");
-parcelRequire("1Um3j");
 class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
     static styles = [
         (0, $040001cdf6cad6dd$export$2e2bcd8739ae039),
@@ -6171,7 +6104,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
         this.first_init = true;
         this.re_render = false;
         this._dialog_box = null;
-        this._waiting = null;
         this.addEventListener("display-dialog", function(e) {
             this._handle_display_dialog(e);
         });
@@ -6209,8 +6141,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
             this.current_device = this.no_device;
             this._dialog_box = new (0, $7Rfxy.Dialog)();
             this._dialog_box.init(this._hass, this.shadowRoot);
-            this._waiting = new (0, $f7dfd7a177b6e36c$export$fd1f5457e885dfc6)();
-            this._waiting.init(this._hass, this.shadowRoot);
         } else {
             this.current_device.hass = this._hass;
             if (!this.re_render) return;
@@ -6223,7 +6153,6 @@ class $bf513b85805031e6$export$8a2b7dacab8abd83 extends (0, $eGUNk.LitElement) {
                        ${this.messages}
                        ${this.current_device}
                        ${this._dialog_box.render()}
-                       ${this._waiting.render()}
                        `;
         } //fi
         // no secific device selected, display select form
