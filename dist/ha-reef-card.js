@@ -1371,8 +1371,8 @@ class $038fea56b681b6a5$export$2e2bcd8739ae039 {
             let dev = this._hass.devices[device_id];
             let dev_id = dev.identifiers[0];
             if (Array.isArray(dev_id) && dev_id[0] == 'redsea') {
-                // dev.lenght==2 to get only main device, not sub
-                if (dev_id.length == 2 && dev.model != 'ReefBeat') this.main_devices.push({
+                // Get only main device, not sub or cloud
+                if (!dev_id[1].includes("_head_") && !dev_id[1].includes("_pump") && dev.model != 'ReefBeat') this.main_devices.push({
                     value: dev.primary_config_entry,
                     text: dev.name
                 });
@@ -1399,10 +1399,10 @@ function $038fea56b681b6a5$export$5a544e13ad4e1fa5(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     var rgb = parseInt(result[1], 16) + "," + parseInt(result[2], 16) + "," + parseInt(result[3], 16);
     /*    return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-    } : null;*/ return rgb;
+	r: parseInt(result[1], 16),
+	g: parseInt(result[2], 16),
+	b: parseInt(result[3], 16)
+	} : null;*/ return rgb;
 }
 function $038fea56b681b6a5$export$34d09c4a771c46ef(orig) {
     var regex_hex, regex_trim, color, regex_rgb, matches, hex;
@@ -5722,7 +5722,7 @@ class $af5325ece54e327c$export$b931e564db01e286 extends (0, $1Um3j.default) {
         let style = this.get_style("elt.css");
         if ("class" in this.conf) sclass = this.conf.class;
         let value = this.stateObj.state;
-        if (value == "unavailable" || value.length == 0) {
+        if (value == "unavailable" || value == "unknown" || value.length == 0) {
             value = '';
             style = '';
             trash = '';
@@ -5788,7 +5788,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         for(var entity_id in this._hass.entities){
             var entity = this._hass.entities[entity_id];
             for (var d of this.device.elements){
-                var fname = d['name'].split("_");
+                var fname = d['identifiers'][0][1].split("_");
                 var head_id = 0;
                 if (fname[fname.length - 2] == "head") head_id = parseInt(fname[fname.length - 1]);
                 if (entity.device_id == d.id) {
@@ -5850,8 +5850,8 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
         }
         ////
         /*let cc=customElements.get("ha-entity-toggle");
-	let ccc = new cc();
-	ccc.stateObj=this.get_entity("device_state");*/ ////
+      let ccc = new cc();
+      ccc.stateObj=this.get_entity("device_state");*/ ////
         return (0, $l56HR.html)`
              	<div class="device_bg">
                   ${style}
@@ -5894,7 +5894,7 @@ class $205242e0eaceda90$export$2e2bcd8739ae039 extends (0, $5c2Je.default) {
     }
     handleChangedDeviceEvent(changedEvent) {
         /*if(changedEvent.returnValue){
-	  }*/ let value = changedEvent.currentTarget.checked;
+      }*/ let value = changedEvent.currentTarget.checked;
         var newVal = {
             conf: {
                 [this.current_device.config.model]: {

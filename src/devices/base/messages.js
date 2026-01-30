@@ -27,7 +27,7 @@ export class RSMessages extends  MyElement {
 	    sclass=this.conf.class;
 	}
 	let value=this.stateObj.state;
-	if (value=="unavailable" || value.length==0){
+	if (value=="unavailable" ||value=="unknown" || value.length==0){
 	    value='';
 	    style='';
 	    trash='';
