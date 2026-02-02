@@ -6,7 +6,7 @@ export const config = {
     "dialogs": {
 	"head_configuration":{
 	    "name":"head_configuration",
-	    "title_key":"iconv._('head_configuration') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('head_configuration') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[
 		{
@@ -23,7 +23,7 @@ export const config = {
 				"overload_quit": "head_configuration",
 				},
 			},
-			"label": "iconv._('priming')",
+			"label": "i18n._('priming')",
 			"class": "dialog_button",
 			"css":{
 			    "margin-bottom":"5px",
@@ -48,7 +48,7 @@ export const config = {
 				"overload_quit": "head_configuration",
 			    }
 			},
-			"label": "iconv._('calibration')",
+			"label": "i18n._('calibration')",
 			"class": "dialog_button",
 			"css":{
 			},
@@ -66,7 +66,7 @@ export const config = {
 	},
 	"head_calibration":{
 	    "name":"head_calibration",
-	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('calibration') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[
 		{
@@ -84,11 +84,11 @@ export const config = {
 		},
 		{
 		    "view": "text",
-		    "value": "iconv._('calibration_step_1')"
+		    "value": "i18n._('calibration_step_1')"
 		},
 	    ],
 	    "validate": {
-		"label": "iconv._('start_calibration')",
+		"label": "i18n._('start_calibration')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -109,12 +109,12 @@ export const config = {
 	},
 	"head_calibration_step_2":{
 	    "name":"head_calibration_step_2",
-	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('calibration') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
 	    "content":[
 		{
 		    "view": "text",
-		    "value": "iconv._('calibration_step_2')"
+		    "value": "i18n._('calibration_step_2')"
 		},
 		{
 		    "view": "click-image",
@@ -141,7 +141,7 @@ export const config = {
 		},
 	    ],
 	    "validate": {
-		"label": "iconv._('set_calibration')",
+		"label": "i18n._('set_calibration')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -161,11 +161,11 @@ export const config = {
 	},
 	"test_calibration":{
 	    "name": "test_calibration",
-	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('calibration') +' n°'+ this.elt.device.config.id",
 	    "content":[
 		{
 		    "view": "text",
-		    "value": "iconv._('test_calibration_validation')"
+		    "value": "i18n._('test_calibration_validation')"
 		},
 		{
 		    "view": "click-image",
@@ -197,7 +197,7 @@ export const config = {
 				"data":{"type": "head_calibration"},
 			    },
 			],
-			"label": "iconv._('no')",
+			"label": "i18n._('no')",
 			"class": "dialog_button",
 			"css":{
 			    "margin-bottom":"5px",
@@ -210,7 +210,7 @@ export const config = {
 		},	
 	    ],
 	    "validate": {
-		"label": "iconv._('yes')",
+		"label": "i18n._('yes')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -230,11 +230,11 @@ export const config = {
 	},
 	"head_calibration_step_3":{
 	    "name":"head_calibration_step_3",
-	    "title_key":"iconv._('calibration') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('calibration') +' n°'+ this.elt.device.config.id",
 	    "content":[
 		{
 		    "view": "text",
-		    "value": "iconv._('test_calibration_description')"
+		    "value": "i18n._('test_calibration_description')"
 		},
 		{
 		    "view": "click-image",
@@ -271,7 +271,7 @@ export const config = {
 				},
 			    },
 			],
-			"label": "iconv._('test_calibration')",
+			"label": "i18n._('test_calibration')",
 			"class": "dialog_button",
 			"css":{
 			    "margin-bottom":"5px",
@@ -284,7 +284,7 @@ export const config = {
 		},	
 	    ],
 	    "validate": {
-		"label": "iconv._('finish')",
+		"label": "i18n._('finish')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -304,7 +304,7 @@ export const config = {
 	},
  	"priming":{
 	    "name":"priming",
-	    "title_key":"iconv._('priming') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('priming') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
 	    "content":[
 		{
@@ -332,7 +332,7 @@ export const config = {
 		},
 	    ],
 	    "validate": {
-		"label": "iconv._('next')",
+		"label": "i18n._('next')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -347,7 +347,7 @@ export const config = {
 	},
  	"edit_container":{
 	    "name":"edit_container",
-	    "title_key":"iconv._('dialog_edit_container') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('dialog_edit_container') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[
 		{
@@ -389,11 +389,11 @@ export const config = {
 	},
 	"delete_container":{
 	    "name": "delete_container",
-	    "title_key":"iconv._('dialog_delete_supplement_title') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('dialog_delete_supplement_title') +' n°'+ this.elt.device.config.id",
 	    "close_cross": false,
 	    "content":[],
 	    "validate": {
-		"label": "iconv._('delete')",
+		"label": "i18n._('delete')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -406,7 +406,7 @@ export const config = {
 		    {
 			"domain": "redsea_ui",
 			"action": "message_box",
-			"data":"iconv._('delete_wait')",
+			"data":"i18n._('delete_wait')",
 		    },
 		    {
 			"domain": "redsea_ui",
@@ -418,7 +418,7 @@ export const config = {
 	},
 	"add_supplement":{
 	    "name": "add_supplement",
-	    "title_key":"iconv._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
+	    "title_key":"i18n._('dialog_add_supplement_title') +' n°'+ this.elt.device.config.id",
 	    "close_cross": true,
 	    "content":[
 		{
@@ -438,7 +438,7 @@ export const config = {
 		
 	    ],
 	    "validate": {
-		"label": "iconv._('next')",
+		"label": "i18n._('next')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -459,7 +459,7 @@ export const config = {
 	"set_container_volume":{
 	    "name":"set_container_volume",
 	    "close_cross": true,
-	    "title_key": "iconv._('set_container_volume')",
+	    "title_key": "i18n._('set_container_volume')",
 	    "content":[
 		{
 		    "view":"extend",
@@ -478,7 +478,7 @@ export const config = {
 		}
 	    ],
 	    "validate": {
-		"label": "iconv._('next')",
+		"label": "i18n._('next')",
 		"class": "dialog_button",
 		"type": "common-button",
 		"stateObj":null,
@@ -494,7 +494,7 @@ export const config = {
 	},
  	"set_manual_head_volume":{
 	    "name": "set_manual_head_volume",
-	    "title_key": "iconv._('set_manual_head_volume')",
+	    "title_key": "i18n._('set_manual_head_volume')",
 	    "close_cross": true,
 	    "content":[
 		{
@@ -831,7 +831,7 @@ export const config = {
 		    "put_in": "pump_state_labels",
 		    "class": "scheduler_label_bottom",
 		    "type":"common-sensor-target",
-		    "unit": "iconv._('doses')",
+		    "unit": "i18n._('doses')",
 		    "css": {
 			"text-align": "center",
 			"color": "rgb(130,230,250)",
@@ -847,7 +847,7 @@ export const config = {
 		    "target": "save_initial_container_volume",
 		    "type": "progress-bar",
 		    "class":"pg-container",
-		    "label": "' '+this.get_entity('remaining_days').state+ ' '+iconv._('days_left') ",
+		    "label": "' '+this.get_entity('remaining_days').state+ ' '+i18n._('days_left') ",
 		    "disabled_if": "this.get_entity('slm').state=='off' ||this.get_entity('daily_dose').state==0",
 		    "css":{
 			"position":"absolute",

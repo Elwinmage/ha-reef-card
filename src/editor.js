@@ -2,8 +2,10 @@ import { css, html, LitElement } from 'lit';
 
 import DeviceList from './common';
 
-import RSDevice from './devices/device';
+//import RSDevice from './devices/device';
 import RSDose from './devices/rsdose';
+
+var rsdevice = require('RSDevice');
 
 /*
  * ReefCard Editor for Home Assistant
@@ -98,7 +100,7 @@ export class ReefCardEditor extends LitElement {
 	if (this._config.device && this._config.device.length > 0){
 	    var device=this.devices_list.get_by_name(this._config.device);
 	    var model = device.elements[0].model;
-	    var lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this._config,device);
+	    var lit_device=rsdevice.create_device("redsea-"+model.toLowerCase(),this._hass,this._config,device);
 	    if (lit_device!=null && typeof lit_device['editor'] == 'function'){
 		this.current_device=lit_device;
 		return lit_device.editor(this.shadowRoot);
