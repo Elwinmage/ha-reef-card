@@ -1,6 +1,5 @@
-// @ts-nocheck
-import { html, TemplateResult, CSSResultGroup } from "lit";
-import { property } from "lit/decorators.js";
+import { html, TemplateResult, CSSResultGroup, css } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
 import { MyElement } from "./element";
 
@@ -16,10 +15,15 @@ interface SensorConfig {
 }
 
 export class Sensor extends MyElement {
-  static override styles: CSSResultGroup = style_sensor;
+  static override styles: CSSResultGroup = [style_sensor, css`
+    .sensor {
+      background-color: var(--sensor-bg-color);
+    }
+  `];
 
-  @property({ type: Object })
-  override conf?: SensorConfig;
+  @property({ type: Object, attribute: false })
+  // @ts-expect-error - Property override compatibility
+  declare conf?: SensorConfig;
 
   constructor() {
     super();
@@ -61,29 +65,15 @@ export class Sensor extends MyElement {
       }
     }
 
-    const style = this.get_style('elt.css');
-    
+//    const bgColor = `rgba(${this.c},${this.alpha})`;
     return html`
-      <style>
-        .sensor {
-          background-color: rgba(${this.c},${this.alpha});
-        }
-      </style>
-      <div class="sensor ${sclass}" style="${style}">
-        <span class="value">${value}</span>
+      <div 
+        class="sensor ${sclass}" 
+        style="${_style}; ">
+        ${value}
         ${unit ? html`<span class="unit">${unit}</span>` : ''}
       </div>
     `;
   }
 
-  override render(): TemplateResult {
-    const disabled = this.conf?.disabled_if ? 
-      this.evaluateDisabledCondition(this.conf.disabled_if) : false;
-
-    if (disabled) {
-      return html``;
-    }
-
-    return this._render();
-  }
 }

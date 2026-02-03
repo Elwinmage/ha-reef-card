@@ -1,7 +1,9 @@
 import { html, LitElement, PropertyValues } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { off_color } from "../../common.js";
 import i18n from "../../translations/myi18n.js";
+
+import { attachClickHandlers } from "./click_handler"
 
 // Import des types depuis le dossier types
 import type {
@@ -20,24 +22,35 @@ import type {
 const iconv = i18n;
 
 export class MyElement extends LitElement {
-  @property({ type: Object })
+  @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
 
   @property({ type: Boolean })
   stateOn: boolean = false;
 
-  private mouseDown: number = 0;
-  private mouseUp: number = 0;
-  private oldMouseUp: number = 0;
-  private doubleClick: boolean = false;
 
+  @state()
   protected _hass: HassConfig | null = null;
+  
+  @state()
   protected conf?: ElementConfig;
+  
+  @state()
   protected device?: Device;
+  
+  @state()
   protected color?: string;
+  
+  @state()
   protected alpha?: number;
+  
+  @state()
   protected label: string = '';
+  
+  @state()
   protected stateObjTarget?: StateObject;
+  
+  @state()
   protected c?: string;
 
 
@@ -60,28 +73,18 @@ export class MyElement extends LitElement {
   
   constructor() {
     super();
-
-    this.addEventListener("contextmenu", (e: Event) => {
-      e.preventDefault();
-    });
-
-    this.addEventListener("pointerdown", (e: PointerEvent) => {
-      this.mouseDown = e.timeStamp;
-    });
-
-    this.addEventListener("touchstart", (e: TouchEvent) => {
-      this.mouseDown = e.timeStamp;
-    });
-
-    this.addEventListener("touchend", (e: TouchEvent) => {
-      this.mouseUp = e.timeStamp;
-      if ((e.timeStamp - this.mouseDown) > 500) {
-        this._click_evt(e);
+    attachClickHandlers(this, {
+      onClick: () => {
+	this._click();
+      },
+      
+      onDoubleClick: () => {
+	this._dblclick();
+      },
+      
+      onHold: () => {
+	this._longclick();
       }
-    });
-
-    this.addEventListener("pointerup", (e: PointerEvent) => {
-      this._handleClick(e);
     });
   }
 
@@ -290,7 +293,6 @@ export class MyElement extends LitElement {
       const targetEntity = elt.device.entities[config.target];
       if (targetEntity) {
         elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
-	console.log("TARGET",elt.stateObjTarget);
       }
     }
 
@@ -300,8 +302,16 @@ export class MyElement extends LitElement {
 
   get_style(css_level: string = 'css'): string {
     let style = '';
+    //Set device color patch
     if (this.conf && css_level in this.conf) {
-      style = Object.entries(this.conf[css_level]).map(([k, v]) => `${k}:${v}`).join(';');
+      let o_style = structuredClone(this.conf[css_level]);
+      if(o_style['background-color']=="$DEVICE-COLOR$"){
+	o_style['background-color']="rgb("+this.device.config.color+")";
+      }
+      else  if(o_style['background-color']=="$DEVICE-COLOR-ALPHA$"){
+	o_style['background-color']="rgba("+this.device.config.color+","+this.device.config.alpha+")";
+      }
+      style = Object.entries(o_style).map(([k, v]) => `${k}:${v}`).join(';');
     }
     return style;
   }
@@ -319,29 +329,6 @@ export class MyElement extends LitElement {
       throw new Error(`State for ${entity.entity_id} not found`);
     }
     return state;
-  }
-
-  private _handleClick(e: PointerEvent): void {
-    if (e.pointerType !== "touch") {
-      if (e.detail === 1) {
-        this._click_evt(e);
-      } else if (e.detail === 2) {
-        this.doubleClick = true;
-        this._dblclick(e);
-      }
-    } else {
-      if ((this.mouseUp - this.oldMouseUp) < 400) {
-        this.doubleClick = true;
-        this._dblclick(e);
-      } else {
-        this._click_evt(e);
-      }
-      this.oldMouseUp = this.mouseUp;
-    }
-  }
-
-  sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   protected _render(style: string): any {
@@ -368,7 +355,7 @@ export class MyElement extends LitElement {
 
     return html`
 <div class="${this.conf?.class || ''}" style="${this.get_style()}">
-${this._render(this.get_style('elt.css'))}
+${this._render(this.get_style('css'))}
 </div>
 `;
   }
@@ -439,35 +426,20 @@ ${this._render(this.get_style('elt.css'))}
     }
   }
 
-  async _click_evt(e: MouseEvent | TouchEvent): Promise<void> {
-    let timing = e.timeStamp - this.mouseDown;
 
-    if (e.timeStamp - this.mouseDown > 500) {
-      this._longclick(e);
-    } else {
-      await this.sleep(300);
-      if (this.doubleClick === true) {
-        this.doubleClick = false;
-      } else {
-        this._click(e);
-      }
-    }
-    this.mouseDown = e.timeStamp;
-  }
-
-  _click(e: MouseEvent | TouchEvent): void {
+  _click(): void {
     if (this.conf && 'tap_action' in this.conf) {
       this.run_actions(this.conf.tap_action!);
     }
   }
 
-  _longclick(e: MouseEvent | TouchEvent): void {
+  _longclick(): void {
     if (this.conf && "hold_action" in this.conf) {
       this.run_actions(this.conf.hold_action!);
     }
   }
 
-  _dblclick(e: MouseEvent | TouchEvent): void {
+  _dblclick(): void {
     if (this.conf && "double_tap_action" in this.conf) {
       this.run_actions(this.conf.double_tap_action!);
     }

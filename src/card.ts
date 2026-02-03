@@ -2,7 +2,7 @@ import {
   LitElement,
   html,
 } from "lit";
-
+import { customElement, property, state } from "lit/decorators.js";
 
 import i18n from "./translations/myi18n.js";
 
@@ -33,32 +33,43 @@ export class ReefCard extends LitElement {
 
   static override styles = [style_card,style_dialog];
 
-  // Card is updated when new device is selected or when hass is updated
-  static override get properties() {
-    return {
-      _hass: {},
-      current_device: {},
-    };
-  }// end of reactives properties
-  
-  private select_devices: SelectDevice[];
-  private first_init: boolean;
-  private re_render: boolean;
-  private _dialog_box: Dialog | null;
+  // Propriétés réactives publiques (avec @property)
+  @property({ attribute: false })
   private _hass: any;
-  private user_config: UserConfig = {};
+
+  @property({ attribute: false })
   private current_device: any;
+  
+  // États internes (avec @state)
+  @state()
+  private select_devices: SelectDevice[] = [];
+  
+  @state()
+  private first_init: boolean = true;
+  
+  @state()
+  private re_render: boolean = false;
+  
+  @state()
+  private _dialog_box: Dialog | null = null;
+  
+  @state()
+  private user_config: UserConfig = {};
+  
+  @state()
   private no_device: any;
+  
+  @state()
   private devices_list!: DeviceList;
+  
+  @state()
   private selected?: string;
+  
+  @state()
   private messages?: any;
   
   constructor() {
     super();
-    this.select_devices=[];
-    this.first_init=true;
-    this.re_render=false;
-    this._dialog_box=null;
     this.addEventListener("display-dialog", (e: Event) => {this._handle_display_dialog(e as CustomEvent);});
     this.addEventListener("config-dialog", (e: Event) => {
       if (this._dialog_box) {

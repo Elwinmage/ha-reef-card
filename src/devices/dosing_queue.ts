@@ -43,8 +43,8 @@ export class DosingQueue extends MyElement{
     }
     
     render(){
-	this.schedule=this.stateObj.attributes.queue;
-	if(this.stateOn && this.schedule.length != 0){
+      this.schedule=this.stateObj.attributes.queue;
+      if(this.stateOn && this.schedule.length != 0){
 	    return html`
                   <div style="${this.get_style(this.config)}">
                     ${this.schedule.map(slot => this._render_slot_schedule(slot))}

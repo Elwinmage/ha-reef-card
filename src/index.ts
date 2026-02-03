@@ -18,6 +18,7 @@ window.customCards.push({
     description: "A custom card for reef management.",
 });
 
+
 window.customCards = window.customCards || []; window.customCards.push({
   type: "reef-card-editor",
   name: "Content Card Editor",

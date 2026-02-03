@@ -6,7 +6,6 @@ import styles from "./dose_head.styles";
 import style_sensors from "./base/sensor.styles";
 import style_progress_bar from "./base/progress_bar.styles";
 
-import {ProgressBar} from "./base/progress_bar";
 import {off_color} from "../common.js";
 import i18n from "../translations/myi18n";
 import {MyElement} from "./base/element";

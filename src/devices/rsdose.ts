@@ -119,7 +119,7 @@ export class RSDose extends RSDevice{
     }
     else
     {
-      dose_head=RSDevice.create_device('dose-head',this._hass,new_conf,this);
+      dose_head=RSDevice.create_device('redsea-dose-head',this._hass,new_conf,this);
       dose_head.entities=this._heads[head_id].entities;
       dose_head.stock_alert=this.get_entity('stock_alert_days').state;
       dose_head.state_on=schedule_state;

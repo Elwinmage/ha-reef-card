@@ -1,6 +1,5 @@
 import { TemplateResult, LitElement, html } from "lit";
-import { customElement } from "lit/decorators.js";
-import { property } from 'lit/decorators.js';
+import { customElement, property, state } from "lit/decorators.js";
 import DeviceList from "../common";
 import { MyElement }  from "./base/element";
 import { merge } from "../merge";
@@ -13,23 +12,35 @@ import type { HassConfig, Device, DeviceInfo } from "../types/index";
 @customElement('rs-device')
 export class RSDevice extends LitElement {
 
+  @state()
   public entities: Record<string, any> = {};
+  
+  @state()
   public config: any; 
   
+  @state()
   protected _hass: HassConfig | null = null;
+  
+  @state()
   protected device: DeviceInfo | null = null;
+  
+  @state()
   protected initial_config: any;
+  
+  @state()
   protected user_config: any;
-  protected _elements: any = [];
+  
+  @state()
+  protected _elements: any = {};
 
-  @property ()
+  @property({ type: Boolean })
   to_render: boolean = false;
   
   constructor() {
     super();
   }
 
-  render(){
+  override render(){
     return this._render();
   }
 

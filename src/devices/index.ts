@@ -7,5 +7,5 @@ import {DoseHead} from "./dose_head";
 
 customElements.define('redsea-nodevice',NoDevice);
 customElements.define('redsea-rsdose4',RSDose);
-customElements.define('dosing-queue',DosingQueue);
-customElements.define('dose-head', DoseHead);
+customElements.define('redsea-dosing-queue',DosingQueue);
+customElements.define('redsea-dose-head', DoseHead);

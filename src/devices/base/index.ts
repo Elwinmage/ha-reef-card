@@ -18,3 +18,4 @@ customElements.define('common-switch', RSSwitch);
 customElements.define('progress-bar', ProgressBar);
 customElements.define('progress-circle', ProgressCircle);
 customElements.define('redsea-messages', RSMessages);
+
