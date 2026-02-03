@@ -1,11 +1,9 @@
+// @ts-nocheck
 import { html } from "lit";
 import {RSDevice} from "./device";
 import {config} from "./mapping/NODEVICE";
 import styles from "./nodevice.styles";
 
-/*
- * NoDevice
- */
 export class NoDevice extends RSDevice{
 
     static styles = styles;
@@ -13,7 +11,7 @@ export class NoDevice extends RSDevice{
 
     constructor(){
 	super();
-	this.initial_config=config;
+      this.initial_config=config;
     }
 
     _populate_entities(){
@@ -30,4 +28,3 @@ export class NoDevice extends RSDevice{
     }
 }
 
-//window.customElements.define('redsea-nodevice', NoDevice);

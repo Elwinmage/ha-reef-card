@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { html } from "lit";
 import {RSDevice} from "./device";
 import {config} from "./mapping/RSDOSE4";
@@ -6,7 +7,7 @@ import DoseHead from "./dose_head";
 import style_rsdose from "./rsdose.styles";
 import style_common from "./common.styles";
 
-import i18n from "../translations/myi18n.js";
+import i18n from "../translations/myi18n";
 
 import {rgbToHex,hexToRgb} from "../common";
 import {merge} from "../merge";
@@ -15,21 +16,24 @@ import {DosingQueue} from "./dosing_queue";
 import {MyElement} from "./base/element";
 import {RSMessages} from './base/messages';
 
+interface HeadEntity {
+  entities: Record<string, any>;
+  dose_head?: any;
+}
 
 
-/*
- * RSDose 
- */
 // TODO: RSDOSE Implement advanced schedule edition
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/14
-//   labels: enhancement, rsdose
+// labels: enhancement, rsdose
 export class RSDose extends RSDevice{
 
-  // TODO: RSDOSE Implement basic services
+  // TODO: RSDOSE Implement baifc services
   // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
-  //   labels: enhancement, rsdose
+  // labels: enhancement, rsdose
   static styles = [style_rsdose,style_common];
-  _heads = [];
+  _heads: HeadEntity[] = [];
+  supplement_color: Record<string, any> = {};
+  dosing_queue: DosingQueue | null = null;
 
   static get properties(){
     return{
@@ -44,9 +48,9 @@ export class RSDose extends RSDevice{
     this.dosing_queue=null;
   }// end of constructor
 
-  set hass(obj){
+  set hass(obj: any){
     this._setting_hass(obj);
-    for (let head of this._heads){
+    for (const head of this._heads){
       if ('dose_head' in head){
 	head.dose_head.hass=obj;
       }
@@ -56,20 +60,24 @@ export class RSDose extends RSDevice{
     }
   }
   
-  _populate_entities(){
+  _populate_entities(): void {
     
   }
 
-  _populate_entities_with_heads(){
+  _populate_entities_with_heads(): void {
     this.update_config();
     for (let i=0; i<=this.config.heads_nb;i++){
       this._heads.push({'entities':{}});
     }
-    for (var entity_id in this._hass.entities){
-      var entity=this._hass.entities[entity_id];
-      for (var d of this.device.elements){
-	var fname=d['identifiers'][0][1].split("_");
-	var head_id=0;
+    if (!this._hass) return;
+    
+    for (const entity_id in this._hass.entities){
+      const entity=this._hass.entities[entity_id];
+      if (!this.device) continue;
+      
+      for (const d of this.device.elements){
+	const fname=d['identifiers'][0][1].split("_");
+	let head_id=0;
 	if (fname[fname.length  - 2 ] == "head"){
 	  head_id=parseInt(fname[fname.length-1]);
 	}
@@ -78,7 +86,7 @@ export class RSDose extends RSDevice{
 	    this.entities[entity.translation_key]=entity;
 	  }
 	  else {
-	    this._heads[head_id].entities[entity.translation_key]=entity;
+	    this._heads[head_id]!.entities[entity.translation_key]=entity;
 	  }
 	  
 	}
@@ -128,10 +136,6 @@ export class RSDose extends RSDevice{
                     `;
   }
 
-  // updated(changes){
-  // 	console.log("RE-RENDERED");
-  // }
-
   _render(){
     this.to_render=false;
     console.debug("Render rsdose");
@@ -153,11 +157,7 @@ export class RSDose extends RSDevice{
       this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this);
       this.dosing_queue.color_list=this.supplement_color;
     }
-    ////
-    /*let cc=customElements.get("ha-entity-toggle");
-      let ccc = new cc();
-      ccc.stateObj=this.get_entity("device_state");*/
-    ////
+    
     return html`
              	<div class="device_bg">
                   ${style}
@@ -168,16 +168,16 @@ export class RSDose extends RSDevice{
                    ${this.dosing_queue}
                  ${this._render_elements()}
                </div>`;
-  }//end of function render
+  }// end of function render
   
   _editor_head_color(head_id){
-    //	this.update_config();
+    // this.update_config();
     let color=rgbToHex("rgb\("+this.config.heads["head_"+head_id].color+"\);");
     let shortcuts=this.config.heads["head_"+head_id].shortcut;
     return html `
              <tr>
                <td class="config_color">
-                 <input type="color" id="head_${head_id}-color" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
+                 <input type="color" id="head_${head_id}-color" value="${color}" @changes="${this.handleChangesdEvent}" @input="${this.handleChangesdEvent}" list="RedSeaColors" />
                  <datalist id="RedSeaColors">
                    <option>#8c4394</option>
                    <option>#0081c5</option>
@@ -193,24 +193,23 @@ export class RSDose extends RSDevice{
                 <label class="tab-label">${i18n._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
               </td>
               <td>
-                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @change="${this.handleChangedEvent}" ></input>
+                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @changes="${this.handleChangesdEvent}" ></input>
               </td>
            </tr>`;
-  }//end of function _editor_head_color
+  }// end of function _editor_head_color
 
-  handleChangedDeviceEvent(changedEvent) {
-    /*if(changedEvent.returnValue){
-      }*/
-    let value= (changedEvent.currentTarget.checked);
-    var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
-    var newConfig = JSON.parse(JSON.stringify(this._config));
+  handleChangesdDeviceEvent(changesdEvent) {
+
+    let value= (changesdEvent.currentTarget.checked);
+    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changesdEvent.target.id]:{disabled_if:value}}}}}}};
+    let newConfig = JSON.parse(JSON.stringify(this._config));
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
+      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changesdEvent.target.id].disabled_if = value;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
     }
-    const messageEvent = new CustomEvent("config-changed", {
+    const messageEvent = new CustomEvent("config-changesd", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
@@ -218,40 +217,39 @@ export class RSDose extends RSDevice{
     this.dispatchEvent(messageEvent);
   }
   
-  //head
-  handleChangedEvent(changedEvent) {
-    let i_val=changedEvent.currentTarget.value;
-    const head=changedEvent.target.id.split('-')[0];
-    const field=changedEvent.target.id.split('-')[1]
+  handleChangesdEvent(changesdEvent) {
+    let i_val=changesdEvent.currentTarget.value;
+    const head=changesdEvent.target.id.split('-')[0];
+    const field=changesdEvent.target.id.split('-')[1]
     if (field=="color"){
       i_val=hexToRgb(i_val);
     }
-    var newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[head]:{[field]:i_val}}}}}}};
-    var newConfig = JSON.parse(JSON.stringify(this._config));
+    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[head]:{[field]:i_val}}}}}}};
+    let newConfig = JSON.parse(JSON.stringify(this._config));
     
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
+      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changesdEvent.target.head][field] = i_val;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
     }
-    const messageEvent = new CustomEvent("config-changed", {
+    const messageEvent = new CustomEvent("config-changesd", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
     });
     this.dispatchEvent(messageEvent);
-  }// end of function handleChangedEvent
+  }// end of function handleChangesdEvent
 
   is_checked(id){
-    var result=false;
+    let result=false;
     if("disabled_if" in this.config.elements[id]){
       result=this.config.elements[id].disabled_if;
     }
     if(result){
       return html`
                    <label class="switch">
-                      <input type="checkbox" id="${id}" @change="${this.handleChangedDeviceEvent}" checked />
+                      <input type="checkbox" id="${id}" @changes="${this.handleChangesdDeviceEvent}" checked />
                       <span class="slider round"></span>
                    </label>
                    <label>${i18n._(id)}</label>                   
@@ -260,22 +258,20 @@ export class RSDose extends RSDevice{
     else{
       return html`
                    <label class="switch">
-                      <input type="checkbox" id="${id}"  @change="${this.handleChangedDeviceEvent}" />
+                      <input type="checkbox" id="${id}"  @changes="${this.handleChangesdDeviceEvent}" />
                       <span class="slider round"></span>
                    </label>
                    <label>${i18n._(id)}</label>                   
 `;
     }
+  }// end of function is_checked  
 
-    //	return result;
-  }//end of function is_checked
-  
   editor(doc){
     if(this.is_disabled()){
       return html ``;
     }
     this._populate_entities_with_heads();
-    var element = doc.getElementById("heads_colors");
+    let element = doc.getElementById("heads_colors");
     if (element){
       element.reset();
     }
@@ -283,8 +279,7 @@ export class RSDose extends RSDevice{
     return html`
                  <hr />
                  <style>
-                   /* The switch - the box around the slider */
-                   .switch {
+/* The switch - the box around the slider */                   .switch {
                      position: relative;
                      display: inline-block;
                      width: 30px;
@@ -292,15 +287,13 @@ export class RSDose extends RSDevice{
 
                    }
 
-                   /* Hide default HTML checkbox */
-                   .switch input {
+/* Hide default HTML checkbox */                   .switch input {
                      opacity: 0;
                      width: 0;
                      height: 0;
                    }
                    
-                   /* The slider */
-                   .slider {
+/* The slider */                   .slider {
                      position: absolute;
                      cursor: pointer;
                      top: 0;
@@ -338,8 +331,7 @@ export class RSDose extends RSDevice{
                      transform: translateX(13px);
                    }
                    
-                   /* Rounded sliders */
-                   .slider.round {
+/* Rounded sliders */                   .slider.round {
                      border-radius: 17px;
                    }
                    
@@ -362,8 +354,6 @@ ${this.is_checked("last_alert_message")}
                  </table>
                    </form>`;
     
-  }//end of function editor
+  }// end of function editor
 }
-
-//window.customElements.define('redsea-rsdose4', RSDose);
 

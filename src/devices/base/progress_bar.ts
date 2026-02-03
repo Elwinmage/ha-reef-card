@@ -1,76 +1,108 @@
-import { html } from "lit";
+// @ts-nocheck
+import { html, TemplateResult } from "lit";
+import { property } from "lit/decorators.js";
 import style_progress_bar from "./progress_bar.styles";
-import i18n from "../../translations/myi18n.js";
-import {off_color} from "../../common.js";
+import i18n from "../../translations/myi18n";
+import { MyElement } from "./element";
+import type { HassEntity, ProgressConfig } from "../../types/index";
 
-import {MyElement} from "./element";
+export class ProgressBar extends MyElement {
+  static override styles = style_progress_bar;
 
-/*
- *  ProgressBar
- */
-//export class ProgressBar extends  MyElement {
-export class ProgressBar extends  MyElement {
+  @property({ type: Object })
+  declare stateObjTarget: HassEntity | null;
 
-    static styles = style_progress_bar;
+  @property({ type: Object })
+  declare conf?: ProgressConfig;
 
-    static get properties(){
-	return {
-	    stateObjTarget: {},
-	};
-    }
-    
-    /*
-     * conf the conf in mapping file
-     * stateObj the hass element 
-     */
-    constructor(){//hass,conf,device){
- 	super();//hass,conf,device);
-	this.stateObjTarget=null;//stateObjTarget;
-    }//end of constructor
+  constructor() {
+    super();
+    this.stateObjTarget = null;
+  }
 
-    _render(){
-	if ('disabled_if' in this.conf && eval(this.conf.disabled_if) ){
-	    return html`<br />`;
-	}
-
-	let value=this.stateObj.state;
-	let target=this.stateObjTarget.state;
-	let percent=Math.floor(this.stateObj.state*100/this.stateObjTarget.state);
-	let bar_class=this.conf.class;
-	let label='';
-	if('label' in this.conf){
-	    label=eval(this.label);
-	}
-	let unit="%"
-	let fill=percent-1;
-	if (fill<0){
-	    fill = 0;
-	}
-	return html`
-            <style>
-             div.progress{
-               background-color: rgba(${this.c},0.8);
-              }   
-            </style>
-              <div class="bar" id="${this.conf.name}" style="background-color:rgba(150,150,150,0.7)">
-       	        <div class="progress" id="${this.conf.name}" style="width:${fill}%;height:100;">&nbsp</div>
-                <label class="progress-bar"};" >${percent}${unit} - ${label}</label>
-              </div>
-             `;
-    }//end of function render
-
-    async _click(e){
-	console.debug("Click ",e.detail," ",e.timeStamp);
+  /**
+   * Evaluates label expression safely
+   */
+  private evaluateLabel(): string {
+    if (!this.conf?.label || !this.label) {
+      return '';
     }
 
-    async _longclick(e){
-	console.debug("Long Click");
-    }//end of function longclick
-    
-    async _dblclick(e){
-	console.debug("Double click");
-    }//end of function dblclick
-    
-}// end of class
+    const labelConf = this.conf.label;
 
-//window.customElements.define('progress-bar', ProgressBar);
+    // If it's a simple string, use this.label which is already evaluated
+    if (typeof labelConf === 'string') {
+      return this.substituteVariables(this.label, this.getTemplateContext());
+    }
+
+    // If it's a dynamic value with expression
+    if (typeof labelConf === 'object' && 'expression' in labelConf) {
+      const context = {
+        ...this.getTemplateContext(),
+        ...(labelConf.variables || {})
+      };
+      return this.substituteVariables(labelConf.expression, context);
+    }
+
+    return this.label;
+  }
+
+  /**
+   * Extended template context for progress bar
+   */
+  protected getTemplateContext(): Record<string, any> {
+    return {
+      //...super.getTemplateContext(),
+      target: this.stateObjTarget?.state,
+      targetEntity: this.stateObjTarget,
+      i18n : i18n
+    };
+  }
+
+  protected _render(style: string = ''): TemplateResult {
+    // Check disabled condition
+    if (this.conf?.disabled_if && this.evaluateDisabledCondition(this.conf.disabled_if)) {
+      return html`<br />`;
+    }
+
+    if (!this.stateObj || !this.stateObjTarget) {
+      return html`<div class="error">Missing state</div>`;
+    }
+
+    const value = parseFloat(this.stateObj.state) || 0;
+    const target = parseFloat(this.stateObjTarget.state) || 1;
+    const percent = Math.floor((value * 100) / target);
+    if(percent>100){
+      console.error("Error for "+this.conf.name+", target "+this.conf.target+" bad value : "+this.stateObjTarget.state);
+      return html`<br />`; 
+    }
+    
+    const bar_class = this.conf?.class || 'progress-bar';
+    const label = this.evaluateLabel();
+    const unit = "%";
+    
+    let fill = Math.max(0, percent - 1);
+
+    return html`
+      <div class="${bar_class}">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: ${fill}%; background-color: rgb(${this.c})"></div>
+        </div>
+        ${label ? html`<span class="progress-label">${label}</span>` : ''}
+        <span class="progress-value">${percent}${unit}</span>
+      </div>
+    `;
+  }
+
+  async _click(e: PointerEvent | TouchEvent): Promise<void> {
+    console.debug("Click", (e as any).detail, e.timeStamp);
+  }
+
+  async _longclick(e: PointerEvent | TouchEvent): Promise<void> {
+    console.debug("Long Click");
+  }
+
+  async _dblclick(e: PointerEvent | TouchEvent): Promise<void> {
+    console.debug("Double click");
+  }
+}

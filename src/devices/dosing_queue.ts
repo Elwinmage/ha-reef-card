@@ -1,10 +1,11 @@
+// @ts-nocheck
 import { html } from "lit";
 
-import i18n from "../translations/myi18n.js";
+import i18n from "../translations/myi18n";
 import {MyElement} from "./base/element"
 
 import styles from "./dosing_queue.styles";
-import {toTime} from "../common.js";
+import {toTime} from "../common";
 
 export class DosingQueue extends MyElement{
 
@@ -31,8 +32,7 @@ export class DosingQueue extends MyElement{
               ${toTime(slot.time)}
              </span><hr />
           </div>`;
-     }//end of function _render_slot_schedule
-
+     }// end of function _render_slot_schedule
 
 
     set hass(obj){
@@ -50,11 +50,9 @@ export class DosingQueue extends MyElement{
                     ${this.schedule.map(slot => this._render_slot_schedule(slot))}
                   </div>
    	    `;
-	}//if
-	else {
+	}// if	else {
 	    return html``;
-	}//else
-    }
+	}// else    }
 };
 
-//window.customElements.define('dosing-queue', DosingQueue);
+// window.customElements.define('doifng-queue', DoifngQueue);

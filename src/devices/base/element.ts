@@ -3,84 +3,21 @@ import { property } from "lit/decorators.js";
 import { off_color } from "../../common.js";
 import i18n from "../../translations/myi18n.js";
 
+// Import des types depuis le dossier types
+import type {
+  StateObject,
+  HassConfig,
+  DeviceEntity,
+  DeviceConfig,
+  Device,
+  ActionData,
+  Action,
+  LabelExpression,
+  DisabledCondition,
+  ElementConfig
+} from "../../types/element";
 
-////////////////////////////////////////////////////////////////////////////////
-// Types et interfaces
-interface StateObject {
-  entity_id: string;
-  state: string;
-  attributes?: Record<string, any>;
-  [key: string]: any;
-}
-
-interface HassConfig {
-  states: { [entity_id: string]: StateObject };
-  callService: (domain: string, action: string, data: any) => void;
-}
-
-interface DeviceEntity {
-  entity_id: string;
-  [key: string]: any;
-}
-
-interface DeviceConfig {
-  color: string;
-  alpha: number;
-  [key: string]: any;
-}
-
-interface Device {
-  entities: { [name: string]: DeviceEntity };
-  config: DeviceConfig;
-  is_on: () => boolean;
-}
-
-interface ActionData {
-  entity_id?: string;
-  type?: string;
-  overload_quit?: boolean;
-  [key: string]: any;
-}
-
-interface Action {
-  domain: string;
-  action: string;
-  data: ActionData | "default";
-  enabled?: boolean;
-}
-
-// Type pour les expressions de label personnalisées
-type LabelExpression = {
-  type: 'template';
-  template: string;
-  variables?: Record<string, any>;
-} | string;
-
-interface ElementConfig {
-  type: string;
-  name: string;
-  class?: string;
-  label?: LabelExpression | boolean;
-  target?: string;
-  stateObj?: boolean;
-  disabled_if?: DisabledCondition;
-  css?: { [key: string]: string };
-  "elt.css"?: { [key: string]: string };
-  tap_action?: Action | Action[];
-  hold_action?: Action | Action[];
-  double_tap_action?: Action | Action[];
-  [key: string]: any;
-}
-
-// Type pour les conditions de désactivation
-type DisabledCondition = {
-  entity?: string;
-  state?: string | string[];
-  attribute?: string;
-  value?: any;
-  operator?: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
-} | DisabledCondition[];
-////////////////////////////////////////////////////////////////////////////////
+const iconv = i18n;
 
 export class MyElement extends LitElement {
   @property({ type: Object })
@@ -103,6 +40,24 @@ export class MyElement extends LitElement {
   protected stateObjTarget?: StateObject;
   protected c?: string;
 
+
+  private static createEntitiesContext(device: any, hass: any): Record<string, any> {
+    const entitiesObj: Record<string, any> = {};
+    
+    if (device?.entities && hass?.states) {
+      for (const key in device.entities) {
+	const entity = device.entities[key];
+	if (entity?.entity_id && hass.states[entity.entity_id]) {
+          entitiesObj[key] = hass.states[entity.entity_id];
+	}
+      }
+    }
+    
+    return entitiesObj;
+  }
+
+
+  
   constructor() {
     super();
 
@@ -130,28 +85,15 @@ export class MyElement extends LitElement {
     });
   }
 
-/*  async connectedCallback() {
-    super.connectedCallback();
-    
-    // Attendre que les traductions soient chargées
-    await i18n.translate('welcome');
-  }
-  */
-  set state_on(state: boolean) {
-    if (state !== this.stateOn) {
-      this.stateOn = state;
-    }
-  }
-
   has_changed(hass: HassConfig): boolean {
     let res = false;
     if (this.stateObj) {
-      let so = hass.states[this.stateObj.entity_id];
-      if (this.stateObj.state !== so.state) {
+      const so = hass.states[this.stateObj.entity_id];
+      if (so && this.stateObj.state !== so.state) {
         res = true;
       } else if (this.conf && "target" in this.conf && this.stateObjTarget) {
-        let sot = hass.states[this.stateObjTarget.entity_id];
-        if (this.stateObjTarget.state !== sot.state) {
+        const sot = hass.states[this.stateObjTarget.entity_id];
+        if (sot && this.stateObjTarget.state !== sot.state) {
           res = true;
         }
       }
@@ -162,15 +104,16 @@ export class MyElement extends LitElement {
   set hass(obj: HassConfig) {
     this._hass = obj;
     if (this.stateObj) {
-      let so = this._hass.states[this.stateObj.entity_id];
-      if (this.stateObj.state !== so.state) {
+      const so = this._hass.states[this.stateObj.entity_id];
+      if (so && this.stateObj.state !== so.state) {
         this.stateObj = so;
-      } else if (this.conf && "target" in this.conf && this.stateObjTarget) {
-        let sot = this._hass.states[this.stateObjTarget.entity_id];
-        if (this.stateObjTarget.state !== sot.state) {
-          this.stateObjTarget = sot;
+      }
+      else if (this.conf && "target" in this.conf && this.stateObjTarget) {
+	const sot = this._hass.states[this.stateObjTarget.entity_id];
+        if (sot && this.stateObjTarget.state !== sot.state) {
+          this.stateObjTarget = sot || null;
           this.stateObj = so; // force render
-        }
+	}
       }
     }
   }
@@ -179,9 +122,6 @@ export class MyElement extends LitElement {
     this.conf = conf;
   }
 
-  /**
-   * Résout une expression de label
-   */
   private resolveLabelExpression(labelExpr: LabelExpression, context: Record<string, any>): string {
     if (typeof labelExpr === 'string') {
       return this.substituteVariables(labelExpr, context);
@@ -195,32 +135,73 @@ export class MyElement extends LitElement {
     return '';
   }
 
+
   /**
-   * Substitue les variables dans une chaîne template
-   * Exemple: "Hello ${name}" avec {name: "World"} => "Hello World"
+   * Substitue les variables dans un template string
+   * Gère les traductions i18n._() et les expressions JavaScript
    */
-  private substituteVariables(template: string, variables: Record<string, any>): string {
-    return template.replace(/\${([^}]+)}/g, (match, key) => {
-      const value = this.getNestedProperty(variables, key.trim());
-      return value !== undefined ? String(value) : match;
+  protected substituteVariables(template: string, variables: Record<string, any>): string {
+    let processed = template;
+    
+    processed = processed.replace(/(i18n)\._\(['"]([^'"]+)['"]\)/g, (match, obj, key) => {
+      try {
+	return i18n._(key);
+      } catch (error) {
+	console.warn(`Translation not found for key: ${key}`);
+	return key;
+      }
     });
+    
+    // Étape 2: Remplacer les variables et expressions ${...}
+    processed = processed.replace(/\${([^}]+)}/g, (match, expression) => {
+      try {
+	const trimmed = expression.trim();
+	
+	// Variable simple (ex: state, device.name)
+	if (/^[a-zA-Z_$][a-zA-Z0-9_$.]*$/.test(trimmed)) {
+          const value = this.getNestedProperty(variables, trimmed);
+          return value !== undefined ? String(value) : match;
+	}
+	
+	// Expression complexe (ex: state * 2, condition ? a : b)
+	// Créer une fonction avec les variables comme paramètres
+	const varNames = Object.keys(variables);
+	const varValues = Object.values(variables);
+	
+	const contextVars = {
+          ...variables,
+          i18n: i18n,
+	};
+	
+	const func = new Function(
+          ...Object.keys(contextVars),
+          `"use strict"; return (${trimmed});`
+	);
+	
+	const result = func(...Object.values(contextVars));
+	return result !== undefined && result !== null ? String(result) : match;
+      } catch (error) {
+	console.error('Error evaluating expression:', expression, error);
+	return match;
+      }
+    });
+    
+    return processed;
   }
 
   /**
-   * Récupère une propriété imbriquée d'un objet
-   * Exemple: getNestedProperty({user: {name: "John"}}, "user.name") => "John"
+   * Accède à une propriété imbriquée d'un objet via un chemin
+   * Ex: getNestedProperty({a: {b: {c: 1}}}, 'a.b.c') => 1
    */
   private getNestedProperty(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split('.').reduce((current, key) => {
+      return current?.[key];
+    }, obj);
   }
-
-  /**
-   * Évalue une condition de désactivation
-   */
-  private evaluateDisabledCondition(condition: DisabledCondition): boolean {
+  
+  protected evaluateDisabledCondition(condition: DisabledCondition): boolean {
     if (!this._hass) return false;
 
-    // Si c'est un tableau de conditions (AND logique)
     if (Array.isArray(condition)) {
       return condition.every(c => this.evaluateDisabledCondition(c));
     }
@@ -231,14 +212,12 @@ export class MyElement extends LitElement {
     const operator = condition.operator || 'equals';
     let actualValue: any;
 
-    // Récupérer la valeur à comparer
     if (condition.attribute) {
       actualValue = entity.attributes?.[condition.attribute];
     } else {
       actualValue = entity.state;
     }
 
-    // Comparer selon l'opérateur
     switch (operator) {
       case 'equals':
         if (Array.isArray(condition.state)) {
@@ -267,8 +246,6 @@ export class MyElement extends LitElement {
   }
 
   static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
-    //let iconv = _i18n;
-    let iconv = i18n;
     let Element = customElements.get(config.type) as typeof MyElement;
     let label_name = '';
     console.debug("Creating element", config.type);
@@ -284,38 +261,43 @@ export class MyElement extends LitElement {
     if ('stateObj' in config && !config.stateObj) {
       elt.stateObj = null;
     } else {
-      elt.stateObj = hass.states[elt.device.entities[config.name].entity_id];
-    }
-
-    // Résoudre le label
-    if ('label' in config) {
-      if (typeof config.label === 'boolean' && config.label !== false) {
-        label_name = config.name;
-      } else if (config.label && typeof config.label !== 'boolean') {
-        const context = {
-          entity: elt.stateObj,
-          device: device,
-          config: config,
-          state: elt.stateObj?.state,
-          name: config.name,
-          iconv: iconv
-        };
-        label_name = elt.resolveLabelExpression(config.label, context);
+      const entityData = elt.device.entities[config.name];
+      if (entityData) {
+        elt.stateObj = hass.states[entityData.entity_id] || null;
       }
     }
 
-    if ("target" in config && elt.device) {
-      elt.stateObjTarget = hass.states[elt.device.entities[config.target!].entity_id];
+    if ('label' in config) {
+      if (typeof config.label === 'boolean' && config.label !== false) {
+	label_name = config.name;
+      } else if (config.label && typeof config.label !== 'boolean') {
+	// Créer un objet avec toutes les entités du device
+	const entitiesContext = MyElement.createEntitiesContext(device, hass);
+	
+	const context = {
+	  entity: entitiesContext,      // Accès via entity.nom_entite.state
+	  entities: entitiesContext,    // Accès via entities.nom_entite.state (alias)
+	  device: device,
+	  config: config,
+	  state: elt.stateObj?.state,
+	  name: config.name,
+	  i18n: i18n
+	};
+	label_name = elt.resolveLabelExpression(config.label, context);
+      }
+    }
+    if ("target" in config && elt.device && config.target) {
+      const targetEntity = elt.device.entities[config.target];
+      if (targetEntity) {
+        elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
+	console.log("TARGET",elt.stateObjTarget);
+      }
     }
 
     elt.label = label_name;
     return elt;
   }
 
-  /**
-   * Build a css style string according to given json configuration
-   * @param css_level: the css definition level
-   */
   get_style(css_level: string = 'css'): string {
     let style = '';
     if (this.conf && css_level in this.conf) {
@@ -328,7 +310,15 @@ export class MyElement extends LitElement {
     if (!this._hass || !this.device) {
       throw new Error("Hass or device not initialized");
     }
-    return this._hass.states[this.device.entities[entity_translation_value].entity_id];
+    const entity = this.device.entities[entity_translation_value];
+    if (!entity) {
+      throw new Error(`Entity ${entity_translation_value} not found`);
+    }
+    const state = this._hass.states[entity.entity_id];
+    if (!state) {
+      throw new Error(`State for ${entity.entity_id} not found`);
+    }
+    return state;
   }
 
   private _handleClick(e: PointerEvent): void {
@@ -355,17 +345,15 @@ export class MyElement extends LitElement {
   }
 
   protected _render(style: string): any {
-    // Méthode à implémenter dans les classes enfants
     return html``;
   }
 
-  render() {
+  override render() {
     let value: string | null = null;
     if (this.stateObj !== null) {
       value = this.stateObj.state;
     }
 
-    // Évaluer la condition de désactivation
     if (this.conf && 'disabled_if' in this.conf && this.conf.disabled_if) {
       if (this.evaluateDisabledCondition(this.conf.disabled_if)) {
         return html`<br />`;
@@ -386,8 +374,6 @@ ${this._render(this.get_style('elt.css'))}
   }
 
   async run_actions(actions: Action | Action[]): Promise<void> {
-    //let iconv = _i18n;
-    let iconv = i18n;
     let actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
 
     for (let action of actionsArray) {
@@ -417,30 +403,26 @@ ${this._render(this.get_style('elt.css'))}
 		})
               );
               break;
-
-            case "message_box":
-              let str = '';
-              if (typeof action.data === 'string') {
-                // Substituer les variables dans le message
-                const context = {
-                  entity: this.stateObj,
-                  device: this.device,
-                  state: this.stateObj?.state,
-                  iconv: iconv
-                };
-                str = this.substituteVariables(action.data, context);
-              } else {
-                str = JSON.stringify(action.data);
-              }
-              this.msgbox(str);
-              break;
-
-            default:
-              let error_str = "Error: try to run unknown redsea_ui action: " + action.action;
-              this.msgbox(error_str);
-              console.error(error_str);
-              break;
-          }
+	    case "message_box":
+	      let str = '';
+	      if (typeof action.data === 'string') {
+		// Créer un objet avec toutes les entités du device
+		const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
+		
+		const context = {
+		  entity: entitiesContext,
+		  entities: entitiesContext,
+		  device: this.device,
+		  state: this.stateObj?.state,
+		  i18n: i18n
+		};
+		str = this.substituteVariables(action.data, context);
+	      } else {
+		str = JSON.stringify(action.data);
+	      }
+	      this.msgbox(str);
+	      break;
+	  }
         } else {
           let a_data = structuredClone(action.data);
 

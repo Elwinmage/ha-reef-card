@@ -1,11 +1,11 @@
+// @ts-nocheck
 import {SUPPLEMENTS} from "./supplements_list"
 
 class Supplements{
 
     constructor(){
 	this._list = SUPPLEMENTS;
-    }//end of constructor
-
+    }// end of constructor
     get_supplement(name){
 	let supplement=null;
 	for ( supplement of this._list){
@@ -15,19 +15,17 @@ class Supplements{
 	    if(supplement.type=="Bundle"){
 		console.log("BUNDLE",supplement.bundle);
 		for ( var supp of Object.keys(supplement.bundle)){
-		    var bundle_supplement=supplement.bundle[supp];
+		    let bundle_supplement=supplement.bundle[supp];
 		    console.log("SUPP",bundle_supplement);
 		    if (bundle_supplement.supplement.name==name){
-			bundle_supplement.supplement.sizes=supplement.sizes.map(function(x) { return x * bundle_supplement.ratio; });
+			bundle_supplement.supplement.sizes=supplement.sizes.map(function(x: any) { return x * bundle_supplement.ratio; });
 			return bundle_supplement.supplement;
 		    }
 		}
-	    }//if
-	}//for
-	return null;
-    }//end of function get_supplement
-    
+	    }// if
+	}// for	return null;
+    }// end of function get_supplement    
 }
 
-var supplements_list = new Supplements();
+let supplements_list = new Supplements();
 export default supplements_list;

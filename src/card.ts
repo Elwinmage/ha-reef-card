@@ -1,10 +1,8 @@
 import {
   LitElement,
   html,
-  until,
 } from "lit";
 
-import { until } from 'lit/directives/until.js';
 
 import i18n from "./translations/myi18n.js";
 
@@ -13,82 +11,104 @@ import DeviceList from './common';
 import style_card from './card.styles';
 
 import {RSDevice} from './devices/device';
-//import NoDevice from './devices/nodevice';
-//  import RSDose from './devices/rsdose';
 import {Dialog} from './devices/base/dialog';
 
 import style_dialog from './devices/base/dialog.styles';
 
+interface SelectDevice {
+  value: string;
+  text: string;
+}
 
-/*
- *  ReefCard. Implement a reefcard for HomeAssistant
- */
+interface UserConfig {
+  device?: string;
+  [key: string]: any;
+}
+
+interface CustomEvent<T = any> extends Event {
+  detail: T;
+}
+
 export class ReefCard extends LitElement {
 
-  static styles = [style_card,style_dialog];
+  static override styles = [style_card,style_dialog];
 
   // Card is updated when new device is selected or when hass is updated
-  static get properties() {
+  static override get properties() {
     return {
       _hass: {},
       current_device: {},
     };
-  }//end of reactives properties
-
+  }// end of reactives properties
   
-  /*
-   * CONSTRUCTOR
-   */
+  private select_devices: SelectDevice[];
+  private first_init: boolean;
+  private re_render: boolean;
+  private _dialog_box: Dialog | null;
+  private _hass: any;
+  private user_config: UserConfig = {};
+  private current_device: any;
+  private no_device: any;
+  private devices_list!: DeviceList;
+  private selected?: string;
+  private messages?: any;
+  
   constructor() {
     super();
-    this.version='v0.0.1';
-    //this.select_devices=[{value:'unselected',text:i18n._("select_device")}];
     this.select_devices=[];
     this.first_init=true;
     this.re_render=false;
     this._dialog_box=null;
-    this.addEventListener("display-dialog", function(e) {this._handle_display_dialog(e);});
-    this.addEventListener("config-dialog", function(e) {this._dialog_box.set_conf(e.detail.config);});
-    this.addEventListener("quit-dialog", function(e) {this._dialog_box.quit();this.render(); /* force rerender*/ ;});
-  }//end of constructor
+    this.addEventListener("display-dialog", (e: Event) => {this._handle_display_dialog(e as CustomEvent);});
+    this.addEventListener("config-dialog", (e: Event) => {
+      if (this._dialog_box) {
+        this._dialog_box.set_conf((e as CustomEvent).detail.config);
+      }
+    });
+    this.addEventListener("quit-dialog", () => {
+      if (this._dialog_box) {
+        this._dialog_box.quit();
+      }
+      this.render(); /* force rerender*/
+    });
+  }// end of constructor
 
-
-  /*
-   * Get user configuration
-   */
-  setConfig(config) {
+  setConfig(config: UserConfig): void {
     this.user_config = config;
-  }//end of function - setConfig
+  }// end of function - setConfig
 
-
-  set hass(obj){
+  set hass(obj: any){
     if(this.first_init==true){
       this._hass=obj;
     }
     else {
       this.current_device.hass=obj;
-      this._dialog_box.hass=obj;
+      if (this._dialog_box) {
+        this._dialog_box.hass=obj;
+      }
     }
   }
 
-  _handle_display_dialog(event){
-    this._dialog_box.display(event.detail);
-  }//end of function - _handle_display_dialog
+  private _handle_display_dialog(event: CustomEvent): void {
+    if (this._dialog_box) {
+      this._dialog_box.display(event.detail);
+    }
+  }// end of function - _handle_display_dialog  
+
   
-  /*
-   * RENDER
-   */
-  render() {
+  override render() {
     console.debug("render main");
     if(this.first_init==true){
       
       this.init_devices();
       this.first_init=false;
-      this.no_device=RSDevice.create_device("redsea-nodevice",this._hass,null,null);
+      this.no_device=RSDevice.create_device("redsea-nodevice",this._hass,null,{} as any);
       this.current_device=this.no_device;
       this._dialog_box=new Dialog();
-      this._dialog_box.init(this._hass,this.shadowRoot);
-    }//if
+      if (this.shadowRoot) {
+        this._dialog_box.init(this._hass,this.shadowRoot);
+      }
+    }// if
     else {
       console.debug("No FIRST");
       this.current_device.hass=this._hass;
@@ -98,120 +118,111 @@ export class ReefCard extends LitElement {
     }
     
     if(this.user_config['device']){
-      this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device));
+      this.select_devices.map(dev => this._set_current_device_from_name(dev,this.user_config.device!));
       this.current_device.hass=this._hass;
-      //A specific device has been selected
+      // A specific device has been selected
       return html`
-             ${this.messages}
-             ${this.current_device}
-             ${this._dialog_box.render()}`;
-    }//fi
+${this.messages}
+${this.current_device}
+${this._dialog_box?.render()}`;
+    }// fi
     // no secific device selected, display select form
     return html`
-             ${this.device_select()}
-             ${this.messages}
-             ${this.current_device}
-             ${this._dialog_box.render()}`;
-  }//end of render
+${this.device_select()}
+${this.messages}
+${this.current_device}
+${this._dialog_box?.render()}`;
+  }// end of render
 
-  /*
-   * display select form to choose wich device to display
-   */
-  device_select(){
+  private device_select() {
     return html`
-        <select id="device" @change="${this.onChange}">
-          ${this.select_devices.map(option => html`
-             <option value="${option.value}" ?selected=${this.select_devices === option.value}>${option.text}</option>
-         `)}
-        </select>`;
+<select id="device" @change="${this.onChanges}">
+${this.select_devices.map(option => html`
+      <option value="${option.value}" ?selected=${this.current_device?.device?.elements?.[0]?.primary_config_entry === option.value}>${option.text}</option>
+      `)}
+</select>`;
   }
 
-  /*
-   * Initialise available redsea devices list
-   */
-  init_devices(){
+  private init_devices(): void {
     this.devices_list=new DeviceList(this._hass);
     this.select_devices=[{value:'unselected',text:i18n._("select_device")}];
 
-    for (var d of this.devices_list.main_devices){
+    for (const d of this.devices_list.main_devices){
       this.select_devices.push(d);
     }// for
-  }//end of init_devices
+  }// end of init_devices
 
-  /*
-   * Set the current device to display giving it's name
-   */
-  _set_current_device_from_name(dev,name){
+  private _set_current_device_from_name(dev: SelectDevice, name: string): void {
     if (dev['text']==name){
       this._set_current_device(dev['value']);
     }
-  }//end of _set_current_device_from_name
+  }// end of _set_current_device_from_name
 
-  /*
-   * Set the current device to display giving it's id
-   */
-  _set_current_device(device_id){
+  private _set_current_device(device_id: string): void {
     console.debug("Current device",device_id);
-    //No device selected, display redsea logo
+    // No device selected, display redsea logo
     if (device_id=="unselected"){
       this.current_device=this.no_device;
       return;
     }
     
-    if (this.current_device.device != null &&
+    if (this.current_device.device != null  && this.current_device.device.elements &&
       this.current_device.device.elements[0].primary_config_entry ==device_id){
       console.debug("current device not updated",this.current_device.device.name);
       return;
     }
     
-    var device=this.devices_list.devices[device_id];
-    var model = device.elements[0].model;
-    this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this.user_config,device);
-    //TODO : Implement MAIN tank view support
-    //Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
+    const device=this.devices_list.devices[device_id];
+    if (!device) {
+      console.error("Device not found:", device_id);
+      return;
+    }
+    const model = device.elements[0]?.model;
+    if (!model) {
+      console.error("Device model not found");
+      return;
+    }
+    // @ts-ignore - DeviceInfo type mismatch between imports
+        this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this.user_config,device);
+    console.debug(this.current_device);
+    // TODO : Implement MAIN tank view support
+    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
     // labels: enhancement
-
     switch(model){
-	//TODO : Implement RSDOSE support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/10
+	// TODO : Implement RSDOSE support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/10
 	// labels: enhancement, rsdose
       case "RSDOSE2":
-	//TODO : Implement RSDOSE2 support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/9
+	// TODO : Implement RSDOSE2 support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/9
 	// labels: enhancement, rsdose, rsdose2
       case "RSDOSE4":
-	//TODO : Implement RSDOSE4 support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
-	// labels: enhancement, rsdose, rsdose4
-	
+	// TODO : Implement RSDOSE4 support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/8
+	// labels: enhancement, rsdose, rsdose4	
 	break;
       case "RSRUN":
-	//TODO : Implement RSRUN support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/7
-	// labels: enhancement, rsrun
-	break;
+	// TODO : Implement RSRUN support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/7
+	// labels: enhancement, rsrun	break;
       case "RSWAVE":
-	//TODO : Implement RSWAVE support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/6
+	// TODO : Implement RSWAVE support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/6
 	// labels: enhancement, rswave
-
 	break;
       case "RSMAT":
-	//TODO : Implement RSMAT support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
+	// TODO : Implement RSMAT support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
 	// labels: enhancement, rsmat
-
 	break;
       case "RSATO+":
-	//TODO : Implement RSATO+ support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/4
-	// labels: enhancement, rsato
-	
+	// TODO : Implement RSATO+ support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/4
+	// labels: enhancement, rsato	
 	break;
-	//TODO : Implement RSLED support
-	//Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/3
-	// labels: enhancement, rsled
-	
+	// TODO : Implement RSLED support
+	// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/3
+	// labels: enhancement, rsled	
       case "RSLED50":
       case "RSLED60":
       case "RSLED90":
@@ -225,28 +236,29 @@ export class ReefCard extends LitElement {
     
   }
 
-  /*
-   * When SELECT form change, update the current redsea device to display.
-   */
-  onChange(){
+  private onChanges = (): void => {
     setTimeout(()=>{
-      this.selected = this.shadowRoot.querySelector('#device').value;
+      if (this.shadowRoot) {
+        const selectElement = this.shadowRoot.querySelector('#device') as HTMLSelectElement | null;
+        if (selectElement) {
+          this.selected = selectElement.value;
+        }
+      }
       this.current_device=this.no_device;
       
       if (this.selected=="unselected"){
         console.log('Nothing selected');
       }
-      else{
+      else if (this.selected) {
 	this._set_current_device(this.selected);
       }
       this.re_render=true;
+      this.requestUpdate();
+      
     },300)
-  }// end of onChange
+  }// end of onChanges
 
-  /*
-   * Card editor
-   */
   static getConfigElement() {
     return document.createElement("reef-card-editor");
-  }//end of getConfigElement
-}//end of class ReefCard
+  }// end of getConfigElement
+}// end of class ReefCard

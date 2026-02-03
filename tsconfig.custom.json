@@ -11,10 +11,11 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "resolveJsonModule": true
   },
   "files": [
-    "src/devices/base/sensor.ts"
+    "src/devices/base/element.ts"
   ]
 
 }

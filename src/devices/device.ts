@@ -1,66 +1,41 @@
-import { html,LitElement } from "lit";
-import i18n from "../translations/myi18n.js";
+import { TemplateResult, LitElement, html } from "lit";
+import { customElement } from "lit/decorators.js";
+import { property } from 'lit/decorators.js';
+import DeviceList from "../common";
+import { MyElement }  from "./base/element";
+import { merge } from "../merge";
+import i18n from "../translations/myi18n";
 
-import {MyElement} from "./base/element";
+import type { HassConfig, Device, DeviceInfo } from "../types/index";
 
-/*import Switch from "./base/switch";
-  import Button from "./base/button";
-  import Sensor from "./base/sensor";
-  import ProgressBar from "./base/progress_bar";
-  import ProgressCircle from "./base/progress_circle";
-  import SensorTarget from "./base/sensor_target";
-  import NoDevice from "./nodevice";*/
-import {merge} from "../merge";
-import {off_color} from "../common.js";
 
-import style_common from "./common.styles";
 
-let iconv = i18n;
-
-/*
- * RSDevice
- */
+@customElement('rs-device')
 export class RSDevice extends LitElement {
 
-  static styles = [style_common];
+  public entities: Record<string, any> = {};
+  public config: any; 
   
-  // Device is updated when hass is updated
-  static get properties() {
-    return {
-      to_render: {type: Boolean},
-    }
-  }// end of reactives properties
+  protected _hass: HassConfig | null = null;
+  protected device: DeviceInfo | null = null;
+  protected initial_config: any;
+  protected user_config: any;
+  protected _elements: any = [];
 
-  /*
-   * Construct a new Redsea LitElement of type name
-   * @name: type of device: redsea-rsdose2, redsea-rswave...
-   * @hass: the homeassistant states
-   * @config: the user configuration file
-   * @device: the hass redsea device 
-   */
-  static create_device(name,hass,config,device){
-    let Element=customElements.get(name);
-    if ( typeof Element=="undefined"){
-      Element=customElements.get("redsea-nodevice");
-    }
-    console.debug("Creating device",name);
-    let elt=new Element();
-    elt.hass=hass;
-    elt.user_config=config;
-    elt.device=device;
-    return elt;
-  }// end of - create_device
-
-  /*
-   * CONSTRUCTOR
-   */
-  constructor(){
+  @property ()
+  to_render: boolean = false;
+  
+  constructor() {
     super();
-    this.entities={};
-    this._elements=[];
-    this.to_render = false;
-    this.first_init=true;
-  }//end of constructor
+  }
+
+  render(){
+    return this._render();
+  }
+
+  _render(){
+    return html`RSDEVICE Base class`;
+  }
 
   _setting_hass(obj){
     this._hass=obj;
@@ -79,100 +54,163 @@ export class RSDevice extends LitElement {
       this.render();
     }
   }
-
-  render(){
-    return this._render();
-  }
   
-  set hass(obj){
+  set hass(obj: HassConfig) {
     this._setting_hass(obj);
   }
 
-  /*
-   * Return  the hass entity id according to it's translation key
-   * Entities list must be populate before with this._populate_entities()
-   * @entity_translation_value: a strign representation the translation key of the entity
-   */
-  get_entity(entity_translation_value){
-    return this._hass.states[this.entities[entity_translation_value].entity_id];
-  }//end of function get_entity
+  get hass(): HassConfig | null {
+    return this._hass;
+  }
 
+  setConfig(config: any): void {
+    this.user_config = config;
+  }
 
-  /*
-   * Find leaves on a json configuration object
-   * @tree: the current json object to search for
-   * @path: the path to search for leaves
+  /**
+   * Recursively sets nested properties in a target object
+   * Replaces the unsafe eval() version
    */
-  find_leaves(tree,path){
-    var keys = Object.keys(tree);
-    if (keys[0]=='0'){
-      eval(path+'="'+tree+'"');
+  private setNestedProperty(obj: any, path: string, value: any): void {
+    const keys = path.split('.');
+    let current = obj;
+    
+    // Navigate to the parent of the target property
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current) || typeof current[key] !== 'object') {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+    
+    // Set the final property
+    const lastKey = keys[keys.length - 1];
+    current[lastKey] = value;
+  }
+
+  /**
+   * Find and apply leaf values to configuration
+   * Safe replacement for eval()-based find_leaves
+   */
+  private applyLeaves(tree: any, basePath: string = ''): void {
+    const keys = Object.keys(tree);
+    
+    // Check if this is a leaf node (array-like object with numeric keys)
+    if (keys.length > 0 && keys[0] === '0') {
+      // This is a leaf value, apply it to the config
+      this.setNestedProperty(this.config, basePath, tree);
       return;
-    }//if
-    for (var key of keys){
-      let sep='.';
-      let ipath=path+sep+key;
-      this.find_leaves(tree[key],ipath);
-    }//for
-  }//end of function - find_leaves
+    }
+    
+    // Recursively process child nodes
+    for (const key of keys) {
+      const newPath = basePath ? `${basePath}.${key}` : key;
+      this.applyLeaves(tree[key], newPath);
+    }
+  }
 
-  /*
-   * Update default configuration with user values changes
-   */
-  update_config(){
-    this.config=JSON.parse(JSON.stringify(this.initial_config));
-    if (this.user_config && "conf" in this.user_config){
-      if (this.device.elements[0].model in this.user_config.conf){
-	let device_conf=this.user_config.conf[this.device.elements[0].model];
-	if ('common' in device_conf){
-	  this.find_leaves(device_conf['common'],"this.config");
-	}//if
-	if ('devices' in device_conf && this.device.name in device_conf.devices){
-	  this.config=merge(this.config,this.user_config.conf[this.device.elements[0].model]['devices'][this.device.name]);
-	}
-      }//if
-    }//if
-    // send dialogs conf
-    if (this.config.dialogs){
+  get_entity(entity_translation_value: string): any {
+    if (!this._hass || !this.entities) {
+      return null;
+    }
+    const entity = this.entities[entity_translation_value];
+    if (!entity) {
+      return null;
+    }
+    return this._hass.states[entity.entity_id];
+  }
+
+  update_config(): void {
+    this.config = JSON.parse(JSON.stringify(this.initial_config));
+    
+    if (this.user_config && "conf" in this.user_config && this.device) {
+      const model = this.device.elements[0].model;
+      
+      if (model && model in this.user_config.conf) {
+        const device_conf = this.user_config.conf[model];
+        
+        // Apply common configuration
+        if ('common' in device_conf) {
+          this.applyLeaves(device_conf.common);
+        }
+        
+        // Apply device-specific configuration
+        if ('devices' in device_conf && this.device.name in device_conf.devices) {
+          this.config = merge(
+            this.config,
+            this.user_config.conf[model].devices[this.device.name]
+          );
+        }
+      }
+    }
+    
+    // Send dialogs configuration
+    if (this.config.dialogs) {
       this.dispatchEvent(
-	new CustomEvent(
-	  "config-dialog",
-	  {
-	    bubbles: true,
-	    composed: true,
-	    detail: {
-	      config: this.config.dialogs,
-	    }
-	  }
-	)
-      )
-    }//if
+        new CustomEvent("config-dialog", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            dialogs: this.config.dialogs,
+            device: this
+          }
+        })
+      );
+    }
+  }
 
-  }//end of function update_config
-  
+  static create_device(
+    tag_name: string,
+    hass: HassConfig,
+    config: any,
+    device: DeviceInfo
+  ): RSDevice | null {
+    const Element = customElements.get(tag_name);
+    
+    if (!Element) {
+      console.error(`Custom element ${tag_name} not found`);
+      return null;
+    }
+    
+    const elt = new (Element as any)() as RSDevice;
+    elt.hass = hass;
+    elt.device = device;
+    elt.setConfig(config);
+    
+    return elt;
+  }
+
   /*
    * Get all entities linked to this redsea device
    */
   _populate_entities(){
-    for (var entity of this._hass.entities){
-      if(entity.device_id == this.device.elements[0].id){
-	this.entities[entity.translation_key]=entity;
-      }//if
-    }//for
+    if (this._hass && this.device){
+      for (const entity of this._hass.entities || []){
+        if(entity.device_id == this.device.elements[0]?.id){
+          this.entities[entity.translation_key]=entity;
+        }
+      }
+    }
+    else {
+      console.error("_populate_entities() failed, _hass or device object is null");
+    }
   }//end of function - _populate_entities
 
   /*
    * Check is the current device is disabled or not
    */
   is_disabled(){
+    if (!this.device) return true;
+    
     let disabled=false;
     let sub_nb=this.device.elements.length;
-    for( var i = 0; i<sub_nb; i++){
-      if (this.device.elements[i].disabled_by!=null){
-	disabled=true;
-	break;
-      }// if
-    }// for
+    for( let i = 0; i<sub_nb; i++){
+      if (this.device.elements[i]?.disabled_by!=null){
+        disabled=true;
+        break;
+      }
+    }
     return disabled;
   }//end of function is_disabled
 
@@ -180,45 +218,50 @@ export class RSDevice extends LitElement {
   /*
    * Get the state of the device on or off.
    */
-  is_on(){
-    return (this._hass.states[this.entities['device_state'].entity_id].state=='on');
+  is_on(): boolean{
+    if (!this._hass || !this.entities['device_state']) return false;
+    return (this._hass.states[this.entities['device_state'].entity_id]?.state=='on');
   }//end of function - is_on
 
   /*
    * Special render if the device is disabled or in maintenance mode in HA
    */
   _render_disabled(){
-    let reason =null;
-    let maintenance='';
+    let reason: string | null = null;
+    let maintenance : TemplateResult  = html``;
+    
     if (this.is_disabled()){
       reason="disabledInHa";
     }
-    else if (this._hass.states[this.entities['maintenance'].entity_id].state=='on'){
+    else if (this._hass && this.entities['maintenance'] && 
+             this._hass.states[this.entities['maintenance'].entity_id]?.state=='on'){
       reason="maintenance";
       // if in maintenance mode, display maintenance switch
-      let elements=[];
-      for(var i in this.config.elements){
-	elements.push(this.config.elements[i]);
+      let elements: any[] =[];
+      for(const i in this.config.elements){
+        elements.push(this.config.elements[i]);
       }
 
-      for ( let swtch of elements){
-	if (swtch.name=="maintenance"){
-	  let maintenance_button=MyElement.create_element(this._hass,swtch,this);
-	  maintenance=html`
-                                      ${maintenance_button}
-                                    `;
-	  break;
-	}//if
-      }//for
-    }// else if
-    if (reason==null){
-      return reason;
+      for ( const swtch of elements){
+        if (swtch.name=="maintenance"){
+          if (this._hass) {
+            let maintenance_button=MyElement.create_element(this._hass,swtch,this);
+            maintenance=html`${maintenance_button}`;
+          }
+          break;
+        }
+      }
     }
+    
+    if (reason==null){
+      return null;
+    }
+    
     return html`<div class="device_bg">
-                      <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-                      <p class='disabled_in_ha'>${i18n._(reason)}</p>
-                         ${maintenance}
-                    </div">`;
+<img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+<p class='disabled_in_ha'>${i18n._(reason)}</p>
+${maintenance}
+</div">`;
   }//end of function _render_disabled
 
   /*
@@ -234,36 +277,38 @@ export class RSDevice extends LitElement {
   }//end of function get_style
   
   /*
-   * Render a sungle element: switch, sensor...
+   * Render a single element: switch, sensor...
    * @conf: the json configuration for the element
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
-  _render_element(conf,state,put_in){
+  _render_element(conf: any, state: boolean, put_in: string | null){
     let sensor_put_in=null;
     //Element is groupped with others 
     if ("put_in" in conf){
       sensor_put_in=conf.put_in;
-    }//if
+    }
 
-    //Element is disabled or not i nthe requested group
-    if ( ('disabled' in conf && disabled==true) || 
-	 (sensor_put_in!=put_in) ){
+    //Element is disabled or not in the requested group
+    if ( ('disabled' in conf && conf.disabled==true) || 
+         (sensor_put_in!=put_in) ){
       return html``;
-    }//if
+    }
     
-    let element = null;
+    let element: MyElement | null = null;
     if (conf.name in this._elements){
       element= this._elements[conf.type+'.'+conf.name];
-      element.state_on=state;
+      if (element) {
+        element.stateOn=state;
+      }
     }
     else {
-      element=MyElement.create_element(this._hass,conf,this);
-      this._elements[conf.type+'.'+conf.name]=element;
+      if (this._hass) {
+        element=MyElement.create_element(this._hass,conf,this);
+        this._elements[conf.type+'.'+conf.name]=element;
+      }
     }
-    return html`
-                       ${element}
-                     `;
+    return html`${element}`;
   }//end of function - _render_actuator
   
   /*
@@ -271,17 +316,14 @@ export class RSDevice extends LitElement {
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
-  _render_elements(state,put_in=null){
-    let elements=[];
-    for(var i in this.config.elements){
+  _render_elements(state: boolean, put_in: string | null=null){
+    let elements: any[] = [];
+    for(const i in this.config.elements){
       elements.push(this.config.elements[i]);
     }
-    //${this.config.elements.map(conf => this._render_element(conf,state,put_in))}
-    return html `
-                     ${elements.map(conf => this._render_element(conf,state,put_in))} 
-                     `;
+    return html `${elements.map(conf => this._render_element(conf,state,put_in))}`;
   }//end of function - _render_elements
-  
-}//end of class RSDevice
 
-//window.customElements.define('rs-device', RSDevice);
+}
+
+export default RSDevice;

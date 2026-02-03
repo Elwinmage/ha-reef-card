@@ -1,6 +1,5 @@
 import i18n from "./translations/myi18n";
 
-// Types et interfaces
 interface HassDevice {
   identifiers: Array<string | [string, string]>;
   primary_config_entry: string;
@@ -26,7 +25,6 @@ interface MainDevice {
   text: string;
 }
 
-// Classe DeviceList
 export default class DeviceList {
   private _hass: HassConfig;
   public main_devices: MainDevice[];
@@ -60,11 +58,14 @@ export default class DeviceList {
   private init_devices(): void {
     for (const device_id in this._hass.devices) {
       const dev = this._hass.devices[device_id];
+      if (!dev) continue;
+      
       const dev_id = dev.identifiers[0];
+      if (!dev_id) continue;
 
       if (Array.isArray(dev_id) && dev_id[0] === 'redsea') {
         // Get only main device, not sub or cloud
-        if (
+	if (
           !dev_id[1].includes("_head_") &&
             !dev_id[1].includes("_pump") &&
             dev.model !== 'ReefBeat'
@@ -81,10 +82,10 @@ export default class DeviceList {
             elements: [dev]
           };
         } else {
-          this.devices[dev.primary_config_entry].elements.push(dev);
-          // Change main device name with main device
-          if (dev_id.length === 2) {
-            this.devices[dev.primary_config_entry].name = dev.name;
+          this.devices[dev.primary_config_entry]?.elements.push(dev);
+          // Changes main device name with main device
+          if (dev_id.length === 2 && this.devices[dev.primary_config_entry]) {
+            this.devices[dev.primary_config_entry]!.name = dev.name;
           }
         }
       }
@@ -93,11 +94,10 @@ export default class DeviceList {
   }
 }
 
-// Fonction hexToRgb
 export function hexToRgb(hex: string): string | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-  if (!result) {
+  if (!result || !result[1] || !result[2] || !result[3]) {
     return null;
   }
 
@@ -105,31 +105,18 @@ export function hexToRgb(hex: string): string | null {
   return rgb;
 }
 
-/**
- * Convert RGB to Hex. Allows whitespace. If given hex, returns that hex. Alpha opacity is discarded.
- * Supports formats:
- * #fc0
- * #ffcc00
- * rgb( 255, 255, 255 )
- * rgba( 255, 255, 255, 0.5 )
- * rgba( 255 255 255 / 0.5 )
- */
 export function rgbToHex(orig: string): string {
-  // Remove whitespace
   const regex_trim = /[^#0-9a-f\.\(\)rgba]+/gim;
   const color = orig.replace(regex_trim, ' ').trim();
 
-  // Check if already hex
   const regex_hex = /#(([0-9a-f]{1})([0-9a-f]{1})([0-9a-f]{1}))|(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}))/gi;
   if (regex_hex.exec(color)) {
     return color;
   }
-
-  // Extract RGB values
   const regex_rgb = /rgba?\([\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*[, ][\t\s]*([0-9]{1,3})[\t\s]*([,\/][\t\s]*[0-9\.]{1,})?[\t\s]*\);?/gim;
   const matches = regex_rgb.exec(orig);
 
-  if (matches) {
+  if (matches && matches[1] && matches[2] && matches[3]) {
     const hex =
       '#' +
       (parseInt(matches[1]) | 1 << 8).toString(16).slice(1) +
@@ -141,11 +128,9 @@ export function rgbToHex(orig: string): string {
   }
 }
 
-// Constantes de couleur
 export const off_color: string = "150,150,150";
 export const button_color: string = "0,60,78";
 
-// Fonction toTime
 export function toTime(time: number): string {
   const seconds = time % 60;
   const minutes = ((time - seconds) / 60) % 60;
@@ -156,21 +141,21 @@ export function toTime(time: number): string {
     String(seconds).padStart(2, '0');
 }
 
-// Fonction timeToString
 function timeToString(time: number): string {
   return String(Math.floor(time / 60)).padStart(2, '0') + ':' +
     String(Math.floor(time % 60)).padStart(2, "0");
 }
 
-// Fonction stringToTime
 export function stringToTime(str: string): number {
   const s_time = str.split(":");
+  if (s_time.length < 2 || !s_time[0] || !s_time[1]) {
+    return 0;
+  }
   return parseInt(s_time[0]) * 60 + parseInt(s_time[1]);
 }
 
-// Fonction create_select
 export function create_select(
-  shadowRoot: Document | ShadowRoot,
+  _shadowRoot: Document | ShadowRoot,
   id: string,
   options: string[],
   selected: string | null = null,
@@ -210,9 +195,8 @@ export function create_select(
   return div;
 }
 
-// Fonction create_hour
 export function create_hour(
-  shadowRoot: Document | ShadowRoot,
+  _shadowRoot: Document | ShadowRoot,
   id: string,
   hour: number = 0,
   id_suffix: number = 1

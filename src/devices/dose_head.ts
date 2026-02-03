@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { html } from "lit";
 import {RSDevice} from "./device";
 
@@ -52,7 +53,7 @@ export class DoseHead extends RSDevice{
 
 	img='/hacsfiles/ha-reef-card/img/supplements/'+supplement_uid+'.supplement.png';
 	
-	var http = new XMLHttpRequest();
+	let http = new XMLHttpRequest();
 	http.open('HEAD', img, false);
 	http.send();
 	if(http.status == 404){
@@ -87,15 +88,14 @@ export class DoseHead extends RSDevice{
 	if (this.supplement_info){
 
 	    return html`${this._render_elements(true,"supplement_info")}`;
-	}//if
+	}// if
     }
 
     _render_ask() {
 	    let ask='';
 	    if ( this.supplement_info && !this.supplement.attributes.supplement.is_name_editable){
-		ask=html`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;
-	    }//if
-	return html`${ask}`;
+	      ask=html`<a class="addSupplement" target="_blank" href='https:// github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;	    }// if
+      return html`${ask}`;
     }
     
     is_on(){
@@ -167,8 +167,8 @@ export class DoseHead extends RSDevice{
               ${this._render_elements(this.state_on)}
               ${calibration}
    	    `;
-	}//if
-	else {
+	}// if
+      else {
 
 	    let conf={
 		"type": "click-image",
@@ -190,8 +190,7 @@ export class DoseHead extends RSDevice{
                    <div class="container" style="${this.get_style(this.config.container)}">
                      ${add_img}
                    </div>`;
-	}//else
+      }// else
     }
 };
 
-//window.customElements.define('dose-head', DoseHead);

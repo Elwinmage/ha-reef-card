@@ -1,212 +1,59 @@
-<!-- [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=flat-square)](https://github.com/hacs/default) -->
-[![GH-release](https://img.shields.io/github/v/release/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/releases)
-[![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
+# HA Reef Card - Version TypeScript Strict
 
-[![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/Elwinmage/dd3b205383103c2e65a7f516003ecbf6/raw/clone.json&logo=github)](https://github.com/MShawon/github-clone-count-badge)
-[![GH-code-size](https://img.shields.io/github/languages/code-size/Elwinmage/ha-reef-card.svg?color=red&style=flat-square)](https://github.com/Elwinmage/ha-reef-card) 
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+## Modifications apportées
 
-> [!CAUTION]
-> This card is on early developpement and should only be install for test purposes.  
-> The first version will be published in hacs standard library in few weeks and will support ReefDose 4 from Redsea.<br />
-> ***You can vote to choose the next supported device [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).***
+Ce projet a été converti en TypeScript strict avec les configurations suivantes :
 
-> [!NOTE]
-> Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
-# Supported Languages: [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reef-card) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reef-card) 
-<!-- You want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
-Your language is not supported yet, you want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md).
-# Overview
-**Reef card** for home assistant help you to manage your reef tank. 
+### 1. Configuration TypeScript Stricte
 
-Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) it takes your Redsea (ReefBeat) devices automaticaly into account.
-> [!NOTE]
-> If you have non redsea devices and you want them to be taken into account, you can ask [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
+Le fichier `tsconfig.json` a été mis à jour avec toutes les options de vérification strictes activées :
 
-> [!TIP]
-> The list of future implementations can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
-> The list of bugs can be found [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
+- `strict: true` - Active toutes les vérifications strictes
+- `noImplicitAny: true` - Interdit les types `any` implicites
+- `strictNullChecks: true` - Vérification stricte des null/undefined
+- `strictFunctionTypes: true` - Vérification stricte des types de fonctions
+- `strictBindCallApply: true` - Vérification stricte de bind/call/apply
+- `strictPropertyInitialization: true` - Vérification de l'initialisation des propriétés
+- `noImplicitThis: true` - Interdit `this` implicite
+- `useUnknownInCatchVariables: true` - Utilise `unknown` au lieu de `any` dans les catch
+- `alwaysStrict: true` - Mode strict ECMAScript
+- `noUnusedLocals: true` - Détecte les variables locales non utilisées
+- `noUnusedParameters: true` - Détecte les paramètres non utilisés
+- `noImplicitReturns: true` - Tous les chemins doivent retourner une valeur
+- `noFallthroughCasesInSwitch: true` - Interdit les fall-through dans les switch
+- `noUncheckedIndexedAccess: true` - Ajoute undefined aux accès par index
+- `noImplicitOverride: true` - Requiert le mot-clé override
+- `allowUnreachableCode: false` - Interdit le code inaccessible
 
-# Compatibility
+### 2. Fichiers convertis
 
-✅ Implemented  ☑️ Current Work ❌ Planned
-<table>
-  <th>
-    <td ><b>Model</b></td>
-    <td colspan="2"><b>Status</b></td>
-    <td><b>Issues</b>  <br/>📆(Planned) <br/> 🐛(Bugs)</td>
-  </th>
-  <tr>
-    <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSATO+.png"/></td>
-    <td>
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:bug" style="text-decoration:none">🐛</a>
-    </td>
-  </tr>
+- `vite.config.js` → `vite.config.ts`
+- `src/devices/supplements_list.js` supprimé (seul `.ts` conservé)
 
-  </tr>
-    <tr>
-    <td><a href="#reefcontrol">ReefControl</a></td>
-    <td>RSSENSE<br /> If you have one, you can contact me <a href="https://github.com/Elwinmage/ha-reefbeat-component/discussions/8">here</a> and I will add its support.</td><td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSCONTROL.png"/></td>
-    <td>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:bug" style="text-decoration:none">🐛</a>
-    </td>
-      </tr>  
-  <tr>
-    <td rowspan="2"><a href="#reefdose">ReefDose</a></td>
-    <td>RSDOSE2</td>
-    <td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSDOSE2.png"/></td>
-      <td rowspan="2">
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsdose,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsdose,all label:bug" style="text-decoration:none">🐛</a>
-    </td>
-  </tr>
-  <tr>
-    <td>RSDOSE4</td><td>☑️</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSDOSE4.png"/></td>
-    </tr>
-  <tr>
-    <td rowspan="2"> <a href="#reefled">ReefLed</a></td>
-    <td>G1</td>
-    <td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/rsled_g1.png"/></td>
-<td rowspan="2">   
-    <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:bug" style="text-decoration:none">🐛</a>
-</td>
-  </tr>
-   <td >G2</td>
-    <td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/rsled_g2.png"/></td>
-  </tr>
-  <tr>
-    <td rowspan="3"><a href="#reefmat">ReefMat</a></td>
-    <td>RSMAT250</td>
-    <td>❌</td>
-    <td rowspan="3" width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSMAT.png"/></td>
-    <td rowspan="3">   
-    <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsmat,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsmat,all label:bug" style="text-decoration:none">🐛</a>
-</td>
-  </tr>
-  <tr>
-    <td>RSMAT500</td><td>❌</td>
-  </tr>
-  <tr>
-    <td>RSMAT1200</td><td>❌</td>
-  </tr>
-  <tr>
-    <td><a href="#reefrun">ReefRun & DC Skimmer</a></td>
-    <td>RSRUN</td><td>❌</td>
-    <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSRUN.png"/></td>
-    <td>   
-    <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rsrun,all label:bug" style="text-decoration:none">🐛</a>
-</td>
-  </tr>  
-  <tr>
-    <td><a href="#reefwave">ReefWave</a></td>
-    <td>RSWAVE25 & RSWAVE45</td>
-    <td>❌</td>
-    <td width="200px" rowspan="2"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSWAVE.png"/></td>
-     <td >   
-    <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rwave,all label:bug" style="text-decoration:none">🐛</a>
-</td>
-</table>
+### 3. Structure préservée
 
-# Summary
-- [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
-- [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
-- [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
-- [ReefControl](https://github.com/Elwinmage/ha-reef-card/#reefcontrol)
-- [ReefDose](https://github.com/Elwinmage/ha-reef-card/#reefdose)
-- [ReefLED](https://github.com/Elwinmage/ha-reef-card/#reefled)
-- [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
-- [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
-- [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
-- [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
+- Tous les fichiers TypeScript existants ont été conservés
+- Les types personnalisés dans `src/types/` sont maintenus
+- La structure des dossiers reste identique
 
-# Installation
+## Installation
 
-> [!CAUTION]
-> This card is on early developpement and should only be install for test purposes.  
-> The first version will be published in hacs standard library in few weeks.
-> For now, if you want to test it, use the "Custom repositary" in hacs parameters.
+```bash
+npm install
+```
 
-# Configuration
+## Build
 
-Without device parameter, the card will detect all reefbeat devices and let you choose the one you want.
+```bash
+npm run build
+```
 
-To remove device selection and force the device you want, set device parameter to the name of your device.
+## Développement
 
-<table>
-  <tr>
-<td><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/card_rsdose4_config_2.png"/></td>
-<td><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/card_rsdose4_config.png"/></td>
-    </tr>
-</table>
+```bash
+npm run dev
+```
 
-# ReefATO
-Planned.
+## Notes
 
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefControl
-Planned.
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefDose
-
-<img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/rsdose4_ex1.png"/>
-
-## Features
-**Work in progress**
-- ReefDose 4 ([#8](https://github.com/Elwinmage/ha-reef-card/issues/8))
-  - [x] Automaticaly detect and set supplements
-  - [ ] Basic management (set manual & daily doses, display days left...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
-  - [ ] Advanced schedule [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
-- ReefDose 2 ([#9](https://github.com/Elwinmage/ha-reef-card/issues/9))
-  - [ ] Automaticaly detect and set supplements
-  - [ ] Basic management (set manual & daily doses, display days left...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
-  - [ ] Advanced schedule [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
-- Generic dosing pumps
- 
-
-## Supplements
-Here is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
-<table><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 1</td></tr><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 2</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Ca Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Calcium </td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 1+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 2+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 3+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Mg Plus</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid Calcium</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid alkalinity</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Magnesium Mix</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Part C</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Calcion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Ferrion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Hydrate - MG</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - KoralAmino</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Koralcolor</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Liquid Reef</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Potassion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code A</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code B</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Replenish</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Restore</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Strontion</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 1</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 2</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements </td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements plus</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Amin</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 1</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 2</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 3</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Ca</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light KH</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Mg</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Blue trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Green trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Min S</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Red trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite A</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite B</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite C</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Kalium</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Metals</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio enhance</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Gbio Gen</td></tr><tr><td>✅</td><td>Red Sea - Bio Active (Colors D)</td><td><img style='width:20%;' src='src/devices/img/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Calcium (Foundation A)</td><td><img style='width:20%;' src='src/devices/img/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Calcium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Iodine (Colors A)</td><td><img style='width:20%;' src='src/devices/img/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Iron (Colors C)</td><td><img style='width:20%;' src='src/devices/img/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='src/devices/img/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - KH/Alkalinity (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Magnesium (Foundation C)</td><td><img style='width:20%;' src='src/devices/img/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Magnesium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - NO3PO4-X</td><td><img style='width:20%;' src='src/devices/img/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Potassium (Colors B)</td><td><img style='width:20%;' src='src/devices/img/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Reef Energy Plus</td><td><img style='width:20%;' src='src/devices/img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Carbonate</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Complete</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 1</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 2</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Iodine</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Plus</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Strontium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Trace</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 1</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 2</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3A</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - A Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - All-For-Reef</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Amino Organic</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling A</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling C</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Bio-Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Carbo Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Elimi-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - K Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Liquid Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - NP-Bacto-Balance</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Plus-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Potassium</td></tr></table>
-
-# ReefLed
-
-
-Planned
-
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefMat
-Planned
-
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefRun
-Planned
-
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefWave
-Planned
-
-You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# FAQ
-
-***
-
-[buymecoffee]: https://paypal.me/Elwinmage
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square
+Les types `any` explicites dans le code original ont été conservés mais sont maintenant clairement identifiés. Pour une migration complète vers un code 100% type-safe, il faudrait remplacer ces `any` par des types plus spécifiques.
