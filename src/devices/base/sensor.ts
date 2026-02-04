@@ -50,7 +50,7 @@ export class Sensor extends MyElement {
     let unit = '';
 
     if (this.stateObj) {
-      value = this.conf.label || this.stateObj.state;
+      value = this.label || this.stateObj.state;
       unit = this.conf.unit || this.stateObj.attributes?.unit_of_measurement || '';
 
       if (this.conf.prefix) {
@@ -65,7 +65,6 @@ export class Sensor extends MyElement {
       }
     }
 
-//    const bgColor = `rgba(${this.c},${this.alpha})`;
     return html`
       <div 
         class="sensor ${sclass}" 

@@ -23,7 +23,7 @@ export class ProgressCircle extends MyElement {
   }
 
   protected override _render(_style: string = ''): TemplateResult {
-    if (this.conf?.disabled_if && this.evaluateDisabledCondition(this.conf.disabled_if)) {
+    if (this.conf?.disabled_if && this.evaluateCondition(this.conf.disabled_if)) {
       return html`<br />`;
     }
     let value=this.stateObj.state;

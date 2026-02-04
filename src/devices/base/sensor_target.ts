@@ -28,8 +28,8 @@ export class SensorTarget extends Sensor {
     }
 
     //eval de unit
-    const unit = this.conf?.unit || this.stateObj.attributes?.unit_of_measurement || '';
-
+    const unit = this.evaluate(this.conf?.unit || this.stateObj.attributes?.unit_of_measurement || '');
+    
     const sclass = this.conf?.class || 'sensor';
     
     const style = this.get_style('css');

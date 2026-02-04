@@ -50,28 +50,14 @@ export interface Action {
   enabled?: boolean;
 }
 
-export type LabelExpression = {
-  type: 'template';
-  template: string;
-  variables?: Record<string, any>;
-} | string;
-
-export type DisabledCondition = {
-  entity?: string;
-  state?: string | string[];
-  attribute?: string;
-  value?: any;
-  operator?: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
-} | DisabledCondition[];
-
 export interface ElementConfig {
   name: string;
   type: string;
   class?: string;
-  label?: LabelExpression | boolean;
+  label?: string | boolean;
   target?: string;
   stateObj?: boolean;
-  disabled_if?: DisabledCondition;
+  disabled_if?: string;
   css?: { [key: string]: string };
   "elt.css"?: { [key: string]: string };
   tap_action?: Action | Action[];

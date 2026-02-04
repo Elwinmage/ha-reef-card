@@ -19,8 +19,6 @@ export type {
   Device,
   ActionData,
   Action,
-  LabelExpression,
-  DisabledCondition,
   ElementConfig
 } from './element';
 

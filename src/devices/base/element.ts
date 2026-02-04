@@ -4,6 +4,7 @@ import { off_color } from "../../common.js";
 import i18n from "../../translations/myi18n.js";
 
 import { attachClickHandlers } from "./click_handler"
+import { SafeEval, SafeEvalContext } from '../../utils/SafeEval';
 
 // Import des types depuis le dossier types
 import type {
@@ -14,12 +15,9 @@ import type {
   Device,
   ActionData,
   Action,
-  LabelExpression,
-  DisabledCondition,
   ElementConfig
 } from "../../types/element";
 
-const iconv = i18n;
 
 export class MyElement extends LitElement {
   @property({ type: Object, attribute: false })
@@ -53,6 +51,7 @@ export class MyElement extends LitElement {
   @state()
   protected c?: string;
 
+  protected evalCtx: SafeEvalContext;
 
   private static createEntitiesContext(device: any, hass: any): Record<string, any> {
     const entitiesObj: Record<string, any> = {};
@@ -86,6 +85,33 @@ export class MyElement extends LitElement {
 	this._longclick();
       }
     });
+  }
+
+
+  createContext(){
+    if(!this.evalCtx){
+	const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
+	const context = {
+	  stateObj: this.stateObj,
+	  entity: entitiesContext,    // Accès via entities.nom_entite.state (alias)
+	  device: this.device,
+	  config: this.conf,
+	  state: this.stateObj?.state,
+	  name: this.conf.name,
+	  i18n: i18n,
+	};
+      this.evalCtx = new SafeEval(context);
+    }      
+  }
+  
+  evaluate(expression: string){
+    this.createContext();
+    return this.evalCtx.evaluate(expression);
+  }
+
+  evaluateCondition(expression: string){
+    this.createContext();
+    return this.evalCtx.evaluateCondition(expression);
   }
 
   has_changed(hass: HassConfig): boolean {
@@ -125,72 +151,7 @@ export class MyElement extends LitElement {
     this.conf = conf;
   }
 
-  private resolveLabelExpression(labelExpr: LabelExpression, context: Record<string, any>): string {
-    if (typeof labelExpr === 'string') {
-      return this.substituteVariables(labelExpr, context);
-    }
 
-    if (typeof labelExpr === 'object' && labelExpr.type === 'template') {
-      const variables = { ...context, ...(labelExpr.variables || {}) };
-      return this.substituteVariables(labelExpr.template, variables);
-    }
-
-    return '';
-  }
-
-
-  /**
-   * Substitue les variables dans un template string
-   * Gère les traductions i18n._() et les expressions JavaScript
-   */
-  protected substituteVariables(template: string, variables: Record<string, any>): string {
-    let processed = template;
-    
-    processed = processed.replace(/(i18n)\._\(['"]([^'"]+)['"]\)/g, (match, obj, key) => {
-      try {
-	return i18n._(key);
-      } catch (error) {
-	console.warn(`Translation not found for key: ${key}`);
-	return key;
-      }
-    });
-    
-    // Étape 2: Remplacer les variables et expressions ${...}
-    processed = processed.replace(/\${([^}]+)}/g, (match, expression) => {
-      try {
-	const trimmed = expression.trim();
-	
-	// Variable simple (ex: state, device.name)
-	if (/^[a-zA-Z_$][a-zA-Z0-9_$.]*$/.test(trimmed)) {
-          const value = this.getNestedProperty(variables, trimmed);
-          return value !== undefined ? String(value) : match;
-	}
-	
-	// Expression complexe (ex: state * 2, condition ? a : b)
-	// Créer une fonction avec les variables comme paramètres
-	const varNames = Object.keys(variables);
-	const varValues = Object.values(variables);
-	
-	const contextVars = {
-          ...variables,
-          i18n: i18n,
-	};
-	
-	const func = new Function(
-          ...Object.keys(contextVars),
-          `"use strict"; return (${trimmed});`
-	);
-	
-	const result = func(...Object.values(contextVars));
-	return result !== undefined && result !== null ? String(result) : match;
-      } catch (error) {
-	console.error('Error evaluating expression:', expression, error);
-	return match;
-      }
-    });
-    
-    return processed;
-  }
 
   /**
    * Accède à une propriété imbriquée d'un objet via un chemin
@@ -202,51 +163,6 @@ export class MyElement extends LitElement {
     }, obj);
   }
   
-  protected evaluateDisabledCondition(condition: DisabledCondition): boolean {
-    if (!this._hass) return false;
-
-    if (Array.isArray(condition)) {
-      return condition.every(c => this.evaluateDisabledCondition(c));
-    }
-
-    const entity = condition.entity ? this._hass.states[condition.entity] : this.stateObj;
-    if (!entity) return false;
-
-    const operator = condition.operator || 'equals';
-    let actualValue: any;
-
-    if (condition.attribute) {
-      actualValue = entity.attributes?.[condition.attribute];
-    } else {
-      actualValue = entity.state;
-    }
-
-    switch (operator) {
-      case 'equals':
-        if (Array.isArray(condition.state)) {
-          return condition.state.includes(actualValue);
-        }
-        return actualValue === (condition.state || condition.value);
-
-      case 'not_equals':
-        if (Array.isArray(condition.state)) {
-          return !condition.state.includes(actualValue);
-        }
-        return actualValue !== (condition.state || condition.value);
-
-      case 'greater_than':
-        return parseFloat(actualValue) > parseFloat(condition.value);
-
-      case 'less_than':
-        return parseFloat(actualValue) < parseFloat(condition.value);
-
-      case 'contains':
-        return String(actualValue).includes(String(condition.value));
-
-      default:
-        return false;
-    }
-  }
 
   static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
     let Element = customElements.get(config.type) as typeof MyElement;
@@ -273,20 +189,22 @@ export class MyElement extends LitElement {
     if ('label' in config) {
       if (typeof config.label === 'boolean' && config.label !== false) {
 	label_name = config.name;
-      } else if (config.label && typeof config.label !== 'boolean') {
+      }
+      else if (config.label && typeof config.label !== 'boolean') {
 	// Créer un objet avec toutes les entités du device
 	const entitiesContext = MyElement.createEntitiesContext(device, hass);
 	
 	const context = {
-	  entity: entitiesContext,      // Accès via entity.nom_entite.state
-	  entities: entitiesContext,    // Accès via entities.nom_entite.state (alias)
+	  stateObj: elt.stateObj,
+	  entity: entitiesContext,    // Accès via entities.nom_entite.state (alias)
 	  device: device,
 	  config: config,
 	  state: elt.stateObj?.state,
 	  name: config.name,
 	  i18n: i18n
 	};
-	label_name = elt.resolveLabelExpression(config.label, context);
+	elt.evalCtx = new SafeEval(context);
+	label_name = elt.evaluate(config.label);
       }
     }
     if ("target" in config && elt.device && config.target) {
@@ -305,11 +223,15 @@ export class MyElement extends LitElement {
     //Set device color patch
     if (this.conf && css_level in this.conf) {
       let o_style = structuredClone(this.conf[css_level]);
+      let device_color=this.device.config.color;
+      if (!this.device.is_on() ){
+	device_color=off_color;
+      }
       if(o_style['background-color']=="$DEVICE-COLOR$"){
-	o_style['background-color']="rgb("+this.device.config.color+")";
+	o_style['background-color']="rgb("+device_color+")";
       }
       else  if(o_style['background-color']=="$DEVICE-COLOR-ALPHA$"){
-	o_style['background-color']="rgba("+this.device.config.color+","+this.device.config.alpha+")";
+	o_style['background-color']="rgba("+device_color+","+this.device.config.alpha+")";
       }
       style = Object.entries(o_style).map(([k, v]) => `${k}:${v}`).join(';');
     }
@@ -341,10 +263,9 @@ export class MyElement extends LitElement {
       value = this.stateObj.state;
     }
 
-    if (this.conf && 'disabled_if' in this.conf && this.conf.disabled_if) {
-      if (this.evaluateDisabledCondition(this.conf.disabled_if)) {
-        return html`<br />`;
-      }
+    //if (this.conf && 'disabled_if' in this.conf && this.conf.disabled_if) {
+    if (this.evaluateCondition(this.conf?.disabled_if)) {
+      return html`<br />`;
     }
 
     if (!this.stateOn) {
@@ -393,17 +314,7 @@ ${this._render(this.get_style('css'))}
 	    case "message_box":
 	      let str = '';
 	      if (typeof action.data === 'string') {
-		// Créer un objet avec toutes les entités du device
-		const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
-		
-		const context = {
-		  entity: entitiesContext,
-		  entities: entitiesContext,
-		  device: this.device,
-		  state: this.stateObj?.state,
-		  i18n: i18n
-		};
-		str = this.substituteVariables(action.data, context);
+		str = this.evaluate(action.data);
 	      } else {
 		str = JSON.stringify(action.data);
 	      }

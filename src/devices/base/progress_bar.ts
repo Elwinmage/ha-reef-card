@@ -24,10 +24,11 @@ export class ProgressBar extends MyElement {
 
   protected override _render(_style: string = ''): TemplateResult {
     // Check disabled condition
+/*    console.debug("DISABLED?",this.conf.disabled_if);
     if (this.conf?.disabled_if && this.evaluateDisabledCondition(this.conf.disabled_if)) {
       return html`<br />`;
     }
-
+*/
     if (!this.stateObj || !this.stateObjTarget) {
       return html`<div class="error">Missing state</div>`;
     }
@@ -35,6 +36,9 @@ export class ProgressBar extends MyElement {
     const value = parseFloat(this.stateObj.state) || 0;
     const target = parseFloat(this.stateObjTarget.state) || 1;
     const percent = Math.floor((value * 100) / target);
+    if (percent > 100){
+      console.error(`[ProgressBar - ${this.conf.name}] bad percent value  : ${percent}=${value}*100/${target}`);
+    }
     
     const bar_class = this.conf?.class || 'progress-bar';
     const label = this.label || '';
