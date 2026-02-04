@@ -898,6 +898,7 @@ export const config = {
                   "border-radius":" 50%",
                   "top":" 5%",
                   "left":" 33%;",
+		  "background-color": "$DEVICE-COLOR-ALPHA$",
 		},
 		"tap_action": {
 		  "domain": "button",

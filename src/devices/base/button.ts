@@ -22,13 +22,11 @@ export class Button extends MyElement {
       ? html`<ha-icon icon="${this.conf.icon}"></ha-icon>`
       : null;
     
-    const bgColor = `rgba(${this.c},${this.alpha})`;
     
     return html`
       <div 
         class="button" 
-        id="${this.conf?.name || ''}" 
-        style="--button-bg-color: ${bgColor}">
+        id="${this.conf?.name || ''}" >
         ${icon}${this.label}
       </div>
     `;
