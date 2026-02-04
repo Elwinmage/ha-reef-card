@@ -339,7 +339,7 @@ ${this._render(this.get_style('css'))}
 
 
   _click(): void {
-    if (this.conf && 'tap_action' in this.conf) {
+    if (this.conf?.tap_action){//this.conf && 'tap_action' in this.conf) {
       this.run_actions(this.conf.tap_action!);
     }
   }

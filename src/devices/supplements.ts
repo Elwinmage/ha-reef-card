@@ -1,46 +1,33 @@
-import { html } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import {SUPPLEMENTS} from "./supplements_list"
 
-import {RSDevice} from "./device";
+class Supplements{
 
-@customElement('redsea-supplements')
-// @ts-expect-error - Class extends RSDevice compatibility
-export class Supplements extends RSDevice {
+    constructor(){
+	this._list = SUPPLEMENTS;
+    }//end of constructor
 
-  
-  private _list: any[] = [];
-
-  constructor() {
-    super();
-  }
-
-  protected override _render() {
-    this._list = [];
+    get_supplement(name){
+	let supplement=null;
+	for ( supplement of this._list){
+	    if (supplement.fullname==name){
+		return supplement;
+	    }
+	    if(supplement.type=="Bundle"){
+		console.log("BUNDLE",supplement.bundle);
+		for ( var supp of Object.keys(supplement.bundle)){
+		    var bundle_supplement=supplement.bundle[supp];
+		    console.log("SUPP",bundle_supplement);
+		    if (bundle_supplement.supplement.name==name){
+			bundle_supplement.supplement.sizes=supplement.sizes.map(function(x) { return x * bundle_supplement.ratio; });
+			return bundle_supplement.supplement;
+		    }
+		}
+	    }//if
+	}//for
+	return null;
+    }//end of function get_supplement
     
-    if (this.config?.supplements) {
-      for (const key in this.config.supplements) {
-        const supplement = this.config.supplements[key];
-        if (supplement) {
-          this._list.push({
-            key: key,
-            name: supplement.name || key,
-            image: supplement.image || '',
-            info: supplement.info || ''
-          });
-        }
-      }
-    }
-
-    return html`
-      <div class="supplements-list">
-        ${this._list.map(item => html`
-          <div class="supplement-item">
-            ${item.image ? html`<img src="${item.image}" alt="${item.name}" />` : ''}
-            <div class="supplement-name">${item.name}</div>
-            ${item.info ? html`<div class="supplement-info">${item.info}</div>` : ''}
-          </div>
-        `)}
-      </div>
-    `;
-  }
 }
+
+var supplements_list = new Supplements();
+export default supplements_list;

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { html } from "lit";
-import supplements_list from "./supplements";
+import  supplements_list  from "./supplements";
 
 import i18n from "../translations/myi18n";
 import * as com from '../common';
@@ -32,7 +32,7 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 	  {
 	    "domain": "redsea_ui",
 	    "action" : "message_box",
-	    "data": "i18n._('dosing')+ ' "+shortcut+"mL'"
+	    "data": "${i18n._('dosing')}+ ' "+shortcut+"mL'"
 	  }
 	],
 	"css":{
@@ -171,11 +171,11 @@ export function set_container_volume(elt,hass,shadowRoot){
     }
   }
 
-  export function edit_container(elt,hass,shadowRoot){
+export   function edit_container(elt,hass,shadowRoot){
     set_container_volume(elt,hass,shadowRoot);
   }
 
-  export function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
+export  function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
     if(elt.device.bundle && elt.device.config.id>1){
       return;
     }
@@ -207,9 +207,10 @@ export function set_container_volume(elt,hass,shadowRoot){
     dd.value=elt.device.get_entity("daily_dose").state;
     form.appendChild(dd);
 
-    content=eval("head_configuration_schedule_"+saved_schedule.type+"(saved_schedule,elt,hass,shadowRoot,form);");
+    //content=eval("head_configuration_schedule_"+saved_schedule.type+"(saved_schedule,elt,hass,shadowRoot,form);");
+  let fname="head_configuration_schedule_"+saved_schedule.type;
+  local_actions[fname]?.(saved_schedule,elt,hass,shadowRoot,form);
     
-    let node=null;
     node=shadowRoot.createElement("label");
     node.innerHTML=i18n._("days");
     form.appendChild(node);
@@ -241,14 +242,14 @@ export function set_container_volume(elt,hass,shadowRoot){
     shadowRoot.querySelector("#dialog-content").appendChild(content);
   }
 
-  function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
+function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
     form.appendChild(com.create_hour(shadowRoot,'hour',schedule.time));
     form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
     return form;
   }
 
 
-  function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
+function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
     const default_interval={
       st: 0,
       end: 1440,
@@ -272,7 +273,7 @@ export function set_container_volume(elt,hass,shadowRoot){
   }
 
 
-  function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
+function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
     const default_interval={
       st: 0,
       volume: 1,
@@ -298,7 +299,7 @@ export function set_container_volume(elt,hass,shadowRoot){
     return form;
   }
 
-  function save_schedule(event,shadowRoot,form,elt,hass){
+function save_schedule(event,shadowRoot,form,elt,hass){
     let schedule={};
     schedule.type=shadowRoot.querySelector("#schedule_1").value;
     schedule.days=[];
@@ -308,7 +309,9 @@ export function set_container_volume(elt,hass,shadowRoot){
 	schedule.days.push(day);
       }
     }
-    let to_schedule=eval("save_schedule_"+schedule.type+"(shadowRoot,elt,hass,schedule)");
+  //let to_schedule=eval("save_schedule_"+schedule.type+"(shadowRoot,elt,hass,schedule)");
+  let fname="save_schedule_"+schedule.type;
+  local_actions[fname]?.(shadowRoot,elt,hass,schedule);
     if(to_schedule!=null){
       let data={
 	access_path: "/head/"+elt.device.config.id+"/settings",
@@ -336,14 +339,14 @@ export function set_container_volume(elt,hass,shadowRoot){
     }
   }
 
-  function save_schedule_single(shadowRoot,elt,hass,schedule){
+function save_schedule_single(shadowRoot,elt,hass,schedule){
     schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.time=stringToTime(shadowRoot.querySelector("#hour_1").value);
     schedule.mode=shadowRoot.querySelector("#speed_1").value;
     return schedule;
   }
 
-  function save_schedule_hourly(shadowRoot,elt,hass,schedule){
+function save_schedule_hourly(shadowRoot,elt,hass,schedule){
     schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     if (schedule.dd<5.0){
       shadowRoot.dispatchEvent(
@@ -365,7 +368,7 @@ export function set_container_volume(elt,hass,shadowRoot){
     return schedule;
   }
 
-  function save_schedule_custom(shadowRoot,elt,hass,schedule){
+function save_schedule_custom(shadowRoot,elt,hass,schedule){
     schedule.dd=parseFloat(shadowRoot.querySelector("#dailydose").value);
     schedule.intervals=[];
     for (let interval of shadowRoot.querySelectorAll(".interval")){
@@ -403,7 +406,7 @@ export function set_container_volume(elt,hass,shadowRoot){
   }
 
 
-  function compare_interval( a, b ) {
+function compare_interval( a, b ) {
     if (a.st < b.st){
       return -1;
     }
@@ -414,7 +417,7 @@ export function set_container_volume(elt,hass,shadowRoot){
   }
 
 
-  function save_schedule_timer(shadowRoot,elt,hass,schedule){
+function save_schedule_timer(shadowRoot,elt,hass,schedule){
     schedule.intervals=[];
     for (let interval of shadowRoot.querySelectorAll(".interval")){
       let s_id=interval.id.split("_");
@@ -431,7 +434,7 @@ export function set_container_volume(elt,hass,shadowRoot){
   }
 
 
-  function head_configuration_intervals_custom(shadowRoot,interval,form){
+function head_configuration_intervals_custom(shadowRoot,interval,form){
     let div=shadowRoot.createElement('div');
     let position=0;
     for (position=0;position<100;position++){
@@ -460,7 +463,7 @@ export function set_container_volume(elt,hass,shadowRoot){
     form.appendChild(div);
   }
 
-  function head_configuration_intervals_timer(shadowRoot,interval,form){
+function head_configuration_intervals_timer(shadowRoot,interval,form){
     let div=shadowRoot.createElement('div');
     let position=0;
     for (position=0;position<100;position++){
@@ -503,12 +506,12 @@ export function set_container_volume(elt,hass,shadowRoot){
     form.appendChild(div);
   }
 
-  function head_configuration_delete_interval(position,intervals){
+function head_configuration_delete_interval(position,intervals){
     let interval=intervals.querySelector("#interval_"+position);
     interval.remove();
   }
 
-  function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
+function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
     let min=com.create_select(shadowRoot,'min', Array(6).fill().map((x,i)=>i*10),schedule.min,false,"min");
     form.appendChild(min);
     form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
@@ -516,13 +519,12 @@ export function set_container_volume(elt,hass,shadowRoot){
 
   }
 
-
-  function handle_schedule_type_changes(event,elt,hass,shadowRoot){
+function handle_schedule_type_changes(event,elt,hass,shadowRoot){
     let schedule={type:event.target.value};
     head_configuration(elt,hass,shadowRoot,schedule);
   }
 
-  function update_dd(shadowRoot){
+function update_dd(shadowRoot){
     let total_volume=shadowRoot.querySelector("#dailydose");
     let total=0;
     for (let volume of shadowRoot.querySelectorAll(".volume")){
@@ -530,3 +532,14 @@ export function set_container_volume(elt,hass,shadowRoot){
     }
     total_volume.value=total;
   }
+
+const local_actions = {
+  head_configuration_schedule_single,
+  head_configuration_schedule_custom,
+  head_configuration_schedule_timer,
+  head_configuration_schedule_hourly,
+  save_schedule_single,
+  save_schedule_custom,
+  save_schedule_timer,
+  save_schedule_hourly,
+}

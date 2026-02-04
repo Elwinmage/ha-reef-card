@@ -2,6 +2,7 @@ import {
   LitElement,
   html,
 } from "lit";
+
 import { customElement, property, state } from "lit/decorators.js";
 
 import i18n from "./translations/myi18n.js";
@@ -73,7 +74,7 @@ export class ReefCard extends LitElement {
     this.addEventListener("display-dialog", (e: Event) => {this._handle_display_dialog(e as CustomEvent);});
     this.addEventListener("config-dialog", (e: Event) => {
       if (this._dialog_box) {
-        this._dialog_box.set_conf((e as CustomEvent).detail.config);
+        this._dialog_box.set_conf((e as CustomEvent).detail.dialogs);
       }
     });
     this.addEventListener("quit-dialog", () => {
@@ -121,7 +122,6 @@ export class ReefCard extends LitElement {
       }
     }// if
     else {
-      console.debug("No FIRST");
       this.current_device.hass=this._hass;
       if(!this.re_render){
 	return;

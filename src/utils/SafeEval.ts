@@ -324,8 +324,9 @@ export class SafeEval {
       const result = func(...contextValues);
       return result;
     } catch (error) {
-      console.error('Complex expression evaluation error:', expression, error);
-      throw error;
+      //console.error('Complex expression evaluation error:', expression, error);
+      //throw error;
+      return expression;
     }
   }
 
