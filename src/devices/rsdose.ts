@@ -177,7 +177,7 @@ export class RSDose extends RSDevice{
     return html `
              <tr>
                <td class="config_color">
-                 <input type="color" id="head_${head_id}-color" value="${color}" @changes="${this.handleChangesdEvent}" @input="${this.handleChangesdEvent}" list="RedSeaColors" />
+                 <input type="color" id="head_${head_id}-color" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
                  <datalist id="RedSeaColors">
                    <option>#8c4394</option>
                    <option>#0081c5</option>
@@ -193,23 +193,23 @@ export class RSDose extends RSDevice{
                 <label class="tab-label">${i18n._("head")} ${head_id}: ${this._hass.states[this._heads[head_id].entities['supplement'].entity_id].state}</label>
               </td>
               <td>
-                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @changes="${this.handleChangesdEvent}" ></input>
+                <input type="text" id="head_${head_id}-shortcut" value="${shortcuts}" @change="${this.handleChangedEvent}" ></input>
               </td>
            </tr>`;
   }// end of function _editor_head_color
 
-  handleChangesdDeviceEvent(changesdEvent) {
+  handleChangedDeviceEvent(changedEvent) {
 
-    let value= (changesdEvent.currentTarget.checked);
-    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changesdEvent.target.id]:{disabled_if:value}}}}}}};
+    let value= (changedEvent.currentTarget.checked);
+    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
     let newConfig = JSON.parse(JSON.stringify(this._config));
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changesdEvent.target.id].disabled_if = value;
+      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
     }
-    const messageEvent = new CustomEvent("config-changesd", {
+    const messageEvent = new CustomEvent("config-changed", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
@@ -217,10 +217,10 @@ export class RSDose extends RSDevice{
     this.dispatchEvent(messageEvent);
   }
   
-  handleChangesdEvent(changesdEvent) {
-    let i_val=changesdEvent.currentTarget.value;
-    const head=changesdEvent.target.id.split('-')[0];
-    const field=changesdEvent.target.id.split('-')[1]
+  handleChangedEvent(changedEvent) {
+    let i_val=changedEvent.currentTarget.value;
+    const head=changedEvent.target.id.split('-')[0];
+    const field=changedEvent.target.id.split('-')[1]
     if (field=="color"){
       i_val=hexToRgb(i_val);
     }
@@ -228,18 +228,18 @@ export class RSDose extends RSDevice{
     let newConfig = JSON.parse(JSON.stringify(this._config));
     
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changesdEvent.target.head][field] = i_val;
+      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
     }
-    const messageEvent = new CustomEvent("config-changesd", {
+    const messageEvent = new CustomEvent("config-changed", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
     });
     this.dispatchEvent(messageEvent);
-  }// end of function handleChangesdEvent
+  }// end of function handleChangedEvent
 
   is_checked(id){
     let result=false;
@@ -249,7 +249,7 @@ export class RSDose extends RSDevice{
     if(result){
       return html`
                    <label class="switch">
-                      <input type="checkbox" id="${id}" @changes="${this.handleChangesdDeviceEvent}" checked />
+                      <input type="checkbox" id="${id}" @change="${this.handleChangedDeviceEvent}" checked />
                       <span class="slider round"></span>
                    </label>
                    <label>${i18n._(id)}</label>                   
@@ -258,7 +258,7 @@ export class RSDose extends RSDevice{
     else{
       return html`
                    <label class="switch">
-                      <input type="checkbox" id="${id}"  @changes="${this.handleChangesdDeviceEvent}" />
+                      <input type="checkbox" id="${id}"  @change="${this.handleChangedDeviceEvent}" />
                       <span class="slider round"></span>
                    </label>
                    <label>${i18n._(id)}</label>                   

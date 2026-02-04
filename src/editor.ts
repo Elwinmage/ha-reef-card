@@ -1,6 +1,8 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import i18n from "./translations/myi18n";
+
 import DeviceList from './common';
 import {RSDevice} from './devices/device';
 
@@ -26,7 +28,7 @@ export class ReefCardEditor extends LitElement {
   private _hass: any;
   
   @state()
-  private select_devices: SelectDevice[] = [{value:'unselected',text:"Select a device"}];
+  private select_devices: SelectDevice[] = [];
   
   @state()
   private first_init: boolean = true;
@@ -36,11 +38,16 @@ export class ReefCardEditor extends LitElement {
 
   constructor(){
     super();
+    this.current_device=null;
+    //    this.addEventListener('config-changed', this.render());
+    this.addEventListener('config-changed', this.requestUpdate());    
   }// end of constructor
 
   setConfig(config: HassConfig): void {
     console.log("setConfig CARD");
     this._config = config;
+    //this.render();
+    this.requestUpdate();
   }// end of function setConfig
 
   set hass(obj: any){
@@ -49,11 +56,13 @@ export class ReefCardEditor extends LitElement {
   
   private init_devices(): void {
     this.devices_list=new DeviceList(this._hass);
+    this.select_devices=[{value:'unselected',text:i18n._("select_device")}];
     for (const d of this.devices_list.main_devices){
       this.select_devices.push(d);
     }// for
   }
 
+  
   static styles = css`
 .table {
 display: table;
@@ -70,7 +79,6 @@ padding: 0.5em;
   render() {
     console.log("Render Editor");
     if(this._config){
-      console.log("yes");
       if (this.first_init==true){
 	this.first_init=false;
 	this.init_devices();
@@ -80,7 +88,7 @@ padding: 0.5em;
 <div class="tabs">
 <div class="tab">
 <label class="rab-label" for="device">Device:</label>
-<select id="device" class="value cell" @changes="${this.handleChangesdEvent}">
+<select id="device" class="value cell" @change="${this.handleChangedEvent}">
 ${this.select_devices.map(option => html`
         <option value="${option.value}" ?selected=${this._config!.device === option.text}>${option.text}</option>
         `)}
@@ -116,7 +124,7 @@ ${this.device_conf()}
     return ``;
   }// end of function - device_conf
 
-  private handleChangesdEvent(_changesdEvent: Event): void {
+  private handleChangedEvent(_changesdEvent: Event): void {
     // this._config is readonly, copy needed
     if (this.shadowRoot == null){
       console.error("Can not found a device");
@@ -137,7 +145,7 @@ ${this.device_conf()}
       val = elt.options[elt.selectedIndex]!.text;
       newConfig.device = val;
     }
-    const messageEvent = new CustomEvent("config-changesd", {
+    const messageEvent = new CustomEvent("config-changed", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,

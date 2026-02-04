@@ -19,7 +19,8 @@ window.customCards.push({
 });
 
 
-window.customCards = window.customCards || []; window.customCards.push({
+window.customCards = window.customCards || [];
+window.customCards.push({
   type: "reef-card-editor",
   name: "Content Card Editor",
   preview: false, // Optional - defaults to false
