@@ -6,7 +6,7 @@ export const config = {
   "dialogs": {
     "head_configuration":{
       "name":"head_configuration",
-      "title_key":"${i18n._('head_configuration')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('head_configuration')}  n° ${config.id}",
       "close_cross": false,
       "content":[
 	{

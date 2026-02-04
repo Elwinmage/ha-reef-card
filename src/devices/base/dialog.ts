@@ -106,7 +106,7 @@ export class Dialog extends LitElement {
         // Note: eval usage removed for security - extend this as needed
 	//this.evalaluate(elt);
 	console.log("!!!!!!",_elt);
-	//eval(_elt)
+	run_action(_elt.package,_elt.function_name,this.elt,this._hass,this._shadowRoot);
         console.warn("extends_to_re_render not fully implemented");
       }
     }
@@ -178,7 +178,7 @@ export class Dialog extends LitElement {
 
 	  
 	    if (content_conf.re_render){
-		this.extends_to_re_render.push(cmd);
+	      this.extends_to_re_render.push({"package":content_conf.extend,"function_name":this.to_render.name});
 	    }
 	    return;
 	}

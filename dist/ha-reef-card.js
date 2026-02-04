@@ -1,5 +1,5 @@
 const F = globalThis, le = F.ShadowRoot && (F.ShadyCSS === void 0 || F.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, re = /* @__PURE__ */ Symbol(), Ie = /* @__PURE__ */ new WeakMap();
-let Ue = class {
+let ve = class {
   constructor(e, t, n) {
     if (this._$cssResult$ = !0, n !== re) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = e, this.t = t;
@@ -17,14 +17,14 @@ let Ue = class {
     return this.cssText;
   }
 };
-const Xe = (s) => new Ue(typeof s == "string" ? s : s + "", void 0, re), h = (s, ...e) => {
+const Le = (s) => new ve(typeof s == "string" ? s : s + "", void 0, re), h = (s, ...e) => {
   const t = s.length === 1 ? s[0] : e.reduce(((n, i, a) => n + ((l) => {
     if (l._$cssResult$ === !0) return l.cssText;
     if (typeof l == "number") return l;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + l + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(i) + s[a + 1]), s[0]);
-  return new Ue(t, s, re);
-}, Le = (s, e) => {
+  return new ve(t, s, re);
+}, Ge = (s, e) => {
   if (le) s.adoptedStyleSheets = e.map(((t) => t instanceof CSSStyleSheet ? t : t.styleSheet));
   else for (const t of e) {
     const n = document.createElement("style"), i = F.litNonce;
@@ -33,12 +33,12 @@ const Xe = (s) => new Ue(typeof s == "string" ? s : s + "", void 0, re), h = (s,
 }, pe = le ? (s) => s : (s) => s instanceof CSSStyleSheet ? ((e) => {
   let t = "";
   for (const n of e.cssRules) t += n.cssText;
-  return Xe(t);
+  return Le(t);
 })(s) : s;
-const { is: Ge, defineProperty: De, getOwnPropertyDescriptor: Qe, getOwnPropertyNames: Be, getOwnPropertySymbols: _e, getPrototypeOf: $e } = Object, $ = globalThis, he = $.trustedTypes, et = he ? he.emptyScript : "", tt = $.reactiveElementPolyfillSupport, q = (s, e) => s, L = { toAttribute(s, e) {
+const { is: De, defineProperty: Qe, getOwnPropertyDescriptor: Be, getOwnPropertyNames: _e, getOwnPropertySymbols: $e, getPrototypeOf: et } = Object, $ = globalThis, he = $.trustedTypes, tt = he ? he.emptyScript : "", nt = $.reactiveElementPolyfillSupport, q = (s, e) => s, L = { toAttribute(s, e) {
   switch (e) {
     case Boolean:
-      s = s ? et : null;
+      s = s ? tt : null;
       break;
     case Object:
     case Array:
@@ -63,9 +63,9 @@ const { is: Ge, defineProperty: De, getOwnPropertyDescriptor: Qe, getOwnProperty
       }
   }
   return t;
-} }, ce = (s, e) => !Ge(s, e), Ce = { attribute: !0, type: String, converter: L, reflect: !1, useDefault: !1, hasChanged: ce };
+} }, ce = (s, e) => !De(s, e), Ce = { attribute: !0, type: String, converter: L, reflect: !1, useDefault: !1, hasChanged: ce };
 Symbol.metadata ??= /* @__PURE__ */ Symbol("metadata"), $.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-let k = class extends HTMLElement {
+let j = class extends HTMLElement {
   static addInitializer(e) {
     this._$Ei(), (this.l ??= []).push(e);
   }
@@ -75,11 +75,11 @@ let k = class extends HTMLElement {
   static createProperty(e, t = Ce) {
     if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
       const n = /* @__PURE__ */ Symbol(), i = this.getPropertyDescriptor(e, n, t);
-      i !== void 0 && De(this.prototype, e, i);
+      i !== void 0 && Qe(this.prototype, e, i);
     }
   }
   static getPropertyDescriptor(e, t, n) {
-    const { get: i, set: a } = Qe(this.prototype, e) ?? { get() {
+    const { get: i, set: a } = Be(this.prototype, e) ?? { get() {
       return this[t];
     }, set(l) {
       this[t] = l;
@@ -94,13 +94,13 @@ let k = class extends HTMLElement {
   }
   static _$Ei() {
     if (this.hasOwnProperty(q("elementProperties"))) return;
-    const e = $e(this);
+    const e = et(this);
     e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
   }
   static finalize() {
     if (this.hasOwnProperty(q("finalized"))) return;
     if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(q("properties"))) {
-      const t = this.properties, n = [...Be(t), ..._e(t)];
+      const t = this.properties, n = [..._e(t), ...$e(t)];
       for (const i of n) this.createProperty(i, t[i]);
     }
     const e = this[Symbol.metadata];
@@ -146,7 +146,7 @@ let k = class extends HTMLElement {
   }
   createRenderRoot() {
     const e = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return Le(e, this.constructor.elementStyles), e;
+    return Ge(e, this.constructor.elementStyles), e;
   }
   connectedCallback() {
     this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(!0), this._$EO?.forEach(((e) => e.hostConnected?.()));
@@ -246,43 +246,43 @@ let k = class extends HTMLElement {
   firstUpdated(e) {
   }
 };
-k.elementStyles = [], k.shadowRootOptions = { mode: "open" }, k[q("elementProperties")] = /* @__PURE__ */ new Map(), k[q("finalized")] = /* @__PURE__ */ new Map(), tt?.({ ReactiveElement: k }), ($.reactiveElementVersions ??= []).push("2.1.1");
-const oe = globalThis, G = oe.trustedTypes, Re = G ? G.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, ve = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, Ze = "?" + v, nt = `<${Ze}>`, S = document, J = () => S.createComment(""), Y = (s) => s === null || typeof s != "object" && typeof s != "function", de = Array.isArray, it = (s) => de(s) || typeof s?.[Symbol.iterator] == "function", te = `[ 	
+j.elementStyles = [], j.shadowRootOptions = { mode: "open" }, j[q("elementProperties")] = /* @__PURE__ */ new Map(), j[q("finalized")] = /* @__PURE__ */ new Map(), nt?.({ ReactiveElement: j }), ($.reactiveElementVersions ??= []).push("2.1.1");
+const oe = globalThis, G = oe.trustedTypes, Re = G ? G.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, Ze = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, Oe = "?" + v, it = `<${Oe}>`, S = document, J = () => S.createComment(""), Y = (s) => s === null || typeof s != "object" && typeof s != "function", de = Array.isArray, st = (s) => de(s) || typeof s?.[Symbol.iterator] == "function", te = `[ 	
 \f\r]`, K = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, fe = /-->/g, Ee = />/g, Z = RegExp(`>|${te}(?:([^\\s"'>=/]+)(${te}*=${te}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, ze = /"/g, Oe = /^(?:script|style|textarea|title)$/i, st = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), o = st(1), V = /* @__PURE__ */ Symbol.for("lit-noChange"), R = /* @__PURE__ */ Symbol.for("lit-nothing"), Me = /* @__PURE__ */ new WeakMap(), O = S.createTreeWalker(S, 129);
-function Se(s, e) {
+\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, ze = /"/g, Se = /^(?:script|style|textarea|title)$/i, at = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), o = at(1), V = /* @__PURE__ */ Symbol.for("lit-noChange"), R = /* @__PURE__ */ Symbol.for("lit-nothing"), Me = /* @__PURE__ */ new WeakMap(), O = S.createTreeWalker(S, 129);
+function Pe(s, e) {
   if (!de(s) || !s.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return Re !== void 0 ? Re.createHTML(e) : e;
 }
-const at = (s, e) => {
+const lt = (s, e) => {
   const t = s.length - 1, n = [];
   let i, a = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", l = K;
   for (let r = 0; r < t; r++) {
     const c = s[r];
     let d, A, m = -1, p = 0;
-    for (; p < c.length && (l.lastIndex = p, A = l.exec(c), A !== null); ) p = l.lastIndex, l === K ? A[1] === "!--" ? l = fe : A[1] !== void 0 ? l = Ee : A[2] !== void 0 ? (Oe.test(A[2]) && (i = RegExp("</" + A[2], "g")), l = Z) : A[3] !== void 0 && (l = Z) : l === Z ? A[0] === ">" ? (l = i ?? K, m = -1) : A[1] === void 0 ? m = -2 : (m = l.lastIndex - A[2].length, d = A[1], l = A[3] === void 0 ? Z : A[3] === '"' ? ze : ye) : l === ze || l === ye ? l = Z : l === fe || l === Ee ? l = K : (l = Z, i = void 0);
+    for (; p < c.length && (l.lastIndex = p, A = l.exec(c), A !== null); ) p = l.lastIndex, l === K ? A[1] === "!--" ? l = fe : A[1] !== void 0 ? l = Ee : A[2] !== void 0 ? (Se.test(A[2]) && (i = RegExp("</" + A[2], "g")), l = Z) : A[3] !== void 0 && (l = Z) : l === Z ? A[0] === ">" ? (l = i ?? K, m = -1) : A[1] === void 0 ? m = -2 : (m = l.lastIndex - A[2].length, d = A[1], l = A[3] === void 0 ? Z : A[3] === '"' ? ze : ye) : l === ze || l === ye ? l = Z : l === fe || l === Ee ? l = K : (l = Z, i = void 0);
     const I = l === Z && s[r + 1].startsWith("/>") ? " " : "";
-    a += l === K ? c + nt : m >= 0 ? (n.push(d), c.slice(0, m) + ve + c.slice(m) + v + I) : c + v + (m === -2 ? r : I);
+    a += l === K ? c + it : m >= 0 ? (n.push(d), c.slice(0, m) + Ze + c.slice(m) + v + I) : c + v + (m === -2 ? r : I);
   }
-  return [Se(s, a + (s[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), n];
+  return [Pe(s, a + (s[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), n];
 };
 class W {
   constructor({ strings: e, _$litType$: t }, n) {
     let i;
     this.parts = [];
     let a = 0, l = 0;
-    const r = e.length - 1, c = this.parts, [d, A] = at(e, t);
+    const r = e.length - 1, c = this.parts, [d, A] = lt(e, t);
     if (this.el = W.createElement(d, n), O.currentNode = this.el.content, t === 2 || t === 3) {
       const m = this.el.content.firstChild;
       m.replaceWith(...m.childNodes);
     }
     for (; (i = O.nextNode()) !== null && c.length < r; ) {
       if (i.nodeType === 1) {
-        if (i.hasAttributes()) for (const m of i.getAttributeNames()) if (m.endsWith(ve)) {
+        if (i.hasAttributes()) for (const m of i.getAttributeNames()) if (m.endsWith(Ze)) {
           const p = A[l++], I = i.getAttribute(m).split(v), H = /([.?@])?(.*)/.exec(p);
-          c.push({ type: 1, index: a, name: H[2], strings: I, ctor: H[1] === "." ? rt : H[1] === "?" ? ct : H[1] === "@" ? ot : ee }), i.removeAttribute(m);
+          c.push({ type: 1, index: a, name: H[2], strings: I, ctor: H[1] === "." ? ct : H[1] === "?" ? ot : H[1] === "@" ? dt : ee }), i.removeAttribute(m);
         } else m.startsWith(v) && (c.push({ type: 6, index: a }), i.removeAttribute(m));
-        if (Oe.test(i.tagName)) {
+        if (Se.test(i.tagName)) {
           const m = i.textContent.split(v), p = m.length - 1;
           if (p > 0) {
             i.textContent = G ? G.emptyScript : "";
@@ -290,7 +290,7 @@ class W {
             i.append(m[p], J());
           }
         }
-      } else if (i.nodeType === 8) if (i.data === Ze) c.push({ type: 2, index: a });
+      } else if (i.nodeType === 8) if (i.data === Oe) c.push({ type: 2, index: a });
       else {
         let m = -1;
         for (; (m = i.data.indexOf(v, m + 1)) !== -1; ) c.push({ type: 7, index: a }), m += v.length - 1;
@@ -309,7 +309,7 @@ function T(s, e, t = s, n) {
   const a = Y(e) ? void 0 : e._$litDirective$;
   return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(s), i._$AT(s, t, n)), n !== void 0 ? (t._$Co ??= [])[n] = i : t._$Cl = i), i !== void 0 && (e = T(s, i._$AS(s, e.values), i, n)), e;
 }
-class lt {
+class rt {
   constructor(e, t) {
     this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
   }
@@ -326,7 +326,7 @@ class lt {
     for (; c !== void 0; ) {
       if (l === c.index) {
         let d;
-        c.type === 2 ? d = new w(a, a.nextSibling, this, e) : c.type === 1 ? d = new c.ctor(a, c.name, c.strings, this, e) : c.type === 6 && (d = new dt(a, this, e)), this._$AV.push(d), c = n[++r];
+        c.type === 2 ? d = new w(a, a.nextSibling, this, e) : c.type === 1 ? d = new c.ctor(a, c.name, c.strings, this, e) : c.type === 6 && (d = new mt(a, this, e)), this._$AV.push(d), c = n[++r];
       }
       l !== c?.index && (a = O.nextNode(), l++);
     }
@@ -356,7 +356,7 @@ class w {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = T(this, e, t), Y(e) ? e === R || e == null || e === "" ? (this._$AH !== R && this._$AR(), this._$AH = R) : e !== this._$AH && e !== V && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : it(e) ? this.k(e) : this._(e);
+    e = T(this, e, t), Y(e) ? e === R || e == null || e === "" ? (this._$AH !== R && this._$AR(), this._$AH = R) : e !== this._$AH && e !== V && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : st(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -368,10 +368,10 @@ class w {
     this._$AH !== R && Y(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
   }
   $(e) {
-    const { values: t, _$litType$: n } = e, i = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = W.createElement(Se(n.h, n.h[0]), this.options)), n);
+    const { values: t, _$litType$: n } = e, i = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = W.createElement(Pe(n.h, n.h[0]), this.options)), n);
     if (this._$AH?._$AD === i) this._$AH.p(t);
     else {
-      const a = new lt(i, this), l = a.u(this.options);
+      const a = new rt(i, this), l = a.u(this.options);
       a.p(t), this.T(l), this._$AH = a;
     }
   }
@@ -421,7 +421,7 @@ class ee {
     e === R ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
   }
 }
-class rt extends ee {
+class ct extends ee {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -429,7 +429,7 @@ class rt extends ee {
     this.element[this.name] = e === R ? void 0 : e;
   }
 }
-class ct extends ee {
+class ot extends ee {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -437,7 +437,7 @@ class ct extends ee {
     this.element.toggleAttribute(this.name, !!e && e !== R);
   }
 }
-class ot extends ee {
+class dt extends ee {
   constructor(e, t, n, i, a) {
     super(e, t, n, i, a), this.type = 5;
   }
@@ -450,7 +450,7 @@ class ot extends ee {
     typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
   }
 }
-class dt {
+class mt {
   constructor(e, t, n) {
     this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
   }
@@ -461,9 +461,9 @@ class dt {
     T(this, e);
   }
 }
-const mt = oe.litHtmlPolyfillSupport;
-mt?.(W, w), (oe.litHtmlVersions ??= []).push("3.3.1");
-const At = (s, e, t) => {
+const At = oe.litHtmlPolyfillSupport;
+At?.(W, w), (oe.litHtmlVersions ??= []).push("3.3.1");
+const gt = (s, e, t) => {
   const n = t?.renderBefore ?? e;
   let i = n._$litPart$;
   if (i === void 0) {
@@ -473,7 +473,7 @@ const At = (s, e, t) => {
   return i._$AI(s), i;
 };
 const me = globalThis;
-class b extends k {
+class b extends j {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -483,7 +483,7 @@ class b extends k {
   }
   update(e) {
     const t = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = At(t, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = gt(t, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -496,15 +496,15 @@ class b extends k {
   }
 }
 b._$litElement$ = !0, b.finalized = !0, me.litElementHydrateSupport?.({ LitElement: b });
-const gt = me.litElementPolyfillSupport;
-gt?.({ LitElement: b });
+const ut = me.litElementPolyfillSupport;
+ut?.({ LitElement: b });
 (me.litElementVersions ??= []).push("4.2.1");
-const ut = (s) => (e, t) => {
+const It = (s) => (e, t) => {
   t !== void 0 ? t.addInitializer((() => {
     customElements.define(s, e);
   })) : customElements.define(s, e);
 };
-const It = { attribute: !0, type: String, converter: L, reflect: !1, hasChanged: ce }, pt = (s = It, e, t) => {
+const pt = { attribute: !0, type: String, converter: L, reflect: !1, hasChanged: ce }, ht = (s = pt, e, t) => {
   const { kind: n, metadata: i } = t;
   let a = globalThis.litPropertyMetadata.get(i);
   if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), n === "setter" && ((s = Object.create(s)).wrapped = !0), a.set(t.name, s), n === "accessor") {
@@ -526,7 +526,7 @@ const It = { attribute: !0, type: String, converter: L, reflect: !1, hasChanged:
   throw Error("Unsupported decorator location: " + n);
 };
 function E(s) {
-  return (e, t) => typeof t == "object" ? pt(s, e, t) : ((n, i, a) => {
+  return (e, t) => typeof t == "object" ? ht(s, e, t) : ((n, i, a) => {
     const l = i.hasOwnProperty(a);
     return i.constructor.createProperty(a, n), l ? Object.getOwnPropertyDescriptor(i, a) : void 0;
   })(s, e, t);
@@ -534,164 +534,164 @@ function E(s) {
 function u(s) {
   return E({ ...s, state: !0, attribute: !1 });
 }
-const ht = "Ask for picture", Ct = "Between start and end should be at least 30 minutes", Rt = "Brand Name", ft = "Calibration", Et = "Place the empty graduated container at the outlet of the head", yt = "What value are you reading?", zt = "Can not find translation string: ", Mt = "Can not save schedule: ", xt = "Cancel", bt = "Custom", Ut = "Daily dose (mL)", vt = "Monday", Zt = "Tuesday", Ot = "Wednesday", St = "Thrusday", Pt = "Friday", jt = "Saturday", kt = "Sunday", Vt = "Days", Tt = "Days Left", Nt = "Deletion in progress", Kt = "Add new supplement to head", qt = "Delete supplement for head", Jt = "Edit Container", Yt = "Device disabled in HomeAssistant!", Wt = "Display Name", wt = "Doses", Ht = "Dosing", Ft = "Empty", Xt = "End", Lt = "End time cannot be earlier than start time", Gt = "Done", Dt = "Finish", Qt = "Head", Bt = "Configuration head", _t = "Heads Colors", $t = "Manual Shorcut Doses", en = "Hour", tn = "Hourly", nn = "Hide Last Alert Message", sn = "Hide Last Message", an = "Maintenance in progress..", ln = "Minimum", rn = "The minimal dose for this type of schedule is 5mL", cn = "min", on = "Name", dn = "Number of doses", mn = "Next", An = "No", gn = "Priming", un = "Quick", In = "Regular", pn = "Save schedule", hn = "Schedule type", Cn = "Schedule saved", Rn = "Select a device", fn = "Set calibration value", En = "Container Volume", yn = "Manual volume", zn = "Short Name", Mn = "Single", xn = "Sizes", bn = "Speed", Un = "Start", vn = "Start Calibration", Zn = "Test calibration", On = "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'", Sn = "Is the value equal to 4 mL +/- (0.05mL)?", Pn = "Timer", jn = "Total volume: ", kn = "Volume (mL)", Vn = " mL", Tn = "Hello", Nn = "Whisper", Kn = "Yes", qn = {
-  ask_add_supplement: ht,
-  at_least_30m_between: Ct,
-  brand_name: Rt,
-  calibration: ft,
-  calibration_step_1: Et,
-  calibration_step_2: yt,
-  canNotFindTranslation: zt,
-  can_not_save: Mt,
-  cancel: xt,
-  custom: bt,
-  daily_dose: Ut,
-  day_1: vt,
-  day_2: Zt,
-  day_3: Ot,
-  day_4: St,
-  day_5: Pt,
+const Ct = "Ask for picture", Rt = "Between start and end should be at least 30 minutes", ft = "Brand Name", Et = "Calibration", yt = "Place the empty graduated container at the outlet of the head", zt = "What value are you reading?", Mt = "Can not find translation string: ", xt = "Can not save schedule: ", bt = "Cancel", Ut = "Custom", vt = "Daily dose (mL)", Zt = "Monday", Ot = "Tuesday", St = "Wednesday", Pt = "Thrusday", kt = "Friday", jt = "Saturday", Vt = "Sunday", Tt = "Days", Nt = "Days Left", Kt = "Deletion in progress", qt = "Add new supplement to head", Jt = "Delete supplement for head", Yt = "Edit Container", Wt = "Device disabled in HomeAssistant!", wt = "Display Name", Ht = "Doses", Ft = "Dosing", Xt = "Empty", Lt = "End", Gt = "End time cannot be earlier than start time", Dt = "Done", Qt = "Finish", Bt = "Head", _t = "Configuration head", $t = "Heads Colors", en = "Manual Shorcut Doses", tn = "Hour", nn = "Hourly", sn = "Hide Last Alert Message", an = "Hide Last Message", ln = "Maintenance in progress..", rn = "Minimum", cn = "The minimal dose for this type of schedule is 5mL", on = "min", dn = "Name", mn = "Number of doses", An = "Next", gn = "No", un = "Priming", In = "Quick", pn = "Regular", hn = "Save schedule", Cn = "Schedule type", Rn = "Schedule saved", fn = "Select a device", En = "Set calibration value", yn = "Container Volume", zn = "Manual volume", Mn = "Short Name", xn = "Single", bn = "Sizes", Un = "Speed", vn = "Start", Zn = "Start Calibration", On = "Test calibration", Sn = "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'", Pn = "Is the value equal to 4 mL +/- (0.05mL)?", kn = "Timer", jn = "Total volume: ", Vn = "Volume (mL)", Tn = " mL", Nn = "Hello", Kn = "Whisper", qn = "Yes", Jn = {
+  ask_add_supplement: Ct,
+  at_least_30m_between: Rt,
+  brand_name: ft,
+  calibration: Et,
+  calibration_step_1: yt,
+  calibration_step_2: zt,
+  canNotFindTranslation: Mt,
+  can_not_save: xt,
+  cancel: bt,
+  custom: Ut,
+  daily_dose: vt,
+  day_1: Zt,
+  day_2: Ot,
+  day_3: St,
+  day_4: Pt,
+  day_5: kt,
   day_6: jt,
-  day_7: kt,
-  days: Vt,
-  days_left: Tt,
+  day_7: Vt,
+  days: Tt,
+  days_left: Nt,
   delete: "Delete",
-  delete_wait: Nt,
-  dialog_add_supplement_title: Kt,
-  dialog_delete_supplement_title: qt,
-  dialog_edit_container: Jt,
-  disabledInHa: Yt,
-  display_name: Wt,
-  doses: wt,
-  dosing: Ht,
-  empty: Ft,
-  end: Xt,
-  end_earlier_than_start: Lt,
-  exit: Gt,
-  finish: Dt,
-  head: Qt,
-  head_configuration: Bt,
-  heads_colors: _t,
-  heads_shortcuts: $t,
-  hour: en,
-  hourly: tn,
-  last_alert_message: nn,
-  last_message: sn,
-  maintenance: an,
-  min: ln,
-  min_dose: rn,
-  minutes: cn,
-  name: on,
-  nd: dn,
-  next: mn,
-  no: An,
-  priming: gn,
-  quick: un,
-  regular: In,
-  save_schedule: pn,
-  schedule: hn,
-  schedule_saved: Cn,
-  select_device: Rn,
+  delete_wait: Kt,
+  dialog_add_supplement_title: qt,
+  dialog_delete_supplement_title: Jt,
+  dialog_edit_container: Yt,
+  disabledInHa: Wt,
+  display_name: wt,
+  doses: Ht,
+  dosing: Ft,
+  empty: Xt,
+  end: Lt,
+  end_earlier_than_start: Gt,
+  exit: Dt,
+  finish: Qt,
+  head: Bt,
+  head_configuration: _t,
+  heads_colors: $t,
+  heads_shortcuts: en,
+  hour: tn,
+  hourly: nn,
+  last_alert_message: sn,
+  last_message: an,
+  maintenance: ln,
+  min: rn,
+  min_dose: cn,
+  minutes: on,
+  name: dn,
+  nd: mn,
+  next: An,
+  no: gn,
+  priming: un,
+  quick: In,
+  regular: pn,
+  save_schedule: hn,
+  schedule: Cn,
+  schedule_saved: Rn,
+  select_device: fn,
   "set_auto_dose ": "Auto daily volume",
-  set_calibration: fn,
-  set_container_volume: En,
-  set_manual_head_volume: yn,
-  short_name: zn,
-  single: Mn,
-  sizes: xn,
-  speed: bn,
-  st: Un,
-  start_calibration: vn,
-  test_calibration: Zn,
-  test_calibration_description: On,
-  test_calibration_validation: Sn,
-  timer: Pn,
+  set_calibration: En,
+  set_container_volume: yn,
+  set_manual_head_volume: zn,
+  short_name: Mn,
+  single: xn,
+  sizes: bn,
+  speed: Un,
+  st: vn,
+  start_calibration: Zn,
+  test_calibration: On,
+  test_calibration_description: Sn,
+  test_calibration_validation: Pn,
+  timer: kn,
   total_volume: jn,
-  volume: kn,
-  volume_unit: Vn,
-  welcome: Tn,
-  whisper: Nn,
-  yes: Kn
-}, Jn = "Il faut au moins 30 minimum entre l'heure de début et de fin", Yn = "Marque", Wn = "Calibration", wn = "Placez le récipient gradué vide à la sortie de la tête", Hn = "Quelle valeur lisez vous?", Fn = "Traduction introuvable pour: ", Xn = "Impossible de sauvegarder la plannification: ", Ln = "Annuler", Gn = "Personnalidé", Dn = "Dose journalière (mL)", Qn = "Lundi", Bn = "Mardi", _n = "Mercredi", $n = "Jeudi", ei = "Vendredi", ti = "Samedi", ni = "Dimanche", ii = "Jours", si = "Jours restant", ai = "Suppression en cours", li = "Nouveau Supplément pour la tête", ri = "Supprimer le Supplément de la tête", ci = "Edition du Conteneur", oi = "Périphérique désactivé dans HomeAssistant!", di = "Nom d'affichage", mi = "Doses", Ai = "Distribution de", gi = "Vide", ui = "Fin", Ii = "L'heure de fin ne peut pas être plus tôt que celle du début.", pi = "Terminer", hi = "Fin", Ci = "Tête", Ri = "Configuration tête", fi = "Couleur des têtes", Ei = "Raccourcis doses manuelles", yi = "Heure", zi = "Horaire", Mi = "Cacher le dernier message d'alerte", xi = "Cacher le dernier message", bi = "Maintenance en cours...", Ui = "Minimum", vi = "La dose minimale pour cette planification est de  5ml", Zi = "min", Oi = "Nom", Si = "Nombre de doses", Pi = "Suivant", ji = "Non", ki = "Amorçage", Vi = "Turbo", Ti = "Standard", Ni = "Save schedule", Ki = "Type de plannification", qi = "Planning sauvegardé", Ji = "Choissisez un équipement", Yi = "Valider la valeur", Wi = "Volume du supplément", wi = "Volume manuel", Hi = "Nom court", Fi = "Unique", Xi = "Tailles", Li = "Vitesse", Gi = "Début", Di = "Démarrer la Calibration", Qi = "Testez la calibration", Bi = "Placez le récipient gradué vide à la sortie de la tête et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'", _i = "La valeur est elle égale à 4 mL +/- (0.05mL)?", $i = "Minuteur", es = "Volume total ", ts = "Volume (mL)", ns = " mL", is = "Hello", ss = "Silencieux", as = "Oui", ls = {
+  volume: Vn,
+  volume_unit: Tn,
+  welcome: Nn,
+  whisper: Kn,
+  yes: qn
+}, Yn = "Il faut au moins 30 minimum entre l'heure de début et de fin", Wn = "Marque", wn = "Calibration", Hn = "Placez le récipient gradué vide à la sortie de la tête", Fn = "Quelle valeur lisez vous?", Xn = "Traduction introuvable pour: ", Ln = "Impossible de sauvegarder la plannification: ", Gn = "Annuler", Dn = "Personnalidé", Qn = "Dose journalière (mL)", Bn = "Lundi", _n = "Mardi", $n = "Mercredi", ei = "Jeudi", ti = "Vendredi", ni = "Samedi", ii = "Dimanche", si = "Jours", ai = "Jours restant", li = "Suppression en cours", ri = "Nouveau Supplément pour la tête", ci = "Supprimer le Supplément de la tête", oi = "Edition du Conteneur", di = "Périphérique désactivé dans HomeAssistant!", mi = "Nom d'affichage", Ai = "Doses", gi = "Distribution de", ui = "Vide", Ii = "Fin", pi = "L'heure de fin ne peut pas être plus tôt que celle du début.", hi = "Terminer", Ci = "Fin", Ri = "Tête", fi = "Configuration tête", Ei = "Couleur des têtes", yi = "Raccourcis doses manuelles", zi = "Heure", Mi = "Horaire", xi = "Cacher le dernier message d'alerte", bi = "Cacher le dernier message", Ui = "Maintenance en cours...", vi = "Minimum", Zi = "La dose minimale pour cette planification est de  5ml", Oi = "min", Si = "Nom", Pi = "Nombre de doses", ki = "Suivant", ji = "Non", Vi = "Amorçage", Ti = "Turbo", Ni = "Standard", Ki = "Save schedule", qi = "Type de plannification", Ji = "Planning sauvegardé", Yi = "Choissisez un équipement", Wi = "Valider la valeur", wi = "Volume du supplément", Hi = "Volume manuel", Fi = "Nom court", Xi = "Unique", Li = "Tailles", Gi = "Vitesse", Di = "Début", Qi = "Démarrer la Calibration", Bi = "Testez la calibration", _i = "Placez le récipient gradué vide à la sortie de la tête et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'", $i = "La valeur est elle égale à 4 mL +/- (0.05mL)?", es = "Minuteur", ts = "Volume total ", ns = "Volume (mL)", is = " mL", ss = "Hello", as = "Silencieux", ls = "Oui", rs = {
   "ask_add_supplement ": "Demande d'image",
-  at_least_30m_between: Jn,
-  brand_name: Yn,
-  calibration: Wn,
-  calibration_step_1: wn,
-  calibration_step_2: Hn,
-  canNotFindTranslation: Fn,
-  can_not_save: Xn,
-  cancel: Ln,
-  custom: Gn,
-  daily_dose: Dn,
-  day_1: Qn,
-  day_2: Bn,
-  day_3: _n,
-  day_4: $n,
-  day_5: ei,
-  day_6: ti,
-  day_7: ni,
-  days: ii,
-  days_left: si,
+  at_least_30m_between: Yn,
+  brand_name: Wn,
+  calibration: wn,
+  calibration_step_1: Hn,
+  calibration_step_2: Fn,
+  canNotFindTranslation: Xn,
+  can_not_save: Ln,
+  cancel: Gn,
+  custom: Dn,
+  daily_dose: Qn,
+  day_1: Bn,
+  day_2: _n,
+  day_3: $n,
+  day_4: ei,
+  day_5: ti,
+  day_6: ni,
+  day_7: ii,
+  days: si,
+  days_left: ai,
   delete: "Supprimer",
-  delete_wait: ai,
-  dialog_add_supplement_title: li,
-  dialog_delete_supplement_title: ri,
-  dialog_edit_container: ci,
-  disabledInHa: oi,
-  display_name: di,
-  doses: mi,
-  dosing: Ai,
-  empty: gi,
-  end: ui,
-  end_earlier_than_start: Ii,
-  exit: pi,
-  finish: hi,
-  head: Ci,
-  head_configuration: Ri,
-  heads_colors: fi,
-  heads_shortcuts: Ei,
-  hour: yi,
-  hourly: zi,
-  last_alert_message: Mi,
-  last_message: xi,
-  maintenance: bi,
-  min: Ui,
-  min_dose: vi,
-  minutes: Zi,
-  name: Oi,
-  nd: Si,
-  next: Pi,
+  delete_wait: li,
+  dialog_add_supplement_title: ri,
+  dialog_delete_supplement_title: ci,
+  dialog_edit_container: oi,
+  disabledInHa: di,
+  display_name: mi,
+  doses: Ai,
+  dosing: gi,
+  empty: ui,
+  end: Ii,
+  end_earlier_than_start: pi,
+  exit: hi,
+  finish: Ci,
+  head: Ri,
+  head_configuration: fi,
+  heads_colors: Ei,
+  heads_shortcuts: yi,
+  hour: zi,
+  hourly: Mi,
+  last_alert_message: xi,
+  last_message: bi,
+  maintenance: Ui,
+  min: vi,
+  min_dose: Zi,
+  minutes: Oi,
+  name: Si,
+  nd: Pi,
+  next: ki,
   no: ji,
-  priming: ki,
-  quick: Vi,
-  regular: Ti,
-  save_schedule: Ni,
-  schedule: Ki,
-  schedule_saved: qi,
-  select_device: Ji,
+  priming: Vi,
+  quick: Ti,
+  regular: Ni,
+  save_schedule: Ki,
+  schedule: qi,
+  schedule_saved: Ji,
+  select_device: Yi,
   "set_auto_dose ": "Dose automatique journalière",
-  set_calibration: Yi,
-  set_container_volume: Wi,
-  set_manual_head_volume: wi,
-  short_name: Hi,
-  single: Fi,
-  sizes: Xi,
-  speed: Li,
-  st: Gi,
-  start_calibration: Di,
-  test_calibration: Qi,
-  test_calibration_description: Bi,
-  test_calibration_validation: _i,
-  timer: $i,
-  total_volume: es,
-  volume: ts,
-  volume_unit: ns,
-  welcome: is,
-  whisper: ss,
-  yes: as
+  set_calibration: Wi,
+  set_container_volume: wi,
+  set_manual_head_volume: Hi,
+  short_name: Fi,
+  single: Xi,
+  sizes: Li,
+  speed: Gi,
+  st: Di,
+  start_calibration: Qi,
+  test_calibration: Bi,
+  test_calibration_description: _i,
+  test_calibration_validation: $i,
+  timer: es,
+  total_volume: ts,
+  volume: ns,
+  volume_unit: is,
+  welcome: ss,
+  whisper: as,
+  yes: ls
 };
-class rs {
+class cs {
   fallbackLanguage;
   currentLanguage;
   dictionaries;
@@ -701,8 +701,8 @@ class rs {
       "en",
       "fr"
     ], this.dictionaries = /* @__PURE__ */ new Map([
-      ["en", qn],
-      ["fr", ls]
+      ["en", Jn],
+      ["fr", rs]
     ]);
     const t = document.querySelector("home-assistant"), n = t?.hass?.selectedLanguage || t?.hass?.language || e.defaultLanguage || this.fallbackLanguage;
     this.currentLanguage = this.normalizeLanguage(n), console.debug(`MyI18n initialized with language: ${this.currentLanguage}`);
@@ -790,8 +790,8 @@ class rs {
     console.debug(`Dictionary for '${e}' merged`);
   }
 }
-const g = new rs();
-class Pe {
+const g = new cs();
+class ke {
   _hass;
   main_devices;
   devices;
@@ -822,11 +822,11 @@ class Pe {
     this.main_devices.sort(this.device_compare);
   }
 }
-function cs(s) {
+function os(s) {
   const e = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(s);
   return !e || !e[1] || !e[2] || !e[3] ? null : `${parseInt(e[1], 16)},${parseInt(e[2], 16)},${parseInt(e[3], 16)}`;
 }
-function os(s) {
+function ds(s) {
   const e = /[^#0-9a-f\.\(\)rgba]+/gim, t = s.replace(e, " ").trim();
   if (/#(([0-9a-f]{1})([0-9a-f]{1})([0-9a-f]{1}))|(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}))/gi.exec(t))
     return t;
@@ -834,11 +834,11 @@ function os(s) {
   return a && a[1] && a[2] && a[3] ? "#" + (parseInt(a[1]) | 256).toString(16).slice(1) + (parseInt(a[2]) | 256).toString(16).slice(1) + (parseInt(a[3]) | 256).toString(16).slice(1) : s;
 }
 const D = "150,150,150";
-function ds(s) {
+function ms(s) {
   const e = s % 60, t = (s - e) / 60 % 60, n = (s - e - t * 60) / 3600;
   return String(n).padStart(2, "0") + ":" + String(t).padStart(2, "0") + ":" + String(e).padStart(2, "0");
 }
-function ms(s) {
+function As(s) {
   return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(Math.floor(s % 60)).padStart(2, "0");
 }
 function Q(s) {
@@ -860,11 +860,11 @@ function B(s, e, t = 0, n = 1) {
   const i = document.createElement("div"), a = document.createElement("label");
   a.htmlFor = e, a.innerHTML = g._(e);
   const l = document.createElement("input");
-  return l.type = "time", l.id = e + "_" + n, l.value = ms(t), i.appendChild(a), i.appendChild(l), i;
+  return l.type = "time", l.id = e + "_" + n, l.value = As(t), i.appendChild(a), i.appendChild(l), i;
 }
-const As = h`
+const gs = h`
 `;
-function gs(s, e, t) {
+function us(s, e, t) {
   let a = null, l = null, r = 0, c = !1;
   function d() {
     a !== null && (clearTimeout(a), a = null);
@@ -1161,10 +1161,10 @@ class _ {
   }
 }
 new _();
-var us = Object.defineProperty, x = (s, e, t, n) => {
+var Is = Object.defineProperty, x = (s, e, t, n) => {
   for (var i = void 0, a = s.length - 1, l; a >= 0; a--)
     (l = s[a]) && (i = l(e, t, i) || i);
-  return i && us(e, t, i), i;
+  return i && Is(e, t, i), i;
 };
 const z = class ie extends b {
   stateObj = null;
@@ -1188,7 +1188,7 @@ const z = class ie extends b {
     return n;
   }
   constructor() {
-    super(), gs(this, {
+    super(), us(this, {
       onClick: () => {
         this._click();
       },
@@ -1421,10 +1421,10 @@ function se(s, ...e) {
 function X(s, e) {
   return se(structuredClone(s), e);
 }
-var Is = Object.defineProperty, ps = Object.getOwnPropertyDescriptor, U = (s, e, t, n) => {
-  for (var i = n > 1 ? void 0 : n ? ps(e, t) : e, a = s.length - 1, l; a >= 0; a--)
+var ps = Object.defineProperty, hs = Object.getOwnPropertyDescriptor, U = (s, e, t, n) => {
+  for (var i = n > 1 ? void 0 : n ? hs(e, t) : e, a = s.length - 1, l; a >= 0; a--)
     (l = s[a]) && (i = (n ? l(e, t, i) : l(i)) || i);
-  return n && i && Is(e, t, i), i;
+  return n && i && ps(e, t, i), i;
 };
 let f = class extends b {
   entities = {};
@@ -1647,7 +1647,7 @@ U([
   E({ type: Boolean })
 ], f.prototype, "to_render", 2);
 f = U([
-  ut("rs-device")
+  It("rs-device")
 ], f);
 const je = h`
 
@@ -1828,7 +1828,7 @@ margin-right: 5px;
 background-color: rgb(200,200,200);
 }
 
-`, ke = h`
+`, Ve = h`
 
 img:hover{
   cursor: pointer;
@@ -1836,7 +1836,7 @@ img:hover{
   border-radius: 30px
 }
 
-`, hs = [
+`, Cs = [
   {
     uid: "0e63ba83-3ec4-445e-a3dd-7f2dbdc7f964",
     name: "Calcium (Powder)",
@@ -2884,9 +2884,9 @@ img:hover{
     fullname: "RedSea - ReefCare Program"
   }
 ];
-class Cs {
+class Rs {
   constructor() {
-    this._list = hs;
+    this._list = Cs;
   }
   //end of constructor
   get_supplement(e) {
@@ -2909,8 +2909,8 @@ class Cs {
   }
   //end of function get_supplement
 }
-var ae = new Cs();
-function Rs(s, e, t) {
+var ae = new Rs();
+function fs(s, e, t) {
   if (s.device.config.shortcut)
     for (let n of s.device.config.shortcut.split(",")) {
       let i = {
@@ -2948,7 +2948,7 @@ function Rs(s, e, t) {
       t.querySelector("#dialog-content").appendChild(a);
     }
 }
-function fs(s, e, t) {
+function Es(s, e, t) {
   let n = s.device.get_entity("supplements").state, i = ae.get_supplement(n), a = "/hacsfiles/ha-reef-card/generic_container.supplement.png", l = t.querySelector("#add-supplement");
   if (l?.remove(), i) {
     let r = "/hacsfiles/ha-reef-card/" + i.uid + ".supplement.png", c = new XMLHttpRequest();
@@ -2975,7 +2975,7 @@ function fs(s, e, t) {
     A.id = "add-supplement", A.appendChild(c), t.querySelector("#dialog-content").appendChild(A);
   }
 }
-function Ve(s, e, t) {
+function Te(s, e, t) {
   let n = s.device.get_entity("supplement").state, i = ae.get_supplement(n);
   if (i || (n = s.device.get_entity("supplements").state, i = ae.get_supplement(n)), i && i.sizes)
     for (let a of i.sizes) {
@@ -3020,41 +3020,40 @@ function Ve(s, e, t) {
       t.querySelector("#dialog-content").appendChild(c);
     }
 }
-function Es(s, e, t) {
-  Ve(s, e, t);
+function ys(s, e, t) {
+  Te(s, e, t);
 }
-function Te(s, e, t, n = null) {
+function Ne(s, e, t, n = null) {
   if (s.device.bundle && s.device.config.id > 1)
     return;
-  let i = null;
   (n == null || n.type == s.device.get_entity("schedule_head").attributes.schedule.type) && (n = s.device.get_entity("schedule_head").attributes.schedule);
-  let a = t.querySelector("#schedule");
-  a && a.remove(), a = t.createElement("form"), a.className = "schedule", a.id = "schedule";
-  let l = P(t, "schedule", ["single", "custom", "hourly", "timer"], n.type);
-  l.addEventListener("changes", function(m) {
-    Ss(m, s, e, t);
-  }), a.appendChild(l);
-  let r = null;
-  r = t.createElement("label"), r.innerHTML = g._("daily_dose"), a.appendChild(r);
-  let c = t.createElement("input");
-  c.type = "number", c.id = "dailydose", c.min = 0.1, c.step = 0.1, c.max = 300, c.value = s.device.get_entity("daily_dose").state, a.appendChild(c);
-  let d = "head_configuration_schedule_" + n.type;
-  Je[d]?.(n, s, e, t, a), r = t.createElement("label"), r.innerHTML = g._("days"), a.appendChild(r);
+  let i = t.querySelector("#schedule");
+  i && i.remove(), i = t.createElement("form"), i.className = "schedule", i.id = "schedule";
+  let a = P(t, "schedule", ["single", "custom", "hourly", "timer"], n.type);
+  a.addEventListener("changes", function(m) {
+    Ps(m, s, e, t);
+  }), i.appendChild(a);
+  let l = null;
+  l = t.createElement("label"), l.innerHTML = g._("daily_dose"), i.appendChild(l);
+  let r = t.createElement("input");
+  r.type = "number", r.id = "dailydose", r.min = 0.1, r.step = 0.1, r.max = 300, r.value = s.device.get_entity("daily_dose").state, i.appendChild(r);
+  let c = "head_configuration_schedule_" + n.type, d = Ye[c]?.(n, s, e, t, i);
+  l = t.createElement("label"), l.innerHTML = g._("days"), i.appendChild(l);
   for (let m = 1; m < 8; m++) {
     let p = "day_" + String(m);
-    r = t.createElement("input"), r.className = "days", r.type = "checkbox", r.value = p, r.id = p, n && n.days && !n.days.includes(m) ? r.checked = !1 : r.checked = !0;
+    l = t.createElement("input"), l.className = "days", l.type = "checkbox", l.value = p, l.id = p, n && n.days && !n.days.includes(m) ? l.checked = !1 : l.checked = !0;
     let I = t.createElement("label");
-    I.innerHTML = g._("day_" + String(m))[0], I.className = "days", I.htmlFor = p, a.appendChild(I), a.appendChild(r);
+    I.innerHTML = g._("day_" + String(m))[0], I.className = "days", I.htmlFor = p, i.appendChild(I), i.appendChild(l);
   }
   let A = t.createElement("button");
   A.innerHTML = g._("save_schedule"), A.style.width = "100%", A.addEventListener("click", function(m) {
-    m.preventDefault(), xs(m, t, a, s, e);
-  }, !1), a.appendChild(A), t.querySelector("#dialog-content").appendChild(i);
-}
-function ys(s, e, t, n, i) {
-  return i.appendChild(B(n, "hour", s.time)), i.appendChild(P(n, "speed", ["whisper", "regular", "quick"], s.mode)), i;
+    m.preventDefault(), bs(m, t, i, s, e);
+  }, !1), i.appendChild(A), console.debug("SR", t), t.querySelector("#dialog-content").appendChild(d);
 }
 function zs(s, e, t, n, i) {
+  return i.appendChild(B(n, "hour", s.time)), i.appendChild(P(n, "speed", ["whisper", "regular", "quick"], s.mode)), i;
+}
+function Ms(s, e, t, n, i) {
   const a = {
     st: 0,
     end: 1440,
@@ -3071,7 +3070,7 @@ function zs(s, e, t, n, i) {
     d.preventDefault(), xe(n, a, l);
   }, !1), i.appendChild(c), i;
 }
-function Ms(s, e, t, n, i) {
+function xs(s, e, t, n, i) {
   const a = {
     st: 0,
     volume: 1,
@@ -3087,9 +3086,9 @@ function Ms(s, e, t, n, i) {
   let d = n.createElement("button");
   return d.innerHTML = "+", d.style.width = "100%", d.addEventListener("click", function(A) {
     A.preventDefault(), be(n, a, r);
-  }, !1), i.appendChild(d), qe(i), i;
+  }, !1), i.appendChild(d), Je(i), i;
 }
-function xs(s, e, t, n, i) {
+function bs(s, e, t, n, i) {
   let a = {};
   a.type = e.querySelector("#schedule_1").value, a.days = [];
   for (let r = 1; r < 8; r++) {
@@ -3097,7 +3096,7 @@ function xs(s, e, t, n, i) {
     e.querySelector(c).checked && a.days.push(r);
   }
   let l = "save_schedule_" + a.type;
-  if (Je[l]?.(e, n, i, a), to_schedule != null) {
+  if (Ye[l]?.(e, n, i, a), to_schedule != null) {
     let r = {
       access_path: "/head/" + n.device.config.id + "/settings",
       method: "put",
@@ -3119,10 +3118,10 @@ function xs(s, e, t, n, i) {
   } else
     console.error("Can not save schedule", data);
 }
-function bs(s, e, t, n) {
+function Us(s, e, t, n) {
   return n.dd = parseFloat(s.querySelector("#dailydose").value), n.time = Q(s.querySelector("#hour_1").value), n.mode = s.querySelector("#speed_1").value, n;
 }
-function Us(s, e, t, n) {
+function vs(s, e, t, n) {
   return n.dd = parseFloat(s.querySelector("#dailydose").value), n.dd < 5 ? (s.dispatchEvent(
     new CustomEvent(
       "hass-notification",
@@ -3136,7 +3135,7 @@ function Us(s, e, t, n) {
     )
   ), null) : (n.min = parseInt(s.querySelector("#min_1").value), n.mode = s.querySelector("#speed_1").value, n);
 }
-function vs(s, e, t, n) {
+function Zs(s, e, t, n) {
   n.dd = parseFloat(s.querySelector("#dailydose").value), n.intervals = [];
   for (let i of s.querySelectorAll(".interval")) {
     let a = i.id.split("_"), l = a[a.length - 1], r = Q(i.querySelector("#st_" + l).value), c = Q(i.querySelector("#end_" + l).value);
@@ -3158,18 +3157,18 @@ function vs(s, e, t, n) {
     let d = parseInt(i.querySelector("#nd_" + l).value), A = i.querySelector("#speed_" + l).value, m = { st: r, end: c, nd: d, mode: A };
     n.intervals.push(m);
   }
-  return n.intervals.sort(Ne), n.type = s.querySelector("#schedule_1").value, n;
+  return n.intervals.sort(Ke), n.type = s.querySelector("#schedule_1").value, n;
 }
-function Ne(s, e) {
+function Ke(s, e) {
   return s.st < e.st ? -1 : s.st > e.st ? 1 : 0;
 }
-function Zs(s, e, t, n) {
+function Os(s, e, t, n) {
   n.intervals = [];
   for (let i of s.querySelectorAll(".interval")) {
     let a = i.id.split("_"), l = a[a.length - 1], r = Q(i.querySelector("#st_" + l).value), c = parseFloat(i.querySelector("#volume_" + l).value), d = i.querySelector("#speed_" + l).value, A = { st: r, volume: c, mode: d };
     n.intervals.push(A);
   }
-  return n.intervals.sort(Ne), n.type = s.querySelector("#schedule_1").value, n;
+  return n.intervals.sort(Ke), n.type = s.querySelector("#schedule_1").value, n;
 }
 function xe(s, e, t) {
   let n = s.createElement("div"), i = 0;
@@ -3180,7 +3179,7 @@ function xe(s, e, t) {
   n.appendChild(a), n.appendChild(l), n.appendChild(r), n.appendChild(P(s, "speed", ["whisper", "regular", "quick"], e.mode, !0, "", i));
   let c = s.createElement("button");
   c.className = "delete_button", i == 0 && (c.style.visibility = "hidden"), c.addEventListener("click", function(d) {
-    d.preventDefault(), Ke(i, t);
+    d.preventDefault(), qe(i, t);
   }, !1), n.appendChild(c), t.appendChild(n);
 }
 function be(s, e, t) {
@@ -3192,50 +3191,50 @@ function be(s, e, t) {
   r = s.createElement("label"), r.innerHTML = g._("volume");
   let c = s.createElement("input");
   c.type = "number", c.min = 0.1, c.set = 0.1, c.max = 300, c.id = "volume_" + i, c.value = "1", c.className = "volume", c.addEventListener("changes", (A) => {
-    qe(s);
+    Je(s);
   }), l.appendChild(r), l.appendChild(c), n.appendChild(a), n.appendChild(l), n.appendChild(P(s, "speed", ["whisper", "regular", "quick"], e.mode, !0, "", i));
   let d = s.createElement("button");
   d.className = "delete_button", i == 0 && (d.style.visibility = "hidden"), d.addEventListener("click", function(A) {
-    A.preventDefault(), Ke(i, t);
+    A.preventDefault(), qe(i, t);
   }, !1), n.appendChild(d), t.appendChild(n);
 }
-function Ke(s, e) {
+function qe(s, e) {
   e.querySelector("#interval_" + s).remove();
 }
-function Os(s, e, t, n, i) {
+function Ss(s, e, t, n, i) {
   let a = P(n, "min", Array(6).fill().map((l, r) => r * 10), s.min, !1, "min");
   return i.appendChild(a), i.appendChild(P(n, "speed", ["whisper", "regular", "quick"], s.mode)), i;
 }
-function Ss(s, e, t, n) {
+function Ps(s, e, t, n) {
   let i = { type: s.target.value };
-  Te(e, t, n, i);
+  Ne(e, t, n, i);
 }
-function qe(s) {
+function Je(s) {
   let e = s.querySelector("#dailydose"), t = 0;
   for (let n of s.querySelectorAll(".volume"))
     t += parseFloat(n.value);
   e.value = t;
 }
-const Je = {
-  head_configuration_schedule_single: ys,
-  head_configuration_schedule_custom: zs,
-  head_configuration_schedule_timer: Ms,
-  head_configuration_schedule_hourly: Os,
-  save_schedule_single: bs,
-  save_schedule_custom: vs,
-  save_schedule_timer: Zs,
-  save_schedule_hourly: Us
-}, Ps = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ye = {
+  head_configuration_schedule_single: zs,
+  head_configuration_schedule_custom: Ms,
+  head_configuration_schedule_timer: xs,
+  head_configuration_schedule_hourly: Ss,
+  save_schedule_single: Us,
+  save_schedule_custom: Zs,
+  save_schedule_timer: Os,
+  save_schedule_hourly: vs
+}, ks = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  add_supplement: fs,
-  edit_container: Es,
-  head_configuration: Te,
-  set_container_volume: Ve,
-  set_manual_head_volume: Rs
+  add_supplement: Es,
+  edit_container: ys,
+  head_configuration: Ne,
+  set_container_volume: Te,
+  set_manual_head_volume: fs
 }, Symbol.toStringTag, { value: "Module" })), js = {
-  dose_head_dialog: Ps
+  dose_head_dialog: ks
 };
-function ks(s, e, ...t) {
+function Ue(s, e, ...t) {
   const n = js[s]?.[e];
   if (typeof n != "function") {
     console.warn(`Action ${s}.${e} introuvable`);
@@ -3243,8 +3242,8 @@ function ks(s, e, ...t) {
   }
   return n(...t);
 }
-class Ye extends b {
-  static styles = [je, ke];
+class We extends b {
+  static styles = [je, Ve];
   static get properties() {
     return {
       _shadowRoot: {},
@@ -3302,7 +3301,7 @@ class Ye extends b {
         t.hass = e;
     if (this.extends_to_re_render)
       for (const t of this.extends_to_re_render)
-        console.log("!!!!!!", t), console.warn("extends_to_re_render not fully implemented");
+        console.log("!!!!!!", t), Ue(t.package, t.function_name, this.elt, this._hass, this._shadowRoot), console.warn("extends_to_re_render not fully implemented");
   }
   set_conf(e) {
     console.log("Setting config", this.config), this.config = e;
@@ -3342,7 +3341,7 @@ class Ye extends b {
         console.error("ERROR", n), t.innerHTML = e.value;
       }
     } else if (e.view == "extend") {
-      ks(e.extend, this.to_render.name, this.elt, this._hass, this._shadowRoot), e.re_render && this.extends_to_re_render.push(cmd);
+      Ue(e.extend, this.to_render.name, this.elt, this._hass, this._shadowRoot), e.re_render && this.extends_to_re_render.push({ package: e.extend, function_name: this.to_render.name });
       return;
     } else {
       const n = customElements.get(e.view);
@@ -3404,7 +3403,7 @@ var Vs = Object.defineProperty, M = (s, e, t, n) => {
   return i && Vs(e, t, i), i;
 };
 class y extends b {
-  static styles = [As, je];
+  static styles = [gs, je];
   _hass;
   current_device;
   select_devices = [];
@@ -3439,7 +3438,7 @@ class y extends b {
   // end of function - _handle_display_dialog  
   render() {
     if (console.debug("render main"), this.first_init == !0)
-      this.init_devices(), this.first_init = !1, this.no_device = f.create_device("redsea-nodevice", this._hass, null, {}), this.current_device = this.no_device, this._dialog_box = new Ye(), this.shadowRoot && this._dialog_box.init(this._hass, this.shadowRoot);
+      this.init_devices(), this.first_init = !1, this.no_device = f.create_device("redsea-nodevice", this._hass, null, {}), this.current_device = this.no_device, this._dialog_box = new We(), this.shadowRoot && this._dialog_box.init(this._hass, this.shadowRoot);
     else if (this.current_device.hass = this._hass, !this.re_render)
       return;
     return this.user_config.device ? (this.select_devices.map((e) => this._set_current_device_from_name(e, this.user_config.device)), this.current_device.hass = this._hass, o`
@@ -3461,7 +3460,7 @@ ${this.select_devices.map((e) => o`
 </select>`;
   }
   init_devices() {
-    this.devices_list = new Pe(this._hass), this.select_devices = [{ value: "unselected", text: g._("select_device") }];
+    this.devices_list = new ke(this._hass), this.select_devices = [{ value: "unselected", text: g._("select_device") }];
     for (const e of this.devices_list.main_devices)
       this.select_devices.push(e);
   }
@@ -3576,7 +3575,7 @@ var Ts = Object.defineProperty, N = (s, e, t, n) => {
     (l = s[a]) && (i = l(e, t, i) || i);
   return i && Ts(e, t, i), i;
 };
-class j extends b {
+class k extends b {
   _config = null;
   current_device = null;
   _hass;
@@ -3595,7 +3594,7 @@ class j extends b {
     this._hass = e;
   }
   init_devices() {
-    this.devices_list = new Pe(this._hass), this.select_devices = [{ value: "unselected", text: g._("select_device") }];
+    this.devices_list = new ke(this._hass), this.select_devices = [{ value: "unselected", text: g._("select_device") }];
     for (const e of this.devices_list.main_devices)
       this.select_devices.push(e);
   }
@@ -3667,22 +3666,22 @@ ${this.device_conf()}
 }
 N([
   E({ attribute: !1 })
-], j.prototype, "_config");
+], k.prototype, "_config");
 N([
   E({ attribute: !1 })
-], j.prototype, "current_device");
+], k.prototype, "current_device");
 N([
   E({ attribute: !1 })
-], j.prototype, "_hass");
+], k.prototype, "_hass");
 N([
   u()
-], j.prototype, "select_devices");
+], k.prototype, "select_devices");
 N([
   u()
-], j.prototype, "first_init");
+], k.prototype, "first_init");
 N([
   u()
-], j.prototype, "devices_list");
+], k.prototype, "devices_list");
 const Ns = h`
 
 :hover{
@@ -3735,7 +3734,7 @@ class Ks extends C {
   }
 }
 class qs extends C {
-  static styles = [ke];
+  static styles = [Ve];
   constructor() {
     super();
   }
@@ -3793,7 +3792,7 @@ const Js = h`
   z-index: 2;
 }
 `;
-var Ys = Object.defineProperty, We = (s, e, t, n) => {
+var Ys = Object.defineProperty, we = (s, e, t, n) => {
   for (var i = void 0, a = s.length - 1, l; a >= 0; a--)
     (l = s[a]) && (i = l(e, t, i) || i);
   return i && Ys(e, t, i), i;
@@ -3828,15 +3827,15 @@ class Ae extends C {
     `;
   }
 }
-We([
+we([
   E({ type: Object })
 ], Ae.prototype, "stateObjTarget");
-We([
+we([
   E({ type: Object })
 ], Ae.prototype, "conf");
 const Ws = h`
 `;
-var ws = Object.defineProperty, we = (s, e, t, n) => {
+var ws = Object.defineProperty, He = (s, e, t, n) => {
   for (var i = void 0, a = s.length - 1, l; a >= 0; a--)
     (l = s[a]) && (i = l(e, t, i) || i);
   return i && ws(e, t, i), i;
@@ -3865,10 +3864,10 @@ class ge extends C {
 </svg>`;
   }
 }
-we([
+He([
   E({ type: Object })
 ], ge.prototype, "stateObjTarget");
-we([
+He([
   E({ type: Object })
 ], ge.prototype, "conf");
 const Hs = h`
@@ -3921,7 +3920,7 @@ const Xs = h`
 span.unit{
 font-size: 0.6em;
 }
-`, He = h`
+`, Fe = h`
 
 :hover{
 cursor: pointer;
@@ -3937,7 +3936,7 @@ var Ls = Object.defineProperty, Gs = (s, e, t, n) => {
   return i && Ls(e, t, i), i;
 };
 class ue extends C {
-  static styles = [He, h`
+  static styles = [Fe, h`
     .sensor {
       background-color: var(--sensor-bg-color);
     }
@@ -3978,7 +3977,7 @@ var Ds = Object.defineProperty, Qs = (s, e, t, n) => {
     (l = s[a]) && (i = l(e, t, i) || i);
   return i && Ds(e, t, i), i;
 };
-class Fe extends ue {
+class Xe extends ue {
   static styles = Xs;
   stateObjTarget = null;
   constructor() {
@@ -3997,7 +3996,7 @@ class Fe extends ue {
 }
 Qs([
   E({ type: Object })
-], Fe.prototype, "stateObjTarget");
+], Xe.prototype, "stateObjTarget");
 const Bs = h`
 
 :hover{
@@ -4082,9 +4081,9 @@ class _s extends C {
 }
 customElements.define("click-image", qs);
 customElements.define("common-button", Ks);
-customElements.define("common-dialog", Ye);
+customElements.define("common-dialog", We);
 customElements.define("common-sensor", ue);
-customElements.define("common-sensor-target", Fe);
+customElements.define("common-sensor-target", Xe);
 customElements.define("common-switch", _s);
 customElements.define("progress-bar", Ae);
 customElements.define("progress-circle", ge);
@@ -4135,7 +4134,7 @@ const na = {
   dialogs: {
     head_configuration: {
       name: "head_configuration",
-      title_key: "${i18n._('head_configuration')} +' n°'+ this.elt.device.config.id",
+      title_key: "${i18n._('head_configuration')}  n° ${config.id}",
       close_cross: !1,
       content: [
         {
@@ -5193,7 +5192,7 @@ class aa extends f {
   }
   // end of function render
   _editor_head_color(e) {
-    let t = os("rgb(" + this.config.heads["head_" + e].color + ");"), n = this.config.heads["head_" + e].shortcut;
+    let t = ds("rgb(" + this.config.heads["head_" + e].color + ");"), n = this.config.heads["head_" + e].shortcut;
     return o`
              <tr>
                <td class="config_color">
@@ -5235,7 +5234,7 @@ class aa extends f {
   handleChangedEvent(e) {
     let t = e.currentTarget.value;
     const n = e.target.id.split("-")[0], i = e.target.id.split("-")[1];
-    i == "color" && (t = cs(t));
+    i == "color" && (t = os(t));
     let a = { conf: { [this.current_device.config.model]: { devices: { [this.current_device.device.name]: { heads: { [n]: { [i]: t } } } } } } }, l = JSON.parse(JSON.stringify(this._config));
     try {
       l.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[e.target.head][i] = t;
@@ -5379,7 +5378,7 @@ class ra extends C {
              <span class="dosing_queue">
               ${e.head}<br />
               ${e.volume.toFixed(1)}mL<br />
-              ${ds(e.time)}
+              ${ms(e.time)}
              </span><hr />
           </div>`;
   }
@@ -5430,7 +5429,7 @@ img{
 }
 `;
 class oa extends f {
-  static styles = [ca, He];
+  static styles = [ca, Fe];
   static get properties() {
     return {
       state_on: {},
@@ -5546,7 +5545,7 @@ customElements.define("redsea-rsdose4", aa);
 customElements.define("redsea-dosing-queue", ra);
 customElements.define("redsea-dose-head", oa);
 customElements.define("reef-card", y);
-customElements.define("reef-card-editor", j);
+customElements.define("reef-card-editor", k);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "reef-card",
