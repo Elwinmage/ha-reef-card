@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { html } from "lit";
 import  supplements_list  from "./supplements";
 

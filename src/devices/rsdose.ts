@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { html } from "lit";
 import {RSDevice} from "./device";
 import {config} from "./mapping/RSDOSE4";

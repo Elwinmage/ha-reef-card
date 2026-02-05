@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { html } from "lit";
 
 import i18n from "../translations/myi18n";
@@ -19,7 +18,7 @@ export class DosingQueue extends MyElement{
 
     constructor(){
 	super();
-	this.schdedule=null;
+	this.schedule=null;
     }
 
     _render_slot_schedule(slot){
