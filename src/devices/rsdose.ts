@@ -52,6 +52,7 @@ export class RSDose extends RSDevice{
 
   set hass(obj: any){
     this._setting_hass(obj);
+    
     for (const head of this._heads){
       if ('dose_head' in head){
 	head.dose_head.hass=obj;
@@ -114,7 +115,7 @@ export class RSDose extends RSDevice{
     if ( "dose_head" in this._heads[head_id]){
       dose_head=this._heads[head_id]["dose_head"];
       dose_head.state_on=schedule_state;
-      dose_head.device_state=this.is_on();
+      dose_head.update_state(this.is_on());
       dose_head.hass=this._hass;
       dose_head.bundle=this.bundle;
       
@@ -125,7 +126,7 @@ export class RSDose extends RSDevice{
       dose_head.entities=this._heads[head_id].entities;
       dose_head.stock_alert=this.get_entity('stock_alert_days').state;
       dose_head.state_on=schedule_state;
-      dose_head.device_state=this.is_on();
+      dose_head.update_state(this.is_on());
       this._heads[head_id]['dose_head']=dose_head;
       dose_head.config=new_conf;
       dose_head.bundle=this.bundle;
@@ -158,6 +159,7 @@ export class RSDose extends RSDevice{
       this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this) as DosingQueue;
       this.dosing_queue.color_list=this.supplement_color;
     }
+    this.dosing_queue.update_state(this.is_on());
     
     return html`
              	<div class="device_bg">

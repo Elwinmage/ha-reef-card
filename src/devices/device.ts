@@ -38,9 +38,13 @@ export class RSDevice extends LitElement {
   
   @property({ type: Boolean })
   isEditorMode: boolean = false;
+
+
+  protected state: boolean = false;
   
   constructor() {
     super();
+    this.state=this.is_on();
   }
 
   override render(){

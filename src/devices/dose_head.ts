@@ -138,6 +138,13 @@ export class DoseHead extends RSDevice{
 	return res;
     }
 
+  update_state(value){
+    if (this.device_state != value){
+      this.device_state=value;
+    }
+    this.requestUpdate();
+  }
+  
     set hass(obj){
 	this._setting_hass(obj);
 	if(this.is_on() != this.state_on){

@@ -111,7 +111,6 @@ export class Dialog extends LitElement {
   }
 
   set_conf(config: any): void {
-    console.log("Setting config",this.config);
     this.config = config;
   }
 

@@ -38,6 +38,13 @@ export class DosingQueue extends MyElement{
      }// end of function _render_slot_schedule
 
 
+  update_state(value){
+    if (this.stateOn != value){
+      this.stateOn=value;
+    }
+    this.requestUpdate();
+  }
+  
     set hass(obj){
 	if (this.stateObj && this.stateObj.attributes.queue != obj.states[this.stateObj.entity_id].attributes.queue){
 	  this._hass=obj;
