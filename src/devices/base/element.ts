@@ -90,7 +90,7 @@ export class MyElement extends LitElement {
 
   createContext(){
     if(!this.evalCtx){
-	const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
+      const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
 	const context = {
 	  stateObj: this.stateObj,
 	  entity: entitiesContext,    // Accès via entities.nom_entite.state (alias)
@@ -131,17 +131,22 @@ export class MyElement extends LitElement {
   }
 
   set hass(obj: HassConfig) {
+    if(this.stateObj?.entity_id== "sensor.rsdose4_338229039_dernier_message"){
+    }
     this._hass = obj;
     if (this.stateObj) {
       const so = this._hass.states[this.stateObj.entity_id];
+      if(this.stateObj?.entity_id== "sensor.rsdose4_338229039_dernier_message"){
+      }
       if (so && this.stateObj.state !== so.state) {
         this.stateObj = so;
+	this.requestUpdate();
       }
       else if (this.conf && "target" in this.conf && this.stateObjTarget) {
 	const sot = this._hass.states[this.stateObjTarget.entity_id];
         if (sot && this.stateObjTarget.state !== sot.state) {
           this.stateObjTarget = sot || null;
-          this.stateObj = so; // force render
+	this.requestUpdate(); // force render
 	}
       }
     }
@@ -223,15 +228,17 @@ export class MyElement extends LitElement {
     //Set device color patch
     if (this.conf && css_level in this.conf) {
       let o_style = structuredClone(this.conf[css_level]);
-      let device_color=this.device.config.color;
-      if (!this.device.is_on() ){
-	device_color=off_color;
-      }
-      if(o_style['background-color']=="$DEVICE-COLOR$"){
-	o_style['background-color']="rgb("+device_color+")";
-      }
-      else  if(o_style['background-color']=="$DEVICE-COLOR-ALPHA$"){
-	o_style['background-color']="rgba("+device_color+","+this.device.config.alpha+")";
+      if(this.device){
+	let device_color=this.device.config.color;
+	if (!this.device.is_on() ){
+	  device_color=off_color;
+	}
+	if(o_style['background-color']=="$DEVICE-COLOR$"){
+	  o_style['background-color']="rgb("+device_color+")";
+	}
+	else  if(o_style['background-color']=="$DEVICE-COLOR-ALPHA$"){
+	  o_style['background-color']="rgba("+device_color+","+this.device.config.alpha+")";
+	}
       }
       style = Object.entries(o_style).map(([k, v]) => `${k}:${v}`).join(';');
     }

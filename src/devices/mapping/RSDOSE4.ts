@@ -4,6 +4,29 @@ export const config = {
   "background_img": new URL("../img/RSDOSE4.png",import.meta.url),
   "heads_nb": 4,
   "dialogs": {
+    "wifi":{
+      "name":"wifi",
+      "title_key":"${i18n._('wifi')}",
+      "close_cross":false,
+      "content":[
+	{
+	  "view": "hui-entities-card",
+	  "conf":{
+	    "type":"entities",
+	    "entities": [
+	      {"entity":"wifi_ssid","name":{"type":"entity"}},
+	      {"entity":"ip","name":{"type":"entity"}},
+	      {"entity":"wifi_signal","name":{"type":"entity"}},
+	      {"entity":"wifi_quality","name":{"type":"entity"}},
+	      {"entity":"cloud_connect","name":{"type":"entity"}},	      
+	      {"entity":"cloud_state","name":{"type":"entity"}},
+	      {"entity":"cloud_account","name":{"type":"entity"}},
+	      {"entity":"use_cloud_api","name":{"type":"entity"}},
+	    ]
+	  }
+	},
+      ],
+    },
     "head_configuration":{
       "name":"head_configuration",
       "title_key":"${i18n._('head_configuration')}  n°${config.id}",
@@ -67,7 +90,7 @@ export const config = {
     "head_calibration":{
       "name":"head_calibration",
       "title_key":"${i18n._('calibration')} n°${config.id}",
-      "close_cross": true,
+      "close_cross": false,
       "content":[
 	{
 	  "view": "click-image",
@@ -110,7 +133,7 @@ export const config = {
     "head_calibration_step_2":{
       "name":"head_calibration_step_2",
       "title_key":"${i18n._('calibration')} n°${config.id}",
-      "close_cross": true,
+      "close_cross": false,
       "content":[
 	{
 	  "view": "text",
@@ -254,7 +277,7 @@ export const config = {
 	  "conf": {
 	    "type": "common-button",
 	    "stateObj": null,
-	    "icon": "mdi:test-tube",
+	    "oicon": "mdi:test-tube",
 	    "tap_action":[
 	      {
 		"domain":"button",
@@ -418,7 +441,7 @@ export const config = {
     },
     "add_supplement":{
       "name": "add_supplement",
-      "title_key":"${i18n._('dialog_add_supplement_title')} n°${device.config.id}",
+      "title_key":"${i18n._('dialog_add_supplement_title')} n°${config.id}",
       "close_cross": true,
       "content":[
 	{
@@ -494,7 +517,7 @@ export const config = {
     },
     "set_manual_head_volume":{
       "name": "set_manual_head_volume",
-      "title_key": "${i18n._('set_manual_head_volume')}",
+      "title_key": "${i18n._('set_manual_head_volume')} n°${config.id}",
       "close_cross": true,
       "content":[
 	{
@@ -554,11 +577,6 @@ export const config = {
 	  "name": "last_alert_message",
 	  "type":"redsea-messages",
 	  "label":"'⚠'",
-	  /* "tap_action": { 		"domain": "switch",
-	     "action":"toggle",
-	     "data": "default",
-	     // "data": {"entity_id":"switch.ifmu_rsdose4_4647319427_head_4_schedule_enabled"},
-	     },*/
 	  "css":{
 	    "color": "red",
 	    "flex": "0 0 auto",
@@ -618,6 +636,27 @@ export const config = {
 	      "left": "2%",
 	    }
 	  },
+	  "wifi_quality":{
+	    "name": "wifi_quality",
+	    "type":"common-sensor",
+	    "master": true,
+	    "label":false,
+	    "icon": true,
+	    "tap_action": {
+	      "domain": "redsea_ui",
+	      "action":"dialog",
+	      "data": {"type":"wifi"},
+	    },
+	    "css":{
+	      "flex": "0 0 auto",
+	      "position": "absolute",
+	      "width": "5.5%",
+	      "height": "2%",
+	      "top": "0%",
+	      "right": "0%",
+	    }
+	  },
+	
 	},
 	"dosing_queue":{
 	  "type": "redsea-dosing-queue",
@@ -731,7 +770,7 @@ export const config = {
 		  "position": "absolute",
 		  "width": "80%",
 		  "top": "30%",
-		  "left": "10%",
+		  "left": "12%",
 		  "text-align": "center",
 		  "color": "white",
 		  "background-color": "rgba(0,0,0,0)",
@@ -922,6 +961,7 @@ export const config = {
 	    "css":{
 	      "left":"23%",
 	    },
+	    
 	  },
 	  "head_3": {
 	    "id" : 3,

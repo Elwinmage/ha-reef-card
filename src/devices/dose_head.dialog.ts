@@ -45,7 +45,7 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 	  "color": "white",
 	}
       };
-      let content=MyElement.create_element(hass,conf,elt.device);
+      let content=MyElement.create_element(hass,conf as any,elt.device);
       shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
   }
@@ -55,14 +55,14 @@ export function add_supplement(elt,hass,shadowRoot){
   let selected_supplement=elt.device.get_entity("supplements").state;
   let supplement = supplements_list.get_supplement(selected_supplement);
 
-  let img='/hacsfiles/ha-reef-card/generic_container.supplement.png';
+  let img='/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png';
   let cc=shadowRoot.querySelector("#add-supplement");
   if(cc != null){
     cc.remove();
   }
   
   if (supplement){
-    let t_img='/hacsfiles/ha-reef-card/'+supplement.uid+'.supplement.png';
+    let t_img='/hacsfiles/ha-reef-card/img/supplements/'+supplement.uid+'.supplement.png';
     let http = new XMLHttpRequest();
     http.open('HEAD', t_img, false);
     http.send();
@@ -70,9 +70,14 @@ export function add_supplement(elt,hass,shadowRoot){
       img=t_img;
     }
     const r_element=customElements.get("click-image");
-    const content= new r_element();
-    let conf={"image":img,"css":{"display": "inline-block","width":"20%"},"elt.css":{"width":"100%"}}
-    content.setConfig(conf);
+    const content: any= new r_element();
+    let conf_img={
+      name:"supplement",
+      type:"click-image",
+      image:img,
+      css:{"display": "inline-block","width":"50%"},
+    };
+    content.setConfig(conf_img);
     let div=document.createElement("div");
     div.style.cssText = "display: inline-block";
     div.id="add-supplement";
@@ -93,7 +98,7 @@ export function add_supplement(elt,hass,shadowRoot){
   }
   else{
     const r_element= customElements.get("hui-entities-card");
-    const content= new r_element();
+    const content: any= new r_element();
 
     let conf={
       "type":"entities",
@@ -298,7 +303,7 @@ function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
 
 function save_schedule(event,shadowRoot,form,elt,hass){
   console.debug("Save schedule");
-  let schedule={};
+  let schedule: any={};
   schedule.type=shadowRoot.querySelector("#schedule_1").value;
   schedule.days=[];
   for (let day=1;day<8;day++){
@@ -333,7 +338,7 @@ function save_schedule(event,shadowRoot,form,elt,hass){
     );
   }
   else {
-    console.error("Can not save schedule", data);
+    console.error("Can not save schedule - to_schedule is null");
   }
 }
 
@@ -445,7 +450,7 @@ function head_configuration_intervals_custom(shadowRoot,interval,form){
   div.id="interval_"+position;
   let start=com.create_hour(shadowRoot,'st',interval.st,position);
   let end=com.create_hour(shadowRoot,'end',interval.end,position);
-  let nd=com.create_select(shadowRoot,'nd', Array(24).fill().map((x,i)=>i+1),interval.nd,false,'',position);
+  let nd=com.create_select(shadowRoot,'nd', Array.from({length:24},(x,i)=>(i+1).toString()),interval.nd,false,'',position);
   div.appendChild(start);
   div.appendChild(end);
   div.appendChild(nd);
@@ -510,7 +515,7 @@ function head_configuration_delete_interval(position,intervals){
 }
 
 function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
-  let min=com.create_select(shadowRoot,'min', Array(6).fill().map((x,i)=>i*10),schedule.min,false,"min");
+  let min=com.create_select(shadowRoot,'min', Array.from({length:6},(x,i)=>(i*10).toString()),schedule.min,false,"min");
   form.appendChild(min);
   form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
   return form;

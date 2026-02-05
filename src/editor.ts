@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import i18n from "./translations/myi18n";
@@ -101,26 +101,29 @@ ${this.device_conf()}
     return html``;
   }// end of - render
 
-  private device_conf() {
+  private device_conf(): TemplateResult {
     if (this._config && this._config.device && this._config.device.length > 0){
       const device=this.devices_list.get_by_name(this._config.device);
       if (!device) {
-        return ``;
+        return html``;
       }
       const model = device.elements[0]?.model;
       if (!model) {
-        return ``;
+        return html``;
       }
-      // @ts-ignore - DeviceInfo type mismatch
-            const lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this._config,device);
-      if (lit_device!=null && typeof lit_device['editor'] == 'function'){
-// @ts-ignore - editor property exists at runtime
-		this.current_device=lit_device;
-	// @ts-ignore - editor property exists at runtime
-	return lit_device.editor(this.shadowRoot);
-      }// if
+      
+      const lit_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this._config,device as any);
+      
+      if (lit_device!=null){
+        // Activer le mode éditeur
+        lit_device.isEditorMode = true;
+        this.current_device = lit_device;
+        
+        // Retourner le composant directement dans le template
+        return html`${lit_device}`;
+      }
     }
-    return ``;
+    return html``;
   }// end of function - device_conf
 
   private handleChangedEvent(_changesdEvent: Event): void {

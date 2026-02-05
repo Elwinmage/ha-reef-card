@@ -16,6 +16,10 @@ export class DosingQueue extends MyElement{
 	}
     }
 
+    // Déclaration des propriétés d'instance
+    schedule: any = null;
+    color_list: any;
+
     constructor(){
 	super();
 	this.schedule=null;
@@ -36,8 +40,9 @@ export class DosingQueue extends MyElement{
 
     set hass(obj){
 	if (this.stateObj && this.stateObj.attributes.queue != obj.states[this.stateObj.entity_id].attributes.queue){
-	    this._hass=obj;
-	    this.stateObj=obj.states[this.stateObj.entity_id];
+	  this._hass=obj;
+	  this.stateObj=obj.states[this.stateObj.entity_id];
+	  this.requestUpdate();
 	}
     }
     
@@ -45,7 +50,7 @@ export class DosingQueue extends MyElement{
       this.schedule=this.stateObj.attributes.queue;
       if(this.stateOn && this.schedule.length != 0){
 	    return html`
-                  <div style="${this.get_style(this.config)}">
+                  <div style="${this.get_style('css')}">
                     ${this.schedule.map(slot => this._render_slot_schedule(slot))}
                   </div>
    	    `;

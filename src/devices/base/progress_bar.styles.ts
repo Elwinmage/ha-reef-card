@@ -13,7 +13,7 @@ export default css`
   position: relative;
   height: 20px;
   border-radius: 20px;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.8);
   overflow: hidden;
 }
 

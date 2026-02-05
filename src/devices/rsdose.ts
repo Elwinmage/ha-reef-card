@@ -1,7 +1,7 @@
-import { html } from "lit";
+import { html, TemplateResult } from "lit";
 import {RSDevice} from "./device";
 import {config} from "./mapping/RSDOSE4";
-import DoseHead from "./dose_head";
+import {DoseHead} from "./dose_head";
 
 import style_rsdose from "./rsdose.styles";
 import style_common from "./common.styles";
@@ -33,6 +33,9 @@ export class RSDose extends RSDevice{
   _heads: HeadEntity[] = [];
   supplement_color: Record<string, any> = {};
   dosing_queue: DosingQueue | null = null;
+  bundle: boolean = false;
+  current_device: any;
+  _config: any;
 
   static get properties(){
     return{
@@ -118,7 +121,7 @@ export class RSDose extends RSDevice{
     }
     else
     {
-      dose_head=RSDevice.create_device('redsea-dose-head',this._hass,new_conf,this);
+      dose_head=RSDevice.create_device('redsea-dose-head',this._hass,new_conf,this as any);
       dose_head.entities=this._heads[head_id].entities;
       dose_head.stock_alert=this.get_entity('stock_alert_days').state;
       dose_head.state_on=schedule_state;
@@ -139,7 +142,6 @@ export class RSDose extends RSDevice{
     this.to_render=false;
     console.debug("Render rsdose");
 
-
     this.update_config();
     let style=html``;
     this._populate_entities_with_heads();
@@ -153,7 +155,7 @@ export class RSDose extends RSDevice{
       style=html`<style>img{filter: grayscale(90%);}</style>`;
     }
     if (this.dosing_queue==null){
-      this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this);
+      this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this) as DosingQueue;
       this.dosing_queue.color_list=this.supplement_color;
     }
     
@@ -165,7 +167,7 @@ export class RSDose extends RSDevice{
                      ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
                  </div>
                    ${this.dosing_queue}
-                 ${this._render_elements()}
+                 ${this._render_elements(this.is_on())}
                </div>`;
   }// end of function render
   
@@ -176,7 +178,7 @@ export class RSDose extends RSDevice{
     return html `
              <tr>
                <td class="config_color">
-                 <input type="color" id="head_${head_id}-color" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
+<input type="color" id="head_${head_id}-color" value="${color}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
                  <datalist id="RedSeaColors">
                    <option>#8c4394</option>
                    <option>#0081c5</option>
@@ -200,10 +202,10 @@ export class RSDose extends RSDevice{
   handleChangedDeviceEvent(changedEvent) {
 
     let value= (changedEvent.currentTarget.checked);
-    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
-    let newConfig = JSON.parse(JSON.stringify(this._config));
+    let newVal={conf:{[this.config.model]:{devices:{[this.device.name]:{elements:{[changedEvent.target.id]:{disabled_if:value}}}}}}};
+    let newConfig = JSON.parse(JSON.stringify(this.user_config));
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].elements[changedEvent.target.id].disabled_if = value;
+      newConfig.conf[this.config.model].devices[this.device.name].elements[changedEvent.target.id].disabled_if = value;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
@@ -223,11 +225,11 @@ export class RSDose extends RSDevice{
     if (field=="color"){
       i_val=hexToRgb(i_val);
     }
-    let newVal={conf:{[this.current_device.config.model]:{devices:{[this.current_device.device.name]:{heads:{[head]:{[field]:i_val}}}}}}};
-    let newConfig = JSON.parse(JSON.stringify(this._config));
+    let newVal={conf:{[this.config.model]:{devices:{[this.device.name]:{heads:{[head]:{[field]:i_val}}}}}}};
+    let newConfig = JSON.parse(JSON.stringify(this.user_config));
     
     try{
-      newConfig.conf[this.current_device.config.model].devices[this.current_device.device.name].heads[changedEvent.target.head][field] = i_val;
+      newConfig.conf[this.config.model].devices[this.device.name].heads[changedEvent.target.head][field] = i_val;
     }
     catch (error){
       newConfig=merge(newConfig,newVal);
@@ -265,16 +267,13 @@ export class RSDose extends RSDevice{
     }
   }// end of function is_checked  
 
-  editor(doc){
+  override renderEditor(): TemplateResult {
     if(this.is_disabled()){
-      return html ``;
+      return html``;
     }
     this._populate_entities_with_heads();
-    let element = doc.getElementById("heads_colors");
-    if (element){
-      element.reset();
-    }
     this.update_config();
+    
     return html`
                  <hr />
                  <style>
@@ -353,6 +352,6 @@ ${this.is_checked("last_alert_message")}
                  </table>
                    </form>`;
     
-  }// end of function editor
+  }// end of function renderEditor
 }
 

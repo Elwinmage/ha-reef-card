@@ -36,16 +36,26 @@ export class RSDevice extends LitElement {
   @property({ type: Boolean })
   to_render: boolean = false;
   
+  @property({ type: Boolean })
+  isEditorMode: boolean = false;
+  
   constructor() {
     super();
   }
 
   override render(){
+    if (this.isEditorMode) {
+      return this.renderEditor();
+    }
     return this._render();
   }
 
   _render(){
     return html`RSDEVICE Base class`;
+  }
+  
+  renderEditor(): TemplateResult {
+    return html`<p>No editor configuration available for this device</p>`;
   }
 
   _setting_hass(obj){
@@ -62,7 +72,8 @@ export class RSDevice extends LitElement {
     }
     if(re_render){
       this.to_render=true;
-      this.render();
+      //this.render();
+      this.requestUpdate();
     }
   }
   

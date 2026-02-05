@@ -2,6 +2,8 @@ import { html, TemplateResult, CSSResultGroup, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
 import { MyElement } from "./element";
+import { button_color} from "../../common";
+
 
 interface SensorConfig {
   name?: string;
@@ -46,6 +48,15 @@ export class Sensor extends MyElement {
     }
 
     const sclass = this.conf.class || '';
+
+    if (this.conf?.icon){
+      return html`
+      <ha-icon 
+         icon="${this.stateObj.attributes.icon || 'mdi:help'}"
+         style="color:rgb(${button_color})">
+      </ha-icon>`;
+    }
+
     let value: string | number = '';
     let unit = '';
 

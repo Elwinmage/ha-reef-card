@@ -14,7 +14,10 @@ export class ClickImage extends MyElement {
 
   protected override _render(_style: string = ''): any {
     const imageSrc = this.conf?.image || '';
-    
+
+    if (!_style){
+      _style=this.get_style("css");
+    }
     return html`
       <img 
         class="click-image" 

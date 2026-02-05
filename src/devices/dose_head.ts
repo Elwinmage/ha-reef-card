@@ -19,9 +19,19 @@ export class DoseHead extends RSDevice{
 	    device_state:{},
 	    head_state:{},
 	    supplement:{},
-	    force_render:false,
+	    force_render:{},
 	}
     }
+
+    // Déclaration des propriétés d'instance
+    state_on: boolean = false;
+    device_state: any = null;
+    head_state: any = null;
+    supplement: any = null;
+    stock_alert: any = null;
+    supplement_info: boolean = false;
+    bundle: boolean = false;
+    force_render: boolean = false;
 
     constructor(){
 	super();
@@ -45,9 +55,13 @@ export class DoseHead extends RSDevice{
     }
 
     _render_container(){
+	if (!this.supplement) {
+	    return html``;
+	}
+	
 	let supplement_uid=this.supplement.attributes.supplement.uid
 	let img=null;
-	let warning='';
+	let warning: any='';
 
 	img='/hacsfiles/ha-reef-card/img/supplements/'+supplement_uid+'.supplement.png';
 	
@@ -66,9 +80,22 @@ export class DoseHead extends RSDevice{
 	    color=off_color;
 	}
 
-	if (parseInt(this.get_entity('remaining_days').state)<parseInt(this.stock_alert) && this.get_entity('slm').state=="on" && this.get_entity('daily_dose').state > 0){
-	    warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
+	// Vérifier que les entités existent avant d'accéder à leurs propriétés
+	try {
+	    const remainingDaysEntity = this.get_entity('remaining_days');
+	    const slmEntity = this.get_entity('slm');
+	    const dailyDoseEntity = this.get_entity('daily_dose');
+	    
+	    if (remainingDaysEntity && slmEntity && dailyDoseEntity && 
+	        this.stock_alert && 
+	        parseInt(remainingDaysEntity.state) < parseInt(this.stock_alert.toString()) && 
+	        slmEntity.state == "on" && 
+	        parseFloat(dailyDoseEntity.state) > 0) {
+		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
 	    }
+	} catch (error) {
+	    console.warn("Could not check stock alert:", error);
+	}
 
 	return html`
               <div class="container" style="${this.get_style(this.config.container)}">
@@ -89,7 +116,7 @@ export class DoseHead extends RSDevice{
     }
 
     _render_ask() {
-	    let ask='';
+	    let ask: any='';
 	    if ( this.supplement_info && !this.supplement.attributes.supplement.is_name_editable){
 	      ask=html`<a class="addSupplement" target="_blank" href='https:// github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;	    }// if
       return html`${ask}`;
@@ -98,9 +125,14 @@ export class DoseHead extends RSDevice{
     is_on(){
 	let res=true;
 
-	if( 'head_state' in this.entities && ( this._hass.states[this.entities['head_state'].entity_id].state=="not-setup" ||
-					       !this.device_state ||
-					      (this._hass.states[this.entities['schedule_enabled'].entity_id].state=='off'))){
+	if( 'head_state' in this.entities && 
+	    this._hass && 
+	    this._hass.states[this.entities['head_state'].entity_id] && 
+	    ( this._hass.states[this.entities['head_state'].entity_id].state=="not-setup" ||
+	      !this.device_state ||
+	      (this.entities['schedule_enabled'] && 
+	       this._hass.states[this.entities['schedule_enabled'].entity_id] && 
+	       this._hass.states[this.entities['schedule_enabled'].entity_id].state=='off'))){
 	    res=false;
 	}
 	return res;
@@ -109,13 +141,19 @@ export class DoseHead extends RSDevice{
     set hass(obj){
 	this._setting_hass(obj);
 	if(this.is_on() != this.state_on){
-	    this.state_on=this.is_on();
+	  this.state_on=this.is_on();
+	  this.requestUpdate();
 	}
-	if(this.entites && this.head_state!=this.entities['head_state'].state){
-	    this.head_state=this.entities['head_state'].state;
+	if(this.entities && this.entities['head_state'] && this.head_state!=this.entities['head_state'].state){
+	  this.head_state=this.entities['head_state'].state;
+	  this.requestUpdate();
 	}
-	if(this.entities['supplement'] && this._hass.states[this.entities['supplement'].entity_id].attributes.supplement.uid != this.supplement.attributes.supplement.uid){
-	    this.supplement=this._hass.states[this.entities['supplement'].entity_id];
+      if(this.entities && this.entities['supplement'] && 
+	this._hass && this._hass.states[this.entities['supplement'].entity_id] && 
+	this.supplement && 
+	this._hass.states[this.entities['supplement'].entity_id].attributes.supplement.uid != this.supplement.attributes.supplement.uid){
+	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
+	this.requestUpdate();
 	}
     }
     
@@ -123,12 +161,20 @@ export class DoseHead extends RSDevice{
 	this.to_render=false;
 	this.state_on=this.is_on();
 	console.debug("Render dose_head n°",this.config.id);
+	
+	// Vérifier que l'entité supplement existe
+	if (!this.entities || !this.entities['supplement'] || !this._hass || !this._hass.states[this.entities['supplement'].entity_id]) {
+	    return html`<p>Waiting for supplement data...</p>`;
+	}
+	
 	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
 	if (this.supplement.attributes.supplement.uid!='null'){
-	    let calibration='';
+	    let calibration: any='';
 	    let color=this.config.color+","+this.config.alpha;
 	    
-	    if (this._hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
+	    if (this.entities['head_state'] && 
+	        this._hass.states[this.entities['head_state'].entity_id] && 
+	        this._hass.states[this.entities['head_state'].entity_id].state=="not-setup"){
 		this.state_on=false;
 		let conf={
 		    "image":new URL("./img/configuration.png",import.meta.url),

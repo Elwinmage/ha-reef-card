@@ -129,7 +129,8 @@ export function rgbToHex(orig: string): string {
 }
 
 export const off_color: string = "150,150,150";
-export const button_color: string = "0,60,78";
+//export const button_color: string = "0,60,78";
+export const button_color: string = "51,151,232";
 
 export function toTime(time: number): string {
   const seconds = time % 60;

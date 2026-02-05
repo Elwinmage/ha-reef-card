@@ -76,7 +76,8 @@ export class Dialog extends LitElement {
     this.elt = conf.elt;
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;
-    this.render();
+    this.evalCtx = null;
+    this.render();// no this.requestUpdate() here !!
     box.style.display = "flex";
   }
 
@@ -104,11 +105,7 @@ export class Dialog extends LitElement {
     }
     if (this.extends_to_re_render) {
       for (const _elt of this.extends_to_re_render) {
-        // Note: eval usage removed for security - extend this as needed
-	//this.evalaluate(elt);
-	console.log("!!!!!!",_elt);
 	run_action(_elt.package,_elt.function_name,this.elt,this._hass,this._shadowRoot);
-        console.warn("extends_to_re_render not fully implemented");
       }
     }
   }
