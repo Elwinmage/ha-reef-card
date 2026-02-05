@@ -50,10 +50,14 @@ export class Sensor extends MyElement {
     const sclass = this.conf.class || '';
 
     if (this.conf?.icon){
+      let color="rgb("+button_color+")";
+      if (this.conf?.icon_color){
+	color=this.conf.icon_color;
+      }
       return html`
       <ha-icon 
          icon="${this.stateObj.attributes.icon || 'mdi:help'}"
-         style="color:rgb(${button_color})">
+         style="color:${color}">
       </ha-icon>`;
     }
 

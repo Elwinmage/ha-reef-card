@@ -642,6 +642,7 @@ export const config = {
 	    "master": true,
 	    "label":false,
 	    "icon": true,
+	    "icon_color": "#ec2330",
 	    "tap_action": {
 	      "domain": "redsea_ui",
 	      "action":"dialog",
