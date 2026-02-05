@@ -85,7 +85,6 @@ export class DoseHead extends RSDevice{
 
     _render_supplement_info(){
 	if (this.supplement_info){
-
 	    return html`${this._render_elements(true,"supplement_info")}`;
 	}// if
     }
@@ -144,7 +143,7 @@ export class DoseHead extends RSDevice{
 			    "data": {"type":"head_configuration"},
 			} 
 		    ],
-		    "elt.css":this.config.calibration.css
+		    "css":this.config.calibration.css
 		};
 		calibration=MyElement.create_element(this._hass,conf,this);
 	    }
@@ -162,7 +161,7 @@ export class DoseHead extends RSDevice{
                   <div class="pump_state_labels" style="${this.get_style(this.config.pump_state_labels)}">
                     ${this._render_elements(this.state_on,"pump_state_labels")}
                   </div>
-              </div>
+                </div>
               ${this._render_elements(this.state_on)}
               ${calibration}
    	    `;
@@ -179,7 +178,7 @@ export class DoseHead extends RSDevice{
 		    "action": "dialog",
 		    "data": {"type": "add_supplement"}
 		},
-		"elt.css":{
+	      "css":{
 		    "width": "100%",
 		}
 		

@@ -4,6 +4,8 @@ import style_dialog from "./dialog.styles";
 import style_click_image from "./click_image.styles";
 import { SafeEval, SafeEvalContext } from '../../utils/SafeEval';
 
+import { RSHTMLElement } from "../../types/index";
+
 import i18n from "../../translations/myi18n.js";
 
 import { MyElement } from "./element";
@@ -72,7 +74,6 @@ export class Dialog extends LitElement {
     
     if (!box) return;
     this.elt = conf.elt;
-    console.log("DISPLAY",this.config,conf);
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;
     this.render();
@@ -163,7 +164,9 @@ export class Dialog extends LitElement {
 	    content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
 	}
 	else if(content_conf.view=="text"){
-	    content=this._shadowRoot.createElement("p");
+	  //content=this._shadowRoot.createElement("p");
+	  content=document.createElement("p");
+	  this._shadowRoot.appendChild(content);
 	    try {
 		content.innerHTML=this.evaluate(content_conf.value);
 	    }
@@ -233,7 +236,7 @@ export class Dialog extends LitElement {
       }
       if("cancel" in this.to_render && this.to_render.cancel){
 	cancel_conf=close_conf;
-	cancel_conf.label=i18n._("cancel");
+	cancel_conf.label="${i18n._('cancel')}";
 	cancel_conf.css={left:"-30%"};
 	
       }
@@ -247,8 +250,8 @@ export class Dialog extends LitElement {
       if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
 	let close_cross_class=customElements.get("click-image");
 	let close_cross=new close_cross_class();
-	close_cross.conf=close_conf;
-	close_cross.hass=this._hass;
+	(close_cross as RSHTMLElement).conf=close_conf;
+	(close_cross as RSHTMLElement).hass=this._hass;
 	this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
       }
       // Title

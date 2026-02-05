@@ -1,3 +1,7 @@
+export type{
+  Supplement
+} from "./supplement";
+
 export type {
   RGB,
   MainDevice,
@@ -19,7 +23,8 @@ export type {
   Device,
   ActionData,
   Action,
-  ElementConfig
+  ElementConfig,
+  RSHTMLElement,
 } from './element';
 
 // Alias pour compatibilité

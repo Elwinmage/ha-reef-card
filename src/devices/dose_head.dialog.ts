@@ -191,7 +191,7 @@ export  function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
   form.className="schedule";
   form.id="schedule";
   let schedule_type=com.create_select(shadowRoot,'schedule',['single','custom','hourly','timer'],saved_schedule.type);
-  schedule_type.addEventListener("changes",function(event: any) {handle_schedule_type_changes(event,elt,hass,shadowRoot)});
+  schedule_type.addEventListener("change",function(event: any) {handle_schedule_type_change(event,elt,hass,shadowRoot)});
   form.appendChild(schedule_type);
   let node=null;
   node=shadowRoot.createElement("label");
@@ -234,10 +234,10 @@ export  function head_configuration(elt,hass,shadowRoot,saved_schedule=null){
   }
   let save_button=shadowRoot.createElement("button");
   save_button.innerHTML=i18n._('save_schedule');
-  save_button.style.width="100%",
+  save_button.style.width="100%";
+  save_button.type = "button";
   save_button.addEventListener("click", function(e: any) {e.preventDefault();save_schedule(e,shadowRoot,form,elt,hass)},false);
   form.appendChild(save_button);
-  console.debug("SR",shadowRoot);
   shadowRoot.querySelector("#dialog-content").appendChild(content);
 }
 
@@ -246,7 +246,6 @@ function head_configuration_schedule_single(schedule,elt,hass,shadowRoot,form){
   form.appendChild(com.create_select(shadowRoot,'speed',['whisper','regular','quick'],schedule.mode));
   return form;
 }
-
 
 function head_configuration_schedule_custom(schedule,elt,hass,shadowRoot,form){
   const default_interval={
@@ -299,6 +298,7 @@ function head_configuration_schedule_timer(schedule,elt,hass,shadowRoot,form){
 }
 
 function save_schedule(event,shadowRoot,form,elt,hass){
+  console.debug("Save schedule");
   let schedule={};
   schedule.type=shadowRoot.querySelector("#schedule_1").value;
   schedule.days=[];
@@ -310,7 +310,7 @@ function save_schedule(event,shadowRoot,form,elt,hass){
   }
   //let to_schedule=eval("save_schedule_"+schedule.type+"(shadowRoot,elt,hass,schedule)");
   let fname="save_schedule_"+schedule.type;
-  local_actions[fname]?.(shadowRoot,elt,hass,schedule);
+  let to_schedule = local_actions[fname]?.(shadowRoot,elt,hass,schedule);
   if(to_schedule!=null){
     let data={
       access_path: "/head/"+elt.device.config.id+"/settings",
@@ -487,7 +487,7 @@ function head_configuration_intervals_timer(shadowRoot,interval,form){
   volume.id="volume_"+position;
   volume.value="1";
   volume.className="volume";
-  volume.addEventListener("changes", (event: any) => { update_dd(shadowRoot)})
+  volume.addEventListener("change", (event: any) => { update_dd(shadowRoot)})
   vol.appendChild(node);
   vol.appendChild(volume);
 
@@ -518,7 +518,7 @@ function head_configuration_schedule_hourly(schedule,elt,hass,shadowRoot,form){
 
 }
 
-function handle_schedule_type_changes(event,elt,hass,shadowRoot){
+function handle_schedule_type_change(event,elt,hass,shadowRoot){
   let schedule={type:event.target.value};
   head_configuration(elt,hass,shadowRoot,schedule);
 }
@@ -541,4 +541,5 @@ const local_actions = {
   save_schedule_custom,
   save_schedule_timer,
   save_schedule_hourly,
+  save_schedule,
 }

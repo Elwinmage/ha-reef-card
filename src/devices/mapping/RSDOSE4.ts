@@ -6,7 +6,7 @@ export const config = {
   "dialogs": {
     "head_configuration":{
       "name":"head_configuration",
-      "title_key":"${i18n._('head_configuration')}  n° ${config.id}",
+      "title_key":"${i18n._('head_configuration')}  n°${config.id}",
       "close_cross": false,
       "content":[
 	{
@@ -66,19 +66,19 @@ export const config = {
     },
     "head_calibration":{
       "name":"head_calibration",
-      "title_key":"${i18n._('calibration')} +' n°'+ this.elt.device.config.id",
-      "close_cross": false,
+      "title_key":"${i18n._('calibration')} n°${config.id}",
+      "close_cross": true,
       "content":[
 	{
 	  "view": "click-image",
 	  "conf":{
-	    "image":'/hacsfiles/ha-reef-card/head_calibration.png',
-	    "type": "clic-_image",
+	    "image":'/hacsfiles/ha-reef-card/img/head_calibration.png',
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[],
-	    "elt.css":{
-	      "width":"30%",
-	      "margin-left":"35%",
+	    "css":{
+	      "width":"60%",
+	      "margin-left":"20%",
 	    }
 	  }
 	},
@@ -109,7 +109,7 @@ export const config = {
     },
     "head_calibration_step_2":{
       "name":"head_calibration_step_2",
-      "title_key":"${i18n._('calibration')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('calibration')} n°${config.id}",
       "close_cross": true,
       "content":[
 	{
@@ -119,13 +119,13 @@ export const config = {
 	{
 	  "view": "click-image",
 	  "conf":{
-	    "image":'/hacsfiles/ha-reef-card/read_graduated.jpg',
-	    "type": "clic-_image",
+	    "image":'/hacsfiles/ha-reef-card/img/read_graduated.jpg',
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[],
-	    "elt.css":{
-	      "width":"30%",
-	      "margin-left":"35%",
+	    "css":{
+	      "width":"60%",
+	      "margin-left":"20%",
 	    }
 	  }
 	},
@@ -161,7 +161,7 @@ export const config = {
     },
     "test_calibration":{
       "name": "test_calibration",
-      "title_key":"${i18n._('calibration')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('calibration')} n°${config.id}",
       "content":[
 	{
 	  "view": "text",
@@ -170,13 +170,13 @@ export const config = {
 	{
 	  "view": "click-image",
 	  "conf":{
-	    "image":'/hacsfiles/ha-reef-card/read_graduated.jpg',
-	    "type": "clic-_image",
+	    "image":'/hacsfiles/ha-reef-card/img/read_graduated.jpg',
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[],
-	    "elt.css":{
-	      "width":"30%",
-	      "margin-left":"35%",
+	    "css":{
+	      "width":"60%",
+	      "margin-left":"20%",
 	    }
 	  }
 	},
@@ -230,7 +230,7 @@ export const config = {
     },
     "head_calibration_step_3":{
       "name":"head_calibration_step_3",
-      "title_key":"${i18n._('calibration')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('calibration')} n°${config.id}",
       "content":[
 	{
 	  "view": "text",
@@ -239,13 +239,13 @@ export const config = {
 	{
 	  "view": "click-image",
 	  "conf":{
-	    "image":'/hacsfiles/ha-reef-card/head_calibration.png',
-	    "type": "clic-_image",
+	    "image":'/hacsfiles/ha-reef-card/img/head_calibration.png',
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[],
-	    "elt.css":{
-	      "width":"20%",
-	      "margin-left":"35%",
+	    "css":{
+	      "width":"60%",
+	      "margin-left":"20%",
 	    }
 	  }
 	},
@@ -304,19 +304,19 @@ export const config = {
     },
     "priming":{
       "name":"priming",
-      "title_key":"${i18n._('priming')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('priming')} n°${config.id}",
       "close_cross": true,
       "content":[
 	{
 	  "view": "click-image",
 	  "conf":{
-	    "image":'/hacsfiles/ha-reef-card/priming.png',
-	    "type": "clic-_image",
+	    "image":'/hacsfiles/ha-reef-card/img/priming.png',
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[],
-	    "elt.css":{
-	      "width":"30%",
-	      "margin-left":"35%",
+	    "css":{
+	      "width":"60%",
+	      "margin-left":"20%",
 	    }
 	  }
 	},
@@ -347,7 +347,7 @@ export const config = {
     },
     "edit_container":{
       "name":"edit_container",
-      "title_key":"${i18n._('dialog_edit_container')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('dialog_edit_container')}  n°${config.id}",
       "close_cross": false,
       "content":[
 	{
@@ -369,7 +369,7 @@ export const config = {
 	  "view": "click-image",
 	  "conf":{
 	    "image":'/hacsfiles/ha-reef-card/img/trash.svg',
-	    "type": "clic-_image",
+	    "type": "click-image",
 	    "stateObj":null,
 	    "tap_action":[
 	      {
@@ -378,7 +378,7 @@ export const config = {
 		"data": {"type":"delete_container"},
 	      } 
 	    ],
-	    "elt.css":{
+	    "css":{
 	      "position":"absolute",
 	      "top":"7%",
 	      "right": "5%",
@@ -389,7 +389,7 @@ export const config = {
     },
     "delete_container":{
       "name": "delete_container",
-      "title_key":"${i18n._('dialog_delete_supplement_title')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('dialog_delete_supplement_title')}  n°${config.id}",
       "close_cross": false,
       "content":[],
       "validate": {
@@ -418,7 +418,7 @@ export const config = {
     },
     "add_supplement":{
       "name": "add_supplement",
-      "title_key":"${i18n._('dialog_add_supplement_title')} +' n°'+ this.elt.device.config.id",
+      "title_key":"${i18n._('dialog_add_supplement_title')} n°${device.config.id}",
       "close_cross": true,
       "content":[
 	{
@@ -714,14 +714,11 @@ export const config = {
 	    },
 	    "calibration": {
 	      "css":{
-		"flex": "0 0 auto",
+		//"flex": "0 0 auto",
                 "position": "absolute",
-                "width": "50%",
-                "top": "10%",
-                "left": "35%",
-		"filter": "none",
-		"animation": "blink 1s",
-		"animation-iteration-count": "infinite",
+                "width": "80%",
+		"left":"15%",
+                "top": "8%",
 	      }
 	    },
 	    "elements": {
@@ -730,11 +727,12 @@ export const config = {
 		"label": "${stateObj.attributes.supplement.brand_name}: ${stateObj.state}",
 		"type": "common-sensor",
 		"put_in":"supplement_info",
-		"elt.css":{
+		"css":{
 		  "position": "absolute",
-		  "width": "60%",
+		  "width": "80%",
 		  "top": "30%",
-		  "left": "30%",
+		  "left": "10%",
+		  "text-align": "center",
 		  "color": "white",
 		  "background-color": "rgba(0,0,0,0)",
 		}
@@ -745,7 +743,10 @@ export const config = {
 		"type": "common-button",
 		"put_in":"supplement",
 		"stateObj":null,
-		"elt.css":{
+		"css":{
+		  "display": "block",
+		  "width": "100%",
+		  "height": "100%",
 		  "position": "absolute",
 		  "background-color": "rgba(0,80,120,0)",
 		},
@@ -914,11 +915,6 @@ export const config = {
 	    "css":{
 	      "left":"1%",
 	    },
-	    "calibration":{
-	      "css":{
-		"left":"33%",
-	      },
-	    }
 	  },
 	  "head_2": {
 	    "id" : 2,
@@ -940,7 +936,7 @@ export const config = {
 	    },
 	    "calibration":{
 	      "css":{
-		"left":"37%",
+		"left":"17%",
 	      },
 	    }
 
@@ -958,7 +954,7 @@ export const config = {
 	    },
 	    "calibration":{
 	      "css":{
-		"left":"41%",
+		"left":"20%",
 	      },
 	    }
 	    

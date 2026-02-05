@@ -39,8 +39,7 @@ export class ReefCardEditor extends LitElement {
   constructor(){
     super();
     this.current_device=null;
-    //    this.addEventListener('config-changed', this.render());
-    this.addEventListener('config-changed', this.requestUpdate());    
+    this.addEventListener('config-changed',  () => this.requestUpdate());    
   }// end of constructor
 
   setConfig(config: HassConfig): void {

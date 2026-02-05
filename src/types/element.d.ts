@@ -28,6 +28,11 @@ export interface DeviceConfig {
   [key: string]: any;
 }
 
+export interface RSHTMLElement extends HTMLElement{
+  conf: ElementConfig;
+  hass: any;
+}
+
 export interface Device {
   entities: { [name: string]: DeviceEntity };
   config: DeviceConfig;
@@ -46,12 +51,12 @@ export interface ActionData {
 export interface Action {
   domain: string;
   action: string;
-  data: ActionData | "default";
+  data?: ActionData | "default";
   enabled?: boolean;
 }
 
 export interface ElementConfig {
-  name: string;
+  name?: string;
   type: string;
   class?: string;
   label?: string | boolean;

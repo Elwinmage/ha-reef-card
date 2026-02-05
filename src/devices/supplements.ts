@@ -1,14 +1,17 @@
 import {SUPPLEMENTS} from "./supplements_list"
+import {Supplement} from "../types/supplement";
 
 class Supplements{
-
+  //_list: any[];
+  _list: Supplement[];
+  
     constructor(){
 	this._list = SUPPLEMENTS;
     }//end of constructor
 
     get_supplement(name){
 	let supplement=null;
-	for ( supplement of this._list){
+      for ( supplement of this._list){
 	    if (supplement.fullname==name){
 		return supplement;
 	    }

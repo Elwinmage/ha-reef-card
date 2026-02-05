@@ -14,16 +14,12 @@ export class ClickImage extends MyElement {
 
   protected override _render(_style: string = ''): any {
     const imageSrc = this.conf?.image || '';
-    const imageStyle = this.conf?.css ? 
-      Object.entries(this.conf.css)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(';') : '';
     
     return html`
       <img 
         class="click-image" 
         src="${imageSrc}" 
-        style="${imageStyle}"
+        style="${_style}"
         alt="${this.conf?.name || 'clickable image'}" />
     `;
   }
