@@ -32,7 +32,8 @@ export class DoseHead extends RSDevice{
     supplement_info: boolean = false;
     bundle: boolean = false;
     force_render: boolean = false;
-
+  last_state_container_warning: boolean = false;
+  
     constructor(){
 	super();
 	this.supplement=null;
@@ -86,11 +87,7 @@ export class DoseHead extends RSDevice{
 	    const slmEntity = this.get_entity('slm');
 	    const dailyDoseEntity = this.get_entity('daily_dose');
 	    
-	    if (remainingDaysEntity && slmEntity && dailyDoseEntity && 
-	        this.stock_alert && 
-	        parseInt(remainingDaysEntity.state) < parseInt(this.stock_alert.toString()) && 
-	        slmEntity.state == "on" && 
-	        parseFloat(dailyDoseEntity.state) > 0) {
+	  if (this.container_warning()){
 		warning=html`<img class='warning' src='${new URL("./img/warning.svg",import.meta.url)}'/ style="${this.get_style(this.config.warning)}" /><div class="warning" style="${this.get_style(this.config.warning_label)}">${i18n._("empty")}</div>`;
 	    }
 	} catch (error) {
@@ -145,24 +142,44 @@ export class DoseHead extends RSDevice{
     this.requestUpdate();
   }
   
-    set hass(obj){
+  set hass(obj){
+    let to_update: boolean=false;
 	this._setting_hass(obj);
 	if(this.is_on() != this.state_on){
 	  this.state_on=this.is_on();
-	  this.requestUpdate();
+	  to_update=true;
 	}
 	if(this.entities && this.entities['head_state'] && this.head_state!=this.entities['head_state'].state){
 	  this.head_state=this.entities['head_state'].state;
-	  this.requestUpdate();
+	  to_update=true;
 	}
       if(this.entities && this.entities['supplement'] && 
 	this._hass && this._hass.states[this.entities['supplement'].entity_id] && 
 	this.supplement && 
 	this._hass.states[this.entities['supplement'].entity_id].attributes.supplement.uid != this.supplement.attributes.supplement.uid){
 	this.supplement=this._hass.states[this.entities['supplement'].entity_id];
-	this.requestUpdate();
-	}
+	to_update=true;
+      }
+    if(this.container_warning()!=this.last_state_container_warning){
+      to_update=true;
+      this.last_state_container_warning=this.container_warning();
     }
+    if(to_update){
+      this.requestUpdate();
+    }
+  }
+
+  container_warning(){
+    const remainingDaysEntity = this.get_entity('remaining_days');
+    const slmEntity = this.get_entity('slm');
+    const dailyDoseEntity = this.get_entity('daily_dose');
+	    
+    return (remainingDaysEntity && slmEntity && dailyDoseEntity && 
+      this.stock_alert && 
+      parseInt(remainingDaysEntity.state) < parseInt(this.stock_alert.toString()) && 
+      slmEntity.state == "on" && 
+      parseFloat(dailyDoseEntity.state) > 0)
+  }
     
     _render(){
 	this.to_render=false;

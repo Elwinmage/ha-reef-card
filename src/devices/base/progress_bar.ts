@@ -41,7 +41,10 @@ export class ProgressBar extends MyElement {
     }
     
     const bar_class = this.conf?.class || 'progress-bar';
-    const label = this.label || '';
+   let label = this.label || '';
+    if (typeof this.conf.label !== 'boolean') {
+      label = this.evaluate(this.conf.label) ||'';
+    }
     const unit = "%";
     
     const fill = Math.max(0, percent - 1);

@@ -89,7 +89,7 @@ export class MyElement extends LitElement {
 
 
   createContext(){
-    if(!this.evalCtx){
+  //  if(!this.evalCtx){
       const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
 	const context = {
 	  stateObj: this.stateObj,
@@ -101,7 +101,7 @@ export class MyElement extends LitElement {
 	  i18n: i18n,
 	};
       this.evalCtx = new SafeEval(context);
-    }      
+//    }      
   }
   
   evaluate(expression: string){
