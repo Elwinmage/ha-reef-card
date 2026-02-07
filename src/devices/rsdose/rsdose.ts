@@ -1,6 +1,7 @@
 import { html, TemplateResult } from "lit";
 import {RSDevice} from "../device";
-import {config} from "./rsdose4.mapping";
+import {config4} from "./rsdose4.mapping";
+import {config2} from "./rsdose2.mapping";
 import {DoseHead} from "./dose_head";
 
 import style_rsdose from "./rsdose.styles";
@@ -46,7 +47,7 @@ export class RSDose extends RSDevice{
   constructor(){
     super();
     this.supplement_color={};
-    this.initial_config=config;
+//    this.initial_config=config;
     this.dosing_queue=null;
   }// end of constructor
 
@@ -357,3 +358,20 @@ ${this.is_checked("last_alert_message")}
   }// end of function renderEditor
 }
 
+
+
+export class RSDose4 extends RSDose{
+
+  constructor(){
+    super();
+    this.initial_config=config4;
+  }// end of constructor
+}
+
+export class RSDose2 extends RSDose{
+
+  constructor(){
+    super();
+    this.initial_config=config2;
+  }// end of constructor
+}

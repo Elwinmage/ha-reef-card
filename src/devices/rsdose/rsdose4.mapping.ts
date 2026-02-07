@@ -1,9 +1,27 @@
-export const config = {
+export const config4 = {
   "name": null,
   "model": "RSDOSE4",
   "background_img": new URL("../../img/RSDOSE4.png",import.meta.url),
   "heads_nb": 4,
   "dialogs": {
+    "config":{
+      "name":"config",
+      "title_key":"${i18n._('config')}",
+      "close_cross":false,
+      "content":[
+	{
+	  "view": "hui-entities-card",
+	  "conf":{
+	    "type":"entities",
+	    "entities": [
+	      {"entity":"stock_alert_days","name":{"type":"entity"}},
+	      {"entity":"dosing_waiting_period","name":{"type":"entity"}},
+	      {"entity":"battery_level","name":{"type":"entity"}},
+	    ]
+	  }
+	},
+      ],
+    },
     "wifi":{
       "name":"wifi",
       "title_key":"${i18n._('wifi')}",
@@ -588,6 +606,25 @@ export const config = {
 	  },
 	  "elt.css":{
 	    "background-color": "rgba(240,200,200,0.7)",
+	  }
+	},
+	"configuration":{
+	  "name": "configuration",
+	  "type":"click-image",
+	  "icon": "mdi:cog",
+	  "icon_color": "#ec2330",
+	  "tap_action": {
+	    "domain": "redsea_ui",
+	    "action":"dialog",
+	      "data":{
+		"type":"config",
+	      },
+	  },
+	  "css":{
+	    "flex": "0 0 auto",
+	    "position": "absolute",
+	    "top": "0%",
+	    "right": "6%",
 	  }
 	},
 	"device_state":{

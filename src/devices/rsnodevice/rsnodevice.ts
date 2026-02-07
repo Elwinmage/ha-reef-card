@@ -22,7 +22,6 @@ export class NoDevice extends RSDevice {
     }  
 
   protected override _render() {
-
 	this.update_config();
 	return html`
                      <p id="device_name">${this.config.name}</p>
