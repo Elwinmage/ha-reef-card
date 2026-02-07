@@ -1,0 +1,18 @@
+    quit(): void {
+	if (this.overload_quit){
+	    const event={type:this.overload_quit,elt:this.elt};
+	    this.display(event);
+	}
+	else {
+	    if (this._shadowRoot) {
+	        const box = this._shadowRoot.querySelector("#window-mask") as HTMLElement | null;
+	        if (box) box.style.display="none";
+	    }
+	    this.elt=null;
+	    this.to_render=null;
+	}
+    }
+
+    set hass(obj: any){
+	this._hass=obj;
+	if(this.elts){
