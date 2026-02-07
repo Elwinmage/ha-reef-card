@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import i18n from "./translations/myi18n";
 
-import DeviceList from './common';
+import DeviceList from './utils/common';
 import {RSDevice} from './devices/device';
 
 interface HassConfig {

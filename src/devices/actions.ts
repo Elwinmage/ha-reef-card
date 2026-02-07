@@ -1,4 +1,4 @@
-import * as dose_head_dialog from "./dose_head.dialog";
+import * as dose_head_dialog from "./rsdose/dose_head.dialog";
 
 export const actionRegistry: Record<string, Record<string, Function>> = {
   dose_head_dialog,

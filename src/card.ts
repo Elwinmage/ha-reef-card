@@ -7,14 +7,14 @@ import { customElement, property, state } from "lit/decorators.js";
 
 import i18n from "./translations/myi18n.js";
 
-import DeviceList from './common';
+import DeviceList from './utils/common';
 
 import style_card from './card.styles';
 
 import {RSDevice} from './devices/device';
-import {Dialog} from './devices/base/dialog';
+import {Dialog} from './base/dialog';
 
-import style_dialog from './devices/base/dialog.styles';
+import style_dialog from './base/dialog.styles';
 
 interface SelectDevice {
   value: string;

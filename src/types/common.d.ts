@@ -38,7 +38,7 @@ export interface StateObject {
 }
 
 export interface ElementConfig {
-  type: string;
+  type?: string;
   name: string;
   class?: string;
   label?: LabelExpression | boolean;

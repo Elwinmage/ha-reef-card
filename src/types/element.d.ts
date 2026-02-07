@@ -57,7 +57,7 @@ export interface Action {
 
 export interface ElementConfig {
   name?: string;
-  type: string;
+  type?: string;
   class?: string;
   label?: string | boolean;
   target?: string;

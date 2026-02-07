@@ -1,8 +1,8 @@
 import { TemplateResult, LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import DeviceList from "../common";
-import { MyElement }  from "./base/element";
-import { merge } from "../merge";
+import DeviceList from "../utils/common";
+import { MyElement }  from "../base/element";
+import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
 
 import type { HassConfig, Device, DeviceInfo } from "../types/index";
@@ -246,7 +246,7 @@ export class RSDevice extends LitElement {
    */
   is_on(): boolean{
     if (!this._hass || !this.entities['device_state']) return false;
-    return (this._hass.states[this.entities['device_state'].entity_id]?.state=='on');
+    return (this._hass.states[this.entities['device_state'].entity_id]?.state!='off');
   }//end of function - is_on
 
   /*
