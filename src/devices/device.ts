@@ -296,7 +296,7 @@ ${maintenance}
    */
   get_style(conf){
     let style='';
-    if(conf && 'css' in conf){
+    if(conf?.css){
       style=Object.entries(conf.css).map(([k, v]) => `${k}:${v}`).join(';');
     }
     return style;

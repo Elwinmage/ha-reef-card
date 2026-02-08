@@ -156,16 +156,23 @@ export class RSDose extends RSDevice{
     if(!this.is_on()){
       style=html`<style>img{filter: grayscale(90%);}</style>`;
     }
+
+    let substyle='';
+    if(this.config?.css){
+      substyle=this.get_style(this.config);
+      console.log("dconf",this.config.css,substyle);
+      
+    }
+
     if (this.dosing_queue==null){
       this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this) as DosingQueue;
       this.dosing_queue.color_list=this.supplement_color;
     }
     this.dosing_queue.update_state(this.is_on());
-    
     return html`
              	<div class="device_bg">
                   ${style}
-          	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
+                  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
                   <div class="heads">
                      ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
                  </div>

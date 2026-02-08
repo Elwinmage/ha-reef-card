@@ -2,6 +2,10 @@ export const config2 = {
   "name": null,
   "model": "RSDOSE2",
   "background_img": new URL("../../img/RSDOSE2.png",import.meta.url),
+  "css":{
+    "width":"56%",
+    "left":"22%"
+  },
   "heads_nb": 2,
   "dialogs": {
     "config":{
@@ -624,7 +628,7 @@ export const config2 = {
 	    "flex": "0 0 auto",
 	    "position": "absolute",
 	    "top": "0%",
-	    "right": "6%",
+	    "right": "28%",
 	  }
 	},
 	"device_state":{
@@ -647,7 +651,7 @@ export const config2 = {
 	      "height": "2%",
 	      "border-radius": "50%",
 	      "top": "28%",
-	      "left": "2%",
+	      "left": "23%",
 	    }
 	  },
 	  "maintenance":{
@@ -670,7 +674,7 @@ export const config2 = {
 	      "height": "2%",
 	      "border-radius": "50%",
 	      "top": "22%",
-	      "left": "2%",
+	      "left": "23%",
 	    }
 	  },
 	  "wifi_quality":{
@@ -691,7 +695,7 @@ export const config2 = {
 	      "width": "5.5%",
 	      "height": "2%",
 	      "top": "0%",
-	      "right": "0%",
+	      "right": "22%",
 	    }
 	  },
 	
@@ -841,7 +845,7 @@ export const config2 = {
 		  "position": "absolute",
 		  "width": "60%",
 		  "top": "0%",
-		  "left": "20%",
+		  "left": "18%",
 		  "background-color": "$DEVICE-COLOR-ALPHA$",
 		  "border-radius": "30px",
 		  "text-align": "center",
@@ -990,14 +994,14 @@ export const config2 = {
 	    "id" : 1,
 	    "color": "140,67,148",
 	    "css":{
-	      "left":"1%",
+	      "left":"22%",
 	    },
 	  },
 	  "head_2": {
 	    "id" : 2,
 	    "color": "0,129,197",
 	    "css":{
-	      "left":"23%",
+	      "left":"43%",
 	    },
 	    
 	  },
