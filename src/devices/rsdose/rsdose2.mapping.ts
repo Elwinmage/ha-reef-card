@@ -711,7 +711,7 @@ export const config2 = {
             "position": "absolute",
             "width": "12%",
             "height": "45%",
-            "left": "88%",
+            "left": "65%",
             "top": "45%",
             "font-size": "x-small",
             "overflow-x": "hidden",
