@@ -81,7 +81,6 @@ min-height: 33.5%;
   display: flex;
   flex-direction: column;
 justify-content: center;
-border: 1px solid red;
 }
 
 #bt_center {
@@ -91,7 +90,6 @@ min-height: 33%;
   display: flex;
   flex-direction: column;
 justify-content: center;
-border: 1px solid green;
 }
 
 #bt_right {
@@ -102,7 +100,6 @@ height: 100%;
   display: flex;
   flex-direction: column;
 justify-content: center;
-border: 1px solid blue;
 }
 
 

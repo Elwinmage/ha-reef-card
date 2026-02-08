@@ -21,12 +21,13 @@ export default css`
   border-radius: 20px;
   background-color: #009ac7;
   color: white;
+font-size: 0.7em;
   font-weight: bold;
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 20px;
   padding-right: 20px;
-display:inline-block;
+  display:inline-block;
 }
 .
 `;
