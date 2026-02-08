@@ -4,6 +4,9 @@ import {config4} from "./rsdose4.mapping";
 import {config2} from "./rsdose2.mapping";
 import {DoseHead} from "./dose_head";
 
+import {dialogs_device} from "../device.dialogs"
+import {dialogs_rsdose} from "./rsdose.dialogs"
+
 import style_rsdose from "./rsdose.styles";
 import style_common from "../../utils/common.styles";
 
@@ -27,6 +30,7 @@ interface HeadEntity {
 // labels: enhancement, rsdose
 export class RSDose extends RSDevice{
 
+  
   // TODO: RSDOSE Implement baifc services
   // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/13
   // labels: enhancement, rsdose
@@ -49,6 +53,7 @@ export class RSDose extends RSDevice{
     this.supplement_color={};
 //    this.initial_config=config;
     this.dosing_queue=null;
+    this.load_dialogs([dialogs_device,dialogs_rsdose]);
   }// end of constructor
 
   set hass(obj: any){
@@ -103,7 +108,7 @@ export class RSDose extends RSDevice{
     return entity.state;
   }
   
-  _render_head(head_id){
+  _render_head(head_id,masterOn){
     let dose_head=null;
     let new_conf=merge(this.config.heads.common,this.config.heads["head_"+head_id]);
     let schedule_state=(this._hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
@@ -119,6 +124,7 @@ export class RSDose extends RSDevice{
       dose_head.update_state(this.is_on());
       dose_head.hass=this._hass;
       dose_head.bundle=this.bundle;
+      dose_head.masterOn=masterOn;
       
     }
     else
@@ -131,6 +137,7 @@ export class RSDose extends RSDevice{
       this._heads[head_id]['dose_head']=dose_head;
       dose_head.config=new_conf;
       dose_head.bundle=this.bundle;
+      dose_head.masterOn=masterOn;
     }
     
     return html`
@@ -147,7 +154,7 @@ export class RSDose extends RSDevice{
     this.update_config();
     let style=html``;
     this._populate_entities_with_heads();
-    this.bundle=this.get_entity('bundled_heads').state=="on";
+    this.bundle=this.get_entity('bundled_heads')?.state=="on";
     
     let disabled=this._render_disabled();
     if(disabled!=null){
@@ -155,8 +162,11 @@ export class RSDose extends RSDevice{
     }
     if(!this.is_on()){
       style=html`<style>img{filter: grayscale(90%);}</style>`;
+      this.masterOn=false;
     }
-
+    else{
+      this.masterOn=true;
+    }
     let substyle='';
     if(this.config?.css){
       substyle=this.get_style(this.config);
@@ -174,7 +184,7 @@ export class RSDose extends RSDevice{
                   ${style}
                   <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
                   <div class="heads">
-                     ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head))}
+                     ${Array.from({length:this.config.heads_nb},(x,i) => i+1).map(head => this._render_head(head,this.masterOn))}
                  </div>
                    ${this.dosing_queue}
                  ${this._render_elements(this.is_on())}

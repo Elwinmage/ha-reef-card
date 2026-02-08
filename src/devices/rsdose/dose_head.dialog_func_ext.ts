@@ -118,11 +118,13 @@ export function add_supplement(elt,hass,shadowRoot){
 }
 
 export function set_container_volume(elt,hass,shadowRoot){
-  let selected_supplement=elt.device.get_entity("supplement").state;
-  let supplement = supplements_list.get_supplement(selected_supplement);
+  //  let selected_supplement=elt.device.get_entity("supplement").state;
+  let selected_supplement=elt.device.get_entity("supplement").attributes.supplement.uid;
+  let supplement = supplements_list.get_supplement_from_uid(selected_supplement);
+  console.log("SUPPL",supplement);
   if(!supplement){
     selected_supplement=elt.device.get_entity("supplements").state;
-    supplement = supplements_list.get_supplement(selected_supplement);
+    supplement = supplements_list.get_supplement_from_fullname(selected_supplement);
   }
   if (supplement && supplement.sizes){
     for (let size of supplement.sizes){

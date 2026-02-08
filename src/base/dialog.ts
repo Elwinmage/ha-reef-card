@@ -102,7 +102,7 @@ export class Dialog extends LitElement {
         elt.hass = obj;
       }
     }
-    if (this.extends_to_re_render) {
+    if (this.to_render && this.extends_to_re_render) {
       for (const _elt of this.extends_to_re_render) {
 	run_action(_elt.package,_elt.function_name,this.elt,this._hass,this._shadowRoot);
       }

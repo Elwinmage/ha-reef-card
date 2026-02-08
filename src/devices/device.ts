@@ -33,13 +33,19 @@ export class RSDevice extends LitElement {
   @state()
   protected _elements: any = {};
 
+  @state()
+  protected masterOn: boolean = true;
+  
   @property({ type: Boolean })
   to_render: boolean = false;
   
   @property({ type: Boolean })
   isEditorMode: boolean = false;
 
+  @state()
+  protected dialogs: any;
 
+  
   protected state: boolean = false;
   
   constructor() {
@@ -47,6 +53,14 @@ export class RSDevice extends LitElement {
     this.state=this.is_on();
   }
 
+  load_dialogs(dialogs_list: any[]){
+    this.dialogs= {};
+    for (let dialog of dialogs_list){
+      this.dialogs=merge(this.dialogs,dialog);
+    }
+    console.log("Dialogs",this.dialogs);
+  }
+  
   override render(){
     if (this.isEditorMode) {
       return this.renderEditor();
@@ -172,13 +186,13 @@ export class RSDevice extends LitElement {
     }
     
     // Send dialogs configuration
-    if (this.config.dialogs) {
+    if (this.dialogs) {
       this.dispatchEvent(
         new CustomEvent("config-dialog", {
           bubbles: true,
           composed: true,
           detail: {
-            dialogs: this.config.dialogs,
+            dialogs: this.dialogs,
             device: this
           }
         })

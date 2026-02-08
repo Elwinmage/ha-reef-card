@@ -1,7 +1,7 @@
-import * as dose_head_dialog from "./rsdose/dose_head.dialog";
+import * as dose_head_dialog_func_ext from "./rsdose/dose_head.dialog_func_ext";
 
 export const actionRegistry: Record<string, Record<string, Function>> = {
-  dose_head_dialog,
+  dose_head_dialog_func_ext,
 };
 
 export function run_action(module: string, fname: string, ...args: any[]) {
