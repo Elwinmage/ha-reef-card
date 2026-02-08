@@ -51,7 +51,7 @@ export function set_manual_head_volume(elt,hass,shadowRoot){
 
 export function add_supplement(elt,hass,shadowRoot){
   let selected_supplement=elt.device.get_entity("supplements").state;
-  let supplement = supplements_list.get_supplement(selected_supplement);
+  let supplement = supplements_list.get_supplement_from_fullname(selected_supplement);
 
   let img='/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png';
   let cc=shadowRoot.querySelector("#add-supplement");

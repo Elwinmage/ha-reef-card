@@ -26,7 +26,7 @@ export default css`
   padding-bottom: 10px;
   padding-left: 20px;
   padding-right: 20px;
-  display:inline-block;
+display:inline-block;
 }
 .
 `;

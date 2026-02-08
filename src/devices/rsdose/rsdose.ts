@@ -51,7 +51,6 @@ export class RSDose extends RSDevice{
   constructor(){
     super();
     this.supplement_color={};
-//    this.initial_config=config;
     this.dosing_queue=null;
     this.load_dialogs([dialogs_device,dialogs_rsdose]);
   }// end of constructor
@@ -391,4 +390,5 @@ export class RSDose2 extends RSDose{
     super();
     this.initial_config=config2;
   }// end of constructor
+
 }

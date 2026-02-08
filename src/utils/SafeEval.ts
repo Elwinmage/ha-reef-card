@@ -396,6 +396,10 @@ export class SafeEval {
    */
   public evaluateCondition(condition: string | undefined | null): boolean {
     // Protection contre les valeurs undefined/null/empty
+    if(condition && typeof condition =="boolean" ){
+      return condition;
+    }
+
     if (!condition || typeof condition !== 'string' || condition.trim() === '') {
       return false; // Condition invalide = pas désactivé par défaut
     }

@@ -61,18 +61,50 @@ width:90%;
 margin-left: 5%;
 }
 
-#dialog-submit{
-// border: 1px solid green;grid-column: 2/4;
-grid-row: 3;
-text-align:right;
-margin-right: 2%;
+#dialog-buttons {
+  grid-column: 1/3;
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 10px 5px;
+  width: 90%;
+margin-left: 5%;
+min-width: 90%;
+align-items: stretch;
 }
-#dialog-cancel{
-// border: 1px solid green;grid-column: 1/3;
-grid-row: 3;
-text-align:left;
-margin-left: 2%;
+
+#bt_left {
+  grid-column: 1;
+text-align: center;
+min-height: 33.5%;
+  display: flex;
+  flex-direction: column;
+justify-content: center;
+border: 1px solid red;
 }
+
+#bt_center {
+  grid-column: 2;
+text-align: center;
+min-height: 33%;
+  display: flex;
+  flex-direction: column;
+justify-content: center;
+border: 1px solid green;
+}
+
+#bt_right {
+  grid-column: 3;
+text-align: center;
+min-width: 33.5%;
+height: 100%;
+  display: flex;
+  flex-direction: column;
+justify-content: center;
+border: 1px solid blue;
+}
+
 
 form.schedule{
   margin-top:10px;

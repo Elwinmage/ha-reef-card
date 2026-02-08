@@ -239,8 +239,9 @@ export class Dialog extends LitElement {
       this._shadowRoot.querySelector("#dialog-close").innerHTML='';
       this._shadowRoot.querySelector("#dialog-title").innerHTML='';
       this._shadowRoot.querySelector("#dialog-content").innerHTML='';
-      this._shadowRoot.querySelector("#dialog-cancel").innerHTML='';
-      this._shadowRoot.querySelector("#dialog-submit").innerHTML='';
+      this._shadowRoot.querySelector("#bt_left").innerHTML='';
+      this._shadowRoot.querySelector("#bt_center").innerHTML='';
+      this._shadowRoot.querySelector("#bt_right").innerHTML='';
       // Closing cross
       if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
 	let close_cross_class=customElements.get("click-image");
@@ -257,22 +258,30 @@ export class Dialog extends LitElement {
       this.to_render.content.map(c => this._render_content(c));
       // Submit
       let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
-      this._shadowRoot.querySelector("#dialog-submit").appendChild(submit_button);
+      this._shadowRoot.querySelector("#bt_right").appendChild(submit_button);
+      // Other
+      if(this.to_render.other){
+	let other_button=MyElement.create_element(this._hass,this.to_render.other.conf,this.elt.device);
+	this._shadowRoot.querySelector("#bt_center").appendChild(other_button);
+      }
       //Cancel
       if(cancel_conf){
 	let cancel_button=MyElement.create_element(this._hass,cancel_conf,this.elt.device);
-	this._shadowRoot.querySelector("#dialog-cancel").appendChild(cancel_button);
+	this._shadowRoot.querySelector("#bt_left").appendChild(cancel_button);
       }
     }
     return html`
 <div id="window-mask">
-<div id="dialog">
-<div id="dialog-close"></div>
-<div id="dialog-title"></div>
-<div id="dialog-content"></div>
-<div id="dialog-cancel"></div>
-<div id="dialog-submit"></div>
-</div>
+  <div id="dialog">
+    <div id="dialog-close"></div>
+    <div id="dialog-title"></div>
+    <div id="dialog-content"></div>
+    <div id="dialog-buttons">
+      <div id="bt_left"></div>
+      <div id="bt_center"></div>
+      <div id="bt_right"></div>
+    </div>
+   </div>
 </div>
 `;
   }//end of function render

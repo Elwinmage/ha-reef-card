@@ -3,7 +3,7 @@ export const config2 = {
   "model": "RSDOSE2",
   "background_img": new URL("../../img/RSDOSE2.png",import.meta.url),
   "css":{
-    "width":"56%",
+    "width":"64%",
     "left":"22%"
   },
   "heads_nb": 2,

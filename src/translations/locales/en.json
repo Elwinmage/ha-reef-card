@@ -76,5 +76,6 @@
   "volume_unit":" mL",
   "welcome":"Hello",
   "whisper":"Whisper",
-  "wifi":"Wifi"
+  "wifi":"Wifi",
+  "yes":"Yes"
 }
