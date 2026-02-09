@@ -20,29 +20,30 @@ export class RSSwitch extends MyElement {
   protected override _render(_style: string = ''): any {
     if (this.conf.style=="switch"){
       return html`
-            <div class="switch_${this.stateObj.state}">
-              <div class="switch_in_${this.stateObj.state}"></div>
-            </div>`;
-	}//if
-	else if (this.conf.style=="button"){
-	    if ('color' in this.conf){
-		this.color=this.conf.color;
-	    }
-	    if ('alpha' in this.conf){
-		this.alpha=this.conf.alpha;
-	    }
-	    return html`
-                     <style>
-                       #${this.conf.name}{
-                          background-color: rgba(${this.color},${this.alpha});
-                       }   
-                     </style>
-                     <div class="switch_button"  id="${this.conf.name}">${this.label}</div>
+<label>${this.label}</label>
+<div class="switch_${this.stateObj.state}">
+<div class="switch_in_${this.stateObj.state}"></div>
+</div>`;
+    }//if
+    else if (this.conf.style=="button"){
+      if ('color' in this.conf){
+	this.color=this.conf.color;
+      }
+      if ('alpha' in this.conf){
+	this.alpha=this.conf.alpha;
+      }
+      return html`
+<style>
+#${this.conf.name}{
+background-color: rgba(${this.color},${this.alpha});
+}   
+</style>
+<div class="switch_button"  id="${this.conf.name}">${this.label}</div>
 `;
-	}
-	else{
-	    console.error("Switch style "+this.conf.style+" unknown for "+this.conf.name);
-	}
+    }
+    else{
+      console.error("Switch style "+this.conf.style+" unknown for "+this.conf.name);
+    }
   }
   
   private _handleSwitchChange = (e: Event): void => {

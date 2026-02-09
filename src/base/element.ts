@@ -167,14 +167,42 @@ export class MyElement extends LitElement {
       return current?.[key];
     }, obj);
   }
+
+
+  static replace_translation_key_by_id(conf: ElementConfig,device: Device){
+    const clone = structuredClone(conf);
+    if("entities" in conf){
+      for (let pos in conf.entities){
+	if (typeof clone.entities[pos]=="string"){
+	  clone.entities[pos]=device.get_entity(conf.entities[pos]).entity_id;
+	}
+	else {
+	  clone.entities[pos].entity=device.get_entity(conf.entities[pos].entity).entity_id;
+	}
+      }
+    }
+    else if("entity" in conf){
+      clone.entity=device.get_entity(conf.entity).entity_id;
+    }
+    return clone;
+  }
   
 
   static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
     let Element = customElements.get(config.type) as typeof MyElement;
     let label_name = '';
     console.debug("Creating element", config.type);
-
     let elt = new Element();
+
+    if (config.type=="hui-entities-card"){
+      const clone = MyElement.replace_translation_key_by_id(config.conf,device);
+      
+      elt.hass = hass;
+      elt.setConfig(clone);
+      elt.device=device;
+      return elt;
+    }
+    
     elt.device = device;
     elt.stateOn = elt.device.is_on();
     elt.hass = hass;
@@ -193,7 +221,12 @@ export class MyElement extends LitElement {
 
     if ('label' in config) {
       if (typeof config.label === 'boolean' && config.label !== false) {
-	label_name = config.name;
+	if (elt.stateObj){
+	  label_name = elt.stateObj.attributes.friendly_name.replace(device.device.name+" ","");
+	}
+	else {
+	  label_name = config.name;
+	}
       }
       else if (config.label && typeof config.label !== 'boolean') {
 	// Créer un objet avec toutes les entités du device
@@ -218,7 +251,6 @@ export class MyElement extends LitElement {
         elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
       }
     }
-
     elt.label = label_name;
     return elt;
   }

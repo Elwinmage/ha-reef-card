@@ -1,6 +1,10 @@
-import { html } from "lit";
+import { html, TemplateResult } from "lit";
 import { RSDevice } from "../device";
 import { config } from "./rswave.mapping";
+
+import {dialogs_device} from "../device.dialogs"
+
+import i18n from "../../translations/myi18n";
 
 export class RSWave extends RSDevice {
   
@@ -15,12 +19,14 @@ export class RSWave extends RSDevice {
     'elements': null
   };
 
-  _render() {
-    this.update_config();
-     return html`
-             	<div class="device_bg">
-          	  <img class="device_img" id="rsdose4_img" alt=""  src='${this.config.background_img}' />
-                 ${this._render_elements(this.is_on())}
-</div>`;
-    }
+
+  override renderEditor(): TemplateResult {
+    return html``;
+  }
+}
+
+export class RSWave25 extends RSWave{
+}
+
+export class RSWave45 extends RSWave{
 }

@@ -1,6 +1,10 @@
-import { html } from "lit";
+import { html,TemplateResult } from "lit";
 import { RSDevice } from "../device";
 import { config } from "./rsato.mapping";
+
+import {dialogs_device} from "../device.dialogs"
+
+import i18n from "../../translations/myi18n";
 
 export class RSAto extends RSDevice {
   
@@ -15,12 +19,7 @@ export class RSAto extends RSDevice {
     'elements': null
   };
 
-  _render() {
-    this.update_config();
-    return html`
-             	<div class="device_bg">
-          	  <img class="device_img" id="rsato_img" alt=""  src='${this.config.background_img}' />
-                 ${this._render_elements(this.is_on())}
-               </div>`;
+  override renderEditor(): TemplateResult {
+    return html``;
   }
 }

@@ -1,7 +1,7 @@
-export const config = {
+export const config2 = {
   "name": null,
-  "model": "RSRUN",
-  "background_img": new URL("../../img/RSRUN.png", import.meta.url),
+  "model": "RSLED",
+  "background_img": new URL("../../img/rsled_g2.png", import.meta.url),
   "css":{
     "width":"100%",
   },
@@ -70,6 +70,5 @@ export const config = {
         "right": "0%",
       }
     },
-    
   }
 };

@@ -181,26 +181,12 @@ export class Dialog extends LitElement {
 	    return;
 	}
 	else{
-	    const r_element= customElements.get(content_conf.view);
-	    content= new r_element();
-	    // translate from translation_key to entity_id
-	    const clone = structuredClone(content_conf.conf);
-	    if("entities" in content_conf.conf){
-		for (let pos in content_conf.conf.entities){
-		    if (typeof clone.entities[pos]=="string"){
-			clone.entities[pos]=this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
-		    }
-		    else {
-			clone.entities[pos].entity=this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
-		    }
-		}
-	    }
-	    else if("entity" in content_conf.conf){
-		clone.entity=this.elt.get_entity(content_conf.conf.entity).entity_id;
-	    }
-	    content.setConfig(clone);
-	    content.hass=this._hass;
-	    content.device=this.elt.device;
+	  const r_element= customElements.get(content_conf.view);
+	  content= new r_element();
+	  const clone = MyElement.replace_translation_key_by_id(content_conf.conf,this.elt.device);
+	  content.setConfig(clone);
+	  content.hass=this._hass;
+	  content.device=this.elt.device;
 	}
 	this.elts.push(content);
 	this._shadowRoot.querySelector("#dialog-content").appendChild(content);

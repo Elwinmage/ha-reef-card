@@ -1,4 +1,4 @@
-import { html, css } from "lit";
+import { html, TemplateResult, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import {RSDevice} from "../device";
@@ -21,10 +21,15 @@ export class NoDevice extends RSDevice {
     _populate_entities(){
     }  
 
+  override render(){
+    return this._render();
+  }
+  
+  
+  
   protected override _render() {
 	this.update_config();
 	return html`
-                     <p id="device_name">${this.config.name}</p>
                      <div class="device_bg">
                        <img class="device_img" src="${this.config.background_img}"/>
                      </div>

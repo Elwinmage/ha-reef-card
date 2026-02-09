@@ -22,6 +22,7 @@
   "days_left": "Jours restant",
   "delete": "Supprimer",
   "delete_wait": "Suppression en cours",
+  "dev_planned": "Developpement planifié",
   "dialog_add_supplement_title": "Nouveau Supplément pour la tête",
   "dialog_delete_supplement_title": "Supprimer le Supplément de la tête",
   "dialog_edit_container": "Edition du Conteneur",
@@ -40,6 +41,7 @@
   "heads_shortcuts": "Raccourcis doses manuelles",
   "hour":"Heure",
   "hourly":"Horaire",
+  "in_dev": "En cours de développement",
   "last_alert_message": "Cacher le dernier message d'alerte",
   "last_message": "Cacher le dernier message",
   "maintenance": "Maintenance en cours...",
@@ -70,6 +72,7 @@
   "test_calibration_validation": "La valeur est elle égale à 4 mL +/- (0.05mL)?",
   "timer":"Minuteur",
   "volume":"Volume (mL)",
+  "vote_next_device": "Votez pour le prochain périphérique à être supporté",
   "whisper":"Silencieux",
   "wifi":"Wifi",
   "yes":"Oui"

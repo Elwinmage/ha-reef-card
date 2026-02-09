@@ -115,7 +115,7 @@ export class DoseHead extends RSDevice{
     _render_ask() {
 	    let ask: any='';
 	    if ( this.supplement_info && !this.supplement.attributes.supplement.is_name_editable){
-	      ask=html`<a class="addSupplement" target="_blank" href='https:// github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;	    }// if
+	      ask=html`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;	    }// if
       return html`${ask}`;
     }
     

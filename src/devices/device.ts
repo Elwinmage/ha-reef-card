@@ -6,7 +6,9 @@ import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
 
 import type { HassConfig, Device, DeviceInfo } from "../types/index";
+import style_common from "../utils/common.styles";
 
+import {dialogs_device} from "./device.dialogs"
 
 
 @customElement('rs-device')
@@ -47,10 +49,13 @@ export class RSDevice extends LitElement {
 
   
   protected state: boolean = false;
+
+  static styles = [style_common];
   
   constructor() {
     super();
     this.state=this.is_on();
+    this.load_dialogs([dialogs_device]);
   }
 
   load_dialogs(dialogs_list: any[]){
@@ -58,7 +63,6 @@ export class RSDevice extends LitElement {
     for (let dialog of dialogs_list){
       this.dialogs=merge(this.dialogs,dialog);
     }
-    console.log("Dialogs",this.dialogs);
   }
   
   override render(){
@@ -91,7 +95,21 @@ export class RSDevice extends LitElement {
   }
 
   _render(style=null,substyle=null){
-    return html`RSDEVICE Base class`;
+    return html`
+    <div class="device_bg">
+                  ${style}
+<img class="device_img" id="rsdevice_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
+
+<div id="banner" style="background-color:rgba(135,135,135,0.7);position:absolute;top:0%;width:100%;height: 100%;text-align:center;">
+<div style="background-color:rgba(255,255,255,0.7);border-radius:30px">
+<H1 style="color:red;">${i18n._("dev_planned")}</h1>
+<h2><a href="https://github.com/Elwinmage/ha-reef-card/discussions/22">${i18n._("vote_next_device")}</a></h2>
+</div>
+<div>
+${this._render_elements(this.is_on())}
+</div>
+</div>
+               </div>`;
   }
   
   renderEditor(): TemplateResult {
@@ -103,7 +121,8 @@ export class RSDevice extends LitElement {
     let re_render=false;
     for (let element in this._elements){
       let elt = this._elements[element];
-      if ('master' in elt.conf && elt.conf.master){
+      //      if ('master' in elt.conf && elt.conf.master){
+      if (elt?.conf?.master){
 	if(elt.has_changed(obj)){
 	  re_render=true;
 	}
@@ -248,7 +267,6 @@ export class RSDevice extends LitElement {
   _populate_entities(){
     this.update_config();
     if (this._hass && this.device){
-      console.log("Populate",this._hass.entities);
       for (const entity_id in this._hass.entities || []){
 	const entity=this._hass.entities[entity_id];
         if(entity.device_id == this.device.elements[0]?.id){

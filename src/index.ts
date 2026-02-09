@@ -25,5 +25,5 @@ window.customCards.push({
   name: "Content Card Editor",
   preview: false, // Optional - defaults to false
   description: "Reef Card!", // Optional
-  documentationURL: "https:// github.com/Elwinmage/ha-reef-card", // Adds a help link in the frontend card editor
+  documentationURL: "https://github.com/Elwinmage/ha-reef-card", // Adds a help link in the frontend card editor
 });

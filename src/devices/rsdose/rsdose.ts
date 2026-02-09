@@ -39,7 +39,6 @@ export class RSDose extends RSDevice{
   supplement_color: Record<string, any> = {};
   dosing_queue: DosingQueue | null = null;
   bundle: boolean = false;
-  current_device: any;
   _config: any;
 
   static get properties(){

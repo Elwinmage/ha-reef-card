@@ -22,6 +22,7 @@
   "days_left": "Days Left",
   "delete": "Delete",
   "delete_wait": "Deletion in progress",
+  "dev_planned": "Developpement planned",
   "dialog_add_supplement_title": "Add new supplement to head",
   "dialog_delete_supplement_title": "Delete supplement for head",
   "dialog_edit_container": "Edit Container",
@@ -40,6 +41,7 @@
   "heads_shortcuts": "Manual Shorcut Doses",
   "hour":"Hour",
   "hourly":"Hourly",
+  "in_dev": "Currently under developpement",
   "last_alert_message": "Hide Last Alert Message",
   "last_message": "Hide Last Message",
   "maintenance": "Maintenance in progress..",
@@ -70,6 +72,7 @@
   "test_calibration_validation": "Is the value equal to 4 mL +/- (0.05mL)?",
   "timer":"Timer",
   "volume":"Volume (mL)",
+  "vote_next_device": "Vote for next supported device",
   "whisper":"Whisper",
   "wifi":"Wifi",
   "yes":"Yes"

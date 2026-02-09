@@ -2,7 +2,9 @@ export const config = {
   "name": null,
   "model": "RSATO",
   "background_img": new URL("../../img/RSATO+.png", import.meta.url),
-  
+  "css":{
+    "width":"100%",
+  },
   "dialogs": {
     "wifi": {
       "name": "wifi",
@@ -63,54 +65,17 @@ export const config = {
         "background-color": "rgba(240,200,200,0.7)",
       }
     },
-    
-    "device_state": {
-      "name": "device_state",
-      "master": true,
-      "type": "common-switch",
-      "label": false,
-      "class": "on_off",
-      "style": "switch",
-      "tap_action": {
-        "domain": "switch",
-        "action": "toggle",
-        "data": "default",
-      },
-      "css": {
-        "flex": "0 0 auto",
-        "position": "absolute",
-        "width": "5.5%",
-        "height": "2%",
-        "border-radius": "50%",
-        "top": "28%",
-        "left": "2%",
+    "device_states":{
+      "type": "hui-entities-card",
+      "conf":{
+	"type":"entities",
+	"entities": [
+	  {"entity":"device_state","name":{"type":"entity"}},
+	  {"entity":"maintenance","name":{"type":"entity"}},
+	]
       }
     },
-    
-    "maintenance": {
-      "name": "maintenance",
-      "type": "common-switch",
-      "master": true,
-      "label": false,
-      "class": "on_off",
-      "style": "switch",
-      "tap_action": {
-        "enabled": true,
-        "domain": "switch",
-        "action": "toggle",
-        "data": "default",
-      },
-      "css": {
-        "flex": "0 0 auto",
-        "position": "absolute",
-        "width": "5.5%",
-        "height": "2%",
-        "border-radius": "50%",
-        "top": "22%",
-        "left": "2%",
-      }
-    },
-    
+
     "wifi_quality": {
       "name": "wifi_quality",
       "type": "common-sensor",

@@ -1,7 +1,20 @@
+
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  server: {
+    watch: {
+      awaitWriteFinish: {
+        stabilityThreshold: 2000,  // 1 seconde
+        pollInterval: 100
+      }
+    },
+    
+    hmr: {
+      timeout: 2000
+    }
+  },
   build: {
     sourcemap: true,
     lib: {
