@@ -69,7 +69,7 @@ export class RSDose extends RSDevice{
   }
   
   _populate_entities(): void {
-    
+    this._populate_entities_with_heads();
   }
 
   _populate_entities_with_heads(): void {
@@ -146,33 +146,9 @@ export class RSDose extends RSDevice{
                     `;
   }
 
-  _render(){
-    this.to_render=false;
-    console.debug("Render rsdose");
+  _render(style=null,substyle=null){
 
-    this.update_config();
-    let style=html``;
-    this._populate_entities_with_heads();
     this.bundle=this.get_entity('bundled_heads')?.state=="on";
-    
-    let disabled=this._render_disabled();
-    if(disabled!=null){
-      return disabled;
-    }
-    if(!this.is_on()){
-      style=html`<style>img{filter: grayscale(90%);}</style>`;
-      this.masterOn=false;
-    }
-    else{
-      this.masterOn=true;
-    }
-    let substyle='';
-    if(this.config?.css){
-      substyle=this.get_style(this.config);
-      console.log("dconf",this.config.css,substyle);
-      
-    }
-
     if (this.dosing_queue==null){
       this.dosing_queue=MyElement.create_element(this._hass,this.config.dosing_queue,this) as DosingQueue;
       this.dosing_queue.color_list=this.supplement_color;

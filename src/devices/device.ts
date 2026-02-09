@@ -65,10 +65,32 @@ export class RSDevice extends LitElement {
     if (this.isEditorMode) {
       return this.renderEditor();
     }
-    return this._render();
+    this.update_config();
+    this.to_render=false;
+    console.debug("Render ",this.config.model);
+    
+    let style=html``;
+    this._populate_entities();
+    
+    let disabled=this._render_disabled();
+    if(disabled!=null){
+      return disabled;
+    }
+    if(!this.is_on()){
+      style=html`<style>img{filter: grayscale(90%);}</style>`;
+      this.masterOn=false;
+    }
+    else{
+      this.masterOn=true;
+    }
+    let substyle='';
+    if(this.config?.css){
+      substyle=this.get_style(this.config);
+    }
+    return this._render(style,substyle);
   }
 
-  _render(){
+  _render(style=null,substyle=null){
     return html`RSDEVICE Base class`;
   }
   
@@ -90,7 +112,6 @@ export class RSDevice extends LitElement {
     }
     if(re_render){
       this.to_render=true;
-      //this.render();
       this.requestUpdate();
     }
   }
@@ -225,8 +246,11 @@ export class RSDevice extends LitElement {
    * Get all entities linked to this redsea device
    */
   _populate_entities(){
+    this.update_config();
     if (this._hass && this.device){
-      for (const entity of this._hass.entities || []){
+      console.log("Populate",this._hass.entities);
+      for (const entity_id in this._hass.entities || []){
+	const entity=this._hass.entities[entity_id];
         if(entity.device_id == this.device.elements[0]?.id){
           this.entities[entity.translation_key]=entity;
         }

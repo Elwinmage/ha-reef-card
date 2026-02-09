@@ -170,7 +170,6 @@ ${this.select_devices.map(option => html`
   }// end of _set_current_device_from_name
 
   private _set_current_device(device_id: string): void {
-    console.debug("Current device",device_id);
     // No device selected, display redsea logo
     if (device_id=="unselected"){
       this.current_device=this.no_device;
@@ -195,7 +194,6 @@ ${this.select_devices.map(option => html`
     }
     // @ts-ignore - DeviceInfo type mismatch between imports
         this.current_device=RSDevice.create_device("redsea-"+model.toLowerCase(),this._hass,this.user_config,device);
-    console.debug(this.current_device);
     // TODO : Implement MAIN tank view support
     // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
     // labels: enhancement

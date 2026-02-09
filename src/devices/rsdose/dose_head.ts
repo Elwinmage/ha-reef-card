@@ -180,8 +180,12 @@ export class DoseHead extends RSDevice{
       slmEntity.state == "on" && 
       parseFloat(dailyDoseEntity.state) > 0)
   }
-    
-    _render(){
+
+  override render(){
+    return this._render();
+  }
+  
+  _render(style=null,substyle=null){
 	this.to_render=false;
 	this.state_on=this.is_on();
 	console.debug("Render dose_head n°",this.config.id);

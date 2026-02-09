@@ -16,11 +16,14 @@ export class RSMat extends RSDevice {
   };
 
   _render() {
-    this.update_config();
     return html`
              	<div class="device_bg">
           	  <img class="device_img" id="rsmat_img" alt=""  src='${this.config.background_img}' />
                  ${this._render_elements(this.is_on())}
                </div>`;
+  }
+
+  override renderEditor(): TemplateResult {
+    return html``;
   }
 }
