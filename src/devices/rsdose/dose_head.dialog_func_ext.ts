@@ -380,9 +380,9 @@ function save_schedule_custom(shadowRoot,elt,hass,schedule){
     let start=com.stringToTime(interval.querySelector("#st_"+position).value);
     let end=com.stringToTime(interval.querySelector("#end_"+position).value);
     if (end-start < 30){
-      let msg="at_least_30m_between";
+      let msg=i18n._("at_least_30m_between");
       if (end-start < 0){
-	msg="end_earlier_than_start";
+	msg=i18n._("end_earlier_than_start");
       }
       shadowRoot.dispatchEvent(
 	new CustomEvent(
@@ -391,7 +391,7 @@ function save_schedule_custom(shadowRoot,elt,hass,schedule){
 	    bubbles: true,
 	    composed: true,
 	    detail: {
-	      message: i18n._("can_not_save")+i18n._(msg)
+	      message: i18n._("can_not_save")+msg
 	    }
 	  }
 	)

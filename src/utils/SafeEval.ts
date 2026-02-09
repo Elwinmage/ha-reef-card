@@ -9,7 +9,7 @@
  * - Comparaisons: ==, !=, <, >, <=, >=, ===, !==
  * - Opérateurs booléens: &&, ||, !
  * - Ternaire: condition ? valTrue : valFalse
- * - Traductions: i18n._('key') ou ${i18n._('key')}
+ * - Traductions: i18n._('<key>') ou ${i18n._('<key>')}
  * - Accès aux propriétés: obj.prop, obj['prop'], obj.nested.prop
  * - Fonctions: Math.round(), Math.floor(), parseFloat(), etc.
  * - Templates: ${expression}
@@ -164,7 +164,7 @@ export class SafeEval {
    * Traite les traductions i18n._() dans une expression
    */
   private processTranslationsInExpression(expression: string): string {
-    // Remplacer i18n._('key') ou iconv._('key') par la traduction
+    // Remplacer i18n._('<key>') ou iconv._('<key>') par la traduction
     return expression.replace(
       /(i18n|iconv)\._\(\s*['"]([^'"]+)['"]\s*\)/g,
       (match, obj, key) => {

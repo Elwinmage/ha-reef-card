@@ -271,11 +271,11 @@ export class RSDevice extends LitElement {
     let maintenance : TemplateResult  = html``;
     
     if (this.is_disabled()){
-      reason="disabledInHa";
+      reason=i18n._("disabledInHa");
     }
     else if (this._hass && this.entities['maintenance'] && 
              this._hass.states[this.entities['maintenance'].entity_id]?.state=='on'){
-      reason="maintenance";
+      reason=i18n._("maintenance");
       // if in maintenance mode, display maintenance switch
       let elements: any[] =[];
       for(const i in this.config.elements){
@@ -299,7 +299,7 @@ export class RSDevice extends LitElement {
     
     return html`<div class="device_bg">
 <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
-<p class='disabled_in_ha'>${i18n._(reason)}</p>
+<p class='disabled_in_ha'>${reason}</p>
 ${maintenance}
 </div">`;
   }//end of function _render_disabled
