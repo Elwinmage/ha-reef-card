@@ -6,19 +6,23 @@ type ClickHandlers = {
 
 export function attachClickHandlers(
   element: HTMLElement,
-  handlers: ClickHandlers,
+  handlers: {
+    onClick?: (e: MouseEvent) => void;
+    onDoubleClick?: (e: MouseEvent) => void;
+    onHold?: (e: PointerEvent) => void;
+  },
   options?: {
-    holdDelay?: number;        // durée pour hold (ms)
-    doubleClickDelay?: number; // délai double click (ms)
+    holdDelay?: number;
+    clickDelay?: number;
   }
 ) {
   const holdDelay = options?.holdDelay ?? 500;
-  const doubleClickDelay = options?.doubleClickDelay ?? 250;
+  const clickDelay = options?.clickDelay ?? 250;
 
   let holdTimeout: number | null = null;
   let clickTimeout: number | null = null;
-  let clickCount = 0;
-  let holdTriggered = false;
+  let holdActive = false;
+  let doubleClickDetected = false;
 
   function clearHold() {
     if (holdTimeout !== null) {
@@ -34,42 +38,47 @@ export function attachClickHandlers(
     }
   }
 
-  element.addEventListener("contextmenu", (event: Event) => {
-    event.preventDefault();
-  });
-  
-  element.addEventListener("pointerdown", (event) => {
-    holdTriggered = false;
+  // ---- HOLD ----
+  element.addEventListener("pointerdown", (e) => {
+    holdActive = false;
+    doubleClickDetected = false;
+
+    clearHold();
+    clearClick();
 
     holdTimeout = window.setTimeout(() => {
-      holdTriggered = true;
-      handlers.onHold?.(event);
+      holdActive = true;
+      handlers.onHold?.(e);
     }, holdDelay);
   });
 
-  element.addEventListener("pointerup", (event) => {
-    clearHold();
+  element.addEventListener("pointerup", clearHold);
+  element.addEventListener("pointerleave", clearHold);
+  element.addEventListener("pointercancel", clearHold);
 
-    // Si hold déclenché → on ignore click/double click
-    if (holdTriggered) return;
+  // ---- CLICK (différé) ----
+  element.addEventListener("click", (e) => {
+    if (holdActive) return;
 
-    clickCount++;
+    clearClick();
 
-    if (clickCount === 1) {
-      clickTimeout = window.setTimeout(() => {
-        handlers.onClick?.(event);
-        clickCount = 0;
-      }, doubleClickDelay);
-    }
-
-    if (clickCount === 2) {
-      clearClick();
-      handlers.onDoubleClick?.(event);
-      clickCount = 0;
-    }
+    clickTimeout = window.setTimeout(() => {
+      if (!doubleClickDetected) {
+        handlers.onClick?.(e);
+      }
+      clickTimeout = null;
+      doubleClickDetected = false;
+    }, clickDelay);
   });
 
-  element.addEventListener("pointerleave", () => {
-    clearHold();
+  // ---- DOUBLE CLICK ----
+  element.addEventListener("dblclick", (e) => {
+    if (holdActive) return;
+
+    doubleClickDetected = true;
+    clearClick();
+    handlers.onDoubleClick?.(e);
   });
+
+  element.addEventListener("contextmenu", e => e.preventDefault());
 }

@@ -379,20 +379,17 @@ ${this._render(this.get_style('css'))}
 
   _click(): void {
     if (this.conf?.tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-    //    if (this.conf?.tap_action){
       this.run_actions(this.conf.tap_action!);
     }
   }
 
   _longclick(): void {
     if (this.conf?.hold_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      //    if (this.conf?.hold_action){
       this.run_actions(this.conf.hold_action!);
     }
   }
 
   _dblclick(): void {
-    //    if (this.conf?.double_tap_action){
     if (this.conf?.double_tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
       this.run_actions(this.conf.double_tap_action!);
     }
