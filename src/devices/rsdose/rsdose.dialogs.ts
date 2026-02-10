@@ -452,6 +452,7 @@ export const dialogs_rsdose = {
 	"class": "dialog_button",
 	"type": "common-button",
 	"stateObj":null,
+	"timer":5,
 	"tap_action":[
 	  {
 	    "domain": "button",

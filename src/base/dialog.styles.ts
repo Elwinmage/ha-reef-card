@@ -1,3 +1,8 @@
+/**
+ * @file Component styles
+ * @module base.dialog.styles
+ */
+
 import {css} from 'lit';
 
 
@@ -189,6 +194,13 @@ button{
 button:hover{
 cursor:pointer;
 }
+
+/* Timer animation - used by _wait_timer() in element.ts */
+@keyframes dialog-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 
 button.delete_button{
  background-color:red;

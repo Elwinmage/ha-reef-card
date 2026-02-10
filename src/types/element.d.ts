@@ -1,7 +1,3 @@
-/**
- * Types pour MyElement et les composants UI
- */
-
 export interface StateObject {
   entity_id: string;
   state: string;
@@ -63,6 +59,7 @@ export interface ElementConfig {
   target?: string;
   stateObj?: boolean;
   disabled_if?: string;
+  timer?: number;  // Delay in seconds between HA service calls and dialog navigation
   css?: { [key: string]: string };
   "elt.css"?: { [key: string]: string };
   tap_action?: Action | Action[];

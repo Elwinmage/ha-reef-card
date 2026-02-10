@@ -1,3 +1,8 @@
+/**
+ * @file Base class for UI elements
+ * @module base.element
+ */
+
 import { html, LitElement, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { off_color } from "../utils/common.js";
@@ -6,7 +11,7 @@ import i18n from "../translations/myi18n.js";
 import { attachClickHandlers } from "../utils/click_handler"
 import { SafeEval, SafeEvalContext } from '../utils/SafeEval';
 
-// Import des types depuis le dossier types
+
 import type {
   StateObject,
   HassConfig,
@@ -17,6 +22,20 @@ import type {
   Action,
   ElementConfig
 } from "../types/element";
+
+
+/**
+ * MyElement component
+ * @class MyElement
+ * @extends {LitElement}
+ */
+
+
+/**
+ * MyElement component
+ * @class MyElement
+ * @extends {LitElement}
+ */
 
 
 export class MyElement extends LitElement {
@@ -70,6 +89,7 @@ export class MyElement extends LitElement {
 
 
   
+  // Initialize component
   constructor() {
     super();
     attachClickHandlers(this, {
@@ -89,19 +109,19 @@ export class MyElement extends LitElement {
 
 
   createContext(){
-  //  if(!this.evalCtx){
-      const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
-	const context = {
-	  stateObj: this.stateObj,
-	  entity: entitiesContext,    // Accès via entities.nom_entite.state (alias)
-	  device: this.device,
-	  config: this.conf,
-	  state: this.stateObj?.state,
-	  name: this.conf.name,
-	  i18n: i18n,
-	};
-      this.evalCtx = new SafeEval(context);
-//    }      
+    
+    const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
+    const context = {
+      stateObj: this.stateObj,
+      entity: entitiesContext,    
+      device: this.device,
+      config: this.conf,
+      state: this.stateObj?.state,
+      name: this.conf.name,
+      i18n: i18n,
+    };
+    this.evalCtx = new SafeEval(context);
+
   }
   
   evaluate(expression: string){
@@ -130,6 +150,7 @@ export class MyElement extends LitElement {
     return res;
   }
 
+  // Update Home Assistant instance
   set hass(obj: HassConfig) {
     if(this.stateObj?.entity_id== "sensor.rsdose4_338229039_dernier_message"){
     }
@@ -146,63 +167,32 @@ export class MyElement extends LitElement {
 	const sot = this._hass.states[this.stateObjTarget.entity_id];
         if (sot && this.stateObjTarget.state !== sot.state) {
           this.stateObjTarget = sot || null;
-	this.requestUpdate(); // force render
+	  this.requestUpdate(); 
 	}
       }
     }
   }
 
+  // Set component configuration
   setConfig(conf: ElementConfig): void {
     this.conf = conf;
   }
 
 
 
-  /**
-   * Accède à une propriété imbriquée d'un objet via un chemin
-   * Ex: getNestedProperty({a: {b: {c: 1}}}, 'a.b.c') => 1
-   */
   private getNestedProperty(obj: any, path: string): any {
     return path.split('.').reduce((current, key) => {
       return current?.[key];
     }, obj);
-  }
-
-
-  static replace_translation_key_by_id(conf: ElementConfig,device: Device){
-    const clone = structuredClone(conf);
-    if("entities" in conf){
-      for (let pos in conf.entities){
-	if (typeof clone.entities[pos]=="string"){
-	  clone.entities[pos]=device.get_entity(conf.entities[pos]).entity_id;
-	}
-	else {
-	  clone.entities[pos].entity=device.get_entity(conf.entities[pos].entity).entity_id;
-	}
-      }
-    }
-    else if("entity" in conf){
-      clone.entity=device.get_entity(conf.entity).entity_id;
-    }
-    return clone;
   }
   
 
   static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
     let Element = customElements.get(config.type) as typeof MyElement;
     let label_name = '';
-//    console.debug("Creating element", config.type);
-    let elt = new Element();
+    console.debug("Creating element", config.type);
 
-    if (config.type=="hui-entities-card"){
-      const clone = MyElement.replace_translation_key_by_id(config.conf,device);
-      
-      elt.hass = hass;
-      elt.setConfig(clone);
-      elt.device=device;
-      return elt;
-    }
-    
+    let elt = new Element();
     elt.device = device;
     elt.stateOn = elt.device.is_on();
     elt.hass = hass;
@@ -221,20 +211,15 @@ export class MyElement extends LitElement {
 
     if ('label' in config) {
       if (typeof config.label === 'boolean' && config.label !== false) {
-	if (elt.stateObj){
-	  label_name = elt.stateObj.attributes.friendly_name.replace(device.device.name+" ","");
-	}
-	else {
-	  label_name = config.name;
-	}
+	label_name = config.name;
       }
       else if (config.label && typeof config.label !== 'boolean') {
-	// Créer un objet avec toutes les entités du device
+	
 	const entitiesContext = MyElement.createEntitiesContext(device, hass);
 	
 	const context = {
 	  stateObj: elt.stateObj,
-	  entity: entitiesContext,    // Accès via entities.nom_entite.state (alias)
+	  entity: entitiesContext,    
 	  device: device,
 	  config: config,
 	  state: elt.stateObj?.state,
@@ -251,13 +236,14 @@ export class MyElement extends LitElement {
         elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
       }
     }
+
     elt.label = label_name;
     return elt;
   }
 
   get_style(css_level: string = 'css'): string {
     let style = '';
-    //Set device color patch
+    
     if (this.conf && css_level in this.conf) {
       let o_style = structuredClone(this.conf[css_level]);
       if(this.device){
@@ -292,17 +278,19 @@ export class MyElement extends LitElement {
     return state;
   }
 
+  // Render component template
   protected _render(style: string): any {
     return html``;
   }
 
+  // Render component template
   override render() {
     let value: string | null = null;
     if (this.stateObj !== null) {
       value = this.stateObj.state;
     }
 
-    //if (this.conf && 'disabled_if' in this.conf && this.conf.disabled_if) {
+    
     if (this.evaluateCondition(this.conf?.disabled_if)) {
       return html`<br />`;
     }
@@ -320,78 +308,140 @@ ${this._render(this.get_style('css'))}
 `;
   }
 
-  async run_actions(actions: Action | Action[]): Promise<void> {
+  async run_actions(actions: Action | Action[], timer?: number): Promise<void> {
     let actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
 
-    for (let action of actionsArray) {
-      if (!("enabled" in action) || action.enabled) {
-        if (action.domain === "redsea_ui") {
-          switch (action.action) {
-            case "dialog":
-              this.dispatchEvent(
-                new CustomEvent("display-dialog", {
-                  bubbles: true,
-                  composed: true,
-                  detail: {
-                    type: (action.data as ActionData).type,
-                    overload_quit: (action.data as ActionData).overload_quit,
-                    elt: this,
-                  }
-                })
-              );
-              break;
+    // Separate HA service calls from UI navigation actions (dialog/exit-dialog)
+    // Execution order:
+    //   1. All HA service calls immediately (device processes them)
+    //   2. Wait timer if set (device acknowledgement delay)
+    //   3. UI navigation actions (dialog switch / close)
+    const ha_actions = actionsArray.filter(a => ("enabled" in a ? a.enabled : true) && a.domain !== "redsea_ui");
+    const ui_actions = actionsArray.filter(a => ("enabled" in a ? a.enabled : true) && a.domain === "redsea_ui");
 
-            case "exit-dialog":
-              this.dispatchEvent(
-                new CustomEvent("quit-dialog", {
-                  bubbles: true,
-                  composed: true,
-                  detail: {}
-		})
-              );
-              break;
-	    case "message_box":
-	      let str = '';
-	      if (typeof action.data === 'string') {
-		str = this.evaluate(action.data);
-	      } else {
-		str = JSON.stringify(action.data);
-	      }
-	      this.msgbox(str);
-	      break;
-	  }
-        } else {
-          let a_data = structuredClone(action.data);
+    // Step 1 : fire all HA service calls immediately
+    for (const action of ha_actions) {
+      let a_data = structuredClone(action.data);
 
-          if (a_data === "default" && this.stateObj) {
-            a_data = { entity_id: this.stateObj.entity_id };
-          } else if (typeof a_data === 'object' && a_data !== null && "entity_id" in a_data) {
-            a_data.entity_id = this.get_entity((action.data as ActionData).entity_id!).entity_id;
+      if (a_data === "default" && this.stateObj) {
+        a_data = { entity_id: this.stateObj.entity_id };
+      } else if (typeof a_data === 'object' && a_data !== null && "entity_id" in a_data) {
+        a_data.entity_id = this.get_entity((action.data as ActionData).entity_id!).entity_id;
+      }
+
+      console.debug("Call Service", action.domain, action.action, a_data);
+      this._hass?.callService(action.domain, action.action, a_data);
+    }
+
+    // Step 2 : wait timer if HA actions were sent and a timer is defined
+    if (timer && timer > 0 && ha_actions.length > 0) {
+      await this._wait_timer(timer);
+    }
+
+    // Step 3 : execute UI navigation actions
+    for (const action of ui_actions) {
+      switch (action.action) {
+        case "dialog":
+          this.dispatchEvent(
+            new CustomEvent("display-dialog", {
+              bubbles: true,
+              composed: true,
+              detail: {
+                type: (action.data as ActionData).type,
+                overload_quit: (action.data as ActionData).overload_quit,
+                elt: this,
+              }
+            })
+          );
+          break;
+
+        case "exit-dialog":
+          this.dispatchEvent(
+            new CustomEvent("quit-dialog", {
+              bubbles: true,
+              composed: true,
+              detail: {}
+            })
+          );
+          break;
+
+        case "message_box":
+          let str = '';
+          if (typeof action.data === 'string') {
+            str = this.evaluate(action.data);
+          } else {
+            str = JSON.stringify(action.data);
           }
-
-          console.debug("Call Service", action.domain, action.action, a_data);
-          this._hass?.callService(action.domain, action.action, a_data);
-        }
+          this.msgbox(str);
+          break;
       }
     }
+  }
+
+    /**
+   * Wait for a timer while showing a spinning indicator on the button that triggered the action.
+   * The button is greyed out and shows a rotating arrow + countdown during the wait.
+   * @param seconds - Number of seconds to wait
+   */
+  async _wait_timer(seconds: number): Promise<void> {
+    // The button is rendered as <div class="button"> inside this element's shadow root
+    const btn = this.shadowRoot?.querySelector(".button") as HTMLElement | null;
+    const original_html = btn?.innerHTML ?? null;
+    const original_pointer = btn?.style.pointerEvents ?? null;
+
+    if (btn) {
+      btn.style.opacity      = "0.5";
+      btn.style.filter       = "grayscale(60%)";
+      btn.style.cursor       = "not-allowed";
+      btn.style.pointerEvents = "none";  // block re-clicks
+    }
+
+    let remaining = seconds;
+
+    const update_label = () => {
+      if (btn) {
+        btn.innerHTML = `<span style="display:inline-block;animation:timer-spin 1s linear infinite;font-size:1.1em">↻</span>&nbsp;${remaining}s`;
+      }
+    };
+
+    update_label();
+
+    await new Promise<void>(resolve => {
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+          update_label();
+        } else {
+          clearInterval(interval);
+          if (btn && original_html !== null) {
+            btn.innerHTML          = original_html;
+            btn.style.opacity      = "";
+            btn.style.filter       = "";
+            btn.style.cursor       = "";
+            btn.style.pointerEvents = original_pointer ?? "";
+          }
+          resolve();
+        }
+      }, 1000);
+    });
   }
 
 
   _click(): void {
     if (this.conf?.tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.tap_action!);
+      this.run_actions(this.conf.tap_action!, this.conf.timer);
     }
   }
 
   _longclick(): void {
     if (this.conf?.hold_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.hold_action!);
+      this.run_actions(this.conf.hold_action!, this.conf.timer);
     }
   }
 
   _dblclick(): void {
     if (this.conf?.double_tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.double_tap_action!);
+      this.run_actions(this.conf.double_tap_action!, this.conf.timer);
     }
   }
 

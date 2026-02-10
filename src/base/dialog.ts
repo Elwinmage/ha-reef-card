@@ -1,3 +1,8 @@
+/**
+ * @file Dialog system for device interactions
+ * @module base.dialog
+ */
+
 import { html, LitElement } from "lit";
 
 import style_dialog from "./dialog.styles";
@@ -11,6 +16,18 @@ import i18n from "../translations/myi18n.js";
 import { MyElement } from "./element";
 
 import { run_action } from "../utils/actions";
+
+/**
+ * Dialog component for 
+ * @class Dialog
+ * @extends {LitElement}
+ */
+
+/**
+ * Dialog component for 
+ * @class Dialog
+ * @extends {LitElement}
+ */
 
 export class Dialog extends LitElement {
 
@@ -34,6 +51,7 @@ export class Dialog extends LitElement {
   protected overload_quit: any = null;
   protected evalCtx: SafeEvalContext;
 
+  // Initialize component
   constructor() {
     super();
     this._hass = null;
@@ -48,10 +66,10 @@ export class Dialog extends LitElement {
 
   createContext(){
     if(!this.evalCtx){
-	const context = {
-	  config: this.elt.device.config,
-	  i18n: i18n,
-	};
+      const context = {
+	config: this.elt.device.config,
+	i18n: i18n,
+      };
       this.evalCtx = new SafeEval(context);
     }      
   }
@@ -76,7 +94,8 @@ export class Dialog extends LitElement {
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;
     this.evalCtx = null;
-    this.render();// no this.requestUpdate() here !!
+  // Render component template
+    this.render();
     box.style.display = "flex";
   }
 
@@ -95,6 +114,7 @@ export class Dialog extends LitElement {
     }
   }
 
+  // Update Home Assistant instance
   set hass(obj: any) {
     this._hass = obj;
     if (this.elts) {
@@ -154,44 +174,59 @@ export class Dialog extends LitElement {
 
 
   _render_content(content_conf){
-	var content=null;
-	if(content_conf.view=="common-button"){
-	    content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
-	}
-	else if(content_conf.view=="text"){
-	  //content=this._shadowRoot.createElement("p");
-	  content=document.createElement("p");
-	  this._shadowRoot.appendChild(content);
-	    try {
-		content.innerHTML=this.evaluate(content_conf.value);
-	    }
-	    catch (error){
-		console.error("ERROR",error);
-		content.innerHTML=content_conf.value;
-	    }
-	}
-	else if(content_conf.view=="extend"){
+    var content=null;
+    if(content_conf.view=="common-button"){
+      content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
+    }
+    else if(content_conf.view=="text"){
+      
+      content=document.createElement("p");
+      this._shadowRoot.appendChild(content);
+      try {
+	content.innerHTML=this.evaluate(content_conf.value);
+      }
+      catch (error){
+	console.error("ERROR",error);
+	content.innerHTML=content_conf.value;
+      }
+    }
+    else if(content_conf.view=="extend"){
 
-	  run_action(content_conf.extend,this.to_render.name,this.elt,this._hass,this._shadowRoot);
+      run_action(content_conf.extend,this.to_render.name,this.elt,this._hass,this._shadowRoot);
 
-	  
-	    if (content_conf.re_render){
-	      this.extends_to_re_render.push({"package":content_conf.extend,"function_name":this.to_render.name});
-	    }
-	    return;
+      
+      if (content_conf.re_render){
+	this.extends_to_re_render.push({"package":content_conf.extend,"function_name":this.to_render.name});
+      }
+      return;
+    }
+    else{
+      const r_element= customElements.get(content_conf.view);
+      content= new r_element();
+      
+      const clone = structuredClone(content_conf.conf);
+      if("entities" in content_conf.conf){
+	for (let pos in content_conf.conf.entities){
+	  if (typeof clone.entities[pos]=="string"){
+	    clone.entities[pos]=this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
+	  }
+	  else {
+	    clone.entities[pos].entity=this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
+	  }
 	}
-	else{
-	  const r_element= customElements.get(content_conf.view);
-	  content= new r_element();
-	  const clone = MyElement.replace_translation_key_by_id(content_conf.conf,this.elt.device);
-	  content.setConfig(clone);
-	  content.hass=this._hass;
-	  content.device=this.elt.device;
-	}
-	this.elts.push(content);
-	this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+      }
+      else if("entity" in content_conf.conf){
+	clone.entity=this.elt.get_entity(content_conf.conf.entity).entity_id;
+      }
+      content.setConfig(clone);
+      content.hass=this._hass;
+      content.device=this.elt.device;
+    }
+    this.elts.push(content);
+    this._shadowRoot.querySelector("#dialog-content").appendChild(content);
   }
   
+  // Render component template
   render(){
     let close_conf={
       "image": new URL('../img/close_cross.svg',import.meta.url),
@@ -228,7 +263,7 @@ export class Dialog extends LitElement {
       this._shadowRoot.querySelector("#bt_left").innerHTML='';
       this._shadowRoot.querySelector("#bt_center").innerHTML='';
       this._shadowRoot.querySelector("#bt_right").innerHTML='';
-      // Closing cross
+      
       if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
 	let close_cross_class=customElements.get("click-image");
 	let close_cross=new close_cross_class();
@@ -236,21 +271,22 @@ export class Dialog extends LitElement {
 	(close_cross as RSHTMLElement).hass=this._hass;
 	this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
       }
-      // Title
+      
       this._shadowRoot.querySelector("#dialog-title").innerHTML=this.evaluate(this.to_render.title_key);
-      // Content
+      
       this.elts=[];
       this.extends_to_re_render=[];
       this.to_render.content.map(c => this._render_content(c));
-      // Submit
+      
+      // Check if submit button has a timer (now handled in run_actions via action.timer)
       let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
       this._shadowRoot.querySelector("#bt_right").appendChild(submit_button);
-      // Other
+      
       if(this.to_render.other){
 	let other_button=MyElement.create_element(this._hass,this.to_render.other.conf,this.elt.device);
 	this._shadowRoot.querySelector("#bt_center").appendChild(other_button);
       }
-      //Cancel
+      
       if(cancel_conf){
 	let cancel_button=MyElement.create_element(this._hass,cancel_conf,this.elt.device);
 	this._shadowRoot.querySelector("#bt_left").appendChild(cancel_button);
@@ -258,17 +294,17 @@ export class Dialog extends LitElement {
     }
     return html`
 <div id="window-mask">
-  <div id="dialog">
-    <div id="dialog-close"></div>
-    <div id="dialog-title"></div>
-    <div id="dialog-content"></div>
-    <div id="dialog-buttons">
-      <div id="bt_left"></div>
-      <div id="bt_center"></div>
-      <div id="bt_right"></div>
-    </div>
-   </div>
+<div id="dialog">
+<div id="dialog-close"></div>
+<div id="dialog-title"></div>
+<div id="dialog-content"></div>
+<div id="dialog-buttons">
+<div id="bt_left"></div>
+<div id="bt_center"></div>
+<div id="bt_right"></div>
+</div>
+</div>
 </div>
 `;
-  }//end of function render
+  }
 }

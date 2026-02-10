@@ -1,3 +1,8 @@
+/**
+ * @file Component styles
+ * @module base.button.styles
+ */
+
 import {css} from 'lit';
 
 export default css`
@@ -28,6 +33,12 @@ font-size: 0.7em;
   padding-left: 20px;
   padding-right: 20px;
   display:inline-block;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+@keyframes timer-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 .
 `;
