@@ -59,7 +59,9 @@ export class RSDose extends RSDevice{
     
     for (const head of this._heads){
       if ('dose_head' in head){
+	head.dose_head.stock_alert = Number(this.get_entity("stock_alert_days").state);
 	head.dose_head.hass=obj;
+	
       }
     }
     if(this.dosing_queue){
@@ -123,7 +125,7 @@ export class RSDose extends RSDevice{
       dose_head.hass=this._hass;
       dose_head.bundle=this.bundle;
       dose_head.masterOn=masterOn;
-      
+      dose_head.stock_alert=this.get_entity('stock_alert_days').state;
     }
     else
     {
