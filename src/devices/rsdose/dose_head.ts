@@ -60,9 +60,8 @@ export class DoseHead extends RSDevice{
     let supplement_uid=this.supplement.attributes.supplement.uid
     let img=null;
     let warning: any=html``;
-
+    this.supplement_info=false;
     img='/hacsfiles/ha-reef-card/img/supplements/'+supplement_uid+'.supplement.png';
-    
     let http = new XMLHttpRequest();
     http.open('HEAD', img, false);
     http.send();
@@ -70,7 +69,6 @@ export class DoseHead extends RSDevice{
       img='/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png'
       this.supplement_info=true;
     }
-    
     let style=html``;
     let color=this.config.color;
     if(!this.state_on){
@@ -110,10 +108,10 @@ ${this._render_ask()}
   }
 
   _render_ask() {
-    let ask: any='';
     if ( this.supplement_info && !this.supplement.attributes.supplement.is_name_editable){
-      ask=html`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;	    }// if
-    return html`${ask}`;
+      return html`<a class="addSupplement" target="_blank" href='https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(' ','+')}+${this.supplement.attributes.supplement.name.replace(' ','+')}&body=${JSON.stringify(this.supplement.attributes.supplement,null,"%0D%0A")}'>+${i18n._("ask_add_supplement")}+</a>`;
+    }// if
+    return html``;
   }
   
   is_on(){
@@ -153,7 +151,7 @@ ${this._render_ask()}
     if(this.entities && this.entities['supplement'] && 
       this._hass && this._hass.states[this.entities['supplement'].entity_id] && 
       this.supplement && 
-      this._hass.states[this.entities['supplement'].entity_id].attributes.supplement.uid != this.supplement.attributes.supplement.uid){
+      this._hass.states[this.entities['supplement'].entity_id].attributes?.supplement?.uid != this.supplement.attributes?.supplement?.uid){
       this.supplement=this._hass.states[this.entities['supplement'].entity_id];
       to_update=true;
     }
@@ -187,7 +185,9 @@ ${this._render_ask()}
     console.debug("Render dose_head n°",this.config.id);
     
     // Vérifier que l'entité supplement existe
-    if (!this.entities || !this.entities['supplement'] || !this._hass || !this._hass.states[this.entities['supplement'].entity_id]) {
+    if (!this.entities || !this.entities['supplement'] || !this._hass ||
+        !this._hass.states[this.entities['supplement'].entity_id] ||
+        !this._hass.states[this.entities['supplement'].entity_id].attributes?.supplement) {
       return html`<p>Waiting for supplement data...</p>`;
     }
     

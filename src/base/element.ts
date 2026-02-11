@@ -190,7 +190,7 @@ export class MyElement extends LitElement {
   static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
     let Element = customElements.get(config.type) as typeof MyElement;
     let label_name = '';
-    console.debug("Creating element", config.type);
+    //console.debug("Creating element", config.type);
 
     let elt = new Element();
     elt.device = device;

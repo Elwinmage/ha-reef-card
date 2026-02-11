@@ -111,11 +111,21 @@ export class RSDose extends RSDevice{
   _render_head(head_id,masterOn){
     let dose_head=null;
     let new_conf=merge(this.config.heads.common,this.config.heads["head_"+head_id]);
-    let schedule_state=(this._hass.states[this._heads[head_id].entities['schedule_enabled'].entity_id].state=='on');
+
+    // Guard: entity states may be unavailable when device is disabled or just re-enabled
+    const schedule_entity_id = this._heads[head_id]?.entities['schedule_enabled']?.entity_id;
+    const supplement_entity_id = this._heads[head_id]?.entities['supplement']?.entity_id;
+    if (!schedule_entity_id || !supplement_entity_id
+        || !this._hass.states[schedule_entity_id]
+        || !this._hass.states[supplement_entity_id]?.attributes?.supplement) {
+      return html``;
+    }
+
+    let schedule_state=(this._hass.states[schedule_entity_id].state=='on');
     if (!this.is_on()){
       schedule_state=false;
     }
-    let short_name=this._hass.states[this._heads[head_id].entities['supplement'].entity_id].attributes.supplement.short_name;
+    let short_name=this._hass.states[supplement_entity_id].attributes.supplement.short_name;
     this.supplement_color[short_name]=this.config.heads['head_'+head_id].color;
 
     if ( "dose_head" in this._heads[head_id]){

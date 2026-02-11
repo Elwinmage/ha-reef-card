@@ -75,8 +75,12 @@ export class RSDevice extends LitElement {
     
     let style=html``;
     this._populate_entities();
+    let substyle='';
+    if(this.config?.css){
+      substyle=this.get_style(this.config);
+    }
     
-    let disabled=this._render_disabled();
+    let disabled=this._render_disabled(substyle);
     if(disabled!=null){
       return disabled;
     }
@@ -86,10 +90,6 @@ export class RSDevice extends LitElement {
     }
     else{
       this.masterOn=true;
-    }
-    let substyle='';
-    if(this.config?.css){
-      substyle=this.get_style(this.config);
     }
     return this._render(style,substyle);
   }
@@ -119,6 +119,19 @@ ${this._render_elements(this.is_on())}
   _setting_hass(obj){
     this._hass=obj;
     let re_render=false;
+
+    // Detect enable/disable change: refresh device.elements from hass.devices
+    // so that is_disabled() always reads the current state.
+    if (this.device?.elements && obj.devices) {
+      for (const el of this.device.elements) {
+        const fresh = obj.devices[el.id];
+        if (fresh && fresh.disabled_by !== el.disabled_by) {
+          el.disabled_by = fresh.disabled_by;
+          re_render = true;
+        }
+      }
+    }
+
     for (let element in this._elements){
       let elt = this._elements[element];
       //      if ('master' in elt.conf && elt.conf.master){
@@ -282,20 +295,10 @@ ${this._render_elements(this.is_on())}
   /*
    * Check is the current device is disabled or not
    */
-  is_disabled(){
-    if (!this.device) return true;
-    
-    let disabled=false;
-    let sub_nb=this.device.elements.length;
-    for( let i = 0; i<sub_nb; i++){
-      if (this.device.elements[i]?.disabled_by!=null){
-        disabled=true;
-        break;
-      }
-    }
-    return disabled;
-  }//end of function is_disabled
-
+  is_disabled(): boolean {
+    if (!this.device?.elements?.length) return true;
+    return this.device.elements.some(el => el?.disabled_by != null);
+  }
 
   /*
    * Get the state of the device on or off.
@@ -308,7 +311,7 @@ ${this._render_elements(this.is_on())}
   /*
    * Special render if the device is disabled or in maintenance mode in HA
    */
-  _render_disabled(){
+  _render_disabled(substyle=null){
     let reason: string | null = null;
     let maintenance : TemplateResult  = html``;
     
@@ -340,7 +343,7 @@ ${this._render_elements(this.is_on())}
     }
     
     return html`<div class="device_bg">
-<img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}'/>
+<img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
 <p class='disabled_in_ha'>${reason}</p>
 ${maintenance}
 </div">`;

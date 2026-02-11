@@ -46,16 +46,17 @@ export class DosingQueue extends MyElement{
   }
   
     set hass(obj){
-	if (this.stateObj && this.stateObj.attributes.queue != obj.states[this.stateObj.entity_id].attributes.queue){
+	const fresh = this.stateObj && obj.states[this.stateObj.entity_id];
+	if (fresh && fresh.attributes?.queue !== this.stateObj.attributes?.queue){
 	  this._hass=obj;
-	  this.stateObj=obj.states[this.stateObj.entity_id];
+	  this.stateObj=fresh;
 	  this.requestUpdate();
 	}
     }
     
     render(){
-      this.schedule=this.stateObj.attributes.queue;
-      if(this.stateOn && this.schedule.length != 0){
+      this.schedule=this.stateObj?.attributes?.queue;
+      if(this.stateOn && this.schedule?.length){
 	    return html`
                   <div style="${this.get_style('css')}">
                     ${this.schedule.map(slot => this._render_slot_schedule(slot))}
