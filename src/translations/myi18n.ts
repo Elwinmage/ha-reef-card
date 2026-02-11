@@ -2,12 +2,12 @@ import type {
   LanguageDictionary,
   SupportedLanguage,
   I18nConfig,
-  NestedTranslation
-} from './types';
+  NestedTranslation,
+} from "./types";
 
 // Import synchrone des dictionarys
-import en from './locales/en.json';
-import fr from './locales/fr.json';
+import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
 class MyI18n {
   private fallbackLanguage: SupportedLanguage;
@@ -16,18 +16,17 @@ class MyI18n {
   private supportedLanguages: SupportedLanguage[];
 
   constructor(config: I18nConfig = {}) {
-    this.fallbackLanguage = config.fallbackLanguage || 'en';
-    this.supportedLanguages = config.supportedLanguages || [
-      'en', 'fr'
-    ];
+    this.fallbackLanguage = config.fallbackLanguage || "en";
+    this.supportedLanguages = config.supportedLanguages || ["en", "fr"];
 
     this.dictionaries = new Map<SupportedLanguage, LanguageDictionary>([
-      ['en', en as LanguageDictionary],
-      ['fr', fr as LanguageDictionary],
+      ["en", en as LanguageDictionary],
+      ["fr", fr as LanguageDictionary],
     ]);
 
-    const homeAssistant = document.querySelector('home-assistant');
-    const detectedLang = homeAssistant?.hass?.selectedLanguage ||
+    const homeAssistant = document.querySelector("home-assistant");
+    const detectedLang =
+      homeAssistant?.hass?.selectedLanguage ||
       homeAssistant?.hass?.language ||
       config.defaultLanguage ||
       this.fallbackLanguage;
@@ -38,29 +37,31 @@ class MyI18n {
   }
 
   private normalizeLanguage(lang: string): SupportedLanguage {
-    const normalized = lang.toLowerCase().split('-')[0] as SupportedLanguage;
+    const normalized = lang.toLowerCase().split("-")[0] as SupportedLanguage;
 
     if (this.supportedLanguages.includes(normalized)) {
       return normalized;
     }
 
-    console.warn(`Language '${lang}' not supported, falling back to '${this.fallbackLanguage}'`);
+    console.warn(
+      `Language '${lang}' not supported, falling back to '${this.fallbackLanguage}'`,
+    );
     return this.fallbackLanguage;
   }
 
   private getNestedValue(obj: NestedTranslation, path: string): string | null {
-    const keys = path.split('.');
+    const keys = path.split(".");
     let current: any = obj;
 
     for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
+      if (current && typeof current === "object" && key in current) {
         current = current[key];
       } else {
         return null;
       }
     }
 
-    return typeof current === 'string' ? current : null;
+    return typeof current === "string" ? current : null;
   }
 
   _(key: string, params?: Record<string, string | number>): string {
@@ -80,7 +81,10 @@ class MyI18n {
 
     if (result === null) {
       const errorPrefix = this.dictionaries.get(this.fallbackLanguage)
-        ? this.getNestedValue(this.dictionaries.get(this.fallbackLanguage)!, 'canNotFindTranslation')
+        ? this.getNestedValue(
+            this.dictionaries.get(this.fallbackLanguage),
+            "canNotFindTranslation",
+          )
         : "Translation not found: ";
       result = (errorPrefix || "Translation not found: ") + key;
     }
@@ -92,7 +96,10 @@ class MyI18n {
     return result;
   }
 
-  private replaceParams(text: string, params: Record<string, string | number>): string {
+  private replaceParams(
+    text: string,
+    params: Record<string, string | number>,
+  ): string {
     return text.replace(/\{(\w+)\}/g, (match, key) => {
       return key in params ? String(params[key]) : match;
     });
@@ -113,9 +120,11 @@ class MyI18n {
     this.currentLanguage = normalizedLang;
     console.debug(`Language changesd to '${normalizedLang}'`);
 
-    window.dispatchEvent(new CustomEvent('i18n-language-changesd', {
-      detail: { language: normalizedLang }
-    }));
+    window.dispatchEvent(
+      new CustomEvent("i18n-language-changesd", {
+        detail: { language: normalizedLang },
+      }),
+    );
   }
 
   getLanguage(): SupportedLanguage {
@@ -156,15 +165,15 @@ class MyI18n {
     return this.flattenKeys(dict);
   }
 
-  private flattenKeys(obj: NestedTranslation, prefix = ''): string[] {
+  private flattenKeys(obj: NestedTranslation, prefix = ""): string[] {
     const keys: string[] = [];
 
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
 
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         keys.push(fullKey);
-      } else if (typeof value === 'object' && value !== null) {
+      } else if (typeof value === "object" && value !== null) {
         keys.push(...this.flattenKeys(value as NestedTranslation, fullKey));
       }
     }
@@ -185,10 +194,16 @@ class MyI18n {
     console.debug(`Dictionary for '${lang}' added/updated`);
   }
 
-  mergeDictionary(lang: SupportedLanguage, partialDict: Partial<LanguageDictionary>): void {
+  mergeDictionary(
+    lang: SupportedLanguage,
+    partialDict: Partial<LanguageDictionary>,
+  ): void {
     const existingDict = this.dictionaries.get(lang);
     if (existingDict) {
-      const merged: LanguageDictionary = { ...existingDict, ...partialDict } as LanguageDictionary;
+      const merged: LanguageDictionary = {
+        ...existingDict,
+        ...partialDict,
+      } as LanguageDictionary;
       this.dictionaries.set(lang, merged);
     } else {
       this.dictionaries.set(lang, partialDict as LanguageDictionary);

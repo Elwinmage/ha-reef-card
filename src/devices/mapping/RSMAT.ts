@@ -1,5 +1,5 @@
 export const config = {
-		"name": null,
-		"model": "RSMAT",
-		"background-img": null
+  name: null,
+  model: "RSMAT",
+  "background-img": null,
 };

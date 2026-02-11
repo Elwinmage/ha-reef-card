@@ -1,13 +1,12 @@
-import {css} from 'lit';
+import { css } from "lit";
 
 export default css`
-span.volume_dosing_queue{
-font-size: x-small;
-width: 100%;
-}
+  span.volume_dosing_queue {
+    font-size: x-small;
+    width: 100%;
+  }
 
-.slot{
-color: white;
-}
-
+  .slot {
+    color: white;
+  }
 `;

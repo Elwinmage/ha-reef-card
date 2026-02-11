@@ -15,12 +15,14 @@ export interface HassEntity {
 }
 
 export interface HassDevice {
+  id: string;
   identifiers: Array<string | [string, string]>;
   primary_config_entry: string;
   name: string;
   model?: string;
   manufacturer?: string;
   sw_version?: string;
+  disabled_by: string | null;
   [key: string]: any;
 }
 
@@ -69,10 +71,12 @@ export interface Device {
 // Element Configuration Types
 // ============================================================================
 
-export type DynamicValue<T = any> = T | {
-  expression: string;
-  variables?: Record<string, any>;
-};
+export type DynamicValue<T = any> =
+  | T
+  | {
+      expression: string;
+      variables?: Record<string, any>;
+    };
 
 export interface BaseElementConfig {
   type: string;
@@ -81,7 +85,7 @@ export interface BaseElementConfig {
   stateObj?: boolean;
   disabled_if?: DisabledCondition;
   css?: Record<string, string>;
-  'elt.css'?: Record<string, string>;
+  "elt.css"?: Record<string, string>;
   tap_action?: Action | Action[];
   hold_action?: Action | Action[];
   double_tap_action?: Action | Action[];
@@ -106,7 +110,7 @@ export interface ButtonConfig extends BaseElementConfig {
 }
 
 export interface DialogContentConfig {
-  view: 'element' | 'text' | 'html';
+  view: "element" | "text" | "html";
   value?: DynamicValue<string>;
   conf?: BaseElementConfig;
   [key: string]: any;
@@ -123,13 +127,20 @@ export interface DialogConfig {
 // Condition Types
 // ============================================================================
 
-export type DisabledCondition = {
-  entity?: string;
-  state?: string | string[];
-  attribute?: string;
-  value?: any;
-  operator?: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
-} | DisabledCondition[];
+export type DisabledCondition =
+  | {
+      entity?: string;
+      state?: string | string[];
+      attribute?: string;
+      value?: any;
+      operator?:
+        | "equals"
+        | "not_equals"
+        | "greater_than"
+        | "less_than"
+        | "contains";
+    }
+  | DisabledCondition[];
 
 // ============================================================================
 // Action Types
@@ -159,7 +170,7 @@ export type NestedTranslation = {
 
 export type LanguageDictionary = NestedTranslation;
 
-export type SupportedLanguage = 'en' | 'fr' | 'de' | 'es' | 'it' | 'nl' | 'pt';
+export type SupportedLanguage = "en" | "fr" | "de" | "es" | "it" | "nl" | "pt";
 
 export interface I18nConfig {
   fallbackLanguage?: SupportedLanguage;
@@ -193,20 +204,20 @@ export interface EvaluationContext {
 // ============================================================================
 
 export interface Schedule {
-  type: 'fixed' | 'variable' | string;
+  type: "fixed" | "variable" | string;
   days: number[];
   enabled?: boolean;
   [key: string]: any;
 }
 
 export interface ScheduleFixed extends Schedule {
-  type: 'fixed';
+  type: "fixed";
   time: string;
   dose: number;
 }
 
 export interface ScheduleVariable extends Schedule {
-  type: 'variable';
+  type: "variable";
   times: string[];
   doses: number[];
 }

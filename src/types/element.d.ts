@@ -24,7 +24,7 @@ export interface DeviceConfig {
   [key: string]: any;
 }
 
-export interface RSHTMLElement extends HTMLElement{
+export interface RSHTMLElement extends HTMLElement {
   conf: ElementConfig;
   hass: any;
 }
@@ -59,7 +59,7 @@ export interface ElementConfig {
   target?: string;
   stateObj?: boolean;
   disabled_if?: string;
-  timer?: number;  // Delay in seconds between HA service calls and dialog navigation
+  timer?: number; // Delay in seconds between HA service calls and dialog navigation
   css?: { [key: string]: string };
   "elt.css"?: { [key: string]: string };
   tap_action?: Action | Action[];

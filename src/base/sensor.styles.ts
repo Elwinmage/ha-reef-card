@@ -1,12 +1,11 @@
-import {css} from 'lit';
+import { css } from "lit";
 
 export default css`
+  :hover {
+    cursor: pointer;
+  }
 
-:hover{
-cursor: pointer;
-}
-
-span.unit{
-font-size: 0.6em;
-}
+  span.unit {
+    font-size: 0.6em;
+  }
 `;

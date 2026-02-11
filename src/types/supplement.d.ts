@@ -4,8 +4,8 @@ export interface Supplement {
   display_name: string;
   short_name: string;
   brand_name: string;
-  type: string|null;
-  concentration: number|null;
+  type: string | null;
+  concentration: number | null;
   made_by_redsea: boolean;
   fullname: string;
   sizes?: number[];

@@ -1,4 +1,4 @@
-import type { ElementConfig } from './common';
+import type { ElementConfig } from "./common";
 
 export interface SensorConfig extends ElementConfig {
   prefix?: string;

@@ -1,23 +1,21 @@
-import {ReefCard} from "./card";
+import { ReefCard } from "./card";
 import { ReefCardEditor } from "./editor";
 
 import "./types/global.d";
 import "./devices/index";
 
-
 // import { loadHaComponents, DEFAULT_HA_COMPONENTS } from '@kipk/load-ha-components';
 // await loadHaComponents([// 'ha-form',// 'hui-sensor-entity-row'// ]);
 
-customElements.define("reef-card",ReefCard);
-customElements.define("reef-card-editor",ReefCardEditor);
+customElements.define("reef-card", ReefCard);
+customElements.define("reef-card-editor", ReefCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-    type: "reef-card",
-    name: "Reef Tank Card",
-    description: "A custom card for reef management.",
+  type: "reef-card",
+  name: "Reef Tank Card",
+  description: "A custom card for reef management.",
 });
-
 
 window.customCards = window.customCards || [];
 window.customCards.push({

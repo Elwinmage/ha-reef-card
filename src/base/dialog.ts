@@ -3,11 +3,11 @@
  * @module base.dialog
  */
 
-import { html, LitElement } from "lit";
+import { LitElement } from "lit";
 
 import style_dialog from "./dialog.styles";
 import style_click_image from "./click_image.styles";
-import { SafeEval, SafeEvalContext } from '../utils/SafeEval';
+import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 
 import { RSHTMLElement } from "../types/index";
 
@@ -18,19 +18,18 @@ import { MyElement } from "./element";
 import { run_action } from "../utils/actions";
 
 /**
- * Dialog component for 
+ * Dialog component for
  * @class Dialog
  * @extends {LitElement}
  */
 
 /**
- * Dialog component for 
+ * Dialog component for
  * @class Dialog
  * @extends {LitElement}
  */
 
 export class Dialog extends LitElement {
-
   static override styles = [style_dialog, style_click_image];
 
   static override get properties() {
@@ -64,22 +63,21 @@ export class Dialog extends LitElement {
     this.overload_quit = null;
   }
 
-  createContext(){
-    if(!this.evalCtx){
+  createContext() {
+    if (!this.evalCtx) {
       const context = {
-	config: this.elt.device.config,
-	i18n: i18n,
+        config: this.elt.device.config,
+        i18n: i18n,
       };
       this.evalCtx = new SafeEval(context);
-    }      
+    }
   }
-  
-  evaluate(expression: string){
+
+  evaluate(expression: string) {
     this.createContext();
     return this.evalCtx.evaluate(expression);
   }
 
-  
   init(hass: any, shadowRoot: ShadowRoot): void {
     this._hass = hass;
     this._shadowRoot = shadowRoot;
@@ -91,7 +89,9 @@ export class Dialog extends LitElement {
 
   display(conf: any): void {
     if (!this._shadowRoot) return;
-    const box = this._shadowRoot.querySelector("#window-mask") as HTMLElement | null;
+    const box = this._shadowRoot.querySelector(
+      "#window-mask",
+    ) as HTMLElement | null;
     if (!box) return;
     this.elt = conf.elt;
     this.to_render = this.config?.[conf.type];
@@ -106,10 +106,11 @@ export class Dialog extends LitElement {
     if (this.overload_quit) {
       const event = { type: this.overload_quit, elt: this.elt };
       this.display(event);
-    }
-    else {
+    } else {
       if (this._shadowRoot) {
-        const box = this._shadowRoot.querySelector("#window-mask") as HTMLElement | null;
+        const box = this._shadowRoot.querySelector(
+          "#window-mask",
+        ) as HTMLElement | null;
         if (box) box.style.display = "none";
       }
       this.elt = null;
@@ -127,7 +128,13 @@ export class Dialog extends LitElement {
     }
     if (this.to_render && this.extends_to_re_render) {
       for (const _elt of this.extends_to_re_render) {
-	run_action(_elt.package,_elt.function_name,this.elt,this._hass,this._shadowRoot);
+        run_action(
+          _elt.package,
+          _elt.function_name,
+          this.elt,
+          this._hass,
+          this._shadowRoot,
+        );
       }
     }
   }
@@ -163,7 +170,11 @@ export class Dialog extends LitElement {
       const Element = customElements.get(tag_name);
 
       if (Element) {
-        const elt = new (Element as any)() as HTMLElement & { setConfig?: (c: any) => void; hass?: any; device?: any };
+        const elt = new (Element as any)() as HTMLElement & {
+          setConfig?: (c: any) => void;
+          hass?: any;
+          device?: any;
+        };
         elt.setConfig?.(element);
         elt.hass = this._hass;
         elt.device = this.elt?.device;
@@ -175,60 +186,67 @@ export class Dialog extends LitElement {
     }
   }
 
-
-  _render_content(content_conf){
-    var content=null;
-    if(content_conf.view=="common-button"){
-      content=MyElement.create_element(this._hass,content_conf.conf,this.elt.device);
-    }
-    else if(content_conf.view=="text"){
-      
-      content=document.createElement("p");
+  _render_content(content_conf) {
+    let content = null;
+    if (content_conf.view === "common-button") {
+      content = MyElement.create_element(
+        this._hass,
+        content_conf.conf,
+        this.elt.device,
+      );
+    } else if (content_conf.view === "text") {
+      content = document.createElement("p");
       this._shadowRoot.appendChild(content);
       try {
-	content.innerHTML=this.evaluate(content_conf.value);
+        content.innerHTML = this.evaluate(content_conf.value);
+      } catch (error) {
+        console.error("ERROR", error);
+        content.innerHTML = content_conf.value;
       }
-      catch (error){
-	console.error("ERROR",error);
-	content.innerHTML=content_conf.value;
-      }
-    }
-    else if(content_conf.view=="extend"){
+    } else if (content_conf.view === "extend") {
+      run_action(
+        content_conf.extend,
+        this.to_render.name,
+        this.elt,
+        this._hass,
+        this._shadowRoot,
+      );
 
-      run_action(content_conf.extend,this.to_render.name,this.elt,this._hass,this._shadowRoot);
-
-      
-      if (content_conf.re_render){
-	this.extends_to_re_render.push({"package":content_conf.extend,"function_name":this.to_render.name});
+      if (content_conf.re_render) {
+        this.extends_to_re_render.push({
+          package: content_conf.extend,
+          function_name: this.to_render.name,
+        });
       }
       return;
-    }
-    else{
-      const r_element= customElements.get(content_conf.view);
-      content= new r_element();
-      
+    } else {
+      const r_element = customElements.get(content_conf.view);
+      content = new r_element();
+
       const clone = structuredClone(content_conf.conf);
-      if("entities" in content_conf.conf){
-	for (let pos in content_conf.conf.entities){
-	  if (typeof clone.entities[pos]=="string"){
-	    clone.entities[pos]=this.elt.get_entity(content_conf.conf.entities[pos]).entity_id;
-	  }
-	  else {
-	    clone.entities[pos].entity=this.elt.get_entity(content_conf.conf.entities[pos].entity).entity_id;
-	  }
-	}
-      }
-      else if("entity" in content_conf.conf){
-	clone.entity=this.elt.get_entity(content_conf.conf.entity).entity_id;
+      if ("entities" in content_conf.conf) {
+        for (const pos in content_conf.conf.entities) {
+          if (typeof clone.entities[pos] === "string") {
+            clone.entities[pos] = this.elt.get_entity(
+              content_conf.conf.entities[pos],
+            ).entity_id;
+          } else {
+            clone.entities[pos].entity = this.elt.get_entity(
+              content_conf.conf.entities[pos].entity,
+            ).entity_id;
+          }
+        }
+      } else if ("entity" in content_conf.conf) {
+        clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
       }
       content.setConfig(clone);
-      content.hass=this._hass;
-      content.device=this.elt.device;
+      content.hass = this._hass;
+      content.device = this.elt.device;
     }
     this.elts.push(content);
     this._shadowRoot.querySelector("#dialog-content").appendChild(content);
   }
-  
+
   /**
    * Returns the static HTML shell of the dialog.
    * Called ONCE by init() - never called again to avoid flickering.
@@ -254,67 +272,85 @@ export class Dialog extends LitElement {
    * Called by display() each time a dialog is shown - does NOT touch the shell structure.
    */
   _fill_content(): void {
-    let close_conf={
-      "image": new URL('../img/close_cross.svg',import.meta.url),
-      "type": "common-button",
-      "stateObj": null,
-      "tap_action":{
-	"domain":"redsea_ui",
-	"action":"exit-dialog",
+    const close_conf = {
+      image: new URL("../img/close_cross.svg", import.meta.url),
+      type: "common-button",
+      stateObj: null,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "exit-dialog",
       },
-      "label": "${i18n._('exit')}",
-      "class": "dialog_button",
-      "elt.css":{
-	"background-color":"rgba(0,0,0,0)",
-      }
+      label: "${i18n._('exit')}",
+      class: "dialog_button",
+      "elt.css": {
+        "background-color": "rgba(0,0,0,0)",
+      },
     };
 
-    if(this.to_render!=null){
-      let submit_conf=close_conf;
-      let cancel_conf=null;
-      if("validate" in this.to_render){
-	this.to_render.validate['elt.css']={"background-color":"rgba(0,0,0,0)"};
-	submit_conf=this.to_render.validate;
+    if (this.to_render !== null) {
+      let submit_conf = close_conf;
+      let cancel_conf = null;
+      if ("validate" in this.to_render) {
+        this.to_render.validate["elt.css"] = {
+          "background-color": "rgba(0,0,0,0)",
+        };
+        submit_conf = this.to_render.validate;
       }
-      if("cancel" in this.to_render && this.to_render.cancel){
-	cancel_conf=close_conf;
-	cancel_conf.label="${i18n._('cancel')}";
-	cancel_conf.css={left:"-30%"};
+      if ("cancel" in this.to_render && this.to_render.cancel) {
+        cancel_conf = close_conf;
+        cancel_conf.label = "${i18n._('cancel')}";
+        cancel_conf.css = { left: "-30%" };
       }
 
-      this._shadowRoot.querySelector("#dialog-close").innerHTML='';
-      this._shadowRoot.querySelector("#dialog-title").innerHTML='';
-      this._shadowRoot.querySelector("#dialog-content").innerHTML='';
-      this._shadowRoot.querySelector("#bt_left").innerHTML='';
-      this._shadowRoot.querySelector("#bt_center").innerHTML='';
-      this._shadowRoot.querySelector("#bt_right").innerHTML='';
-      
-      if(!("close_cross" in this.to_render && !this.to_render.close_cross)){
-	let close_cross_class=customElements.get("click-image");
-	let close_cross=new close_cross_class();
-	(close_cross as RSHTMLElement).conf=close_conf;
-	(close_cross as RSHTMLElement).hass=this._hass;
-	this._shadowRoot.querySelector("#dialog-close").appendChild(close_cross);
+      this._shadowRoot.querySelector("#dialog-close").innerHTML = "";
+      this._shadowRoot.querySelector("#dialog-title").innerHTML = "";
+      this._shadowRoot.querySelector("#dialog-content").innerHTML = "";
+      this._shadowRoot.querySelector("#bt_left").innerHTML = "";
+      this._shadowRoot.querySelector("#bt_center").innerHTML = "";
+      this._shadowRoot.querySelector("#bt_right").innerHTML = "";
+
+      if (!("close_cross" in this.to_render && !this.to_render.close_cross)) {
+        const close_cross_class = customElements.get("click-image");
+        const close_cross = new close_cross_class();
+        (close_cross as RSHTMLElement).conf = close_conf;
+        (close_cross as RSHTMLElement).hass = this._hass;
+        this._shadowRoot
+          .querySelector("#dialog-close")
+          .appendChild(close_cross);
       }
-      
-      this._shadowRoot.querySelector("#dialog-title").innerHTML=this.evaluate(this.to_render.title_key);
-      
-      this.elts=[];
-      this.extends_to_re_render=[];
-      this.to_render.content.map(c => this._render_content(c));
-      
+
+      this._shadowRoot.querySelector("#dialog-title").innerHTML = this.evaluate(
+        this.to_render.title_key,
+      );
+
+      this.elts = [];
+      this.extends_to_re_render = [];
+      this.to_render.content.map((c) => this._render_content(c));
+
       // Check if submit button has a timer (now handled in run_actions via action.timer)
-      let submit_button=MyElement.create_element(this._hass,submit_conf,this.elt.device);
+      const submit_button = MyElement.create_element(
+        this._hass,
+        submit_conf,
+        this.elt.device,
+      );
       this._shadowRoot.querySelector("#bt_right").appendChild(submit_button);
-      
-      if(this.to_render.other){
-	let other_button=MyElement.create_element(this._hass,this.to_render.other.conf,this.elt.device);
-	this._shadowRoot.querySelector("#bt_center").appendChild(other_button);
+
+      if (this.to_render.other) {
+        const other_button = MyElement.create_element(
+          this._hass,
+          this.to_render.other.conf,
+          this.elt.device,
+        );
+        this._shadowRoot.querySelector("#bt_center").appendChild(other_button);
       }
-      
-      if(cancel_conf){
-	let cancel_button=MyElement.create_element(this._hass,cancel_conf,this.elt.device);
-	this._shadowRoot.querySelector("#bt_left").appendChild(cancel_button);
+
+      if (cancel_conf) {
+        const cancel_button = MyElement.create_element(
+          this._hass,
+          cancel_conf,
+          this.elt.device,
+        );
+        this._shadowRoot.querySelector("#bt_left").appendChild(cancel_button);
       }
     }
   }

@@ -1,7 +1,5 @@
 {
   "*": {
-    "update": [
-      "firmware_update"
-    ]
+    "update": ["firmware_update"]
   }
 }

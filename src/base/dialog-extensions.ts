@@ -6,7 +6,7 @@
 type DialogExtensionFunction = (
   elt: any,
   hass: any,
-  shadowRoot: ShadowRoot | Document
+  shadowRoot: ShadowRoot | Document,
 ) => void | HTMLElement;
 
 interface DialogExtension {
@@ -31,19 +31,21 @@ class DialogExtensionRegistry {
     dialogName: string,
     elt: any,
     hass: any,
-    shadowRoot: ShadowRoot | Document
+    shadowRoot: ShadowRoot | Document,
   ): void | HTMLElement {
     const module = this.extensions.get(moduleName);
-    
+
     if (!module) {
       console.error(`Dialog extension module '${moduleName}' not found`);
       return;
     }
 
     const fn = module[dialogName];
-    
-    if (!fn || typeof fn !== 'function') {
-      console.error(`Dialog function '${dialogName}' not found in module '${moduleName}'`);
+
+    if (!fn || typeof fn !== "function") {
+      console.error(
+        `Dialog function '${dialogName}' not found in module '${moduleName}'`,
+      );
       return;
     }
 
@@ -55,13 +57,13 @@ class DialogExtensionRegistry {
    */
   has(moduleName: string, dialogName?: string): boolean {
     const module = this.extensions.get(moduleName);
-    
+
     if (!module) {
       return false;
     }
 
     if (dialogName) {
-      return dialogName in module && typeof module[dialogName] === 'function';
+      return dialogName in module && typeof module[dialogName] === "function";
     }
 
     return true;

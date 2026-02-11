@@ -4,7 +4,7 @@ export type NestedTranslation = {
 
 export type LanguageDictionary = NestedTranslation;
 
-export type SupportedLanguage = 'en' | 'fr';
+export type SupportedLanguage = "en" | "fr";
 
 export interface HomeAssistant {
   hass: {
@@ -21,6 +21,6 @@ export interface I18nConfig {
 
 declare global {
   interface Document {
-    querySelector(selector: 'home-assistant'): HomeAssistant | null;
+    querySelector(selector: "home-assistant"): HomeAssistant | null;
   }
 }

@@ -14,16 +14,6 @@ export interface DeviceInfo {
   elements: HassDevice[];
 }
 
-export interface HassDevice {
-  identifiers: Array<string | [string, string]>;
-  primary_config_entry: string;
-  entity_id: string;
-  state: any;
-  name: string;
-  model?: string;
-  [key: string]: any;
-}
-
 export interface StateObject {
   entity_id: string;
   state: string;
@@ -35,6 +25,24 @@ export interface StateObject {
     parent_id?: string | null;
     user_id?: string | null;
   };
+}
+
+export interface HassDevice {
+  id: string;
+  identifiers: Array<string | [string, string]>;
+  primary_config_entry: string;
+  name: string;
+  model?: string;
+  disabled_by: string | null;
+  stateObjTarget: StateObject | null;
+  [key: string]: any;
+}
+
+export interface HassConfig {
+  devices: {
+    [device_id: string]: HassDevice;
+  };
+  [key: string]: any;
 }
 
 export interface ElementConfig {
@@ -60,5 +68,4 @@ export interface HassConfig {
   [key: string]: any;
   states: { [entity_id: string]: StateObject };
   callService: (domain: string, action: string, data: any) => void;
-  
 }

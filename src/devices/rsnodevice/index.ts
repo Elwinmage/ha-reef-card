@@ -1,2 +1,2 @@
 // Export principal du device NODEVICE
-export { NoDevice } from './rsnodevice';
+export { NoDevice } from "./rsnodevice";

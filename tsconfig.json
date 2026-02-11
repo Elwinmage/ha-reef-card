@@ -24,22 +24,22 @@
 
     /* Type Checking - STRICT MODE (pragmatique pour projet legacy) */
     "strict": true,
-    "noImplicitAny": false,              /* Désactivé pour code legacy */
+    "noImplicitAny": false /* Désactivé pour code legacy */,
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
-    "strictPropertyInitialization": false, /* Désactivé pour simplifier */
+    "strictPropertyInitialization": false /* Désactivé pour simplifier */,
     "noImplicitThis": true,
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
-    
+
     /* Additional Checks (désactivées pour pragmatisme) */
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": false,
-    "noImplicitReturns": false,          /* Désactivé pour code legacy */
+    "noImplicitReturns": false /* Désactivé pour code legacy */,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,   /* Désactivé pour simplifier */
+    "noUncheckedIndexedAccess": false /* Désactivé pour simplifier */,
     "noImplicitOverride": false,
     "noPropertyAccessFromIndexSignature": false,
     "allowUnusedLabels": false,

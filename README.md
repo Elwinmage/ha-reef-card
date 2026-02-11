@@ -1,25 +1,31 @@
 <!-- [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=flat-square)](https://github.com/hacs/default) -->
+
 [![GH-release](https://img.shields.io/github/v/release/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/releases)
 [![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
 
 [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/Elwinmage/dd3b205383103c2e65a7f516003ecbf6/raw/clone.json&logo=github)](https://github.com/MShawon/github-clone-count-badge)
-[![GH-code-size](https://img.shields.io/github/languages/code-size/Elwinmage/ha-reef-card.svg?color=red&style=flat-square)](https://github.com/Elwinmage/ha-reef-card) 
+[![GH-code-size](https://img.shields.io/github/languages/code-size/Elwinmage/ha-reef-card.svg?color=red&style=flat-square)](https://github.com/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 > [!CAUTION]
 > This card is on early developpement and should only be install for test purposes.  
-> The first version will be published in hacs standard library in few weeks and will support ReefDose 4 from Redsea.<br />
-> ***You can vote to choose the next supported device [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).***
+> The first version will be published in hacs standard library in few weeks and will support ReefDose 4 from Redsea.<br /> > **_You can vote to choose the next supported device [here](https://github.com/Elwinmage/ha-reef-card/discussions/22)._**
 
 > [!NOTE]
 > Help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
-# Supported Languages: [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reef-card) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reef-card) 
+
+# Supported Languages: [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reef-card) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reef-card)
+
 <!-- You want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
+
 Your language is not supported yet, you want to help with translation, follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md).
+
 # Overview
-**Reef card** for home assistant help you to manage your reef tank. 
+
+**Reef card** for home assistant help you to manage your reef tank.
 
 Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) it takes your Redsea (ReefBeat) devices automaticaly into account.
+
 > [!NOTE]
 > If you have non redsea devices and you want them to be taken into account, you can ask [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
 
@@ -29,7 +35,8 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 
 # Compatibility
 
-✅ Implemented  ☑️ Current Work ❌ Planned
+✅ Implemented ☑️ Current Work ❌ Planned
+
 <table>
   <th>
     <td ><b>Model</b></td>
@@ -121,6 +128,7 @@ Coupled with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-co
 </table>
 
 # Summary
+
 - [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
 - [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
@@ -153,11 +161,13 @@ To remove device selection and force the device you want, set device parameter t
 </table>
 
 # ReefATO
+
 Planned.
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
+
 Planned.
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
@@ -166,7 +176,9 @@ You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose4_ex1.png"/>
 
 ## Features
+
 **Work in progress**
+
 - ReefDose 4 ([#8](https://github.com/Elwinmage/ha-reef-card/issues/8))
   - [x] Automaticaly detect and set supplements
   - [ ] Basic management (set manual & daily doses, display days left...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
@@ -176,37 +188,40 @@ You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-
   - [ ] Basic management (set manual & daily doses, display days left...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
   - [ ] Advanced schedule [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
 - Generic dosing pumps
- 
 
 ## Supplements
+
 Here is the list of supported images for the supplement. If yours as a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+
 <table><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 1</td></tr><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 2</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Ca Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Calcium </td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 1+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 2+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 3+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Mg Plus</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid Calcium</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid alkalinity</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Magnesium Mix</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Part C</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Calcion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Ferrion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Hydrate - MG</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - KoralAmino</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Koralcolor</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Liquid Reef</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Potassion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code A</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code B</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Replenish</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Restore</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Strontion</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 1</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 2</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements </td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements plus</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Amin</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 1</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 2</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 3</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Ca</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light KH</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Mg</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Blue trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Green trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Min S</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Red trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite A</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite B</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite C</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Kalium</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Metals</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio enhance</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Gbio Gen</td></tr><tr><td>✅</td><td>Red Sea - Bio Active (Colors D)</td><td><img style='width:20%;' src='src/devices/img/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Calcium (Foundation A)</td><td><img style='width:20%;' src='src/devices/img/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Calcium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Iodine (Colors A)</td><td><img style='width:20%;' src='src/devices/img/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Iron (Colors C)</td><td><img style='width:20%;' src='src/devices/img/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='src/devices/img/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - KH/Alkalinity (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Magnesium (Foundation C)</td><td><img style='width:20%;' src='src/devices/img/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Magnesium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - NO3PO4-X</td><td><img style='width:20%;' src='src/devices/img/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Potassium (Colors B)</td><td><img style='width:20%;' src='src/devices/img/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Reef Energy Plus</td><td><img style='width:20%;' src='src/devices/img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Carbonate</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Complete</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 1</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 2</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Iodine</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Plus</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Strontium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Trace</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 1</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 2</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3A</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - A Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - All-For-Reef</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Amino Organic</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling A</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling C</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Bio-Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Carbo Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Elimi-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - K Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Liquid Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - NP-Bacto-Balance</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Plus-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Potassium</td></tr></table>
 
 # ReefLed
-
 
 Planned
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefMat
+
 Planned
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefRun
+
 Planned
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefWave
+
 Planned
 
 You want it to be supported faster? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # FAQ
 
-***
+---
 
 [buymecoffee]: https://paypal.me/Elwinmage
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square

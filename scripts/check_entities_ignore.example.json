@@ -14,34 +14,18 @@
 
   "_": "--- Entités communes à tous les devices ---",
   "*": {
-    "button": [
-      "fetch_config",
-      "firmware_update",
-      "reset"
-    ],
-    "time": [
-      "schedule_time"
-    ],
-    "update": [
-      "firmware_update"
-    ]
+    "button": ["fetch_config", "firmware_update", "reset"],
+    "time": ["schedule_time"],
+    "update": ["firmware_update"]
   },
 
   "rsdose": {
-    "binary_sensor": [
-      "recalibration_required"
-    ],
-    "sensor": [
-      "last_calibration",
-      "mode"
-    ]
+    "binary_sensor": ["recalibration_required"],
+    "sensor": ["last_calibration", "mode"]
   },
 
   "rsled": {
-    "binary_sensor": [
-      "battery_level",
-      "status"
-    ],
+    "binary_sensor": ["battery_level", "status"],
     "sensor": [
       "acclimation_duration",
       "acclimation_start_intensity_factor",
@@ -54,22 +38,14 @@
       "todays_moon_day",
       "white"
     ],
-    "switch": [
-      "acclimation",
-      "moon_phase"
-    ],
+    "switch": ["acclimation", "moon_phase"],
     "number": [
       "acclimation_duration",
       "acclimation_start_intensity_factor",
       "manual_duration",
       "moon_day"
     ],
-    "select": [
-      "mode"
-    ],
-    "light": [
-      "kelvin_intensity",
-      "moon"
-    ]
+    "select": ["mode"],
+    "light": ["kelvin_intensity", "moon"]
   }
 }

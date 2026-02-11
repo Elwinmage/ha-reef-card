@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: Prettier
+        types_or: [ts, javascript, json, css, markdown, yaml]
+        additional_dependencies:
+          - prettier@3.1.0
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        language: system
+        entry: npx eslint
+        args: [--fix]
+        files: \.(ts|js)$
+        types: [file]
+
+  - repo: local
+    hooks:
+      - id: check_translation
+        name: Check Entities translations
+        entry: python scripts/check_translations.py
+        language: python
+        pass_filenames: false

@@ -3,21 +3,16 @@ import { RSDevice } from "../device";
 import { config } from "./rsled.mapping";
 import { config2 } from "./rsled_g2.mapping";
 
-import {dialogs_device} from "../device.dialogs"
-
-import i18n from "../../translations/myi18n";
-
 export class RSLed extends RSDevice {
-  
   constructor() {
     super();
     this.initial_config = config;
   }
 
   device = {
-    'model': 'RSLED',
-    'name': '',
-    'elements': null
+    model: "RSLED",
+    name: "",
+    elements: null,
   };
 
   override renderEditor(): TemplateResult {
@@ -25,29 +20,21 @@ export class RSLed extends RSDevice {
   }
 }
 
-export class RSLed160 extends RSLed{
-}
+export class RSLed160 extends RSLed {}
 
-export class RSLed90 extends RSLed{
-}
+export class RSLed90 extends RSLed {}
 
-export class RSLed50 extends RSLed{
-}
+export class RSLed50 extends RSLed {}
 
-
-class RSLedG2 extends RSLed{
-
-  constructor(){
+class RSLedG2 extends RSLed {
+  constructor() {
     super();
-    this.initial_config=config2;
-  }// end of constructor
+    this.initial_config = config2;
+  } // end of constructor
 }
 
-export class RSLed170 extends RSLedG2{
-}
+export class RSLed170 extends RSLedG2 {}
 
-export class RSLed115 extends RSLedG2{
-}
+export class RSLed115 extends RSLedG2 {}
 
-export class RSLed60 extends RSLedG2{
-}
+export class RSLed60 extends RSLedG2 {}

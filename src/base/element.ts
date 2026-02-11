@@ -3,40 +3,34 @@
  * @module base.element
  */
 
-import { html, LitElement, PropertyValues } from "lit";
+import { html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 import { off_color } from "../utils/common.js";
 import i18n from "../translations/myi18n.js";
 
-import { attachClickHandlers } from "../utils/click_handler"
-import { SafeEval, SafeEvalContext } from '../utils/SafeEval';
-
+import { attachClickHandlers } from "../utils/click_handler";
+import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 
 import type {
   StateObject,
   HassConfig,
-  DeviceEntity,
-  DeviceConfig,
   Device,
   ActionData,
   Action,
-  ElementConfig
+  ElementConfig,
 } from "../types/element";
 
-
 /**
  * MyElement component
  * @class MyElement
  * @extends {LitElement}
  */
 
-
 /**
  * MyElement component
  * @class MyElement
  * @extends {LitElement}
  */
-
 
 export class MyElement extends LitElement {
   @property({ type: Object, attribute: false })
@@ -45,75 +39,76 @@ export class MyElement extends LitElement {
   @property({ type: Boolean })
   stateOn: boolean = false;
 
-
   @state()
   protected _hass: HassConfig | null = null;
-  
+
   @state()
   protected conf?: ElementConfig;
-  
+
   @state()
   protected device?: Device;
-  
+
   @state()
   protected color?: string;
-  
+
   @state()
   protected alpha?: number;
-  
+
   @state()
-  protected label: string = '';
-  
+  protected label: string = "";
+
   @state()
   protected stateObjTarget?: StateObject;
-  
+
   @state()
   protected c?: string;
 
   protected evalCtx: SafeEvalContext;
 
-  private static createEntitiesContext(device: any, hass: any): Record<string, any> {
+  private static createEntitiesContext(
+    device: any,
+    hass: any,
+  ): Record<string, any> {
     const entitiesObj: Record<string, any> = {};
-    
+
     if (device?.entities && hass?.states) {
       for (const key in device.entities) {
-	const entity = device.entities[key];
-	if (entity?.entity_id && hass.states[entity.entity_id]) {
+        const entity = device.entities[key];
+        if (entity?.entity_id && hass.states[entity.entity_id]) {
           entitiesObj[key] = hass.states[entity.entity_id];
-	}
+        }
       }
     }
-    
+
     return entitiesObj;
   }
 
-
-  
   // Initialize component
   constructor() {
     super();
     attachClickHandlers(this, {
       onClick: () => {
-	this._click();
+        this._click();
       },
-      
+
       onDoubleClick: () => {
-	this._dblclick();
+        this._dblclick();
       },
-      
+
       onHold: () => {
-	this._longclick();
-      }
+        this._longclick();
+      },
     });
   }
 
-
-  createContext(){
-    
-    const entitiesContext = MyElement.createEntitiesContext(this.device, this._hass);
+  createContext() {
+    const entitiesContext = MyElement.createEntitiesContext(
+      this.device,
+      this._hass,
+    );
     const context = {
       stateObj: this.stateObj,
-      entity: entitiesContext,    
+      entity: entitiesContext,
       device: this.device,
       config: this.conf,
       state: this.stateObj?.state,
@@ -121,15 +116,14 @@ export class MyElement extends LitElement {
       i18n: i18n,
     };
     this.evalCtx = new SafeEval(context);
-
   }
-  
-  evaluate(expression: string){
+
+  evaluate(expression: string) {
     this.createContext();
     return this.evalCtx.evaluate(expression);
   }
 
-  evaluateCondition(expression: string){
+  evaluateCondition(expression: string) {
     this.createContext();
     return this.evalCtx.evaluateCondition(expression);
   }
@@ -152,23 +146,18 @@ export class MyElement extends LitElement {
 
   // Update Home Assistant instance
   set hass(obj: HassConfig) {
-    if(this.stateObj?.entity_id== "sensor.rsdose4_338229039_dernier_message"){
-    }
     this._hass = obj;
     if (this.stateObj) {
       const so = this._hass.states[this.stateObj.entity_id];
-      if(this.stateObj?.entity_id== "sensor.rsdose4_338229039_dernier_message"){
-      }
       if (so && this.stateObj.state !== so.state) {
         this.stateObj = so;
-	this.requestUpdate();
-      }
-      else if (this.conf && "target" in this.conf && this.stateObjTarget) {
-	const sot = this._hass.states[this.stateObjTarget.entity_id];
+        this.requestUpdate();
+      } else if (this.conf && "target" in this.conf && this.stateObjTarget) {
+        const sot = this._hass.states[this.stateObjTarget.entity_id];
         if (sot && this.stateObjTarget.state !== sot.state) {
           this.stateObjTarget = sot || null;
-	  this.requestUpdate(); 
-	}
+          this.requestUpdate();
+        }
       }
     }
   }
@@ -178,21 +167,22 @@ export class MyElement extends LitElement {
     this.conf = conf;
   }
 
-
-
   private getNestedProperty(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => {
+    return path.split(".").reduce((current, key) => {
       return current?.[key];
     }, obj);
   }
-  
 
-  static create_element(hass: HassConfig, config: ElementConfig, device: Device): MyElement {
-    let Element = customElements.get(config.type) as typeof MyElement;
-    let label_name = '';
+  static create_element(
+    hass: HassConfig,
+    config: ElementConfig,
+    device: Device,
+  ): MyElement {
+    const Element = customElements.get(config.type) as typeof MyElement;
+    let label_name = "";
     //console.debug("Creating element", config.type);
 
-    let elt = new Element();
+    const elt = new Element();
     elt.device = device;
     elt.stateOn = elt.device.is_on();
     elt.hass = hass;
@@ -200,7 +190,7 @@ export class MyElement extends LitElement {
     elt.color = elt.device.config.color;
     elt.alpha = elt.device.config.alpha;
 
-    if ('stateObj' in config && !config.stateObj) {
+    if ("stateObj" in config && !config.stateObj) {
       elt.stateObj = null;
     } else {
       const entityData = elt.device.entities[config.name];
@@ -209,25 +199,23 @@ export class MyElement extends LitElement {
       }
     }
 
-    if ('label' in config) {
-      if (typeof config.label === 'boolean' && config.label !== false) {
-	label_name = config.name;
-      }
-      else if (config.label && typeof config.label !== 'boolean') {
-	
-	const entitiesContext = MyElement.createEntitiesContext(device, hass);
-	
-	const context = {
-	  stateObj: elt.stateObj,
-	  entity: entitiesContext,    
-	  device: device,
-	  config: config,
-	  state: elt.stateObj?.state,
-	  name: config.name,
-	  i18n: i18n
-	};
-	elt.evalCtx = new SafeEval(context);
-	label_name = elt.evaluate(config.label);
+    if ("label" in config) {
+      if (typeof config.label === "boolean" && config.label !== false) {
+        label_name = config.name;
+      } else if (config.label && typeof config.label !== "boolean") {
+        const entitiesContext = MyElement.createEntitiesContext(device, hass);
+
+        const context = {
+          stateObj: elt.stateObj,
+          entity: entitiesContext,
+          device: device,
+          config: config,
+          state: elt.stateObj?.state,
+          name: config.name,
+          i18n: i18n,
+        };
+        elt.evalCtx = new SafeEval(context);
+        label_name = elt.evaluate(config.label);
       }
     }
     if ("target" in config && elt.device && config.target) {
@@ -241,24 +229,26 @@ export class MyElement extends LitElement {
     return elt;
   }
 
-  get_style(css_level: string = 'css'): string {
-    let style = '';
-    
+  get_style(css_level: string = "css"): string {
+    let style = "";
+
     if (this.conf && css_level in this.conf) {
-      let o_style = structuredClone(this.conf[css_level]);
-      if(this.device){
-	let device_color=this.device.config.color;
-	if (!this.device.is_on() ){
-	  device_color=off_color;
-	}
-	if(o_style['background-color']=="$DEVICE-COLOR$"){
-	  o_style['background-color']="rgb("+device_color+")";
-	}
-	else  if(o_style['background-color']=="$DEVICE-COLOR-ALPHA$"){
-	  o_style['background-color']="rgba("+device_color+","+this.device.config.alpha+")";
-	}
+      const o_style = structuredClone(this.conf[css_level]);
+      if (this.device) {
+        let device_color = this.device.config.color;
+        if (!this.device.is_on()) {
+          device_color = off_color;
+        }
+        if (o_style["background-color"] === "$DEVICE-COLOR$") {
+          o_style["background-color"] = "rgb(" + device_color + ")";
+        } else if (o_style["background-color"] === "$DEVICE-COLOR-ALPHA$") {
+          o_style["background-color"] =
+            "rgba(" + device_color + "," + this.device.config.alpha + ")";
+        }
       }
-      style = Object.entries(o_style).map(([k, v]) => `${k}:${v}`).join(';');
+      style = Object.entries(o_style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     }
     return style;
   }
@@ -279,18 +269,17 @@ export class MyElement extends LitElement {
   }
 
   // Render component template
-  protected _render(style: string): any {
+  protected _render(_style: string): any {
     return html``;
   }
 
   // Render component template
   override render() {
-    let value: string | null = null;
+    let _value: string | null = null;
     if (this.stateObj !== null) {
-      value = this.stateObj.state;
+      _value = this.stateObj.state;
     }
 
-    
     if (this.evaluateCondition(this.conf?.disabled_if)) {
       return html`<br />`;
     }
@@ -302,22 +291,26 @@ export class MyElement extends LitElement {
     }
 
     return html`
-<div class="${this.conf?.class || ''}" style="${this.get_style()}">
-${this._render(this.get_style('css'))}
-</div>
-`;
+      <div class="${this.conf?.class || ""}" style="${this.get_style()}">
+        ${this._render(this.get_style("css"))}
+      </div>
+    `;
   }
 
   async run_actions(actions: Action | Action[], timer?: number): Promise<void> {
-    let actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
+    const actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
 
     // Separate HA service calls from UI navigation actions (dialog/exit-dialog)
     // Execution order:
     //   1. All HA service calls immediately (device processes them)
     //   2. Wait timer if set (device acknowledgement delay)
     //   3. UI navigation actions (dialog switch / close)
-    const ha_actions = actionsArray.filter(a => ("enabled" in a ? a.enabled : true) && a.domain !== "redsea_ui");
-    const ui_actions = actionsArray.filter(a => ("enabled" in a ? a.enabled : true) && a.domain === "redsea_ui");
+    const ha_actions = actionsArray.filter(
+      (a) => ("enabled" in a ? a.enabled : true) && a.domain !== "redsea_ui",
+    );
+    const ui_actions = actionsArray.filter(
+      (a) => ("enabled" in a ? a.enabled : true) && a.domain === "redsea_ui",
+    );
 
     // Step 1 : fire all HA service calls immediately
     for (const action of ha_actions) {
@@ -325,8 +318,14 @@ ${this._render(this.get_style('css'))}
 
       if (a_data === "default" && this.stateObj) {
         a_data = { entity_id: this.stateObj.entity_id };
-      } else if (typeof a_data === 'object' && a_data !== null && "entity_id" in a_data) {
-        a_data.entity_id = this.get_entity((action.data as ActionData).entity_id!).entity_id;
+      } else if (
+        typeof a_data === "object" &&
+        a_data !== null &&
+        "entity_id" in a_data
+      ) {
+        a_data.entity_id = this.get_entity(
+          (action.data as ActionData).entity_id,
+        ).entity_id;
       }
 
       console.debug("Call Service", action.domain, action.action, a_data);
@@ -350,8 +349,8 @@ ${this._render(this.get_style('css'))}
                 type: (action.data as ActionData).type,
                 overload_quit: (action.data as ActionData).overload_quit,
                 elt: this,
-              }
-            })
+              },
+            }),
           );
           break;
 
@@ -360,14 +359,14 @@ ${this._render(this.get_style('css'))}
             new CustomEvent("quit-dialog", {
               bubbles: true,
               composed: true,
-              detail: {}
-            })
+              detail: {},
+            }),
           );
           break;
 
         case "message_box":
-          let str = '';
-          if (typeof action.data === 'string') {
+          let str = "";
+          if (typeof action.data === "string") {
             str = this.evaluate(action.data);
           } else {
             str = JSON.stringify(action.data);
@@ -378,7 +377,7 @@ ${this._render(this.get_style('css'))}
     }
   }
 
-    /**
+  /**
    * Wait for a timer while showing a spinning indicator on the button that triggered the action.
    * The button is greyed out and shows a rotating arrow + countdown during the wait.
    * @param seconds - Number of seconds to wait
@@ -390,10 +389,10 @@ ${this._render(this.get_style('css'))}
     const original_pointer = btn?.style.pointerEvents ?? null;
 
     if (btn) {
-      btn.style.opacity      = "0.5";
-      btn.style.filter       = "grayscale(60%)";
-      btn.style.cursor       = "not-allowed";
-      btn.style.pointerEvents = "none";  // block re-clicks
+      btn.style.opacity = "0.5";
+      btn.style.filter = "grayscale(60%)";
+      btn.style.cursor = "not-allowed";
+      btn.style.pointerEvents = "none"; // block re-clicks
     }
 
     let remaining = seconds;
@@ -406,7 +405,7 @@ ${this._render(this.get_style('css'))}
 
     update_label();
 
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       const interval = setInterval(() => {
         remaining--;
         if (remaining > 0) {
@@ -414,10 +413,10 @@ ${this._render(this.get_style('css'))}
         } else {
           clearInterval(interval);
           if (btn && original_html !== null) {
-            btn.innerHTML          = original_html;
-            btn.style.opacity      = "";
-            btn.style.filter       = "";
-            btn.style.cursor       = "";
+            btn.innerHTML = original_html;
+            btn.style.opacity = "";
+            btn.style.filter = "";
+            btn.style.cursor = "";
             btn.style.pointerEvents = original_pointer ?? "";
           }
           resolve();
@@ -426,22 +425,36 @@ ${this._render(this.get_style('css'))}
     });
   }
 
-
   _click(): void {
-    if (this.conf?.tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.tap_action!, this.conf.timer);
+    if (
+      this.conf?.tap_action &&
+      (!this.device ||
+        this.device.masterOn ||
+        ["device_state", "trash", "wifi"].includes(this.conf?.name))
+    ) {
+      this.run_actions(this.conf.tap_action, this.conf.timer);
     }
   }
 
   _longclick(): void {
-    if (this.conf?.hold_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.hold_action!, this.conf.timer);
+    if (
+      this.conf?.hold_action &&
+      (!this.device ||
+        this.device.masterOn ||
+        ["device_state", "trash", "wifi"].includes(this.conf?.name))
+    ) {
+      this.run_actions(this.conf.hold_action, this.conf.timer);
     }
   }
 
   _dblclick(): void {
-    if (this.conf?.double_tap_action && (!this.device || (this.device.masterOn || ["device_state","trash","wifi"].includes(this.conf?.name)))){
-      this.run_actions(this.conf.double_tap_action!, this.conf.timer);
+    if (
+      this.conf?.double_tap_action &&
+      (!this.device ||
+        this.device.masterOn ||
+        ["device_state", "trash", "wifi"].includes(this.conf?.name))
+    ) {
+      this.run_actions(this.conf.double_tap_action, this.conf.timer);
     }
   }
 
@@ -451,9 +464,9 @@ ${this._render(this.get_style('css'))}
         bubbles: true,
         composed: true,
         detail: {
-          message: msg
-        }
-      })
+          message: msg,
+        },
+      }),
     );
   }
 }

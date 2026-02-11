@@ -1,10 +1,13 @@
-declare module './translations/myi18n' {
-  import type { SupportedLanguage, I18nConfig } from '../../translations/types';
+declare module "./translations/myi18n" {
+  import type { SupportedLanguage, I18nConfig } from "../../translations/types";
 
   class MyI18n {
     constructor(config?: I18nConfig);
     _(key: string, params?: Record<string, string | number>): string;
-    translate(key: string, params?: Record<string, string | number>): Promise<string>;
+    translate(
+      key: string,
+      params?: Record<string, string | number>,
+    ): Promise<string>;
     setLanguage(lang: string): Promise<void>;
     getLanguage(): SupportedLanguage;
     getFallbackLanguage(): SupportedLanguage;

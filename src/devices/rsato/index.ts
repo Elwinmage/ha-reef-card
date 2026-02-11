@@ -1,2 +1,2 @@
 // Export principal du device RSATO
-export { RSAto } from './rsato';
+export { RSAto } from "./rsato";

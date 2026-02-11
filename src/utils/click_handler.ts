@@ -1,9 +1,3 @@
-type ClickHandlers = {
-  onClick?: (event: PointerEvent) => void;
-  onDoubleClick?: (event: PointerEvent) => void;
-  onHold?: (event: PointerEvent) => void;
-};
-
 export function attachClickHandlers(
   element: HTMLElement,
   handlers: {
@@ -14,7 +8,7 @@ export function attachClickHandlers(
   options?: {
     holdDelay?: number;
     clickDelay?: number;
-  }
+  },
 ) {
   const holdDelay = options?.holdDelay ?? 500;
   const clickDelay = options?.clickDelay ?? 250;
@@ -80,5 +74,5 @@ export function attachClickHandlers(
     handlers.onDoubleClick?.(e);
   });
 
-  element.addEventListener("contextmenu", e => e.preventDefault());
+  element.addEventListener("contextmenu", (e) => e.preventDefault());
 }

@@ -2,12 +2,9 @@ import { html, TemplateResult } from "lit";
 import { RSDevice } from "../device";
 import { config } from "./rsrun.mapping";
 
-import {dialogs_device} from "../device.dialogs"
-
-import i18n from "../../translations/myi18n";
+import { dialogs_device } from "../device.dialogs";
 
 export class RSRun extends RSDevice {
-  
   constructor() {
     super();
     this.initial_config = config;
@@ -15,9 +12,9 @@ export class RSRun extends RSDevice {
   }
 
   device = {
-    'model': 'RSRUN',
-    'name': '',
-    'elements': null
+    model: "RSRUN",
+    name: "",
+    elements: null,
   };
 
   override renderEditor(): TemplateResult {
