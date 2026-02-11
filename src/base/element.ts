@@ -146,7 +146,6 @@ export class MyElement extends LitElement {
     if (!expression) return false;
     if (typeof expression !== "string") {
       // Handle structured DisabledCondition objects
-      // TODO: Implement proper structured condition evaluation
       return false;
     }
     this.createContext();
