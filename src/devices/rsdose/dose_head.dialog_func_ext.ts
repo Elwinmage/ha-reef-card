@@ -55,6 +55,17 @@ export function add_supplement(elt,hass,shadowRoot){
 
   let img='/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png';
   let cc=shadowRoot.querySelector("#add-supplement");
+
+  // Guard: only rebuild the DOM if the selected supplement has actually changed.
+  // Without this, the block is destroyed and recreated on every set hass call
+  // (~1s), causing visible flicker due to layout recalculation.
+  const current_uid = supplement?.uid ?? selected_supplement ?? '__none__';
+  if (cc != null && cc.dataset.supplementUid === current_uid) {
+    // Same supplement - just propagate hass to any inner HA elements
+    cc.querySelectorAll('*').forEach((el: any) => { if ('hass' in el) el.hass = hass; });
+    return;
+  }
+
   if(cc != null){
     cc.remove();
   }
@@ -79,6 +90,7 @@ export function add_supplement(elt,hass,shadowRoot){
     let div=document.createElement("div");
     div.style.cssText = "display: inline-block";
     div.id="add-supplement";
+    div.dataset.supplementUid = current_uid;  // used by re-render guard
     shadowRoot.querySelector("#dialog-content").appendChild(div);
     div.appendChild(content);
     let infos=document.createElement("div");
@@ -111,6 +123,7 @@ export function add_supplement(elt,hass,shadowRoot){
     content.device=elt.device;
     let div=document.createElement("div");
     div.id="add-supplement";
+    div.dataset.supplementUid = current_uid;  // used by re-render guard
     div.appendChild(content);
 
     shadowRoot.querySelector("#dialog-content").appendChild(div);

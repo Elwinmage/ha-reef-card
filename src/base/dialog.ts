@@ -83,19 +83,22 @@ export class Dialog extends LitElement {
   init(hass: any, shadowRoot: ShadowRoot): void {
     this._hass = hass;
     this._shadowRoot = shadowRoot;
+    // Inject the dialog shell once - never rebuilt after this
+    const tpl = document.createElement("template");
+    tpl.innerHTML = this.render_shell();
+    this._shadowRoot.appendChild(tpl.content.cloneNode(true));
   }
 
   display(conf: any): void {
     if (!this._shadowRoot) return;
     const box = this._shadowRoot.querySelector("#window-mask") as HTMLElement | null;
-    
     if (!box) return;
     this.elt = conf.elt;
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;
     this.evalCtx = null;
-  // Render component template
-    this.render();
+    // Only fill content, never rebuild the shell
+    this._fill_content();
     box.style.display = "flex";
   }
 
@@ -226,8 +229,31 @@ export class Dialog extends LitElement {
     this._shadowRoot.querySelector("#dialog-content").appendChild(content);
   }
   
-  // Render component template
-  render(){
+  /**
+   * Returns the static HTML shell of the dialog.
+   * Called ONCE by init() - never called again to avoid flickering.
+   */
+  render_shell(): string {
+    return `
+<div id="window-mask">
+<div id="dialog">
+<div id="dialog-close"></div>
+<div id="dialog-title"></div>
+<div id="dialog-content"></div>
+<div id="dialog-buttons">
+<div id="bt_left"></div>
+<div id="bt_center"></div>
+<div id="bt_right"></div>
+</div>
+</div>
+</div>`;
+  }
+
+  /**
+   * Fills the dialog slots with current content.
+   * Called by display() each time a dialog is shown - does NOT touch the shell structure.
+   */
+  _fill_content(): void {
     let close_conf={
       "image": new URL('../img/close_cross.svg',import.meta.url),
       "type": "common-button",
@@ -254,7 +280,6 @@ export class Dialog extends LitElement {
 	cancel_conf=close_conf;
 	cancel_conf.label="${i18n._('cancel')}";
 	cancel_conf.css={left:"-30%"};
-	
       }
 
       this._shadowRoot.querySelector("#dialog-close").innerHTML='';
@@ -292,19 +317,5 @@ export class Dialog extends LitElement {
 	this._shadowRoot.querySelector("#bt_left").appendChild(cancel_button);
       }
     }
-    return html`
-<div id="window-mask">
-<div id="dialog">
-<div id="dialog-close"></div>
-<div id="dialog-title"></div>
-<div id="dialog-content"></div>
-<div id="dialog-buttons">
-<div id="bt_left"></div>
-<div id="bt_center"></div>
-<div id="bt_right"></div>
-</div>
-</div>
-</div>
-`;
   }
 }

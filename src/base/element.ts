@@ -400,7 +400,7 @@ ${this._render(this.get_style('css'))}
 
     const update_label = () => {
       if (btn) {
-        btn.innerHTML = `<span style="display:inline-block;animation:timer-spin 1s linear infinite;font-size:1.1em">↻</span>&nbsp;${remaining}s`;
+        btn.innerHTML = `<span style="display:inline-block;animation:timer-spin 1s linear infinite;font-size:1.1em">↻</span>`;
       }
     };
 

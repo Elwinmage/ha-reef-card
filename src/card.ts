@@ -135,14 +135,14 @@ export class ReefCard extends LitElement {
       return html`
 ${this.messages}
 ${this.current_device}
-${this._dialog_box?.render()}`;
+`;
     }// fi
     // no secific device selected, display select form
     return html`
 ${this.device_select()}
 ${this.messages}
 ${this.current_device}
-${this._dialog_box?.render()}`;
+`;
   }// end of render
 
   private device_select() {

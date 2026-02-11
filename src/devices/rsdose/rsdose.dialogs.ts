@@ -105,6 +105,7 @@ export const dialogs_rsdose = {
 	"class": "dialog_button",
 	"type": "common-button",
 	"stateObj":null,
+	"timer": 10,
 	"tap_action":[
 	  {
 	    "domain":"button",
@@ -269,6 +270,7 @@ export const dialogs_rsdose = {
 	    "type": "common-button",
 	    "stateObj": null,
 	    "icon": "mdi:test-tube",
+	    "timer":10,
 	    "tap_action":[
 	      {
 		"domain":"button",
