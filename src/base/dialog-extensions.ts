@@ -3,15 +3,7 @@
  * Safe replacement for eval()-based dynamic dialog extensions
  */
 
-type DialogExtensionFunction = (
-  elt: any,
-  hass: any,
-  shadowRoot: ShadowRoot | Document,
-) => void | HTMLElement;
-
-interface DialogExtension {
-  [dialogName: string]: DialogExtensionFunction;
-}
+import type { DialogExtensionFunction, DialogExtension } from "../types/index";
 
 class DialogExtensionRegistry {
   private extensions: Map<string, DialogExtension> = new Map();
@@ -79,6 +71,3 @@ class DialogExtensionRegistry {
 
 // Global singleton instance
 export const dialogExtensions = new DialogExtensionRegistry();
-
-// Export types for extension modules
-export type { DialogExtensionFunction, DialogExtension };

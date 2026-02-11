@@ -3,7 +3,7 @@ import type {
   SupportedLanguage,
   I18nConfig,
   NestedTranslation,
-} from "./types";
+} from "../types/index";
 
 // Import synchrone des dictionarys
 import en from "./locales/en.json";

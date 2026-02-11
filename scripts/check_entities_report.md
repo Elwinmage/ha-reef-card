@@ -1,20 +1,20 @@
 # HA ReefBeat — Entity coverage report
 
-_Generated on 2026-02-10 16:04_
+_Generated on 2026-02-11 17:37_
 
 ## Summary
 
 | Device            |   Total | ✅ Found | ⚪ Ignored | ❌ Missing | Coverage   |
 | ----------------- | ------: | -------: | ---------: | ---------: | ---------- |
-| **rsdose**        |      54 |       46 |          1 |          7 | 🟡 85%     |
-| **rsled_g1**      |      40 |        0 |          1 |         39 | 🔴 0%      |
-| **rsled_g2**      |      39 |        0 |          1 |         38 | 🔴 0%      |
+| **rsdose**        |      54 |       46 |          0 |          8 | 🟡 85%     |
+| **rsled_g1**      |      40 |        0 |          0 |         40 | 🔴 0%      |
+| **rsled_g2**      |      39 |        0 |          0 |         39 | 🔴 0%      |
 | **rsled_virtual** |      21 |        0 |          0 |         21 | 🔴 0%      |
-| **rsato**         |      44 |       12 |          1 |         31 | 🔴 27%     |
-| **rsrun**         |      41 |       12 |          1 |         28 | 🔴 29%     |
-| **rswave**        |      40 |       12 |          1 |         27 | 🔴 30%     |
-| **rsmat**         |      36 |       12 |          1 |         23 | 🔴 33%     |
-| **TOTAL**         | **315** |   **94** |      **7** |    **214** | 🔴 **30%** |
+| **rsato**         |      44 |       12 |          0 |         32 | 🔴 27%     |
+| **rsrun**         |      41 |       12 |          0 |         29 | 🔴 29%     |
+| **rswave**        |      40 |       12 |          0 |         28 | 🔴 30%     |
+| **rsmat**         |      36 |       12 |          0 |         24 | 🔴 33%     |
+| **TOTAL**         | **315** |   **94** |      **0** |    **221** | 🔴 **30%** |
 
 ## Detail by device
 
@@ -30,10 +30,10 @@ _Generated on 2026-02-10 16:04_
 | ✅ `switch`        |     6 |        6 |          0 |          0 |
 | ✅ `text`          |     3 |        3 |          0 |          0 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (7)</summary>
+<summary>❌ Missing entities (8)</summary>
 
 | Platform        | Entity key               |
 | --------------- | ------------------------ |
@@ -44,15 +44,7 @@ _Generated on 2026-02-10 16:04_
 | `sensor`        | `last_calibration`       |
 | `sensor`        | `mode`                   |
 | `time`          | `schedule_time`          |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`        |
 
 </details>
 
@@ -68,10 +60,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    16 |        0 |          0 |         16 |
 | ❌ `switch`        |     6 |        0 |          0 |          6 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (39)</summary>
+<summary>❌ Missing entities (40)</summary>
 
 | Platform        | Entity key                           |
 | --------------- | ------------------------------------ |
@@ -114,15 +106,7 @@ _Generated on 2026-02-10 16:04_
 | `switch`        | `moon_phase`                         |
 | `switch`        | `use_cloud_api`                      |
 | `time`          | `schedule_time`                      |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`                    |
 
 </details>
 
@@ -138,10 +122,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    18 |        0 |          0 |         18 |
 | ❌ `switch`        |     6 |        0 |          0 |          6 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (38)</summary>
+<summary>❌ Missing entities (39)</summary>
 
 | Platform        | Entity key                           |
 | --------------- | ------------------------------------ |
@@ -183,15 +167,7 @@ _Generated on 2026-02-10 16:04_
 | `switch`        | `moon_phase`                         |
 | `switch`        | `use_cloud_api`                      |
 | `time`          | `schedule_time`                      |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`                    |
 
 </details>
 
@@ -247,10 +223,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    21 |        7 |          0 |         14 |
 | ❌ `switch`        |     5 |        4 |          0 |          1 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (31)</summary>
+<summary>❌ Missing entities (32)</summary>
 
 | Platform        | Entity key                 |
 | --------------- | -------------------------- |
@@ -285,15 +261,7 @@ _Generated on 2026-02-10 16:04_
 | `sensor`        | `water_level`              |
 | `switch`        | `auto_fill`                |
 | `time`          | `schedule_time`            |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`          |
 
 </details>
 
@@ -308,10 +276,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    13 |        7 |          0 |          6 |
 | ❌ `switch`        |     7 |        4 |          0 |          3 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (28)</summary>
+<summary>❌ Missing entities (29)</summary>
 
 | Platform        | Entity key               |
 | --------------- | ------------------------ |
@@ -343,15 +311,7 @@ _Generated on 2026-02-10 16:04_
 | `switch`        | `overskimming_enabled`   |
 | `switch`        | `schedule_enabled`       |
 | `time`          | `schedule_time`          |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`        |
 
 </details>
 
@@ -366,10 +326,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    16 |        7 |          0 |          9 |
 | ✅ `switch`        |     4 |        4 |          0 |          0 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (27)</summary>
+<summary>❌ Missing entities (28)</summary>
 
 | Platform | Entity key                   |
 | -------- | ---------------------------- |
@@ -400,15 +360,7 @@ _Generated on 2026-02-10 16:04_
 | `sensor` | `wave_step`                  |
 | `sensor` | `wave_type`                  |
 | `time`   | `schedule_time`              |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update` | `firmware_update`            |
 
 </details>
 
@@ -423,10 +375,10 @@ _Generated on 2026-02-10 16:04_
 | ❌ `sensor`        |    14 |        7 |          0 |          7 |
 | ❌ `switch`        |     6 |        4 |          0 |          2 |
 | ❌ `time`          |     1 |        0 |          0 |          1 |
-| ✅ `update`        |     1 |        0 |          1 |          0 |
+| ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (23)</summary>
+<summary>❌ Missing entities (24)</summary>
 
 | Platform        | Entity key               |
 | --------------- | ------------------------ |
@@ -453,14 +405,6 @@ _Generated on 2026-02-10 16:04_
 | `switch`        | `auto_advance`           |
 | `switch`        | `scheduled_advance`      |
 | `time`          | `schedule_time`          |
-
-</details>
-
-<details>
-<summary>⚪ Ignored entities (1)</summary>
-
-| Platform | Entity key        |
-| -------- | ----------------- |
-| `update` | `firmware_update` |
+| `update`        | `firmware_update`        |
 
 </details>

@@ -13,19 +13,7 @@ import { Dialog } from "./base/dialog";
 
 import style_dialog from "./base/dialog.styles";
 
-interface SelectDevice {
-  value: string;
-  text: string;
-}
-
-interface UserConfig {
-  device?: string;
-  [key: string]: any;
-}
-
-interface CustomEvent<T = any> extends Event {
-  detail: T;
-}
+import type { SelectDevice, UserConfig } from "./types/index";
 
 export class ReefCard extends LitElement {
   static override styles = [style_card, style_dialog];

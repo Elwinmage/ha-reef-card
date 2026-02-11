@@ -438,19 +438,19 @@ def extract_component_entities(component_dir: Path) -> dict[str, dict[str, list[
 # ---------------------------------------------------------------------------
 
 CARD_ENTITY_PATTERNS: list[re.Pattern[str]] = [
-    # {"entity": "key"}
-    re.compile(r'"entity"\s*:\s*"([a-z_][a-z0-9_]*)"'),
+    # {"entity": "key"} ou {entity: "key"} (avec ou sans guillemets autour de la clé)
+    re.compile(r'["\']?entity["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # get_entity('key') or get_entity("key")
     re.compile(r'get_entity\([\'"]([a-z_][a-z0-9_]*)[\'"]'),
     # entities['key'] or entities["key"]
     re.compile(r"entities\[['\"]([ a-z_][a-z0-9_]*)['\"]"),
     # "name": "snake_case_key"  — element key names in mapping objects
-    re.compile(r'"name"\s*:\s*"([a-z_][a-z0-9_]+)"'),
+    re.compile(r'["\']?name["\']?\s*:\s*["\']([a-z_][a-z0-9_]+)["\']'),
     # "entity_id": "key"
-    re.compile(r'"entity_id"\s*:\s*"([a-z_][a-z0-9_]*)"'),
+    re.compile(r'["\']?entity_id["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # "target": "key"  — progress-bar / progress-circle / *-target elements
     # The "target" field references a second entity used as the goal value
-    re.compile(r'"target"\s*:\s*"([a-z_][a-z0-9_]*)"'),
+    re.compile(r'["\']?target["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # ${entity.key.state} — inline template expressions
     re.compile(r'\$\{entity\.([a-z_][a-z0-9_]*)'),
 ]
@@ -579,34 +579,49 @@ def normalize_key(key: str) -> str:
 # ---------------------------------------------------------------------------
 
 IgnoreList = dict[str, dict[str, list[str]]]  # { device: { platform: [key, ...] } }
+DevInProgressList = list[str]  # ["rsdose", "rsmat", ...]
 
 
-def load_ignore_list(path: Path) -> IgnoreList:
+def load_ignore_list(path: Path) -> tuple[IgnoreList, DevInProgressList]:
     """
     Load an optional JSON ignore-list.
 
     Expected format::
 
         {
-          "rsdose": {
-            "switch": ["cloud_connect", "use_cloud_api"],
-            "sensor": ["mode"]
-          },
-          "*": {
-            "button": ["fetch_config", "firmware_update", "reset"]
+          "dev_in_progress": ["rsmat", "rsdose"],
+          "ignore": {
+            "rsdose": {
+              "switch": ["cloud_connect", "use_cloud_api"],
+              "sensor": ["mode"]
+            },
+            "*": {
+              "button": ["fetch_config", "firmware_update", "reset"]
+            }
           }
         }
 
     The special device key ``"*"`` applies to every device.
+    Devices in "dev_in_progress" will show missing entities but won't cause exit code 1.
     """
     if not path.exists():
-        return {}
+        return {}, []
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"{YELLOW}Avertissement : impossible de lire {path} : {exc}{RESET}")
-        return {}
-    return raw  # type: ignore[return-value]
+        return {}, []
+    
+    # Support both old format (direct ignore dict) and new format (with dev_in_progress)
+    if "ignore" in raw or "dev_in_progress" in raw:
+        ignore_list = raw.get("ignore", {})
+        dev_in_progress = raw.get("dev_in_progress", [])
+    else:
+        # Old format: assume entire file is the ignore dict
+        ignore_list = raw
+        dev_in_progress = []
+    
+    return ignore_list, dev_in_progress  # type: ignore[return-value]
 
 
 def _ignored_keys_for(ignore: IgnoreList, device: str, platform: str) -> set[str]:
@@ -680,8 +695,18 @@ def print_report(
     report: dict[str, dict[str, dict[str, list[str]]]],
     component: dict[str, dict[str, list[str]]],
     card: dict[str, set[str]],
+    dev_in_progress: DevInProgressList | None = None,
     verbose: bool = True,
-) -> None:
+) -> int:
+    """
+    Print the coverage report.
+    
+    Returns:
+        Number of MISSING entities that are NOT in dev_in_progress devices (i.e., actual errors).
+    """
+    if dev_in_progress is None:
+        dev_in_progress = []
+    
     print(f"\n{BOLD}{'='*70}{RESET}")
     print(f"{BOLD}  HA ReefBeat  —  Component ↔ Card entity coverage report{RESET}")
     print(f"{BOLD}{'='*70}{RESET}\n")
@@ -689,8 +714,9 @@ def print_report(
     total_present = 0
     total_missing = 0
     total_ignored = 0
+    total_missing_errors = 0  # Missing entities NOT in dev devices
     # Per-device totals for final summary table
-    dev_totals: list[tuple[str, int, int, int, int]] = []  # (device, total, present, ignored, missing)
+    dev_totals: list[tuple[str, int, int, int, int, bool]] = []  # (device, total, present, ignored, missing, is_dev)
 
     for device in DEVICES:
         device_data = report[device]
@@ -698,17 +724,23 @@ def print_report(
         dev_missing = sum(len(v["missing"]) for v in device_data.values())
         dev_ignored = sum(len(v.get("ignored", [])) for v in device_data.values())
         dev_total = dev_present + dev_ignored + dev_missing
+        is_dev = device in dev_in_progress
+        
         total_present += dev_present
         total_missing += dev_missing
         total_ignored += dev_ignored
-        dev_totals.append((device, dev_total, dev_present, dev_ignored, dev_missing))
+        if not is_dev:
+            total_missing_errors += dev_missing
+        
+        dev_totals.append((device, dev_total, dev_present, dev_ignored, dev_missing, is_dev))
 
-        status_color = GREEN if dev_missing == 0 else RED
+        status_color = GREEN if dev_missing == 0 else (YELLOW if is_dev else RED)
         ignored_note = f"  {DIM}~ {dev_ignored}{RESET}" if dev_ignored else ""
+        dev_label = f" {YELLOW}[DEV]{RESET}" if is_dev else ""
         print(
-            f"{BOLD}{CYAN}◆ {device.upper()}{RESET}  "
+            f"{BOLD}{CYAN}◆ {device.upper()}{RESET}{dev_label}  "
             f"{status_color}{dev_present} présent(s){RESET}  "
-            f"{RED if dev_missing else DIM}{dev_missing} manquant(s){RESET}"
+            f"{status_color if dev_missing else DIM}{dev_missing} manquant(s){RESET}"
             f"{ignored_note}"
         )
 
@@ -717,7 +749,8 @@ def print_report(
             missing = data["missing"]
             ignored = data.get("ignored", [])
             p_str = f"{GREEN}✓ {len(present)}{RESET}"
-            m_str = f"{RED}✗ {len(missing)}{RESET}" if missing else f"{DIM}✗ 0{RESET}"
+            m_color = YELLOW if is_dev and missing else (RED if missing else DIM)
+            m_str = f"{m_color}✗ {len(missing)}{RESET}" if missing else f"{DIM}✗ 0{RESET}"
             i_str = f"  {DIM}~ {len(ignored)}{RESET}" if ignored else ""
             print(f"  {BOLD}{platform:<16}{RESET}  {p_str}  {m_str}{i_str}")
 
@@ -725,8 +758,10 @@ def print_report(
                 for k in present:
                     print(f"    {GREEN}✓{RESET} {k}")
             if missing:
+                miss_color = YELLOW if is_dev else RED
+                miss_label = "MISSING (DEV)" if is_dev else "MISSING"
                 for k in missing:
-                    print(f"    {RED}✗ MISSING:{RESET} {BOLD}{k}{RESET}")
+                    print(f"    {miss_color}✗ {miss_label}:{RESET} {BOLD}{k}{RESET}")
             if ignored:
                 for k in ignored:
                     print(f"    {DIM}~{RESET} IGNORE  {k}")
@@ -742,10 +777,11 @@ def print_report(
     print(f"{BOLD}{'─'*70}{RESET}")
     print(f"{BOLD}  {'DEVICE':<12}  {'TOTAL':>{W}}  {GREEN}✓ FOUND{RESET}{BOLD}  {DIM}~ IGNORE{RESET}{BOLD}  {RED}✗ MISSING{RESET}{BOLD}{RESET}")
     print(f"{BOLD}  {'─'*12}  {'─'*W}  {'─'*W}  {'─'*W}  {'─'*W}{RESET}")
-    for device, dtotal, dpresent, dignored, dmissing in dev_totals:
-        m_color = RED if dmissing else DIM
+    for device, dtotal, dpresent, dignored, dmissing, is_dev in dev_totals:
+        m_color = YELLOW if is_dev and dmissing else (RED if dmissing else DIM)
+        dev_mark = f" {YELLOW}[DEV]{RESET}" if is_dev else ""
         print(
-            f"  {BOLD}{CYAN}{device:<12}{RESET}"
+            f"  {BOLD}{CYAN}{device:<12}{RESET}{dev_mark if not is_dev else ''}"
             f"  {dtotal:>{W}}"
             f"  {GREEN}✓{RESET} {dpresent:<{W-2}}"
             f"  {DIM}~{RESET} {dignored:<{W-2}}"
@@ -761,11 +797,16 @@ def print_report(
     )
     print(f"{BOLD}{'─'*70}{RESET}")
     print(f"  {BOLD}Couverture :{RESET}  {color}{total_present}/{grand_total}  ({pct:.1f}%){RESET}")
-    if total_missing == 0:
+    if total_missing_errors == 0:
         print(f"  {GREEN}{BOLD}✓ Toutes les entités sont présentes (ou ignorées) !{RESET}")
+    elif total_missing_errors != total_missing:
+        print(f"  {YELLOW}{BOLD}⚠ {total_missing - total_missing_errors} entités manquantes dans des devices en développement{RESET}")
+        print(f"  {RED}{BOLD}✗ {total_missing_errors} entités manquantes à corriger !{RESET}")
     else:
-        print(f"  {RED}{BOLD}✗ {total_missing} entité(s) manquante(s) dans la card.{RESET}")
+        print(f"  {RED}{BOLD}✗ {total_missing_errors} entités manquantes à corriger !{RESET}")
     print()
+    
+    return total_missing_errors
 
 
 # ---------------------------------------------------------------------------
@@ -963,11 +1004,23 @@ def print_help() -> None:
       Default: {D}scripts/check_entities_ignore.json{R} (if present).
       Format:
         {{
-          "*":      {{ "button": ["fetch_config", "reset"] }},
-          "rsdose": {{ "sensor": ["mode", "last_calibration"] }}
+          "dev_in_progress": ["rsmat", "rsdose"],
+          "ignore": {{
+            "*":      {{ "button": ["fetch_config", "reset"] }},
+            "rsdose": {{ "sensor": ["mode", "last_calibration"] }}
+          }}
         }}
-      The special key {C}"*"{R} applies to every device.
-      These entities are shown as {D}~ IGNORE{R} instead of {Y}✗ MISSING{R}.
+      
+      {B}dev_in_progress{R}: List of devices under active development.
+          Missing entities in these devices are shown as {Y}✗ MISSING (DEV){R}
+          but do NOT cause exit code 1 (CI/CD will pass).
+      
+      {B}ignore{R}: Entities intentionally not implemented in the card.
+          The special key {C}"*"{R} applies to every device.
+          These entities are shown as {D}~ IGNORE{R}.
+      
+      {B}Old format{R}: For backward compatibility, a file containing only the
+          ignore dict (without "dev_in_progress") is still supported.
 
   {G}--json=<file.json>{R}
       Write the full report as JSON to the given file.
@@ -981,6 +1034,10 @@ def print_help() -> None:
 
   {G}--help{R}, {G}-h{R}
       Show this message and exit.
+
+{B}Exit Codes:{R}
+  {G}0{R}  All entities present or ignored (including dev devices)
+  {G}1{R}  One or more entities missing in non-dev devices
 
 {B}Examples:{R}
   {D}# Full report (console + auto JSON){R}
@@ -1032,10 +1089,14 @@ def main() -> None:
     print(f"  Card      : {CARD_DIR}")
 
     ignore: IgnoreList = {}
+    dev_in_progress: DevInProgressList = []
     if ignore_path is not None:
-        ignore = load_ignore_list(ignore_path)
+        ignore, dev_in_progress = load_ignore_list(ignore_path)
+        ignore_count = sum(len(p) for d in ignore.values() for p in d.values())
         if ignore:
-            print(f"  Ignore    : {ignore_path}  ({sum(len(p) for d in ignore.values() for p in d.values())} entité(s) ignorée(s))")
+            print(f"  Ignore    : {ignore_path}  ({ignore_count} entité(s) ignorée(s))")
+        if dev_in_progress:
+            print(f"  Dev       : {len(dev_in_progress)} device(s) en développement : {', '.join(dev_in_progress)}")
     print()
 
     print("Extraction des entités du composant (AST)…")
@@ -1047,7 +1108,7 @@ def main() -> None:
     print("Vérification croisée…")
     report = cross_check(component, card, ignore=ignore)
 
-    print_report(report, component, card, verbose=verbose)
+    error_count = print_report(report, component, card, dev_in_progress=dev_in_progress, verbose=verbose)
 
     if json_out:
         dump_json(component, card, report, json_out, ignore=ignore)
@@ -1058,6 +1119,13 @@ def main() -> None:
 
     if md_out:
         dump_markdown(report, component, md_out, ignore=ignore)
+
+    # Exit with error code 1 if there are missing entities (excluding dev devices)
+    if error_count > 0:
+        print(f"\n{RED}Échec : {error_count} entité(s) manquante(s) à corriger.{RESET}")
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 
 if __name__ == "__main__":

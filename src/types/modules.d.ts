@@ -1,5 +1,9 @@
+/**
+ * Module declarations for ambient imports
+ */
+
 declare module "./translations/myi18n" {
-  import type { SupportedLanguage, I18nConfig } from "../../translations/types";
+  import type { SupportedLanguage, I18nConfig } from "./i18n";
 
   class MyI18n {
     constructor(config?: I18nConfig);

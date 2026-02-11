@@ -12,6 +12,8 @@
     "et ne feront pas baisser le score de couverture."
   ],
 
+  "dev_in_progress": ["rsmat"],
+
   "_": "--- Entités communes à tous les devices ---",
   "*": {
     "button": ["fetch_config", "firmware_update", "reset"],

@@ -6,19 +6,11 @@ import i18n from "./translations/myi18n";
 import DeviceList from "./utils/common";
 import { RSDevice } from "./devices/device";
 
-interface HassConfig {
-  device?: string;
-  [key: string]: any;
-}
-
-interface SelectDevice {
-  value: string;
-  text: string;
-}
+import type { SelectDevice, UserConfig } from "./types/index";
 
 export class ReefCardEditor extends LitElement {
   @property({ attribute: false })
-  _config: HassConfig | null = null;
+  _config: UserConfig | null = null;
 
   @property({ attribute: false })
   current_device: any | null = null;
@@ -41,7 +33,7 @@ export class ReefCardEditor extends LitElement {
     this.addEventListener("config-changed", () => this.requestUpdate());
   } // end of constructor
 
-  setConfig(config: HassConfig): void {
+  setConfig(config: UserConfig): void {
     console.debug("setConfig CARD");
     this._config = config;
     //this.render();
@@ -149,7 +141,7 @@ export class ReefCardEditor extends LitElement {
       return;
     }
 
-    const newConfig = JSON.parse(JSON.stringify(this._config)) as HassConfig;
+    const newConfig = JSON.parse(JSON.stringify(this._config)) as UserConfig;
     const elt = this.shadowRoot.getElementById(
       "device",
     ) as HTMLSelectElement | null;

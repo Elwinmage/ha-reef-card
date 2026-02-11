@@ -15,11 +15,7 @@ import { merge } from "../../utils/merge";
 
 import { DosingQueue } from "./dosing_queue";
 import { MyElement } from "../../base/element";
-interface HeadEntity {
-  entities: Record<string, any>;
-  dose_head?: any;
-}
-
+import type { HeadEntity } from "../../types/index";
 // TODO: RSDOSE Implement advanced schedule edition
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/14
 // labels: enhancement, rsdose

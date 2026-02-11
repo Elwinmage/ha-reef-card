@@ -4,16 +4,7 @@ import style_sensor from "./sensor.styles";
 import { MyElement } from "./element";
 import { button_color } from "../utils/common";
 
-interface SensorConfig {
-  name?: string;
-  class?: string;
-  prefix?: string;
-  force_integer?: boolean;
-  unit?: string;
-  label?: string;
-  disabled_if?: any;
-  [key: string]: any;
-}
+import type { SensorConfig } from "../types/index";
 
 export class Sensor extends MyElement {
   static override styles: CSSResultGroup = [

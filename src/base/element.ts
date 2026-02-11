@@ -18,7 +18,9 @@ import type {
   ActionData,
   Action,
   ElementConfig,
-} from "../types/element";
+  DisabledCondition,
+  DynamicValue,
+} from "../types/index";
 
 /**
  * MyElement component
@@ -118,12 +120,35 @@ export class MyElement extends LitElement {
     this.evalCtx = new SafeEval(context);
   }
 
-  evaluate(expression: string) {
+  evaluate(expression: string | DynamicValue<any>): any {
+    // If already a plain value, return it
+    if (typeof expression !== "string" && typeof expression !== "object") {
+      return expression;
+    }
+    // If it's a DynamicValue object, extract the expression
+    if (
+      typeof expression === "object" &&
+      expression !== null &&
+      "expression" in expression
+    ) {
+      expression = expression.expression;
+    }
+    if (typeof expression !== "string") {
+      return expression;
+    }
     this.createContext();
     return this.evalCtx.evaluate(expression);
   }
 
-  evaluateCondition(expression: string) {
+  evaluateCondition(
+    expression: string | DisabledCondition | undefined,
+  ): boolean {
+    if (!expression) return false;
+    if (typeof expression !== "string") {
+      // Handle structured DisabledCondition objects
+      // TODO: Implement proper structured condition evaluation
+      return false;
+    }
     this.createContext();
     return this.evalCtx.evaluateCondition(expression);
   }

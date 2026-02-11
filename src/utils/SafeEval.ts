@@ -17,9 +17,7 @@
 
 import i18n from "../translations/myi18n";
 
-export interface SafeEvalContext {
-  [key: string]: any;
-}
+import type { SafeEvalContext } from "../types/index";
 
 export class SafeEval {
   private context: SafeEvalContext;
@@ -521,3 +519,6 @@ export function evaluateCondition(
   const evaluator = new SafeEval(context);
   return evaluator.evaluateCondition(condition);
 }
+
+// Re-export the type for convenience
+export type { SafeEvalContext } from "../types/index";

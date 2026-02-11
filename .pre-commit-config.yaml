@@ -5,6 +5,7 @@ repos:
       - id: prettier
         name: Prettier
         types_or: [ts, javascript, json, css, markdown, yaml]
+        exclude: ^dist/
         additional_dependencies:
           - prettier@3.1.0
 
@@ -16,6 +17,7 @@ repos:
         entry: npx eslint
         args: [--fix]
         files: \.(ts|js)$
+        exclude: ^dist/
         types: [file]
 
   - repo: local

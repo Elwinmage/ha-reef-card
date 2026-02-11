@@ -1,5 +1,5 @@
 import i18n from "../translations/myi18n";
-import { HassConfig, MainDevice, DeviceInfo } from "../types/common.d";
+import { HassConfig, MainDevice, DeviceInfo } from "../types/index";
 
 export default class DeviceList {
   private _hass: HassConfig;
