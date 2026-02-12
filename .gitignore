@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+dist/ha-reef-card.js.map
+
 
 # Distribution / packaging
 .parcel-cache/

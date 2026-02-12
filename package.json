@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "watch": "vite build --watch --mode development",
+    "watch": "vite build --watch",
+    "watch:prod": "vite build --watch --mode production",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src"
