@@ -1,8 +1,16 @@
+/**
+ * Implement a button linked or not to a hass entity
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html, css } from "lit";
 
 import style_button from "./button.styles";
 import { MyElement } from "./element";
 
+//----------------------------------------------------------------------------//
 export class Button extends MyElement {
   static override styles = [
     style_button,
@@ -13,10 +21,17 @@ export class Button extends MyElement {
     `,
   ];
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Render
+   * @param style: Not use here
+   */
   protected override _render(_style: string = ""): any {
     const _sclass = this.conf?.class || "button";
     const icon = this.conf?.icon

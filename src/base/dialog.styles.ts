@@ -12,9 +12,9 @@ export default css`
     left: 0px;
     width: 100%;
     height: 100%;
-    // text-align:center;background-color: rgba(175,175,175,0.8);
+    background-color: rgba(175, 175, 175, 0.8);
     z-index: 6;
-    // display: flex hidden;display: none;
+    display: none;
     justify-content: center;
     align-items: center;
   }
@@ -24,7 +24,7 @@ export default css`
     z-index: 7;
     position: absolute;
     top: 100px;
-    // margin-left:35%;// margin-right:35%;// min-height: 200px;// min-width: 300px;// width:28%;padding-left:15px;
+    padding-left: 15px;
     padding-right: 15px;
     padding-top: 20px;
     padding-bottom: 10px;
@@ -34,11 +34,11 @@ export default css`
     align-items: center;
     display: grid;
     grid-template-columns: 40px 90%;
-    // grid-template-rows: 3;grid-gap: 10px;
+    grid-gap: 10px;
   }
 
   #dialog-close {
-    // border: 1px solid green;grid-column: 1;
+    grid-column: 1;
     grid-row: 1;
     padding-left: 5px;
     padding-right: 5px;
@@ -46,7 +46,7 @@ export default css`
   }
 
   #dialog-title {
-    // border: 1px solid green;grid-column: 2/4;
+    grid-column: 2/4;
     grid-row: 1;
     padding-left: 5px;
     padding-right: 5px;
@@ -55,7 +55,7 @@ export default css`
   }
 
   #dialog-content {
-    // border: 1px solid green;grid-column: 1/4;
+    grid-column: 1/4;
     grid-row: 2;
     padding-left: 5px;
     padding-right: 5px;

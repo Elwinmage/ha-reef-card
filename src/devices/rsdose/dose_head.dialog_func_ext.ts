@@ -259,7 +259,6 @@ export function head_configuration(
   form.className = "schedule";
   form.id = "schedule";
   const schedule_type = com.create_select(
-    shadowRoot,
     "schedule",
     ["single", "custom", "hourly", "timer"],
     saved_schedule.type,
@@ -339,14 +338,9 @@ function head_configuration_schedule_single(
   shadowRoot,
   form,
 ) {
-  form.appendChild(com.create_hour(shadowRoot, "hour", schedule.time));
+  form.appendChild(com.create_hour("hour", schedule.time));
   form.appendChild(
-    com.create_select(
-      shadowRoot,
-      "speed",
-      ["whisper", "regular", "quick"],
-      schedule.mode,
-    ),
+    com.create_select("speed", ["whisper", "regular", "quick"], schedule.mode),
   );
   return form;
 }
@@ -576,10 +570,9 @@ function head_configuration_intervals_custom(shadowRoot, interval, form) {
   }
   div.className = "interval";
   div.id = "interval_" + position;
-  const start = com.create_hour(shadowRoot, "st", interval.st, position);
-  const end = com.create_hour(shadowRoot, "end", interval.end, position);
+  const start = com.create_hour("st", interval.st, position);
+  const end = com.create_hour("end", interval.end, position);
   const nd = com.create_select(
-    shadowRoot,
     "nd",
     Array.from({ length: 24 }, (x, i) => (i + 1).toString()),
     interval.nd,
@@ -592,7 +585,6 @@ function head_configuration_intervals_custom(shadowRoot, interval, form) {
   div.appendChild(nd);
   div.appendChild(
     com.create_select(
-      shadowRoot,
       "speed",
       ["whisper", "regular", "quick"],
       interval.mode,
@@ -630,7 +622,7 @@ function head_configuration_intervals_timer(shadowRoot, interval, form) {
   }
   div.className = "interval";
   div.id = "interval_" + position;
-  const start = com.create_hour(shadowRoot, "st", interval.st, position);
+  const start = com.create_hour("st", interval.st, position);
   const vol = shadowRoot.createElement("div");
   let node = null;
   node = shadowRoot.createElement("label");
@@ -654,7 +646,6 @@ function head_configuration_intervals_timer(shadowRoot, interval, form) {
   div.appendChild(vol);
   div.appendChild(
     com.create_select(
-      shadowRoot,
       "speed",
       ["whisper", "regular", "quick"],
       interval.mode,
@@ -694,7 +685,6 @@ function head_configuration_schedule_hourly(
   form,
 ) {
   const min = com.create_select(
-    shadowRoot,
     "min",
     Array.from({ length: 6 }, (x, i) => (i * 10).toString()),
     schedule.min,
@@ -703,12 +693,7 @@ function head_configuration_schedule_hourly(
   );
   form.appendChild(min);
   form.appendChild(
-    com.create_select(
-      shadowRoot,
-      "speed",
-      ["whisper", "regular", "quick"],
-      schedule.mode,
-    ),
+    com.create_select("speed", ["whisper", "regular", "quick"], schedule.mode),
   );
   return form;
 }

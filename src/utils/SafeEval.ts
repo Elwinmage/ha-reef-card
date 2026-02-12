@@ -1,22 +1,21 @@
 /**
- * SafeEval - Évaluateur d'expressions sécurisé
+ * SafeEval - Secure expression evaluator
  *
- * Remplace eval() de manière sécurisée pour évaluer des expressions
- * dans un contexte contrôlé.
+ * Safely replaces eval() to evaluate expressions
+ * in a controlled context.
  *
- * Supporte:
- * - Opérations arithmétiques: +, -, *, /, %, **
- * - Comparaisons: ==, !=, <, >, <=, >=, ===, !==
- * - Opérateurs booléens: &&, ||, !
- * - Ternaire: condition ? valTrue : valFalse
- * - Traductions: i18n._('<key>') ou ${i18n._('<key>')}
- * - Accès aux propriétés: obj.prop, obj['prop'], obj.nested.prop
- * - Fonctions: Math.round(), Math.floor(), parseFloat(), etc.
+ * Supports:
+ * - Arithmetic operations: +, -, *, /, %, **
+ * - Comparisons: ==, !=, <, >, <=, >=, ===, !==
+ * - Boolean operators: &&, ||, !
+ * - Ternary: condition ? valTrue : valFalse
+ * - Translations: i18n._('<key>') or ${i18n._('<key>')}
+ * - Property access: obj.prop, obj['prop'], obj.nested.prop
+ * - Functions: Math.round(), Math.floor(), parseFloat(), etc.
  * - Templates: ${expression}
  */
 
 import i18n from "../translations/myi18n";
-
 import type { SafeEvalContext } from "../types/index";
 
 export class SafeEval {
@@ -40,7 +39,7 @@ export class SafeEval {
       JSON: JSON,
     };
 
-    // Liste blanche des fonctions autorisées
+    // Whitelist of allowed functions
     this.allowedFunctions = new Set([
       "Math.round",
       "Math.floor",
@@ -67,7 +66,7 @@ export class SafeEval {
   }
 
   /**
-   * Évalue une expression dans le contexte
+   * Evaluates an expression within the context
    */
   public evaluate(expression: string | undefined | null): any {
     if (!expression || typeof expression !== "string") {
@@ -75,11 +74,11 @@ export class SafeEval {
     }
 
     try {
-      // Si contient des templates ${...}, les traiter
+      // If it contains ${...} templates, process them
       if (expression.includes("${")) {
         const processed = this.processTemplates(expression);
 
-        // Si après traitement c'est une simple valeur, la retourner
+        // If the result is a simple value after processing, return it
         if (this.isSimpleValue(processed)) {
           const result = this.parseSimpleValue(processed);
           return result;
@@ -88,30 +87,30 @@ export class SafeEval {
         return processed;
       }
 
-      // Pas de template ${...}
+      // No ${...} template
 
-      // Vérifier si c'est une valeur simple
+      // Check if it is a simple value
       if (this.isSimpleValue(expression)) {
         const result = this.parseSimpleValue(expression);
         return result;
       }
 
-      // Sinon, évaluer comme expression
+      // Otherwise evaluate as an expression
       const result = this.evaluateExpression(expression);
       return result;
     } catch (_error) {
       console.error("SafeEval error:", _error, "Expression:", expression);
-      // Ne pas retourner la string ! Retourner undefined pour éviter des boolean trompeurs
+      // Do not return the string! Return undefined to avoid misleading booleans
       return undefined;
     }
   }
 
   /**
-   * Traite les templates ${...}
-   * Les i18n._() doivent être à l'intérieur des ${...}
+   * Processes ${...} templates
+   * i18n._() must be inside ${...}
    */
   private processTemplates(text: string): string {
-    // Si pas de ${}, retourner tel quel
+    // If no ${}, return as-is
     if (!text.includes("${")) {
       return text;
     }
@@ -120,7 +119,7 @@ export class SafeEval {
       try {
         const trimmed = expression.trim();
 
-        // D'abord traiter les i18n._() dans l'expression
+        // First process i18n._() inside the expression
         const processedExpr = this.processTranslationsInExpression(trimmed);
 
         const result = this.evaluateExpression(processedExpr);
@@ -132,11 +131,11 @@ export class SafeEval {
   }
 
   /**
-   * Traite les templates ${...} dans une expression JavaScript
-   * Préserve les types en ajoutant des quotes pour les strings
+   * Processes ${...} templates inside a JavaScript expression
+   * Preserves types by adding quotes for strings
    */
   private processTemplatesForExpression(expression: string): string {
-    // Si pas de ${}, retourner tel quel
+    // If no ${}, return as-is
     if (!expression.includes("${")) {
       return expression;
     }
@@ -145,27 +144,27 @@ export class SafeEval {
       try {
         const trimmed = innerExpr.trim();
 
-        // D'abord traiter les i18n._() dans l'expression
+        // First process i18n._() inside the expression
         const processedExpr = this.processTranslationsInExpression(trimmed);
 
         const result = this.evaluateExpression(processedExpr);
 
-        // Convertir le résultat en représentation JavaScript valide
+        // Convert result into valid JavaScript representation
         if (result === undefined || result === null) {
           return String(result);
         }
 
-        // Si c'est une string, ajouter des quotes
+        // If it's a string, add quotes
         if (typeof result === "string") {
-          return `'${result.replace(/'/g, "\\'")}'`; // Échapper les quotes
+          return `'${result.replace(/'/g, "\\'")}'`; // Escape quotes
         }
 
-        // Si c'est un number ou boolean, convertir directement
+        // If it's a number or boolean, convert directly
         if (typeof result === "number" || typeof result === "boolean") {
           return String(result);
         }
 
-        // Pour les autres types, convertir en JSON
+        // For other types, convert to JSON
         return JSON.stringify(result);
       } catch {
         return match;
@@ -174,16 +173,16 @@ export class SafeEval {
   }
 
   /**
-   * Traite les traductions i18n._() dans une expression
+   * Processes i18n._() translations inside an expression
    */
   private processTranslationsInExpression(expression: string): string {
-    // Remplacer i18n._('<key>') ou iconv._('<key>') par la traduction
+    // Replace i18n._('<key>') or iconv._('<key>') with the translation
     return expression.replace(
       /(i18n|iconv)\._\(\s*['"]([^'"]+)['"]\s*\)/g,
       (match, obj, key) => {
         try {
           const translation = i18n._(key);
-          // Retourner la traduction entre quotes pour l'évaluation
+          // Return translation wrapped in quotes for evaluation
           return `"${translation}"`;
         } catch {
           return `"${key}"`;
@@ -193,17 +192,17 @@ export class SafeEval {
   }
 
   /**
-   * Vérifie si c'est une valeur simple (pas besoin d'évaluation)
+   * Checks whether it is a simple value (no evaluation required)
    */
   private isSimpleValue(value: string): boolean {
     const trimmed = value.trim();
 
-    // Nombre
+    // Number
     if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
       return true;
     }
 
-    // String entre quotes
+    // String in quotes
     if (/^['"].*['"]$/.test(trimmed)) {
       return true;
     }
@@ -213,7 +212,7 @@ export class SafeEval {
       return true;
     }
 
-    // null ou undefined
+    // null or undefined
     if (trimmed === "null" || trimmed === "undefined") {
       return true;
     }
@@ -222,22 +221,22 @@ export class SafeEval {
   }
 
   /**
-   * Évalue une expression JavaScript
+   * Evaluates a JavaScript expression
    */
   private evaluateExpression(expression: string): any {
     const trimmed = expression.trim();
 
-    // Valeur simple
+    // Simple value
     if (this.isSimpleValue(trimmed)) {
       return this.parseSimpleValue(trimmed);
     }
 
-    // Variable simple (ex: "myVar")
+    // Simple variable (e.g. "myVar")
     if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(trimmed)) {
       return this.getNestedProperty(this.context, trimmed);
     }
 
-    // Propriété imbriquée (ex: "obj.prop.nested")
+    // Nested property (e.g. "obj.prop.nested")
     if (
       /^[a-zA-Z_$][a-zA-Z0-9_$.[\]'"]*$/.test(trimmed) &&
       !this.containsOperator(trimmed)
@@ -245,17 +244,17 @@ export class SafeEval {
       return this.getNestedProperty(this.context, trimmed);
     }
 
-    // Expression complexe - utiliser Function
+    // Complex expression - use Function
     return this.evaluateComplexExpression(trimmed);
   }
 
   /**
-   * Parse une valeur simple
+   * Parses a simple value
    */
   private parseSimpleValue(value: string): any {
     const trimmed = value.trim();
 
-    // Nombre
+    // Number
     if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
       return parseFloat(trimmed);
     }
@@ -269,7 +268,7 @@ export class SafeEval {
     if (trimmed === "true") return true;
     if (trimmed === "false") return false;
 
-    // null
+    // null or undefined
     if (trimmed === "null") return null;
     if (trimmed === "undefined") return undefined;
 
@@ -277,10 +276,9 @@ export class SafeEval {
   }
 
   /**
-   * Vérifie si l'expression contient des opérateurs
+   * Checks whether the expression contains operators
    */
   private containsOperator(expression: string): boolean {
-    // Exclure les points des propriétés
     const operators = [
       "+",
       "-",
@@ -315,12 +313,12 @@ export class SafeEval {
   }
 
   /**
-   * Récupère une propriété imbriquée
+   * Retrieves a nested property
    */
   private getNestedProperty(obj: any, path: string): any {
     if (!path) return undefined;
 
-    // Gérer les accès avec crochets: obj['prop']
+    // Handle bracket access: obj['prop']
     path = path.replace(/\[['"]([^'"]+)['"]\]/g, ".$1");
 
     const parts = path.split(".");
@@ -337,51 +335,50 @@ export class SafeEval {
   }
 
   /**
-   * Évalue une expression complexe avec Function
+   * Evaluates a complex expression using Function
    */
   private evaluateComplexExpression(expression: string): any {
     try {
-      // Créer une fonction avec les variables du contexte
+      // Create a function with context variables
       const contextKeys = Object.keys(this.context);
       const contextValues = Object.values(this.context);
 
-      // Créer la fonction
+      // Create the function
       const func = new Function(
         ...contextKeys,
         `"use strict"; return (${expression});`,
       );
 
-      // Exécuter avec les valeurs du contexte
-      const result = func(...contextValues);
-      return result;
+      // Execute with context values
+      return func(...contextValues);
     } catch {
       return expression;
     }
   }
 
   /**
-   * Ajoute ou met à jour une variable dans le contexte
+   * Adds or updates a variable in the context
    */
   public setContext(key: string, value: any): void {
     this.context[key] = value;
   }
 
   /**
-   * Ajoute plusieurs variables au contexte
+   * Adds multiple variables to the context
    */
   public setContextBatch(context: SafeEvalContext): void {
     Object.assign(this.context, context);
   }
 
   /**
-   * Récupère le contexte complet
+   * Returns the full context
    */
   public getContext(): SafeEvalContext {
     return { ...this.context };
   }
 
   /**
-   * Réinitialise le contexte
+   * Resets the context
    */
   public resetContext(newContext: SafeEvalContext = {}): void {
     this.context = {
@@ -398,18 +395,18 @@ export class SafeEval {
   }
 
   /**
-   * Évalue plusieurs expressions
+   * Evaluates multiple expressions
    */
   public evaluateBatch(expressions: string[]): any[] {
     return expressions.map((expr) => this.evaluate(expr));
   }
 
   /**
-   * Vérifie si une expression est valide (sans l'évaluer)
+   * Checks whether an expression is valid (without evaluating it)
    */
   public isValidExpression(expression: string): boolean {
     try {
-      // Vérifier la syntaxe sans évaluer
+      // Check syntax without executing
       const contextKeys = Object.keys(this.context);
       new Function(...contextKeys, `"use strict"; return (${expression});`);
       return true;
@@ -419,12 +416,11 @@ export class SafeEval {
   }
 
   /**
-   * Évalue une condition (retourne toujours un boolean)
-   * Force l'évaluation même sans ${}
-   * Supporte les templates ${...} dans les conditions
+   * Evaluates a condition (always returns a boolean)
+   * Forces evaluation even without ${}
+   * Supports ${...} templates inside conditions
    */
   public evaluateCondition(condition: string | undefined | null): boolean {
-    // Protection contre les valeurs undefined/null/empty
     if (condition && typeof condition === "boolean") {
       return condition;
     }
@@ -434,37 +430,37 @@ export class SafeEval {
       typeof condition !== "string" ||
       condition.trim() === ""
     ) {
-      return false; // Condition invalide = pas désactivé par défaut
+      return false; // Invalid condition = not disabled by default
     }
 
     try {
-      // Si la condition contient des ${...}, les traiter en préservant les types
       let processedCondition = condition.trim();
+
+      // If condition contains ${...}, process while preserving types
       if (processedCondition.includes("${")) {
         processedCondition =
           this.processTemplatesForExpression(processedCondition);
       }
 
-      // Forcer l'évaluation directe comme expression
+      // Force direct evaluation as expression
       const result = this.evaluateComplexExpression(processedCondition);
 
-      // S'assurer que c'est bien un boolean
+      // Ensure boolean
       if (typeof result === "boolean") {
         return result;
       }
 
-      // Sinon convertir en boolean
       return Boolean(result);
     } catch (_error) {
       console.error("Condition evaluation error:", condition, _error);
-      // En cas d'erreur, retourner false par sécurité
+      // On error, return false for safety
       return false;
     }
   }
 
   /**
-   * Évalue un template complet
-   * Les i18n._() doivent être dans ${...}
+   * Evaluates a full template
+   * i18n._() must be inside ${...}
    */
   public evaluateTemplate(template: string | undefined | null): string {
     if (!template || typeof template !== "string") {
@@ -472,9 +468,7 @@ export class SafeEval {
     }
 
     try {
-      // Traiter les templates ${...} qui contiennent les i18n._()
-      const result = this.processTemplates(template);
-      return result;
+      return this.processTemplates(template);
     } catch (_error) {
       console.error("Template evaluation error:", template, _error);
       return template;
@@ -483,12 +477,12 @@ export class SafeEval {
 }
 
 /**
- * Instance globale pour faciliter l'utilisation
+ * Global instance for easier usage
  */
 export const safeEval = new SafeEval();
 
 /**
- * Fonction helper pour évaluer rapidement
+ * Helper function to quickly evaluate an expression
  */
 export function evaluate(
   expression: string,
@@ -499,7 +493,7 @@ export function evaluate(
 }
 
 /**
- * Fonction helper pour évaluer un template
+ * Helper function to evaluate a template
  */
 export function evaluateTemplate(
   template: string,
@@ -510,7 +504,7 @@ export function evaluateTemplate(
 }
 
 /**
- * Fonction helper pour évaluer une condition
+ * Helper function to evaluate a condition
  */
 export function evaluateCondition(
   condition: string,

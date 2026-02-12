@@ -6,6 +6,9 @@ import { dialogs_device } from "../device.dialogs";
 
 import i18n from "../../translations/myi18n";
 
+// TODO : Implement RSMAT support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
+// labels: enhancement, rsmat
 export class RSMat extends RSDevice {
   constructor() {
     super();

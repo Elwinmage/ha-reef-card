@@ -1,59 +1,24 @@
+/**
+ * Implement the main HA editor
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { css, html, LitElement, TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 
-import i18n from "./translations/myi18n";
-
-import DeviceList from "./utils/common";
-import { RSDevice } from "./devices/device";
-
 import type { SelectDevice, UserConfig } from "./types/index";
 
+import i18n from "./translations/myi18n";
+import DeviceList from "./utils/common";
+
+import { RSDevice } from "./devices/device";
+
+//----------------------------------------------------------------------------//
+
 export class ReefCardEditor extends LitElement {
-  @property({ attribute: false })
-  _config: UserConfig | null = null;
-
-  @property({ attribute: false })
-  current_device: any | null = null;
-
-  @property({ attribute: false })
-  private _hass: any;
-
-  @state()
-  private select_devices: SelectDevice[] = [];
-
-  @state()
-  private first_init: boolean = true;
-
-  @state()
-  private devices_list!: DeviceList;
-
-  constructor() {
-    super();
-    this.current_device = null;
-    this.addEventListener("config-changed", () => this.requestUpdate());
-  } // end of constructor
-
-  setConfig(config: UserConfig): void {
-    console.debug("setConfig CARD");
-    this._config = config;
-    //this.render();
-    this.requestUpdate();
-  } // end of function setConfig
-
-  set hass(obj: any) {
-    this._hass = obj;
-  }
-
-  private init_devices(): void {
-    this.devices_list = new DeviceList(this._hass);
-    this.select_devices = [
-      { value: "unselected", text: i18n._("select_device") },
-    ];
-    for (const d of this.devices_list.main_devices) {
-      this.select_devices.push(d);
-    } // for
-  }
-
+  //CSS
   static styles = css`
     .table {
       display: table;
@@ -67,6 +32,71 @@ export class ReefCardEditor extends LitElement {
     }
   `;
 
+  // Public  reactive properties
+  @property({ attribute: false })
+  _config: UserConfig | null = null;
+
+  @property({ attribute: false })
+  current_device: any | null = null;
+
+  @property({ attribute: false })
+  private _hass: any;
+
+  // Internal states
+  @state()
+  private select_devices: SelectDevice[] = [];
+
+  @state()
+  private first_init: boolean = true;
+
+  @state()
+  private devices_list!: DeviceList;
+
+  /**
+   * Constructor
+   */
+  constructor() {
+    super();
+    this.current_device = null;
+    // Udapte editor card on config changes
+    this.addEventListener("config-changed", () => this.requestUpdate());
+  }
+
+  /**
+   * Update user configuration
+   * @param config: The user config data
+   */
+  setConfig(config: UserConfig): void {
+    this._config = config;
+    //re-render
+    this.requestUpdate();
+  }
+
+  /**
+   * Set hass object
+   * No propagation for editor
+   * @param obj: the new hass object with new states
+   */
+  set hass(obj: any) {
+    this._hass = obj;
+  }
+
+  /**
+   * Create the list of detected redsea devices.
+   */
+  private init_devices(): void {
+    this.devices_list = new DeviceList(this._hass);
+    this.select_devices = [
+      { value: "unselected", text: i18n._("select_device") },
+    ];
+    for (const d of this.devices_list.main_devices) {
+      this.select_devices.push(d);
+    }
+  }
+
+  /**
+   * Render the editor card
+   */
   render() {
     console.debug("Render Editor");
     if (this._config) {
@@ -101,11 +131,15 @@ export class ReefCardEditor extends LitElement {
         </div>
       `;
     }
+    //If not config, display nothing
     return html``;
-  } // end of - render
+  }
 
+  /**
+   *
+   */
   private device_conf(): TemplateResult {
-    if (this._config && this._config.device && this._config.device.length > 0) {
+    if (this._config?.device?.length > 0) {
       const device = this.devices_list.get_by_name(this._config.device);
       if (!device) {
         return html``;
@@ -123,19 +157,22 @@ export class ReefCardEditor extends LitElement {
       );
 
       if (lit_device !== null) {
-        // Activer le mode éditeur
+        // Enable card editor mode
         lit_device.isEditorMode = true;
         this.current_device = lit_device;
 
-        // Retourner le composant directement dans le template
+        // return the element
         return html`${lit_device}`;
       }
     }
+    //No device so display nohting
     return html``;
-  } // end of function - device_conf
+  }
 
+  /**
+   * force to reload de card if a new devioce is selected.
+   */
   private handleChangedEvent(_changesdEvent: Event): void {
-    // this._config is readonly, copy needed
     if (this.shadowRoot === null) {
       console.error("Can not found a device");
       return;
@@ -156,11 +193,13 @@ export class ReefCardEditor extends LitElement {
       val = elt.options[elt.selectedIndex].text;
       newConfig.device = val;
     }
+    // Send config-changed mesage to force re-render
+    // config is the configuration for this new device
     const messageEvent = new CustomEvent("config-changed", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
     });
     this.dispatchEvent(messageEvent);
-  } // end of function - handleChangesdEvent
-} // end of class ReefCardEditor
+  }
+}

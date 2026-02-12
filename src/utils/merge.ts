@@ -1,7 +1,18 @@
+/**
+ * Deep merge js objects
+ */
+
+/**
+ * Test if an item is an object and alos if this object is not an array
+ * @param item: the js object to check
+ */
 export function isObject(item: unknown): item is Record<string, any> {
   return item !== null && typeof item === "object" && !Array.isArray(item);
 }
 
+/**
+ * Recursive merging fonction on js objects
+ */
 export function mergeDeep<T extends Record<string, any>>(
   target: T,
   ...sources: Partial<T>[]
@@ -26,6 +37,12 @@ export function mergeDeep<T extends Record<string, any>>(
   return mergeDeep(target, ...sources);
 }
 
+/**
+ * Deep merge of two json data
+ * @param target: the js object to merge data in
+ * @param source: the js data to add to target
+ * @return the merged object. target is not changed
+ */
 export function merge<T extends Record<string, any>>(
   target: T,
   source: Partial<T>,

@@ -2,6 +2,9 @@ import { html, TemplateResult } from "lit";
 import { RSDevice } from "../device";
 import { config } from "./rswave.mapping";
 
+// TODO : Implement RSWAVE support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/6
+// labels: enhancement, rswave
 export class RSWave extends RSDevice {
   constructor() {
     super();

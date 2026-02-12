@@ -4,6 +4,9 @@ import { config } from "./rsrun.mapping";
 
 import { dialogs_device } from "../device.dialogs";
 
+// TODO : Implement RSRUN support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/7
+// labels: enhancement, rsrun	break;
 export class RSRun extends RSDevice {
   constructor() {
     super();

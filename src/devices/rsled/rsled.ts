@@ -3,6 +3,9 @@ import { RSDevice } from "../device";
 import { config } from "./rsled.mapping";
 import { config2 } from "./rsled_g2.mapping";
 
+// TODO : Implement RSLED support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/3
+// labels: enhancement, rsled
 export class RSLed extends RSDevice {
   constructor() {
     super();

@@ -3,32 +3,29 @@
  * @module base.dialog
  */
 
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { LitElement } from "lit";
-
-import style_dialog from "./dialog.styles";
-import style_click_image from "./click_image.styles";
-import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 
 import { RSHTMLElement } from "../types/index";
 
+import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 import i18n from "../translations/myi18n.js";
 
 import { MyElement } from "./element";
-
 import { run_action } from "../utils/actions";
 
-/**
- * Dialog component for
- * @class Dialog
- * @extends {LitElement}
- */
+import style_dialog from "./dialog.styles";
+import style_click_image from "./click_image.styles";
+
+//----------------------------------------------------------------------------//
 
 /**
  * Dialog component for
  * @class Dialog
  * @extends {LitElement}
  */
-
 export class Dialog extends LitElement {
   static override styles = [style_dialog, style_click_image];
 

@@ -1,3 +1,23 @@
+/**
+ * Detect Click, Hold and Double Click event and link them to given action
+ * Use:
+ *    attachClickHandlers(this, {
+ *     onClick: () => {
+ *       this._click();
+ *     },
+ *
+ *      onDoubleClick: () => {
+ *        this._dblclick();
+ *     },
+ *
+ *      onHold: () => {
+ *        this._longclick();
+ *      },
+ *    });
+ * @param element: the lit-element to watch
+ * @param handler: the action to run when Click, DoubleClick or Hold is detected
+ * @param options : timer for hold and click, default 500ms to treat a click as a hold, 250 for simple click
+ */
 export function attachClickHandlers(
   element: HTMLElement,
   handlers: {
@@ -18,6 +38,9 @@ export function attachClickHandlers(
   let holdActive = false;
   let doubleClickDetected = false;
 
+  /**
+   * Clear Hold Timer when pointer down is detected
+   */
   function clearHold() {
     if (holdTimeout !== null) {
       clearTimeout(holdTimeout);
@@ -25,6 +48,9 @@ export function attachClickHandlers(
     }
   }
 
+  /**
+   * Clear click Timer when pointer down is detected
+   */
   function clearClick() {
     if (clickTimeout !== null) {
       clearTimeout(clickTimeout);
@@ -50,7 +76,7 @@ export function attachClickHandlers(
   element.addEventListener("pointerleave", clearHold);
   element.addEventListener("pointercancel", clearHold);
 
-  // ---- CLICK (différé) ----
+  // ---- CLICK (differed to detect double click) ----
   element.addEventListener("click", (e) => {
     if (holdActive) return;
 
@@ -74,5 +100,6 @@ export function attachClickHandlers(
     handlers.onDoubleClick?.(e);
   });
 
+  // ---- Disable contextual menu on right click ----
   element.addEventListener("contextmenu", (e) => e.preventDefault());
 }
