@@ -1,3 +1,30 @@
+/**
+ * Common sensor implementation
+ * Example: {
+ *      name: "wifi_quality",
+ *      type: "common-sensor",
+ *      master: true,
+ *      label: false,
+ *      icon: true,
+ *      icon_color: "#ec2330",
+ *      tap_action: {
+ *        domain: "redsea_ui",
+ *        action: "dialog",
+ *        data: { type: "wifi" },
+ *      },
+ *      css: {
+ *        flex: "0 0 auto",
+ *        position: "absolute",
+ *        width: "5.5%",
+ *        height: "2%",
+ *        top: "0%",
+ *        right: "0%",
+ *      },
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html, TemplateResult, CSSResultGroup, css } from "lit";
 import { property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
@@ -5,6 +32,8 @@ import { MyElement } from "./element";
 import { button_color } from "../utils/common";
 
 import type { SensorConfig } from "../types/index";
+
+//----------------------------------------------------------------------------//
 
 export class Sensor extends MyElement {
   static override styles: CSSResultGroup = [
@@ -16,9 +45,13 @@ export class Sensor extends MyElement {
     `,
   ];
 
+  // Public reactive property
   @property({ type: Object, attribute: false })
   declare conf?: SensorConfig;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
   }
@@ -34,6 +67,10 @@ export class Sensor extends MyElement {
     }
   }
 
+  /**
+   * Render
+   * @param _style: set personal style
+   */
   protected override _render(_style: string = ""): TemplateResult {
     if (!this.conf) {
       return html``;

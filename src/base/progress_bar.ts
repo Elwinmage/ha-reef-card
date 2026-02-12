@@ -1,8 +1,34 @@
+/**
+ * Implement a progress bar
+ * Exemple:{
+ *           name: "container_volume", // =>  the hass entity translation_key for the current value
+ *           target: "save_initial_container_volume",// =>  the hass entity translation_key for the target value
+ *           type: "progress-bar",
+ *           class: "pg-container",
+ *           label: " ${entity.remaining_days.state} ${i18n._('days_left')}",
+ *           disabled_if:
+ *             "${entity.slm.state}=='off' || ${entity.daily_dose.state}==0",
+ *           css: {
+ *             position: "absolute",
+ *             transform: "rotate(-90deg)",
+ *             top: "69%",
+ *             left: "-60%",
+ *             width: "140%",
+ *           },
+ *         }
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html, TemplateResult, css } from "lit";
 import { property } from "lit/decorators.js";
-import style_progress_bar from "./progress_bar.styles";
-import { MyElement } from "./element";
+
 import type { ProgressConfig, StateObject } from "../types/index";
+import { MyElement } from "./element";
+
+import style_progress_bar from "./progress_bar.styles";
+//----------------------------------------------------------------------------//
 
 export class ProgressBar extends MyElement {
   static override styles = [
@@ -14,24 +40,26 @@ export class ProgressBar extends MyElement {
     `,
   ];
 
+  // Public reactive properties
   @property({ type: Object })
   override stateObjTarget: StateObject | null = null;
 
   @property({ type: Object })
   declare conf?: ProgressConfig;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
     this.stateObjTarget = null;
   }
 
+  /**
+   * Render
+   * @param _style: No used here
+   */
   protected override _render(_style: string = ""): TemplateResult {
-    // Check disabled condition
-    /*    console.debug("DISABLED?",this.conf.disabled_if);
-    if (this.conf?.disabled_if && this.evaluateDisabledCondition(this.conf.disabled_if)) {
-      return html`<br />`;
-    }
-*/
     if (!this.stateObj || !this.stateObjTarget) {
       return html`<div class="error">Missing state</div>`;
     }

@@ -1,16 +1,32 @@
+/**
+ * An auto scrolling text implemntation
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html } from "lit";
 
-import style_messages from "./messages.styles";
-import { MyElement } from "./element";
 import type { ElementConfig } from "../types/element";
+import { MyElement } from "./element";
 
+import style_messages from "./messages.styles";
+
+//----------------------------------------------------------------------------//
 export class RSMessages extends MyElement {
   static override styles = style_messages;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Render
+   * @param _style: Not used here
+   */
   protected override _render(_style: string = ""): any {
     const sclass = this.conf?.class || "";
     let trash: any = null;
@@ -29,6 +45,7 @@ export class RSMessages extends MyElement {
       if (this.conf && "label" in this.conf) {
         value = this.conf.label + value + this.conf.label;
       }
+      // Add a trash button to clean the message queue
       const conf: ElementConfig = {
         type: "click-image",
         name: "trash",

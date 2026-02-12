@@ -1,8 +1,30 @@
+/**
+ * Implement a progress circle
+ * Exemple  {
+ *          name: "auto_dosed_today",
+ *          target: "daily_dose",
+ *          force_integer: true,
+ *          type: "progress-circle",
+ *          class: "today_dosing",
+ *          put_in: "pump_state_labels",
+ *          no_value: true,
+ *         },
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
+
 import { html, TemplateResult, css } from "lit";
 import { property } from "lit/decorators.js";
-import style_progress_circle from "./progress_circle.styles";
-import { MyElement } from "./element";
+
 import type { StateObject, ProgressConfig } from "../types/index";
+
+import { MyElement } from "./element";
+
+import style_progress_circle from "./progress_circle.styles";
+
+//----------------------------------------------------------------------------//
 
 export class ProgressCircle extends MyElement {
   static override styles = [
@@ -13,18 +35,25 @@ export class ProgressCircle extends MyElement {
       }
     `,
   ];
-
+  // Public reactive properties
   @property({ type: Object })
   override stateObjTarget: StateObject | null = null;
 
   @property({ type: Object })
   declare conf?: ProgressConfig;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
     this.stateObjTarget = null;
   }
 
+  /**
+   * Render
+   * @param _style: No used here
+   */
   protected override _render(_style: string = ""): TemplateResult {
     if (
       this.conf?.disabled_if &&

@@ -1,3 +1,8 @@
+/**
+ * Common device dialog box
+ *    - wifi information
+ */
+
 export const dialogs_device = {
   wifi: {
     name: "wifi",

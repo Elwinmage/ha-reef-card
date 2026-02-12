@@ -1,20 +1,57 @@
+/**
+ * Implement a sensor target element
+ * Exemple: {
+ *          name: "auto_dosed_today",
+ *          target: "daily_dose",
+ *          force_integer: true,
+ *          put_in: "pump_state_labels",
+ *          class: "scheduler_label_middle",
+ *          type: "common-sensor-target",
+ *          css: {
+ *            "text-align": "center",
+ *            color: "white",
+ *            "grid-column": "1",
+ *            "grid-row": "2",
+ *            "font-weight": "bold",
+ *            "font-size": "1.2em",
+ *            "margin-top": "-20%",
+ *          },
+ *        }
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html, TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
-import style_sensor_target from "./sensor_target.styles";
-import { Sensor } from "./sensor";
+
 import type { StateObject } from "../types/index";
+
+import { Sensor } from "./sensor";
+
+import style_sensor_target from "./sensor_target.styles";
+
+//----------------------------------------------------------------------------//
 
 export class SensorTarget extends Sensor {
   static override styles = style_sensor_target;
 
+  // Public reactive property
   @property({ type: Object })
   override stateObjTarget: StateObject | null = null;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
     this.stateObjTarget = null;
   }
 
+  /**
+   * Render
+   * @param _style: unused
+   */
   protected override _render(_style: string = ""): TemplateResult {
     if (!this.stateObj || !this.stateObjTarget) {
       return html`<div class="error">Missing state</div>`;

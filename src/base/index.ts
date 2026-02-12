@@ -1,3 +1,6 @@
+/**
+ * Define the base elements and register them
+ */
 import { Button } from "./button";
 import { ClickImage } from "./click_image";
 import { Dialog } from "./dialog";

@@ -3,13 +3,11 @@
  * @module base.element
  */
 
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
 import { html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
-import { off_color } from "../utils/common.js";
-import i18n from "../translations/myi18n.js";
-
-import { attachClickHandlers } from "../utils/click_handler";
-import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 
 import type {
   StateObject,
@@ -22,25 +20,27 @@ import type {
   DynamicValue,
 } from "../types/index";
 
-/**
- * MyElement component
- * @class MyElement
- * @extends {LitElement}
- */
+import { off_color } from "../utils/common.js";
+import { attachClickHandlers } from "../utils/click_handler";
+import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
+import i18n from "../translations/myi18n.js";
+
+//----------------------------------------------------------------------------//
 
 /**
  * MyElement component
  * @class MyElement
  * @extends {LitElement}
  */
-
 export class MyElement extends LitElement {
+  // Public reactive properties
   @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
 
   @property({ type: Boolean })
   stateOn: boolean = false;
 
+  // Internal states
   @state()
   protected _hass: HassConfig | null = null;
 
@@ -67,6 +67,12 @@ export class MyElement extends LitElement {
 
   protected evalCtx: SafeEvalContext;
 
+  /**
+   * Create the list of entities taht can be used in a context for string evaluation
+   * @param device: the current device hass object
+   * @param hass: the hass states
+   * @return a context to help evaluate dynamic strings
+   */
   private static createEntitiesContext(
     device: any,
     hass: any,
@@ -81,13 +87,102 @@ export class MyElement extends LitElement {
         }
       }
     }
-
     return entitiesObj;
   }
 
-  // Initialize component
+  /**
+   * Generate a new element from configraiton data
+   * @param hass: the hass states object
+   * @param config: the configuratio ndata to apply to new object
+   *            Exemple to create a button linked to supplement_bottle hass object
+   *                {
+   *                  name: "supplement_bottle",
+   *                  label: null,
+   *                  type: "common-button",
+   *                  put_in: "supplement",
+   *                  stateObj: null,
+   *                  css: {
+   *                    display: "block",
+   *                    width: "100%",
+   *                    height: "100%",
+   *                    position: "absolute",
+   *                    "background-color": "rgba(0,80,120,0)",
+   *                  },
+   *                  tap_action: {
+   *                    domain: "redsea_ui",
+   *                    action: "dialog",
+   *                    data: { type: "edit_container" },
+   *                    },
+   *                  },
+   *
+   * @param device: the device to link the element to
+   * @return the instance of the new element
+   */
+  static create_element(
+    hass: HassConfig,
+    config: ElementConfig,
+    device: Device,
+  ): MyElement {
+    // Get the element name  (ex:  common-button)
+    const Element = customElements.get(config.type) as typeof MyElement;
+    let label_name = "";
+    //  Create the element and initialize it
+    const elt = new Element();
+    elt.device = device;
+    elt.stateOn = elt.device.is_on();
+    elt.hass = hass;
+    elt.conf = config;
+    elt.color = elt.device.config.color;
+    elt.alpha = elt.device.config.alpha;
+
+    //link to hass enttity (statObj) if required
+    if ("stateObj" in config && !config.stateObj) {
+      elt.stateObj = null;
+    } else {
+      const entityData = elt.device.entities[config.name];
+      if (entityData) {
+        elt.stateObj = hass.states[entityData.entity_id] || null;
+      }
+    }
+
+    //Add label if required
+    if ("label" in config) {
+      if (typeof config.label === "boolean" && config.label !== false) {
+        label_name = config.name;
+      } else if (config.label && typeof config.label !== "boolean") {
+        const entitiesContext = MyElement.createEntitiesContext(device, hass);
+
+        const context = {
+          stateObj: elt.stateObj,
+          entity: entitiesContext,
+          device: device,
+          config: config,
+          state: elt.stateObj?.state,
+          name: config.name,
+          i18n: i18n,
+        };
+        elt.evalCtx = new SafeEval(context);
+        label_name = elt.evaluate(config.label);
+      }
+    }
+    //link to hass entity if a target entity is also required (sensor-target,progreess-bar,progress-circle...)
+    if ("target" in config && elt.device && config.target) {
+      const targetEntity = elt.device.entities[config.target];
+      if (targetEntity) {
+        elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
+      }
+    }
+
+    elt.label = label_name;
+    return elt;
+  }
+
+  /**
+   * Constructor
+   */
   constructor() {
     super();
+    //Link pointer action to actions
     attachClickHandlers(this, {
       onClick: () => {
         this._click();
@@ -103,6 +198,9 @@ export class MyElement extends LitElement {
     });
   }
 
+  /**
+   * Create the main context for string evaluation
+   */
   createContext() {
     const entitiesContext = MyElement.createEntitiesContext(
       this.device,
@@ -120,6 +218,11 @@ export class MyElement extends LitElement {
     this.evalCtx = new SafeEval(context);
   }
 
+  /**
+   * Evaluate a  string and replace dynamic parts
+   * @param expression: the string to evaluate
+   * @return a string
+   */
   evaluate(expression: string | DynamicValue<any>): any {
     // If already a plain value, return it
     if (typeof expression !== "string" && typeof expression !== "object") {
@@ -140,6 +243,11 @@ export class MyElement extends LitElement {
     return this.evalCtx.evaluate(expression);
   }
 
+  /**
+   * Evaluate a string reprenseting a conditionnal test and replace dynamic parts
+   * @param expression: the string to evaluate
+   * @return a boolean
+   */
   evaluateCondition(
     expression: string | DisabledCondition | undefined,
   ): boolean {
@@ -152,6 +260,11 @@ export class MyElement extends LitElement {
     return this.evalCtx.evaluateCondition(expression);
   }
 
+  /**
+   * Test the nes states in hass to check if the stateObk linked to this element has changed.
+   * @param hass: the news states on hass
+   * @return true on change, false else
+   */
   has_changed(hass: HassConfig): boolean {
     let res = false;
     if (this.stateObj) {
@@ -168,7 +281,11 @@ export class MyElement extends LitElement {
     return res;
   }
 
-  // Update Home Assistant instance
+  /**
+   * Update Home Assistant instance
+   * @param hass: the news states on hass
+   * if the state or the value of the current element has changes re-render the element.
+   */
   set hass(obj: HassConfig) {
     this._hass = obj;
     if (this.stateObj) {
@@ -186,7 +303,9 @@ export class MyElement extends LitElement {
     }
   }
 
-  // Set component configuration
+  /**
+   * Set component configuration
+   */
   setConfig(conf: ElementConfig): void {
     this.conf = conf;
   }
@@ -197,62 +316,10 @@ export class MyElement extends LitElement {
     }, obj);
   }
 
-  static create_element(
-    hass: HassConfig,
-    config: ElementConfig,
-    device: Device,
-  ): MyElement {
-    const Element = customElements.get(config.type) as typeof MyElement;
-    let label_name = "";
-    //console.debug("Creating element", config.type);
-
-    const elt = new Element();
-    elt.device = device;
-    elt.stateOn = elt.device.is_on();
-    elt.hass = hass;
-    elt.conf = config;
-    elt.color = elt.device.config.color;
-    elt.alpha = elt.device.config.alpha;
-
-    if ("stateObj" in config && !config.stateObj) {
-      elt.stateObj = null;
-    } else {
-      const entityData = elt.device.entities[config.name];
-      if (entityData) {
-        elt.stateObj = hass.states[entityData.entity_id] || null;
-      }
-    }
-
-    if ("label" in config) {
-      if (typeof config.label === "boolean" && config.label !== false) {
-        label_name = config.name;
-      } else if (config.label && typeof config.label !== "boolean") {
-        const entitiesContext = MyElement.createEntitiesContext(device, hass);
-
-        const context = {
-          stateObj: elt.stateObj,
-          entity: entitiesContext,
-          device: device,
-          config: config,
-          state: elt.stateObj?.state,
-          name: config.name,
-          i18n: i18n,
-        };
-        elt.evalCtx = new SafeEval(context);
-        label_name = elt.evaluate(config.label);
-      }
-    }
-    if ("target" in config && elt.device && config.target) {
-      const targetEntity = elt.device.entities[config.target];
-      if (targetEntity) {
-        elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
-      }
-    }
-
-    elt.label = label_name;
-    return elt;
-  }
-
+  /**
+   * Transform config part of the css information to js object representing this css.
+   * @param css_level: the tag of css level : "css" or "elt.css"
+   */
   get_style(css_level: string = "css"): string {
     let style = "";
 
@@ -277,6 +344,9 @@ export class MyElement extends LitElement {
     return style;
   }
 
+  /**
+   * Get hass entity from it's tranlation name
+   */
   get_entity(entity_translation_value: string): StateObject {
     if (!this._hass || !this.device) {
       throw new Error("Hass or device not initialized");
@@ -292,12 +362,21 @@ export class MyElement extends LitElement {
     return state;
   }
 
-  // Render component template
+  /*
+   * Render component template
+   * Must be overrided by buttons, switch, click-image,progres-* ...
+   */
   protected _render(_style: string): any {
     return html``;
   }
 
-  // Render component template
+  /*
+   * Render component template
+   * Common render part to all elements.
+   *   - test if render condition is met
+   *   - set the color according to state
+   *   - call the _render() function of elements
+   */
   override render() {
     let _value: string | null = null;
     if (this.stateObj !== null) {
@@ -321,6 +400,11 @@ export class MyElement extends LitElement {
     `;
   }
 
+  /**
+   * Check and run the declared action after a click, double click or hold.
+   * @param actions: the list of actions to run
+   * @param timer: a time (in seconds) to wait before executing the last action
+   */
   async run_actions(actions: Action | Action[], timer?: number): Promise<void> {
     const actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
 
@@ -377,7 +461,7 @@ export class MyElement extends LitElement {
             }),
           );
           break;
-
+        //exit dialog box
         case "exit-dialog":
           this.dispatchEvent(
             new CustomEvent("quit-dialog", {
@@ -387,7 +471,7 @@ export class MyElement extends LitElement {
             }),
           );
           break;
-
+        // display a short hass message box
         case "message_box":
           let str = "";
           if (typeof action.data === "string") {
@@ -449,6 +533,9 @@ export class MyElement extends LitElement {
     });
   }
 
+  /**
+   * Test if the click must be taken into account and run associated actions
+   */
   _click(): void {
     if (
       this.conf?.tap_action &&
@@ -460,6 +547,9 @@ export class MyElement extends LitElement {
     }
   }
 
+  /**
+   * Test if the hold click  must be taken into account and run associated actions
+   */
   _longclick(): void {
     if (
       this.conf?.hold_action &&
@@ -471,6 +561,9 @@ export class MyElement extends LitElement {
     }
   }
 
+  /**
+   * Test if the double click  must be taken into account and run associated actions
+   */
   _dblclick(): void {
     if (
       this.conf?.double_tap_action &&
@@ -482,6 +575,10 @@ export class MyElement extends LitElement {
     }
   }
 
+  /**
+   * Display a hass notification
+   * @param msg: the text to display
+   */
   msgbox(msg: string): void {
     this.dispatchEvent(
       new CustomEvent("hass-notification", {

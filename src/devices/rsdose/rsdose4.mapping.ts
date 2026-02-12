@@ -363,7 +363,6 @@ export const config4 = {
             top: "-23%",
             left: "-23%",
             "aspect-ratio": "1/1",
-
             width: "140%",
           },
         },

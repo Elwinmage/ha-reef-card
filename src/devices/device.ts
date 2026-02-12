@@ -1,14 +1,26 @@
+/**
+ * Base class for all devices: rsdose,rsrun,rsato+,rswave,rsled
+ */
+
+//----------------------------------------------------------------------------//
+//   IMPORT
+//----------------------------------------------------------------------------//
+
 import { TemplateResult, LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { MyElement } from "../base/element";
+
+import type { HassConfig, DeviceInfo } from "../types/index";
+
 import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
 
-import type { HassConfig, DeviceInfo } from "../types/index";
-import style_common from "../utils/common.styles";
+import { MyElement } from "../base/element";
 
 import { dialogs_device } from "./device.dialogs";
 
+import style_common from "../utils/common.styles";
+
+//----------------------------------------------------------------------------//
 @customElement("rs-device")
 export class RSDevice extends LitElement {
   @state()
@@ -48,12 +60,48 @@ export class RSDevice extends LitElement {
 
   static styles = [style_common];
 
+  /**
+   * Create a device from a configuration (ex: rsdose4.mapping.ts)
+   * @param tag_name: the name of the element (ex: redsea-rsdose4)
+   * @param hass: the hass states
+   * @param config: the configuration datas (generaly stored in a .mapping.ts file)
+   * @param device: the hass device from ha-reefbeat-component that is representing this lit element.
+   */
+  static create_device(
+    tag_name: string,
+    hass: HassConfig,
+    config: any,
+    device: DeviceInfo,
+  ): RSDevice | null {
+    const Element = customElements.get(tag_name);
+
+    if (!Element) {
+      console.error(`Custom element ${tag_name} not found`);
+      return null;
+    }
+
+    const elt = new (Element as any)() as RSDevice;
+    elt.hass = hass;
+    elt.device = device;
+    elt.setConfig(config);
+
+    return elt;
+  }
+
+  /**
+   * Constructor
+   */
   constructor() {
     super();
+    //check device state
     this.state = this.is_on();
+    //load associated dialog boxes
     this.load_dialogs([dialogs_device]);
   }
 
+  /**
+   * Load all dialogs box definitions linked to this device
+   */
   load_dialogs(dialogs_list: any[]) {
     this.dialogs = {};
     for (const dialog of dialogs_list) {
@@ -61,6 +109,9 @@ export class RSDevice extends LitElement {
     }
   }
 
+  /**
+   * Render device
+   */
   override render() {
     if (this.isEditorMode) {
       return this.renderEditor();
@@ -69,6 +120,7 @@ export class RSDevice extends LitElement {
     this.to_render = false;
     console.debug("Render ", this.config.model);
 
+    // get style and substyle
     let style = html``;
     this._populate_entities();
     let substyle = "";
@@ -80,6 +132,7 @@ export class RSDevice extends LitElement {
     if (disabled !== null) {
       return disabled;
     }
+    //check device state
     if (!this.is_on()) {
       style = html`<style>
         img {
@@ -121,10 +174,17 @@ export class RSDevice extends LitElement {
     </div>`;
   }
 
+  /**
+   * Override this method in your component for specific editor view  for this component
+   */
   renderEditor(): TemplateResult {
     return html`<p>No editor configuration available for this device</p>`;
   }
 
+  /**
+   * Check if new hass states impy a re-render and propagate for sub elements.
+   * @param obj: the new hass states
+   */
   _setting_hass(obj) {
     this._hass = obj;
     let re_render = false;
@@ -143,7 +203,7 @@ export class RSDevice extends LitElement {
 
     for (const element in this._elements) {
       const elt = this._elements[element];
-      //      if ('master' in elt.conf && elt.conf.master){
+      //If the element control a master state, re-render the device
       if (elt?.conf?.master) {
         if (elt.has_changed(obj)) {
           re_render = true;
@@ -212,6 +272,11 @@ export class RSDevice extends LitElement {
     }
   }
 
+  /**
+   * Get Hass entity from it's translation key
+   * @param entity_translation_value: the translation key of the entity
+   * @return : the hass entity linked to this translation_key
+   */
   get_entity(entity_translation_value: string): any {
     if (!this._hass || !this.entities) {
       return null;
@@ -223,6 +288,9 @@ export class RSDevice extends LitElement {
     return this._hass.states[entity.entity_id];
   }
 
+  /**
+   * Merge basic device onfiguraiton with user configuration for final configuration
+   */
   update_config(): void {
     this.config = JSON.parse(JSON.stringify(this.initial_config));
 
@@ -265,27 +333,6 @@ export class RSDevice extends LitElement {
     }
   }
 
-  static create_device(
-    tag_name: string,
-    hass: HassConfig,
-    config: any,
-    device: DeviceInfo,
-  ): RSDevice | null {
-    const Element = customElements.get(tag_name);
-
-    if (!Element) {
-      console.error(`Custom element ${tag_name} not found`);
-      return null;
-    }
-
-    const elt = new (Element as any)() as RSDevice;
-    elt.hass = hass;
-    elt.device = device;
-    elt.setConfig(config);
-
-    return elt;
-  }
-
   /*
    * Get all entities linked to this redsea device
    */
@@ -322,7 +369,7 @@ export class RSDevice extends LitElement {
       this._hass.states[this.entities["device_state"].entity_id]?.state !==
       "off"
     );
-  } //end of function - is_on
+  }
 
   /*
    * Special render if the device is disabled or in maintenance mode in HA
@@ -369,7 +416,7 @@ export class RSDevice extends LitElement {
 <p class='disabled_in_ha'>${reason}</p>
 ${maintenance}
 </div">`;
-  } //end of function _render_disabled
+  }
 
   /*
    * Build a css style string according to given json configuration
@@ -383,7 +430,7 @@ ${maintenance}
         .join(";");
     }
     return style;
-  } //end of function get_style
+  }
 
   /*
    * Render a single element: switch, sensor...
@@ -419,7 +466,7 @@ ${maintenance}
       }
     }
     return html`${element}`;
-  } //end of function - _render_actuator
+  }
 
   /*
    * Render all elements that are declared in the configuration of the device
@@ -434,7 +481,7 @@ ${maintenance}
     return html`${elements.map((conf) =>
       this._render_element(conf, state, put_in),
     )}`;
-  } //end of function - _render_elements
+  }
 }
 
 export default RSDevice;
