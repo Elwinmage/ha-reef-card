@@ -8,6 +8,7 @@ __pycache__/
 
 dist/ha-reef-card.js.map
 translation_report.txt
+check_entities_report.json
 
 # Distribution / packaging
 .parcel-cache/
