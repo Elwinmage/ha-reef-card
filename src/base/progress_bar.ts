@@ -25,13 +25,20 @@ import { html, TemplateResult, css } from "lit";
 import { property } from "lit/decorators.js";
 
 import type { ProgressConfig, StateObject } from "../types/index";
-import { MyElement } from "./element";
+import { SensorTarget } from "./sensor_target";
 
 import style_progress_bar from "./progress_bar.styles";
+import { OFF_COLOR } from "../utils/constants";
+
 //----------------------------------------------------------------------------//
 
-export class ProgressBar extends MyElement {
+export class ProgressBar extends SensorTarget {
   static override styles = [
+    // Include parent styles from SensorTarget/Sensor chain
+    ...(Array.isArray(SensorTarget.styles)
+      ? SensorTarget.styles
+      : [SensorTarget.styles]),
+    // Add ProgressBar-specific styles
     style_progress_bar,
     css`
       .progress-bar-fill {
@@ -39,10 +46,6 @@ export class ProgressBar extends MyElement {
       }
     `,
   ];
-
-  // Public reactive properties
-  @property({ type: Object })
-  override stateObjTarget: StateObject | null = null;
 
   @property({ type: Object })
   declare conf?: ProgressConfig;
@@ -52,7 +55,6 @@ export class ProgressBar extends MyElement {
    */
   constructor() {
     super();
-    this.stateObjTarget = null;
   }
 
   /**
@@ -60,13 +62,20 @@ export class ProgressBar extends MyElement {
    * @param _style: No used here
    */
   protected override _render(_style: string = ""): TemplateResult {
-    if (!this.stateObj || !this.stateObjTarget) {
+    if (!this.hasTargetState()) {
       return html`<div class="error">Missing state</div>`;
     }
 
-    const value = parseFloat(this.stateObj.state) || 0;
-    const target = parseFloat(this.stateObjTarget.state) || 1;
-    const percent = Math.floor((value * 100) / target);
+    // Set this.c based on DEVICE state (not stateObj state)
+    // ProgressBar entities are numbers, not on/off states
+    // So we check if the DEVICE is on, not if the progress value is "on"
+    if (!this.device.is_on()) {
+      this.c = OFF_COLOR;
+    } else {
+      this.c = this.color;
+    }
+
+    const percent = this.getPercentage();
     if (percent > 100) {
       console.error(
         `[ProgressBar - ${this.conf.name}] bad percent value  : ${percent}=${value}*100/${target}`,

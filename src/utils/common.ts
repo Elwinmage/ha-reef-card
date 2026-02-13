@@ -10,7 +10,6 @@
  *     - rgToHex
  *     - hexToRgb
  *   + Colors:
- *     - off_color
  *     - button_color
  *   + Devices:
  *     - DeviceList
@@ -183,7 +182,6 @@ export function rgbToHex(orig: string): string {
 /**
  * Color of off elements
  */
-export const off_color: string = "150,150,150";
 /**
  * blue color for buttons
  */

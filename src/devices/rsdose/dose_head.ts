@@ -4,9 +4,9 @@ import { RSDevice } from "../device";
 import styles from "./dose_head.styles";
 import style_sensors from "../../base/sensor.styles";
 
-import { off_color } from "../../utils/common.js";
 import i18n from "../../translations/myi18n";
 import { MyElement } from "../../base/element";
+import { OFF_COLOR } from "../../utils/constants";
 
 export class DoseHead extends RSDevice {
   static styles = [styles, style_sensors];
@@ -41,7 +41,7 @@ export class DoseHead extends RSDevice {
   _pipe_path() {
     let color = this.config.color;
     if (!this.state_on) {
-      color = off_color;
+      color = OFF_COLOR;
     }
     return html`
       <svg viewBox="0 0 86 56" style="fill:rgb(${color});">
@@ -82,7 +82,6 @@ export class DoseHead extends RSDevice {
           filter: grayscale(90%);
         }
       </style>`;
-      //      color = off_color;
     }
 
     // Vérifier que les entités existent avant d'accéder à leurs propriétés
@@ -273,7 +272,7 @@ export class DoseHead extends RSDevice {
       }
 
       if (!this.state_on) {
-        color = off_color + "," + this.config.alpha;
+        color = OFF_COLOR + "," + this.config.alpha;
       }
       return html`
         ${this._render_container()}

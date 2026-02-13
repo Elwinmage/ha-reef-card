@@ -20,10 +20,10 @@ import type {
   DynamicValue,
 } from "../types/index";
 
-import { off_color } from "../utils/common.js";
 import { attachClickHandlers } from "../utils/click_handler";
 import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 import i18n from "../translations/myi18n.js";
+import { OFF_COLOR } from "../utils/constants";
 
 //----------------------------------------------------------------------------//
 
@@ -58,9 +58,6 @@ export class MyElement extends LitElement {
 
   @state()
   protected label: string = "";
-
-  @state()
-  protected stateObjTarget?: StateObject;
 
   @state()
   protected c?: string;
@@ -271,11 +268,6 @@ export class MyElement extends LitElement {
       const so = hass.states[this.stateObj.entity_id];
       if (so && this.stateObj.state !== so.state) {
         res = true;
-      } else if (this.conf && "target" in this.conf && this.stateObjTarget) {
-        const sot = hass.states[this.stateObjTarget.entity_id];
-        if (sot && this.stateObjTarget.state !== sot.state) {
-          res = true;
-        }
       }
     }
     return res;
@@ -293,12 +285,6 @@ export class MyElement extends LitElement {
       if (so && this.stateObj.state !== so.state) {
         this.stateObj = so;
         this.requestUpdate();
-      } else if (this.conf && "target" in this.conf && this.stateObjTarget) {
-        const sot = this._hass.states[this.stateObjTarget.entity_id];
-        if (sot && this.stateObjTarget.state !== sot.state) {
-          this.stateObjTarget = sot || null;
-          this.requestUpdate();
-        }
       }
     }
   }
@@ -328,7 +314,7 @@ export class MyElement extends LitElement {
       if (this.device) {
         let device_color = this.device.config.color;
         if (!this.device.is_on()) {
-          device_color = off_color;
+          device_color = OFF_COLOR;
         }
         if (o_style["background-color"] === "$DEVICE-COLOR$") {
           o_style["background-color"] = "rgb(" + device_color + ")";
@@ -388,7 +374,7 @@ export class MyElement extends LitElement {
     }
 
     if (!this.stateOn) {
-      this.c = off_color;
+      this.c = OFF_COLOR;
     } else {
       this.c = this.color;
     }

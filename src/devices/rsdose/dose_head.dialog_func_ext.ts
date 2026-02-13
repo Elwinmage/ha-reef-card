@@ -172,7 +172,6 @@ export function add_supplement(elt, hass, shadowRoot) {
 }
 
 export function set_container_volume(elt, hass, shadowRoot) {
-  //  let selected_supplement=elt.device.get_entity("supplement").state;
   let selected_supplement =
     elt.device.get_entity("supplement").attributes.supplement.uid;
   let supplement =
@@ -439,7 +438,6 @@ function save_schedule(event, shadowRoot, form, elt, hass) {
       schedule.days.push(day);
     }
   }
-  //let to_schedule=eval("save_schedule_"+schedule.type+"(shadowRoot,elt,hass,schedule)");
   const fname = "save_schedule_" + schedule.type;
   const to_schedule = local_actions[fname]?.(shadowRoot, elt, hass, schedule);
   if (to_schedule !== null) {

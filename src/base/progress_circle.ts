@@ -20,14 +20,20 @@ import { property } from "lit/decorators.js";
 
 import type { StateObject, ProgressConfig } from "../types/index";
 
-import { MyElement } from "./element";
+import { SensorTarget } from "./sensor_target";
 
 import style_progress_circle from "./progress_circle.styles";
+import { OFF_COLOR } from "../utils/constants";
 
 //----------------------------------------------------------------------------//
 
-export class ProgressCircle extends MyElement {
+export class ProgressCircle extends SensorTarget {
   static override styles = [
+    // Include parent styles from SensorTarget/Sensor chain
+    ...(Array.isArray(SensorTarget.styles)
+      ? SensorTarget.styles
+      : [SensorTarget.styles]),
+    // Add ProgressCircle-specific styles
     style_progress_circle,
     css`
       .progress-circle-path {
@@ -35,10 +41,6 @@ export class ProgressCircle extends MyElement {
       }
     `,
   ];
-  // Public reactive properties
-  @property({ type: Object })
-  override stateObjTarget: StateObject | null = null;
-
   @property({ type: Object })
   declare conf?: ProgressConfig;
 
@@ -47,7 +49,6 @@ export class ProgressCircle extends MyElement {
    */
   constructor() {
     super();
-    this.stateObjTarget = null;
   }
 
   /**
@@ -55,6 +56,17 @@ export class ProgressCircle extends MyElement {
    * @param _style: No used here
    */
   protected override _render(_style: string = ""): TemplateResult {
+    if (!this.hasTargetState()) {
+      return html`<div class="error">Missing state</div>`;
+    }
+
+    // Set this.c based on DEVICE state (not stateObj state)
+    if (!this.device.is_on()) {
+      this.c = OFF_COLOR;
+    } else {
+      this.c = this.color;
+    }
+
     if (
       this.conf?.disabled_if &&
       this.evaluateCondition(this.conf.disabled_if)

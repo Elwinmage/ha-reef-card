@@ -49,16 +49,62 @@ export class SensorTarget extends Sensor {
   }
 
   /**
+   * Override hass setter to also update stateObjTarget
+   */
+  override set hass(obj: HassConfig) {
+    super.hass = obj;
+
+    // Update stateObjTarget if it exists
+    if (this.stateObjTarget && this.conf && "target" in this.conf) {
+      const sot = obj.states[this.stateObjTarget.entity_id];
+      if (sot && this.stateObjTarget.state !== sot.state) {
+        this.stateObjTarget = sot || null;
+        this.requestUpdate();
+      }
+    }
+  }
+
+  /**
+   * Get numeric value from state object
+   */
+  protected getValue(): number {
+    return parseFloat(this.stateObj?.state || "0") || 0;
+  }
+
+  /**
+   * Get numeric target value from target state object
+   */
+  protected getTargetValue(): number {
+    return parseFloat(this.stateObjTarget?.state || "0") || 0;
+  }
+
+  /**
+   * Calculate percentage (value / target * 100)
+   */
+  protected getPercentage(): number {
+    const value = this.getValue();
+    const target = this.getTargetValue() || 1; // Avoid division by zero
+    return Math.floor((value * 100) / target);
+  }
+
+  /**
+   * Check if both state objects are available
+   */
+  protected hasTargetState(): boolean {
+    return !!(this.stateObj && this.stateObjTarget);
+  }
+
+  /**
    * Render
    * @param _style: unused
    */
   protected override _render(_style: string = ""): TemplateResult {
-    if (!this.stateObj || !this.stateObjTarget) {
+    if (!this.hasTargetState()) {
       return html`<div class="error">Missing state</div>`;
     }
 
-    let value = parseFloat(this.stateObj.state) || 0;
-    let target = parseFloat(this.stateObjTarget.state) || 0;
+    let value = this.getValue();
+    let target = this.getTargetValue();
     if (this.conf.force_integer) {
       value = Math.floor(value);
       target = Math.floor(target);

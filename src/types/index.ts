@@ -70,3 +70,6 @@ export type { HassEntity as HassEntityAlias } from "./homeassistant";
 export type { BaseElementConfig as ProgressConfig_compat } from "./element";
 /** @deprecated Use DeviceInfo instead */
 export type { DeviceInfo as DeviceInfoAlias } from "./device";
+
+// Export constants
+export { OFF_COLOR } from "../utils/constants";
