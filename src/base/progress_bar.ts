@@ -24,7 +24,7 @@
 import { html, TemplateResult, css } from "lit";
 import { property } from "lit/decorators.js";
 
-import type { ProgressConfig, StateObject } from "../types/index";
+import type { ProgressConfig } from "../types/index";
 import { SensorTarget } from "./sensor_target";
 
 import style_progress_bar from "./progress_bar.styles";
@@ -75,6 +75,8 @@ export class ProgressBar extends SensorTarget {
       this.c = this.color;
     }
 
+    const value = parseFloat(this.stateObj.state) || 0;
+    const target = parseFloat(this.stateObjTarget.state) || 1;
     const percent = this.getPercentage();
     if (percent > 100) {
       console.error(

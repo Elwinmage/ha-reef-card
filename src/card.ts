@@ -8,7 +8,7 @@
 import { LitElement, html } from "lit";
 import { property, state } from "lit/decorators.js";
 
-import type { SelectDevice, UserConfig } from "./types/index";
+import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n.js";
 import DeviceList from "./utils/common";
@@ -26,10 +26,10 @@ export class ReefCard extends LitElement {
 
   // Public reactive properties
   @property({ attribute: false })
-  private _hass: any;
+  private _hass: HassConfig;
 
   @property({ attribute: false })
-  private current_device: any;
+  private current_device: any = null;
 
   // Internal states
   @state()
@@ -48,7 +48,7 @@ export class ReefCard extends LitElement {
   private user_config: UserConfig = {};
 
   @state()
-  private no_device: any;
+  private no_device: unknown;
 
   @state()
   private devices_list!: DeviceList;
@@ -94,7 +94,7 @@ export class ReefCard extends LitElement {
    * Propagate hass update to dialog_box
    * @param obj: the new hass object with new states
    */
-  set hass(obj: any) {
+  set hass(obj: HassConfig) {
     if (this.first_init === true) {
       this._hass = obj;
     } else {

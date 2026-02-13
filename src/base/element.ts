@@ -132,7 +132,7 @@ export class MyElement extends LitElement {
     elt.color = elt.device.config.color;
     elt.alpha = elt.device.config.alpha;
 
-    //link to hass enttity (statObj) if required
+    //link to hass entity (statObj) if required
     if ("stateObj" in config && !config.stateObj) {
       elt.stateObj = null;
     } else {
@@ -163,17 +163,22 @@ export class MyElement extends LitElement {
       }
     }
     //link to hass entity if a target entity is also required (sensor-target,progreess-bar,progress-circle...)
-    if ("target" in config && elt.device && config.target) {
+    elt._load_subelements();
+    /*if ( config?target && elt.device ) {
       const targetEntity = elt.device.entities[config.target];
       if (targetEntity) {
+	
         elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
       }
-    }
+    }*/
 
     elt.label = label_name;
     return elt;
   }
 
+  protected _load_subelements() {
+    return;
+  }
   /**
    * Constructor
    */
@@ -220,10 +225,10 @@ export class MyElement extends LitElement {
    * @param expression: the string to evaluate
    * @return a string
    */
-  evaluate(expression: string | DynamicValue<any>): any {
+  evaluate(expression: string | DynamicValue<unknown>): string {
     // If already a plain value, return it
     if (typeof expression !== "string" && typeof expression !== "object") {
-      return expression;
+      return String(expression);
     }
     // If it's a DynamicValue object, extract the expression
     if (
@@ -234,7 +239,7 @@ export class MyElement extends LitElement {
       expression = expression.expression;
     }
     if (typeof expression !== "string") {
-      return expression;
+      return String(expression);
     }
     this.createContext();
     return this.evalCtx.evaluate(expression);

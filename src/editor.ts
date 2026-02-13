@@ -8,7 +8,7 @@
 import { css, html, LitElement, TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 
-import type { SelectDevice, UserConfig } from "./types/index";
+import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n";
 import DeviceList from "./utils/common";
@@ -37,10 +37,10 @@ export class ReefCardEditor extends LitElement {
   _config: UserConfig | null = null;
 
   @property({ attribute: false })
-  current_device: any | null = null;
+  current_device: unknown | null = null;
 
   @property({ attribute: false })
-  private _hass: any;
+  private _hass: HassConfig;
 
   // Internal states
   @state()
@@ -77,7 +77,7 @@ export class ReefCardEditor extends LitElement {
    * No propagation for editor
    * @param obj: the new hass object with new states
    */
-  set hass(obj: any) {
+  set hass(obj: HassConfig) {
     this._hass = obj;
   }
 

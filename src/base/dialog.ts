@@ -8,7 +8,12 @@
 //----------------------------------------------------------------------------//
 import { LitElement } from "lit";
 
-import { RSHTMLElement } from "../types/index";
+import {
+  RSHTMLElement,
+  HassConfig,
+  DialogConfig,
+  DialogElement,
+} from "../types/index";
 
 import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 import i18n from "../translations/myi18n.js";
@@ -37,10 +42,10 @@ export class Dialog extends LitElement {
     };
   }
 
-  protected _hass: any = null;
+  protected _hass: HassConfig | null = null;
   protected _shadowRoot: ShadowRoot | null = null;
-  protected config: any = null;
-  protected elt: any = null;
+  protected config: Record<string, any> | null = null;
+  protected elt: DialogElement | null = null;
   protected elts: any[] = [];
   protected extends_to_re_render: any[] = [];
   protected to_render: any = null;
@@ -75,7 +80,7 @@ export class Dialog extends LitElement {
     return this.evalCtx.evaluate(expression);
   }
 
-  init(hass: any, shadowRoot: ShadowRoot): void {
+  init(hass: HassConfig, shadowRoot: ShadowRoot): void {
     this._hass = hass;
     this._shadowRoot = shadowRoot;
     // Inject the dialog shell once - never rebuilt after this
@@ -84,7 +89,7 @@ export class Dialog extends LitElement {
     this._shadowRoot.appendChild(tpl.content.cloneNode(true));
   }
 
-  display(conf: any): void {
+  display(conf: DialogConfig): void {
     if (!this._shadowRoot) return;
     const box = this._shadowRoot.querySelector(
       "#window-mask",
@@ -116,7 +121,7 @@ export class Dialog extends LitElement {
   }
 
   // Update Home Assistant instance
-  set hass(obj: any) {
+  set hass(obj: HassConfig) {
     this._hass = obj;
     if (this.elts) {
       for (const elt of this.elts) {
@@ -136,11 +141,11 @@ export class Dialog extends LitElement {
     }
   }
 
-  set_conf(config: any): void {
+  set_conf(config: unknown): void {
     this.config = config;
   }
 
-  create_form(content_conf: any): HTMLElement[] {
+  create_form(content_conf: any[]): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
     for (const input of content_conf) {
@@ -168,7 +173,7 @@ export class Dialog extends LitElement {
 
       if (Element) {
         const elt = new (Element as any)() as HTMLElement & {
-          setConfig?: (c: any) => void;
+          setConfig?: (c: unknown) => void;
           hass?: any;
           device?: any;
         };

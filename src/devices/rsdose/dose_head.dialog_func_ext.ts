@@ -40,7 +40,11 @@ export function set_manual_head_volume(elt, hass, shadowRoot) {
           color: "white",
         },
       };
-      const content = MyElement.create_element(hass, conf as any, elt.device);
+      const content = MyElement.create_element(
+        hass,
+        conf as unknown,
+        elt.device,
+      );
       shadowRoot.querySelector("#dialog-content").appendChild(content);
     }
   }
@@ -61,7 +65,7 @@ export function add_supplement(elt, hass, shadowRoot) {
   const current_uid = supplement?.uid ?? selected_supplement ?? "__none__";
   if (cc !== null && cc.dataset.supplementUid === current_uid) {
     // Same supplement - just propagate hass to any inner HA elements
-    cc.querySelectorAll("*").forEach((el: any) => {
+    cc.querySelectorAll("*").forEach((el: object) => {
       if ("hass" in el) el.hass = hass;
     });
     return;
@@ -262,7 +266,7 @@ export function head_configuration(
     ["single", "custom", "hourly", "timer"],
     saved_schedule.type,
   );
-  schedule_type.addEventListener("change", function (_event: any) {
+  schedule_type.addEventListener("change", function (_event: unknown) {
     handle_schedule_type_change(_event, elt, hass, shadowRoot);
   });
   form.appendChild(schedule_type);
@@ -320,7 +324,7 @@ export function head_configuration(
   save_button.type = "button";
   save_button.addEventListener(
     "click",
-    function (e: any) {
+    function (e: Event) {
       e.preventDefault();
       save_schedule(e, shadowRoot, form, elt, hass);
     },
@@ -370,7 +374,7 @@ function head_configuration_schedule_custom(
   add_button.style.width = "100%";
   add_button.addEventListener(
     "click",
-    function (e: any) {
+    function (e: Event) {
       e.preventDefault();
       head_configuration_intervals_custom(
         shadowRoot,
@@ -412,7 +416,7 @@ function head_configuration_schedule_timer(
   add_button.style.width = "100%";
   add_button.addEventListener(
     "click",
-    function (e: any) {
+    function (e: Event) {
       e.preventDefault();
       head_configuration_intervals_timer(
         shadowRoot,
@@ -599,7 +603,7 @@ function head_configuration_intervals_custom(shadowRoot, interval, form) {
   }
   delete_button.addEventListener(
     "click",
-    function (e: any) {
+    function (e: Event) {
       e.preventDefault();
       head_configuration_delete_interval(position, form);
     },
@@ -660,7 +664,7 @@ function head_configuration_intervals_timer(shadowRoot, interval, form) {
   }
   delete_button.addEventListener(
     "click",
-    function (e: any) {
+    function (e: Event) {
       e.preventDefault();
       head_configuration_delete_interval(position, form);
     },

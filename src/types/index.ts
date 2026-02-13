@@ -5,6 +5,8 @@
  *   import type { HassConfig, DeviceInfo, ... } from "../types/index";
  */
 
+// ── Common  ─────────────────────────────────────────────────────────────
+export type { DialogElement } from "./common-types";
 // ── Home Assistant ─────────────────────────────────────────────────────────────
 export type {
   HassEntity,

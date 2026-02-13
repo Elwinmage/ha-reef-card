@@ -154,7 +154,7 @@ export interface DialogContentConfig {
 
 export interface DialogConfig {
   title?: DynamicValue<string>;
-  content: DialogContentConfig[];
+  content?: DialogContentConfig[];
   extends_to_re_render?: string[];
   [key: string]: any;
 }

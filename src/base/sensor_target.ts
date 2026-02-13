@@ -25,7 +25,7 @@
 import { html, TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
-import type { StateObject } from "../types/index";
+import type { StateObject, HassConfig } from "../types/index";
 
 import { Sensor } from "./sensor";
 
@@ -34,11 +34,11 @@ import style_sensor_target from "./sensor_target.styles";
 //----------------------------------------------------------------------------//
 
 export class SensorTarget extends Sensor {
-  static override styles = style_sensor_target;
+  static override styles = [style_sensor_target];
 
   // Public reactive property
   @property({ type: Object })
-  override stateObjTarget: StateObject | null = null;
+  stateObjTarget: StateObject | null = null;
 
   /**
    * Constructor
@@ -125,5 +125,14 @@ export class SensorTarget extends Sensor {
         ${value}/${target}<span class="unit">${unit}</span>
       </div>
     `;
+  }
+
+  protected override _load_subelements() {
+    if (this.conf?.target && this.device) {
+      const targetEntity = this.device.entities[this.conf.target];
+      if (targetEntity) {
+        this.stateObjTarget = this._hass.states[targetEntity.entity_id] || null;
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@
 import { html, TemplateResult, css } from "lit";
 import { property } from "lit/decorators.js";
 
-import type { StateObject, ProgressConfig } from "../types/index";
+import type { ProgressConfig } from "../types/index";
 
 import { SensorTarget } from "./sensor_target";
 

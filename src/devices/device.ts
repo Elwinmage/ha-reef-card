@@ -9,7 +9,7 @@
 import { TemplateResult, LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-import type { HassConfig, DeviceInfo } from "../types/index";
+import type { HassConfig, DeviceInfo, DeviceConfig } from "../types/index";
 
 import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
@@ -27,7 +27,7 @@ export class RSDevice extends LitElement {
   public entities: Record<string, any> = {};
 
   @state()
-  public config: any;
+  public config: DeviceConfig;
 
   @state()
   protected _hass: HassConfig | null = null;
@@ -36,10 +36,10 @@ export class RSDevice extends LitElement {
   protected device: DeviceInfo | null = null;
 
   @state()
-  protected initial_config: any;
+  protected initial_config: Partial<DeviceConfig>;
 
   @state()
-  protected user_config: any;
+  protected user_config: Partial<DeviceConfig>;
 
   @state()
   protected _elements: any = {};

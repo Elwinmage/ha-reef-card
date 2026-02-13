@@ -1,6 +1,8 @@
 import { html } from "lit";
 import { RSDevice } from "../device";
 
+import { StateObject } from "../../types/index";
+
 import styles from "./dose_head.styles";
 import style_sensors from "../../base/sensor.styles";
 
@@ -22,9 +24,9 @@ export class DoseHead extends RSDevice {
 
   // Déclaration des propriétés d'instance
   state_on: boolean = false;
-  device_state: any = null;
-  head_state: any = null;
-  supplement: any = null;
+  device_state: StateObject | null = null;
+  head_state: StateObject | null = null;
+  supplement: StateObject | null = null;
   stock_alert: number | null = null;
   supplement_info: boolean = false;
   bundle: boolean = false;
