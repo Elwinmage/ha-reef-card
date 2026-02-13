@@ -8,7 +8,9 @@
     "rsrun",
     "rswave"
   ],
-  "*": {
-    "update": ["firmware_update"]
+  "ignore": {
+    "*": {
+      "button": ["firmware_update"]
+    }
   }
 }

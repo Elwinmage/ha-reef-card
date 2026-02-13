@@ -9,9 +9,13 @@ export const dialogs_rsdose = {
         conf: {
           type: "entities",
           entities: [
+            { entity: "mode", name: { type: "entity" } },
             { entity: "stock_alert_days", name: { type: "entity" } },
             { entity: "dosing_waiting_period", name: { type: "entity" } },
             { entity: "battery_level", name: { type: "entity" } },
+            { entity: "fetch_config", name: { type: "entity" } },
+            { entity: "reset", name: { type: "entity" } },
+            { entity: "firmware_update", name: { type: "entity" } },
           ],
         },
       },
@@ -69,6 +73,17 @@ export const dialogs_rsdose = {
           },
         },
       },
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "last_calibration", name: { type: "entity" } },
+            { entity: "recalibration_required", name: { type: "entity" } },
+          ],
+        },
+      },
+
       {
         view: "extend",
         extend: "dose_head_dialog_func_ext",
