@@ -229,7 +229,7 @@ export const config4 = {
         supplement: {
           name: "supplement",
           label:
-            "${stateObj.attributes.supplement.brand_name}: ${stateObj.state}",
+            "${stateObj.attributes.supplement.name}: ${stateObj.attributes.supplement.brand_name} - ${stateObj.attributes.supplement.display_name}",
           type: "common-sensor",
           put_in: "supplement_info",
           css: {

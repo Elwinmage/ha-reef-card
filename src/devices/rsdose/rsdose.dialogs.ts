@@ -391,6 +391,16 @@ export const dialogs_rsdose = {
         },
       },
       {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "new_supplement_display_name", name: { type: "entity" } },
+            { entity: "set_supplement_name", name: { type: "entity" } },
+          ],
+        },
+      },
+      {
         view: "click-image",
         conf: {
           image: "/hacsfiles/ha-reef-card/img/trash.svg",

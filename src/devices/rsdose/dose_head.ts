@@ -191,8 +191,11 @@ export class DoseHead extends RSDevice {
       this._hass &&
       this._hass.states[this.entities["supplement"].entity_id] &&
       this.supplement &&
-      this._hass.states[this.entities["supplement"].entity_id].attributes
-        ?.supplement?.uid !== this.supplement.attributes?.supplement?.uid
+      (this._hass.states[this.entities["supplement"].entity_id].attributes
+        ?.supplement?.uid !== this.supplement.attributes?.supplement?.uid ||
+        this._hass.states[this.entities["supplement"].entity_id].attributes
+          ?.supplement?.display_name !==
+          this.supplement.attributes?.supplement?.display_name)
     ) {
       this.supplement =
         this._hass.states[this.entities["supplement"].entity_id];

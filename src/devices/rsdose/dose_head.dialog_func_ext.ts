@@ -235,6 +235,26 @@ export function set_container_volume(elt, hass, shadowRoot) {
 
 export function edit_container(elt, hass, shadowRoot) {
   set_container_volume(elt, hass, shadowRoot);
+  const display_name =
+    elt.device.get_entity("supplement").attributes.supplement.display_name;
+  const text_box = elt.device.get_entity("new_supplement_display_name");
+  const supplements_list = elt.device.get_entity("supplements");
+  // Get last element: "Other" to activate display_name text box
+  const stateObj = elt._hass.states[supplements_list.entity_id];
+  const options = stateObj.attributes.options || [];
+
+  if (options.length > 0) {
+    const last_option = options[options.length - 1];
+
+    elt._hass.callService("select", "select_option", {
+      entity_id: supplements_list.entity_id,
+      option: last_option,
+    });
+  }
+  elt._hass.callService("text", "set_value", {
+    entity_id: text_box.entity_id,
+    value: display_name,
+  });
 }
 
 export function head_configuration(
