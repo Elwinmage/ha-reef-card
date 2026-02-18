@@ -453,6 +453,35 @@ ${maintenance}
       return html``;
     }
 
+    // Handle hui-entities-card natively — same logic as dialog.ts _render_content()
+    if (conf.type === "hui-entities-card") {
+      const key = "hui-entities-card." + (conf.name || "device_states");
+      if (!(key in this._elements)) {
+        const HuiCard = customElements.get("hui-entities-card") as any;
+        if (HuiCard && this._hass && conf.conf) {
+          const card = new HuiCard();
+          // Resolve translation_key -> real entity_id, exactly like dialog.ts
+          const clone = structuredClone(conf.conf);
+          for (const pos in conf.conf.entities) {
+            const e = conf.conf.entities[pos];
+            if (typeof e === "string") {
+              clone.entities[pos] = this.get_entity(e)?.entity_id ?? e;
+            } else {
+              clone.entities[pos].entity =
+                this.get_entity(e.entity)?.entity_id ?? e.entity;
+            }
+          }
+          card.setConfig(clone);
+          card.hass = this._hass;
+          this._elements[key] = card;
+        }
+      } else {
+        // Propagate hass updates
+        this._elements[key].hass = this._hass;
+      }
+      return html`${this._elements[key]}`;
+    }
+
     let element: MyElement | null = null;
     if (conf.name in this._elements) {
       element = this._elements[conf.type + "." + conf.name];

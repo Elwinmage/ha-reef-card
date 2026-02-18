@@ -163,15 +163,10 @@ export class MyElement extends LitElement {
       }
     }
     //link to hass entity if a target entity is also required (sensor-target,progreess-bar,progress-circle...)
-    elt._load_subelements();
-    /*if ( config?target && elt.device ) {
-      const targetEntity = elt.device.entities[config.target];
-      if (targetEntity) {
-	
-        elt.stateObjTarget = hass.states[targetEntity.entity_id] || null;
-      }
-    }*/
-
+    // it this elemnt is a standard hass element, do not try to run _load_subelements
+    if (typeof elt._load_subelements === "function") {
+      elt._load_subelements();
+    }
     elt.label = label_name;
     return elt;
   }
