@@ -9,6 +9,8 @@ For each README:
       * count of supplements with image / total for that brand
   - Image paths are adjusted relative to each README's location
   - Section heading and intro text are localized per language
+
+Exit code is always 0: pre-commit detects file modifications automatically.
 """
 
 import os
@@ -22,7 +24,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 SCRIPT_DIR = Path(__file__).resolve().parent
 CARD_DIR   = SCRIPT_DIR.parent
-IMG_DIR    = CARD_DIR / "public" / "img" / "supplements"
+IMG_DIR    = CARD_DIR / "src" / "devices" / "img"
 DOC_DIR    = CARD_DIR / "doc"
 
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -74,7 +76,6 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
     Build the full Supplements section HTML, grouped by brand,
     with one collapsible <details> per brand.
     """
-    # Group supplements by brand_name, sorted alphabetically within each brand
     brands: dict = defaultdict(list)
     for s in SUPPLEMENTS:
         brands[s["brand_name"]].append(s)
@@ -98,7 +99,6 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
 
         for s in supplements:
             uid  = s["uid"]
-            # Display only the product name, without the "Brand - " prefix
             name = s["fullname"].split(" - ", 1)[-1]
             if has_image(uid):
                 src = img_path(uid, readme_path)
@@ -119,26 +119,25 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
     return "\n".join(lines)
 
 
-def update_readme(readme_path: Path, lang: str) -> None:
-    """Replace the Supplements section in a README file."""
+def update_readme(readme_path: Path, lang: str) -> bool:
+    """
+    Replace the Supplements section in a README file.
+    Returns True if the file was modified.
+    """
     if not readme_path.exists():
         print(f"  SKIP (not found): {readme_path}")
-        return
+        return False
 
     heading, intro = LANG_CONFIG.get(lang, LANG_CONFIG[DEFAULT_LANG])
-
     data = readme_path.read_text(encoding="utf-8")
 
-    # Check that both markers exist before attempting replacement
     if heading not in data:
         print(f"  SKIP (marker '{heading}' not found): {readme_path}")
-        return
+        return False
 
     new_section = build_supplement_block(readme_path, heading, intro)
-    # Replacement ends just before "# ReefLed" — keep that anchor intact
     new_section += "\n# ReefLed"
 
-    # Escape heading for regex (handles accented chars safely)
     heading_escaped = re.escape(heading)
     updated = re.sub(
         rf"{heading_escaped}.+?# ReefLed",
@@ -148,20 +147,23 @@ def update_readme(readme_path: Path, lang: str) -> None:
     )
 
     if updated == data:
-        print(f"  No change: {readme_path}")
+        print(f"  OK        : {readme_path}")
+        return False
     else:
         readme_path.write_text(updated, encoding="utf-8")
-        print(f"  Updated  : {readme_path}")
+        print(f"  UPDATED   : {readme_path}")
+        return True
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main() -> None:
-    print("Updating Supplements section in READMEs...\n")
+    print("Checking Supplements section in READMEs...")
+    changed = False
 
     # 1. Main README.md (English)
-    update_readme(CARD_DIR / "README.md", "en")
+    changed |= update_readme(CARD_DIR / "README.md", "en")
 
     # 2. All doc/<lang>/README.<lang>.md
     if DOC_DIR.exists():
@@ -170,9 +172,13 @@ def main() -> None:
                 continue
             lang   = lang_dir.name
             readme = lang_dir / f"README.{lang}.md"
-            update_readme(readme, lang)
+            changed |= update_readme(readme, lang)
 
-    print("\nDone.")
+    if changed:
+        print("\n⚠  READMEs were updated.")
+    else:
+        print("\n✓  All READMEs are up to date.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

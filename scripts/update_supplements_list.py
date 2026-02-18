@@ -44,7 +44,8 @@ def parse_args() -> argparse.Namespace:
         prog="update_supplements_list.py",
         description=(
             "Sync supplements_list.py from ha-reefbeat-component (local or GitHub)\n"
-            "and convert it to a TypeScript module for ha-reef-card."
+            "and convert it to a TypeScript module for ha-reef-card.\n\n"
+            "Exit code is always 0: pre-commit detects file modifications automatically."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -79,25 +80,33 @@ def parse_args() -> argparse.Namespace:
 # ---------------------------------------------------------------------------
 # Step 1 — sync supplements_list.py
 # ---------------------------------------------------------------------------
-def sync_source() -> None:
-    """Copy from local component repo if present, otherwise download from GitHub."""
+def sync_source() -> bool:
+    """
+    Copy from local component repo if present, otherwise download from GitHub.
+    Returns True if the file was updated.
+    """
     if LOCAL_SOURCE.exists():
         source_text = LOCAL_SOURCE.read_text(encoding="utf-8")
         if CURRENT_COPY.exists():
             if source_text == CURRENT_COPY.read_text(encoding="utf-8"):
-                print("supplements_list.py is already up to date.")
-                return
-            print(f"Updating from local component: {LOCAL_SOURCE}")
+                print("  OK        : supplements_list.py is already up to date.")
+                return False
+            print(f"  UPDATED   : supplements_list.py from {LOCAL_SOURCE}")
         else:
-            print(f"Copying from local component: {LOCAL_SOURCE}")
+            print(f"  CREATED   : supplements_list.py from {LOCAL_SOURCE}")
         CURRENT_COPY.write_text(source_text, encoding="utf-8")
+        return True
     else:
         print("Local component not found, downloading from GitHub...")
         try:
             with urllib.request.urlopen(ONLINE_URL) as resp:
-                content = resp.read().decode("utf-8")
-            CURRENT_COPY.write_text(content, encoding="utf-8")
-            print("Download complete.")
+                downloaded = resp.read().decode("utf-8")
+            if CURRENT_COPY.exists() and CURRENT_COPY.read_text(encoding="utf-8") == downloaded:
+                print("  OK        : supplements_list.py is already up to date.")
+                return False
+            CURRENT_COPY.write_text(downloaded, encoding="utf-8")
+            print("  UPDATED   : supplements_list.py downloaded from GitHub.")
+            return True
         except Exception as exc:
             print(f"ERROR: Failed to download supplements list: {exc}", file=sys.stderr)
             sys.exit(1)
@@ -106,7 +115,7 @@ def sync_source() -> None:
 # ---------------------------------------------------------------------------
 # Step 2 — convert Python -> TypeScript
 # ---------------------------------------------------------------------------
-def python_to_ts(indent: int, output: Path) -> None:
+def python_to_ts(indent: int, output: Path) -> bool:
     """
     Extract the SUPPLEMENTS list from the Python file and emit a TypeScript
     module, converting Python literals to JS equivalents.
@@ -148,12 +157,16 @@ def python_to_ts(indent: int, output: Path) -> None:
     ts_content = (
         'import { Supplement } from "../../types/supplement";\n\n'
         "export const SUPPLEMENTS: Supplement[] = [\n"
-        + body
-        + "\n"
+        + body.rstrip()
+        + ";\n"
     )
 
+    if output.exists() and output.read_text(encoding="utf-8") == ts_content:
+        print(f"  OK        : {output} is already up to date.")
+        return False
     output.write_text(ts_content, encoding="utf-8")
-    print(f"TypeScript output written to: {output}")
+    print(f"  UPDATED   : {output}")
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -168,6 +181,11 @@ if __name__ == "__main__":
     print(f"Indent        : {args.indent} spaces")
     print(f"Output        : {output}")
 
-    sync_source()
-    python_to_ts(indent=args.indent, output=output)
-    print("Done.")
+    changed = sync_source()
+    changed |= python_to_ts(indent=args.indent, output=output)
+
+    if changed:
+        print("\n⚠  Files were updated.")
+    else:
+        print("\n✓  supplements_list.ts is up to date.")
+    sys.exit(0)

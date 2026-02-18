@@ -19,11 +19,18 @@ repos:
         files: \.(ts|js)$
         exclude: ^dist/
         types: [file]
-
-  - repo: local
-    hooks:
       - id: check_translation
         name: Check Entities translations
         entry: python scripts/check_translations.py
+        language: python
+        pass_filenames: false
+      - id: supplements_list
+        name: Check supplements list
+        entry: python scripts/update_supplements_list.py
+        language: python
+        pass_filenames: false
+      - id: supplements_image
+        name: Update Supplements Images List in README
+        entry: python scripts/supplement_img.py
         language: python
         pass_filenames: false
