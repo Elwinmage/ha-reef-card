@@ -253,6 +253,7 @@ export class MyElement extends LitElement {
   evaluateCondition(
     expression: string | DisabledCondition | undefined,
   ): boolean {
+    if (typeof expression === "boolean") return expression;
     if (!expression) return false;
     if (typeof expression !== "string") {
       // Handle structured DisabledCondition objects

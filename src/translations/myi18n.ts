@@ -13,9 +13,13 @@ import type {
 } from "../types/index";
 
 // Import synchrone of dictionarys
+import de from "./locales/de.json";
 import en from "./locales/en.json";
+import es from "./locales/es.json";
 import fr from "./locales/fr.json";
-
+import it from "./locales/it.json";
+import pl from "./locales/pl.json";
+import pt from "./locales/pt.json";
 //----------------------------------------------------------------------------//
 
 class MyI18n {
@@ -34,11 +38,24 @@ class MyI18n {
    */
   constructor(config: I18nConfig = {}) {
     this.fallbackLanguage = config.fallbackLanguage || "en";
-    this.supportedLanguages = config.supportedLanguages || ["en", "fr"];
+    this.supportedLanguages = config.supportedLanguages || [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "pl",
+      "pt",
+    ];
 
     this.dictionaries = new Map<SupportedLanguage, LanguageDictionary>([
+      ["de", de as LanguageDictionary],
       ["en", en as LanguageDictionary],
+      ["es", es as LanguageDictionary],
       ["fr", fr as LanguageDictionary],
+      ["it", it as LanguageDictionary],
+      ["pl", pl as LanguageDictionary],
+      ["pt", pt as LanguageDictionary],
     ]);
 
     // Get homeassistant currentlanguage and set to current language
