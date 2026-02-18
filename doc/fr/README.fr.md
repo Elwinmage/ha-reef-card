@@ -194,9 +194,174 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 ## Suppléments
 
-Voici la liste des images de suppléments supportées. Si le vôtre affiche un ❌, vous pouvez demander son ajout [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+Voici la liste des images de suppléments supportées, regroupées par marque. Si la vôtre affiche ❌, vous pouvez demander son ajout [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
-<table><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 1</td></tr><tr><td> ❌</td><td colspan='2'>ATI - Essential Pro 2</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Ca Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Calcium </td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 1+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 2+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Component 3+</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - KH Plus</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Aqua Forest - Mg Plus</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid Calcium</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Liquid alkalinity</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Magnesium Mix</td></tr><tr><td> ❌</td><td colspan='2'>BRS - Part C</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Calcion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Ferrion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Hydrate - MG</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - KoralAmino</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Koralcolor</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Liquid Reef</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Potassion</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code A</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Reef Code B</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Replenish</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Restore</td></tr><tr><td> ❌</td><td colspan='2'>Brightwell - Strontion</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 1</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Component 2</td></tr><tr><td> ❌</td><td colspan='2'>ESV - B-Ionic Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements </td></tr><tr><td> ❌</td><td colspan='2'>ESV - Transition elements plus</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Amin</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 1</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 2</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light  trace 3</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Ca</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light KH</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Balling light Mg</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Blue trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Green trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Min S</td></tr><tr><td> ❌</td><td colspan='2'>Fauna Marine - Red trace elements</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite A</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite B</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Aragonite C</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Kalium</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio Metals</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Bio enhance</td></tr><tr><td> ❌</td><td colspan='2'>Quantum - Gbio Gen</td></tr><tr><td>✅</td><td>Red Sea - Bio Active (Colors D)</td><td><img style='width:20%;' src='src/devices/img/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Calcium (Foundation A)</td><td><img style='width:20%;' src='src/devices/img/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Calcium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Iodine (Colors A)</td><td><img style='width:20%;' src='src/devices/img/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Iron (Colors C)</td><td><img style='width:20%;' src='src/devices/img/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='src/devices/img/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - KH/Alkalinity (Powder)</td></tr><tr><td>✅</td><td>Red Sea - Magnesium (Foundation C)</td><td><img style='width:20%;' src='src/devices/img/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Red Sea - Magnesium (Powder)</td></tr><tr><td>✅</td><td>Red Sea - NO3PO4-X</td><td><img style='width:20%;' src='src/devices/img/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Potassium (Colors B)</td><td><img style='width:20%;' src='src/devices/img/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr><tr><td>✅</td><td>Red Sea - Reef Energy Plus</td><td><img style='width:20%;' src='src/devices/img/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Carbonate</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Complete</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 1</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Fusion 2</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Iodine</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Plus</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Strontium</td></tr><tr><td> ❌</td><td colspan='2'>Seachem - Reef Trace</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 1</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 2</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3A</td></tr><tr><td> ❌</td><td colspan='2'>Triton - Core7 elements 3B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - A Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - All-For-Reef</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Amino Organic</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling A</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling B</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Balling C</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Bio-Magnesium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Carbo Calcium</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Elimi-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - K Element</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Liquid Buffer</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - NP-Bacto-Balance</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Plus-NP</td></tr><tr><td> ❌</td><td colspan='2'>Tropic Marin - Potassium</td></tr></table>
+<details>
+<summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Essential Pro 1</td></tr>
+<tr><td>❌</td><td colspan='2'>Essential Pro 2</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Aqua Forest &nbsp; <sup>3/9 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Ca Plus</td><td><img style='width:20%;' src='../../public/img/supplements/9ea6c9f2-b6f3-41ee-9370-06457f286fe5.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Calcium </td></tr>
+<tr><td>❌</td><td colspan='2'>Component 1+</td></tr>
+<tr><td>❌</td><td colspan='2'>Component 2+</td></tr>
+<tr><td>❌</td><td colspan='2'>Component 3+</td></tr>
+<tr><td>❌</td><td colspan='2'>KH Buffer</td></tr>
+<tr><td>✅</td><td>KH Plus</td><td><img style='width:20%;' src='../../public/img/supplements/e391e8d1-0d4c-4355-8887-9231500703ef.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Magnesium</td></tr>
+<tr><td>✅</td><td>Mg Plus</td><td><img style='width:20%;' src='../../public/img/supplements/deb3a943-68a5-40a9-860b-e6d259eee947.supplement.png'/></td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>BRS &nbsp; <sup>0/4 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Liquid Calcium</td></tr>
+<tr><td>❌</td><td colspan='2'>Liquid alkalinity</td></tr>
+<tr><td>❌</td><td colspan='2'>Magnesium Mix</td></tr>
+<tr><td>❌</td><td colspan='2'>Part C</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Brightwell &nbsp; <sup>0/12 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Calcion</td></tr>
+<tr><td>❌</td><td colspan='2'>Ferrion</td></tr>
+<tr><td>❌</td><td colspan='2'>Hydrate - MG</td></tr>
+<tr><td>❌</td><td colspan='2'>KoralAmino</td></tr>
+<tr><td>❌</td><td colspan='2'>Koralcolor</td></tr>
+<tr><td>❌</td><td colspan='2'>Liquid Reef</td></tr>
+<tr><td>❌</td><td colspan='2'>Potassion</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Code A</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Code B</td></tr>
+<tr><td>❌</td><td colspan='2'>Replenish</td></tr>
+<tr><td>❌</td><td colspan='2'>Restore</td></tr>
+<tr><td>❌</td><td colspan='2'>Strontion</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>ESV &nbsp; <sup>0/5 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>B-Ionic Component 1</td></tr>
+<tr><td>❌</td><td colspan='2'>B-Ionic Component 2</td></tr>
+<tr><td>❌</td><td colspan='2'>B-Ionic Magnesium</td></tr>
+<tr><td>❌</td><td colspan='2'>Transition elements </td></tr>
+<tr><td>❌</td><td colspan='2'>Transition elements plus</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Fauna Marine &nbsp; <sup>0/11 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Amin</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light  trace 1</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light  trace 2</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light  trace 3</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light Ca</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light KH</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling light Mg</td></tr>
+<tr><td>❌</td><td colspan='2'>Blue trace elements</td></tr>
+<tr><td>❌</td><td colspan='2'>Green trace elements</td></tr>
+<tr><td>❌</td><td colspan='2'>Min S</td></tr>
+<tr><td>❌</td><td colspan='2'>Red trace elements</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Quantum &nbsp; <sup>7/7 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Aragonite A</td><td><img style='width:20%;' src='../../public/img/supplements/322c1c47-7259-4fd9-9050-f6157036ea36.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Aragonite B</td><td><img style='width:20%;' src='../../public/img/supplements/e6537278-0e0a-4fd7-8146-566334bb74ed.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Aragonite C</td><td><img style='width:20%;' src='../../public/img/supplements/5f491b59-4f54-4572-bbce-aa9b708ccb51.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio Kalium</td><td><img style='width:20%;' src='../../public/img/supplements/8fec18b0-adf6-4dfa-b923-c7226a6fb87d.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio Metals</td><td><img style='width:20%;' src='../../public/img/supplements/a1d797e3-4679-4be4-9219-22e35822ab97.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio enhance</td><td><img style='width:20%;' src='../../public/img/supplements/fd8dee42-f3da-4660-b491-880d7dac869a.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Gbio Gen</td><td><img style='width:20%;' src='../../public/img/supplements/26a4f030-e78c-459c-90cb-5c6099de10fd.supplement.png'/></td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Red Sea &nbsp; <sup>10/13 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Bio Active (Colors D)</td><td><img style='width:20%;' src='../../public/img/supplements/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Calcium (Foundation A)</td><td><img style='width:20%;' src='../../public/img/supplements/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Calcium (Powder)</td></tr>
+<tr><td>✅</td><td>Iodine (Colors A)</td><td><img style='width:20%;' src='../../public/img/supplements/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Iron (Colors C)</td><td><img style='width:20%;' src='../../public/img/supplements/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr>
+<tr><td>✅</td><td>KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='../../public/img/supplements/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>KH/Alkalinity (Powder)</td></tr>
+<tr><td>✅</td><td>Magnesium (Foundation C)</td><td><img style='width:20%;' src='../../public/img/supplements/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Magnesium (Powder)</td></tr>
+<tr><td>✅</td><td>NO3PO4-X</td><td><img style='width:20%;' src='../../public/img/supplements/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Potassium (Colors B)</td><td><img style='width:20%;' src='../../public/img/supplements/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Reef Energy Plus</td><td><img style='width:20%;' src='../../public/img/supplements/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Program</td><td><img style='width:20%;' src='../../public/img/supplements/redsea-reefcare.supplement.png'/></td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Seachem &nbsp; <sup>0/9 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Reef Calcium</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Carbonate</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Complete</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Fusion 1</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Fusion 2</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Iodine</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Plus</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Strontium</td></tr>
+<tr><td>❌</td><td colspan='2'>Reef Trace</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Triton &nbsp; <sup>0/4 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>Core7 elements 1</td></tr>
+<tr><td>❌</td><td colspan='2'>Core7 elements 2</td></tr>
+<tr><td>❌</td><td colspan='2'>Core7 elements 3A</td></tr>
+<tr><td>❌</td><td colspan='2'>Core7 elements 3B</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>Tropic Marin &nbsp; <sup>5/14 🖼️</sup></b></summary>
+
+<table>
+<tr><td>❌</td><td colspan='2'>A Element</td></tr>
+<tr><td>✅</td><td>All-For-Reef</td><td><img style='width:20%;' src='../../public/img/supplements/aff00331-3c23-4357-b6d4-6609dbc4fed1.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Amino Organic</td><td><img style='width:20%;' src='../../public/img/supplements/fddbe0a4-02eb-4903-969b-6c27c805bf6b.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Balling A</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling B</td></tr>
+<tr><td>❌</td><td colspan='2'>Balling C</td></tr>
+<tr><td>✅</td><td>Bio-Magnesium</td><td><img style='width:20%;' src='../../public/img/supplements/2f04f694-3743-4e12-a45f-a3eb63aef806.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Carbo Calcium</td><td><img style='width:20%;' src='../../public/img/supplements/8cdabb9f-ebcf-4675-a10f-f9020941928f.supplement.png'/></td></tr>
+<tr><td>❌</td><td colspan='2'>Elimi-NP</td></tr>
+<tr><td>❌</td><td colspan='2'>K Element</td></tr>
+<tr><td>❌</td><td colspan='2'>Liquid Buffer</td></tr>
+<tr><td>❌</td><td colspan='2'>NP-Bacto-Balance</td></tr>
+<tr><td>❌</td><td colspan='2'>Plus-NP</td></tr>
+<tr><td>✅</td><td>Potassium</td><td><img style='width:20%;' src='../../public/img/supplements/964e897e-9668-4fc8-9cd9-e8c42a27cf85.supplement.png'/></td></tr>
+</table>
+</details>
 
 # ReefLed
 

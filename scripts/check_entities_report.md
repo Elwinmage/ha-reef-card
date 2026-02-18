@@ -1,69 +1,51 @@
 # HA ReefBeat — Entity coverage report
 
-_Generated on 2026-02-11 17:37_
+_Generated on 2026-02-18 20:09_
 
 ## Summary
 
 | Device            |   Total | ✅ Found | ⚪ Ignored | ❌ Missing | Coverage   |
 | ----------------- | ------: | -------: | ---------: | ---------: | ---------- |
-| **rsdose**        |      54 |       46 |          0 |          8 | 🟡 85%     |
-| **rsled_g1**      |      40 |        0 |          0 |         40 | 🔴 0%      |
-| **rsled_g2**      |      39 |        0 |          0 |         39 | 🔴 0%      |
-| **rsled_virtual** |      21 |        0 |          0 |         21 | 🔴 0%      |
-| **rsato**         |      44 |       12 |          0 |         32 | 🔴 27%     |
-| **rsrun**         |      41 |       12 |          0 |         29 | 🔴 29%     |
-| **rswave**        |      40 |       12 |          0 |         28 | 🔴 30%     |
-| **rsmat**         |      36 |       12 |          0 |         24 | 🔴 33%     |
-| **TOTAL**         | **315** |   **94** |      **0** |    **221** | 🔴 **30%** |
+| **rsdose**        |      55 |       55 |          0 |          0 | 🟢 100%    |
+| **rsled_g1**      |      39 |        0 |          1 |         38 | 🔴 0%      |
+| **rsled_g2**      |      38 |        0 |          1 |         37 | 🔴 0%      |
+| **rsled_virtual** |      20 |        0 |          0 |         20 | 🔴 0%      |
+| **rsato**         |      42 |       12 |          1 |         29 | 🔴 29%     |
+| **rsrun**         |      40 |       12 |          1 |         27 | 🔴 30%     |
+| **rswave**        |      39 |       12 |          1 |         26 | 🔴 31%     |
+| **rsmat**         |      36 |       12 |          1 |         23 | 🔴 33%     |
+| **TOTAL**         | **309** |  **103** |      **6** |    **200** | 🔴 **33%** |
 
 ## Detail by device
 
-### 🔴 RSDOSE
+### 🟢 RSDOSE
 
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
-| ❌ `binary_sensor` |     4 |        3 |          0 |          1 |
-| ❌ `button`        |    12 |        9 |          0 |          3 |
+| ✅ `binary_sensor` |     4 |        4 |          0 |          0 |
+| ✅ `button`        |    13 |       13 |          0 |          0 |
 | ✅ `number`        |     7 |        7 |          0 |          0 |
 | ✅ `select`        |     1 |        1 |          0 |          0 |
-| ❌ `sensor`        |    19 |       17 |          0 |          2 |
+| ✅ `sensor`        |    19 |       19 |          0 |          0 |
 | ✅ `switch`        |     6 |        6 |          0 |          0 |
-| ✅ `text`          |     3 |        3 |          0 |          0 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
-| ❌ `update`        |     1 |        0 |          0 |          1 |
-
-<details>
-<summary>❌ Missing entities (8)</summary>
-
-| Platform        | Entity key               |
-| --------------- | ------------------------ |
-| `binary_sensor` | `recalibration_required` |
-| `button`        | `fetch_config`           |
-| `button`        | `firmware_update`        |
-| `button`        | `reset`                  |
-| `sensor`        | `last_calibration`       |
-| `sensor`        | `mode`                   |
-| `time`          | `schedule_time`          |
-| `update`        | `firmware_update`        |
-
-</details>
+| ✅ `text`          |     4 |        4 |          0 |          0 |
+| ✅ `update`        |     1 |        1 |          0 |          0 |
 
 ### 🔴 RSLED_G1
 
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ❌ `binary_sensor` |     3 |        0 |          0 |          3 |
-| ❌ `button`        |     4 |        0 |          0 |          4 |
+| ❌ `button`        |     4 |        0 |          1 |          3 |
 | ❌ `light`         |     4 |        0 |          0 |          4 |
 | ❌ `number`        |     4 |        0 |          0 |          4 |
 | ❌ `select`        |     1 |        0 |          0 |          1 |
 | ❌ `sensor`        |    16 |        0 |          0 |         16 |
 | ❌ `switch`        |     6 |        0 |          0 |          6 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (40)</summary>
+<summary>❌ Missing entities (38)</summary>
 
 | Platform        | Entity key                           |
 | --------------- | ------------------------------------ |
@@ -71,7 +53,6 @@ _Generated on 2026-02-11 17:37_
 | `binary_sensor` | `cloud_state`                        |
 | `binary_sensor` | `status`                             |
 | `button`        | `fetch_config`                       |
-| `button`        | `firmware_update`                    |
 | `button`        | `led_identify`                       |
 | `button`        | `reset`                              |
 | `light`         | `blue`                               |
@@ -105,8 +86,16 @@ _Generated on 2026-02-11 17:37_
 | `switch`        | `maintenance`                        |
 | `switch`        | `moon_phase`                         |
 | `switch`        | `use_cloud_api`                      |
-| `time`          | `schedule_time`                      |
 | `update`        | `firmware_update`                    |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
 
@@ -115,24 +104,22 @@ _Generated on 2026-02-11 17:37_
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ❌ `binary_sensor` |     2 |        0 |          0 |          2 |
-| ❌ `button`        |     4 |        0 |          0 |          4 |
+| ❌ `button`        |     4 |        0 |          1 |          3 |
 | ❌ `light`         |     2 |        0 |          0 |          2 |
 | ❌ `number`        |     4 |        0 |          0 |          4 |
 | ❌ `select`        |     1 |        0 |          0 |          1 |
 | ❌ `sensor`        |    18 |        0 |          0 |         18 |
 | ❌ `switch`        |     6 |        0 |          0 |          6 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (39)</summary>
+<summary>❌ Missing entities (37)</summary>
 
 | Platform        | Entity key                           |
 | --------------- | ------------------------------------ |
 | `binary_sensor` | `cloud_state`                        |
 | `binary_sensor` | `status`                             |
 | `button`        | `fetch_config`                       |
-| `button`        | `firmware_update`                    |
 | `button`        | `led_identify`                       |
 | `button`        | `reset`                              |
 | `light`         | `kelvin_intensity`                   |
@@ -166,8 +153,16 @@ _Generated on 2026-02-11 17:37_
 | `switch`        | `maintenance`                        |
 | `switch`        | `moon_phase`                         |
 | `switch`        | `use_cloud_api`                      |
-| `time`          | `schedule_time`                      |
 | `update`        | `firmware_update`                    |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
 
@@ -182,10 +177,9 @@ _Generated on 2026-02-11 17:37_
 | ❌ `select`        |     1 |        0 |          0 |          1 |
 | ❌ `sensor`        |     3 |        0 |          0 |          3 |
 | ❌ `switch`        |     5 |        0 |          0 |          5 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (21)</summary>
+<summary>❌ Missing entities (20)</summary>
 
 | Platform        | Entity key                           |
 | --------------- | ------------------------------------ |
@@ -209,7 +203,6 @@ _Generated on 2026-02-11 17:37_
 | `switch`        | `device_state`                       |
 | `switch`        | `maintenance`                        |
 | `switch`        | `moon_phase`                         |
-| `time`          | `schedule_time`                      |
 
 </details>
 
@@ -218,15 +211,14 @@ _Generated on 2026-02-11 17:37_
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ❌ `binary_sensor` |     9 |        1 |          0 |          8 |
-| ❌ `button`        |     6 |        0 |          0 |          6 |
+| ❌ `button`        |     6 |        0 |          1 |          5 |
 | ❌ `number`        |     1 |        0 |          0 |          1 |
-| ❌ `sensor`        |    21 |        7 |          0 |         14 |
+| ❌ `sensor`        |    20 |        7 |          0 |         13 |
 | ❌ `switch`        |     5 |        4 |          0 |          1 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (32)</summary>
+<summary>❌ Missing entities (29)</summary>
 
 | Platform        | Entity key                 |
 | --------------- | -------------------------- |
@@ -240,12 +232,10 @@ _Generated on 2026-02-11 17:37_
 | `binary_sensor` | `water_level`              |
 | `button`        | `fetch_config`             |
 | `button`        | `fill`                     |
-| `button`        | `firmware_update`          |
 | `button`        | `reset`                    |
 | `button`        | `resume`                   |
 | `button`        | `stop_fill`                |
 | `number`        | `ato_volume_left`          |
-| `sensor`        | `ato_mode`                 |
 | `sensor`        | `current_level`            |
 | `sensor`        | `current_read`             |
 | `sensor`        | `daily_fills_average`      |
@@ -260,8 +250,16 @@ _Generated on 2026-02-11 17:37_
 | `sensor`        | `volume_left`              |
 | `sensor`        | `water_level`              |
 | `switch`        | `auto_fill`                |
-| `time`          | `schedule_time`            |
 | `update`        | `firmware_update`          |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
 
@@ -270,16 +268,15 @@ _Generated on 2026-02-11 17:37_
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ❌ `binary_sensor` |     8 |        1 |          0 |          7 |
-| ❌ `button`        |     7 |        0 |          0 |          7 |
+| ❌ `button`        |     7 |        0 |          1 |          6 |
 | ❌ `number`        |     3 |        0 |          0 |          3 |
 | ❌ `select`        |     1 |        0 |          0 |          1 |
 | ❌ `sensor`        |    13 |        7 |          0 |          6 |
 | ❌ `switch`        |     7 |        4 |          0 |          3 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (29)</summary>
+<summary>❌ Missing entities (27)</summary>
 
 | Platform        | Entity key               |
 | --------------- | ------------------------ |
@@ -292,7 +289,6 @@ _Generated on 2026-02-11 17:37_
 | `binary_sensor` | `sensor_controlled`      |
 | `button`        | `delete_emergency`       |
 | `button`        | `fetch_config`           |
-| `button`        | `firmware_update`        |
 | `button`        | `preview_save`           |
 | `button`        | `preview_start`          |
 | `button`        | `preview_stop`           |
@@ -310,8 +306,16 @@ _Generated on 2026-02-11 17:37_
 | `switch`        | `fullcup_enabled`        |
 | `switch`        | `overskimming_enabled`   |
 | `switch`        | `schedule_enabled`       |
-| `time`          | `schedule_time`          |
 | `update`        | `firmware_update`        |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
 
@@ -320,21 +324,19 @@ _Generated on 2026-02-11 17:37_
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ✅ `binary_sensor` |     1 |        1 |          0 |          0 |
-| ❌ `button`        |     7 |        0 |          0 |          7 |
+| ❌ `button`        |     7 |        0 |          1 |          6 |
 | ❌ `number`        |     8 |        0 |          0 |          8 |
 | ❌ `select`        |     2 |        0 |          0 |          2 |
 | ❌ `sensor`        |    16 |        7 |          0 |          9 |
 | ✅ `switch`        |     4 |        4 |          0 |          0 |
-| ❌ `time`          |     1 |        0 |          0 |          1 |
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (28)</summary>
+<summary>❌ Missing entities (26)</summary>
 
 | Platform | Entity key                   |
 | -------- | ---------------------------- |
 | `button` | `fetch_config`               |
-| `button` | `firmware_update`            |
 | `button` | `preview_save`               |
 | `button` | `preview_set_from_current`   |
 | `button` | `preview_start`              |
@@ -359,8 +361,16 @@ _Generated on 2026-02-11 17:37_
 | `sensor` | `wave_forward_time`          |
 | `sensor` | `wave_step`                  |
 | `sensor` | `wave_type`                  |
-| `time`   | `schedule_time`              |
 | `update` | `firmware_update`            |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
 
@@ -369,7 +379,7 @@ _Generated on 2026-02-11 17:37_
 | Platform           | Total | ✅ Found | ⚪ Ignored | ❌ Missing |
 | ------------------ | ----: | -------: | ---------: | ---------: |
 | ❌ `binary_sensor` |     3 |        1 |          0 |          2 |
-| ❌ `button`        |     6 |        0 |          0 |          6 |
+| ❌ `button`        |     6 |        0 |          1 |          5 |
 | ❌ `number`        |     3 |        0 |          0 |          3 |
 | ❌ `select`        |     2 |        0 |          0 |          2 |
 | ❌ `sensor`        |    14 |        7 |          0 |          7 |
@@ -378,7 +388,7 @@ _Generated on 2026-02-11 17:37_
 | ❌ `update`        |     1 |        0 |          0 |          1 |
 
 <details>
-<summary>❌ Missing entities (24)</summary>
+<summary>❌ Missing entities (23)</summary>
 
 | Platform        | Entity key               |
 | --------------- | ------------------------ |
@@ -387,7 +397,6 @@ _Generated on 2026-02-11 17:37_
 | `button`        | `advance`                |
 | `button`        | `delete_emergency`       |
 | `button`        | `fetch_config`           |
-| `button`        | `firmware_update`        |
 | `button`        | `new_roll`               |
 | `button`        | `reset`                  |
 | `number`        | `custom_advance_value`   |
@@ -406,5 +415,14 @@ _Generated on 2026-02-11 17:37_
 | `switch`        | `scheduled_advance`      |
 | `time`          | `schedule_time`          |
 | `update`        | `firmware_update`        |
+
+</details>
+
+<details>
+<summary>⚪ Ignored entities (1)</summary>
+
+| Platform | Entity key        |
+| -------- | ----------------- |
+| `button` | `firmware_update` |
 
 </details>
