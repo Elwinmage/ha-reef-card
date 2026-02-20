@@ -148,7 +148,7 @@ Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Té
 Ou recherchez « reef-card »  dans HACS.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefcard/main/doc/img/hacs_search.png" alt="Image">
+<img src="../img/hacs_search.png" alt="Image">
 </p>
 
 # Configuration
@@ -178,7 +178,11 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 # ReefDose
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/rsdose4_ex1.png"/>
+ReefDose avec ha-reef-card en action:
+
+[![Regarder la vidéo](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
+
+<img src="../img/rsdose/rsdose4_ex1.png"/>
 La carte ReefDose est découpée en 6 zones:
 
  1. Configuration/Information Wifi
@@ -188,19 +192,27 @@ La carte ReefDose est découpée en 6 zones:
  5. Gestion dessuppléments
  6. File d'attentes des futures doses
 
-## Configuration/Information Wifi 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1.png"/>
-Cliquez sur l'icone <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/cog_icon.png"/>  pour gérer la configuration générale du ReefDose.
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1_dialog_config.png"/> 
-Cliquez sur l'icone <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/wifi_icon.png"/>  pour gérer les paramètres réseaux.
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1_dialog_wifi.png"/> 
 
-## Etats
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2.png"/>
-L'interrupteur de maintenance  <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance 
- <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/maintenance_view.png"/>
-L'interrupteur de on/off  <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2_off.png"/> permet de basculer vers entre les états on et off du ReefDose 
- <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/off_view.png"/>
+
+## Configuration/Information Wifi <img src="../img/rsdose/zone_1.png"/>
+
+<span >Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefDose.</span>
+
+<img src="../img/rsdose/zone_1_dialog_config.png"/> 
+
+<span>Cliquez sur l'icone <img width="30px" src="../img/rsdose/wifi_icon.png"/>  pour gérer les paramètres réseaux.</span>
+
+<img src="../img/rsdose/zone_1_dialog_wifi.png"/> 
+
+## Etats <img src="../img/rsdose/zone_2.png"/>
+
+<span>L'interrupteur de maintenance  <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance.</span>
+
+ <img  src="../img/rsdose/maintenance_view.png"/>
+
+<span>L'interrupteur de on/off  <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer vers entre les états on et off du ReefDose.</span>
+
+ <img  src="../img/rsdose/off_view.png"/>
 
 ## Suppléments
 
