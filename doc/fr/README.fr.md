@@ -7,12 +7,8 @@
 [![GH-code-size](https://img.shields.io/github/languages/code-size/Elwinmage/ha-reef-card.svg?color=red&style=flat-square)](https://github.com/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-> [!CAUTION]
-> Cette carte est en cours de développement et ne doit être installée qu'à des fins de test.  
-> La première version sera publiée dans la bibliothèque standard HACS dans quelques semaines et supportera le ReefDose 4 de Redsea.<br /> > **_Vous pouvez voter pour choisir le prochain appareil supporté [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22)._**
-
 > [!NOTE]
-> L'aide est la bienvenue, n'hésitez pas à [me contacter](https://github.com/Elwinmage/ha-reef-card/discussions/1).
+> Toute aide est la bienvenue, n'hésitez pas à [me contacter](https://github.com/Elwinmage/ha-reef-card/discussions/1).
 
 # Langues supportées : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](https://github.com/Elwinmage/ha-reef-card) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](https://github.com/Elwinmage/ha-reef-card)
 
@@ -66,7 +62,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   <tr>
     <td rowspan="2"><a href="#reefdose">ReefDose</a></td>
     <td>RSDOSE2</td>
-    <td>❌</td>
+    <td>✅</td>
     <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSDOSE2.png"/></td>
       <td rowspan="2">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsdose,all label:enhancement" style="text-decoration:none">📆</a>
@@ -74,7 +70,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
     </td>
   </tr>
   <tr>
-    <td>RSDOSE4</td><td>☑️</td>
+    <td>RSDOSE4</td><td>✅</td>
     <td width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSDOSE4.png"/></td>
     </tr>
   <tr>
@@ -94,7 +90,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   <tr>
     <td rowspan="3"><a href="#reefmat">ReefMat</a></td>
     <td>RSMAT250</td>
-    <td>❌</td>
+    <td>☑️</td>
     <td rowspan="3" width="200px"><img src="https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/img/RSMAT.png"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsmat,all label:enhancement" style="text-decoration:none">📆</a>
@@ -103,11 +99,11 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   </tr>
   <tr>
     <td>RSMAT500</td>
-    <td>❌</td>
+    <td>☑️</td>
   </tr>
   <tr>
     <td>RSMAT1200</td>
-    <td>❌</td>
+    <td>☑️</td>
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
@@ -144,10 +140,16 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
 
 # Installation
 
-> [!CAUTION]
-> Cette carte est en cours de développement et ne doit être installée qu'à des fins de test.  
-> La première version sera publiée dans la bibliothèque standard HACS dans quelques semaines.
-> Pour l'instant, si vous souhaitez la tester, utilisez le "Dépôt personnalisé" dans les paramètres HACS.
+## Installation directe
+
+Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Télécharger » :  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+
+## Rechercher dans HACS
+Ou recherchez « reef-card »  dans HACS.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefcard/main/doc/img/hacs_search.png" alt="Image">
+</p>
 
 # Configuration
 
@@ -165,7 +167,7 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 # ReefATO
 
 Planifié.
-
+  
 Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
@@ -176,21 +178,29 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 # ReefDose
 
-<img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/rsdose4_ex1.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/rsdose4_ex1.png"/>
+La carte ReefDose est découpée en 6 zones:
 
-## Fonctionnalités
+ 1. Configuration/Information Wifi
+ 2. Etats
+ 3. Dosage Manuel
+ 4. Configuration et planning des têtes
+ 5. Gestion dessuppléments
+ 6. File d'attentes des futures doses
 
-**En cours de développement**
+## Configuration/Information Wifi 
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1.png"/>
+Cliquez sur l'icone <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/cog_icon.png"/>  pour gérer la configuration générale du ReefDose.
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1_dialog_config.png"/> 
+Cliquez sur l'icone <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/wifi_icon.png"/>  pour gérer les paramètres réseaux.
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_1_dialog_wifi.png"/> 
 
-- ReefDose 4 ([#8](https://github.com/Elwinmage/ha-reef-card/issues/8))
-  - [x] Détection et configuration automatique des suppléments
-  - [ ] Gestion de base (doses manuelles et journalières, affichage des jours restants...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
-  - [ ] Planification avancée [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
-- ReefDose 2 ([#9](https://github.com/Elwinmage/ha-reef-card/issues/9))
-  - [ ] Détection et configuration automatique des suppléments
-  - [ ] Gestion de base (doses manuelles et journalières, affichage des jours restants...) [#13](https://github.com/Elwinmage/ha-reef-card/issues/13)
-  - [ ] Planification avancée [#14](https://github.com/Elwinmage/ha-reef-card/issues/14)
-- Pompes doseuses génériques
+## Etats
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2.png"/>
+L'interrupteur de maintenance  <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance 
+ <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/maintenance_view.png"/>
+L'interrupteur de on/off  <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/zone_2_off.png"/> permet de basculer vers entre les états on et off du ReefDose 
+ <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsdose/off_view.png"/>
 
 ## Suppléments
 
