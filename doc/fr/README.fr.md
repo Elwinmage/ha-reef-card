@@ -159,8 +159,8 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 
 <table>
   <tr>
-<td><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/card_rsdose4_config_2.png"/></td>
-<td><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/card_rsdose4_config.png"/></td>
+<td><img src="../img/card_rsdose4_config_2.png"/></td>
+<td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
 
@@ -189,12 +189,13 @@ La carte ReefDose est découpée en 6 zones:
  2. Etats
  3. Dosage Manuel
  4. Configuration et planning des têtes
- 5. Gestion dessuppléments
+ 5. Gestion des suppléments
  6. File d'attentes des futures doses
 
+## Configuration/Information Wifi 
+<img src="../img/rsdose/zone_1.png"/>
 
-
-## Configuration/Information Wifi <img src="../img/rsdose/zone_1.png"/>
+***
 
 <span >Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefDose.</span>
 
@@ -204,8 +205,11 @@ La carte ReefDose est découpée en 6 zones:
 
 <img src="../img/rsdose/zone_1_dialog_wifi.png"/> 
 
-## Etats <img src="../img/rsdose/zone_2.png"/>
+## Etats
 
+ <img src="../img/rsdose/zone_2.png"/>
+
+***
 <span>L'interrupteur de maintenance  <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance.</span>
 
  <img  src="../img/rsdose/maintenance_view.png"/>
@@ -214,7 +218,27 @@ La carte ReefDose est découpée en 6 zones:
 
  <img  src="../img/rsdose/off_view.png"/>
 
-## Suppléments
+
+## Dosage Manuel
+
+<img src="../img/rsdose/zone_3.png"/>
+
+***
+
+
+## Configuration et planning des têtes
+
+ <img src="../img/rsdose/zone_4.png"/>
+
+***
+
+## Gestion des suppléments
+
+ <img src="../img/rsdose/zone_5.png"/>
+
+***
+
+### Suppléments
 
 Voici la liste des images de suppléments supportées, regroupées par marque. Si la vôtre affiche ❌, vous pouvez demander son ajout [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
@@ -384,6 +408,12 @@ Voici la liste des images de suppléments supportées, regroupées par marque. S
 <tr><td>❌</td><td colspan='2'>Potassium</td></tr>
 </table>
 </details>
+
+## File d'attentes des futures doses 
+
+<img src="../img/rsdose/zone_6.png"/>
+
+***
 
 # ReefLed
 
