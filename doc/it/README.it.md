@@ -8,36 +8,36 @@
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 > [!NOTE]
-> Any help is welcome, feel free to [contact me](https://github.com/Elwinmage/ha-reef-card/discussions/1).
+> Ogni aiuto è benvenuto, non esitate a [contattarmi](https://github.com/Elwinmage/ha-reef-card/discussions/1).
 
-# Supported languages : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](doc/fr/README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](README.md) [<img src="https://flagicons.lipis.dev/flags/4x3/es.svg" style="width: 5%"/>](doc/es/README.es.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pt.svg" style="width: 5%"/>](doc/pt/README.pt.md) [<img src="https://flagicons.lipis.dev/flags/4x3/de.svg" style="width: 5%"/>](doc/de/README.de.md) [<img src="https://flagicons.lipis.dev/flags/4x3/it.svg" style="width: 5%"/>](doc/it/README.it.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pl.svg" style="width: 5%"/>](doc/pl/README.pl.md)
+# Lingue supportate : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](../fr/README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](../../README.md) [<img src="https://flagicons.lipis.dev/flags/4x3/es.svg" style="width: 5%"/>](../es/README.es.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pt.svg" style="width: 5%"/>](../pt/README.pt.md) [<img src="https://flagicons.lipis.dev/flags/4x3/de.svg" style="width: 5%"/>](../de/README.de.md) [<img src="https://flagicons.lipis.dev/flags/4x3/it.svg" style="width: 5%"/>](README.it.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pl.svg" style="width: 5%"/>](../pl/README.pl.md)
 
 <!-- Vous souhaitez aider à la traduction, suivez ce [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md). -->
 
-Your language is not yet supported and you want to help with the translation? Follow this [guide](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md).
+La vostra lingua non è ancora supportata e volete contribuire alla traduzione? Seguite questa [guida](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/TRANSLATION.md).
 
-# Overview
+# Presentazione
 
-The **Reef card** for Home Assistant helps you manage your reef aquarium.
+La **Reef card** per Home Assistant vi aiuta a gestire il vostro acquario di barriera corallina.
 
-Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), it automatically supports your Redsea (ReefBeat) devices.
+Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), supporta automaticamente i vostri dispositivi Redsea (ReefBeat).
 
 > [!NOTE]
-> If you have non-Redsea devices and want them to be supported, you can request it [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
+> Se avete dispositivi non Redsea e desiderate che siano supportati, potete farne richiesta [qui](https://github.com/Elwinmage/ha-reef-card/discussions/2).
 
 > [!TIP]
-> The list of upcoming features is available [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
-> The list of bugs is available [here](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
+> La lista delle funzionalità future è disponibile [qui](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
+> La lista dei bug è disponibile [qui](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
 
-# Compatibility
+# Compatibilità
 
-✅ Implemented ☑️ In progress ❌ Planned
+✅ Implementato ☑️ In corso ❌ Pianificato
 
 <table>
   <th>
-    <td ><b>Model</b></td>
-    <td colspan="2"><b>Status</b></td>
-    <td><b>Issues</b>  <br/>📆(Planned) <br/> 🐛(Bugs)</td>
+    <td ><b>Modello</b></td>
+    <td colspan="2"><b>Stato</b></td>
+    <td><b>Issues</b>  <br/>📆(Pianificato) <br/> 🐛(Bug)</td>
   </th>
   <tr>
     <td><a href="#reefato">ReefATO+</a></td>
@@ -52,7 +52,7 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
   </tr>
     <tr>
     <td><a href="#reefcontrol">ReefControl</a></td>
-    <td>RSSENSE<br /> If you own one, you can contact me <a href="https://github.com/Elwinmage/ha-reefbeat-component/discussions/8">here</a> and I will add its support.</td><td>❌</td>
+    <td>RSSENSE<br /> Se ne possedete uno, potete contattarmi <a href="https://github.com/Elwinmage/ha-reefbeat-component/discussions/8">qui</a> e aggiungerò il suo supporto.</td><td>❌</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROL.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
@@ -125,10 +125,10 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
   </tr>
 </table>
 
-# Table of contents
+# Sommario
 
-- [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
-- [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
+- [Installazione](https://github.com/Elwinmage/ha-reef-card/#installation)
+- [Configurazione](https://github.com/Elwinmage/ha-reef-card/#configuration)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/#reefcontrol)
 - [ReefDose](https://github.com/Elwinmage/ha-reef-card/#reefdose)
@@ -138,156 +138,156 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
-# Installation
+# Installazione
 
-## Direct installation
+## Installazione diretta
 
-Click here to open the repository directly in HACS and click "Download":  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Clicca qui per accedere direttamente al repository in HACS e clicca su "Scarica":  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
-## Search in HACS
-Or search for «reef-card» in HACS.
+## Cercare in HACS
+Oppure cerca «reef-card» in HACS.
 
 <p align="center">
-<img src="doc/img/hacs_search.png" alt="Image">
+<img src="../img/hacs_search.png" alt="Image">
 </p>
 
-# Configuration
+# Configurazione
 
-Without the `device` parameter, the card automatically detects all ReefBeat devices and lets you choose the one you want.
+Senza il parametro `device`, la card rileva automaticamente tutti i dispositivi ReefBeat e vi permette di scegliere quello desiderato.
 
-To remove device selection and force a specific one, set the `device` parameter to the name of your device.
+Per rimuovere la selezione del dispositivo e forzarne uno specifico, impostate il parametro `device` con il nome del vostro dispositivo.
 
 <table>
   <tr>
-<td><img src="doc/img/card_rsdose4_config_2.png"/></td>
-<td><img src="doc/img/card_rsdose4_config.png"/></td>
+<td><img src="../img/card_rsdose4_config_2.png"/></td>
+<td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
 
 # ReefATO
 
-Planned.
+Pianificato.
   
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
 
-Planned.
+Pianificato.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefDose
 
-ReefDose with ha-reef-card in action:
+ReefDose con ha-reef-card in azione:
 
-[![Watch the video](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
+[![Guarda il video](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
 
 
-The ReefDose card is divided into 6 zones:
+La card ReefDose è suddivisa in 6 zone:
 
- 1. Configuration/WiFi Information
- 2. States
- 3. Manual Dosing
- 4. Head configuration and scheduling
- 5. Supplement management
- 6. Future dose queue
+ 1. Configurazione/Informazioni Wifi
+ 2. Stati
+ 3. Dosaggio Manuale
+ 4. Configurazione e programmazione delle teste
+ 5. Gestione degli integratori
+ 6. Coda delle dosi future
 
-<img src="doc/img/rsdose/rsdose4_ex1.png"/>
+<img src="../img/rsdose/rsdose4_ex1.png"/>
 
-## Configuration/WiFi Information
-<img src="doc/img/rsdose/zone_1.png"/>
-
-***
-
-<span >Click the icon <img src="doc/img/rsdose/cog_icon.png" width="30" /> to manage the general configuration of the ReefDose.</span>
-
-<img src="doc/img/rsdose/zone_1_dialog_config.png"/> 
-
-<span>Click the icon <img width="30px" src="doc/img/rsdose/wifi_icon.png"/>  to manage the network settings.</span>
-
-<img src="doc/img/rsdose/zone_1_dialog_wifi.png"/> 
-
-## States
-
- <img src="doc/img/rsdose/zone_2.png"/>
+## Configurazione/Informazioni Wifi
+<img src="../img/rsdose/zone_1.png"/>
 
 ***
-<span>The maintenance switch <img width="30px" src="doc/img/rsdose/zone_2_maintenance.png"/> switches the device to maintenance mode.</span>
 
- <img  src="doc/img/rsdose/maintenance_view.png"/>
+<span >Cliccate sull'icona <img src="../img/rsdose/cog_icon.png" width="30" /> per gestire la configurazione generale del ReefDose.</span>
 
-<span>The on/off switch <img width="30px" src="doc/img/rsdose/zone_2_off.png"/> toggles the ReefDose between on and off states.</span>
+<img src="../img/rsdose/zone_1_dialog_config.png"/> 
 
- <img  src="doc/img/rsdose/off_view.png"/>
+<span>Cliccate sull'icona <img width="30px" src="../img/rsdose/wifi_icon.png"/>  per gestire i parametri di rete.</span>
 
+<img src="../img/rsdose/zone_1_dialog_wifi.png"/> 
 
-## Manual Dosing
+## Stati
 
-<img src="doc/img/rsdose/zone_3.png"/>
+ <img src="../img/rsdose/zone_2.png"/>
 
 ***
-<span>The button <img src="doc/img/rsdose/zone_3_manula_config_button.png"/>  displays the default manual dose for this head. Clicking it opens the configuration dialog for this dosing.</span>
+<span>L'interruttore di manutenzione <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permette di passare alla modalità manutenzione.</span>
 
-<img src="doc/img/rsdose/zone_3_dialog_manual_dose_without.png"/>
+ <img  src="../img/rsdose/maintenance_view.png"/>
 
-You can add shortcuts using the card editor:
+<span>L'interruttore on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permette di alternare tra gli stati acceso e spento del ReefDose.</span>
 
-<img src="doc/img/rsdose/editor.png"/>
+ <img  src="../img/rsdose/off_view.png"/>
 
-For example, head 1 offers 2, 5, and 10 mL as shortcuts.
 
-These values will appear at the top of the dialog. Clicking a shortcut sends a command to dose the defined value.
+## Dosaggio Manuale
 
-<img src="doc/img/rsdose/zone_3_dialog_manual_dose.png"/>
+<img src="../img/rsdose/zone_3.png"/>
 
-<span>Pressing the manual dose button: <img src="doc/img/rsdose/zone_3_manual_button.png"/> sends a dose command with the default value displayed just above: <img src="doc/img/rsdose/zone_3_manual_dose.png"/>, i.e. 10 mL in this example.
+***
+<span>Il pulsante <img src="../img/rsdose/zone_3_manula_config_button.png"/> mostra la dose manuale predefinita per questa testa. Un clic apre la finestra di configurazione di questo dosaggio.</span>
+
+<img src="../img/rsdose/zone_3_dialog_manual_dose_without.png"/>
+
+È possibile aggiungere scorciatoie utilizzando l'editor della card:
+
+<img src="../img/rsdose/editor.png"/>
+
+Ad esempio, la testa 1 propone come scorciatoie i valori 2, 5 e 10 mL.
+
+Questi valori appariranno nella parte superiore della finestra di dialogo. Un clic su queste scorciatoie invierà un comando per dosare il valore definito.
+
+<img src="../img/rsdose/zone_3_dialog_manual_dose.png"/>
+
+<span>Premendo il pulsante di dose manuale: <img src="../img/rsdose/zone_3_manual_button.png"/> verrà inviato un comando di dose con il valore predefinito visibile appena sopra: <img src="../img/rsdose/zone_3_manual_dose.png"/>, ovvero 10 mL in questo esempio.
 </span>
 
 
-## Head configuration and scheduling
+## Configurazione e programmazione delle teste
 
- <img src="doc/img/rsdose/zone_4.png"/>
+ <img src="../img/rsdose/zone_4.png"/>
 
 ***
-This zone allows you to view the current head schedule and change it.
-- The colored circular ring indicates the percentage of the daily dose already delivered.
-- The yellow number at the top shows the cumulative daily manual dose total.
-- The central part shows the volume delivered compared to the total programmed daily volume.
-- The blue lower part shows the number of doses delivered compared to the total doses for the day (example: 14/24 for blue because it is an hourly schedule and this screenshot was taken at 14:15). The values for purple and green show 0/0 because these doses are scheduled for 8:00 but the integration was started after 8:00, so there will be no doses today.
-- A long press on one of the 4 heads toggles it on/off.
-- A click on a head opens the scheduling dialog.
-  From this dialog you can run a priming cycle, recalibrate the head, change the daily dose and its schedule. Don't forget to save the schedule before closing.
+Questa zona permette di visualizzare la programmazione corrente delle teste e di modificarla.
+- L'anello circolare colorato indica la percentuale di dose giornaliera già distribuita.
+- Il numero giallo in alto indica il cumulato di dose manuale giornaliera.
+- La parte centrale indica il volume distribuito rispetto al volume giornaliero programmato totale.
+- La parte blu in basso indica il numero di dosi distribuite rispetto al numero totale di dosi della giornata (esempio: 14/24 per il blu perché è una programmazione oraria effettuata alle 14:15). I valori per il viola e il verde indicano 0/0 perché queste dosi devono essere distribuite alle 8h ma l'integrazione è stata avviata dopo le 8h, quindi non ci sarà nessuna dose oggi.
+- Un clic lungo su una delle 4 teste la attiverà o disattiverà.
+- Un clic su una testa aprirà la finestra di programmazione.
+  Da questa finestra è possibile avviare un'innestura, ricalibrare la testa, modificare la dose giornaliera e la sua programmazione. Non dimenticate di salvare la programmazione prima di uscire.
   
-  <img src="doc/img/rsdose/zone_4_dialog_schedule.png"/>
+  <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
    
 
-## Supplement management
+## Gestione degli integratori
 
- <img src="doc/img/rsdose/zone_5.png"/>
+ <img src="../img/rsdose/zone_5.png"/>
 
 ***
-This zone is used to manage supplements.
-If a supplement is already declared, clicking on it will open the configuration dialog where you can:
-- Delete the supplement (trash icon at the top right)
-- Specify the total volume of the container
-- Specify the actual volume of the supplement
-- Decide whether you want to track the remaining volume. Clicking the shortcuts at the top will enable tracking and set default values for a full container.
-- Change the display name of the supplement.
+Questa zona permette di gestire gli integratori.
+Se un integratore è già dichiarato, un clic su di esso aprirà la finestra di configurazione dove potrete:
+- Eliminare l'integratore (icona cestino in alto a destra)
+- Indicare il volume totale del contenitore
+- Indicare il volume reale dell'integratore
+- Decidere se volete monitorare il volume rimanente. Un clic sulle scorciatoie in alto attiverà il controllo e imposterà i valori predefiniti con un contenitore pieno.
+- Modificare il nome di visualizzazione dell'integratore.
 
- <img src="doc/img/rsdose/zone_5_dialog_container.png"/>
+ <img src="../img/rsdose/zone_5_dialog_container.png"/>
 
 
-If no supplement is linked to a head, you can add one by clicking on the container with a '+' (head 4 in our example).
+Se nessun integratore è collegato a una testa, è possibile aggiungerne uno cliccando sul contenitore con un '+' (testa 4 nel nostro esempio).
 
-<img src="doc/img/rsdose/zone_5_add_container.png"/>
+<img src="../img/rsdose/zone_5_add_container.png"/>
 
-Then follow the instructions:
+Seguite quindi le istruzioni:
 
-<img src="doc/img/rsdose/zone_5_dialog_add.png"/>
+<img src="../img/rsdose/zone_5_dialog_add.png"/>
 
-### Supplements
+### Integratori
 
-Here is the list of supported supplement images, grouped by brand. If yours shows a ❌, you can request it be added [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+Ecco la lista delle immagini di integratori supportati, raggruppati per marca. Se il vostro mostra un ❌, potete richiederne l'aggiunta [qui](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
 <details>
 <summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
@@ -456,36 +456,36 @@ Here is the list of supported supplement images, grouped by brand. If yours show
 </table>
 </details>
 
-## Future dose queue
+## Coda delle dosi future
 
-<img src="doc/img/rsdose/zone_6.png"/>
+<img src="../img/rsdose/zone_6.png"/>
 
 ***
-This zone simply displays the list of upcoming doses for your device, whether automatic or manual (shifted schedule due to the defined wait time between two different supplements).
+Questa zona mostra semplicemente la lista delle dosi future del vostro dispositivo, siano esse automatiche o manuali (orario spostato a causa dell'attesa definita tra due integratori diversi).
 
 # ReefLed
 
-Planned.
+Pianificato.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefMat
 
-Planned.
+Pianificato.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefRun
 
-Planned.
+Pianificato.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefWave
 
-Planned.
+Pianificato.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # FAQ
 
