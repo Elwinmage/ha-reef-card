@@ -19,7 +19,7 @@ jobs:
         id: update_manifest
         run: |
           yq -i -o json '.version="${{ github.event.inputs.tag}}"' \
-            "${{ github.workspace }}/custom_components/redsea/manifest.json"
+            "${{ github.workspace }}/package.json"
           git config --global user.email "moranderic31@gmail.com"
           git config --global user.name "Elwinmage"
           git commit -a -m "Update version"
