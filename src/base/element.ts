@@ -123,6 +123,11 @@ export class MyElement extends LitElement {
     // Get the element name  (ex:  common-button)
     const Element = customElements.get(config.type) as typeof MyElement;
     let label_name = "";
+    // Return null if the element type is not registered
+    if (!Element) {
+      console.error(`create_element: unknown element type "${config.type}"`);
+      return null as unknown as MyElement;
+    }
     //  Create the element and initialize it
     const elt = new Element();
     elt.device = device;

@@ -13,6 +13,7 @@ For each README:
 Exit code is always 0: pre-commit detects file modifications automatically.
 """
 
+
 import os
 import re
 import sys
@@ -20,11 +21,13 @@ from collections import defaultdict
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Bootstrap: ensure supplements_list.py in scripts/ is importable
+# Paths
 # ---------------------------------------------------------------------------
 SCRIPT_DIR = Path(__file__).resolve().parent
 CARD_DIR   = SCRIPT_DIR.parent
-IMG_DIR    = CARD_DIR / "src" / "devices" / "img"
+
+IMG_DIR    = CARD_DIR / "public" / "img" / "supplements"
+
 DOC_DIR    = CARD_DIR / "doc"
 
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -33,11 +36,11 @@ from supplements_list import SUPPLEMENTS  # noqa: E402
 # ---------------------------------------------------------------------------
 # Per-language configuration
 # Each entry: (section_heading, intro_text)
-# section_heading is the localized "## Supplements" used as start marker
+# section_heading is the localized "### Supplements" used as start marker.
 # ---------------------------------------------------------------------------
-LANG_CONFIG: dict = {
+LANG_CONFIG: dict[str, tuple[str, str]] = {
     "en": (
-        "## Supplements",
+        "### Supplements",
         (
             "Here is the list of supported images for supplements, grouped by brand. "
             "If yours has a ❌, you can request its addition "
@@ -45,14 +48,53 @@ LANG_CONFIG: dict = {
         ),
     ),
     "fr": (
-        "## Suppléments",
+        "### Suppléments",
         (
             "Voici la liste des images de suppléments supportées, regroupées par marque. "
             "Si la vôtre affiche ❌, vous pouvez demander son ajout "
             "[ici](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
         ),
     ),
-    # Add new languages here following the same pattern
+    "de": (
+        "### Ergänzungsmittel",
+        (
+            "Hier ist die Liste der unterstützten Bilder für Ergänzungsmittel, nach Marke gruppiert. "
+            "Wenn Ihres ein ❌ anzeigt, können Sie dessen Hinzufügung "
+            "[hier](https://github.com/Elwinmage/ha-reef-card/discussions/25) beantragen."
+        ),
+    ),
+    "es": (
+        "### Suplementos",
+        (
+            "Aquí está la lista de imágenes de suplementos compatibles, agrupadas por marca. "
+            "Si el tuyo tiene un ❌, puedes solicitar su incorporación "
+            "[aquí](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+        ),
+    ),
+    "it": (
+        "### Integratori",
+        (
+            "Ecco l'elenco delle immagini supportate per gli integratori, raggruppate per marca. "
+            "Se il tuo mostra un ❌, puoi richiederne l'aggiunta "
+            "[qui](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+        ),
+    ),
+    "pl": (
+        "### Suplementy",
+        (
+            "Oto lista obsługiwanych obrazów dla suplementów, pogrupowanych według marki. "
+            "Jeśli Twój wyświetla ❌, możesz poprosić o jego dodanie "
+            "[tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+        ),
+    ),
+    "pt": (
+        "### Suplementos",
+        (
+            "Aqui está a lista de imagens suportadas para suplementos, agrupadas por marca. "
+            "Se o seu apresenta um ❌, pode solicitar a sua adição "
+            "[aqui](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+        ),
+    ),
 }
 
 DEFAULT_LANG = "en"
@@ -60,7 +102,6 @@ DEFAULT_LANG = "en"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 def img_path(uid: str, readme_path: Path) -> str:
     """Return the image src path relative to the given README file location."""
     img_file = IMG_DIR / f"{uid}.supplement.png"
@@ -87,9 +128,9 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
     lines.append(intro + "\n")
 
     for brand in sorted(brands.keys()):
-        supplements = brands[brand]
-        total    = len(supplements)
-        with_img = sum(1 for s in supplements if has_image(s["uid"]))
+        brand_supplements = brands[brand]
+        total    = len(brand_supplements)
+        with_img = sum(1 for s in brand_supplements if has_image(s["uid"]))
 
         summary = f"{brand} &nbsp; <sup>{with_img}/{total} 🖼️</sup>"
 
@@ -97,7 +138,7 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
         lines.append(f"<summary><b>{summary}</b></summary>\n")
         lines.append("<table>")
 
-        for s in supplements:
+        for s in brand_supplements:
             uid  = s["uid"]
             name = s["fullname"].split(" - ", 1)[-1]
             if has_image(uid):
@@ -159,6 +200,7 @@ def update_readme(readme_path: Path, lang: str) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 def main() -> None:
+    print(f"Loaded {len(SUPPLEMENTS)} supplements.")
     print("Checking Supplements section in READMEs...")
     changed = False
 
@@ -168,7 +210,7 @@ def main() -> None:
     # 2. All doc/<lang>/README.<lang>.md
     if DOC_DIR.exists():
         for lang_dir in sorted(DOC_DIR.iterdir()):
-            if not lang_dir.is_dir():
+            if not lang_dir.is_dir() or lang_dir.name == "img":
                 continue
             lang   = lang_dir.name
             readme = lang_dir / f"README.{lang}.md"

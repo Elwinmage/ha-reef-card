@@ -22,22 +22,38 @@ import { RSAto } from "./rsato";
 import { RSWave25, RSWave45 } from "./rswave";
 
 // register devices
-customElements.define("redsea-nodevice", NoDevice);
-customElements.define("redsea-rsdose4", RSDose4);
-customElements.define("redsea-rsdose2", RSDose2);
-customElements.define("redsea-dosing-queue", DosingQueue);
-customElements.define("redsea-dose-head", DoseHead);
-customElements.define("redsea-rsmat", RSMat);
-customElements.define("redsea-rsled160", RSLed160);
-customElements.define("redsea-rsled90", RSLed90);
-customElements.define("redsea-rsled50", RSLed50);
-customElements.define("redsea-rsled170", RSLed170);
-customElements.define("redsea-rsled115", RSLed115);
-customElements.define("redsea-rsled60", RSLed60);
-customElements.define("redsea-rsrun", RSRun);
-customElements.define("redsea-rsato+", RSAto);
-customElements.define("redsea-rswave25", RSWave45);
-customElements.define("redsea-rswave45", RSWave25);
+if (!customElements.get("redsea-nodevice"))
+  customElements.define("redsea-nodevice", NoDevice);
+if (!customElements.get("redsea-rsdose4"))
+  customElements.define("redsea-rsdose4", RSDose4);
+if (!customElements.get("redsea-rsdose2"))
+  customElements.define("redsea-rsdose2", RSDose2);
+if (!customElements.get("redsea-dosing-queue"))
+  customElements.define("redsea-dosing-queue", DosingQueue);
+if (!customElements.get("redsea-dose-head"))
+  customElements.define("redsea-dose-head", DoseHead);
+if (!customElements.get("redsea-rsmat"))
+  customElements.define("redsea-rsmat", RSMat);
+if (!customElements.get("redsea-rsled160"))
+  customElements.define("redsea-rsled160", RSLed160);
+if (!customElements.get("redsea-rsled90"))
+  customElements.define("redsea-rsled90", RSLed90);
+if (!customElements.get("redsea-rsled50"))
+  customElements.define("redsea-rsled50", RSLed50);
+if (!customElements.get("redsea-rsled170"))
+  customElements.define("redsea-rsled170", RSLed170);
+if (!customElements.get("redsea-rsled115"))
+  customElements.define("redsea-rsled115", RSLed115);
+if (!customElements.get("redsea-rsled60"))
+  customElements.define("redsea-rsled60", RSLed60);
+if (!customElements.get("redsea-rsrun"))
+  customElements.define("redsea-rsrun", RSRun);
+if (!customElements.get("redsea-rsato"))
+  customElements.define("redsea-rsato", RSAto);
+if (!customElements.get("redsea-rswave25"))
+  customElements.define("redsea-rswave25", RSWave45);
+if (!customElements.get("redsea-rswave45"))
+  customElements.define("redsea-rswave45", RSWave25);
 
 // Export devices
 export { NoDevice } from "./rsnodevice";

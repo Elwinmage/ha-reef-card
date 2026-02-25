@@ -142,9 +142,10 @@ Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-comp
 
 ## Installazione diretta
 
-Clicca qui per accedere direttamente al repository in HACS e clicca su "Scarica":  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Clicca qui per accedere direttamente al repository in HACS e clicca su "Scarica": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
 ## Cercare in HACS
+
 Oppure cerca «reef-card» in HACS.
 
 <p align="center">
@@ -167,7 +168,7 @@ Per rimuovere la selezione del dispositivo e forzarne uno specifico, impostate i
 # ReefATO
 
 Pianificato.
-  
+
 Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
@@ -182,36 +183,37 @@ ReefDose con ha-reef-card in azione:
 
 [![Guarda il video](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
 
-
 La card ReefDose è suddivisa in 6 zone:
 
- 1. Configurazione/Informazioni Wifi
- 2. Stati
- 3. Dosaggio Manuale
- 4. Configurazione e programmazione delle teste
- 5. Gestione degli integratori
- 6. Coda delle dosi future
+1.  Configurazione/Informazioni Wifi
+2.  Stati
+3.  Dosaggio Manuale
+4.  Configurazione e programmazione delle teste
+5.  Gestione degli integratori
+6.  Coda delle dosi future
 
 <img src="../img/rsdose/rsdose4_ex1.png"/>
 
 ## Configurazione/Informazioni Wifi
+
 <img src="../img/rsdose/zone_1.png"/>
 
-***
+---
 
 <span >Cliccate sull'icona <img src="../img/rsdose/cog_icon.png" width="30" /> per gestire la configurazione generale del ReefDose.</span>
 
-<img src="../img/rsdose/zone_1_dialog_config.png"/> 
+<img src="../img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Cliccate sull'icona <img width="30px" src="../img/rsdose/wifi_icon.png"/>  per gestire i parametri di rete.</span>
+<span>Cliccate sull'icona <img width="30px" src="../img/rsdose/wifi_icon.png"/> per gestire i parametri di rete.</span>
 
-<img src="../img/rsdose/zone_1_dialog_wifi.png"/> 
+<img src="../img/rsdose/zone_1_dialog_wifi.png"/>
 
 ## Stati
 
  <img src="../img/rsdose/zone_2.png"/>
 
-***
+---
+
 <span>L'interruttore di manutenzione <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permette di passare alla modalità manutenzione.</span>
 
  <img  src="../img/rsdose/maintenance_view.png"/>
@@ -220,12 +222,12 @@ La card ReefDose è suddivisa in 6 zone:
 
  <img  src="../img/rsdose/off_view.png"/>
 
-
 ## Dosaggio Manuale
 
 <img src="../img/rsdose/zone_3.png"/>
 
-***
+---
+
 <span>Il pulsante <img src="../img/rsdose/zone_3_manula_config_button.png"/> mostra la dose manuale predefinita per questa testa. Un clic apre la finestra di configurazione di questo dosaggio.</span>
 
 <img src="../img/rsdose/zone_3_dialog_manual_dose_without.png"/>
@@ -243,13 +245,14 @@ Questi valori appariranno nella parte superiore della finestra di dialogo. Un cl
 <span>Premendo il pulsante di dose manuale: <img src="../img/rsdose/zone_3_manual_button.png"/> verrà inviato un comando di dose con il valore predefinito visibile appena sopra: <img src="../img/rsdose/zone_3_manual_dose.png"/>, ovvero 10 mL in questo esempio.
 </span>
 
-
 ## Configurazione e programmazione delle teste
 
  <img src="../img/rsdose/zone_4.png"/>
 
-***
+---
+
 Questa zona permette di visualizzare la programmazione corrente delle teste e di modificarla.
+
 - L'anello circolare colorato indica la percentuale di dose giornaliera già distribuita.
 - Il numero giallo in alto indica il cumulato di dose manuale giornaliera.
 - La parte centrale indica il volume distribuito rispetto al volume giornaliero programmato totale.
@@ -257,17 +260,18 @@ Questa zona permette di visualizzare la programmazione corrente delle teste e di
 - Un clic lungo su una delle 4 teste la attiverà o disattiverà.
 - Un clic su una testa aprirà la finestra di programmazione.
   Da questa finestra è possibile avviare un'innestura, ricalibrare la testa, modificare la dose giornaliera e la sua programmazione. Non dimenticate di salvare la programmazione prima di uscire.
-  
+
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
-   
 
 ## Gestione degli integratori
 
  <img src="../img/rsdose/zone_5.png"/>
 
-***
+---
+
 Questa zona permette di gestire gli integratori.
 Se un integratore è già dichiarato, un clic su di esso aprirà la finestra di configurazione dove potrete:
+
 - Eliminare l'integratore (icona cestino in alto a destra)
 - Indicare il volume totale del contenitore
 - Indicare il volume reale dell'integratore
@@ -275,7 +279,6 @@ Se un integratore è già dichiarato, un clic su di esso aprirà la finestra di 
 - Modificare il nome di visualizzazione dell'integratore.
 
  <img src="../img/rsdose/zone_5_dialog_container.png"/>
-
 
 Se nessun integratore è collegato a una testa, è possibile aggiungerne uno cliccando sul contenitore con un '+' (testa 4 nel nostro esempio).
 
@@ -287,7 +290,7 @@ Seguite quindi le istruzioni:
 
 ### Integratori
 
-Ecco la lista delle immagini di integratori supportati, raggruppati per marca. Se il vostro mostra un ❌, potete richiederne l'aggiunta [qui](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+Ecco l'elenco delle immagini supportate per gli integratori, raggruppate per marca. Se il tuo mostra un ❌, puoi richiederne l'aggiunta [qui](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
 <details>
 <summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
@@ -299,18 +302,18 @@ Ecco la lista delle immagini di integratori supportati, raggruppati per marca. S
 </details>
 
 <details>
-<summary><b>Aqua Forest &nbsp; <sup>0/9 🖼️</sup></b></summary>
+<summary><b>Aqua Forest &nbsp; <sup>3/9 🖼️</sup></b></summary>
 
 <table>
-<tr><td>❌</td><td colspan='2'>Ca Plus</td></tr>
+<tr><td>✅</td><td>Ca Plus</td><td><img style='width:20%;' src='../../public/img/supplements/9ea6c9f2-b6f3-41ee-9370-06457f286fe5.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Calcium </td></tr>
 <tr><td>❌</td><td colspan='2'>Component 1+</td></tr>
 <tr><td>❌</td><td colspan='2'>Component 2+</td></tr>
 <tr><td>❌</td><td colspan='2'>Component 3+</td></tr>
 <tr><td>❌</td><td colspan='2'>KH Buffer</td></tr>
-<tr><td>❌</td><td colspan='2'>KH Plus</td></tr>
+<tr><td>✅</td><td>KH Plus</td><td><img style='width:20%;' src='../../public/img/supplements/e391e8d1-0d4c-4355-8887-9231500703ef.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Magnesium</td></tr>
-<tr><td>❌</td><td colspan='2'>Mg Plus</td></tr>
+<tr><td>✅</td><td>Mg Plus</td><td><img style='width:20%;' src='../../public/img/supplements/deb3a943-68a5-40a9-860b-e6d259eee947.supplement.png'/></td></tr>
 </table>
 </details>
 
@@ -375,36 +378,36 @@ Ecco la lista delle immagini di integratori supportati, raggruppati per marca. S
 </details>
 
 <details>
-<summary><b>Quantum &nbsp; <sup>0/7 🖼️</sup></b></summary>
+<summary><b>Quantum &nbsp; <sup>7/7 🖼️</sup></b></summary>
 
 <table>
-<tr><td>❌</td><td colspan='2'>Aragonite A</td></tr>
-<tr><td>❌</td><td colspan='2'>Aragonite B</td></tr>
-<tr><td>❌</td><td colspan='2'>Aragonite C</td></tr>
-<tr><td>❌</td><td colspan='2'>Bio Kalium</td></tr>
-<tr><td>❌</td><td colspan='2'>Bio Metals</td></tr>
-<tr><td>❌</td><td colspan='2'>Bio enhance</td></tr>
-<tr><td>❌</td><td colspan='2'>Gbio Gen</td></tr>
+<tr><td>✅</td><td>Aragonite A</td><td><img style='width:20%;' src='../../public/img/supplements/322c1c47-7259-4fd9-9050-f6157036ea36.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Aragonite B</td><td><img style='width:20%;' src='../../public/img/supplements/e6537278-0e0a-4fd7-8146-566334bb74ed.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Aragonite C</td><td><img style='width:20%;' src='../../public/img/supplements/5f491b59-4f54-4572-bbce-aa9b708ccb51.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio Kalium</td><td><img style='width:20%;' src='../../public/img/supplements/8fec18b0-adf6-4dfa-b923-c7226a6fb87d.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio Metals</td><td><img style='width:20%;' src='../../public/img/supplements/a1d797e3-4679-4be4-9219-22e35822ab97.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Bio enhance</td><td><img style='width:20%;' src='../../public/img/supplements/fd8dee42-f3da-4660-b491-880d7dac869a.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Gbio Gen</td><td><img style='width:20%;' src='../../public/img/supplements/26a4f030-e78c-459c-90cb-5c6099de10fd.supplement.png'/></td></tr>
 </table>
 </details>
 
 <details>
-<summary><b>Red Sea &nbsp; <sup>0/13 🖼️</sup></b></summary>
+<summary><b>Red Sea &nbsp; <sup>10/13 🖼️</sup></b></summary>
 
 <table>
-<tr><td>❌</td><td colspan='2'>Bio Active (Colors D)</td></tr>
-<tr><td>❌</td><td colspan='2'>Calcium (Foundation A)</td></tr>
+<tr><td>✅</td><td>Bio Active (Colors D)</td><td><img style='width:20%;' src='../../public/img/supplements/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Calcium (Foundation A)</td><td><img style='width:20%;' src='../../public/img/supplements/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Calcium (Powder)</td></tr>
-<tr><td>❌</td><td colspan='2'>Iodine (Colors A)</td></tr>
-<tr><td>❌</td><td colspan='2'>Iron (Colors C)</td></tr>
-<tr><td>❌</td><td colspan='2'>KH/Alkalinity (Foundation B)</td></tr>
+<tr><td>✅</td><td>Iodine (Colors A)</td><td><img style='width:20%;' src='../../public/img/supplements/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Iron (Colors C)</td><td><img style='width:20%;' src='../../public/img/supplements/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr>
+<tr><td>✅</td><td>KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='../../public/img/supplements/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>KH/Alkalinity (Powder)</td></tr>
-<tr><td>❌</td><td colspan='2'>Magnesium (Foundation C)</td></tr>
+<tr><td>✅</td><td>Magnesium (Foundation C)</td><td><img style='width:20%;' src='../../public/img/supplements/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Magnesium (Powder)</td></tr>
-<tr><td>❌</td><td colspan='2'>NO3PO4-X</td></tr>
-<tr><td>❌</td><td colspan='2'>Potassium (Colors B)</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Energy Plus</td></tr>
-<tr><td>❌</td><td colspan='2'>ReefCare Program</td></tr>
+<tr><td>✅</td><td>NO3PO4-X</td><td><img style='width:20%;' src='../../public/img/supplements/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Potassium (Colors B)</td><td><img style='width:20%;' src='../../public/img/supplements/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Reef Energy Plus</td><td><img style='width:20%;' src='../../public/img/supplements/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Program</td><td><img style='width:20%;' src='../../public/img/supplements/redsea-reefcare.supplement.png'/></td></tr>
 </table>
 </details>
 
@@ -436,32 +439,25 @@ Ecco la lista delle immagini di integratori supportati, raggruppati per marca. S
 </details>
 
 <details>
-<summary><b>Tropic Marin &nbsp; <sup>0/14 🖼️</sup></b></summary>
+<summary><b>Tropic Marin &nbsp; <sup>5/14 🖼️</sup></b></summary>
 
 <table>
 <tr><td>❌</td><td colspan='2'>A Element</td></tr>
-<tr><td>❌</td><td colspan='2'>All-For-Reef</td></tr>
-<tr><td>❌</td><td colspan='2'>Amino Organic</td></tr>
+<tr><td>✅</td><td>All-For-Reef</td><td><img style='width:20%;' src='../../public/img/supplements/aff00331-3c23-4357-b6d4-6609dbc4fed1.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Amino Organic</td><td><img style='width:20%;' src='../../public/img/supplements/fddbe0a4-02eb-4903-969b-6c27c805bf6b.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Balling A</td></tr>
 <tr><td>❌</td><td colspan='2'>Balling B</td></tr>
 <tr><td>❌</td><td colspan='2'>Balling C</td></tr>
-<tr><td>❌</td><td colspan='2'>Bio-Magnesium</td></tr>
-<tr><td>❌</td><td colspan='2'>Carbo Calcium</td></tr>
+<tr><td>✅</td><td>Bio-Magnesium</td><td><img style='width:20%;' src='../../public/img/supplements/2f04f694-3743-4e12-a45f-a3eb63aef806.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Carbo Calcium</td><td><img style='width:20%;' src='../../public/img/supplements/8cdabb9f-ebcf-4675-a10f-f9020941928f.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Elimi-NP</td></tr>
 <tr><td>❌</td><td colspan='2'>K Element</td></tr>
 <tr><td>❌</td><td colspan='2'>Liquid Buffer</td></tr>
 <tr><td>❌</td><td colspan='2'>NP-Bacto-Balance</td></tr>
 <tr><td>❌</td><td colspan='2'>Plus-NP</td></tr>
-<tr><td>❌</td><td colspan='2'>Potassium</td></tr>
+<tr><td>✅</td><td>Potassium</td><td><img style='width:20%;' src='../../public/img/supplements/964e897e-9668-4fc8-9cd9-e8c42a27cf85.supplement.png'/></td></tr>
 </table>
 </details>
-
-## Coda delle dosi future
-
-<img src="../img/rsdose/zone_6.png"/>
-
-***
-Questa zona mostra semplicemente la lista delle dosi future del vostro dispositivo, siano esse automatiche o manuali (orario spostato a causa dell'attesa definita tra due integratori diversi).
 
 # ReefLed
 

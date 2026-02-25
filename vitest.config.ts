@@ -31,7 +31,8 @@ export default defineConfig({
     coverage: {
       // istanbul has no vulnerable transitive dependencies (unlike v8)
       provider: "istanbul",
-      reporter: ["text", "html"],
+      reporter: ["text", "html", "cobertura"],
+      reportsDirectory: "./reports",
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.styles.ts", "src/img/**", "src/index.ts"],
     },

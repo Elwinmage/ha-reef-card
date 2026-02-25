@@ -258,10 +258,11 @@ export class RSDevice extends LitElement {
   private applyLeaves(tree: any, basePath: string = ""): void {
     const keys = Object.keys(tree);
 
-    // Check if this is a leaf node (array-like object with numeric keys)
-    if (keys.length > 0 && keys[0] === "0") {
-      // This is a leaf value, apply it to the config
-      this.setNestedProperty(this.config, basePath, tree);
+    // Check if this is a leaf node (array-like object with all numeric keys)
+    if (keys.length > 0 && keys.every((k) => !isNaN(Number(k)))) {
+      // Convert numeric-keyed object to a proper array before applying
+      const asArray = keys.map((k) => tree[k]);
+      this.setNestedProperty(this.config, basePath, asArray);
       return;
     }
 

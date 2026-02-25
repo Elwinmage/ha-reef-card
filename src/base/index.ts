@@ -11,12 +11,21 @@ import { SensorTarget } from "./sensor_target";
 import { Sensor } from "./sensor";
 import { RSSwitch } from "./switch";
 
-customElements.define("click-image", ClickImage);
-customElements.define("common-button", Button);
-customElements.define("common-dialog", Dialog);
-customElements.define("common-sensor", Sensor);
-customElements.define("common-sensor-target", SensorTarget);
-customElements.define("common-switch", RSSwitch);
-customElements.define("progress-bar", ProgressBar);
-customElements.define("progress-circle", ProgressCircle);
-customElements.define("redsea-messages", RSMessages);
+if (!customElements.get("click-image"))
+  customElements.define("click-image", ClickImage);
+if (!customElements.get("common-button"))
+  customElements.define("common-button", Button);
+if (!customElements.get("common-dialog"))
+  customElements.define("common-dialog", Dialog);
+if (!customElements.get("common-sensor"))
+  customElements.define("common-sensor", Sensor);
+if (!customElements.get("common-sensor-target"))
+  customElements.define("common-sensor-target", SensorTarget);
+if (!customElements.get("common-switch"))
+  customElements.define("common-switch", RSSwitch);
+if (!customElements.get("progress-bar"))
+  customElements.define("progress-bar", ProgressBar);
+if (!customElements.get("progress-circle"))
+  customElements.define("progress-circle", ProgressCircle);
+if (!customElements.get("redsea-messages"))
+  customElements.define("redsea-messages", RSMessages);
