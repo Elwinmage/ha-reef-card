@@ -142,9 +142,10 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 
 ## Direct installation
 
-Click here to open the repository directly in HACS and click "Download":  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Click here to open the repository directly in HACS and click "Download": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
 ## Search in HACS
+
 Or search for «reef-card» in HACS.
 
 <p align="center">
@@ -167,7 +168,7 @@ To remove device selection and force a specific one, set the `device` parameter 
 # ReefATO
 
 Planned.
-  
+
 Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
@@ -182,36 +183,37 @@ ReefDose with ha-reef-card in action:
 
 [![Watch the video](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
 
-
 The ReefDose card is divided into 6 zones:
 
- 1. Configuration/WiFi Information
- 2. States
- 3. Manual Dosing
- 4. Head configuration and scheduling
- 5. Supplement management
- 6. Future dose queue
+1.  Configuration/WiFi Information
+2.  States
+3.  Manual Dosing
+4.  Head configuration and scheduling
+5.  Supplement management
+6.  Future dose queue
 
 <img src="doc/img/rsdose/rsdose4_ex1.png"/>
 
 ## Configuration/WiFi Information
+
 <img src="doc/img/rsdose/zone_1.png"/>
 
-***
+---
 
 <span >Click the icon <img src="doc/img/rsdose/cog_icon.png" width="30" /> to manage the general configuration of the ReefDose.</span>
 
-<img src="doc/img/rsdose/zone_1_dialog_config.png"/> 
+<img src="doc/img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Click the icon <img width="30px" src="doc/img/rsdose/wifi_icon.png"/>  to manage the network settings.</span>
+<span>Click the icon <img width="30px" src="doc/img/rsdose/wifi_icon.png"/> to manage the network settings.</span>
 
-<img src="doc/img/rsdose/zone_1_dialog_wifi.png"/> 
+<img src="doc/img/rsdose/zone_1_dialog_wifi.png"/>
 
 ## States
 
  <img src="doc/img/rsdose/zone_2.png"/>
 
-***
+---
+
 <span>The maintenance switch <img width="30px" src="doc/img/rsdose/zone_2_maintenance.png"/> switches the device to maintenance mode.</span>
 
  <img  src="doc/img/rsdose/maintenance_view.png"/>
@@ -220,13 +222,13 @@ The ReefDose card is divided into 6 zones:
 
  <img  src="doc/img/rsdose/off_view.png"/>
 
-
 ## Manual Dosing
 
 <img src="doc/img/rsdose/zone_3.png"/>
 
-***
-<span>The button <img src="doc/img/rsdose/zone_3_manula_config_button.png"/>  displays the default manual dose for this head. Clicking it opens the configuration dialog for this dosing.</span>
+---
+
+<span>The button <img src="doc/img/rsdose/zone_3_manula_config_button.png"/> displays the default manual dose for this head. Clicking it opens the configuration dialog for this dosing.</span>
 
 <img src="doc/img/rsdose/zone_3_dialog_manual_dose_without.png"/>
 
@@ -243,13 +245,14 @@ These values will appear at the top of the dialog. Clicking a shortcut sends a c
 <span>Pressing the manual dose button: <img src="doc/img/rsdose/zone_3_manual_button.png"/> sends a dose command with the default value displayed just above: <img src="doc/img/rsdose/zone_3_manual_dose.png"/>, i.e. 10 mL in this example.
 </span>
 
-
 ## Head configuration and scheduling
 
  <img src="doc/img/rsdose/zone_4.png"/>
 
-***
+---
+
 This zone allows you to view the current head schedule and change it.
+
 - The colored circular ring indicates the percentage of the daily dose already delivered.
 - The yellow number at the top shows the cumulative daily manual dose total.
 - The central part shows the volume delivered compared to the total programmed daily volume.
@@ -257,17 +260,18 @@ This zone allows you to view the current head schedule and change it.
 - A long press on one of the 4 heads toggles it on/off.
 - A click on a head opens the scheduling dialog.
   From this dialog you can run a priming cycle, recalibrate the head, change the daily dose and its schedule. Don't forget to save the schedule before closing.
-  
+
   <img src="doc/img/rsdose/zone_4_dialog_schedule.png"/>
-   
 
 ## Supplement management
 
  <img src="doc/img/rsdose/zone_5.png"/>
 
-***
+---
+
 This zone is used to manage supplements.
 If a supplement is already declared, clicking on it will open the configuration dialog where you can:
+
 - Delete the supplement (trash icon at the top right)
 - Specify the total volume of the container
 - Specify the actual volume of the supplement
@@ -275,7 +279,6 @@ If a supplement is already declared, clicking on it will open the configuration 
 - Change the display name of the supplement.
 
  <img src="doc/img/rsdose/zone_5_dialog_container.png"/>
-
 
 If no supplement is linked to a head, you can add one by clicking on the container with a '+' (head 4 in our example).
 
@@ -287,7 +290,7 @@ Then follow the instructions:
 
 ### Supplements
 
-Here is the list of supported supplement images, grouped by brand. If yours shows a ❌, you can request it be added [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+Here is the list of supported images for supplements, grouped by brand. If yours has a ❌, you can request its addition [here](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
 <details>
 <summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
@@ -455,13 +458,6 @@ Here is the list of supported supplement images, grouped by brand. If yours show
 <tr><td>❌</td><td colspan='2'>Potassium</td></tr>
 </table>
 </details>
-
-## Future dose queue
-
-<img src="doc/img/rsdose/zone_6.png"/>
-
-***
-This zone simply displays the list of upcoming doses for your device, whether automatic or manual (shifted schedule due to the defined wait time between two different supplements).
 
 # ReefLed
 

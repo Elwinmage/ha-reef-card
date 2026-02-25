@@ -142,10 +142,11 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
 
 ## Installation directe
 
-Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Télécharger » :  [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Télécharger » : [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
 ## Rechercher dans HACS
-Ou recherchez « reef-card »  dans HACS.
+
+Ou recherchez « reef-card » dans HACS.
 
 <p align="center">
 <img src="../img/hacs_search.png" alt="Image">
@@ -167,7 +168,7 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 # ReefATO
 
 Planifié.
-  
+
 Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefControl
@@ -182,51 +183,52 @@ ReefDose avec ha-reef-card en action:
 
 [![Regarder la vidéo](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
 
-
 La carte ReefDose est découpée en 6 zones:
 
- 1. Configuration/Informations Wifi
- 2. Etats
- 3. Dosage Manuel
- 4. Configuration et planning des têtes
- 5. Gestion des suppléments
- 6. File d'attentes des futures doses
+1.  Configuration/Informations Wifi
+2.  Etats
+3.  Dosage Manuel
+4.  Configuration et planning des têtes
+5.  Gestion des suppléments
+6.  File d'attentes des futures doses
 
 <img src="../img/rsdose/rsdose4_ex1.png"/>
 
-## Configuration/Informations Wifi 
+## Configuration/Informations Wifi
+
 <img src="../img/rsdose/zone_1.png"/>
 
-***
+---
 
 <span >Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefDose.</span>
 
-<img src="../img/rsdose/zone_1_dialog_config.png"/> 
+<img src="../img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Cliquez sur l'icone <img width="30px" src="../img/rsdose/wifi_icon.png"/>  pour gérer les paramètres réseaux.</span>
+<span>Cliquez sur l'icone <img width="30px" src="../img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
 
-<img src="../img/rsdose/zone_1_dialog_wifi.png"/> 
+<img src="../img/rsdose/zone_1_dialog_wifi.png"/>
 
 ## Etats
 
  <img src="../img/rsdose/zone_2.png"/>
 
-***
-<span>L'interrupteur de maintenance  <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance.</span>
+---
+
+<span>L'interrupteur de maintenance <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance.</span>
 
  <img  src="../img/rsdose/maintenance_view.png"/>
 
-<span>L'interrupteur de on/off  <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefDose.</span>
+<span>L'interrupteur de on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefDose.</span>
 
  <img  src="../img/rsdose/off_view.png"/>
-
 
 ## Dosage Manuel
 
 <img src="../img/rsdose/zone_3.png"/>
 
-***
-<span>Le boutton <img src="../img/rsdose/zone_3_manula_config_button.png"/>  affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boite de configuration de ce dosage.</span>
+---
+
+<span>Le boutton <img src="../img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boite de configuration de ce dosage.</span>
 
 <img src="../img/rsdose/zone_3_dialog_manual_dose_without.png"/>
 
@@ -243,41 +245,42 @@ Ces valeurs appraitrons en haut de la boite de dialogue. Un clique sur ces racco
 <span>Un appuie sur le boutton de dose manuel: <img src="../img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par default visible juste au dessus: <img src="../img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exmple.
 </span>
 
-
 ## Configuration et planning des têtes
 
  <img src="../img/rsdose/zone_4.png"/>
 
-***
+---
+
 Cette zone permet de visualiser la programmation courante des têtes et de la changer.
+
 - La bague circulaire colorée indique le pourcentage de dose journalière déjà distribué.
 - le chiffre jaune en haut indique le cumul de dose manuel journalier
-- la partie centrale  indique le volume distributé par rapport au volume journalier programmé total
+- la partie centrale indique le volume distributé par rapport au volume journalier programmé total
 - le partie bleue en bas indique le nombre de doses distribuées par rapport au nombre de doses totales de la journées (exemple: 14/24 pour le bleu car c'est une programmation horaire que ce cette capture a été prise a 14h15.) Les valeurs pour le violet et le vert indiquent 0/0 car ces dosent doivent être distribuées à 8h mais l'intégration a été lancée aprés 8h donc il n'y aura aucune dose aujourd'hui.
 - un clique long sur une des 4 têtes basculera la tête en on/off
-- un clique sur une des tête ouvrira la boite de programmation. 
+- un clique sur une des tête ouvrira la boite de programmation.
   Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avec de quitter.
-  
+
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
-   
 
 ## Gestion des suppléments
 
  <img src="../img/rsdose/zone_5.png"/>
 
-***
+---
+
 Cette zone permet de gérer les supppléments.
 Si un supplément est déjà déclaré, un clique dessus permettra d'ouvrir la boite de configuration où vous pourrez:
+
 - supprimer le supplément (icone corbeille en haut à droite)
 - indiquer le volume total du container
 - indiquer le volume réél du supplément
-- décider si vous voulez suivre le volume restant. Un clique sur les raccourcis  en haut activera le controle et positonnera les valeurs par default avec un conteneur plein.
+- décider si vous voulez suivre le volume restant. Un clique sur les raccourcis en haut activera le controle et positonnera les valeurs par default avec un conteneur plein.
 - modifier le nom d'affichage du supplément.
 
  <img src="../img/rsdose/zone_5_dialog_container.png"/>
 
-
-Si aucun supplément n'est lié à une tête vous pouvez en ajouter un en cliquant sur le container avec un '+'  (tête 4 dans notre exemple) 
+Si aucun supplément n'est lié à une tête vous pouvez en ajouter un en cliquant sur le container avec un '+' (tête 4 dans notre exemple)
 
 <img src="../img/rsdose/zone_5_add_container.png"/>
 
@@ -287,7 +290,7 @@ Suivez ensuite les instructions:
 
 ### Suppléments
 
-Voici la liste des images de suppléments supportés, regroupés par marque. Si le vôtre affiche un ❌, vous pouvez demander son ajout  [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
+Voici la liste des images de suppléments supportées, regroupées par marque. Si la vôtre affiche ❌, vous pouvez demander son ajout [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
 <details>
 <summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
@@ -455,13 +458,6 @@ Voici la liste des images de suppléments supportés, regroupés par marque. Si 
 <tr><td>❌</td><td colspan='2'>Potassium</td></tr>
 </table>
 </details>
-
-## File d'attentes des futures doses 
-
-<img src="../img/rsdose/zone_6.png"/>
-
-***
-Cette zone affiche simplement la liste des futures doses de votre équipement qu'elles soient automatiques ou manuelles  (horaire décalé car attente définie entre deux suppléments différents)
 
 # ReefLed
 
