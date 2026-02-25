@@ -40,4 +40,5 @@ jobs:
             })
       - uses: ncipollo/release-action@v1
         with:
+          prerelease: "true"
           tag: ${{ github.event.inputs.tag}}
