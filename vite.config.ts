@@ -93,7 +93,9 @@ function copyDirectoryRecursive(src, dest) {
 export default defineConfig(({ mode }) => ({
   // Configuration du dossier public
   publicDir: "public",
-
+  optimizeDeps: {
+    include: ["lit/decorators.js"],
+  },
   server: {
     watch: {
       awaitWriteFinish: {
@@ -126,6 +128,17 @@ export default defineConfig(({ mode }) => ({
       name: "HaReefCard",
       fileName: () => "ha-reef-card.js",
       formats: ["es"],
+    },
+    test: {
+      environment: "jsdom", // indispensable pour Lit
+      globals: true,
+      deps: {
+        optimizer: {
+          web: {
+            include: ["lit", "lit/decorators.js", "@lit/reactive-element"],
+          },
+        },
+      },
     },
     outDir: "dist",
     emptyOutDir: true,

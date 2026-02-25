@@ -435,22 +435,23 @@ export class SafeEval {
 
     try {
       let processedCondition = condition.trim();
-
       // If condition contains ${...}, process while preserving types
       if (processedCondition.includes("${")) {
         processedCondition =
           this.processTemplatesForExpression(processedCondition);
       }
-
       // Force direct evaluation as expression
       const result = this.evaluateComplexExpression(processedCondition);
-
       // Ensure boolean
       if (typeof result === "boolean") {
         return result;
       }
-
-      return Boolean(result);
+      // If 0 => false, true else
+      if (typeof result === "number") {
+        return Boolean(result);
+      }
+      //otherwise false
+      return false;
     } catch (_error) {
       console.error("Condition evaluation error:", condition, _error);
       // On error, return false for safety

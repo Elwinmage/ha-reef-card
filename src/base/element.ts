@@ -41,7 +41,7 @@ export class MyElement extends LitElement {
   stateOn: boolean = false;
 
   // Internal states
-  @state()
+  //@state(hasChanged()
   protected _hass: HassConfig | null = null;
 
   @state()

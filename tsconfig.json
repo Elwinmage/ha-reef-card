@@ -1,51 +1,46 @@
 {
   "compilerOptions": {
-    /* Language and Environment */
-    "target": "ES2024",
+    //"target": "ES2024",
+    "target": "ES2022",
     "lib": ["ES2015", "ES2024", "DOM", "DOM.Iterable"],
     "experimentalDecorators": true,
-    "useDefineForClassFields": true,
+    "useDefineForClassFields": false, // Changé de true à false pour Lit
 
-    /* Modules */
-    "module": "ES2020",
-    "moduleResolution": "node",
+    //"module": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler", // Optimisé pour Vite
     "resolveJsonModule": true,
 
-    /* Emit */
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
-    /* Interop Constraints */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
 
-    /* Type Checking - STRICT MODE (pragmatique pour projet legacy) */
     "strict": true,
-    "noImplicitAny": false /* Désactivé pour code legacy */,
+    "noImplicitAny": false,
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
-    "strictPropertyInitialization": false /* Désactivé pour simplifier */,
+    "strictPropertyInitialization": false,
     "noImplicitThis": true,
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
 
-    /* Additional Checks (désactivées pour pragmatisme) */
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": false,
-    "noImplicitReturns": false /* Désactivé pour code legacy */,
+    "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false /* Désactivé pour simplifier */,
+    "noUncheckedIndexedAccess": false,
     "noImplicitOverride": false,
     "noPropertyAccessFromIndexSignature": false,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
 
-    /* Completeness */
     "skipLibCheck": true
   },
   "include": ["src/**/*"],

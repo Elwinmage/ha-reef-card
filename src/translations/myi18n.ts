@@ -181,7 +181,7 @@ class MyI18n {
     }
 
     this.currentLanguage = normalizedLang;
-    console.debug(`Language changesd to '${normalizedLang}'`);
+    console.debug(`Language changed to '${normalizedLang}'`);
 
     window.dispatchEvent(
       new CustomEvent("i18n-language-changed", {
