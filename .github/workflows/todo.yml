@@ -1,5 +1,5 @@
 name: "Run TODO to Issue"
-on: [ "push" ]
+on: ["push"]
 jobs:
   build:
     runs-on: "ubuntu-latest"
@@ -19,7 +19,7 @@ jobs:
       - name: Set Git user
         run: |
           git config --global user.email "moranderic31@gmail.com"
-          git config --global user.name "Elwinmage"          
+          git config --global user.name "Elwinmage"
       - name: Commit and Push Changes
         run: |
           git add -A
@@ -28,4 +28,4 @@ jobs:
             git push origin main
           else
             echo "No changes to commit"
-          fi          
+          fi

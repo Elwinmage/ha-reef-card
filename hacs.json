@@ -1,5 +1,6 @@
 {
-    "name": "ha-reef-card",
-    "render_readme": true,
-    "content_in_root": false
+  "name": "ha-reef-card",
+  "filename": "ha-reef-card.js",
+  "render_readme": true,
+  "content_in_root": false
 }

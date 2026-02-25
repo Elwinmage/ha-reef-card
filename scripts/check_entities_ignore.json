@@ -1,0 +1,16 @@
+{
+  "dev_in_progress": [
+    "rsato",
+    "rsled_g1",
+    "rsled_g2",
+    "rsled_virtual",
+    "rsmat",
+    "rsrun",
+    "rswave"
+  ],
+  "ignore": {
+    "*": {
+      "button": ["firmware_update"]
+    }
+  }
+}

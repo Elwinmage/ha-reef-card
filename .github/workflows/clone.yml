@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: gh login
         run: echo "${{ secrets.SECRET_TOKEN }}" | gh auth login --with-token
 
@@ -84,7 +84,7 @@ jobs:
             git commit -m "create clone count badge"
           fi
       - name: debug
-        run : |
+        run: |
           echo ${{ secrets.SECRET_TOKEN }}
       - name: Push
         uses: ad-m/github-push-action@master
