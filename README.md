@@ -139,6 +139,8 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation
+> [!CAUTION]
+> Until HACS validation you can only install this card using the custom repositary, not the direct installation.
 
 ## Direct installation
 
