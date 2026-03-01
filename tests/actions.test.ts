@@ -1,10 +1,7 @@
-/**
- * Unit tests — src/devices/actions.ts
- * Covers: actionRegistry structure, run_action dispatch and error handling
- */
+// Consolidated tests for actions
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { run_action, actionRegistry } from "../src/devices/actions";
+import { actionRegistry, run_action } from "../src/devices/actions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("actionRegistry", () => {
   it("is a non-null object", () => {
@@ -16,7 +13,6 @@ describe("actionRegistry", () => {
     expect(actionRegistry).toHaveProperty("dose_head_dialog_func_ext");
   });
 });
-
 describe("run_action()", () => {
   beforeEach(() => vi.restoreAllMocks());
 

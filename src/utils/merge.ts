@@ -20,16 +20,19 @@ export function mergeDeep<T extends Record<string, any>>(
   if (!sources.length) return target;
   const source = sources.shift();
 
-  if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        mergeDeep(
-          target[key] as Record<string, any>,
-          source[key] as Record<string, any>,
-        );
-      } else {
-        Object.assign(target, { [key]: source[key] });
+  if (isObject(target)) {
+    //&& isObject(source)) {
+    if (isObject(source)) {
+      for (const key in source) {
+        if (isObject(source[key])) {
+          if (!target[key]) Object.assign(target, { [key]: {} });
+          mergeDeep(
+            target[key] as Record<string, any>,
+            source[key] as Record<string, any>,
+          );
+        } else {
+          Object.assign(target, { [key]: source[key] });
+        }
       }
     }
   }

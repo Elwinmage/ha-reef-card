@@ -146,7 +146,7 @@ export class RSDevice extends LitElement {
     return this._render(style, substyle);
   }
 
-  _render(style = null, substyle = null) {
+  _render(style?: any, substyle?: any) {
     return html` <div class="device_bg">
       ${style}
       <img

@@ -58,7 +58,7 @@ export class SensorTarget extends Sensor {
     if (this.stateObjTarget && this.conf && "target" in this.conf) {
       const sot = obj.states[this.stateObjTarget.entity_id];
       if (sot && this.stateObjTarget.state !== sot.state) {
-        this.stateObjTarget = sot || null;
+        this.stateObjTarget = sot;
         this.requestUpdate();
       }
     }
@@ -98,7 +98,7 @@ export class SensorTarget extends Sensor {
    * Render
    * @param _style: unused
    */
-  protected override _render(_style: string = ""): TemplateResult {
+  protected override _render(_style?: string): TemplateResult {
     if (!this.hasTargetState()) {
       return html`<div class="error">Missing state</div>`;
     }

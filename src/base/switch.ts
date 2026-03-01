@@ -61,7 +61,7 @@ export class RSSwitch extends MyElement {
    * Render
    * @param _style: unused
    */
-  protected override _render(_style: string = ""): any {
+  protected override _render(_style?: string): any {
     if (this.conf.style === "switch") {
       return html` <label>${this.label}</label>
         <div class="switch_${this.stateObj.state}">

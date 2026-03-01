@@ -40,6 +40,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
+    "removeComments": false,
 
     "skipLibCheck": true
   },

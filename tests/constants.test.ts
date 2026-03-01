@@ -1,10 +1,7 @@
-/**
- * Unit tests — src/utils/constants.ts
- * Covers: OFF_COLOR, DEFAULT_ALPHA
- */
+// Consolidated tests for constants
 
-import { describe, it, expect } from "vitest";
-import { OFF_COLOR, DEFAULT_ALPHA } from "../src/utils/constants";
+import { DEFAULT_ALPHA, OFF_COLOR } from "../src/utils/constants";
+import { describe, expect, it } from "vitest";
 
 describe("OFF_COLOR", () => {
   it("is a string", () => expect(typeof OFF_COLOR).toBe("string"));
@@ -21,7 +18,6 @@ describe("OFF_COLOR", () => {
 
   it("equals '150,150,150'", () => expect(OFF_COLOR).toBe("150,150,150"));
 });
-
 describe("DEFAULT_ALPHA", () => {
   it("is a number", () => expect(typeof DEFAULT_ALPHA).toBe("number"));
   it("is in range [0, 1]", () => {

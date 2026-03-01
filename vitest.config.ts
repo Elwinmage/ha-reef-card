@@ -35,6 +35,7 @@ export default defineConfig({
       reportsDirectory: "./reports",
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.styles.ts", "src/img/**", "src/index.ts"],
+      ignoreEmptyLines: true,
     },
   },
 });

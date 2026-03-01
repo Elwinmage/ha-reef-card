@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------------//
 //   IMPORT
 //----------------------------------------------------------------------------//
-import { html, TemplateResult, css } from "lit";
+import { html, TemplateResult, css, CSSResult } from "lit";
 import { property } from "lit/decorators.js";
 
 import type { ProgressConfig } from "../types/index";
@@ -34,10 +34,8 @@ import { OFF_COLOR } from "../utils/constants";
 
 export class ProgressBar extends SensorTarget {
   static override styles = [
-    // Include parent styles from SensorTarget/Sensor chain
-    ...(Array.isArray(SensorTarget.styles)
-      ? SensorTarget.styles
-      : [SensorTarget.styles]),
+    // SensorTarget.styles is always defined as an array
+    ...(SensorTarget.styles as CSSResult[]),
     // Add ProgressBar-specific styles
     style_progress_bar,
     css`
@@ -61,7 +59,7 @@ export class ProgressBar extends SensorTarget {
    * Render
    * @param _style: No used here
    */
-  protected override _render(_style: string = ""): TemplateResult {
+  protected override _render(_style?: string): TemplateResult {
     if (!this.hasTargetState()) {
       return html`<div class="error">Missing state</div>`;
     }

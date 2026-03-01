@@ -551,7 +551,7 @@ function save_schedule_custom(shadowRoot, elt, hass, schedule) {
   return schedule;
 }
 
-function compare_interval(a, b) {
+export function compare_interval(a, b) {
   if (a.st < b.st) {
     return -1;
   }
@@ -594,10 +594,11 @@ function head_configuration_intervals_custom(shadowRoot, interval, form) {
   div.id = "interval_" + position;
   const start = com.create_hour("st", interval.st, position);
   const end = com.create_hour("end", interval.end, position);
+  console.debug("INTERVAL", interval.nd);
   const nd = com.create_select(
     "nd",
     Array.from({ length: 24 }, (x, i) => (i + 1).toString()),
-    interval.nd,
+    interval.nd.toString(),
     false,
     "",
     position,

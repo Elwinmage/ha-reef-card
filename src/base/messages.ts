@@ -27,7 +27,7 @@ export class RSMessages extends MyElement {
    * Render
    * @param _style: Not used here
    */
-  protected override _render(_style: string = ""): any {
+  protected override _render(_style?: string): any {
     const sclass = this.conf?.class || "";
     let trash: any = null;
     let computed_style = this.get_style("elt.css");

@@ -22,7 +22,7 @@ export class RSMat extends RSDevice {
     elements: null,
   };
 
-  _render(style = null, substyle = null) {
+  _render(style?: any, substyle?: any) {
     //position
     const position = "";
     //    position="transform:scaleX(-1)";

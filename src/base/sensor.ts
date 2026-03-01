@@ -71,7 +71,7 @@ export class Sensor extends MyElement {
    * Render
    * @param _style: set personal style
    */
-  protected override _render(_style: string = ""): TemplateResult {
+  protected override _render(_style?: string): TemplateResult {
     if (!this.conf) {
       return html``;
     }
@@ -111,7 +111,7 @@ export class Sensor extends MyElement {
     }
 
     return html`
-      <div class="sensor ${sclass}" style="${_style}; ">
+      <div class="sensor ${sclass}" style="${_style ?? ""}; ">
         ${value} ${unit ? html`<span class="unit">${unit}</span>` : ""}
       </div>
     `;

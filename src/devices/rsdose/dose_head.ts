@@ -57,175 +57,6 @@ export class DoseHead extends RSDevice {
     `;
   }
 
-  _render_container() {
-    if (!this.supplement) {
-      return html``;
-    }
-    const supplement_uid = this.supplement.attributes.supplement.uid;
-    let img = null;
-    let warning: any = html``;
-    this.supplement_info = false;
-    img =
-      "/hacsfiles/ha-reef-card/img/supplements/" +
-      supplement_uid +
-      ".supplement.png";
-    const http = new XMLHttpRequest();
-    http.open("HEAD", img, false);
-    http.send();
-    if (http.status === 404) {
-      img =
-        "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png";
-      this.supplement_info = true;
-    }
-    let style = html``;
-    if (!this.state_on) {
-      style = html`<style>
-        img#id_${supplement_uid} {
-          filter: grayscale(90%);
-        }
-      </style>`;
-    }
-
-    // Vérifier que les entités existent avant d'accéder à leurs propriétés
-    try {
-      if (this.container_warning()) {
-        warning = html`<img class='warning' src='${new URL(
-          "../../img/warning.svg",
-          import.meta.url,
-        )}'/ style="${this.get_style(
-          this.config.warning,
-        )}" /><div class="warning" style="${this.get_style(
-          this.config.warning_label,
-        )}">${i18n._("empty")}</div>`;
-      }
-    } catch (error) {
-      console.warn("Could not check stock alert:", error);
-    }
-
-    return html`
-      <div class="container" style="${this.get_style(this.config.container)}">
-        ${style}
-        <img id="id_${supplement_uid}" src="${img}" width="100%" />
-        ${warning} ${this._render_supplement_info()}
-        ${this._render_elements(true, "supplement")} ${this._render_ask()}
-      </div>
-    `;
-  }
-
-  _render_supplement_info() {
-    if (this.supplement_info) {
-      return html`${this._render_elements(true, "supplement_info")}`;
-    } // if
-  }
-
-  _render_ask() {
-    if (
-      this.supplement_info &&
-      !this.supplement.attributes.supplement.is_name_editable
-    ) {
-      return html`<a
-        class="addSupplement"
-        target="_blank"
-        href="https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(
-          " ",
-          "+",
-        )}+${this.supplement.attributes.supplement.name.replace(
-          " ",
-          "+",
-        )}&body=${JSON.stringify(
-          this.supplement.attributes.supplement,
-          null,
-          "%0D%0A",
-        )}"
-        >+${i18n._("ask_add_supplement")}+</a
-      >`;
-    } // if
-    return html``;
-  }
-
-  is_on() {
-    let res = true;
-
-    if (
-      "head_state" in this.entities &&
-      this._hass &&
-      this._hass.states[this.entities["head_state"].entity_id] &&
-      (this._hass.states[this.entities["head_state"].entity_id].state ===
-        "not-setup" ||
-        !this.device_state ||
-        (this.entities["schedule_enabled"] &&
-          this._hass.states[this.entities["schedule_enabled"].entity_id] &&
-          this._hass.states[this.entities["schedule_enabled"].entity_id]
-            .state === "off"))
-    ) {
-      res = false;
-    }
-    return res;
-  }
-
-  update_state(value) {
-    if (this.device_state !== value) {
-      this.device_state = value;
-    }
-    this.requestUpdate();
-  }
-
-  set hass(obj) {
-    let to_update: boolean = false;
-    this._setting_hass(obj);
-    if (this.is_on() !== this.state_on) {
-      this.state_on = this.is_on();
-      to_update = true;
-    }
-    if (
-      this.entities &&
-      this.entities["head_state"] &&
-      this.head_state !== this.entities["head_state"].state
-    ) {
-      this.head_state = this.entities["head_state"].state;
-      to_update = true;
-    }
-    if (
-      this.entities &&
-      this.entities["supplement"] &&
-      this._hass &&
-      this._hass.states[this.entities["supplement"].entity_id] &&
-      this.supplement &&
-      (this._hass.states[this.entities["supplement"].entity_id].attributes
-        ?.supplement?.uid !== this.supplement.attributes?.supplement?.uid ||
-        this._hass.states[this.entities["supplement"].entity_id].attributes
-          ?.supplement?.display_name !==
-          this.supplement.attributes?.supplement?.display_name)
-    ) {
-      this.supplement =
-        this._hass.states[this.entities["supplement"].entity_id];
-      to_update = true;
-    }
-    if (this.container_warning() !== this.last_state_container_warning) {
-      to_update = true;
-      this.last_state_container_warning = this.container_warning();
-    }
-    if (to_update) {
-      this.requestUpdate();
-    }
-  }
-
-  container_warning() {
-    const remainingDaysEntity = this.get_entity("remaining_days");
-    const slmEntity = this.get_entity("slm");
-    const dailyDoseEntity = this.get_entity("daily_dose");
-    return (
-      remainingDaysEntity &&
-      slmEntity &&
-      dailyDoseEntity &&
-      this.stock_alert &&
-      parseInt(remainingDaysEntity.state) <
-        parseInt(this.stock_alert.toString()) &&
-      slmEntity.state === "on" &&
-      parseFloat(dailyDoseEntity.state) > 0
-    );
-  }
-
   override render() {
     return this._render();
   }
@@ -324,5 +155,177 @@ export class DoseHead extends RSDevice {
         ${add_img}
       </div>`;
     } // else
+  }
+
+  set hass(obj) {
+    let to_update: boolean = false;
+    this._setting_hass(obj);
+    if (this.is_on() !== this.state_on) {
+      this.state_on = this.is_on();
+      to_update = true;
+    }
+    if (
+      this.entities &&
+      this.entities["head_state"] &&
+      this.head_state !== this.entities["head_state"].state
+    ) {
+      this.head_state = this.entities["head_state"].state;
+      to_update = true;
+    }
+    if (
+      this.entities &&
+      this.entities["supplement"] &&
+      this._hass &&
+      this._hass.states[this.entities["supplement"].entity_id] &&
+      this.supplement &&
+      (this._hass.states[this.entities["supplement"].entity_id].attributes
+        ?.supplement?.uid !== this.supplement.attributes?.supplement?.uid ||
+        this._hass.states[this.entities["supplement"].entity_id].attributes
+          ?.supplement?.display_name !==
+          this.supplement.attributes?.supplement?.display_name)
+    ) {
+      this.supplement =
+        this._hass.states[this.entities["supplement"].entity_id];
+      to_update = true;
+    }
+    if (this.container_warning() !== this.last_state_container_warning) {
+      to_update = true;
+      this.last_state_container_warning = this.container_warning();
+    }
+    if (to_update) {
+      this.requestUpdate();
+    }
+    return;
+  }
+
+  container_warning(): boolean {
+    if (!this._hass || !this.entities) return false;
+    const rem = this.entities["remaining_days"];
+    const slm = this.entities["slm"];
+    const dose = this.entities["daily_dose"];
+    if (!rem || !slm || !dose || !this.stock_alert) return false;
+    const remState = this._hass.states[rem.entity_id];
+    const slmState = this._hass.states[slm.entity_id];
+    const doseState = this._hass.states[dose.entity_id];
+    if (!remState || !slmState || !doseState) return false;
+    if (parseInt(remState.state) >= parseInt(this.stock_alert.toString()))
+      return false;
+    if (slmState.state !== "on") return false;
+
+    return parseFloat(doseState.state) > 0;
+  }
+
+  is_on() {
+    let res = true;
+
+    if (
+      "head_state" in this.entities &&
+      this._hass &&
+      this._hass.states[this.entities["head_state"].entity_id] &&
+      (this._hass.states[this.entities["head_state"].entity_id].state ===
+        "not-setup" ||
+        !this.device_state ||
+        (this.entities["schedule_enabled"] &&
+          this._hass.states[this.entities["schedule_enabled"].entity_id] &&
+          this._hass.states[this.entities["schedule_enabled"].entity_id]
+            .state === "off"))
+    ) {
+      res = false;
+    }
+    return res;
+  }
+
+  update_state(value) {
+    if (this.device_state !== value) {
+      this.device_state = value;
+    }
+    this.requestUpdate();
+  }
+
+  _render_ask() {
+    if (
+      this.supplement_info &&
+      !this.supplement.attributes.supplement.is_name_editable
+    ) {
+      return html`<a
+        class="addSupplement"
+        target="_blank"
+        href="https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(
+          " ",
+          "+",
+        )}+${this.supplement.attributes.supplement.name.replace(
+          " ",
+          "+",
+        )}&body=${JSON.stringify(
+          this.supplement.attributes.supplement,
+          null,
+          "%0D%0A",
+        )}"
+        >+${i18n._("ask_add_supplement")}+</a
+      >`;
+    }
+    return html``;
+  }
+
+  _render_supplement_info() {
+    if (this.supplement_info) {
+      return html`${this._render_elements(true, "supplement_info")}`;
+    } // if
+    return null;
+  }
+
+  _render_container() {
+    if (!this.supplement) {
+      return html``;
+    }
+    const supplement_uid = this.supplement.attributes.supplement.uid;
+    let img = null;
+    let warning: any = html``;
+    this.supplement_info = false;
+    img =
+      "/hacsfiles/ha-reef-card/img/supplements/" +
+      supplement_uid +
+      ".supplement.png";
+    const http = new XMLHttpRequest();
+    http.open("HEAD", img, false);
+    http.send();
+    if (http.status === 404) {
+      img =
+        "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png";
+      this.supplement_info = true;
+    }
+    let style = html``;
+    if (!this.state_on) {
+      style = html`<style>
+        img#id_${supplement_uid} {
+          filter: grayscale(90%);
+        }
+      </style>`;
+    }
+
+    // Vérifier que les entités existent avant d'accéder à leurs propriétés
+    try {
+      if (this.container_warning()) {
+        warning = html`<img class='warning' src='${new URL(
+          "../../img/warning.svg",
+          import.meta.url,
+        )}'/ style="${this.get_style(
+          this.config.warning,
+        )}" /><div class="warning" style="${this.get_style(
+          this.config.warning_label,
+        )}">${i18n._("empty")}</div>`;
+      }
+    } catch (error) {
+      console.warn("Could not check stock alert:", error);
+    }
+
+    return html`
+      <div class="container" style="${this.get_style(this.config.container)}">
+        ${style}
+        <img id="id_${supplement_uid}" src="${img}" width="100%" />
+        ${warning} ${this._render_supplement_info()}
+        ${this._render_elements(true, "supplement")} ${this._render_ask()}
+      </div>
+    `;
   }
 }
