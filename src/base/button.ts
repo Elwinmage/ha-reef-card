@@ -32,7 +32,7 @@ export class Button extends MyElement {
    * Render
    * @param style: Not use here
    */
-  protected override _render(_style: string = ""): any {
+  protected override _render(_style?: string): any {
     const _sclass = this.conf?.class || "button";
     const icon = this.conf?.icon
       ? html`<ha-icon icon="${this.conf.icon}"></ha-icon>`

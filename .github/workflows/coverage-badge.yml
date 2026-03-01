@@ -1,0 +1,110 @@
+name: Coverage Badge
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      # coverage-istanbul produit reports/coverage-summary.json
+      - name: Extract coverage percentage
+        id: coverage
+        run: |
+          PCT=$(node -e "
+            const s = require('./reports/coverage-summary.json');
+            const t = s.total;
+            const pct = ((t.lines.pct + t.statements.pct + t.branches.pct + t.functions.pct) / 4).toFixed(1);
+            process.stdout.write(pct);
+          ")
+          echo "pct=$PCT" >> $GITHUB_OUTPUT
+
+      - name: Pick badge color
+        id: color
+        run: |
+          PCT=${{ steps.coverage.outputs.pct }}
+          COLOR=$(node -e "
+            const p = parseFloat('$PCT');
+            if (p >= 90) process.stdout.write('brightgreen');
+            else if (p >= 75) process.stdout.write('green');
+            else if (p >= 60) process.stdout.write('yellow');
+            else if (p >= 40) process.stdout.write('orange');
+            else process.stdout.write('red');
+          ")
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+
+      - name: Generate badge SVG
+        run: |
+          mkdir -p badges
+          PCT=${{ steps.coverage.outputs.pct }}
+          COLOR=${{ steps.color.outputs.color }}
+
+          # Map color name to hex
+          case "$COLOR" in
+            brightgreen) HEX="#4c1" ;;
+            green)       HEX="#97ca00" ;;
+            yellow)      HEX="#dfb317" ;;
+            orange)      HEX="#fe7d37" ;;
+            *)           HEX="#e05d44" ;;
+          esac
+
+          LABEL="coverage"
+          VALUE="${PCT}%"
+
+          # Approximate text widths (7 px per char, +10 padding each side)
+          LW=$(( ${#LABEL} * 7 + 20 ))
+          RW=$(( ${#VALUE} * 7 + 20 ))
+          TW=$(( LW + RW ))
+
+          cat > badges/coverage.svg << SVG
+          <svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="20">
+            <linearGradient id="s" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <clipPath id="r">
+              <rect width="${TW}" height="20" rx="3" fill="#fff"/>
+            </clipPath>
+            <g clip-path="url(#r)">
+              <rect width="${LW}" height="20" fill="#555"/>
+              <rect x="${LW}" width="${RW}" height="20" fill="${HEX}"/>
+              <rect width="${TW}" height="20" fill="url(#s)"/>
+            </g>
+            <g fill="#fff" text-anchor="middle"
+               font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="$(( LW / 2 + 1 ))" y="15" fill="#010101" fill-opacity=".3">${LABEL}</text>
+              <text x="$(( LW / 2 ))"     y="14">${LABEL}</text>
+              <text x="$(( LW + RW / 2 + 1 ))" y="15" fill="#010101" fill-opacity=".3">${VALUE}</text>
+              <text x="$(( LW + RW / 2 ))"     y="14">${VALUE}</text>
+            </g>
+          </svg>
+          SVG
+
+      - name: Commit badge
+        # Only commit on push to main/master, not on PRs
+        if: github.event_name == 'push'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add badges/coverage.svg
+          git diff --cached --quiet || git commit -m "chore: update coverage badge [skip ci]"
+          git push

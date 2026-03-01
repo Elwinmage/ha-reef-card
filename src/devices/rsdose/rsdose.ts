@@ -157,7 +157,7 @@ export class RSDose extends RSDevice {
     `;
   }
 
-  _render(style = null, substyle = null) {
+  _render(style?: any, substyle?: any) {
     this.bundle = this.get_entity("bundled_heads")?.state === "on";
     if (this.dosing_queue === null) {
       this.dosing_queue = MyElement.create_element(
