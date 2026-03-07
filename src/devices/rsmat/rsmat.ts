@@ -1,8 +1,11 @@
 import { html, TemplateResult } from "lit";
+import { property } from "lit/decorators.js";
+
 import { RSDevice } from "../device";
 import { config } from "./rsmat.mapping";
 
 import { dialogs_device } from "../device.dialogs";
+import { dialogs_rsmat } from "./rsmat.dialogs";
 
 import i18n from "../../translations/myi18n";
 
@@ -10,10 +13,13 @@ import i18n from "../../translations/myi18n";
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
 // labels: enhancement, rsmat
 export class RSMat extends RSDevice {
+  @property({ type: Boolean })
+  invert_position: boolean = false;
+
   constructor() {
     super();
     this.initial_config = config;
-    this.load_dialogs([dialogs_device]);
+    this.load_dialogs([dialogs_device, dialogs_rsmat]);
   }
 
   device = {
@@ -22,29 +28,63 @@ export class RSMat extends RSDevice {
     elements: null,
   };
 
+  connectedCallback() {
+    super.connectedCallback();
+    this._originalConfig = config; // store original reference once
+  }
+
+  private swapLeftRight = (obj: any): any => {
+    if (Array.isArray(obj)) {
+      return obj.map((item: any) => this.swapLeftRight(item));
+    }
+
+    // Leave URL instances and other class instances untouched
+    if (obj instanceof URL) return obj;
+
+    if (obj !== null && typeof obj === "object") {
+      const newObj: any = {};
+      for (const key in obj) {
+        if (!obj.hasOwnProperty(key)) continue;
+        const newKey =
+          key === "right" ? "left" : key === "left" ? "right" : key;
+        newObj[newKey] = this.swapLeftRight(obj[key]);
+      }
+      return newObj;
+    }
+    return obj;
+  };
+
   _render(style?: any, substyle?: any) {
-    //position
-    const position = "";
-    //    position="transform:scaleX(-1)";
-    return html` <div class="device_bg" style="${position}">
+    //position left or right
+    const position = this.get_entity("position");
+    this.invert_position = position.state === "left";
+    if (this.invert_position) {
+      substeyle += ";transform:scaleX(-1)";
+    }
+
+    this.config = this.invert_position
+      ? this.swapLeftRight(this._originalConfig) // mirrored copy
+      : this._originalConfig; // original reference
+
+    const remaining = parseInt(this.get_entity("remaining_length").state);
+    const usage = parseInt(this.get_entity("total_usage").state);
+    const percent = 100 - (usage * 100) / (usage + remaining);
+    const steps = [0, 25, 50, 75, 100];
+    const img_state = steps.reduce((prev, curr) => {
+      return Math.abs(curr - percent) < Math.abs(prev - percent) ? curr : prev;
+    });
+    const bg_img = this.config.state_background_imgs[`percent_${img_state}`];
+    console.log("Percent", percent, img_state, bg_img);
+    return html` <div class="device_bg">
       ${style}
       <img
         class="device_img"
         id="rsdevice_img"
         alt=""
-        src="${this.config.background_img}"
+        src="${bg_img}"
         style="${substyle}"
       />
-
-      <div
-        id="banner"
-        style="background-color:rgba(135,135,135,0.7);position:absolute;top:0%;width:100%;height: 100%;text-align:center;"
-      >
-        <div style="background-color:rgba(255,255,255,0.7);border-radius:30px">
-          <h1 style="color:red;">${i18n._("in_dev")}</h1>
-        </div>
-        <div>${this._render_elements(this.is_on())}</div>
-      </div>
+      <div>${this._render_elements(this.is_on())}</div>
     </div>`;
   }
 

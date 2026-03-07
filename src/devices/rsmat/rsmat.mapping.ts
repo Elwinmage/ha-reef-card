@@ -2,6 +2,13 @@ export const config = {
   name: null,
   model: "RSMAT",
   background_img: new URL("../../img/RSMAT.png", import.meta.url),
+  state_background_imgs: {
+    percent_100: new URL("../../img/RSMAT_100.png", import.meta.url),
+    percent_75: new URL("../../img/RSMAT_75.png", import.meta.url),
+    percent_50: new URL("../../img/RSMAT_50.png", import.meta.url),
+    percent_25: new URL("../../img/RSMAT_25.png", import.meta.url),
+    percent_0: new URL("../../img/RSMAT_0.png", import.meta.url),
+  },
   css: {
     width: "100%",
   },
@@ -66,8 +73,27 @@ export const config = {
         position: "absolute",
         width: "5.5%",
         height: "2%",
-        top: "0%",
-        right: "0%",
+        top: "29.5%",
+        right: "12%",
+      },
+    },
+    configuration: {
+      name: "configuration",
+      type: "click-image",
+      icon: "mdi:cog",
+      icon_color: "#ec2330",
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "config",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "30.5%",
+        right: "18%",
       },
     },
   },

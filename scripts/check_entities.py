@@ -438,10 +438,8 @@ def extract_component_entities(component_dir: Path) -> dict[str, dict[str, list[
 # ---------------------------------------------------------------------------
 
 CARD_ENTITY_PATTERNS: list[re.Pattern[str]] = [
-    # {"entity": "key"} ou {entity: "key"} (avec ou sans guillemets autour de la clé)
+    # {"entity": "key"} or {entity: "key"} (with or without quotes around the key)
     re.compile(r'["\']?entity["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
-    # get_entity('key') or get_entity("key")
-    re.compile(r'get_entity\([\'"]([a-z_][a-z0-9_]*)[\'"]'),
     # entities['key'] or entities["key"]
     re.compile(r"entities\[['\"]([ a-z_][a-z0-9_]*)['\"]"),
     # "name": "snake_case_key"  — element key names in mapping objects
@@ -449,11 +447,23 @@ CARD_ENTITY_PATTERNS: list[re.Pattern[str]] = [
     # "entity_id": "key"
     re.compile(r'["\']?entity_id["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # "target": "key"  — progress-bar / progress-circle / *-target elements
-    # The "target" field references a second entity used as the goal value
     re.compile(r'["\']?target["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # ${entity.key.state} — inline template expressions
     re.compile(r'\$\{entity\.([a-z_][a-z0-9_]*)'),
 ]
+
+# get_entity('key') is only a reliable display reference when called from mapping
+# or dialog files.  In plain device logic files (e.g. rsmat.ts) it is used for
+# internal computations (position, bundled_heads …) that are NOT rendered, so
+# scanning those files with this pattern would produce false "present" results.
+CARD_ENTITY_PATTERNS_DECLARATIVE_ONLY: list[re.Pattern[str]] = [
+    re.compile(r'get_entity\([\'"]([a-z_][a-z0-9_]*)[\'"]'),
+]
+
+# File suffixes that are considered "declarative" sources: mapping objects and
+# dialog definitions.  get_entity() calls in these files reference entities that
+# are genuinely rendered or surfaced in the UI.
+_DECLARATIVE_SUFFIXES: tuple[str, ...] = (".mapping.ts", ".dialogs.ts", "dialog_func_ext.ts")
 
 # Known short entity keys that must not be filtered by the noise exclusion
 _SHORT_ENTITY_KEYS: frozenset[str] = frozenset({'ip'})
@@ -491,6 +501,7 @@ SHARED_DIALOG_FILE = "devices/device.dialogs.ts"
 DEVICE_EXTRA_DIALOG_FILES: dict[str, list[str]] = {
     "rsdose": ["devices/rsdose/rsdose.dialogs.ts"],
 }
+
 
 
 def extract_card_entities(card_src_dir: Path) -> dict[str, set[str]]:
@@ -535,10 +546,37 @@ def extract_card_entities(card_src_dir: Path) -> dict[str, set[str]]:
     return result
 
 
+def _strip_comments(content: str) -> str:
+    """
+    Remove TypeScript/JavaScript comments from source before regex matching.
+
+    Handles:
+      - Single-line comments  //  …
+      - Multi-line comments   /* … */
+    String literals are NOT parsed, so a comment marker inside a string would
+    be stripped too — acceptable for our entity-key extraction purpose.
+    """
+    # Remove /* ... */ blocks (non-greedy, DOTALL so newlines are included)
+    content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+    # Remove // ... end-of-line comments
+    content = re.sub(r'//[^\n]*', '', content)
+    return content
+
+
 def _extract_keys_from_ts_file(path: Path) -> set[str]:
-    content = path.read_text(encoding="utf-8")
+    raw = path.read_text(encoding="utf-8")
+    # Strip comments so that commented-out entity references are not collected
+    content = _strip_comments(raw)
+
+    # get_entity() calls are only reliable display indicators in mapping/dialog files.
+    # In plain device logic files they are used for internal computations (e.g. reading
+    # position or bundled_heads to drive rendering logic) and must NOT be counted as
+    # "displayed" references — otherwise those entities would be wrongly marked present.
+    is_declarative = any(path.name.endswith(sfx) for sfx in _DECLARATIVE_SUFFIXES)
+    patterns = CARD_ENTITY_PATTERNS + (CARD_ENTITY_PATTERNS_DECLARATIVE_ONLY if is_declarative else [])
+
     keys: set[str] = set()
-    for pattern in CARD_ENTITY_PATTERNS:
+    for pattern in patterns:
         for m in pattern.finditer(content):
             k = m.group(1).strip()
             # Keep known short keys (e.g. 'ip'); skip mdi icons, CSS, single chars
@@ -639,17 +677,21 @@ def cross_check(
     component: dict[str, dict[str, list[str]]],
     card: dict[str, set[str]],
     ignore: IgnoreList | None = None,
+    device_filter: str | None = None,
 ) -> dict[str, dict[str, dict[str, list[str]]]]:
     """
     Returns::
 
         { device: { platform: { "present": [...], "missing": [...], "ignored": [...] } } }
+
+    If *device_filter* is set, only that device is included in the report.
     """
     if ignore is None:
         ignore = {}
     report: dict[str, dict[str, dict[str, list[str]]]] = {}
 
-    for device in DEVICES:
+    target_devices = [device_filter] if device_filter else DEVICES
+    for device in target_devices:
         report[device] = {}
         card_keys = card.get(device, set())
         platforms_data = component.get(device, {})
@@ -697,18 +739,23 @@ def print_report(
     card: dict[str, set[str]],
     dev_in_progress: DevInProgressList | None = None,
     verbose: bool = True,
+    device_filter: str | None = None,
 ) -> int:
     """
     Print the coverage report.
-    
+
+    If *device_filter* is set, only that device is shown.
+
     Returns:
         Number of MISSING entities that are NOT in dev_in_progress devices (i.e., actual errors).
     """
     if dev_in_progress is None:
         dev_in_progress = []
-    
+
     print(f"\n{BOLD}{'='*70}{RESET}")
     print(f"{BOLD}  HA ReefBeat  —  Component ↔ Card entity coverage report{RESET}")
+    if device_filter:
+        print(f"{BOLD}  Filter: {CYAN}{device_filter}{RESET}")
     print(f"{BOLD}{'='*70}{RESET}\n")
 
     total_present = 0
@@ -718,7 +765,8 @@ def print_report(
     # Per-device totals for final summary table
     dev_totals: list[tuple[str, int, int, int, int, bool]] = []  # (device, total, present, ignored, missing, is_dev)
 
-    for device in DEVICES:
+    target_devices = [device_filter] if device_filter else DEVICES
+    for device in target_devices:
         device_data = report[device]
         dev_present = sum(len(v["present"]) for v in device_data.values())
         dev_missing = sum(len(v["missing"]) for v in device_data.values())
@@ -819,15 +867,18 @@ def dump_json(
     report: dict[str, dict[str, dict[str, list[str]]]],
     out_path: Path,
     ignore: IgnoreList | None = None,
+    device_filter: str | None = None,
 ) -> None:
+    target_devices = {device_filter} if device_filter else set(DEVICES)
     data = {
         "component_entities": {
             dev: {plat: sorted(set(keys)) for plat, keys in plats.items()}
             for dev, plats in component.items()
-            if dev in DEVICES
+            if dev in target_devices
         },
         "card_entities": {
             dev: sorted(keys) for dev, keys in card.items()
+            if dev in target_devices
         },
         "coverage_report": report,
         "ignore_list": ignore or {},
@@ -845,6 +896,7 @@ def dump_markdown(
     component: dict[str, dict[str, list[str]]],
     out_path: Path,
     ignore: IgnoreList | None = None,
+    device_filter: str | None = None,
 ) -> None:
     """Write a GitHub-flavoured Markdown report."""
     from datetime import datetime
@@ -855,7 +907,11 @@ def dump_markdown(
     a("# HA ReefBeat — Entity coverage report")
     a("")
     a(f"*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
+    if device_filter:
+        a(f"\n*Filter: `{device_filter}`*")
     a("")
+
+    target_devices = [device_filter] if device_filter else DEVICES
 
     # ── Global summary table ────────────────────────────────────────────────
     a("## Summary")
@@ -864,7 +920,7 @@ def dump_markdown(
     a("|--------|------:|---------:|----------:|----------:|----------|")
 
     grand_total = grand_present = grand_ignored = grand_missing = 0
-    for device in DEVICES:
+    for device in target_devices:
         device_data = report[device]
         dp = sum(len(v["present"]) for v in device_data.values())
         dm = sum(len(v["missing"]) for v in device_data.values())
@@ -887,7 +943,7 @@ def dump_markdown(
     a("## Detail by device")
     a("")
 
-    for device in DEVICES:
+    for device in target_devices:
         device_data = report[device]
         dp = sum(len(v["present"]) for v in device_data.values())
         dm = sum(len(v["missing"]) for v in device_data.values())
@@ -982,6 +1038,7 @@ def ensure_component() -> None:
 def print_help() -> None:
     B, R, C, G, Y, D = BOLD, RESET, CYAN, GREEN, YELLOW, DIM
     script = Path(sys.argv[0]).name
+    devices = ", ".join(DEVICES)
     print(f"""
 {B}Usage:{R}
   {G}python3 {script}{R} [options]
@@ -995,6 +1052,10 @@ def print_help() -> None:
     {D}{COMPONENT_GIT_URL}{R}
 
 {B}Options:{R}
+  {G}--device=<name>{R}
+      Run the check for a single device only.
+      Valid names: {C}{devices}{R}
+
   {G}--quiet{R}
       Do not list entities that are already present in the card.
       Only missing and ignored entities are shown.
@@ -1040,6 +1101,9 @@ def print_help() -> None:
   {G}1{R}  One or more entities missing in non-dev devices
 
 {B}Examples:{R}
+  {D}# Check a single device only{R}
+  python3 {script} --device=rsmat
+
   {D}# Full report (console + auto JSON){R}
   python3 {script}
 
@@ -1062,6 +1126,7 @@ def main() -> None:
     json_out: Path | None = None
     md_out: Path | None = None
     ignore_path: Path | None = None
+    device_filter: str | None = None  # None = all devices
 
     for arg in sys.argv[1:]:
         if arg in ("--help", "-h"):
@@ -1075,6 +1140,15 @@ def main() -> None:
             md_out = SCRIPT_DIR / "check_entities_report.md"
         elif arg.startswith("--ignore="):
             ignore_path = Path(arg.split("=", 1)[1])
+        elif arg.startswith("--device="):
+            device_filter = arg.split("=", 1)[1].strip()
+            if device_filter not in DEVICES:
+                print(
+                    f"{RED}Erreur : device inconnu '{device_filter}'.{RESET}\n"
+                    f"Devices disponibles : {', '.join(DEVICES)}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
     # Default ignore file: check_entities_ignore.json next to this script
     if ignore_path is None:
@@ -1087,6 +1161,8 @@ def main() -> None:
 
     print(f"  Composant : {COMPONENT_DIR}")
     print(f"  Card      : {CARD_DIR}")
+    if device_filter:
+        print(f"  Device    : {CYAN}{device_filter}{RESET}  (filtre actif)")
 
     ignore: IgnoreList = {}
     dev_in_progress: DevInProgressList = []
@@ -1106,19 +1182,19 @@ def main() -> None:
     card = extract_card_entities(CARD_DIR)
 
     print("Vérification croisée…")
-    report = cross_check(component, card, ignore=ignore)
+    report = cross_check(component, card, ignore=ignore, device_filter=device_filter)
 
-    error_count = print_report(report, component, card, dev_in_progress=dev_in_progress, verbose=verbose)
+    error_count = print_report(report, component, card, dev_in_progress=dev_in_progress, verbose=verbose, device_filter=device_filter)
 
     if json_out:
-        dump_json(component, card, report, json_out, ignore=ignore)
+        dump_json(component, card, report, json_out, ignore=ignore, device_filter=device_filter)
     else:
         # Dump JSON next to this script (ha-reef-card/scripts/)
         default_json = SCRIPT_DIR / "check_entities_report.json"
-        dump_json(component, card, report, default_json, ignore=ignore)
+        dump_json(component, card, report, default_json, ignore=ignore, device_filter=device_filter)
 
     if md_out:
-        dump_markdown(report, component, md_out, ignore=ignore)
+        dump_markdown(report, component, md_out, ignore=ignore, device_filter=device_filter)
 
     # Exit with error code 1 if there are missing entities (excluding dev devices)
     if error_count > 0:

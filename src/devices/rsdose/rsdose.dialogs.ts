@@ -16,6 +16,7 @@ export const dialogs_rsdose = {
             { entity: "fetch_config", name: { type: "entity" } },
             { entity: "reset", name: { type: "entity" } },
             { entity: "firmware_update", name: { type: "entity" } },
+            { entity: "bundled_heads", name: { type: "entity" } },
           ],
         },
       },
