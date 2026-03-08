@@ -59,7 +59,7 @@ export class RSMat extends RSDevice {
     const position = this.get_entity("position");
     this.invert_position = position.state === "left";
     if (this.invert_position) {
-      substeyle += ";transform:scaleX(-1)";
+      substyle += ";transform:scaleX(-1)";
     }
 
     this.config = this.invert_position
@@ -74,7 +74,6 @@ export class RSMat extends RSDevice {
       return Math.abs(curr - percent) < Math.abs(prev - percent) ? curr : prev;
     });
     const bg_img = this.config.state_background_imgs[`percent_${img_state}`];
-    console.log("Percent", percent, img_state, bg_img);
     return html` <div class="device_bg">
       ${style}
       <img
