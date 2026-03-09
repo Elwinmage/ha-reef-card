@@ -60,6 +60,8 @@ export class RSDevice extends LitElement {
 
   static styles = [style_common];
 
+  private _helpers: any;
+
   /**
    * Create a device from a configuration (ex: rsdose4.mapping.ts)
    * @param tag_name: the name of the element (ex: redsea-rsdose4)
@@ -433,6 +435,12 @@ ${maintenance}
     return style;
   }
 
+  async connectedCallback() {
+    super.connectedCallback();
+    this._helpers = await (window as any).loadCardHelpers();
+    this.requestUpdate();
+  }
+
   /*
    * Render a single element: switch, sensor...
    * @conf: the json configuration for the element
@@ -440,6 +448,9 @@ ${maintenance}
    * @put_in: a grouping div to put element on
    */
   _render_element(conf: any, state: boolean, put_in: string | null) {
+    if (!this._helpers) {
+      return html``;
+    }
     let sensor_put_in = null;
     //Element is groupped with others
     if ("put_in" in conf) {
@@ -454,25 +465,39 @@ ${maintenance}
       return html``;
     }
 
-    // Handle hui-entities-card natively — same logic as dialog.ts _render_content()
-    if (conf.type === "hui-entities-card") {
-      const key = "hui-entities-card." + (conf.name || "device_states");
+    // Handle hui-*-card natively — same logic as dialog.ts _render_content()
+    if (conf.type.startsWith("hui-")) {
+      const key = conf.type + "." + (conf.name || "device_states");
       if (!(key in this._elements)) {
-        const HuiCard = customElements.get("hui-entities-card") as any;
-        if (HuiCard && this._hass && conf.conf) {
-          const card = new HuiCard();
+        if (this._hass && conf.conf) {
           // Resolve translation_key -> real entity_id, exactly like dialog.ts
           const clone = structuredClone(conf.conf);
-          for (const pos in conf.conf.entities) {
-            const e = conf.conf.entities[pos];
+          if (clone?.entity) {
+            const e = clone.entity;
             if (typeof e === "string") {
-              clone.entities[pos] = this.get_entity(e)?.entity_id ?? e;
+              clone.entity = this.get_entity(e)?.entity_id ?? e;
             } else {
-              clone.entities[pos].entity =
-                this.get_entity(e.entity)?.entity_id ?? e.entity;
+              clone.entity = this.get_entity(e.entity)?.entity_id ?? e.entity;
+            }
+          } else {
+            for (const pos in conf.conf.entities) {
+              const e = conf.conf.entities[pos];
+              if (typeof e === "string") {
+                clone.entities[pos] = this.get_entity(e)?.entity_id ?? e;
+              } else {
+                clone.entities[pos].entity =
+                  this.get_entity(e.entity)?.entity_id ?? e.entity;
+              }
             }
           }
-          card.setConfig(clone);
+          const card = this._helpers.createCardElement(clone);
+
+          //Treat CSS
+          if (conf.css) {
+            for (const [prop, value] of Object.entries(conf.css)) {
+              card.style.setProperty(prop, value);
+            }
+          }
           card.hass = this._hass;
           this._elements[key] = card;
         }
@@ -480,6 +505,7 @@ ${maintenance}
         // Propagate hass updates
         this._elements[key].hass = this._hass;
       }
+
       return html`${this._elements[key]}`;
     }
 

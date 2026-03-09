@@ -46,7 +46,7 @@ export const config = {
         "background-color": "rgba(240,200,200,0.7)",
       },
     },
-    device_states: {
+    /*    device_states: {
       type: "hui-entities-card",
       conf: {
         type: "entities",
@@ -54,6 +54,67 @@ export const config = {
           { entity: "device_state", name: { type: "entity" } },
           { entity: "maintenance", name: { type: "entity" } },
         ],
+      },
+      },*/
+    device_state: {
+      name: "device_state",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "0%",
+        left: "0%",
+      },
+    },
+    maintenance: {
+      name: "maintenance",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "4%",
+        left: "0%",
+      },
+    },
+    stats: {
+      name: "stats",
+      type: "hui-statistics-graph-card",
+      conf: {
+        type: "statistics-graph",
+        entities: [{ entity: "today_usage", color: "#c55b5a" }],
+        chart_type: "line",
+        period: "hour",
+        days_to_show: 7,
+        stat_types: ["mean"],
+        min_y_axis: 0,
+        hide_legend: true,
+        logarithmic_scale: false,
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "34.5%",
+        right: "50%",
+        width: "51%",
+        height: "36%",
+        "--graph-color-1": "red",
+        opacity: "0.7",
+        border: "none !important",
+        "box-shadow": "none !important",
       },
     },
     wifi_quality: {
@@ -73,8 +134,8 @@ export const config = {
         position: "absolute",
         width: "5.5%",
         height: "2%",
-        top: "29.5%",
-        right: "12%",
+        top: "0%",
+        right: "0%",
       },
     },
     configuration: {
@@ -92,8 +153,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "30.5%",
-        right: "18%",
+        top: "0%",
+        right: "6%",
       },
     },
   },

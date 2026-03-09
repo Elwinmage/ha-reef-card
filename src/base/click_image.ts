@@ -30,21 +30,36 @@ export class ClickImage extends MyElement {
   protected override _render(_style: string = ""): any {
     const imageSrc = this.conf?.image || "";
     const icon = this.conf?.icon || "";
-    const iconColor = this.conf?.icon_color || "currentColor";
+    let iconColor = this.conf?.icon_color || "currentColor";
 
     if (!_style) {
       _style = this.get_style("css");
     }
 
     // Mode 1 : MDI Icon
-    if (icon && icon.startsWith("mdi:")) {
-      return html`
-        <ha-icon
-          class="click-icon"
-          .icon="${icon}"
-          style="color: ${iconColor}; ${_style}"
-        ></ha-icon>
-      `;
+    if (icon) {
+      if (icon === "state") {
+        const obj = this.get_entity(this.conf.name);
+        if (obj.state === "off") {
+          iconColor = "#666666";
+        }
+        return html`
+          <ha-icon
+            class="click-icon"
+            .icon="${obj.attributes.icon}"
+            style="color: ${iconColor}; ${_style}"
+          ></ha-icon>
+        `;
+      }
+      if (icon.startsWith("mdi:")) {
+        return html`
+          <ha-icon
+            class="click-icon"
+            .icon="${icon}"
+            style="color: ${iconColor}; ${_style}"
+          ></ha-icon>
+        `;
+      }
     }
 
     // Mode 2 : Standard image

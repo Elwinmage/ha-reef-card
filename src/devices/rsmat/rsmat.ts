@@ -54,6 +54,19 @@ export class RSMat extends RSDevice {
     return obj;
   };
 
+  override _render_disabled(substyle = null) {
+    const position = this.get_entity("position");
+    this.invert_position = position.state === "left";
+    if (this.invert_position) {
+      substyle += ";transform:scaleX(-1)";
+    }
+
+    this.config = this.invert_position
+      ? this.swapLeftRight(this._originalConfig) // mirrored copy
+      : this._originalConfig; // original reference
+    return super._render_disabled(substyle);
+  }
+
   _render(style?: any, substyle?: any) {
     //position left or right
     const position = this.get_entity("position");
