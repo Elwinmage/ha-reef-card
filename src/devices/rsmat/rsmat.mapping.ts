@@ -21,14 +21,13 @@ export const config = {
         position: "absolute",
         width: "100%",
         height: "15px",
-        top: "33%",
+        bottom: "26%",
         left: "0px",
       },
       "elt.css": {
         "background-color": "rgba(220,220,220,0.7)",
       },
     },
-
     last_alert_message: {
       name: "last_alert_message",
       type: "redsea-messages",
@@ -39,23 +38,13 @@ export const config = {
         position: "absolute",
         width: "100%",
         height: "20px",
-        top: "37%",
+        bottom: "20%",
         left: "0px",
       },
       "elt.css": {
         "background-color": "rgba(240,200,200,0.7)",
       },
     },
-    /*    device_states: {
-      type: "hui-entities-card",
-      conf: {
-        type: "entities",
-        entities: [
-          { entity: "device_state", name: { type: "entity" } },
-          { entity: "maintenance", name: { type: "entity" } },
-        ],
-      },
-      },*/
     device_state: {
       name: "device_state",
       type: "click-image",

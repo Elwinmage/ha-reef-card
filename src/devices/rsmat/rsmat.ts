@@ -60,10 +60,6 @@ export class RSMat extends RSDevice {
     if (this.invert_position) {
       substyle += ";transform:scaleX(-1)";
     }
-
-    this.config = this.invert_position
-      ? this.swapLeftRight(this._originalConfig) // mirrored copy
-      : this._originalConfig; // original reference
     return super._render_disabled(substyle);
   }
 
@@ -75,9 +71,9 @@ export class RSMat extends RSDevice {
       substyle += ";transform:scaleX(-1)";
     }
 
-    this.config = this.invert_position
-      ? this.swapLeftRight(this._originalConfig) // mirrored copy
-      : this._originalConfig; // original reference
+    if (this.invert_position) {
+      this.config = this.swapLeftRight(this.config); // swap the merged config
+    }
 
     const remaining = parseInt(this.get_entity("remaining_length").state);
     const usage = parseInt(this.get_entity("total_usage").state);
@@ -101,6 +97,12 @@ export class RSMat extends RSDevice {
   }
 
   override renderEditor(): TemplateResult {
-    return html``;
+    if (this.is_disabled()) {
+      return html``;
+    }
+    this._populate_entities();
+    this.update_config();
+    console.log("ELEMTS", this.entities, this.config);
+    return html` <form>${this._editor_common()}</form>`;
   }
 }
