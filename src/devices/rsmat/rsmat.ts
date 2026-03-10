@@ -13,7 +13,6 @@ import i18n from "../../translations/myi18n";
 // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
 // labels: enhancement, rsmat
 export class RSMat extends RSDevice {
-  @property({ type: Boolean })
   invert_position: boolean = false;
 
   constructor() {

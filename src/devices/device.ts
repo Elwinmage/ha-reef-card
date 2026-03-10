@@ -23,37 +23,30 @@ import style_common from "../utils/common.styles";
 //----------------------------------------------------------------------------//
 @customElement("rs-device")
 export class RSDevice extends LitElement {
-  @state()
   public entities: Record<string, any> = {};
-
-  @state()
   public config: DeviceConfig;
 
-  @state()
   protected _hass: HassConfig | null = null;
 
-  @state()
   protected device: DeviceInfo | null = null;
 
-  @state()
   protected initial_config: Partial<DeviceConfig>;
 
-  @state()
   protected user_config: Partial<DeviceConfig>;
 
-  @state()
   protected _elements: any = {};
 
-  @state()
   protected masterOn: boolean = true;
 
-  @property({ type: Boolean })
+  @property({
+    type: Boolean,
+    hasChanged: (newVal: boolean, oldVal: boolean) =>
+      newVal === true && oldVal === false,
+  })
   to_render: boolean = false;
 
-  @property({ type: Boolean })
   isEditorMode: boolean = false;
 
-  @state()
   protected dialogs: any;
 
   protected state: boolean = false;
@@ -243,7 +236,7 @@ export class RSDevice extends LitElement {
     }
     if (re_render) {
       this.to_render = true;
-      this.requestUpdate();
+      //      this.requestUpdate();
     }
   }
 

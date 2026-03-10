@@ -45,11 +45,22 @@ export const config = {
         "background-color": "rgba(240,200,200,0.7)",
       },
     },
+    position: {
+      //hidden , force render when position changes
+      name: "position",
+      type: "common-sensor",
+      label: false,
+      master: true,
+      css: {
+        display: "none",
+      },
+    },
     device_state: {
       name: "device_state",
       type: "click-image",
       icon: "state",
       icon_color: "red",
+      master: true,
       tap_action: {
         domain: "switch",
         action: "toggle",
@@ -67,6 +78,7 @@ export const config = {
       type: "click-image",
       icon: "state",
       icon_color: "red",
+      master: true,
       tap_action: {
         domain: "switch",
         action: "toggle",
