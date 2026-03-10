@@ -60,7 +60,9 @@ export class RSMat extends RSDevice {
     if (this.invert_position) {
       substyle += ";transform:scaleX(-1)";
     }
-    return super._render_disabled(substyle);
+    const res = super._render_disabled(substyle);
+
+    return res;
   }
 
   _render(style?: any, substyle?: any) {
@@ -69,9 +71,6 @@ export class RSMat extends RSDevice {
     this.invert_position = position.state === "left";
     if (this.invert_position) {
       substyle += ";transform:scaleX(-1)";
-    }
-
-    if (this.invert_position) {
       this.config = this.swapLeftRight(this.config); // swap the merged config
     }
 

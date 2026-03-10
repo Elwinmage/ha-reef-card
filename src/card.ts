@@ -77,7 +77,7 @@ export class ReefCard extends LitElement {
       if (this._dialog_box) {
         this._dialog_box.quit();
       }
-      this.render(); /* force rerender, do not use requestUpdate*/
+      //      this.render(); /* force rerender, do not use requestUpdate*/
     });
   }
 
