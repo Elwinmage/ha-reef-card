@@ -55,14 +55,16 @@ export class RSMat extends RSDevice {
   };
 
   override _render_disabled(substyle = null) {
-    const position = this.get_entity("position");
-    this.invert_position = position.state === "left";
-    if (this.invert_position) {
-      substyle += ";transform:scaleX(-1)";
-    }
     const res = super._render_disabled(substyle);
-
-    return res;
+    if (res.reason === i18n._("maintenance")) {
+      const position = this.get_entity("position");
+      this.invert_position = position.state === "left";
+      if (this.invert_position) {
+        substyle += ";transform:scaleX(-1)";
+        this.config = this.swapLeftRight(this.config); // swap the merged config
+      }
+    }
+    return { reason: res.reason, substyle: substyle };
   }
 
   _render(style?: any, substyle?: any) {
@@ -101,7 +103,6 @@ export class RSMat extends RSDevice {
     }
     this._populate_entities();
     this.update_config();
-    console.log("ELEMTS", this.entities, this.config);
     return html` <form>${this._editor_common()}</form>`;
   }
 }

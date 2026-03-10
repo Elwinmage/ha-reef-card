@@ -120,7 +120,7 @@ export class RSDevice extends LitElement {
     }
     this.update_config();
     this.to_render = false;
-    console.debug("Render ", this.config.model);
+    console.debug("Render ", this.config.model, this.device.name);
 
     // get style and substyle
     let style = html``;
@@ -131,8 +131,36 @@ export class RSDevice extends LitElement {
     }
 
     const disabled = this._render_disabled(substyle);
-    if (disabled !== null) {
-      return disabled;
+    if (disabled.reason !== null) {
+      // if in maintenance mode, display maintenance switch
+      let maintenance: TemplateResult = html``;
+      if (disabled.reason === i18n._("maintenance")) {
+        const elements: any[] = [];
+        for (const i in this.config.elements) {
+          elements.push(this.config.elements[i]);
+        }
+
+        for (const swtch of elements) {
+          if (swtch.name === "maintenance") {
+            if (this._hass) {
+              const maintenance_button = MyElement.create_element(
+                this._hass,
+                swtch,
+                this,
+              );
+              maintenance = html`${maintenance_button}`;
+            }
+            break;
+          }
+        }
+      }
+
+      return html`
+        <div class="device_bg">
+          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${disabled.substyle}"/>
+          <p class='disabled_in_ha'>${disabled.reason}</p>
+         ${maintenance}
+        </div">`;
     }
     //check device state
     if (!this.is_on()) {
@@ -377,9 +405,8 @@ export class RSDevice extends LitElement {
   /*
    * Special render if the device is disabled or in maintenance mode in HA
    */
-  _render_disabled(substyle = null) {
+  _render_disabled(substyle = null): string {
     let reason: string | null = null;
-    let maintenance: TemplateResult = html``;
 
     if (this.is_disabled()) {
       reason = i18n._("disabledInHa");
@@ -389,36 +416,8 @@ export class RSDevice extends LitElement {
       this._hass.states[this.entities["maintenance"].entity_id]?.state === "on"
     ) {
       reason = i18n._("maintenance");
-      // if in maintenance mode, display maintenance switch
-      const elements: any[] = [];
-      for (const i in this.config.elements) {
-        elements.push(this.config.elements[i]);
-      }
-
-      for (const swtch of elements) {
-        if (swtch.name === "maintenance") {
-          if (this._hass) {
-            const maintenance_button = MyElement.create_element(
-              this._hass,
-              swtch,
-              this,
-            );
-            maintenance = html`${maintenance_button}`;
-          }
-          break;
-        }
-      }
     }
-
-    if (reason === null) {
-      return null;
-    }
-
-    return html`<div class="device_bg">
-<img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
-<p class='disabled_in_ha'>${reason}</p>
-${maintenance}
-</div">`;
+    return { reason: reason, substyle: substyle };
   }
 
   /*
