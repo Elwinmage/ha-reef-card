@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------//
 
 import { TemplateResult, LitElement, html } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
 import type { HassConfig, DeviceInfo, DeviceConfig } from "../types/index";
 
@@ -23,7 +23,21 @@ import style_common from "../utils/common.styles";
 //----------------------------------------------------------------------------//
 @customElement("rs-device")
 export class RSDevice extends LitElement {
+  // Static cache: loadCardHelpers is resolved once for all instances.
+  // This avoids a double render on init (first natural Lit render, then
+  // requestUpdate() after the async await).
+  private static _helpersPromise: Promise<any> | null = null;
+  private static _helpersResolved: any = null;
+
+  @property({
+    type: Boolean,
+    hasChanged: (newVal: boolean, oldVal: boolean) =>
+      newVal === true && oldVal === false,
+  })
+  to_render: boolean = false;
+
   public entities: Record<string, any> = {};
+
   public config: DeviceConfig;
 
   protected _hass: HassConfig | null = null;
@@ -35,15 +49,10 @@ export class RSDevice extends LitElement {
   protected user_config: Partial<DeviceConfig>;
 
   protected _elements: any = {};
+  // Persistent CSS overrides applied by update_conf actions — survive swapLeftRight re-renders
+  protected _conf_overrides: Record<string, Record<string, any>> = {};
 
   protected masterOn: boolean = true;
-
-  @property({
-    type: Boolean,
-    hasChanged: (newVal: boolean, oldVal: boolean) =>
-      newVal === true && oldVal === false,
-  })
-  to_render: boolean = false;
 
   isEditorMode: boolean = false;
 
@@ -236,7 +245,7 @@ export class RSDevice extends LitElement {
     }
     if (re_render) {
       this.to_render = true;
-      //      this.requestUpdate();
+      //this.requestUpdate();
     }
   }
 
@@ -429,8 +438,27 @@ export class RSDevice extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    this._helpers = await (window as any).loadCardHelpers();
-    this.requestUpdate();
+    // If helpers were already resolved (e.g. another device instance loaded them),
+    // assign synchronously so the first Lit render already has them — no extra render needed.
+    if (RSDevice._helpersResolved) {
+      this._helpers = RSDevice._helpersResolved;
+      return;
+    }
+    // First time: start or reuse the single shared promise.
+    if (!RSDevice._helpersPromise) {
+      RSDevice._helpersPromise = (window as any).loadCardHelpers();
+    }
+    this._helpers = await RSDevice._helpersPromise;
+    RSDevice._helpersResolved = this._helpers;
+    // Request update only once, only if hui-* elements are present.
+    const hasHuiElement =
+      this.config?.elements &&
+      Object.values(this.config.elements).some((el: any) =>
+        el?.type?.startsWith("hui-"),
+      );
+    if (hasHuiElement) {
+      this.requestUpdate();
+    }
   }
 
   /*
@@ -440,9 +468,6 @@ export class RSDevice extends LitElement {
    * @put_in: a grouping div to put element on
    */
   _render_element(conf: any, state: boolean, put_in: string | null) {
-    if (!this._helpers) {
-      return html``;
-    }
     let sensor_put_in = null;
     //Element is groupped with others
     if ("put_in" in conf) {
@@ -458,7 +483,11 @@ export class RSDevice extends LitElement {
     }
 
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()
+    // Requires _helpers (loaded async), skip until available
     if (conf.type.startsWith("hui-")) {
+      if (!this._helpers) {
+        return html``;
+      }
       const key = conf.type + "." + (conf.name || "device_states");
       if (!(key in this._elements)) {
         if (this._hass && conf.conf) {
@@ -484,13 +513,33 @@ export class RSDevice extends LitElement {
           }
           const card = this._helpers.createCardElement(clone);
 
-          //Treat CSS
+          //Treat CSS on host element
           if (conf.css) {
             for (const [prop, value] of Object.entries(conf.css)) {
+              // shadow_css entries are injected into the card's shadow DOM (see below)
+              if (prop === "shadow_css") continue;
               card.style.setProperty(prop, value);
             }
           }
           card.hass = this._hass;
+
+          // Inject styles into the card's shadow DOM (e.g. to override background,
+          // min-height, or any internal style unreachable from outside).
+          if (conf.css?.shadow_css) {
+            const shadowCss = conf.css.shadow_css;
+            const injectStyle = () => {
+              if (card.shadowRoot) {
+                const styleEl = document.createElement("style");
+                styleEl.textContent = shadowCss;
+                card.shadowRoot.appendChild(styleEl);
+              } else {
+                // Shadow root not ready yet, retry on next frame
+                requestAnimationFrame(injectStyle);
+              }
+            };
+            requestAnimationFrame(injectStyle);
+          }
+
           this._elements[key] = card;
         }
       } else {
@@ -512,6 +561,10 @@ export class RSDevice extends LitElement {
         element = MyElement.create_element(this._hass, conf, this);
         this._elements[conf.type + "." + conf.name] = element;
       }
+    }
+    // Re-apply persistent CSS overrides (survive swapLeftRight config recreation)
+    if (element && this._conf_overrides[conf.name]?.css) {
+      Object.assign(element.conf.css, this._conf_overrides[conf.name].css);
     }
     return html`${element}`;
   }

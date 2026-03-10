@@ -10,7 +10,7 @@ import style_common from "../../utils/common.styles";
 
 import i18n from "../../translations/myi18n";
 
-import { rgbToHex, hexToRgb } from "../../utils/common";
+import { rgbToHex } from "../../utils/common";
 import { merge } from "../../utils/merge";
 
 import { DosingQueue } from "./dosing_queue";
@@ -224,7 +224,7 @@ export class RSDose extends RSDevice {
            </tr>`;
   } // end of function _editor_head_color
 
-  /*  handleChangedEvent(changedEvent) {
+  *handleChangedEvent(changedEvent) {
     let i_val = changedEvent.currentTarget.value;
     const head = changedEvent.target.id.split("-")[0];
     const field = changedEvent.target.id.split("-")[1];
@@ -256,7 +256,6 @@ export class RSDose extends RSDevice {
     });
     this.dispatchEvent(messageEvent);
   } // end of function handleChangedEvent
-*/
 
   override renderEditor(): TemplateResult {
     if (this.is_disabled()) {

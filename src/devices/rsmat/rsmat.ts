@@ -1,5 +1,4 @@
 import { html, TemplateResult } from "lit";
-import { property } from "lit/decorators.js";
 
 import { RSDevice } from "../device";
 import { config } from "./rsmat.mapping";

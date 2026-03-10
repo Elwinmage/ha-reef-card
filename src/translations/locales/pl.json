@@ -47,6 +47,7 @@
   "maintenance": "Konserwacja w toku..",
   "min": "Minimum",
   "min_dose": "Minimalna dawka dla tego typu harmonogramu wynosi 5 mL",
+  "monthly": "Miesięczny",
   "name": "Nazwa",
   "nd": "Liczba dawek",
   "next": "Dalej",
@@ -73,6 +74,7 @@
   "timer": "Timer",
   "volume": "Objętość (mL)",
   "vote_next_device": "Zagłosuj na następne obsługiwane urządzenie",
+  "weekly": "Tygodniowy",
   "whisper": "Szept",
   "wifi": "WiFi",
   "yes": "Tak"

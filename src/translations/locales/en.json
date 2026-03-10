@@ -47,6 +47,7 @@
   "maintenance": "Maintenance in progress..",
   "min": "Minimum",
   "min_dose": "The minimal dose for this type of schedule is 5mL",
+  "monthly": "Monthly",
   "name": "Name",
   "nd": "Number of doses",
   "next": "Next",
@@ -73,7 +74,7 @@
   "timer": "Timer",
   "volume": "Volume (mL)",
   "vote_next_device": "Vote for next supported device",
-  "weekly": "Wheekly",
+  "weekly": "Weekly",
   "whisper": "Whisper",
   "wifi": "Wifi",
   "yes": "Yes"

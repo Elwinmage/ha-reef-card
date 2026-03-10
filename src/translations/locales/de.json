@@ -47,6 +47,7 @@
   "maintenance": "Wartung läuft..",
   "min": "Minimum",
   "min_dose": "Die Mindestdosis für diesen Zeitplantyp beträgt 5 mL",
+  "monthly": "Monatlich",
   "name": "Name",
   "nd": "Anzahl der Dosen",
   "next": "Weiter",
@@ -73,6 +74,7 @@
   "timer": "Timer",
   "volume": "Volumen (mL)",
   "vote_next_device": "Für das nächste unterstützte Gerät abstimmen",
+  "weekly": "Wöchentlich",
   "whisper": "Flüstern",
   "wifi": "WLAN",
   "yes": "Ja"

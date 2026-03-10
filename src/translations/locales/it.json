@@ -47,6 +47,7 @@
   "maintenance": "Manutenzione in corso..",
   "min": "Minimo",
   "min_dose": "La dose minima per questo tipo di programmazione è di 5 mL",
+  "monthly": "Mensile",
   "name": "Nome",
   "nd": "Numero di dosi",
   "next": "Avanti",
@@ -73,6 +74,7 @@
   "timer": "Timer",
   "volume": "Volume (mL)",
   "vote_next_device": "Vota per il prossimo dispositivo supportato",
+  "weekly": "Settimanale",
   "whisper": "Sussurro",
   "wifi": "WiFi",
   "yes": "Sì"
