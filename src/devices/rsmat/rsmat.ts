@@ -40,6 +40,25 @@ export class RSMat extends RSDevice {
     // Leave URL instances and other class instances untouched
     if (obj instanceof URL) return obj;
 
+    if (typeof obj === "string") {
+      // Swap "left" <-> "right" in CSS string values (e.g. "top left", "flex-start")
+      let result = obj
+        .replace(/\bleft\b/g, "__RIGHT__")
+        .replace(/\bright\b/g, "left")
+        .replace(/__RIGHT__/g, "right");
+
+      // Invert angle signs only for skewY and rotate (mirror-sensitive)
+      result = result.replace(
+        /(skewY|rotate[XYZ]?)\(\s*(-?)(\d+(?:\.\d+)?)(deg|rad|turn|grad)\s*\)/g,
+        (_match, fn, sign, value, unit) => {
+          const inverted = sign === "-" ? "" : "-";
+          return `${fn}(${inverted}${value}${unit})`;
+        },
+      );
+
+      return result;
+    }
+
     if (obj !== null && typeof obj === "object") {
       const newObj: any = {};
       for (const key in obj) {
