@@ -306,6 +306,7 @@ export const config = {
     remaining_length: {
       name: "remaining_length",
       type: "common-sensor",
+      master: true,
       css: {
         position: "absolute",
         //	"background-color":"rgb(150,150,150,0.2)",
@@ -328,7 +329,7 @@ export const config = {
       type: "common-sensor",
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0.8)",
+        "background-color": "rgb(150,150,150,0.9)",
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
