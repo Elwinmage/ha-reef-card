@@ -96,7 +96,12 @@ export class Sensor extends MyElement {
     let unit = "";
 
     if (this.stateObj) {
-      value = this.label || this.stateObj.state;
+      if (this.conf?.translate_values) {
+        value = this.label || this._hass.formatEntityState(this.stateObj);
+      } else {
+        value = this.label || this.stateObj.state;
+      }
+
       if (this.conf.unit) {
         unit = this.evaluate(this.conf.unit);
       } else {

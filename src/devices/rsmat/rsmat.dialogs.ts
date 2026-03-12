@@ -9,7 +9,6 @@ export const dialogs_rsmat = {
         conf: {
           type: "entities",
           entities: [
-            { entity: "mode", name: { type: "entity" } },
             { entity: "fetch_config", name: { type: "entity" } },
             { entity: "reset", name: { type: "entity" } },
             { entity: "model", name: { type: "entity" } },
@@ -54,5 +53,42 @@ export const dialogs_rsmat = {
         },
       },
     ],
+  },
+  new_roll: {
+    name: "new_roll",
+    title_key: "${i18n._('new_roll')}",
+    close_cross: true,
+    content: [
+      {
+        view: "text",
+        value: "${i18n._('new_roll_info')}",
+      },
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "started_roll_diameter", name: { type: "entity" } },
+          ],
+        },
+      },
+    ],
+    validate: {
+      label: "${i18n._('save')}",
+      class: "dialog_button",
+      type: "common-button",
+      stateObj: null,
+      tap_action: [
+        {
+          domain: "button",
+          action: "press",
+          data: { entity_id: "new_roll" },
+        },
+        {
+          domain: "redsea_ui",
+          action: "exit-dialog",
+        },
+      ],
+    },
   },
 };
