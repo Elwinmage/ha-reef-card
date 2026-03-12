@@ -1,6 +1,7 @@
 import { html, TemplateResult } from "lit";
 
 import { RSDevice } from "../device";
+import { MyElement } from "../../base/element";
 import { config } from "./rsmat.mapping";
 
 import { dialogs_device } from "../device.dialogs";
@@ -72,22 +73,35 @@ export class RSMat extends RSDevice {
   };
 
   override _render_disabled(substyle = null) {
+    // Call super without building maintenance_element yet — we may need to swap config first
     const res = super._render_disabled(substyle);
+    let maintenance_element = res.maintenance_element;
+
     if (res.reason === i18n._("maintenance")) {
       const position = this.get_entity("position");
       if (position) {
         this.invert_position = position?.state === "left";
         if (this.invert_position) {
           substyle += ";transform:scaleX(-1)";
-          this.config = this.swapLeftRight(this.config); // swap the merged config
+          // Swap config BEFORE building maintenance_element so its CSS positions
+          // (left→right) are already mirrored to match the scaleX(-1) background image
+          this.config = this.swapLeftRight(this.config);
+          // Rebuild maintenance_element with the swapped config
+          for (const i in this.config.elements) {
+            const swtch = this.config.elements[i];
+            if (swtch.name === "maintenance" && this._hass) {
+              maintenance_element = MyElement.create_element(
+                this._hass,
+                swtch,
+                this,
+              );
+              break;
+            }
+          }
         }
       }
     }
-    return {
-      reason: res.reason,
-      substyle: substyle,
-      maintenance_element: res.maintenance_element,
-    };
+    return { reason: res.reason, substyle: substyle, maintenance_element };
   }
 
   _render(style?: any, substyle?: any) {

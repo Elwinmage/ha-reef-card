@@ -637,9 +637,18 @@ describe("RSMat — _render_disabled() branch coverage", () => {
     expect(result.substyle).toBeNull();
   });
 
-  it("L77-82: reason=maintenance, position=left → invert_position=true, substyle modified", () => {
-    // Covers rsmat.ts L77-82: maintenance + position=left → swapLeftRight called
+  it("L77-82: reason=maintenance, position=left → invert_position=true, substyle gets scaleX(-1), maintenance_element rebuilt with swapped config", () => {
+    // Covers rsmat.ts L77-82: maintenance + position=left → swap config, substyle mirrored,
+    // maintenance_element rebuilt after swap so its CSS positions match the mirrored image
     const mat = makeMat();
+    // Provide a maintenance element in config so the rebuild loop (L91-94) is entered
+    mat.config.elements = {
+      maintenance: {
+        name: "maintenance",
+        type: "click-image",
+        css: { left: "0%" },
+      },
+    };
     mat.entities = {
       maintenance: { entity_id: "sensor.maint" },
       position: { entity_id: "sensor.pos" },
@@ -649,11 +658,41 @@ describe("RSMat — _render_disabled() branch coverage", () => {
       "sensor.pos": makeState_B("left", "sensor.pos"),
     });
     vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+    const fakeElem: any = { conf: {}, hass: null };
+    vi.spyOn(MyElement, "create_element").mockReturnValue(fakeElem);
 
     const result = mat._render_disabled("");
     expect(result.reason).not.toBeNull();
     expect(mat.invert_position).toBe(true);
     expect(result.substyle).toContain("scaleX(-1)");
+    // L91-94: maintenance_element rebuilt with swapped config → right:0% instead of left:0%
+    expect(result.maintenance_element).toBe(fakeElem);
+    vi.restoreAllMocks();
+  });
+
+  it("L92 false: position=left, config.elements has no 'maintenance' key → loop exits without rebuild", () => {
+    // Covers rsmat.ts L92 false branch: swtch.name !== 'maintenance' → create_element not called
+    const mat = makeMat();
+    // Only a non-maintenance element in config → loop iterates but condition is false
+    mat.config.elements = {
+      other: { name: "other", type: "click-image", css: { left: "0%" } },
+    };
+    mat.entities = {
+      maintenance: { entity_id: "sensor.maint" },
+      position: { entity_id: "sensor.pos" },
+    };
+    mat._hass = makeHass_B({
+      "sensor.maint": makeState_B("on", "sensor.maint"),
+      "sensor.pos": makeState_B("left", "sensor.pos"),
+    });
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+    const createSpy = vi.spyOn(MyElement, "create_element");
+
+    const result = mat._render_disabled("");
+    expect(result.substyle).toContain("scaleX(-1)");
+    // No 'maintenance' element in config → create_element not called by the rebuild loop
+    expect(createSpy).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
   });
 
   it("L78: maintenance, position=right → invert_position=false, substyle unchanged", () => {
