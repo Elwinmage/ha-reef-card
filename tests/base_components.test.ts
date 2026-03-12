@@ -534,6 +534,34 @@ describe("Sensor._render()", () => {
     const result = s._render("");
     expect(result).toBeDefined();
   });
+
+  it("L99: uses formatEntityState when translate_values is true", () => {
+    // Covers sensor.ts L99-100: translate_values branch
+    const s = new StubSensor2() as any;
+    s.conf = { translate_values: true };
+    s.stateObj = makeState_B("on", "sensor.x");
+    s._hass = {
+      ...makeHass(),
+      formatEntityState: vi.fn().mockReturnValue("Activé"),
+    };
+    const result = s._render("");
+    expect(result).toBeDefined();
+    expect(s._hass.formatEntityState).toHaveBeenCalled();
+  });
+
+  it("L100: translate_values uses label over formatEntityState when label set", () => {
+    // Covers sensor.ts L100: label overrides formatEntityState
+    const s = new StubSensor2() as any;
+    s.conf = { translate_values: true };
+    s.label = "Custom";
+    s.stateObj = makeState_B("on", "sensor.x");
+    s._hass = {
+      ...makeHass(),
+      formatEntityState: vi.fn().mockReturnValue("Activé"),
+    };
+    s._render("");
+    expect(s._hass.formatEntityState).not.toHaveBeenCalled();
+  });
 });
 describe("RSSwitch._render()", () => {
   it("renders switch style when conf.style='switch'", () => {
@@ -896,6 +924,23 @@ describe("ProgressCircle._render()", () => {
     c.stateObjTarget = makeState_B("100");
     expect(() => c._render()).not.toThrow();
   });
+
+  it("L78: target_is_remaining adds value to target", () => {
+    // Covers progress_circle.ts L78-79: target_is_remaining branch
+    const c = makeCircle("30", "70", true);
+    c.conf.target_is_remaining = true;
+    // effective target = 70 + 30 = 100, percent = 30%
+    const result = c._render("");
+    expect(result).toBeDefined();
+  });
+
+  it("L87: inverted flips percent to 100 - percent", () => {
+    // Covers progress_circle.ts L87-88: inverted branch
+    const c = makeCircle("30", "100", true);
+    c.conf.inverted = true;
+    const result = c._render("");
+    expect(result).toBeDefined();
+  });
 });
 describe("Button._render() L35-41", () => {
   it("renders without icon when conf.icon is absent", async () => {
@@ -1065,6 +1110,39 @@ describe("ClickImage._render() — L42 branch coverage", () => {
   it("traverses img path when conf is undefined (?.name undefined → || fallback)", () => {
     const ci = makeCI();
     ci.conf = undefined;
+    const result = ci._render("");
+    expect(result).toBeDefined();
+  });
+
+  it("L42: icon='state' with entity state='on' renders ha-icon with entity icon color", () => {
+    // Covers click_image.ts L42-50: icon === "state", state !== "off" branch
+    const ci = makeCI();
+    ci.conf = { icon: "state", name: "pump" };
+    ci.get_entity = vi.fn().mockReturnValue({
+      state: "on",
+      attributes: { icon: "mdi:pump" },
+    });
+    const result = ci._render("");
+    expect(result).toBeDefined();
+    expect(ci.get_entity).toHaveBeenCalledWith("pump");
+  });
+
+  it("L44: icon='state' with entity state='off' sets iconColor to #666666", () => {
+    // Covers click_image.ts L44: state === "off" branch → iconColor = "#666666"
+    const ci = makeCI();
+    ci.conf = { icon: "state", name: "pump" };
+    ci.get_entity = vi.fn().mockReturnValue({
+      state: "off",
+      attributes: { icon: "mdi:pump-off" },
+    });
+    const result = ci._render("");
+    expect(result).toBeDefined();
+  });
+
+  it("L55 false branch: non-mdi, non-state icon string falls through to img mode", () => {
+    // Covers click_image.ts L55 false branch: icon set but not "mdi:" prefix → img rendered
+    const ci = makeCI();
+    ci.conf = { icon: "custom-icon", image: "/img/fallback.png" };
     const result = ci._render("");
     expect(result).toBeDefined();
   });

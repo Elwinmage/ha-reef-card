@@ -535,7 +535,7 @@ export const config = {
       name: "mode",
       type: "click-image",
       disabled_if:
-        "${state}==='auto' ||  ${state}==='end_of_roll' ||  ${state}==='maintenance'",
+        "${state}==='auto' ||  ${state}==='end_of_roll' ||  ${state}==='maintenance' || ${state}==='off'",
       icon: "mdi:alert-decagram",
       icon_color: "rgb(197,90,91)",
       class: "blink-icon",

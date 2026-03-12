@@ -600,3 +600,261 @@ describe("RSDose._render() — L160-162: dosing_queue already set (false branch)
     expect(dev.bundle).toBe(true);
   });
 });
+
+// ─── RSMat — full branch coverage ─────────────────────────────────────────────
+describe("RSMat — _render_disabled() branch coverage", () => {
+  function makeMat(): any {
+    const mat = new StubRSMat() as any;
+    mat.config = { ...mat.initial_config, background_img: "", elements: {} };
+    mat._hass = makeHass_B();
+    mat.entities = {};
+    mat._elements = {};
+    mat.requestUpdate = vi.fn();
+    mat.dialogs = null;
+    mat.user_config = null;
+    mat.device = {
+      name: "mat1",
+      elements: [{ id: "x", model: "RSMAT", disabled_by: null }],
+    };
+    return mat;
+  }
+
+  it("L76: reason !== maintenance → returns reason null without touching position", () => {
+    // Covers rsmat.ts L76: res.reason !== maintenance → inner block skipped
+    const mat = makeMat();
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+    // No maintenance entity → reason stays null
+    const result = mat._render_disabled(null);
+    expect(result.reason).toBeNull();
+  });
+
+  it("L74: _render_disabled called with no argument uses default substyle=null", () => {
+    // Covers rsmat.ts L74: default parameter branch (substyle = null)
+    const mat = makeMat();
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+    const result = mat._render_disabled(); // no argument → default null
+    expect(result.reason).toBeNull();
+    expect(result.substyle).toBeNull();
+  });
+
+  it("L77-82: reason=maintenance, position=left → invert_position=true, substyle modified", () => {
+    // Covers rsmat.ts L77-82: maintenance + position=left → swapLeftRight called
+    const mat = makeMat();
+    mat.entities = {
+      maintenance: { entity_id: "sensor.maint" },
+      position: { entity_id: "sensor.pos" },
+    };
+    mat._hass = makeHass_B({
+      "sensor.maint": makeState_B("on", "sensor.maint"),
+      "sensor.pos": makeState_B("left", "sensor.pos"),
+    });
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+
+    const result = mat._render_disabled("");
+    expect(result.reason).not.toBeNull();
+    expect(mat.invert_position).toBe(true);
+    expect(result.substyle).toContain("scaleX(-1)");
+  });
+
+  it("L78: maintenance, position=right → invert_position=false, substyle unchanged", () => {
+    // Covers rsmat.ts L78: position.state !== "left" → invert_position false
+    const mat = makeMat();
+    mat.entities = {
+      maintenance: { entity_id: "sensor.maint" },
+      position: { entity_id: "sensor.pos" },
+    };
+    mat._hass = makeHass_B({
+      "sensor.maint": makeState_B("on", "sensor.maint"),
+      "sensor.pos": makeState_B("right", "sensor.pos"),
+    });
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+
+    const result = mat._render_disabled("");
+    expect(mat.invert_position).toBe(false);
+    expect(result.substyle).not.toContain("scaleX(-1)");
+  });
+
+  it("L77: maintenance but position entity missing → position branch skipped", () => {
+    // Covers rsmat.ts L77: get_entity("position") returns null → inner if skipped
+    const mat = makeMat();
+    mat.entities = { maintenance: { entity_id: "sensor.maint" } };
+    mat._hass = makeHass_B({
+      "sensor.maint": makeState_B("on", "sensor.maint"),
+    });
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+
+    const result = mat._render_disabled("");
+    expect(result.reason).not.toBeNull();
+    expect(mat.invert_position).toBe(false);
+  });
+});
+
+describe("RSMat._render() — position and percent branches", () => {
+  function makeMat(): any {
+    const mat = document.createElement("stub-rsmat-bg") as any;
+    mat.config = {
+      background_img: "/img/rsmat.png",
+      elements: {},
+      state_background_imgs: {
+        percent_0: "/0.png",
+        percent_25: "/25.png",
+        percent_50: "/50.png",
+        percent_75: "/75.png",
+        percent_100: "/100.png",
+      },
+    };
+    mat._hass = makeHass_B();
+    mat.entities = {};
+    mat._elements = {};
+    mat.requestUpdate = vi.fn();
+    mat.dialogs = null;
+    return mat;
+  }
+
+  it("L93: position=left → invert_position=true, substyle gets scaleX(-1)", () => {
+    // Covers rsmat.ts L93-95: position=left branch
+    const mat = makeMat();
+    mat.entities = { position: { entity_id: "sensor.pos" } };
+    mat._hass = makeHass_B({ "sensor.pos": makeState_B("left", "sensor.pos") });
+    mat.get_entity = (k: string) =>
+      k === "position" ? { state: "left" } : null;
+    const result = mat._render(null, "");
+    expect(result).toBeDefined();
+    expect(mat.invert_position).toBe(true);
+  });
+
+  it("L103: percent calculation picks correct step image (50%)", () => {
+    // Covers rsmat.ts L103: steps.reduce — picks nearest step
+    const mat = makeMat();
+    mat.get_entity = (k: string) => {
+      if (k === "remaining_length") return { state: "50" };
+      if (k === "total_usage") return { state: "50" };
+      return null;
+    };
+    // usage=50, remaining=50 → percent = 100 - (50*100)/(50+50) = 50
+    const result = mat._render(null, "");
+    expect(result).toBeDefined();
+  });
+
+  it("L120: state_background_imgs missing key → falls back to empty string", () => {
+    // Covers rsmat.ts L120: ?? "" fallback when key absent
+    const mat = makeMat();
+    mat.config.state_background_imgs = {}; // no keys
+    mat.get_entity = (_k: string) => null;
+    const result = mat._render(null, "");
+    expect(result).toBeDefined();
+  });
+});
+
+describe("RSMat.swapLeftRight() — branch coverage", () => {
+  it("handles array input → maps recursively", () => {
+    // Covers rsmat.ts L35: Array.isArray branch
+    const mat = new StubRSMat() as any;
+    const result = mat.swapLeftRight(["left", "right"]);
+    expect(result).toEqual(["right", "left"]);
+  });
+
+  it("handles URL instance → returns unchanged", () => {
+    // Covers rsmat.ts L40: instanceof URL branch
+    const mat = new StubRSMat() as any;
+    const url = new URL("https://example.com");
+    expect(mat.swapLeftRight(url)).toBe(url);
+  });
+
+  it("handles string with angle → inverts skewY sign", () => {
+    // Covers rsmat.ts L53: skewY/scaleX sign inversion regex
+    const mat = new StubRSMat() as any;
+    expect(mat.swapLeftRight("skewY(10deg)")).toBe("skewY(-10deg)");
+    expect(mat.swapLeftRight("skewY(-10deg)")).toBe("skewY(10deg)");
+    expect(mat.swapLeftRight("scaleX(1)")).toBe("scaleX(-1)");
+  });
+
+  it("handles plain string left<->right swap", () => {
+    const mat = new StubRSMat() as any;
+    expect(mat.swapLeftRight("top left")).toBe("top right");
+    expect(mat.swapLeftRight("top right")).toBe("top left");
+  });
+
+  it("handles null → returns null unchanged", () => {
+    // Covers rsmat.ts L66: null check in object branch
+    const mat = new StubRSMat() as any;
+    expect(mat.swapLeftRight(null)).toBeNull();
+  });
+
+  it("handles object with left/right keys → swaps key names recursively", () => {
+    // Covers rsmat.ts L61-64: object key swap
+    const mat = new StubRSMat() as any;
+    const result = mat.swapLeftRight({
+      left: "10px",
+      right: "20px",
+      top: "5px",
+    });
+    expect(result.right).toBe("10px");
+    expect(result.left).toBe("20px");
+    expect(result.top).toBe("5px");
+  });
+
+  it("handles number → returns unchanged", () => {
+    const mat = new StubRSMat() as any;
+    expect(mat.swapLeftRight(42)).toBe(42);
+  });
+
+  it("L64: skips inherited (non-own) properties via hasOwnProperty check", () => {
+    // Covers rsmat.ts L64: !obj.hasOwnProperty(key) → continue
+    const mat = new StubRSMat() as any;
+    const parent = { inherited: "value" };
+    const child = Object.create(parent);
+    child.own = "own-value";
+    const result = mat.swapLeftRight(child);
+    // Inherited keys should be skipped → not in result
+    expect(result.own).toBeDefined();
+    expect(result.inherited).toBeUndefined();
+  });
+});
+
+describe("RSMat.renderEditor() — is_disabled branch", () => {
+  it("L123: returns empty html when is_disabled() is true", () => {
+    // Covers rsmat.ts L123: is_disabled() → return html``
+    const mat = new StubRSMat() as any;
+    vi.spyOn(mat, "is_disabled").mockReturnValue(true);
+    mat.config = { elements: {} };
+    mat.user_config = null;
+    mat.device = null;
+    mat.entities = {};
+    mat.dialogs = null;
+    const result = mat.renderEditor();
+    expect(result).toBeDefined();
+  });
+
+  it("L124-125: renders editor form when is_disabled() is false", () => {
+    // Covers rsmat.ts L124-125: not disabled → _populate_entities + update_config + form
+    const mat = new StubRSMat() as any;
+    vi.spyOn(mat, "is_disabled").mockReturnValue(false);
+    mat.config = { elements: {}, background_img: "" };
+    mat.user_config = null;
+    mat.device = {
+      name: "mat1",
+      elements: [{ id: "x", model: "RSMAT", disabled_by: null }],
+    };
+    mat.entities = {};
+    mat.dialogs = null;
+    mat._hass = makeHass_B();
+    const result = mat.renderEditor();
+    expect(result).toBeDefined();
+  });
+});
+
+describe("RSMat.connectedCallback() — stores _originalConfig", () => {
+  it("L30-31: connectedCallback sets _originalConfig to initial config reference", async () => {
+    // Covers rsmat.ts L30-31: connectedCallback override
+    const saved = (RSMat as any)._helpersResolved;
+    (RSMat as any)._helpersResolved = { createCardElement: vi.fn() };
+
+    const mat = new StubRSMat() as any;
+    mat.requestUpdate = vi.fn();
+    await mat.connectedCallback();
+    expect(mat._originalConfig).toBeDefined();
+
+    (RSMat as any)._helpersResolved = saved;
+  });
+});

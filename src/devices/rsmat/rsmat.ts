@@ -73,8 +73,6 @@ export class RSMat extends RSDevice {
 
   override _render_disabled(substyle = null) {
     const res = super._render_disabled(substyle);
-    // Device is fully operational — propagate null
-    if (res === null) return null;
     if (res.reason === i18n._("maintenance")) {
       const position = this.get_entity("position");
       if (position) {

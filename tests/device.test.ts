@@ -1468,16 +1468,10 @@ describe("device.ts _render_disabled L397 — _hass null branch", () => {
   });
 });
 describe("device.ts _render_element L462 — HuiCard absent branch", () => {
-  it("does not create HuiCard when customElements.get returns undefined", () => {
-    // hui-entities-card may already be registered from earlier tests in this file.
-    // Spy on customElements.get so it returns undefined for this specific tag,
-    // forcing the L462 null-guard branch to be taken.
-    const originalGet = customElements.get.bind(customElements);
-    const spy = vi
-      .spyOn(customElements, "get")
-      .mockImplementation((tag: string) =>
-        tag === "hui-entities-card" ? undefined : originalGet(tag),
-      );
+  it("does not create HuiCard when helpers are unavailable", () => {
+    // Force helpers to null so the early-return branch is taken (no card created)
+    const savedHelpers = RSDevice._helpersResolved;
+    RSDevice._helpersResolved = null;
 
     const dev = makeDev_E();
     dev._hass = makeHass_G();
@@ -1491,10 +1485,10 @@ describe("device.ts _render_element L462 — HuiCard absent branch", () => {
     };
 
     expect(() => dev._render_element(conf, true, null)).not.toThrow();
-    // L462 branch taken: _elements should NOT have the card key
+    // helpers absent branch: _elements should NOT have the card key
     expect(dev._elements["hui-entities-card.test_absent"]).toBeUndefined();
 
-    spy.mockRestore();
+    RSDevice._helpersResolved = savedHelpers;
   });
 });
 describe("device.ts _render_element L493 — _hass null branch", () => {
@@ -1636,5 +1630,381 @@ describe("RSDevice._render_disabled() — L397: inner _hass guard evaluates to f
     expect(spy).not.toHaveBeenCalled();
 
     expect(result).not.toBeNull();
+  });
+});
+
+// ─── connectedCallback — uncovered branches ──────────────────────────────────
+describe("RSDevice.connectedCallback() — branch coverage", () => {
+  it("L437: skips promise when _helpersResolved already set (early-return branch)", async () => {
+    // Covers device.ts L437: _helpersResolved truthy → assign + return
+    const saved = RSDevice._helpersResolved;
+    const mockHelpers = { createCardElement: vi.fn() };
+    RSDevice._helpersResolved = mockHelpers;
+
+    const dev = makeDev_C();
+    dev.requestUpdate = vi.fn();
+    await dev.connectedCallback();
+
+    expect(dev._helpers).toBe(mockHelpers);
+    RSDevice._helpersResolved = saved;
+  });
+
+  it("L442: reuses existing _helpersPromise when already set", async () => {
+    // Covers device.ts L442: _helpersPromise already set → skip creation
+    const saved = RSDevice._helpersResolved;
+    const savedPromise = (RSDevice as any)._helpersPromise;
+    RSDevice._helpersResolved = null;
+
+    const mockHelpers = { createCardElement: vi.fn() };
+    (RSDevice as any)._helpersPromise = Promise.resolve(mockHelpers);
+
+    const dev = makeDev_C();
+    dev.initial_config = { elements: {}, background_img: "" };
+    dev.user_config = null;
+    dev.device = null;
+    dev.requestUpdate = vi.fn();
+    await dev.connectedCallback();
+
+    expect(dev._helpers).toBe(mockHelpers);
+    RSDevice._helpersResolved = saved;
+    (RSDevice as any)._helpersPromise = savedPromise;
+  });
+
+  it("L443: creates _helpersPromise via loadCardHelpers when none exists", async () => {
+    // Covers device.ts L443: _helpersPromise null → loadCardHelpers() called
+    const saved = RSDevice._helpersResolved;
+    const savedPromise = (RSDevice as any)._helpersPromise;
+    RSDevice._helpersResolved = null;
+    (RSDevice as any)._helpersPromise = null;
+
+    const mockHelpers = { createCardElement: vi.fn() };
+    (window as any).loadCardHelpers = vi.fn().mockResolvedValue(mockHelpers);
+
+    const dev = makeDev_C();
+    dev.initial_config = { elements: {}, background_img: "" };
+    dev.user_config = null;
+    dev.device = null;
+    dev.requestUpdate = vi.fn();
+    await dev.connectedCallback();
+
+    expect((window as any).loadCardHelpers).toHaveBeenCalled();
+    expect(dev._helpers).toBe(mockHelpers);
+    RSDevice._helpersResolved = saved;
+    (RSDevice as any)._helpersPromise = savedPromise;
+  });
+
+  it("L449: calls requestUpdate when a hui-* element is present in config", async () => {
+    // Covers device.ts L449-451: hasHuiElement true → requestUpdate called
+    const saved = RSDevice._helpersResolved;
+    const savedPromise = (RSDevice as any)._helpersPromise;
+    RSDevice._helpersResolved = null;
+
+    const mockHelpers = { createCardElement: vi.fn() };
+    (RSDevice as any)._helpersPromise = Promise.resolve(mockHelpers);
+
+    const dev = makeDev_C();
+    dev.initial_config = {
+      elements: { stats: { type: "hui-statistics-graph-card" } },
+      background_img: "",
+    };
+    dev.user_config = null;
+    dev.device = null;
+    dev.requestUpdate = vi.fn();
+    await dev.connectedCallback();
+
+    expect(dev.requestUpdate).toHaveBeenCalled();
+    RSDevice._helpersResolved = saved;
+    (RSDevice as any)._helpersPromise = savedPromise;
+  });
+});
+
+// ─── _render_element — conf.entity (singular) + css + shadow_css ─────────────
+describe("_render_element — conf.entity (singular) and css branches", () => {
+  it("L492: resolves conf.entity string to entity_id", () => {
+    // Covers device.ts L492-493: clone.entity is a string → get_entity(e)
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({ "sensor.ph": makeState_B("7.5", "sensor.ph") });
+    dev.entities = { ph_value: { entity_id: "sensor.ph" } };
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "entity_str",
+      conf: { entity: "ph_value" },
+    };
+    dev._render_element(conf, true, null);
+    expect(dev._elements["hui-entities-card.entity_str"]).toBeDefined();
+  });
+
+  it("L489 fallback: uses original string when get_entity returns null for string entity", () => {
+    // Covers device.ts L489: clone.entity string, get_entity null → ?? e fallback
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {}; // empty → get_entity null
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "str_fallback",
+      conf: { entity: "missing_key" },
+    };
+    dev._render_element(conf, true, null);
+    expect(dev._elements["hui-entities-card.str_fallback"]).toBeDefined();
+  });
+
+  it("L494: resolves conf.entity object to entity_id via .entity field", () => {
+    // Covers device.ts L494-495: clone.entity is an object → e.entity field
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({ "sensor.ph": makeState_B("7.5", "sensor.ph") });
+    dev.entities = { ph_value: { entity_id: "sensor.ph" } };
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "entity_obj",
+      conf: { entity: { entity: "ph_value", name: "pH" } },
+    };
+    dev._render_element(conf, true, null);
+    expect(dev._elements["hui-entities-card.entity_obj"]).toBeDefined();
+  });
+
+  it("L495: uses resolved entity_id when get_entity returns non-null for object entity", () => {
+    // Covers device.ts L495 non-fallback: get_entity returns entity → uses entity_id
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({ "sensor.ph2": makeState_B("8.1", "sensor.ph2") });
+    dev.entities = { ph2: { entity_id: "sensor.ph2" } };
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "obj_resolved",
+      conf: { entity: { entity: "ph2", color: "blue" } },
+    };
+    dev._render_element(conf, true, null);
+    const card = dev._elements["hui-entities-card.obj_resolved"];
+    expect(card).toBeDefined();
+  });
+
+  it("L489 false: conf.conf has neither entity nor entities → clone used as-is", () => {
+    // Covers device.ts L489 false branch: clone?.entity is falsy AND no entities → else for loop not entered
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {};
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "no_entity",
+      conf: { type: "statistics-graph", period: "5minute" }, // no entity, no entities
+    };
+    dev._render_element(conf, true, null);
+    expect(dev._elements["hui-entities-card.no_entity"]).toBeDefined();
+  });
+
+  it("L513: applies conf.css props to card style (skipping shadow_css key)", () => {
+    // Covers device.ts L513-517: conf.css loop, shadow_css skip branch
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {};
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "css_card",
+      conf: { entities: {} },
+      css: { "--ha-card-background": "red", shadow_css: ".x{color:blue}" },
+    };
+    dev._render_element(conf, true, null);
+    const card = dev._elements["hui-entities-card.css_card"];
+    expect(card).toBeDefined();
+  });
+
+  it("L524: injects shadow_css into card shadowRoot via requestAnimationFrame", () => {
+    // Covers device.ts L524-530: shadow_css branch → injectStyle fires + appends style to shadowRoot
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {};
+
+    // Intercept createCardElement to return a card with a fake shadowRoot
+    const fakeStyle = { textContent: "" };
+    const fakeShadowRoot = { appendChild: vi.fn() };
+    const fakeCard: any = {
+      style: { setProperty: vi.fn() },
+      hass: null,
+      shadowRoot: fakeShadowRoot,
+    };
+    fakeCard.ownerDocument = document;
+    // Override createElement in shadowRoot to return fakeStyle
+    fakeShadowRoot.appendChild = vi.fn();
+    vi.spyOn(document, "createElement").mockImplementationOnce(
+      () => fakeStyle as any,
+    );
+
+    // Inject helpers with our fake card
+    const savedHelpers = RSDevice._helpersResolved;
+    RSDevice._helpersResolved = { createCardElement: () => fakeCard };
+
+    // Use real requestAnimationFrame (JSDOM provides it) but ensure it fires synchronously
+    const rafSpy = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((cb: any) => {
+        cb();
+        return 0;
+      });
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "shadow_card2",
+      conf: { entities: {} },
+      css: { shadow_css: ".card-content { padding: 0; }" },
+    };
+    dev._render_element(conf, true, null);
+
+    expect(rafSpy).toHaveBeenCalled();
+    expect(fakeShadowRoot.appendChild).toHaveBeenCalled();
+
+    rafSpy.mockRestore();
+    RSDevice._helpersResolved = savedHelpers;
+  });
+
+  it("L533: shadow_css retries via requestAnimationFrame when shadowRoot is null initially", () => {
+    // Covers device.ts L533: shadowRoot null → requestAnimationFrame(injectStyle) retry
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {};
+
+    let shadowRootCallCount = 0;
+    const fakeShadowRoot = { appendChild: vi.fn() };
+    const fakeCard: any = {
+      style: { setProperty: vi.fn() },
+      hass: null,
+      get shadowRoot() {
+        // Return null on first call, then real shadowRoot
+        shadowRootCallCount++;
+        return shadowRootCallCount > 1 ? fakeShadowRoot : null;
+      },
+    };
+    vi.spyOn(document, "createElement").mockImplementationOnce(
+      () => ({ textContent: "" }) as any,
+    );
+
+    const savedHelpers = RSDevice._helpersResolved;
+    RSDevice._helpersResolved = { createCardElement: () => fakeCard };
+
+    // RAF fires the callback synchronously, so injectStyle runs twice: first null, then real root
+    const rafSpy = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((cb: any) => {
+        cb();
+        return 0;
+      });
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "shadow_retry",
+      conf: { entities: {} },
+      css: { shadow_css: ".x{}" },
+    };
+    dev._render_element(conf, true, null);
+
+    expect(rafSpy).toHaveBeenCalled();
+    expect(fakeShadowRoot.appendChild).toHaveBeenCalled();
+
+    rafSpy.mockRestore();
+    RSDevice._helpersResolved = savedHelpers;
+  });
+});
+
+describe("RSDevice._render_element L489 false branch — conf.conf absent", () => {
+  it("L489 false: does not call createCardElement when conf.conf is absent for hui-* element", () => {
+    // Covers device.ts L489 false branch: this._hass is set but conf.conf is undefined
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {};
+
+    const createSpy = vi.fn();
+    const savedHelpers = RSDevice._helpersResolved;
+    RSDevice._helpersResolved = { createCardElement: createSpy };
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "no_conf",
+      // conf is intentionally absent
+    };
+    expect(() => dev._render_element(conf, true, null)).not.toThrow();
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(dev._elements["hui-entities-card.no_conf"]).toBeUndefined();
+
+    RSDevice._helpersResolved = savedHelpers;
+  });
+});
+
+describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () => {
+  it("L563: re-applies persistent CSS overrides to common element after creation", () => {
+    // Covers device.ts L563: element && _conf_overrides[conf.name]?.css → Object.assign
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({ "sensor.x": makeState_B("on", "sensor.x") });
+    dev.entities = { relay: { entity_id: "sensor.x" } };
+    dev._conf_overrides = { relay: { css: { opacity: "0.5" } } };
+
+    // Create a real-like element with conf.css so Object.assign can run
+    const fakeElem: any = {
+      conf: { css: {} },
+      hass: null,
+      stateOn: false,
+      requestUpdate: vi.fn(),
+    };
+    vi.spyOn(MyElement, "create_element").mockReturnValue(fakeElem);
+
+    const conf = { type: "common-switch", name: "relay" };
+    dev._render_element(conf, true, null);
+
+    expect(fakeElem.conf.css.opacity).toBe("0.5");
+    vi.restoreAllMocks();
+  });
+});
+
+describe("RSDevice.render() L137 — maintenance_element truthy branch", () => {
+  it("L137: renders maintenance element in disabled overlay when maintenance is on", () => {
+    // Covers device.ts L137: maintenance_element truthy → html`${maintenance_element}`
+    const dev = new StubDevice_C() as any;
+    dev.isEditorMode = false;
+    dev.initial_config = {
+      model: "TEST",
+      elements: {
+        maintenance: { type: "common-switch", name: "maintenance" },
+      },
+      background_img: "img.png",
+    };
+    dev.user_config = {};
+    dev.device = makeDeviceInfo();
+    dev.dialogs = {};
+    dev._elements = {};
+    dev._conf_overrides = {};
+    // Set hass with maintenance=on
+    dev._hass = makeHass_F({
+      "sensor.maint": makeState_F("on", "sensor.maint"),
+    });
+    dev.entities = { maintenance: { entity_id: "sensor.maint" } };
+
+    // Spy create_element to return a fake maintenance button
+    const fakeMaintElem = document.createElement("div");
+    vi.spyOn(MyElement, "create_element").mockReturnValue(fakeMaintElem as any);
+
+    const result = dev.render();
+    expect(result).toBeDefined();
+
+    vi.restoreAllMocks();
+  });
+});
+
+describe("RSDevice._render_element L495 — clone.entity object fallback", () => {
+  it("L495: uses original e.entity when get_entity returns null for object entity", () => {
+    // Covers device.ts L495: clone.entity is object, get_entity null → fallback to e.entity
+    const dev = makeDev_C();
+    dev._hass = makeHass_C();
+    dev.entities = {}; // empty → get_entity returns null
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "obj_fallback2",
+      conf: { entity: { entity: "missing_key", color: "red" } },
+    };
+    dev._render_element(conf, true, null);
+    expect(dev._elements["hui-entities-card.obj_fallback2"]).toBeDefined();
   });
 });

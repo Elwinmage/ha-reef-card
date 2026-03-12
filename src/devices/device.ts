@@ -27,7 +27,7 @@ export class RSDevice extends LitElement {
   // This avoids a double render on init (first natural Lit render, then
   // requestUpdate() after the async await).
   private static _helpersPromise: Promise<any> | null = null;
-  private static _helpersResolved: any = null;
+  static _helpersResolved: any = null; // non-private so tests can inject a mock
 
   @property({
     type: Boolean,
@@ -122,7 +122,7 @@ export class RSDevice extends LitElement {
     }
     this.update_config();
     this.to_render = false;
-    console.debug("Render ", this.config.model, this.device.name);
+    console.debug("Render ", this.config.model, this.device?.name);
 
     // get style and substyle
     let style = html``;
@@ -134,28 +134,9 @@ export class RSDevice extends LitElement {
 
     const disabled = this._render_disabled(substyle);
     if (disabled.reason !== null) {
-      // if in maintenance mode, display maintenance switch
-      let maintenance: TemplateResult = html``;
-      if (disabled.reason === i18n._("maintenance")) {
-        const elements: any[] = [];
-        for (const i in this.config.elements) {
-          elements.push(this.config.elements[i]);
-        }
-
-        for (const swtch of elements) {
-          if (swtch.name === "maintenance") {
-            if (this._hass) {
-              const maintenance_button = MyElement.create_element(
-                this._hass,
-                swtch,
-                this,
-              );
-              maintenance = html`${maintenance_button}`;
-            }
-            break;
-          }
-        }
-      }
+      const maintenance = disabled.maintenance_element
+        ? html`${disabled.maintenance_element}`
+        : html``;
 
       return html`
         <div class="device_bg">
@@ -407,7 +388,7 @@ export class RSDevice extends LitElement {
   /*
    * Special render if the device is disabled or in maintenance mode in HA
    */
-  _render_disabled(substyle = null): string {
+  _render_disabled(substyle = null): any {
     let reason: string | null = null;
 
     if (this.is_disabled()) {
@@ -419,7 +400,28 @@ export class RSDevice extends LitElement {
     ) {
       reason = i18n._("maintenance");
     }
-    return { reason: reason, substyle: substyle };
+    // If in maintenance mode, find and build the maintenance toggle element
+    let maintenance_element: any = null;
+    if (reason === i18n._("maintenance") && this.config?.elements) {
+      for (const i in this.config.elements) {
+        const swtch = this.config.elements[i];
+        if (swtch.name === "maintenance" && this._hass) {
+          maintenance_element = MyElement.create_element(
+            this._hass,
+            swtch,
+            this,
+          );
+          break;
+        }
+      }
+    }
+
+    // Always return an object — caller checks .reason !== null for overlay
+    return {
+      reason: reason,
+      substyle: substyle,
+      maintenance_element: maintenance_element,
+    };
   }
 
   /*
@@ -485,7 +487,9 @@ export class RSDevice extends LitElement {
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()
     // Requires _helpers (loaded async), skip until available
     if (conf.type.startsWith("hui-")) {
-      if (!this._helpers) {
+      // Use instance _helpers or fallback to the shared resolved static
+      const helpers = this._helpers ?? RSDevice._helpersResolved;
+      if (!helpers) {
         return html``;
       }
       const key = conf.type + "." + (conf.name || "device_states");
@@ -511,7 +515,7 @@ export class RSDevice extends LitElement {
               }
             }
           }
-          const card = this._helpers.createCardElement(clone);
+          const card = helpers.createCardElement(clone);
 
           //Treat CSS on host element
           if (conf.css) {
