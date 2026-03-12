@@ -95,11 +95,10 @@ export class Sensor extends MyElement {
 
     if (this.stateObj) {
       value = this.label || this.stateObj.state;
-      unit =
-        this.conf.unit || this.stateObj.attributes?.unit_of_measurement || "";
-
-      if (this.conf.prefix) {
-        value = this.conf.prefix + value;
+      if (this.conf.unit) {
+        unit = this.evaluate(this.conf.unit);
+      } else {
+        unit = this.stateObj.attributes?.unit_of_measurement || "";
       }
 
       if (this.conf.force_integer && typeof value === "string") {
@@ -108,12 +107,14 @@ export class Sensor extends MyElement {
           value = Math.round(numValue).toString();
         }
       }
+      if (this.conf.prefix) {
+        value = this.evaluate(this.conf.prefix).replaceAll('"', "") + value;
+      }
     }
 
-    return html`
-      <div class="sensor ${sclass}" style="${_style ?? ""}; ">
-        ${value} ${unit ? html`<span class="unit">${unit}</span>` : ""}
-      </div>
-    `;
+    return html`${value}
+    ${unit
+      ? html`<span style=${this.get_style("unit_css")}>${unit}</span>`
+      : ""}`;
   }
 }

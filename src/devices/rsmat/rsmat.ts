@@ -48,7 +48,7 @@ export class RSMat extends RSDevice {
 
       // Invert angle signs only for skewY and rotate (mirror-sensitive)
       result = result.replace(
-        /(skewY|rotate[XYZ]?)\(\s*(-?)(\d+(?:\.\d+)?)(deg|rad|turn|grad)\s*\)/g,
+        /(skewY|scaleX)\(\s*(-?)(\d+(?:\.\d+)?)(deg|rad|turn|grad|)\s*\)/g,
         (_match, fn, sign, value, unit) => {
           const inverted = sign === "-" ? "" : "-";
           return `${fn}(${inverted}${value}${unit})`;

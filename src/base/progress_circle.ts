@@ -71,14 +71,21 @@ export class ProgressCircle extends SensorTarget {
     ) {
       return html`<br />`;
     }
-    const value = this.stateObj.state;
-    const target = this.stateObjTarget.state;
+    const value = parseFloat(this.stateObj.state);
+    let target = parseFloat(this.stateObjTarget.state);
+    if (this.conf?.target_is_remaining) {
+      target += value;
+    }
+
     let percent = 100;
-    if (parseFloat(value) < parseFloat(target)) {
-      percent = Math.floor(
-        (Number(this.stateObj.state) * 100) / Number(this.stateObjTarget.state),
-      );
+    if (value < target) {
+      percent = Math.floor((value * 100) / target);
     } //if
+
+    if (this.conf?.inverted) {
+      percent = 100 - percent;
+    }
+
     const _circle_class = this.conf.class;
     const _label = this.label;
 
@@ -91,6 +98,9 @@ export class ProgressCircle extends SensorTarget {
     if (fill < 0) {
       fill = 0;
     }
+    //specific colors
+    const center_color = this.conf?.colors?.center ?? "transparent";
+
     // range 0 to 565 for 200x200
     return html` <svg
       width="100%"
@@ -104,7 +114,7 @@ export class ProgressCircle extends SensorTarget {
         r="90"
         cx="100"
         cy="100"
-        fill="transparent"
+        fill="${center_color}"
         stroke="rgba(150,150,150,0.6)"
         stroke-width="16px"
       ></circle>
@@ -120,14 +130,16 @@ export class ProgressCircle extends SensorTarget {
         stroke-dasharray="565.48px"
       ></circle>
       <text
-        x="71px"
-        y="115px"
-        fill="#6bdba7"
+        x="115px"
+        y="100px"
+        fill="rgb(${this.c})"
         font-size="52px"
         font-weight="bold"
+        text-anchor="middle"
+        dominant-baseline="middle"
         style="${style} transform:rotate(90deg) translate(0px, -196px)"
       >
-        ${percent}
+        ${percent}%
       </text>
     </svg>`;
   }

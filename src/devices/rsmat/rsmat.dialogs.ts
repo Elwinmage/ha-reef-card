@@ -20,4 +20,21 @@ export const dialogs_rsmat = {
       },
     ],
   },
+  custom_advance: {
+    name: "custom_advance",
+    title_key: "${i18n._('custom_advance')}",
+    close_cross: true,
+    content: [
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "custom_advance_value", name: { type: "entity" } },
+            { entity: "advance", name: { type: "entity" } },
+          ],
+        },
+      },
+    ],
+  },
 };
