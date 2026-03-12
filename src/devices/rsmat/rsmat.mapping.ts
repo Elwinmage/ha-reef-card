@@ -1,7 +1,23 @@
+// ─── Color constants ──────────────────────────────────────────────────────────
+// Primary RSMAT brand color (red)
+const COLOR_RSMAT_RGB = "197,91,90";
+const COLOR_RSMAT_HEX = "#c55b5a";
+const COLOR_RSMAT_RGBSTR = "rgb(197,91,90)";
+
+// Error / alert color (bright red)
+const COLOR_ERROR_HEX = "#ec2330";
+
+// Neutral transparent background (used for inactive panels)
+const COLOR_NEUTRAL_0 = "rgb(150,150,150,0)";
+
+// Semi-transparent white card background
+const COLOR_WHITE_60 = "rgba(255,255,255,0.6)";
+// ──────────────────────────────────────────────────────────────────────────────
+
 export const config = {
   name: null,
   model: "RSMAT",
-  color: "197,91,90",
+  color: COLOR_RSMAT_RGB,
   background_img: new URL("../../img/RSMAT.png", import.meta.url),
   state_background_imgs: {
     percent_100: new URL("../../img/RSMAT_100_BASE.png", import.meta.url),
@@ -164,7 +180,7 @@ export const config = {
         "text-align": "center",
         "padding-left": "30px",
         "padding-right": "30px",
-        "background-color": "rgba(197,91,90,1)",
+        "background-color": COLOR_RSMAT_RGBSTR,
         transform: "skewY(12deg)",
         top: "44%",
         left: "14%",
@@ -194,7 +210,7 @@ export const config = {
         "text-align": "center",
         "padding-left": "30px",
         "padding-right": "30px",
-        "background-color": "rgba(197,91,90,1)",
+        "background-color": COLOR_RSMAT_RGBSTR,
         transform: "skewY(12deg)",
         top: "44%",
         left: "14%",
@@ -206,7 +222,7 @@ export const config = {
       type: "hui-statistics-graph-card",
       conf: {
         type: "statistics-graph",
-        entities: [{ entity: "today_usage", color: "#c55b5a" }],
+        entities: [{ entity: "today_usage", color: COLOR_RSMAT_HEX }],
         chart_type: "line",
         period: "hour",
         days_to_show: 7,
@@ -224,7 +240,7 @@ export const config = {
         width: "36%",
         height: "36%",
         "--graph-color-1": "red",
-        "--ha-card-background": "rgba(255,255,255,0.6)",
+        "--ha-card-background": COLOR_WHITE_60,
         "--ha-card-border-width": "0px",
         "--ha-card-box-shadow": "none",
         "box-shadow": "none !important",
@@ -237,7 +253,7 @@ export const config = {
       type: "hui-statistics-graph-card",
       conf: {
         type: "statistics-graph",
-        entities: [{ entity: "today_usage", color: "#c55b5a" }],
+        entities: [{ entity: "today_usage", color: COLOR_RSMAT_HEX }],
         chart_type: "line",
         period: "day",
         days_to_show: 30,
@@ -255,7 +271,7 @@ export const config = {
         width: "36%",
         height: "36%",
         "--graph-color-1": "red",
-        "--ha-card-background": "rgba(255,255,255,0.6)",
+        "--ha-card-background": COLOR_WHITE_60,
         "--ha-card-border-width": "0px",
         "--ha-card-box-shadow": "none",
         "box-shadow": "none !important",
@@ -269,7 +285,7 @@ export const config = {
       master: true,
       label: false,
       icon: true,
-      icon_color: "#ec2330",
+      icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
@@ -288,7 +304,7 @@ export const config = {
       name: "configuration",
       type: "click-image",
       icon: "mdi:cog",
-      icon_color: "#ec2330",
+      icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
@@ -309,7 +325,7 @@ export const config = {
       master: true,
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "30px",
         "padding-right": "30px",
@@ -318,7 +334,7 @@ export const config = {
         transform: "skewY(8deg)",
         top: "19%",
         left: "20%",
-        color: "#c55b5a",
+        color: COLOR_RSMAT_HEX,
         "font-weight": "bolder",
       },
     },
@@ -337,7 +353,7 @@ export const config = {
         transform: "skewY(6deg)",
         top: "6%",
         left: "38%",
-        color: "#c55b5a",
+        color: COLOR_RSMAT_HEX,
         "font-weight": "bolder",
       },
     },
@@ -348,7 +364,7 @@ export const config = {
       unit: "${i18n._('days')}",
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
@@ -367,7 +383,7 @@ export const config = {
       prefix: "${i18n._('daily_average')}  ",
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
@@ -377,7 +393,7 @@ export const config = {
         top: "32%",
         left: "21%",
         width: "19%",
-        color: "#c55b5a",
+        color: COLOR_RSMAT_HEX,
         "font-weight": "bolder",
       },
     },
@@ -392,7 +408,7 @@ export const config = {
       },
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
@@ -402,7 +418,7 @@ export const config = {
         top: "28%",
         left: "2%",
         width: "12%",
-        color: "#ec2330",
+        color: COLOR_ERROR_HEX,
         "font-weight": "bolder",
       },
     },
@@ -410,7 +426,7 @@ export const config = {
       name: "auto_advance",
       type: "click-image",
       icon: "state",
-      icon_color: "rgb(197,90,91)",
+      icon_color: COLOR_RSMAT_RGBSTR,
       master: true,
       tap_action: {
         domain: "switch",
@@ -442,7 +458,7 @@ export const config = {
         },
       ],
       css: {
-        color: "rgb(197,91,90)",
+        color: COLOR_RSMAT_RGBSTR,
         transform: "skewY(-10deg) scaleX(1) scale(1.5)",
         position: "absolute",
         top: "26.5%",
@@ -459,7 +475,7 @@ export const config = {
       },
       css: {
         position: "absolute",
-        color: "rgb(197,91,90)",
+        color: COLOR_RSMAT_RGBSTR,
         top: "28%",
         right: "18%",
         transform: "skewY(-10deg)",
@@ -470,7 +486,7 @@ export const config = {
       name: "scheduled_advance",
       type: "click-image",
       icon: "state",
-      icon_color: "rgb(197,91,90)",
+      icon_color: COLOR_RSMAT_RGBSTR,
       css: {
         flex: "0 0 auto",
         position: "absolute",
@@ -490,7 +506,7 @@ export const config = {
       translate_values: true,
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
@@ -512,7 +528,7 @@ export const config = {
       class: "blink",
       css: {
         position: "absolute",
-        "background-color": "rgb(150,150,150,0)",
+        "background-color": COLOR_NEUTRAL_0,
         "text-align": "center",
         "padding-left": "20px",
         "padding-right": "20px",
@@ -537,7 +553,7 @@ export const config = {
       disabled_if:
         "${state}==='auto' ||  ${state}==='end_of_roll' ||  ${state}==='maintenance' || ${state}==='off'",
       icon: "mdi:alert-decagram",
-      icon_color: "rgb(197,90,91)",
+      icon_color: COLOR_RSMAT_RGBSTR,
       class: "blink-icon",
       css: {
         position: "absolute",
