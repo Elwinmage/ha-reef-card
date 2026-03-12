@@ -1130,7 +1130,8 @@ describe("RSDevice._render_disabled()", () => {
       "sensor.maintenance": makeState_D("off", "sensor.maintenance"),
     });
     dev.config = { background_img: "", elements: {} };
-    expect(dev._render_disabled()).toBeNull();
+    expect(dev._render_disabled().reason).toBeNull();
+    expect(dev._render_disabled().style).toBeUndefined();
   });
 
   it("returns html when device is disabled_by='user'", () => {
@@ -1158,7 +1159,8 @@ describe("RSDevice._render_disabled()", () => {
     dev.entities = {};
     dev._hass = makeHass_E();
     dev.config = { background_img: "", elements: {} };
-    expect(dev._render_disabled()).toBeNull();
+    expect(dev._render_disabled().reason).toBeNull();
+    expect(dev._render_disabled().style).toBeUndefined();
   });
 
   it("accepts a substyle argument without throwing", () => {

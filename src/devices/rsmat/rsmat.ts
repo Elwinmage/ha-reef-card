@@ -73,34 +73,45 @@ export class RSMat extends RSDevice {
 
   override _render_disabled(substyle = null) {
     const res = super._render_disabled(substyle);
+    // Device is fully operational — propagate null
+    if (res === null) return null;
     if (res.reason === i18n._("maintenance")) {
       const position = this.get_entity("position");
-      this.invert_position = position.state === "left";
-      if (this.invert_position) {
-        substyle += ";transform:scaleX(-1)";
-        this.config = this.swapLeftRight(this.config); // swap the merged config
+      if (position) {
+        this.invert_position = position?.state === "left";
+        if (this.invert_position) {
+          substyle += ";transform:scaleX(-1)";
+          this.config = this.swapLeftRight(this.config); // swap the merged config
+        }
       }
     }
-    return { reason: res.reason, substyle: substyle };
+    return {
+      reason: res.reason,
+      substyle: substyle,
+      maintenance_element: res.maintenance_element,
+    };
   }
 
   _render(style?: any, substyle?: any) {
     //position left or right
     const position = this.get_entity("position");
-    this.invert_position = position.state === "left";
+    this.invert_position = position?.state === "left";
     if (this.invert_position) {
       substyle += ";transform:scaleX(-1)";
       this.config = this.swapLeftRight(this.config); // swap the merged config
     }
 
-    const remaining = parseInt(this.get_entity("remaining_length").state);
-    const usage = parseInt(this.get_entity("total_usage").state);
+    const remaining = parseInt(
+      this.get_entity("remaining_length")?.state ?? "0",
+    );
+    const usage = parseInt(this.get_entity("total_usage")?.state ?? "0");
     const percent = 100 - (usage * 100) / (usage + remaining);
     const steps = [0, 25, 50, 75, 100];
     const img_state = steps.reduce((prev, curr) => {
       return Math.abs(curr - percent) < Math.abs(prev - percent) ? curr : prev;
     });
-    const bg_img = this.config.state_background_imgs[`percent_${img_state}`];
+    const bg_img =
+      this.config.state_background_imgs?.[`percent_${img_state}`] ?? "";
     return html` <div class="device_bg">
       ${style}
       <img
