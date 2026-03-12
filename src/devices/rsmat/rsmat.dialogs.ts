@@ -91,4 +91,43 @@ export const dialogs_rsmat = {
       ],
     },
   },
+  end_error: {
+    name: "end_error",
+    title_key: "${i18n._('end_error')}",
+    close_cross: true,
+    content: [
+      {
+        view: "text",
+        value: "${i18n._('end_error_info')}",
+      },
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "mode", name: { type: "entity" } },
+            { entity: "last_alert_message", name: { type: "entity" } },
+            { entity: "last_message", name: { type: "entity" } },
+          ],
+        },
+      },
+    ],
+    validate: {
+      label: "${i18n._('error_corrected')}",
+      class: "dialog_button",
+      type: "common-button",
+      stateObj: null,
+      tap_action: [
+        {
+          domain: "button",
+          action: "press",
+          data: { entity_id: "delete_emergency" },
+        },
+        {
+          domain: "redsea_ui",
+          action: "exit-dialog",
+        },
+      ],
+    },
+  },
 };

@@ -112,4 +112,14 @@ export default css`
   .blink-scale > * {
     animation: blink-scale 1s ease-in-out infinite;
   }
+
+  /** Icon-only blink: only the inner icon blinks, the wrapper (background) stays still */
+  .blink-icon > * {
+    animation: blink 1s linear infinite;
+  }
+
+  /** Icon-only scale: only the inner icon scales, the wrapper (background) stays still */
+  .blink-icon-scale > * {
+    animation: blink-scale 1s ease-in-out infinite;
+  }
 `;
