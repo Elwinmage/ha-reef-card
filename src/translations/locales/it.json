@@ -62,6 +62,7 @@
   "save_schedule": "Salva programmazione",
   "schedule": "Tipo di programmazione",
   "schedule_saved": "Programmazione salvata",
+  "schedule_advance": "Avanzamento programmato",
   "select_device": "Seleziona un dispositivo",
   "set_calibration": "Imposta valore di calibrazione",
   "set_container_volume": "Volume del contenitore",

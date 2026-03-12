@@ -62,6 +62,7 @@
   "save_schedule": "Zeitplan speichern",
   "schedule": "Zeitplantyp",
   "schedule_saved": "Zeitplan gespeichert",
+  "schedule_advance": "Geplanter Vorlauf",
   "select_device": "Gerät auswählen",
   "set_calibration": "Kalibrierungswert setzen",
   "set_container_volume": "Behältervolumen",

@@ -62,6 +62,7 @@
   "save_schedule": "Guardar agendamento",
   "schedule": "Tipo de agendamento",
   "schedule_saved": "Agendamento guardado",
+  "schedule_advance": "Avanço agendado",
   "select_device": "Selecionar um dispositivo",
   "set_calibration": "Definir valor de calibração",
   "set_container_volume": "Volume do recipiente",

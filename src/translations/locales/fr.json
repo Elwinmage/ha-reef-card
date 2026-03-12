@@ -62,6 +62,7 @@
   "save_schedule": "Save schedule",
   "schedule": "Type de plannification",
   "schedule_saved": "Planning sauvegardé",
+  "schedule_advance": "Avance planifiée",
   "select_device": "Choissisez un équipement",
   "set_calibration": "Valider la valeur",
   "set_container_volume": "Volume du supplément",

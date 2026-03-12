@@ -37,4 +37,22 @@ export const dialogs_rsmat = {
       },
     ],
   },
+  schedule_advance: {
+    name: "schedule_advance",
+    title_key: "${i18n._('schedule_advance')}",
+    close_cross: true,
+    content: [
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "scheduled_advance", name: { type: "entity" } },
+            { entity: "schedule_length", name: { type: "entity" } },
+            { entity: "schedule_time", name: { type: "entity" } },
+          ],
+        },
+      },
+    ],
+  },
 };

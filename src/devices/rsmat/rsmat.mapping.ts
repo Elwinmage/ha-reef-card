@@ -467,5 +467,23 @@ export const config = {
         "font-weight": "bolder",
       },
     },
+    schedule_advance: {
+      name: "scheduled_advance",
+      type: "click-image",
+      icon: "state",
+      icon_color: "rgb(197,91,90)",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "60%",
+        left: "60%",
+        transform: "scale(3)",
+      },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "schedule_advance" },
+      },
+    },
   },
 };
