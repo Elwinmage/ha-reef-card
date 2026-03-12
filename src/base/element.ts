@@ -24,6 +24,7 @@ import { attachClickHandlers } from "../utils/click_handler";
 import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 import i18n from "../translations/myi18n.js";
 import { OFF_COLOR } from "../utils/constants";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 
@@ -33,6 +34,8 @@ import { OFF_COLOR } from "../utils/constants";
  * @extends {LitElement}
  */
 export class MyElement extends LitElement {
+  // Inject animation keyframes into every element's shadow DOM
+  static override styles = [style_animations];
   // Public reactive properties
   @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
@@ -387,9 +390,14 @@ export class MyElement extends LitElement {
 
     return html`
       <div class="${this.conf?.class || ""}" style="${this.get_style()}">
-        ${this._render(this.get_style("css"))}
+        ${this._render(this.get_style("elt_css"))}
       </div>
     `;
+    /*    return html`
+      <div class="${this.conf?.class || ""}" style="${this.get_style()}">
+        ${this._render(this.get_style("css"))}
+      </div>
+    `;*/
   }
 
   /**

@@ -4,16 +4,65 @@ export const config = {
   color: "197,91,90",
   background_img: new URL("../../img/RSMAT.png", import.meta.url),
   state_background_imgs: {
-    percent_100: new URL("../../img/RSMAT_100.png", import.meta.url),
-    percent_75: new URL("../../img/RSMAT_75.png", import.meta.url),
-    percent_50: new URL("../../img/RSMAT_50.png", import.meta.url),
-    percent_25: new URL("../../img/RSMAT_25.png", import.meta.url),
-    percent_0: new URL("../../img/RSMAT_0.png", import.meta.url),
+    percent_100: new URL("../../img/RSMAT_100_BASE.png", import.meta.url),
+    percent_75: new URL("../../img/RSMAT_75_BASE.png", import.meta.url),
+    percent_50: new URL("../../img/RSMAT_50_BASE.png", import.meta.url),
+    percent_25: new URL("../../img/RSMAT_25_BASE.png", import.meta.url),
+    percent_0: new URL("../../img/RSMAT_0_BASE.png", import.meta.url),
   },
   css: {
     width: "100%",
   },
   elements: {
+    ec_sensor: {
+      name: "is_ec_sensor_connected",
+      type: "click-image",
+      image: new URL("../../img/RSMAT_SENSOR_PLUGGED.png", import.meta.url),
+      disabled_if: "${state}==='off'",
+      css: {
+        width: "100%",
+        flex: "0 0 auto",
+        position: "absolute",
+        transform: "scaleX(1)",
+        top: "0%",
+      },
+      elt_css: {
+        width: "100%",
+      },
+    },
+    ec_sensor_disconnected: {
+      name: "is_ec_sensor_connected",
+      type: "click-image",
+      class: "blink-fast",
+      disabled_if: "${state}==='on'",
+      image: new URL("../../img/RSMAT_SENSOR_UNPLUGGED.png", import.meta.url),
+      css: {
+        width: "100%",
+        flex: "0 0 auto",
+        position: "absolute",
+        transform: "scaleX(1)",
+        top: "0%",
+      },
+      elt_css: {
+        width: "100%",
+      },
+    },
+    unclean_sensor: {
+      name: "unclean_sensor",
+      type: "click-image",
+      class: "blink-color",
+      disabled_if: "${state}==='off'",
+      icon: "mdi:liquid-spot",
+      icon_color: "rgb(128, 64, 0)",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        transform: "scale(2)",
+        top: "49%",
+        left: "67%",
+      },
+    },
+
     last_message: {
       name: "last_message",
       type: "redsea-messages",

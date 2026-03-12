@@ -23,12 +23,14 @@ import type { ProgressConfig } from "../types/index";
 import { SensorTarget } from "./sensor_target";
 
 import style_progress_circle from "./progress_circle.styles";
+import style_animations from "../utils/animations.styles";
 import { OFF_COLOR } from "../utils/constants";
 
 //----------------------------------------------------------------------------//
 
 export class ProgressCircle extends SensorTarget {
   static override styles = [
+    style_animations,
     // SensorTarget.styles is always defined as an array
     ...(SensorTarget.styles as CSSResult[]),
     // Add ProgressCircle-specific styles

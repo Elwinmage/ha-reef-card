@@ -28,6 +28,7 @@
 import { html, TemplateResult, CSSResultGroup, css } from "lit";
 import { property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
+import style_animations from "../utils/animations.styles";
 import { MyElement } from "./element";
 import { button_color } from "../utils/common";
 
@@ -37,6 +38,7 @@ import type { SensorConfig } from "../types/index";
 
 export class Sensor extends MyElement {
   static override styles: CSSResultGroup = [
+    style_animations,
     style_sensor,
     css`
       .sensor {

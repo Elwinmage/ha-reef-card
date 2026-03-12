@@ -11,10 +11,11 @@ import { html } from "lit";
 import { MyElement } from "./element";
 
 import style_click_image from "./click_image.styles";
+import style_animations from "../utils/animations.styles";
 //----------------------------------------------------------------------------//
 
 export class ClickImage extends MyElement {
-  static override styles = [style_click_image];
+  static override styles = [style_animations, style_click_image];
 
   /**
    * Constructor
@@ -32,10 +33,10 @@ export class ClickImage extends MyElement {
     const icon = this.conf?.icon || "";
     let iconColor = this.conf?.icon_color || "currentColor";
 
-    if (!_style) {
+    /*    if (!_style) {
       _style = this.get_style("css");
     }
-
+*/
     // Mode 1 : MDI Icon
     if (icon) {
       if (icon === "state") {

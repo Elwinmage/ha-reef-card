@@ -28,12 +28,14 @@ import type { ProgressConfig } from "../types/index";
 import { SensorTarget } from "./sensor_target";
 
 import style_progress_bar from "./progress_bar.styles";
+import style_animations from "../utils/animations.styles";
 import { OFF_COLOR } from "../utils/constants";
 
 //----------------------------------------------------------------------------//
 
 export class ProgressBar extends SensorTarget {
   static override styles = [
+    style_animations,
     // SensorTarget.styles is always defined as an array
     ...(SensorTarget.styles as CSSResult[]),
     // Add ProgressBar-specific styles

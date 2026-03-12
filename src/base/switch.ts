@@ -37,10 +37,11 @@ import { html } from "lit";
 import { MyElement } from "./element";
 
 import style_switch from "./switch.styles";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 export class RSSwitch extends MyElement {
-  static override styles = style_switch;
+  static override styles = [style_animations, style_switch];
 
   /**
    * Constructor

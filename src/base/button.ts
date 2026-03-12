@@ -9,10 +9,12 @@ import { html, css } from "lit";
 
 import style_button from "./button.styles";
 import { MyElement } from "./element";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 export class Button extends MyElement {
   static override styles = [
+    style_animations,
     style_button,
     css`
       .button {
