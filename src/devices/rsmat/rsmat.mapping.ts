@@ -35,6 +35,7 @@ export const config = {
       type: "click-image",
       image: new URL("../../img/RSMAT_SENSOR_PLUGGED.png", import.meta.url),
       disabled_if: "${state}==='off'",
+      master: true,
       css: {
         width: "100%",
         flex: "0 0 auto",
@@ -51,6 +52,7 @@ export const config = {
       type: "click-image",
       class: "blink-fast",
       disabled_if: "${state}==='on'",
+      master: true,
       image: new URL("../../img/RSMAT_SENSOR_UNPLUGGED.png", import.meta.url),
       css: {
         width: "100%",
@@ -460,7 +462,7 @@ export const config = {
       },
       css: {
         position: "absolute",
-        color: COLOR_RSMAT_RGBSTR,
+        color: COLOR_WHITE_60,
         "font-size": "clamp(11px, 1.4vw, 15px)",
         "white-space": "nowrap",
         top: "28%",
