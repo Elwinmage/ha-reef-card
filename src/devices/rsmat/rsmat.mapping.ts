@@ -462,7 +462,7 @@ export const config = {
       },
       css: {
         position: "absolute",
-        color: COLOR_RSMAT_RGBSTR,
+        color: COLOR_WHITE_60,
         "font-size": "clamp(11px, 1.4vw, 15px)",
         "white-space": "nowrap",
         top: "28%",
