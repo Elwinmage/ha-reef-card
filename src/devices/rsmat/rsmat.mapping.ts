@@ -35,6 +35,7 @@ export const config = {
       type: "click-image",
       image: new URL("../../img/RSMAT_SENSOR_PLUGGED.png", import.meta.url),
       disabled_if: "${state}==='off'",
+      master: true,
       css: {
         width: "100%",
         flex: "0 0 auto",
@@ -51,6 +52,7 @@ export const config = {
       type: "click-image",
       class: "blink-fast",
       disabled_if: "${state}==='on'",
+      master: true,
       image: new URL("../../img/RSMAT_SENSOR_UNPLUGGED.png", import.meta.url),
       css: {
         width: "100%",
