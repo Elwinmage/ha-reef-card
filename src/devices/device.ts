@@ -469,7 +469,12 @@ export class RSDevice extends LitElement {
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
-  _render_element(conf: any, state: boolean, put_in: string | null) {
+  _render_element(
+    conf: any,
+    state: boolean,
+    put_in: string | null,
+    declarationKey?: string,
+  ) {
     let sensor_put_in = null;
     //Element is groupped with others
     if ("put_in" in conf) {
@@ -492,7 +497,9 @@ export class RSDevice extends LitElement {
       if (!helpers) {
         return html``;
       }
-      const key = conf.type + "." + (conf.name || "device_states");
+      // Use declarationKey if available — keeps cache consistent with update_conf
+      const key =
+        declarationKey ?? conf.type + "." + (conf.name || "device_states");
       if (!(key in this._elements)) {
         if (this._hass && conf.conf) {
           // Resolve translation_key -> real entity_id, exactly like dialog.ts
@@ -555,20 +562,24 @@ export class RSDevice extends LitElement {
     }
 
     let element: MyElement | null = null;
-    if (conf.name in this._elements) {
-      element = this._elements[conf.type + "." + conf.name];
+    // Use declarationKey (unique element id in mapping) as cache key.
+    // This handles cases where multiple elements share the same type+name
+    // (e.g. ec_sensor / ec_sensor_disconnected both have name:"is_ec_sensor_connected")
+    const elementKey = declarationKey ?? conf.type + "." + conf.name;
+    if (elementKey in this._elements) {
+      element = this._elements[elementKey];
       if (element) {
         element.stateOn = state;
       }
     } else {
       if (this._hass) {
         element = MyElement.create_element(this._hass, conf, this);
-        this._elements[conf.type + "." + conf.name] = element;
+        this._elements[elementKey] = element;
       }
     }
     // Re-apply persistent CSS overrides (survive swapLeftRight config recreation)
-    if (element && this._conf_overrides[conf.name]?.css) {
-      Object.assign(element.conf.css, this._conf_overrides[conf.name].css);
+    if (element && this._conf_overrides[elementKey]?.css) {
+      Object.assign(element.conf.css, this._conf_overrides[elementKey].css);
     }
     return html`${element}`;
   }
@@ -581,10 +592,10 @@ export class RSDevice extends LitElement {
   _render_elements(state: boolean, put_in: string | null = null) {
     const elements: any[] = [];
     for (const i in this.config.elements) {
-      elements.push(this.config.elements[i]);
+      elements.push({ conf: this.config.elements[i], key: i });
     }
-    return html`${elements.map((conf) =>
-      this._render_element(conf, state, put_in),
+    return html`${elements.map(({ conf, key }) =>
+      this._render_element(conf, state, put_in, key),
     )}`;
   }
 

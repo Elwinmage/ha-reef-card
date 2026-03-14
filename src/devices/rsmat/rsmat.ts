@@ -107,7 +107,15 @@ export class RSMat extends RSDevice {
   _render(style?: any, substyle?: any) {
     //position left or right
     const position = this.get_entity("position");
-    this.invert_position = position?.state === "left";
+    const newInvert = position?.state === "left";
+
+    // If position changed, clear element cache so all elements are recreated
+    // with the new swapped CSS positions
+    if (newInvert !== this.invert_position) {
+      this._elements = {};
+    }
+    this.invert_position = newInvert;
+
     if (this.invert_position) {
       substyle += ";transform:scaleX(-1)";
       this.config = this.swapLeftRight(this.config); // swap the merged config

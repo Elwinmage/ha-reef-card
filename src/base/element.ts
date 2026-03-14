@@ -508,7 +508,8 @@ export class MyElement extends LitElement {
             for (const [elemName, elemPatch] of Object.entries(patch)) {
               if (elemName in this.device.config.elements) {
                 const elemConf = this.device.config.elements[elemName];
-                const cacheKey = elemConf.type + "." + elemName;
+                // Cache key is now declarationKey (elemName) — matches device.ts _render_element fix
+                const cacheKey = elemName;
                 const cachedElt = (this.device as any)._elements?.[cacheKey];
 
                 // Store overrides persistently so they survive swapLeftRight re-renders
