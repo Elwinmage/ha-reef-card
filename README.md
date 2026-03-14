@@ -470,7 +470,7 @@ Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/
 
 ReefMat with ha-reef-card in action:
 
-[![Watch the video](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX) 
+[![Watch the video](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
 
 The ReefMat card is divided into 7 zones:
 
@@ -483,7 +483,6 @@ The ReefMat card is divided into 7 zones:
 7. Weekly / Monthly Usage Graph
 
 <img src="doc/img/rsmat/rsmat_zones.png"/>
-
 
 The background image changes according to the roll usage status, with 5 different images:
 
@@ -528,7 +527,6 @@ The background image changes according to the roll usage status, with 5 differen
 
  <img  src="doc/img/rsmat/off_mode.png"/>
 
-
 ## Roll Information
 
 <img src="doc/img/rsmat/zone_3.png"/>
@@ -547,7 +545,6 @@ This zone displays the real-time status of the filter roll, from top to bottom:
 - The current **operating mode**: Auto, Maintenance, Off… (below the RedSea logo)
 - The **roll usage percentage** (circular arc, bottom right)
 
-
 If an anomaly is detected, the RedSea logo transforms into a <img src="doc/img/mdi/mdi_alert-decagram.png" width="20"/> blinking icon.
 Clicking this alert opens the anomaly dialog box:
 
@@ -563,13 +560,13 @@ Clicking this alert opens the anomaly dialog box:
 This zone controls the roll advance.
 
 From left to right:
+
 - The <img src="doc/img/mdi/mdi_send.png" width="20"/> button triggers a **manual advance** of the roll by the length shown in the centre.
 - The displayed **advance value** (in cm) is the value sent when the button is pressed. Clicking this number opens the editing dialog.
 
 <img src="doc/img/rsmat/zone_4_dialog_manual_advance.png"/>
 
 - The **automatic advance button** <img src="doc/img/mdi/mdi_autorenew.png" width="20"/> <img src="doc/img/mdi/mdi_autorenew-off.png" width="20"/> enables or disables the automatic roll advance.
-
 
 ## Sensor
 
@@ -581,21 +578,21 @@ This zone shows the status of the level sensor.
 
 Three states are possible:
 
-| State | Image |
-|------|-------|
-| Sensor connected | <img src="doc/img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/> |
+| State               | Image                                                            |
+| ------------------- | ---------------------------------------------------------------- |
+| Sensor connected    | <img src="doc/img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
 | Sensor disconnected | <img src="doc/img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Dirty sensor | <img src="doc/img/mdi/mdi_liquid-spot.png" width="80"/> |
+| Dirty sensor        | <img src="doc/img/mdi/mdi_liquid-spot.png" width="80"/>          |
 
 ## Scheduled Advance
 
 <img src="doc/img/rsmat/zone_6.png"/>
 
 ---
+
 This button <img src="doc/img/mdi/mdi_auto-mode_red.png" width="20"/><img src="doc/img/mdi/mdi_auto-mode_black.png" width="20"/> shows the scheduled advance status and allows editing it by clicking on it.
 
 <img src="doc/img/rsmat/zone_6_dialog_schedule.png"/>
-
 
 ## Usage Graph
 
@@ -606,6 +603,7 @@ This button <img src="doc/img/mdi/mdi_auto-mode_red.png" width="20"/><img src="d
 
 This zone displays a graph of roll consumption over time.
 Clicking the button toggles between the two available modes:
+
 - **Weekly** mode shows consumption over the last 7 days.
 - **Monthly** mode shows consumption over the last 30 days.
 
@@ -613,7 +611,7 @@ Pressing the top left of the graph opens the detailed view in Home Assistant.
 
 ## Messages
 
-<img src="doc/img/rsmat/zone_8.png"/> 
+<img src="doc/img/rsmat/zone_8.png"/>
 
 ---
 

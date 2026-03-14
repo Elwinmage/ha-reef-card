@@ -470,7 +470,7 @@ Möchten Sie, dass es schneller unterstützt wird? Stimmen Sie [hier](https://gi
 
 ReefMat mit ha-reef-card in Aktion:
 
-[![Video ansehen](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX) 
+[![Video ansehen](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
 
 Die ReefMat-Karte ist in 7 Bereiche unterteilt:
 
@@ -483,7 +483,6 @@ Die ReefMat-Karte ist in 7 Bereiche unterteilt:
 7. Wochen- / Monatsverbrauchsdiagramm
 
 <img src="../img/rsmat/rsmat_zones.png"/>
-
 
 Das Hintergrundbild ändert sich je nach Nutzungszustand der Rolle mit 5 verschiedenen Bildern:
 
@@ -528,7 +527,6 @@ Das Hintergrundbild ändert sich je nach Nutzungszustand der Rolle mit 5 verschi
 
  <img  src="../img/rsmat/off_mode.png"/>
 
-
 ## Rolleninformationen
 
 <img src="../img/rsmat/zone_3.png"/>
@@ -547,7 +545,6 @@ Dieser Bereich zeigt den Echtzeitstatus der Filterrolle, von oben nach unten:
 - Der aktuelle **Betriebsmodus**: Auto, Wartung, Aus… (unter dem RedSea-Logo)
 - Der **Rollenverbrauchsprozentsatz** (Kreisbogen unten rechts)
 
-
 Wird eine Anomalie erkannt, verwandelt sich das RedSea-Logo in ein <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> blinkendes Symbol.
 Ein Klick auf diesen Alarm öffnet den Anomalie-Dialog:
 
@@ -563,13 +560,13 @@ Ein Klick auf diesen Alarm öffnet den Anomalie-Dialog:
 Dieser Bereich steuert den Rollenvorschub.
 
 Von links nach rechts:
+
 - Die Schaltfläche <img src="../img/mdi/mdi_send.png" width="20"/> löst einen **manuellen Vorschub** der Rolle um die angezeigte Länge aus.
 - Der angezeigte **Vorschubwert** (in cm) ist der Wert, der beim Drücken der Taste gesendet wird. Ein Klick öffnet den Bearbeitungsdialog.
 
 <img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
 
 - Die **automatische Vorschubschaltfläche** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> aktiviert oder deaktiviert den automatischen Rollenvorschub.
-
 
 ## Sensor
 
@@ -581,21 +578,21 @@ Dieser Bereich zeigt den Status des Niveausensors.
 
 Drei Zustände sind möglich:
 
-| Zustand | Bild |
-|------|-------|
-| Sensor angeschlossen | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/> |
-| Sensor getrennt | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Schmutziger Sensor | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/> |
+| Zustand              | Bild                                                            |
+| -------------------- | --------------------------------------------------------------- |
+| Sensor angeschlossen | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
+| Sensor getrennt      | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
+| Schmutziger Sensor   | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
 
 ## Geplanter Vorschub
 
 <img src="../img/rsmat/zone_6.png"/>
 
 ---
+
 Diese Schaltfläche <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> zeigt den Status des geplanten Vorschubs und ermöglicht die Bearbeitung per Klick.
 
 <img src="../img/rsmat/zone_6_dialog_schedule.png"/>
-
 
 ## Verbrauchsdiagramm
 
@@ -606,6 +603,7 @@ Diese Schaltfläche <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img
 
 Dieser Bereich zeigt ein Diagramm des Rollenverbrauchs über die Zeit.
 Ein Klick auf die Schaltfläche wechselt zwischen den zwei verfügbaren Modi:
+
 - Der Modus **Weekly** zeigt den Verbrauch der letzten 7 Tage.
 - Der Modus **Monthly** zeigt den Verbrauch der letzten 30 Tage.
 
@@ -613,7 +611,7 @@ Ein Druck oben links im Diagramm öffnet die Detailansicht in Home Assistant.
 
 ## Messages
 
-<img src="../img/rsmat/zone_8.png"/> 
+<img src="../img/rsmat/zone_8.png"/>
 
 ---
 
@@ -632,7 +630,7 @@ Diese Zeilen können über die Karteneditor-Oberfläche ausgeblendet werden.
 
 ReefMat con ha-reef-card en acción:
 
-[![Ver el video](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX) 
+[![Ver el video](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX)
 
 La tarjeta ReefMat está dividida en 7 zonas:
 
@@ -645,7 +643,6 @@ La tarjeta ReefMat está dividida en 7 zonas:
 7. Gráfico de uso semanal / mensual
 
 <img src="../img/rsmat/rsmat_zones.png"/>
-
 
 La imagen de fondo cambia según el estado de uso del rollo con 5 imágenes diferentes:
 
@@ -690,7 +687,6 @@ La imagen de fondo cambia según el estado de uso del rollo con 5 imágenes dife
 
  <img  src="../img/rsmat/off_mode.png"/>
 
-
 ## Información del rollo
 
 <img src="../img/rsmat/zone_3.png"/>
@@ -709,7 +705,6 @@ Esta zona muestra el estado en tiempo real del rollo filtrante, de arriba a abaj
 - El **modo de funcionamiento** actual: Auto, Mantenimiento, Apagado… (debajo del logo RedSea)
 - El **porcentaje de rollo usado** (arco circular abajo a la derecha)
 
-
 Si se detecta una anomalía, el logo RedSea se transformará en un <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> icono parpadeante.
 Hacer clic en esta alerta abre el cuadro de diálogo de anomalías:
 
@@ -725,13 +720,13 @@ Hacer clic en esta alerta abre el cuadro de diálogo de anomalías:
 Esta zona permite controlar el avance del rollo.
 
 De izquierda a derecha:
+
 - El botón <img src="../img/mdi/mdi_send.png" width="20"/> lanza un **avance manual** del rollo por la longitud indicada en el centro.
 - El **valor de avance** mostrado (en cm) es el valor que se enviará al pulsar el botón. Hacer clic en este número abre el cuadro de edición.
 
 <img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
 
 - El **botón de avance automático** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> activa o desactiva el avance automático del rollo.
-
 
 ## Sonda
 
@@ -743,21 +738,21 @@ Esta zona muestra el estado del sensor de nivel.
 
 Tres estados son posibles:
 
-| Estado | Imagen |
-|------|-------|
-| Sensor conectado | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/> |
+| Estado              | Imagen                                                          |
+| ------------------- | --------------------------------------------------------------- |
+| Sensor conectado    | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
 | Sensor desconectado | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Sensor sucio | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/> |
+| Sensor sucio        | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
 
 ## Avance programado
 
 <img src="../img/rsmat/zone_6.png"/>
 
 ---
+
 Este botón <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> muestra el estado del avance programado y permite editarlo haciendo clic.
 
 <img src="../img/rsmat/zone_6_dialog_schedule.png"/>
-
 
 ## Gráfico de uso
 
@@ -768,6 +763,7 @@ Este botón <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="..
 
 Esta zona muestra un gráfico del consumo del rollo a lo largo del tiempo.
 Hacer clic en el botón alterna entre los dos modos disponibles:
+
 - El modo **Weekly** muestra el consumo de los últimos 7 días.
 - El modo **Monthly** muestra el consumo de los últimos 30 días.
 
@@ -775,7 +771,7 @@ Pulsar en la esquina superior izquierda del gráfico abre la vista detallada en 
 
 ## Messages
 
-<img src="../img/rsmat/zone_8.png"/> 
+<img src="../img/rsmat/zone_8.png"/>
 
 ---
 
@@ -785,8 +781,6 @@ Esta zona muestra los últimos mensajes del sistema del ReefMat. Tiene dos líne
 - La línea rosa muestra la **última alerta**, precedida del símbolo ⚠.
 
 Hacer clic en <img src="../img/mdi/mdi_delete-empty.png" width="20"/> borra el mensaje correspondiente.
-
-
 
 # ReefRun
 

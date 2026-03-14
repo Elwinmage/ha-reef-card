@@ -470,7 +470,7 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 ReefMat avec ha-reef-card en action:
 
-[![Regarder la vidéo](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX) 
+[![Regarder la vidéo](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
 
 La carte ReefMat est découpée en 7 zones :
 
@@ -483,7 +483,6 @@ La carte ReefMat est découpée en 7 zones :
 7. Graphique d'utilisation hebdomadaire / mensuel
 
 <img src="../img/rsmat/rsmat_zones.png"/>
-
 
 L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 images différentes:
 
@@ -528,7 +527,6 @@ L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 im
 
  <img  src="../img/rsmat/off_mode.png"/>
 
-
 ## Informations du rouleau
 
 <img src="../img/rsmat/zone_3.png"/>
@@ -547,7 +545,6 @@ Cette zone affiche en temps réel l'état du rouleau filtrant, avec de haut en b
 - Le **mode de fonctionnement** courant: Auto, Maintenance, Off… (sous le logo RedSea)
 - Le **pourcentage de rouleau utilisé** (arc de cercle en bas à droite)
 
-
 Si une anomalie est détectée le logo RedSea se transformera en <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> clignotant.
 Un clic sur cette alerte ouvre la boîte de dialogue des anomalies :
 
@@ -560,16 +557,16 @@ Un clic sur cette alerte ouvre la boîte de dialogue des anomalies :
 <img src="../img/rsmat/zone_4_auto_off.png"/>
 ---
 
-Cette zone permet de contrôler  l'avance du rouleau.
+Cette zone permet de contrôler l'avance du rouleau.
 
 De gauche à droite :
+
 - Le bouton <img src="../img/mdi/mdi_send.png" width="20"/> permet de lancer une **avance manuelle** du rouleau de la longueur indiquée par le chiffre au centre.
 - La **valeur d'avance** affichée (en cm) correspond à la valeur qui sera envoyée lors d'un appui sur le bouton. Un clic sur ce chiffre ouvre la boîte d'édition.
 
 <img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
 
 - Le **bouton de d'avance automatiquement** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> permet d'activer/désactiver l'avance automatique du rouleau.
-
 
 ## Sonde
 
@@ -581,21 +578,21 @@ Cette zone indique l'état de la sonde de niveau.
 
 Trois états sont possibles :
 
-| État | Image |
-|------|-------|
-| Capteur branché | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/> |
+| État              | Image                                                           |
+| ----------------- | --------------------------------------------------------------- |
+| Capteur branché   | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
 | Capteur débranché | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Capteur sale | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/> |
+| Capteur sale      | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
 
 ## Avance programmée
 
 <img src="../img/rsmat/zone_6.png"/>
 
 ---
+
 Ce bouton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> permet de donner l'état de l'avance programmée et de l'éditer en cliquant dessus.
 
 <img src="../img/rsmat/zone_6_dialog_schedule.png"/>
-
 
 ## Graphique d'utilisation
 
@@ -606,6 +603,7 @@ Ce bouton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../i
 
 Cette zone affiche un graphique de la consommation du rouleau dans le temps.
 Un clic sur le bouton bascule entre les deux modes disponibles:
+
 - Le mode **Weekly** affiche la consommation sur les 7 derniers jours.
 - Le mode **Monthly** affiche la consommation sur les 30 derniers jours.
 
@@ -613,7 +611,7 @@ Un appui en haut à gauche du graphique ouvre la vue détaillée dans Home Assis
 
 ## Messages
 
-<img src="../img/rsmat/zone_8.png"/> 
+<img src="../img/rsmat/zone_8.png"/>
 
 ---
 

@@ -470,7 +470,7 @@ Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwi
 
 ReefMat con ha-reef-card in azione:
 
-[![Guarda il video](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX) 
+[![Guarda il video](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
 
 La scheda ReefMat è divisa in 7 zone:
 
@@ -483,7 +483,6 @@ La scheda ReefMat è divisa in 7 zone:
 7. Grafico di utilizzo settimanale / mensile
 
 <img src="../img/rsmat/rsmat_zones.png"/>
-
 
 L'immagine di sfondo cambia in base allo stato di utilizzo del rotolo con 5 immagini diverse:
 
@@ -528,7 +527,6 @@ L'immagine di sfondo cambia in base allo stato di utilizzo del rotolo con 5 imma
 
  <img  src="../img/rsmat/off_mode.png"/>
 
-
 ## Informazioni sul rotolo
 
 <img src="../img/rsmat/zone_3.png"/>
@@ -547,7 +545,6 @@ Questa zona mostra in tempo reale lo stato del rotolo filtrante, dall'alto verso
 - La **modalità operativa** corrente: Auto, Manutenzione, Spento… (sotto il logo RedSea)
 - La **percentuale di rotolo utilizzato** (arco circolare in basso a destra)
 
-
 Se viene rilevata un'anomalia, il logo RedSea si trasformerà in un'icona <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> lampeggiante.
 Facendo clic su questo avviso si apre la finestra di dialogo delle anomalie:
 
@@ -563,13 +560,13 @@ Facendo clic su questo avviso si apre la finestra di dialogo delle anomalie:
 Questa zona controlla l'avanzamento del rotolo.
 
 Da sinistra a destra:
+
 - Il pulsante <img src="../img/mdi/mdi_send.png" width="20"/> avvia un **avanzamento manuale** del rotolo della lunghezza indicata al centro.
 - Il **valore di avanzamento** visualizzato (in cm) è il valore inviato alla pressione del pulsante. Cliccando su questo numero si apre la finestra di modifica.
 
 <img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
 
 - Il **pulsante di avanzamento automatico** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> abilita o disabilita l'avanzamento automatico del rotolo.
-
 
 ## Sensore
 
@@ -581,21 +578,21 @@ Questa zona mostra lo stato del sensore di livello.
 
 Tre stati sono possibili:
 
-| Stato | Immagine |
-|------|-------|
-| Sensore collegato | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/> |
+| Stato              | Immagine                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| Sensore collegato  | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
 | Sensore scollegato | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Sensore sporco | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/> |
+| Sensore sporco     | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
 
 ## Avanzamento programmato
 
 <img src="../img/rsmat/zone_6.png"/>
 
 ---
+
 Questo pulsante <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> mostra lo stato dell'avanzamento programmato e permette di modificarlo cliccando.
 
 <img src="../img/rsmat/zone_6_dialog_schedule.png"/>
-
 
 ## Grafico di utilizzo
 
@@ -606,6 +603,7 @@ Questo pulsante <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src
 
 Questa zona mostra un grafico del consumo del rotolo nel tempo.
 Cliccando il pulsante si alterna tra le due modalità disponibili:
+
 - La modalità **Weekly** mostra il consumo degli ultimi 7 giorni.
 - La modalità **Monthly** mostra il consumo degli ultimi 30 giorni.
 
@@ -613,7 +611,7 @@ Premendo in alto a sinistra del grafico si apre la vista dettagliata in Home Ass
 
 ## Messages
 
-<img src="../img/rsmat/zone_8.png"/> 
+<img src="../img/rsmat/zone_8.png"/>
 
 ---
 
