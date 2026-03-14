@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSMAT Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1a1a2e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 14px;
+  font-family: Arial, sans-serif;
+}
+#controls {
+  display: flex; gap: 10px; align-items: center;
+  background: rgba(255,255,255,0.1); padding: 8px 18px;
+  border-radius: 12px; color: white; font-size: 13px;
+  flex-wrap: wrap; justify-content: center;
+}
+#controls button {
+  background: #c55b5a; color: white; border: none;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer;
+  font-weight: bold; font-size: 13px;
+}
+#controls button:hover { background: #a04040; }
+#controls button.active { background: #7a2020; box-shadow: 0 0 0 2px white; }
+#sim-time { color: #c55b5a; font-weight: bold; }
+#scenario-info { color: rgba(255,255,255,0.55); font-size: 12px; }
+
+/* Card */
+#card {
+  position: relative;
+  width: 480px;
+  max-width: 95vw;
+  background: white;
+}
+#card img.bg { width: 100%; display: block; }
+
+/* Sensor overlay — covers full card, transparent PNG */
+#sensor-img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ov {
+  position: absolute;
+  font-weight: bolder;
+  pointer-events: none;
+  z-index: 10;
+  line-height: 1.2;
+}
+
+/* total_usage pill: top≈14% left≈35% */
+#lu-total {
+  top: 8%; left: 35%;
+  background: rgb(150,150,150,0.9);
+  border-radius: 30px;
+  padding: 3px 18px;
+  color: #c55b5a;
+  font-size: clamp(8px, 1.5vw, 14px);
+  transform: skewY(6deg);
+}
+
+/* remaining: top≈29% left≈15% */
+#lu-remain {
+  top: 29%; left: 25%;
+  color: #c55b5a;
+  font-size: clamp(9px, 1.8vw, 17px);
+  transform: skewY(8deg);
+}
+
+/* days_end: top≈37% left≈7% */
+#lu-days {
+  top: 37%; left: 7%;
+  color: rgb(75,55,55);
+  font-size: clamp(8px, 1.4vw, 13px);
+  transform: skewY(8deg);
+  white-space: nowrap;
+}
+
+/* progress circle: top≈44% left≈7% */
+#circ-wrap {
+  position: absolute;
+  top: 41%; left: 7%;
+  width: 55px; height: 55px;
+  transform: skewY(10deg);
+  z-index: 10;
+}
+#circ-canvas { position: absolute; top:0; left:0; width:55px; height:55px; }
+#circ-label {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  font-size: 11px; font-weight: bolder;
+  color: #ec2330; white-space: nowrap; z-index: 11;
+}
+
+/* daily_avg: top≈46% left≈30% */
+#lu-avg {
+  top: 51%; left: 24%;
+  width: 20%;
+  color: #c55b5a;
+  font-size: clamp(8px, 1.4vw, 13px);
+  transform: skewY(10deg);
+  text-align: center;
+}
+
+/* mode: top≈56% left≈16% */
+#lu-mode {
+  top: 57%; left: 20%;
+  color: black;
+  font-size: clamp(8px, 1.4vw, 13px);
+  transform: skewY(10deg);
+}
+
+/* autorenew icon: top≈41% left≈58% */
+#btn-autorenew {
+  position: absolute;
+  top: 41%; left: 64%;
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: all;
+  font-size: clamp(14px, 2vw, 20px);
+  transform: skewY(-10deg);
+  color: #c55b5a;
+  background: none; border: none;
+  line-height: 1;
+}
+
+/* advance value: top≈41% right≈16% */
+#lu-adv {
+  top: 41%; right: 16%;
+  color: rgba(255,255,255,0.6);
+  font-size: clamp(10px, 1.4vw, 14px);
+  transform: skewY(-10deg);
+  white-space: nowrap;
+}
+
+/* send arrow button: top≈40% right≈4% */
+#btn-send {
+  position: absolute;
+  top: 38.9%; right: 8.7%;
+  transform: translateY(-50%) skewY(-10deg);
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: all;
+  font-size: clamp(14px, 2.2vw, 22px);
+  transform: skewY(-10deg);
+  color: #c55b5a;
+  background: none; border: none;
+  line-height: 1;
+}
+
+/* Weekly button: top≈63% left≈18% */
+#btn-period {
+  position: absolute;
+  top: 63%; left: 13%;
+  background: rgb(197,91,90); color: white;
+  border-radius: 30px; padding: 2px 28px;
+  font-size: clamp(7px, 1.4vw, 13px);
+  font-weight: bold;
+  transform: skewY(12deg);
+  z-index: 20; cursor: pointer; border: none;
+}
+#btn-period:hover { background: #a04040; }
+
+/* Stats graph: top≈71% right≈5% */
+#stats-graph {
+  position: absolute;
+  top: 78%; left: 8%;
+  width: 44%; height: 42%;
+  background: rgba(255,255,255,0.55);
+  border-radius: 6px; overflow: hidden;
+  transform: skewY(12deg) scaleY(0.5);
+  transform-origin: top right;
+  z-index: 10;
+}
+#stats-graph canvas { width: 100% !important; height: 100% !important; }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <button id="btn-play">⏸ Pause</button>
+  <button id="btn-2d" class="active">📅 15 jours</button>
+  <button id="btn-2m">📅 2 mois</button>
+  <label style="display:flex;align-items:center;gap:6px;">Vitesse
+    <input id="speed" type="range" min="1" max="11" value="3" style="width:80px">
+    <span id="speed-label">×120</span>
+  </label>
+  <span id="sim-time">—</span>
+</div>
+<div id="scenario-info">Scénario 15 jours — rouleau plein (35.0 m)</div>
+
+<div id="card">
+  <!-- background roll image -->
+  <img class="bg" id="bg-img" src="src/img/RSMAT_100_BASE.png" alt="RSMAT">
+
+  <!-- sensor overlay (RGBA transparent PNG) -->
+  <img id="sensor-img" src="src/img/RSMAT_SENSOR_PLUGGED.png" alt="">
+
+  <!-- text overlays -->
+  <div class="ov" id="lu-total">0.00 m</div>
+  <div class="ov" id="lu-endroll" style="display:none; top:28%; left:18%; transform:skewY(8deg); z-index:11;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABzklEQVRIie2SPWsUYRSFnzuZmY0IS4IgKPYWsVgFA652FoJoITiCM7MJKay0EZv4C2JjmUYsQkiWkCkMKATtYkxcm5BAUliLkmolYNDM17VwR9ZNdmezjc2e5oX7cc49973QRw7kqOCO49h7tv0AqKToBYGT7QgU9g1kOxWdGz6IXowEQdhRYK1SOU2avAEu9zDwpgyYt8qzs1+zgNGcXXScAdL0VRfkXxC9q4XBohYGiyJ6B/gMlDSNX+84jp0Vms1dZ23bBy3nkUsYlcpBUG+KLa267oohbKFcbKx3+pCAoOM55CD6uBwE9fe+f8bUZArAtOLJ0Znq7rrrPlFhUVH/SAGglMev9ol3AKYmU4qMA0SRpcCEIfI2QQFGsnqjpX8410EHmGF46GhaHeTCCH9eB5ZMK55sTI5lRU8BfhXMG6IAbPcsoCrPVl13ZXSmugtMZPFPY2On4iR+3qia+ztQK8HV+ap0eoHzhrC17rpOzfOKNc8rfvDv34uTeBM4B2wMhfHLjO+fna15rnZhYgO41C6nSXr72sLCt7YO8rBX/14W5BFQU9gHfgAfQR8OhdGVZnLo4Q9uLi8f8OfGp7upP7aD46Iv8P8F+sjFb3Dwo7WoWm7JAAAAAElFTkSuQmCC" width="22" style="vertical-align:middle;"/></div>
+  <div class="ov" id="lu-remain">35.000 m</div>
+  <div class="ov" id="lu-days">End of roll: 18 Days</div>
+  <div class="ov" id="lu-avg">Daily average<br>151.6 cm</div>
+  <div class="ov" id="lu-mode">Auto</div>
+  <div class="ov" id="lu-adv">2.28 cm</div>
+
+  <!-- progress circle -->
+  <div id="circ-wrap">
+    <canvas id="circ-canvas" width="55" height="55"></canvas>
+    <div id="circ-label">100%</div>
+  </div>
+
+  <!-- autorenew icon (↻) -->
+  <button id="btn-autorenew">↻</button>
+
+  <!-- send arrow (➤) -->
+  <button id="btn-send">➤</button>
+
+  <!-- period toggle -->
+  <button id="btn-period">Weekly</button>
+
+  <!-- stats graph -->
+  <div id="stats-graph">
+    <canvas id="chart-canvas"></canvas>
+  </div>
+</div>
+
+<script>
+const ROLL    = 35.0;      // metres, full roll
+const ADVANCE = 0.0228;    // metres per physical advance step (2.28cm)
+// Daily usage is driven by the graph curve (60-75 cm/day)
+// We accumulate usage from dailyUsage() directly — no separate DAILY constant
+const RED     = "#c55b5a";
+const ERR     = "#ec2330";
+
+const SPEED_TABLE = [0, 360, 120, 30, 10, 4, 2, 1, 0.5, 0.25, 0.1, 0.01];
+const SPEED_LABEL = ["","×10","×30","×120","×360","×900","×1800","×3600","×7200","×14400","×36000","×360000"];
+
+let scenario = "2d", playing = true, speedIdx = 3;
+let simHours = 0, lastTs = null, showWeekly = true;
+
+const st = { remain: ROLL, used: 0, hist: [] };
+let daysLeft  = 51;  // integer, decremented at midnight
+let lastSimDay = -1;                        // track last sim day to detect midnight
+
+// ── Sim time ──────────────────────────────────────────────────────────────────
+function simNow() {
+  const back = scenario === "2d" ? 2 : 60;
+  return new Date(Date.now() - back * 86400000 + simHours * 3600000);
+}
+
+// ── Daily usage curve: bell 0→peak(60-70cm/h)→0 over 24h ────────────────────
+// Daily peak per calendar day — consistent within same day
+const dayPeaks = {};
+function getDayPeak(dateKey) {
+  if (!dayPeaks[dateKey]) dayPeaks[dateKey] = 60 + Math.random() * 15;
+  return dayPeaks[dateKey];
+}
+
+// Linear ramp with noise: 0 at 00:00 -> peak at 23:59, reset at midnight
+function dailyUsage(d) {
+  const hour = d.getHours() + d.getMinutes() / 60;
+  const dateKey = d.toISOString().slice(0, 10);
+  const peak = getDayPeak(dateKey);
+  const linear = peak * (hour / 24);
+  // add ±8% noise
+  const noise = linear * (0.92 + Math.random() * 0.16);
+  return Math.max(0, noise);
+}
+
+// ── Init history ──────────────────────────────────────────────────────────────
+function initHistory(daysBack) {
+  st.hist = [];
+  const t0 = Date.now() - daysBack * 86400000;
+  for (let i = 0; i <= daysBack * 24; i++) {
+    const t = new Date(t0 + i * 3600000);
+    st.hist.push({ t, v: dailyUsage(t) });
+  }
+}
+
+// ── Progress circle ───────────────────────────────────────────────────────────
+const cc   = document.getElementById("circ-canvas");
+const cctx = cc.getContext("2d");
+
+function drawCircle(pct) {
+  const S = 55, cx = S/2, cy = S/2, r = S/2 - 5;
+  cctx.clearRect(0, 0, S, S);
+  // track
+  cctx.beginPath(); cctx.arc(cx,cy,r,0,Math.PI*2);
+  cctx.strokeStyle = "rgba(0,0,0,0.15)"; cctx.lineWidth = 6; cctx.stroke();
+  // arc
+  if (pct > 0) {
+    cctx.beginPath();
+    cctx.arc(cx, cy, r, -Math.PI/2, -Math.PI/2 + (pct/100)*Math.PI*2);
+    cctx.strokeStyle = pct <= 25 ? ERR : RED; cctx.lineWidth = 6; cctx.stroke();
+  }
+  // center
+  cctx.beginPath(); cctx.arc(cx,cy,r-8,0,Math.PI*2);
+  cctx.fillStyle = "rgba(255,255,255,0.5)"; cctx.fill();
+
+  const lbl = document.getElementById("circ-label");
+  lbl.textContent = Math.round(pct) + "%";
+  lbl.style.color = pct <= 25 ? ERR : RED;
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+const chart = new Chart(
+  document.getElementById("chart-canvas").getContext("2d"), {
+  type: "line",
+  data: { datasets: [{ data: [],
+    borderColor: RED, backgroundColor: RED+"33",
+    borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.4,
+  }]},
+  options: {
+    animation: false, responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { type: "time",
+        ticks: { maxTicksLimit:4, font:{size:11,weight:"bold"}, color:"rgba(0,0,0,0.85)" },
+        grid: { display: false },
+      },
+      y: { min: 0, max: 80,
+        ticks: { maxTicksLimit:4, font:{size:11,weight:"bold"}, color:"rgba(0,0,0,0.85)" },
+        grid: { color: "rgba(0,0,0,0.1)" },
+      }
+    }
+  }
+});
+
+// ── Background image ──────────────────────────────────────────────────────────
+function bgForPct(p) {
+  if (p >= 87.5) return "src/img/RSMAT_100_BASE.png";
+  if (p >= 62.5) return "src/img/RSMAT_75_BASE.png";
+  if (p >= 37.5) return "src/img/RSMAT_50_BASE.png";
+  if (p >= 12.5) return "src/img/RSMAT_25_BASE.png";
+  return "src/img/RSMAT_0_BASE.png";
+}
+
+// ── Update DOM ────────────────────────────────────────────────────────────────
+function updateDOM() {
+  const pct  = Math.max(0, st.remain / ROLL * 100);
+
+  document.getElementById("bg-img").src = bgForPct(pct);
+  document.getElementById("lu-remain").textContent = st.remain.toFixed(3) + " m";
+  document.getElementById("lu-total").textContent  = st.used.toFixed(2) + " m";
+  document.getElementById("lu-days").textContent   =
+    "End of roll: " + (st.remain <= 0.05 ? "0" : Math.max(0, daysLeft)) + " Days";
+  // Daily average = mean of daily peaks over last 7 days
+  const tAvg = simNow();
+  let dailyAvgCm = 0;
+  let dayCount = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(tAvg - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    if (dayPeaks[key]) { dailyAvgCm += dayPeaks[key]; dayCount++; }
+  }
+  if (dayCount > 0) dailyAvgCm /= dayCount;
+  document.getElementById("lu-avg").innerHTML =
+    "Daily average<br>" + (dayCount > 0 ? dailyAvgCm.toFixed(1) : "—") + " cm";
+  const endOfRoll = st.remain <= 0.05;
+  document.getElementById("lu-mode").textContent = endOfRoll ? "End of roll" : "Auto";
+  document.getElementById("lu-endroll").style.display = endOfRoll ? "block" : "none";
+
+  drawCircle(pct);
+  updateChart();
+}
+
+function updateChart() {
+  const wH     = showWeekly ? 7*24 : 30*24;
+  const now    = simNow();
+  const cutoff = new Date(now - wH*3600000);
+  const filtered = st.hist.filter(p => p.t >= cutoff && p.t <= now);
+
+  let pts;
+  if (!showWeekly) {
+    // Monthly: aggregate by day — take max value per day
+    const byDay = {};
+    filtered.forEach(p => {
+      const key = p.t.toISOString().slice(0, 10);
+      if (!byDay[key] || p.v > byDay[key].v) byDay[key] = p;
+    });
+    pts = Object.values(byDay)
+      .sort((a,b) => a.t - b.t)
+      .map(p => ({ x: p.t.getTime(), y: +p.v.toFixed(2) }));
+  } else {
+    pts = filtered.map(p => ({ x: p.t.getTime(), y: +p.v.toFixed(2) }));
+  }
+
+  chart.data.datasets[0].data = pts;
+  chart.options.scales.x.time = {
+    unit: showWeekly ? "hour" : "day",
+    displayFormats: { hour:"EEE HH:mm", day:"MMM d" }
+  };
+  chart.update("none");
+}
+
+// ── Sim step ──────────────────────────────────────────────────────────────────
+function simStep(dtH) {
+  if (st.remain <= 0) return;
+
+  // Consume roll at same rate as graph curve
+  // dailyUsage curve has peak cm/day -> rate = peak/24 cm/h with noise
+  const tNow   = simNow();
+  const dateKey = tNow.toISOString().slice(0, 10);
+  const peak    = getDayPeak(dateKey);          // cm/day for this day (60-75)
+  const cmPerH  = (peak / 24) * (0.92 + Math.random() * 0.16);
+  const mConsumed = (cmPerH / 100) * dtH;      // cm/h -> m, scaled by sim-hours elapsed
+  st.remain = Math.max(0, st.remain - mConsumed);
+  st.used  += mConsumed;
+
+  // Decrement daysLeft at each new sim day (midnight)
+  const t    = tNow;
+  const simDay = Math.floor(simHours / 24);
+  if (simDay !== lastSimDay) {
+    if (lastSimDay >= 0) daysLeft = Math.max(0, daysLeft - 1);
+    lastSimDay = simDay;
+  }
+  const last = st.hist[st.hist.length - 1];
+  if (!last || t - last.t >= 3600000) {
+    st.hist.push({ t, v: dailyUsage(t) });
+    const max = (scenario === "2d" ? 30 : 120) * 24;
+    while (st.hist.length > max) st.hist.shift();
+  }
+
+  updateDOM();
+
+  document.getElementById("sim-time").textContent =
+    t.toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}) + " " +
+    t.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+}
+
+// ── Scenario ──────────────────────────────────────────────────────────────────
+function startScenario(s) {
+  scenario = s; simHours = 0; lastTs = null;
+  st.remain = ROLL; st.used = 0;
+  daysLeft   = 51;
+  lastSimDay = -1;
+  initHistory(s === "2d" ? 15 : 60);
+  document.getElementById("scenario-info").textContent =
+    (s === "2d" ? "Scénario 15 jours" : "Scénario 2 mois") + " — rouleau plein (35.0 m)";
+  document.getElementById("btn-2d").classList.toggle("active", s === "2d");
+  document.getElementById("btn-2m").classList.toggle("active", s === "2m");
+  updateDOM();
+}
+
+// ── RAF loop ──────────────────────────────────────────────────────────────────
+function loop(ts) {
+  requestAnimationFrame(loop);
+  if (!playing || !lastTs) { lastTs = ts; return; }
+  const dtReal = Math.min((ts - lastTs) / 1000, 0.1);
+  lastTs = ts;
+  const dtH = dtReal / SPEED_TABLE[speedIdx];
+  simHours += dtH;
+  const maxH = scenario === "2d" ? 15*24 : 60*24;
+  if (simHours >= maxH) {
+    simHours = maxH; playing = false;
+    document.getElementById("btn-play").textContent = "▶ Play";
+  }
+  simStep(dtH);
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+document.getElementById("btn-play").addEventListener("click", () => {
+  playing = !playing; lastTs = null;
+  document.getElementById("btn-play").textContent = playing ? "⏸ Pause" : "▶ Play";
+});
+document.getElementById("btn-2d").addEventListener("click", () => startScenario("2d"));
+document.getElementById("btn-2m").addEventListener("click", () => startScenario("2m"));
+document.getElementById("speed").addEventListener("input", e => {
+  speedIdx = +e.target.value;
+  document.getElementById("speed-label").textContent = SPEED_LABEL[speedIdx];
+});
+document.getElementById("btn-period").addEventListener("click", () => {
+  showWeekly = !showWeekly;
+  document.getElementById("btn-period").textContent = showWeekly ? "Weekly" : "Monthly";
+  updateChart();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+startScenario("2d");
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
