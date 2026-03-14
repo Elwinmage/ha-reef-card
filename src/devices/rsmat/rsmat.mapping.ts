@@ -315,6 +315,11 @@ export const config = {
         color: COLOR_RSMAT_HEX,
         "font-weight": "bolder",
       },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "new_roll" },
+      },
     },
     total_usage: {
       name: "total_usage",
@@ -514,6 +519,7 @@ export const config = {
       type: "click-image",
       disabled_if: "${state}!=='end_of_roll'",
       icon: "mdi:paper-roll",
+      icon_color: COLOR_RSMAT_RGBSTR,
       class: "blink",
       css: {
         position: "absolute",
