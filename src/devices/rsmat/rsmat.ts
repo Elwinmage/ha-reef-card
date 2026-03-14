@@ -9,9 +9,6 @@ import { dialogs_rsmat } from "./rsmat.dialogs";
 
 import i18n from "../../translations/myi18n";
 
-// TODO : Implement RSMAT support
-// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/5
-// labels: enhancement, rsmat
 export class RSMat extends RSDevice {
   invert_position: boolean = false;
 
