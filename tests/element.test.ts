@@ -953,7 +953,7 @@ describe("run_actions() — UI action branches", () => {
           stats_week: { type: "hui-statistics-graph-card", css: {} },
         },
       },
-      _elements: { "hui-statistics-graph-card.stats_week": fakeCard },
+      _elements: { stats_week: fakeCard }, // declarationKey scheme
       _conf_overrides: {},
       requestUpdate: mockUpdate,
     };
@@ -980,7 +980,7 @@ describe("run_actions() — UI action branches", () => {
           relay: { type: "common-switch", css: {} },
         },
       },
-      _elements: { "common-switch.relay": fakeElem },
+      _elements: { relay: fakeElem }, // declarationKey scheme
       _conf_overrides: {},
       requestUpdate: deviceUpdate,
     };
@@ -1092,7 +1092,7 @@ describe("run_actions() — UI action branches", () => {
     const fakeElem = { conf: {}, requestUpdate: elemUpdate }; // no conf.css
     el.device = {
       config: { elements: { relay: { type: "common-switch", css: {} } } },
-      _elements: { "common-switch.relay": fakeElem },
+      _elements: { relay: fakeElem }, // declarationKey scheme
       _conf_overrides: {},
       requestUpdate: mockUpdate,
     };

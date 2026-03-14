@@ -699,6 +699,19 @@ describe("RSDevice._render_element() L488-490 — existing element stateOn updat
     expect(fakeElement.stateOn).toBe(true);
   });
 
+  it("L571 false branch: skips stateOn when cached element is null", () => {
+    // Covers device.ts L571: if (element) false branch — element is null in cache
+    const dev = makeDev_B();
+    dev._hass = makeHass_B();
+    dev.entities = {};
+
+    const conf = { name: "relay", type: "common-switch" };
+    // Pre-populate cache with null → hits "key in _elements" true, but element is null
+    dev._elements["relay"] = null;
+
+    expect(() => dev._render_element(conf, true, null, "relay")).not.toThrow();
+  });
+
   it("stateOn not set when element lookup at L488 returns undefined", () => {
     const dev = makeDev_B();
     dev._hass = makeHass_B();
@@ -1939,7 +1952,10 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
     const dev = makeDev_C();
     dev._hass = makeHass_C({ "sensor.x": makeState_B("on", "sensor.x") });
     dev.entities = { relay: { entity_id: "sensor.x" } };
-    dev._conf_overrides = { relay: { css: { opacity: "0.5" } } };
+    // Without declarationKey, elementKey fallback = "common-switch.relay"
+    dev._conf_overrides = {
+      "common-switch.relay": { css: { opacity: "0.5" } },
+    };
 
     // Create a real-like element with conf.css so Object.assign can run
     const fakeElem: any = {
@@ -1955,6 +1971,61 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
 
     expect(fakeElem.conf.css.opacity).toBe("0.5");
     vi.restoreAllMocks();
+  });
+
+  it("L571 fallback branch: elementKey uses type.name when declarationKey is undefined", () => {
+    // Covers device.ts L571: declarationKey ?? (conf.type + "." + conf.name) — falsy branch
+    // Call without declarationKey so the ?? right-hand side executes
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({ "sensor.x": makeState_B("on", "sensor.x") });
+    dev.entities = { relay: { entity_id: "sensor.x" } };
+    dev._conf_overrides = {};
+
+    const fakeElem: any = {
+      conf: { css: {} },
+      hass: null,
+      stateOn: false,
+      requestUpdate: vi.fn(),
+    };
+    vi.spyOn(MyElement, "create_element").mockReturnValue(fakeElem);
+
+    const conf = { type: "common-sensor", name: "relay" };
+    // No declarationKey → fallback key = "common-sensor.relay"
+    dev._render_element(conf, true, null);
+
+    expect(dev._elements["common-sensor.relay"]).toBe(fakeElem);
+    vi.restoreAllMocks();
+  });
+});
+
+describe("RSDevice._render_element L502 — hui-* declarationKey fallback branch", () => {
+  it("L502: hui-* uses type.name fallback when declarationKey is undefined", () => {
+    // Covers device.ts L502: ?? right-hand side — declarationKey is undefined
+    const savedHelpers = RSDevice._helpersResolved;
+    const fakeCard = {
+      style: { setProperty: vi.fn() },
+      hass: null as any,
+      shadowRoot: null,
+    };
+    RSDevice._helpersResolved = {
+      createCardElement: vi.fn().mockReturnValue(fakeCard),
+    };
+
+    const dev = makeDev_C();
+    dev._hass = makeHass_C({});
+    dev.entities = {};
+    dev._elements = {};
+
+    const conf = {
+      type: "hui-entities-card",
+      name: "sensor_list",
+      conf: { type: "entities", entities: [] },
+    };
+    // No declarationKey → fallback key = "hui-entities-card.sensor_list"
+    dev._render_element(conf, true, null);
+
+    expect(dev._elements["hui-entities-card.sensor_list"]).toBe(fakeCard);
+    RSDevice._helpersResolved = savedHelpers;
   });
 });
 
