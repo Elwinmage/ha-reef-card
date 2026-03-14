@@ -150,7 +150,7 @@ Haga clic aquí para acceder directamente al repositorio en HACS y haga clic en 
 O busque «reef-card» en HACS.
 
 <p align="center">
-<img src="../img/hacs_search.png" alt="Image">
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/hacs_search.png" alt="Image">
 </p>
 
 # Configuración
@@ -161,8 +161,8 @@ Para eliminar la selección de dispositivo y forzar uno específico, defina el p
 
 <table>
   <tr>
-<td><img src="../img/card_rsdose4_config_2.png"/></td>
-<td><img src="../img/card_rsdose4_config.png"/></td>
+<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config_2.png"/></td>
+<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
 
@@ -193,62 +193,62 @@ La tarjeta ReefDose está dividida en 6 zonas:
 5.  Gestión de suplementos
 6.  Cola de dosis futuras
 
-<img src="../img/rsdose/rsdose4_ex1.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/rsdose4_ex1.png"/>
 
 ## Configuración/Información Wifi
 
-<img src="../img/rsdose/zone_1.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1.png"/>
 
 ---
 
-<span >Haga clic en el icono <img src="../img/rsdose/cog_icon.png" width="30" /> para gestionar la configuración general del ReefDose.</span>
+<span >Haga clic en el icono <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/cog_icon.png" width="30" /> para gestionar la configuración general del ReefDose.</span>
 
-<img src="../img/rsdose/zone_1_dialog_config.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Haga clic en el icono <img width="30px" src="../img/rsdose/wifi_icon.png"/> para gestionar los parámetros de red.</span>
+<span>Haga clic en el icono <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/wifi_icon.png"/> para gestionar los parámetros de red.</span>
 
-<img src="../img/rsdose/zone_1_dialog_wifi.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_wifi.png"/>
 
 ## Estados
 
- <img src="../img/rsdose/zone_2.png"/>
+ <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2.png"/>
 
 ---
 
-<span>El interruptor de mantenimiento <img width="30px" src="../img/rsdose/zone_2_maintenance.png"/> permite cambiar al modo mantenimiento.</span>
+<span>El interruptor de mantenimiento <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2_maintenance.png"/> permite cambiar al modo mantenimiento.</span>
 
- <img  src="../img/rsdose/maintenance_view.png"/>
+ <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/maintenance_view.png"/>
 
-<span>El interruptor on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permite alternar entre los estados encendido y apagado del ReefDose.</span>
+<span>El interruptor on/off <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2_off.png"/> permite alternar entre los estados encendido y apagado del ReefDose.</span>
 
- <img  src="../img/rsdose/off_view.png"/>
+ <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/off_view.png"/>
 
 ## Dosificación Manual
 
-<img src="../img/rsdose/zone_3.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3.png"/>
 
 ---
 
-<span>El botón <img src="../img/rsdose/zone_3_manula_config_button.png"/> muestra la dosis manual predeterminada para esta cabeza. Un clic abre el cuadro de configuración de esta dosificación.</span>
+<span>El botón <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manula_config_button.png"/> muestra la dosis manual predeterminada para esta cabeza. Un clic abre el cuadro de configuración de esta dosificación.</span>
 
-<img src="../img/rsdose/zone_3_dialog_manual_dose_without.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose_without.png"/>
 
 Puede añadir atajos usando el editor de la tarjeta:
 
-<img src="../img/rsdose/editor.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/editor.png"/>
 
 Por ejemplo, la cabeza 1 propone como atajos los valores 2, 5 y 10 mL.
 
 Estos valores aparecerán en la parte superior del cuadro de diálogo. Un clic en estos atajos enviará un comando para dosificar el valor definido.
 
-<img src="../img/rsdose/zone_3_dialog_manual_dose.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose.png"/>
 
-<span>Presionar el botón de dosis manual: <img src="../img/rsdose/zone_3_manual_button.png"/> enviará un comando de dosis con el valor predeterminado visible justo encima: <img src="../img/rsdose/zone_3_manual_dose.png"/>, es decir 10 mL en este ejemplo.
+<span>Presionar el botón de dosis manual: <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manual_button.png"/> enviará un comando de dosis con el valor predeterminado visible justo encima: <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manual_dose.png"/>, es decir 10 mL en este ejemplo.
 </span>
 
 ## Configuración y programación de las cabezas
 
- <img src="../img/rsdose/zone_4.png"/>
+ <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_4.png"/>
 
 ---
 
@@ -262,11 +262,11 @@ Esta zona permite visualizar la programación actual de las cabezas y modificarl
 - Un clic en una cabeza abrirá el cuadro de programación.
   Desde este cuadro puede iniciar un cebado, recalibrar la cabeza, cambiar la dosis diaria y su programación. No olvide guardar la programación antes de salir.
 
-  <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
+  <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_4_dialog_schedule.png"/>
 
 ## Gestión de suplementos
 
- <img src="../img/rsdose/zone_5.png"/>
+ <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5.png"/>
 
 ---
 
@@ -279,26 +279,26 @@ Si ya hay un suplemento declarado, un clic sobre él abrirá el cuadro de config
 - Decidir si desea hacer seguimiento del volumen restante. Un clic en los atajos de la parte superior activará el control y establecerá los valores predeterminados con un contenedor lleno.
 - Modificar el nombre de visualización del suplemento.
 
- <img src="../img/rsdose/zone_5_dialog_container.png"/>
+ <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_dialog_container.png"/>
 
 Si no hay ningún suplemento vinculado a una cabeza, puede añadir uno haciendo clic en el contenedor con un '+' (cabeza 4 en nuestro ejemplo).
 
-<img src="../img/rsdose/zone_5_add_container.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_add_container.png"/>
 
 A continuación, siga las instrucciones:
 
-<img src="../img/rsdose/zone_5_dialog_add.png"/>
+<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_dialog_add.png"/>
 
 ### Suplementos
 
 Aquí está la lista de imágenes de suplementos compatibles, agrupadas por marca. Si el tuyo tiene un ❌, puedes solicitar su incorporación [aquí](https://github.com/Elwinmage/ha-reef-card/discussions/25).
 
 <details>
-<summary><b>ATI &nbsp; <sup>0/2 🖼️</sup></b></summary>
+<summary><b>ATI &nbsp; <sup>2/2 🖼️</sup></b></summary>
 
 <table>
-<tr><td>❌</td><td colspan='2'>Essential Pro 1</td></tr>
-<tr><td>❌</td><td colspan='2'>Essential Pro 2</td></tr>
+<tr><td>✅</td><td>Essential Pro 1</td><td><img style='width:20%;' src='../../public/img/supplements/69692902-dcf9-4f41-b104-402154dc348a.supplement.png'/></td></tr>
+<tr><td>✅</td><td>Essential Pro 2</td><td><img style='width:20%;' src='../../public/img/supplements/e1dbec89-2396-4269-8f28-ab7534cb2d7d.supplement.png'/></td></tr>
 </table>
 </details>
 
