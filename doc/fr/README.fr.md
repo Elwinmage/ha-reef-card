@@ -91,7 +91,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   <tr>
     <td rowspan="3"><a href="#reefmat">ReefMat</a></td>
     <td>RSMAT250</td>
-    <td>☑️</td>
+    <td>✅</td>
     <td rowspan="3" width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSMAT.png"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsmat,all label:enhancement" style="text-decoration:none">📆</a>
@@ -100,11 +100,11 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   </tr>
   <tr>
     <td>RSMAT500</td>
-    <td>☑️</td>
+    <td>✅</td>
   </tr>
   <tr>
     <td>RSMAT1200</td>
-    <td>☑️</td>
+    <td>✅</td>
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
@@ -205,11 +205,11 @@ La carte ReefDose est découpée en 6 zones:
 
 <img src="../img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Cliquez sur l'icone <img width="30px" src="../img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
+<span>Cliquez sur l'icône <img width="30px" src="../img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
 
 <img src="../img/rsdose/zone_1_dialog_wifi.png"/>
 
-## Etats
+## États
 
  <img src="../img/rsdose/zone_2.png"/>
 
@@ -219,7 +219,7 @@ La carte ReefDose est découpée en 6 zones:
 
  <img  src="../img/rsdose/maintenance_view.png"/>
 
-<span>L'interrupteur de on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefDose.</span>
+<span>L'interrupteur de on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefMat.</span>
 
  <img  src="../img/rsdose/off_view.png"/>
 
@@ -229,21 +229,21 @@ La carte ReefDose est découpée en 6 zones:
 
 ---
 
-<span>Le boutton <img src="../img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boite de configuration de ce dosage.</span>
+<span>Le bouton <img src="../img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boîte de configuration de ce dosage.</span>
 
 <img src="../img/rsdose/zone_3_dialog_manual_dose_without.png"/>
 
-Vous pouvez ajouter des raccourcis en utilisant l'edition de la carte:
+Vous pouvez ajouter des raccourcis en utilisant l'édition de la carte :
 
 <img src="../img/rsdose/editor.png"/>
 
-Par exmple la tête 1 propose comme raccourcis les valeurs 2, 5 et 10mL.
+Par exemple la tête 1 propose comme raccourcis les valeurs 2, 5 et 10mL.
 
-Ces valeurs appraitrons en haut de la boite de dialogue. Un clique sur ces raccoucis lancera une commande pour doser la valeur définie.
+Ces valeurs apparaîtront en haut de la boite de dialogue. Un clic sur ces raccourcis lancera une commande pour doser la valeur définie.
 
 <img src="../img/rsdose/zone_3_dialog_manual_dose.png"/>
 
-<span>Un appuie sur le boutton de dose manuel: <img src="../img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par default visible juste au dessus: <img src="../img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exmple.
+<span>Un appui sur le bouton de dose manuel : <img src="../img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par défaut visible juste au dessus: <img src="../img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exemple.
 </span>
 
 ## Configuration et planning des têtes
@@ -258,9 +258,9 @@ Cette zone permet de visualiser la programmation courante des têtes et de la ch
 - le chiffre jaune en haut indique le cumul de dose manuel journalier
 - la partie centrale indique le volume distributé par rapport au volume journalier programmé total
 - le partie bleue en bas indique le nombre de doses distribuées par rapport au nombre de doses totales de la journées (exemple: 14/24 pour le bleu car c'est une programmation horaire que ce cette capture a été prise a 14h15.) Les valeurs pour le violet et le vert indiquent 0/0 car ces dosent doivent être distribuées à 8h mais l'intégration a été lancée aprés 8h donc il n'y aura aucune dose aujourd'hui.
-- un clique long sur une des 4 têtes basculera la tête en on/off
-- un clique sur une des tête ouvrira la boite de programmation.
-  Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avec de quitter.
+- un clic long sur une des 4 têtes basculera la tête en on/off
+- un clic sur une des têtes ouvrira la boîte de programmation.
+  Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avant de quitter.
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
@@ -270,13 +270,13 @@ Cette zone permet de visualiser la programmation courante des têtes et de la ch
 
 ---
 
-Cette zone permet de gérer les supppléments.
-Si un supplément est déjà déclaré, un clique dessus permettra d'ouvrir la boite de configuration où vous pourrez:
+Cette zone permet de gérer les suppléments.
+Si un supplément est déjà déclaré, un clic dessus permettra d'ouvrir la boîte de configuration où vous pourrez:
 
 - supprimer le supplément (icone corbeille en haut à droite)
 - indiquer le volume total du container
-- indiquer le volume réél du supplément
-- décider si vous voulez suivre le volume restant. Un clique sur les raccourcis en haut activera le controle et positonnera les valeurs par default avec un conteneur plein.
+- indiquer le volume réel du supplément
+- décider si vous voulez suivre le volume restant. Un clic sur les raccourcis en haut activera le contrôle et positionnera les valeurs par défaut avec un conteneur plein.
 - modifier le nom d'affichage du supplément.
 
  <img src="../img/rsdose/zone_5_dialog_container.png"/>
@@ -514,7 +514,7 @@ L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 im
 
 <img src="../img/rsmat/zone_1_dialog_wifi.png"/>
 
-## Etats
+## États
 
 <img src="../img/rsmat/zone_2.png"/>
 
@@ -524,7 +524,7 @@ L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 im
 
  <img  src="../img/rsmat/maintenance.png"/>
 
-<span>L'interrupteur de on/off <img src="../img/mdi/mdi_power-plug.png" width="20"/> permet de basculer entre les états on et off du ReefDose.</span>
+<span>L'interrupteur de on/off <img src="../img/mdi/mdi_power-plug.png" width="20"/> permet de basculer entre les états on et off du ReefMat.</span>
 
  <img  src="../img/rsmat/off_mode.png"/>
 
@@ -538,7 +538,7 @@ L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 im
 Cette zone affiche en temps réel l'état du rouleau filtrant, avec de haut en bas :
 
 - La **longueur totale utilisée** depuis le début du rouleau (en haut, en rouge)
-- La **longueur restante** au centre en rouge. Si le rouleau est vide ???? a changer tjs visible? <img src="../img/mdi/mdi_paper-roll.png" width="20"/>
+- La **longueur restante** au centre en rouge. Si le rouleau est vide, une icône <img src="../img/mdi/mdi_paper-roll.png" width="20"/> clignotante s'affiche à la place et une boîte de dialogue propose de remplacer le rouleau.
 
 <img src="../img/rsmat/zone_3_dialog_new_roll.png"/>
 
@@ -548,8 +548,8 @@ Cette zone affiche en temps réel l'état du rouleau filtrant, avec de haut en b
 - Le **pourcentage de rouleau utilisé** (arc de cercle en bas à droite)
 
 
-Si une anomalie est détectée le logo RedSea se tranformera en <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> clignotant.
-Un click sur cette alerte  ouvre la boite dedialogue des anomalies:
+Si une anomalie est détectée le logo RedSea se transformera en <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> clignotant.
+Un clic sur cette alerte ouvre la boîte de dialogue des anomalies :
 
 <img src="../img/rsmat/alert.png"/>
 <img src="../img/rsmat/zone_3_dialog_alert.png" />
@@ -562,9 +562,9 @@ Un click sur cette alerte  ouvre la boite dedialogue des anomalies:
 
 Cette zone permet de contrôler  l'avance du rouleau.
 
-De gauche à droite:
-- Le boutton <img src="../img/mdi/mdi_send.png" width="20"/> permet de lancer une **avance manuelle** du rouleau de la longeur indiquée par le chiffre au centre.
-- La **valeur d'avance** affichée (en cm) correspond à la valeur qui sera envoyée lors d'un appui sur le bouton. Un click sur ce chiffre ouvrela boite d'edition.
+De gauche à droite :
+- Le bouton <img src="../img/mdi/mdi_send.png" width="20"/> permet de lancer une **avance manuelle** du rouleau de la longueur indiquée par le chiffre au centre.
+- La **valeur d'avance** affichée (en cm) correspond à la valeur qui sera envoyée lors d'un appui sur le bouton. Un clic sur ce chiffre ouvre la boîte d'édition.
 
 <img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
 
@@ -592,7 +592,7 @@ Trois états sont possibles :
 <img src="../img/rsmat/zone_6.png"/>
 
 ---
-Ce boutton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> permet de donner l'état de l'avance programmée et de l'éditer en cliquant dessus.
+Ce bouton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> permet de donner l'état de l'avance programmée et de l'éditer en cliquant dessus.
 
 <img src="../img/rsmat/zone_6_dialog_schedule.png"/>
 
@@ -605,7 +605,7 @@ Ce boutton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../
 ---
 
 Cette zone affiche un graphique de la consommation du rouleau dans le temps.
-Un click sur le boutton bascule entre les deux modes disponibles:
+Un clic sur le bouton bascule entre les deux modes disponibles:
 - Le mode **Weekly** affiche la consommation sur les 7 derniers jours.
 - Le mode **Monthly** affiche la consommation sur les 30 derniers jours.
 
@@ -617,7 +617,16 @@ Un appui en haut à gauche du graphique ouvre la vue détaillée dans Home Assis
 
 ---
 
-Cette zone XXXXXXXXXXXXXXXX
+Cette zone affiche les derniers messages système du ReefMat. Elle comporte deux lignes :
+
+- La ligne grise affiche le **dernier message** reçu.
+- La ligne rose affiche la **dernière alerte**, précédée du symbole ⚠.
+
+Un clic sur l'icône <img src="../img/mdi/mdi_delete-empty.png" width="20"/> efface le message correspondant.
+
+Ces lignes peuvent être masquées via l'intefrace d'edition de la carte.
+
+<img src="../img/rsmat/editor.png" />
 
 # ReefRun
 
