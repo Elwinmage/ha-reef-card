@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
+
 import { resolve } from "path";
 import { copyFileSync, mkdirSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
+
+import del from "rollup-plugin-delete";
 
 // ============================================================================
 // Configuration : Dossier de copie automatique
@@ -141,7 +144,8 @@ export default defineConfig(({ mode }) => ({
       },
     },
     outDir: "dist",
-    emptyOutDir: true,
+    //emptyOutDir: true,
+    emptyOutDir: false,
     // Augmenter la limite pour éviter les warnings
     chunkSizeWarningLimit: 1000,
   },
@@ -151,5 +155,5 @@ export default defineConfig(({ mode }) => ({
     legalComments: "none",
   },
   // Ajouter le plugin de copie
-  plugins: [copyPlugin()],
+  plugins: [copyPlugin(), del({ targets: "dist/*", runOnce: true })],
 }));

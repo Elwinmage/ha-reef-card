@@ -80,42 +80,87 @@ class TranslationVerifier:
         # Pattern to match i18n._('key') or i18n._("key")
         pattern_i18n = r"i18n\._\(['\"]([^'\"]+)['\"]\)"
         
-        # Pattern to match create_select(shadowRoot, 'id', ['opt1', 'opt2', ...])
-        pattern_select_with_array = r"create_select\([^,]+,\s*['\"]([^'\"]+)['\"][^,]*,\s*\[([^\]]+)\]"
-        
-        # Pattern to match create_select(shadowRoot, 'id', ...) - just ID
-        pattern_select_id = r"create_select\([^,]+,\s*['\"]([^'\"]+)['\"]"
-        
-        # Pattern to match create_hour(shadowRoot, 'id', ...)
-        pattern_hour = r"create_hour\([^,]+,\s*['\"]([^'\"]+)['\"]"
-        
+        # Pattern to match create_select('id', ['opt1', 'opt2', ...]) - multiline-aware
+        pattern_select_with_array = r"create_select\(\s*['\"]([^'\"]+)['\"][\s\S]*?,\s*\[([^\]]+)\]"
+
+        # Pattern to match create_select('id', ...) - multiline-aware, just ID
+        pattern_select_id = r"create_select\(\s*['\"]([^'\"]+)['\"]"
+
+        # Pattern to match create_hour('id', ...) - multiline-aware
+        pattern_hour = r"create_hour\(\s*['\"]([^'\"]+)['\"]"
+
         # Pattern to match is_checked('id') or is_checked("id")
         # These IDs are element names that appear in config.elements[id]
         pattern_is_checked = r"is_checked\(['\"]([^'\"]+)['\"]\)"
-        
+
         for ts_file in self.src_dir.rglob("*.ts"):
             # Skip .d.ts files
             if ts_file.name.endswith('.d.ts'):
                 continue
-            
+
             try:
-                content = ts_file.read_text(encoding='utf-8')
-                lines = content.split('\n')
-                
-                # Search in each line
+                file_content = ts_file.read_text(encoding='utf-8')
+                lines = file_content.split('\n')
+
+                # Helper: find line number from character offset in file_content
+                def offset_to_line(offset, _fc=file_content):
+                    return _fc[:offset].count('\n') + 1
+
+                # Helper: build a location context dict from a line number
+                def make_context(line_num, _lines=lines, _file=ts_file):
+                    return {
+                        'file': str(_file.relative_to(self.src_dir)),
+                        'line': line_num,
+                        'line_before': _lines[line_num - 2].strip() if line_num > 1 else '',
+                        'line_current': _lines[line_num - 1].strip(),
+                        'line_after': _lines[line_num].strip() if line_num < len(_lines) else '',
+                    }
+
+                # --- Multiline scan: create_select with array ---
+                seen_select_positions = set()
+                for match in re.finditer(pattern_select_with_array, file_content, re.DOTALL):
+                    line_num = offset_to_line(match.start())
+                    id_key = match.group(1)
+                    keys.add(id_key)
+                    ctx = make_context(line_num)
+                    self.key_locations[id_key].append(ctx)
+                    seen_select_positions.add(match.start())
+                    # Options become keys (translation=true by default)
+                    options_str = match.group(2)
+                    for opt_key in re.findall(r"['\"]([^'\"]+)['\"]", options_str):
+                        keys.add(opt_key)
+                        self.key_locations[opt_key].append(ctx)
+
+                # --- Multiline scan: create_select without array (just ID) ---
+                for match in re.finditer(pattern_select_id, file_content, re.DOTALL):
+                    if match.start() in seen_select_positions:
+                        continue  # Already handled by the array variant
+                    line_num = offset_to_line(match.start())
+                    id_key = match.group(1)
+                    keys.add(id_key)
+                    self.key_locations[id_key].append(make_context(line_num))
+
+                # --- Multiline scan: create_hour ---
+                for match in re.finditer(pattern_hour, file_content, re.DOTALL):
+                    line_num = offset_to_line(match.start())
+                    id_key = match.group(1)
+                    keys.add(id_key)
+                    self.key_locations[id_key].append(make_context(line_num))
+
+                # --- Line-by-line scan: i18n._() and is_checked() ---
                 for line_num, line in enumerate(lines, 1):
                     # 1. Find i18n._() calls
                     matches_i18n = re.finditer(pattern_i18n, line)
-                    
+
                     for match in matches_i18n:
                         key = match.group(1)
-                        
+
                         # Skip ignored keys
                         if key in self.IGNORED_KEYS:
                             continue
-                        
+
                         keys.add(key)
-                        
+
                         # Store location and context
                         context = {
                             'file': str(ts_file.relative_to(self.src_dir)),
@@ -125,80 +170,15 @@ class TranslationVerifier:
                             'line_after': lines[line_num].strip() if line_num < len(lines) else '',
                         }
                         self.key_locations[key].append(context)
-                    
-                    # 2. Find create_select() calls with array literals
-                    matches_select_array = re.finditer(pattern_select_with_array, line)
-                    
-                    for match in matches_select_array:
-                        # ID becomes a key (for the label)
-                        id_key = match.group(1)
-                        keys.add(id_key)
-                        
-                        # Store location
-                        context = {
-                            'file': str(ts_file.relative_to(self.src_dir)),
-                            'line': line_num,
-                            'line_before': lines[line_num - 2].strip() if line_num > 1 else '',
-                            'line_current': line.strip(),
-                            'line_after': lines[line_num].strip() if line_num < len(lines) else '',
-                        }
-                        self.key_locations[id_key].append(context)
-                        
-                        # Options become keys (if translation=true, which is default)
-                        options_str = match.group(2)
-                        # Extract quoted strings from the array
-                        option_keys = re.findall(r"['\"]([^'\"]+)['\"]", options_str)
-                        
-                        for opt_key in option_keys:
-                            keys.add(opt_key)
-                            self.key_locations[opt_key].append(context)
-                    
-                    # 2b. Find create_select() calls without array (just capture ID)
-                    # Only if not already matched by pattern_select_with_array
-                    if not re.search(pattern_select_with_array, line):
-                        matches_select_id = re.finditer(pattern_select_id, line)
-                        
-                        for match in matches_select_id:
-                            # ID becomes a key (for the label)
-                            id_key = match.group(1)
-                            keys.add(id_key)
-                            
-                            # Store location
-                            context = {
-                                'file': str(ts_file.relative_to(self.src_dir)),
-                                'line': line_num,
-                                'line_before': lines[line_num - 2].strip() if line_num > 1 else '',
-                                'line_current': line.strip(),
-                                'line_after': lines[line_num].strip() if line_num < len(lines) else '',
-                            }
-                            self.key_locations[id_key].append(context)
-                    
-                    # 3. Find create_hour() calls
-                    matches_hour = re.finditer(pattern_hour, line)
-                    
-                    for match in matches_hour:
-                        # ID becomes a key (for the label)
-                        id_key = match.group(1)
-                        keys.add(id_key)
-                        
-                        # Store location
-                        context = {
-                            'file': str(ts_file.relative_to(self.src_dir)),
-                            'line': line_num,
-                            'line_before': lines[line_num - 2].strip() if line_num > 1 else '',
-                            'line_current': line.strip(),
-                            'line_after': lines[line_num].strip() if line_num < len(lines) else '',
-                        }
-                        self.key_locations[id_key].append(context)
-                    
+
                     # 4. Find is_checked() calls
                     matches_is_checked = re.finditer(pattern_is_checked, line)
-                    
+
                     for match in matches_is_checked:
                         # ID becomes a key (element name used as translation key)
                         id_key = match.group(1)
                         keys.add(id_key)
-                        
+
                         # Store location
                         context = {
                             'file': str(ts_file.relative_to(self.src_dir)),
@@ -208,13 +188,11 @@ class TranslationVerifier:
                             'line_after': lines[line_num].strip() if line_num < len(lines) else '',
                         }
                         self.key_locations[id_key].append(context)
-                
-                if any(re.search(pattern_i18n, line) or 
-                       re.search(pattern_select_with_array, line) or 
-                       re.search(pattern_select_id, line) or 
-                       re.search(pattern_hour, line) or
-                       re.search(pattern_is_checked, line)
-                       for line in lines):
+
+                if (re.search(pattern_i18n, file_content) or
+                        re.search(pattern_select_with_array, file_content, re.DOTALL) or
+                        re.search(pattern_hour, file_content, re.DOTALL) or
+                        re.search(pattern_is_checked, file_content)):
                     files_scanned += 1
                     
             except Exception as e:

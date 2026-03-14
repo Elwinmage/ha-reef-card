@@ -6,7 +6,7 @@
 //   IMPORT
 //----------------------------------------------------------------------------//
 import { css, html, LitElement, TemplateResult } from "lit";
-import { property, state } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
@@ -39,17 +39,17 @@ export class ReefCardEditor extends LitElement {
   @property({ attribute: false })
   current_device: unknown | null = null;
 
-  @property({ attribute: false })
+  //  @property({ attribute: false })
   private _hass: HassConfig;
 
   // Internal states
-  @state()
+  //  @state()
   private select_devices: SelectDevice[] = [];
 
-  @state()
+  //  @state()
   private first_init: boolean = true;
 
-  @state()
+  //  @state()
   private devices_list!: DeviceList;
 
   /**

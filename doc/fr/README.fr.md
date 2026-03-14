@@ -4,7 +4,7 @@
 [![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
 
 [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/Elwinmage/dd3b205383103c2e65a7f516003ecbf6/raw/clone.json&logo=github)](https://github.com/MShawon/github-clone-count-badge)
-![Coverage](./badges/coverage.svg)
+[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg?token=XXXX)](https://codecov.io/gh/Elwinmage/ha-reef-card)
 [![GH-code-size](https://img.shields.io/github/languages/code-size/Elwinmage/ha-reef-card.svg?color=red&style=flat-square)](https://github.com/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
@@ -91,7 +91,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   <tr>
     <td rowspan="3"><a href="#reefmat">ReefMat</a></td>
     <td>RSMAT250</td>
-    <td>☑️</td>
+    <td>✅</td>
     <td rowspan="3" width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSMAT.png"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsmat,all label:enhancement" style="text-decoration:none">📆</a>
@@ -100,15 +100,15 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
   </tr>
   <tr>
     <td>RSMAT500</td>
-    <td>☑️</td>
+    <td>✅</td>
   </tr>
   <tr>
     <td>RSMAT1200</td>
-    <td>☑️</td>
+    <td>✅</td>
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
-    <td>RSRUN</td><td>❌</td>
+    <td>RSRUN</td><td>☑</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>
@@ -205,11 +205,11 @@ La carte ReefDose est découpée en 6 zones:
 
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_config.png"/>
 
-<span>Cliquez sur l'icone <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
+<span>Cliquez sur l'icône <img width="30px" src="../img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
 
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_wifi.png"/>
 
-## Etats
+## États
 
  <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2.png"/>
 
@@ -219,7 +219,7 @@ La carte ReefDose est découpée en 6 zones:
 
  <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/maintenance_view.png"/>
 
-<span>L'interrupteur de on/off <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefDose.</span>
+<span>L'interrupteur de on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefMat.</span>
 
  <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/off_view.png"/>
 
@@ -229,21 +229,21 @@ La carte ReefDose est découpée en 6 zones:
 
 ---
 
-<span>Le boutton <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boite de configuration de ce dosage.</span>
+<span>Le bouton <img src="../img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boîte de configuration de ce dosage.</span>
 
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose_without.png"/>
 
-Vous pouvez ajouter des raccourcis en utilisant l'edition de la carte:
+Vous pouvez ajouter des raccourcis en utilisant l'édition de la carte :
 
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/editor.png"/>
 
-Par exmple la tête 1 propose comme raccourcis les valeurs 2, 5 et 10mL.
+Par exemple la tête 1 propose comme raccourcis les valeurs 2, 5 et 10mL.
 
-Ces valeurs appraitrons en haut de la boite de dialogue. Un clique sur ces raccoucis lancera une commande pour doser la valeur définie.
+Ces valeurs apparaîtront en haut de la boite de dialogue. Un clic sur ces raccourcis lancera une commande pour doser la valeur définie.
 
 <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose.png"/>
 
-<span>Un appuie sur le boutton de dose manuel: <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par default visible juste au dessus: <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exmple.
+<span>Un appui sur le bouton de dose manuel : <img src="../img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par défaut visible juste au dessus: <img src="../img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exemple.
 </span>
 
 ## Configuration et planning des têtes
@@ -258,9 +258,9 @@ Cette zone permet de visualiser la programmation courante des têtes et de la ch
 - le chiffre jaune en haut indique le cumul de dose manuel journalier
 - la partie centrale indique le volume distributé par rapport au volume journalier programmé total
 - le partie bleue en bas indique le nombre de doses distribuées par rapport au nombre de doses totales de la journées (exemple: 14/24 pour le bleu car c'est une programmation horaire que ce cette capture a été prise a 14h15.) Les valeurs pour le violet et le vert indiquent 0/0 car ces dosent doivent être distribuées à 8h mais l'intégration a été lancée aprés 8h donc il n'y aura aucune dose aujourd'hui.
-- un clique long sur une des 4 têtes basculera la tête en on/off
-- un clique sur une des tête ouvrira la boite de programmation.
-  Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avec de quitter.
+- un clic long sur une des 4 têtes basculera la tête en on/off
+- un clic sur une des têtes ouvrira la boîte de programmation.
+  Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avant de quitter.
 
   <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_4_dialog_schedule.png"/>
 
@@ -270,13 +270,13 @@ Cette zone permet de visualiser la programmation courante des têtes et de la ch
 
 ---
 
-Cette zone permet de gérer les supppléments.
-Si un supplément est déjà déclaré, un clique dessus permettra d'ouvrir la boite de configuration où vous pourrez:
+Cette zone permet de gérer les suppléments.
+Si un supplément est déjà déclaré, un clic dessus permettra d'ouvrir la boîte de configuration où vous pourrez:
 
 - supprimer le supplément (icone corbeille en haut à droite)
 - indiquer le volume total du container
-- indiquer le volume réél du supplément
-- décider si vous voulez suivre le volume restant. Un clique sur les raccourcis en haut activera le controle et positonnera les valeurs par default avec un conteneur plein.
+- indiquer le volume réel du supplément
+- décider si vous voulez suivre le volume restant. Un clic sur les raccourcis en haut activera le contrôle et positionnera les valeurs par défaut avec un conteneur plein.
 - modifier le nom d'affichage du supplément.
 
  <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_dialog_container.png"/>
@@ -468,9 +468,163 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 # ReefMat
 
-Planifié.
+ReefMat avec ha-reef-card en action:
 
-Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+[![Regarder la vidéo](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
+
+La carte ReefMat est découpée en 7 zones :
+
+1. Configuration / Informations Wifi
+2. Etats
+3. Informations du rouleau (longueur totale utilisée, longueur restante, fin de rouleau, mode...)
+4. Avance manuelle/automatique
+5. Sonde
+6. Avance programmée
+7. Graphique d'utilisation hebdomadaire / mensuel
+
+<img src="../img/rsmat/rsmat_zones.png"/>
+
+L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 images différentes:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsmat/RSMAT_100_BASE.png" width="100%"/><br/><b>0%</b></td>
+    <td align="center"><img src="../img/rsmat/RSMAT_75_BASE.png" width="100%"/><br/><b>25%</b></td>
+    <td align="center"><img src="../img/rsmat/RSMAT_50_BASE.png" width="100%"/><br/><b>50%</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="../img/rsmat/RSMAT_25_BASE.png" width="100%"/><br/><b>75%</b></td>
+    <td align="center"><img src="../img/rsmat/RSMAT_0_BASE.png" width="100%"/><br/><b>100%</b></td>
+    <td></td>
+  </tr>
+</table>
+
+## Configuration / Informations Wifi
+
+<img src="../img/rsmat/zone_1.png"/>
+
+---
+
+<span>Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefMat.</span>
+
+<img src="../img/rsmat/zone_1_dialog_configuration.png"/>
+
+<span>Cliquez sur l'icône <img src="../img/rsdose/wifi_icon.png" width="30" /> pour gérer les paramètres réseau.</span>
+
+<img src="../img/rsmat/zone_1_dialog_wifi.png"/>
+
+## États
+
+<img src="../img/rsmat/zone_2.png"/>
+
+---
+
+<span>L'interrupteur de maintenance <img src="../img/mdi/mdi_account-wrench.png" width="20"/> permet de basculer vers le mode maintenance.</span>
+
+ <img  src="../img/rsmat/maintenance.png"/>
+
+<span>L'interrupteur de on/off <img src="../img/mdi/mdi_power-plug.png" width="20"/> permet de basculer entre les états on et off du ReefMat.</span>
+
+ <img  src="../img/rsmat/off_mode.png"/>
+
+## Informations du rouleau
+
+<img src="../img/rsmat/zone_3.png"/>
+
+---
+
+Cette zone affiche en temps réel l'état du rouleau filtrant, avec de haut en bas :
+
+- La **longueur totale utilisée** depuis le début du rouleau (en haut, en rouge)
+- La **longueur restante** au centre en rouge. Si le rouleau est vide, une icône <img src="../img/mdi/mdi_paper-roll.png" width="20"/> clignotante s'affiche à la place et une boîte de dialogue propose de remplacer le rouleau.
+
+<img src="../img/rsmat/zone_3_dialog_new_roll.png"/>
+
+- Le **nombre de jours restants** avant la fin du rouleau estimé selon la consommation journalière moyenne (en noir)
+- La **consommation journalière moyenne** en cm (en bas à gauche)
+- Le **mode de fonctionnement** courant: Auto, Maintenance, Off… (sous le logo RedSea)
+- Le **pourcentage de rouleau utilisé** (arc de cercle en bas à droite)
+
+Si une anomalie est détectée le logo RedSea se transformera en <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> clignotant.
+Un clic sur cette alerte ouvre la boîte de dialogue des anomalies :
+
+<img src="../img/rsmat/alert.png"/>
+<img src="../img/rsmat/zone_3_dialog_alert.png" />
+
+## Avance Manuelle/Automatique
+
+<img src="../img/rsmat/zone_4.png"/>
+<img src="../img/rsmat/zone_4_auto_off.png"/>
+---
+
+Cette zone permet de contrôler l'avance du rouleau.
+
+De gauche à droite :
+
+- Le bouton <img src="../img/mdi/mdi_send.png" width="20"/> permet de lancer une **avance manuelle** du rouleau de la longueur indiquée par le chiffre au centre.
+- La **valeur d'avance** affichée (en cm) correspond à la valeur qui sera envoyée lors d'un appui sur le bouton. Un clic sur ce chiffre ouvre la boîte d'édition.
+
+<img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
+
+- Le **bouton de d'avance automatiquement** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> permet d'activer/désactiver l'avance automatique du rouleau.
+
+## Sonde
+
+<img src="../img/rsmat/zone_5.png"/>
+
+---
+
+Cette zone indique l'état de la sonde de niveau.
+
+Trois états sont possibles :
+
+| État              | Image                                                           |
+| ----------------- | --------------------------------------------------------------- |
+| Capteur branché   | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
+| Capteur débranché | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
+| Capteur sale      | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
+
+## Avance programmée
+
+<img src="../img/rsmat/zone_6.png"/>
+
+---
+
+Ce bouton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> permet de donner l'état de l'avance programmée et de l'éditer en cliquant dessus.
+
+<img src="../img/rsmat/zone_6_dialog_schedule.png"/>
+
+## Graphique d'utilisation
+
+<img src="../img/rsmat/zone_7.png"/> 
+<img src="../img/rsmat/monthly.png"/>
+
+---
+
+Cette zone affiche un graphique de la consommation du rouleau dans le temps.
+Un clic sur le bouton bascule entre les deux modes disponibles:
+
+- Le mode **Weekly** affiche la consommation sur les 7 derniers jours.
+- Le mode **Monthly** affiche la consommation sur les 30 derniers jours.
+
+Un appui en haut à gauche du graphique ouvre la vue détaillée dans Home Assistant.
+
+## Messages
+
+<img src="../img/rsmat/zone_8.png"/>
+
+---
+
+Cette zone affiche les derniers messages système du ReefMat. Elle comporte deux lignes :
+
+- La ligne grise affiche le **dernier message** reçu.
+- La ligne rose affiche la **dernière alerte**, précédée du symbole ⚠.
+
+Un clic sur l'icône <img src="../img/mdi/mdi_delete-empty.png" width="20"/> efface le message correspondant.
+
+Ces lignes peuvent être masquées via l'intefrace d'edition de la carte.
+
+<img src="../img/rsmat/editor.png" />
 
 # ReefRun
 

@@ -35,6 +35,8 @@ export default css`
     display: grid;
     grid-template-columns: 40px 90%;
     grid-gap: 10px;
+    /* Ensure hui-number-entity-row has enough width to render slider + value */
+    min-width: 350px;
   }
 
   #dialog-close {

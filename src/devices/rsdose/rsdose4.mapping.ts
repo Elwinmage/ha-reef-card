@@ -265,6 +265,9 @@ export const config4 = {
           name: "manual_head_volume",
           force_integer: true,
           type: "common-sensor",
+          unit_css: {
+            "font-size": "0.7em",
+          },
           css: {
             position: "absolute",
             width: "60%",
@@ -290,6 +293,9 @@ export const config4 = {
           class: "scheduler_label_top",
           disabled_if: "${state}<1",
           prefix: "+",
+          unit_css: {
+            "font-size": "0.7em",
+          },
           css: {
             "text-align": "center",
             "grid-column": "1",
@@ -324,6 +330,9 @@ export const config4 = {
           class: "scheduler_label_bottom",
           type: "common-sensor-target",
           unit: "${i18n._('doses')}",
+          unit_css: {
+            "font-size": "0.7em",
+          },
           css: {
             "text-align": "center",
             color: "rgb(130,230,250)",

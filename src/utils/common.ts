@@ -82,7 +82,7 @@ export default class DeviceList {
    * Initialise devices and main_devices lists with reefbeat devices configured in ha-reefbeat-component
    */
   private init_devices(): void {
-    for (const device_id in this._hass.devices) {
+    for (const device_id in this._hass?.devices) {
       const dev = this._hass.devices[device_id];
       if (!dev) continue;
 

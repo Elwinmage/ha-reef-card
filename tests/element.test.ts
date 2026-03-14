@@ -259,6 +259,13 @@ describe("MyElement.get_style()", () => {
     expect(elt.get_style()).toBe("");
   });
 
+  it("L323 false branch: returns style without device color substitution when device is null", () => {
+    // Covers element.ts L323: this.device null → if(this.device) false, no color substitution
+    const elt = makeElt({ css: { color: "red" } }, null);
+    const style = elt.get_style();
+    expect(style).toContain("color:red");
+  });
+
   it("converts CSS map to style string", () => {
     const elt = makeElt(
       { css: { color: "red", "font-size": "12px" } },
@@ -844,6 +851,259 @@ describe("run_actions() — UI action branches", () => {
     ]);
     expect(spy).toHaveBeenCalledWith(JSON.stringify(d));
     spy.mockRestore();
+  });
+
+  it("L486: device_event dispatches custom event with event+payload from action.data", async () => {
+    // Covers element.ts L486-496: device_event case
+    const el = makeEl();
+    el._hass = makeHass_B();
+    let receivedDetail: any = null;
+    el.addEventListener("device-event", (e: any) => {
+      receivedDetail = e.detail;
+    });
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "device_event",
+        data: { event: "my_event", payload: { foo: 1 } },
+      },
+    ]);
+    expect(receivedDetail).not.toBeNull();
+    expect(receivedDetail.event).toBe("my_event");
+    expect(receivedDetail.payload).toEqual({ foo: 1 });
+  });
+
+  it("L496: device_event with null data dispatches event with undefined event+payload", async () => {
+    // Covers element.ts L496: device_event with no data → ?.event = undefined
+    const el = makeEl();
+    el._hass = makeHass_B();
+    let fired = false;
+    el.addEventListener("device-event", () => {
+      fired = true;
+    });
+    await el.run_actions([
+      { domain: "redsea_ui", action: "device_event", data: null },
+    ]);
+    expect(fired).toBe(true);
+  });
+
+  it("L502: update_conf patches device.config.elements and calls requestUpdate", async () => {
+    // Covers element.ts L502-554: update_conf case — object patch with css
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: {
+        elements: {
+          stats_week: {
+            type: "hui-statistics-graph-card",
+            css: { display: "none" },
+          },
+        },
+      },
+      _elements: {},
+      _conf_overrides: {},
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { stats_week: { css: { display: "block" } } },
+      },
+    ]);
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it("L509: update_conf patches object-type css values in _conf_overrides", async () => {
+    // Covers element.ts L509-511: val is object → deep merge into overrides
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: {
+        elements: {
+          stats_week: { type: "common-switch", css: {} },
+        },
+      },
+      _elements: {},
+      _conf_overrides: { stats_week: {} },
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { stats_week: { css: { color: "red" } } },
+      },
+    ]);
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it("L516: update_conf calls setProperty on cached hui-* element when css patch given", async () => {
+    // Covers element.ts L516-518: hui-* css patch → style.setProperty on cached element
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    const mockSetProp = vi.fn();
+    const fakeCard = { style: { setProperty: mockSetProp } };
+    el.device = {
+      config: {
+        elements: {
+          stats_week: { type: "hui-statistics-graph-card", css: {} },
+        },
+      },
+      _elements: { stats_week: fakeCard }, // declarationKey scheme
+      _conf_overrides: {},
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { stats_week: { css: { "--ha-card-background": "blue" } } },
+      },
+    ]);
+    expect(mockSetProp).toHaveBeenCalledWith("--ha-card-background", "blue");
+  });
+
+  it("L519: update_conf calls requestUpdate on cached common-* element when css patch given", async () => {
+    // Covers element.ts L519-523: common-* css → Object.assign + requestUpdate on element
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const deviceUpdate = vi.fn();
+    const elemUpdate = vi.fn();
+    const fakeElem = { conf: { css: {} }, requestUpdate: elemUpdate };
+    el.device = {
+      config: {
+        elements: {
+          relay: { type: "common-switch", css: {} },
+        },
+      },
+      _elements: { relay: fakeElem }, // declarationKey scheme
+      _conf_overrides: {},
+      requestUpdate: deviceUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { relay: { css: { opacity: "0.5" } } },
+      },
+    ]);
+    expect(elemUpdate).toHaveBeenCalled();
+  });
+
+  it("L529: update_conf stores primitive (non-object) val directly in overrides", async () => {
+    // Covers element.ts L529: else branch — val is primitive → direct assignment
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: {
+        elements: {
+          relay: { type: "common-switch" },
+        },
+      },
+      _elements: {},
+      _conf_overrides: { relay: {} },
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { relay: { display: "none" } }, // primitive string value
+      },
+    ]);
+    expect(el.device._conf_overrides.relay.display).toBe("none");
+  });
+
+  it("L502 false branch: update_conf no-ops when device.config.elements is absent", async () => {
+    // Covers element.ts L502: device?.config?.elements falsy → outer if skipped
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: {},
+      _elements: {},
+      _conf_overrides: {},
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { relay: { css: { opacity: "0" } } },
+      },
+    ]);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("L509 false branch: update_conf skips overrides when _conf_overrides is null", async () => {
+    // Covers element.ts L509: overrides is null → if(overrides) skipped
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: { elements: { relay: { type: "common-switch" } } },
+      _elements: {},
+      _conf_overrides: null, // null → if(overrides) false
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { relay: { display: "block" } },
+      },
+    ]);
+    expect(mockUpdate).toHaveBeenCalled(); // device.requestUpdate still called
+  });
+
+  it("L509 elemName absent: update_conf skips element when key not in config.elements", async () => {
+    // Covers element.ts L509: elemName NOT in device.config.elements → inner block skipped
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    el.device = {
+      config: { elements: { other: { type: "common-switch" } } },
+      _elements: {},
+      _conf_overrides: {},
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { nonexistent: { css: {} } },
+      },
+    ]);
+    // requestUpdate still called even if no element patched
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it("L544 false branch: update_conf on common-* element without conf.css skips Object.assign", async () => {
+    // Covers element.ts L544: cachedElt.conf?.css falsy → Object.assign skipped
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const mockUpdate = vi.fn();
+    const elemUpdate = vi.fn();
+    const fakeElem = { conf: {}, requestUpdate: elemUpdate }; // no conf.css
+    el.device = {
+      config: { elements: { relay: { type: "common-switch", css: {} } } },
+      _elements: { relay: fakeElem }, // declarationKey scheme
+      _conf_overrides: {},
+      requestUpdate: mockUpdate,
+    };
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "update_conf",
+        data: { relay: { css: { opacity: "0.5" } } },
+      },
+    ]);
+    expect(elemUpdate).toHaveBeenCalled();
   });
 });
 describe("_wait_timer() (L485-525)", () => {

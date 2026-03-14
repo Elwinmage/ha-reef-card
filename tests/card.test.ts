@@ -145,14 +145,12 @@ describe("ReefCard — constructor", () => {
     ).not.toThrow();
   });
 
-  it("quit-dialog: calls _dialog_box.quit() and card.render()", () => {
+  it("quit-dialog: calls _dialog_box.quit()", () => {
     const card = makeCard();
     const mockQuit = vi.fn();
     card._dialog_box = { quit: mockQuit };
-    card.render = vi.fn();
     card.dispatchEvent(new CustomEvent("quit-dialog"));
     expect(mockQuit).toHaveBeenCalled();
-    expect(card.render).toHaveBeenCalled();
   });
 
   it("quit-dialog: no-op when _dialog_box is null", () => {

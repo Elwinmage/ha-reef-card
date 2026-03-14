@@ -6,13 +6,6 @@
 import { css } from "lit";
 
 export default css`
-  /* Styles for images */
-  img.click-image:hover {
-    cursor: pointer;
-    background-color: rgb(235, 235, 235);
-    border-radius: 30px;
-  }
-
   /* Styles MDI icons */
   ha-icon.click-icon {
     cursor: pointer;

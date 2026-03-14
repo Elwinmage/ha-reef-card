@@ -24,6 +24,7 @@ import { attachClickHandlers } from "../utils/click_handler";
 import { SafeEval, SafeEvalContext } from "../utils/SafeEval";
 import i18n from "../translations/myi18n.js";
 import { OFF_COLOR } from "../utils/constants";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 
@@ -33,6 +34,8 @@ import { OFF_COLOR } from "../utils/constants";
  * @extends {LitElement}
  */
 export class MyElement extends LitElement {
+  // Inject animation keyframes into every element's shadow DOM
+  static override styles = [style_animations];
   // Public reactive properties
   @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
@@ -387,9 +390,14 @@ export class MyElement extends LitElement {
 
     return html`
       <div class="${this.conf?.class || ""}" style="${this.get_style()}">
-        ${this._render(this.get_style("css"))}
+        ${this._render(this.get_style("elt_css"))}
       </div>
     `;
+    /*    return html`
+      <div class="${this.conf?.class || ""}" style="${this.get_style()}">
+        ${this._render(this.get_style("css"))}
+      </div>
+    `;*/
   }
 
   /**
@@ -472,6 +480,78 @@ export class MyElement extends LitElement {
             str = JSON.stringify(action.data);
           }
           this.msgbox(str);
+          break;
+        // Dispatch a named event up to the parent device for custom handling
+        case "device_event":
+          this.dispatchEvent(
+            new CustomEvent("device-event", {
+              bubbles: true,
+              composed: true,
+              detail: {
+                event: (action.data as any)?.event,
+                payload: (action.data as any)?.payload,
+              },
+            }),
+          );
+          break;
+        // Deep-merge a patch into this.device.config.elements and re-render
+        // Usage in tap_action:
+        //   domain: "redsea_ui", action: "update_conf"
+        //   data: { stats_week: { css: { display: "block" } }, stats_month: { css: { display: "none" } } }
+        case "update_conf":
+          if (
+            this.device?.config?.elements &&
+            action.data &&
+            typeof action.data === "object"
+          ) {
+            const patch = action.data as Record<string, any>;
+            for (const [elemName, elemPatch] of Object.entries(patch)) {
+              if (elemName in this.device.config.elements) {
+                const elemConf = this.device.config.elements[elemName];
+                // Cache key is now declarationKey (elemName) — matches device.ts _render_element fix
+                const cacheKey = elemName;
+                const cachedElt = (this.device as any)._elements?.[cacheKey];
+
+                // Store overrides persistently so they survive swapLeftRight re-renders
+                const overrides = (this.device as any)._conf_overrides;
+                if (overrides) {
+                  if (!overrides[elemName]) overrides[elemName] = {};
+                  for (const [key, val] of Object.entries(elemPatch as any)) {
+                    if (
+                      val !== null &&
+                      typeof val === "object" &&
+                      !Array.isArray(val)
+                    ) {
+                      overrides[elemName][key] = {
+                        ...(overrides[elemName][key] ?? {}),
+                        ...(val as any),
+                      };
+                    } else {
+                      overrides[elemName][key] = val;
+                    }
+                  }
+                }
+
+                if (cachedElt && (elemPatch as any).css) {
+                  if (elemConf.type?.startsWith("hui-")) {
+                    // hui-* cards: style.setProperty directly (created once, never re-rendered)
+                    for (const [prop, val] of Object.entries(
+                      (elemPatch as any).css,
+                    )) {
+                      cachedElt.style.setProperty(prop, val as string);
+                    }
+                  } else {
+                    // common-* elements: patch live conf.css + requestUpdate
+                    if (cachedElt.conf?.css) {
+                      Object.assign(cachedElt.conf.css, (elemPatch as any).css);
+                    }
+                    cachedElt.requestUpdate();
+                  }
+                }
+              }
+            }
+            this.device.requestUpdate();
+          }
           break;
       }
     }

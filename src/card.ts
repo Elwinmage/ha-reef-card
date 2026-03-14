@@ -25,38 +25,38 @@ export class ReefCard extends LitElement {
   static override styles = [style_card, style_dialog];
 
   // Public reactive properties
-  @property({ attribute: false })
+  //  @property({ attribute: false })
   private _hass: HassConfig;
 
   @property({ attribute: false })
   private current_device: any = null;
 
   // Internal states
-  @state()
+  //@state()
   private select_devices: SelectDevice[] = [];
 
-  @state()
+  //  @state()
   private first_init: boolean = true;
 
   @state()
   private re_render: boolean = false;
 
-  @state()
+  //  @state()
   private _dialog_box: Dialog | null = null;
 
-  @state()
+  //  @state()
   private user_config: UserConfig = {};
 
-  @state()
+  //  @state()
   private no_device: unknown;
 
-  @state()
+  //  @state()
   private devices_list!: DeviceList;
 
-  @state()
+  //  @state()
   private selected?: string;
 
-  @state()
+  //  @state()
   private messages?: any;
 
   /**
@@ -77,7 +77,7 @@ export class ReefCard extends LitElement {
       if (this._dialog_box) {
         this._dialog_box.quit();
       }
-      this.render(); /* force rerender, do not use requestUpdate*/
+      //      this.render(); /* force rerender, do not use requestUpdate*/
     });
   }
 

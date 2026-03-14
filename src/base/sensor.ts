@@ -28,6 +28,7 @@
 import { html, TemplateResult, CSSResultGroup, css } from "lit";
 import { property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
+import style_animations from "../utils/animations.styles";
 import { MyElement } from "./element";
 import { button_color } from "../utils/common";
 
@@ -37,6 +38,7 @@ import type { SensorConfig } from "../types/index";
 
 export class Sensor extends MyElement {
   static override styles: CSSResultGroup = [
+    style_animations,
     style_sensor,
     css`
       .sensor {
@@ -94,12 +96,16 @@ export class Sensor extends MyElement {
     let unit = "";
 
     if (this.stateObj) {
-      value = this.label || this.stateObj.state;
-      unit =
-        this.conf.unit || this.stateObj.attributes?.unit_of_measurement || "";
+      if (this.conf?.translate_values) {
+        value = this.label || this._hass.formatEntityState(this.stateObj);
+      } else {
+        value = this.label || this.stateObj.state;
+      }
 
-      if (this.conf.prefix) {
-        value = this.conf.prefix + value;
+      if (this.conf.unit) {
+        unit = this.evaluate(this.conf.unit);
+      } else {
+        unit = this.stateObj.attributes?.unit_of_measurement || "";
       }
 
       if (this.conf.force_integer && typeof value === "string") {
@@ -108,12 +114,14 @@ export class Sensor extends MyElement {
           value = Math.round(numValue).toString();
         }
       }
+      if (this.conf.prefix) {
+        value = this.evaluate(this.conf.prefix).replaceAll('"', "") + value;
+      }
     }
 
-    return html`
-      <div class="sensor ${sclass}" style="${_style ?? ""}; ">
-        ${value} ${unit ? html`<span class="unit">${unit}</span>` : ""}
-      </div>
-    `;
+    return html`${value}
+    ${unit
+      ? html`<span style=${this.get_style("unit_css")}>${unit}</span>`
+      : ""}`;
   }
 }

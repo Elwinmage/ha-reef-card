@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------//
 
 import { TemplateResult, LitElement, html } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
 import type { HassConfig, DeviceInfo, DeviceConfig } from "../types/index";
 
@@ -23,42 +23,46 @@ import style_common from "../utils/common.styles";
 //----------------------------------------------------------------------------//
 @customElement("rs-device")
 export class RSDevice extends LitElement {
-  @state()
-  public entities: Record<string, any> = {};
+  // Static cache: loadCardHelpers is resolved once for all instances.
+  // This avoids a double render on init (first natural Lit render, then
+  // requestUpdate() after the async await).
+  private static _helpersPromise: Promise<any> | null = null;
+  static _helpersResolved: any = null; // non-private so tests can inject a mock
 
-  @state()
-  public config: DeviceConfig;
-
-  @state()
-  protected _hass: HassConfig | null = null;
-
-  @state()
-  protected device: DeviceInfo | null = null;
-
-  @state()
-  protected initial_config: Partial<DeviceConfig>;
-
-  @state()
-  protected user_config: Partial<DeviceConfig>;
-
-  @state()
-  protected _elements: any = {};
-
-  @state()
-  protected masterOn: boolean = true;
-
-  @property({ type: Boolean })
+  @property({
+    type: Boolean,
+    hasChanged: (newVal: boolean, oldVal: boolean) =>
+      newVal === true && oldVal === false,
+  })
   to_render: boolean = false;
 
-  @property({ type: Boolean })
+  public entities: Record<string, any> = {};
+
+  public config: DeviceConfig;
+
+  protected _hass: HassConfig | null = null;
+
+  protected device: DeviceInfo | null = null;
+
+  protected initial_config: Partial<DeviceConfig>;
+
+  protected user_config: Partial<DeviceConfig>;
+
+  protected _elements: any = {};
+  // Persistent CSS overrides applied by update_conf actions — survive swapLeftRight re-renders
+  protected _conf_overrides: Record<string, Record<string, any>> = {};
+
+  protected masterOn: boolean = true;
+
   isEditorMode: boolean = false;
 
-  @state()
   protected dialogs: any;
 
   protected state: boolean = false;
 
   static styles = [style_common];
+
+  private _helpers: any;
 
   /**
    * Create a device from a configuration (ex: rsdose4.mapping.ts)
@@ -118,7 +122,7 @@ export class RSDevice extends LitElement {
     }
     this.update_config();
     this.to_render = false;
-    console.debug("Render ", this.config.model);
+    console.debug("Render ", this.config.model, this.device?.name);
 
     // get style and substyle
     let style = html``;
@@ -129,8 +133,17 @@ export class RSDevice extends LitElement {
     }
 
     const disabled = this._render_disabled(substyle);
-    if (disabled !== null) {
-      return disabled;
+    if (disabled.reason !== null) {
+      const maintenance = disabled.maintenance_element
+        ? html`${disabled.maintenance_element}`
+        : html``;
+
+      return html`
+        <div class="device_bg">
+          <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${disabled.substyle}"/>
+          <p class='disabled_in_ha'>${disabled.reason}</p>
+         ${maintenance}
+        </div">`;
     }
     //check device state
     if (!this.is_on()) {
@@ -213,7 +226,7 @@ export class RSDevice extends LitElement {
     }
     if (re_render) {
       this.to_render = true;
-      this.requestUpdate();
+      //this.requestUpdate();
     }
   }
 
@@ -375,9 +388,8 @@ export class RSDevice extends LitElement {
   /*
    * Special render if the device is disabled or in maintenance mode in HA
    */
-  _render_disabled(substyle = null) {
+  _render_disabled(substyle = null): any {
     let reason: string | null = null;
-    let maintenance: TemplateResult = html``;
 
     if (this.is_disabled()) {
       reason = i18n._("disabledInHa");
@@ -387,36 +399,29 @@ export class RSDevice extends LitElement {
       this._hass.states[this.entities["maintenance"].entity_id]?.state === "on"
     ) {
       reason = i18n._("maintenance");
-      // if in maintenance mode, display maintenance switch
-      const elements: any[] = [];
+    }
+    // If in maintenance mode, find and build the maintenance toggle element
+    let maintenance_element: any = null;
+    if (reason === i18n._("maintenance") && this.config?.elements) {
       for (const i in this.config.elements) {
-        elements.push(this.config.elements[i]);
-      }
-
-      for (const swtch of elements) {
-        if (swtch.name === "maintenance") {
-          if (this._hass) {
-            const maintenance_button = MyElement.create_element(
-              this._hass,
-              swtch,
-              this,
-            );
-            maintenance = html`${maintenance_button}`;
-          }
+        const swtch = this.config.elements[i];
+        if (swtch.name === "maintenance" && this._hass) {
+          maintenance_element = MyElement.create_element(
+            this._hass,
+            swtch,
+            this,
+          );
           break;
         }
       }
     }
 
-    if (reason === null) {
-      return null;
-    }
-
-    return html`<div class="device_bg">
-<img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${substyle}"/>
-<p class='disabled_in_ha'>${reason}</p>
-${maintenance}
-</div">`;
+    // Always return an object — caller checks .reason !== null for overlay
+    return {
+      reason: reason,
+      substyle: substyle,
+      maintenance_element: maintenance_element,
+    };
   }
 
   /*
@@ -433,13 +438,43 @@ ${maintenance}
     return style;
   }
 
+  async connectedCallback() {
+    super.connectedCallback();
+    // If helpers were already resolved (e.g. another device instance loaded them),
+    // assign synchronously so the first Lit render already has them — no extra render needed.
+    if (RSDevice._helpersResolved) {
+      this._helpers = RSDevice._helpersResolved;
+      return;
+    }
+    // First time: start or reuse the single shared promise.
+    if (!RSDevice._helpersPromise) {
+      RSDevice._helpersPromise = (window as any).loadCardHelpers();
+    }
+    this._helpers = await RSDevice._helpersPromise;
+    RSDevice._helpersResolved = this._helpers;
+    // Request update only once, only if hui-* elements are present.
+    const hasHuiElement =
+      this.config?.elements &&
+      Object.values(this.config.elements).some((el: any) =>
+        el?.type?.startsWith("hui-"),
+      );
+    if (hasHuiElement) {
+      this.requestUpdate();
+    }
+  }
+
   /*
    * Render a single element: switch, sensor...
    * @conf: the json configuration for the element
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
-  _render_element(conf: any, state: boolean, put_in: string | null) {
+  _render_element(
+    conf: any,
+    state: boolean,
+    put_in: string | null,
+    declarationKey?: string,
+  ) {
     let sensor_put_in = null;
     //Element is groupped with others
     if ("put_in" in conf) {
@@ -454,46 +489,97 @@ ${maintenance}
       return html``;
     }
 
-    // Handle hui-entities-card natively — same logic as dialog.ts _render_content()
-    if (conf.type === "hui-entities-card") {
-      const key = "hui-entities-card." + (conf.name || "device_states");
+    // Handle hui-*-card natively — same logic as dialog.ts _render_content()
+    // Requires _helpers (loaded async), skip until available
+    if (conf.type.startsWith("hui-")) {
+      // Use instance _helpers or fallback to the shared resolved static
+      const helpers = this._helpers ?? RSDevice._helpersResolved;
+      if (!helpers) {
+        return html``;
+      }
+      // Use declarationKey if available — keeps cache consistent with update_conf
+      const key =
+        declarationKey ?? conf.type + "." + (conf.name || "device_states");
       if (!(key in this._elements)) {
-        const HuiCard = customElements.get("hui-entities-card") as any;
-        if (HuiCard && this._hass && conf.conf) {
-          const card = new HuiCard();
+        if (this._hass && conf.conf) {
           // Resolve translation_key -> real entity_id, exactly like dialog.ts
           const clone = structuredClone(conf.conf);
-          for (const pos in conf.conf.entities) {
-            const e = conf.conf.entities[pos];
+          if (clone?.entity) {
+            const e = clone.entity;
             if (typeof e === "string") {
-              clone.entities[pos] = this.get_entity(e)?.entity_id ?? e;
+              clone.entity = this.get_entity(e)?.entity_id ?? e;
             } else {
-              clone.entities[pos].entity =
-                this.get_entity(e.entity)?.entity_id ?? e.entity;
+              clone.entity = this.get_entity(e.entity)?.entity_id ?? e.entity;
+            }
+          } else {
+            for (const pos in conf.conf.entities) {
+              const e = conf.conf.entities[pos];
+              if (typeof e === "string") {
+                clone.entities[pos] = this.get_entity(e)?.entity_id ?? e;
+              } else {
+                clone.entities[pos].entity =
+                  this.get_entity(e.entity)?.entity_id ?? e.entity;
+              }
             }
           }
-          card.setConfig(clone);
+          const card = helpers.createCardElement(clone);
+
+          //Treat CSS on host element
+          if (conf.css) {
+            for (const [prop, value] of Object.entries(conf.css)) {
+              // shadow_css entries are injected into the card's shadow DOM (see below)
+              if (prop === "shadow_css") continue;
+              card.style.setProperty(prop, value);
+            }
+          }
           card.hass = this._hass;
+
+          // Inject styles into the card's shadow DOM (e.g. to override background,
+          // min-height, or any internal style unreachable from outside).
+          if (conf.css?.shadow_css) {
+            const shadowCss = conf.css.shadow_css;
+            const injectStyle = () => {
+              if (card.shadowRoot) {
+                const styleEl = document.createElement("style");
+                styleEl.textContent = shadowCss;
+                card.shadowRoot.appendChild(styleEl);
+              } else {
+                // Shadow root not ready yet, retry on next frame
+                requestAnimationFrame(injectStyle);
+              }
+            };
+            requestAnimationFrame(injectStyle);
+          }
+
           this._elements[key] = card;
         }
       } else {
         // Propagate hass updates
         this._elements[key].hass = this._hass;
       }
+
       return html`${this._elements[key]}`;
     }
 
     let element: MyElement | null = null;
-    if (conf.name in this._elements) {
-      element = this._elements[conf.type + "." + conf.name];
+    // Use declarationKey (unique element id in mapping) as cache key.
+    // This handles cases where multiple elements share the same type+name
+    // (e.g. ec_sensor / ec_sensor_disconnected both have name:"is_ec_sensor_connected")
+    const elementKey = declarationKey ?? conf.type + "." + conf.name;
+    if (elementKey in this._elements) {
+      element = this._elements[elementKey];
       if (element) {
         element.stateOn = state;
       }
     } else {
       if (this._hass) {
         element = MyElement.create_element(this._hass, conf, this);
-        this._elements[conf.type + "." + conf.name] = element;
+        this._elements[elementKey] = element;
       }
+    }
+    // Re-apply persistent CSS overrides (survive swapLeftRight config recreation)
+    if (element && this._conf_overrides[elementKey]?.css) {
+      Object.assign(element.conf.css, this._conf_overrides[elementKey].css);
     }
     return html`${element}`;
   }
@@ -506,11 +592,149 @@ ${maintenance}
   _render_elements(state: boolean, put_in: string | null = null) {
     const elements: any[] = [];
     for (const i in this.config.elements) {
-      elements.push(this.config.elements[i]);
+      elements.push({ conf: this.config.elements[i], key: i });
     }
-    return html`${elements.map((conf) =>
-      this._render_element(conf, state, put_in),
+    return html`${elements.map(({ conf, key }) =>
+      this._render_element(conf, state, put_in, key),
     )}`;
+  }
+
+  /*
+   * Editor : is_ckeched
+   */
+  is_checked(id) {
+    let result = false;
+    if ("disabled_if" in this.config.elements[id]) {
+      result = this.config.elements[id].disabled_if;
+    }
+    if (result) {
+      return html`
+        <label class="switch">
+          <input
+            type="checkbox"
+            id="${id}"
+            @change="${this.handleChangedDeviceEvent}"
+            checked
+          />
+          <span class="slider round"></span>
+        </label>
+        <label>${i18n._(id)}</label>
+      `;
+    } else {
+      return html`
+        <label class="switch">
+          <input
+            type="checkbox"
+            id="${id}"
+            @change="${this.handleChangedDeviceEvent}"
+          />
+          <span class="slider round"></span>
+        </label>
+        <label>${i18n._(id)}</label>
+      `;
+    }
+  } // end of function is_checked
+
+  _editor_common() {
+    return html`<style>
+        /* The switch - the box around the slider */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 30px;
+          height: 17px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        /* The slider */
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: 0.4s;
+          transition: 0.4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 13px;
+          width: 13px;
+          left: 2px;
+          bottom: 2px;
+          background-color: white;
+          -webkit-transition: 0.4s;
+          transition: 0.4s;
+        }
+
+        input:checked + .slider {
+          background-color: #2196f3;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196f3;
+        }
+
+        input:checked + .slider:before {
+          -webkit-transform: translateX(13px);
+          -ms-transform: translateX(13px);
+          transform: translateX(13px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 17px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
+      </style>
+      <table>
+        <tr>
+          <td>${this.is_checked("last_message")}</td>
+          <td>${this.is_checked("last_alert_message")}</td>
+        </tr>
+      </table> `;
+  }
+
+  handleChangedDeviceEvent(changedEvent) {
+    const value = changedEvent.currentTarget.checked;
+    const newVal = {
+      conf: {
+        [this.config.model]: {
+          devices: {
+            [this.device.name]: {
+              elements: { [changedEvent.target.id]: { disabled_if: value } },
+            },
+          },
+        },
+      },
+    };
+    let newConfig = JSON.parse(JSON.stringify(this.user_config));
+    try {
+      newConfig.conf[this.config.model].devices[this.device.name].elements[
+        changedEvent.target.id
+      ].disabled_if = value;
+    } catch {
+      newConfig = merge(newConfig, newVal);
+    }
+    const messageEvent = new CustomEvent("config-changed", {
+      detail: { config: newConfig },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(messageEvent);
   }
 }
 

@@ -41,3 +41,16 @@ if (!global.PointerEvent) {
   // @ts-ignore
   global.PointerEvent = PointerEvent;
 }
+
+// Pre-populate RSDevice._helpersResolved with a minimal mock so that
+// hui-*-card tests work without waiting for connectedCallback / loadCardHelpers.
+import { RSDevice } from "../src/devices/device";
+RSDevice._helpersResolved = {
+  createCardElement: (conf: any) => {
+    const el = document.createElement("div") as any;
+    el.setConfig = () => {};
+    el.hass = null;
+    el._conf = conf;
+    return el;
+  },
+};
