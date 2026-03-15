@@ -1,9 +1,9 @@
 name: Run tests and upload coverage
 
-on: 
+on:
   push:
   workflow_dispatch:
-  
+
 jobs:
   test:
     name: Run tests and collect coverage
@@ -28,3 +28,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: Elwinmage/ha-reef-card
+          files: ./reports/lcov.info
