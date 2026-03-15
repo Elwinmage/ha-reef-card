@@ -1,4 +1,7 @@
 # ha-reef-card 🌊 for HomeAssistant
+<p align="center">
+  <img src="icon.png"  width="50%"/>
+</p>
 
 [![GH-release](https://img.shields.io/github/v/release/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/releases)
 [![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
