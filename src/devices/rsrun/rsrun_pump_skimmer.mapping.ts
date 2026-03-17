@@ -1,0 +1,67 @@
+export const config = {
+  name: null,
+  model: "RSRUN_SKIMMER",
+  background_img: new URL(
+    "../../img/RSRUN/reefrun_skimmer_off.png",
+    import.meta.url,
+  ),
+  css: {
+    width: "100%",
+  },
+  elements: {
+    alim_cable_1: {
+      name: "missing_pump",
+      type: "click-image",
+      image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
+      put_in: "cables_1",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "57%",
+        top: "2%",
+        left: "47.3%",
+      },
+    },
+    alim_cable_2: {
+      name: "missing_pump",
+      type: "click-image",
+      image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
+      put_in: "cables_2",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "57%",
+        top: "2%",
+        left: "-3.6%",
+        transform: "scaleX(-1)",
+      },
+    },
+    rsk_cable_1: {
+      name: "sensor_controlled",
+      type: "click-image",
+      image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
+      put_in: "cables_1",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "57%",
+        top: "2%",
+        left: "65.4%",
+      },
+    },
+    rsk_cable_2: {
+      name: "sensor_controlled",
+      type: "click-image",
+      image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
+      put_in: "cables_2",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "57%",
+        top: "2%",
+        left: "-12.6%",
+        transform: "scaleX(-1)",
+      },
+    },
+  },
+};
