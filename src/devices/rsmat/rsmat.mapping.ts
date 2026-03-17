@@ -18,13 +18,13 @@ export const config = {
   name: null,
   model: "RSMAT",
   color: COLOR_RSMAT_RGB,
-  background_img: new URL("../../img/RSMAT.png", import.meta.url),
+  background_img: new URL("../../img/RSMAT/RSMAT.png", import.meta.url),
   state_background_imgs: {
-    percent_100: new URL("../../img/RSMAT_100_BASE.png", import.meta.url),
-    percent_75: new URL("../../img/RSMAT_75_BASE.png", import.meta.url),
-    percent_50: new URL("../../img/RSMAT_50_BASE.png", import.meta.url),
-    percent_25: new URL("../../img/RSMAT_25_BASE.png", import.meta.url),
-    percent_0: new URL("../../img/RSMAT_0_BASE.png", import.meta.url),
+    percent_100: new URL("../../img/RSMAT/RSMAT_100_BASE.png", import.meta.url),
+    percent_75: new URL("../../img/RSMAT/RSMAT_75_BASE.png", import.meta.url),
+    percent_50: new URL("../../img/RSMAT/RSMAT_50_BASE.png", import.meta.url),
+    percent_25: new URL("../../img/RSMAT/RSMAT_25_BASE.png", import.meta.url),
+    percent_0: new URL("../../img/RSMAT/RSMAT_0_BASE.png", import.meta.url),
   },
   css: {
     width: "100%",
@@ -33,7 +33,10 @@ export const config = {
     ec_sensor: {
       name: "is_ec_sensor_connected",
       type: "click-image",
-      image: new URL("../../img/RSMAT_SENSOR_PLUGGED.png", import.meta.url),
+      image: new URL(
+        "../../img/RSMAT/RSMAT_SENSOR_PLUGGED.png",
+        import.meta.url,
+      ),
       disabled_if: "${state}==='off'",
       master: true,
       css: {
@@ -53,7 +56,10 @@ export const config = {
       class: "blink-fast",
       disabled_if: "${state}==='on'",
       master: true,
-      image: new URL("../../img/RSMAT_SENSOR_UNPLUGGED.png", import.meta.url),
+      image: new URL(
+        "../../img/RSMAT/RSMAT_SENSOR_UNPLUGGED.png",
+        import.meta.url,
+      ),
       css: {
         width: "100%",
         flex: "0 0 auto",

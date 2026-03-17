@@ -122,4 +122,46 @@ export default css`
   .blink-icon-scale > * {
     animation: blink-scale 1s ease-in-out infinite;
   }
+
+  .wate_mouvement {
+    border: none;
+    position: absolute;
+    overflow: hidden;
+    background-color: rgba(224, 241, 250, 0.1);
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 75%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 100%
+    );
+    background-size: 100% 100px;
+    animation: water-flow 1s linear infinite;
+  }
+
+  @keyframes water-flow {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 100px;
+    }
+  }
+
+  .tube {
+    background-image: url("water_seamless.png");
+    background-repeat: repeat-y;
+    background-size: 113px 192px; /* taille exacte de la tuile */
+    animation: flowUp 2s linear infinite;
+  }
+
+  @keyframes flowUp {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 -192px;
+    } /* = 1 tuile exactement */
+  }
 `;
