@@ -144,9 +144,6 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 
 # Installation
 
-> [!CAUTION]
-> Until HACS validation you can only install this card using the custom repositary, not the direct installation.
-
 ## Direct installation
 
 Click here to open the repository directly in HACS and click "Download": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
