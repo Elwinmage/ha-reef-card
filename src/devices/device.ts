@@ -156,6 +156,7 @@ export class RSDevice extends LitElement {
     } else {
       this.masterOn = true;
     }
+
     return this._render(style, substyle);
   }
 

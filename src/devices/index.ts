@@ -17,7 +17,7 @@ import {
   RSLed115,
   RSLed60,
 } from "./rsled";
-import { RSRun } from "./rsrun";
+import { RSRun, RSPump, RSReturn, RSSkimmer } from "./rsrun";
 import { RSAto } from "./rsato";
 import { RSWave25, RSWave45 } from "./rswave";
 
@@ -48,6 +48,12 @@ if (!customElements.get("redsea-rsled60"))
   customElements.define("redsea-rsled60", RSLed60);
 if (!customElements.get("redsea-rsrun"))
   customElements.define("redsea-rsrun", RSRun);
+if (!customElements.get("redsea-rsrun-unknown"))
+  customElements.define("redsea-rsrun-unknown", RSPump);
+if (!customElements.get("redsea-rsrun-return"))
+  customElements.define("redsea-rsrun-return", RSReturn);
+if (!customElements.get("redsea-rsrun-skimmer"))
+  customElements.define("redsea-rsrun-skimmer", RSSkimmer);
 if (!customElements.get("redsea-rsato"))
   customElements.define("redsea-rsato", RSAto);
 if (!customElements.get("redsea-rswave25"))

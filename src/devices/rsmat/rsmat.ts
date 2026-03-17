@@ -129,6 +129,7 @@ export class RSMat extends RSDevice {
     });
     const bg_img =
       this.config.state_background_imgs?.[`percent_${img_state}`] ?? "";
+    console.log("CONFIG:", this.config);
     return html` <div class="device_bg">
       ${style}
       <img

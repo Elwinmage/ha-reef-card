@@ -55,6 +55,10 @@ export interface HeadEntity {
   dose_head?: any;
 }
 
+export interface PumpEntity {
+  entities: Record<string, any>;
+}
+
 // ── RGB color ─────────────────────────────────────────────────────────────────
 
 export interface RGB {

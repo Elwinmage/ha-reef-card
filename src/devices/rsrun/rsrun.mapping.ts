@@ -1,7 +1,7 @@
 export const config = {
   name: null,
   model: "RSRUN",
-  background_img: new URL("../../img/RSRUN.png", import.meta.url),
+  background_img: new URL("../../img/RSRUN/reefrun.png", import.meta.url),
   css: {
     width: "100%",
   },
@@ -37,16 +37,6 @@ export const config = {
       },
       "elt.css": {
         "background-color": "rgba(240,200,200,0.7)",
-      },
-    },
-    device_states: {
-      type: "hui-entities-card",
-      conf: {
-        type: "entities",
-        entities: [
-          { entity: "device_state", name: { type: "entity" } },
-          { entity: "maintenance", name: { type: "entity" } },
-        ],
       },
     },
     wifi_quality: {
