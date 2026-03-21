@@ -39,6 +39,8 @@ export const config = {
     rsk_cable_1: {
       name: "sensor_controlled",
       type: "click-image",
+      disabled_if: "${state}==='off'",
+      no_br_if_disabled: true,
       image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
       put_in: "cables_1",
       elt_css: {
@@ -52,6 +54,8 @@ export const config = {
     rsk_cable_2: {
       name: "sensor_controlled",
       type: "click-image",
+      disabled_if: "${state}==='off'",
+      no_br_if_disabled: true,
       image: new URL("../../img/RSRUN/reefrun_cable.png", import.meta.url),
       put_in: "cables_2",
       elt_css: {
@@ -61,6 +65,36 @@ export const config = {
         top: "2%",
         left: "-12.6%",
         transform: "scaleX(-1)",
+      },
+    },
+    sensor_controlled: {
+      name: "sensor_controlled",
+      type: "click-image",
+      disabled_if: "${state}==='off'",
+      no_br_if_disabled: true,
+      image: new URL("../../img/RSRUN/reefrun_sensor.png", import.meta.url),
+      put_in: "sensor",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "22%",
+        top: "-27%",
+        left: "34%",
+      },
+    },
+    sensor_controlled_in: {
+      name: "sensor_controlled",
+      type: "click-image",
+      disabled_if: "${state}==='off'",
+      no_br_if_disabled: true,
+      image: new URL("../../img/RSRUN/reefrun_sensor_in.png", import.meta.url),
+      put_in: "sensor_in",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "41%",
+        top: "4%",
+        left: "28%",
       },
     },
   },

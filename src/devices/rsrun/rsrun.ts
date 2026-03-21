@@ -90,7 +90,7 @@ export class RSRun extends RSDevice {
           {} as any,
         );
         pump.id = pump_id;
-        pump.entites = this._pumps[pump_id].entities;
+        pump.entities = this._pumps[pump_id].entities;
         this._pumps[pump_id].litElement = pump;
       }
     }

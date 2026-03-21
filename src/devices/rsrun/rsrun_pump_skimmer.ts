@@ -14,8 +14,10 @@ export class RSSkimmer extends RSPump {
     return html`
       <div>
         ${this._render_elements(this.is_on(), "cables_" + this.id.toString())}
+        ${this._render_elements(this.is_on(), "sensor")}
+        <img class="device_img" alt="" src="${bg_img}" />
+        ${this._render_elements(this.is_on(), "sensor_in")}
       </div>
-      <img class="device_img" alt="" src="${bg_img}" />
     `;
   }
 }

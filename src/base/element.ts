@@ -379,6 +379,9 @@ export class MyElement extends LitElement {
     }
 
     if (this.evaluateCondition(this.conf?.disabled_if)) {
+      if (this.conf?.no_br_if_disabled) {
+        return html``;
+      }
       return html`<br />`;
     }
 
