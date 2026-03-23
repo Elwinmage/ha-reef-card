@@ -149,19 +149,29 @@ export default css`
     }
   }
 
+  /* .tube — wrapper class for flow-image elements (identification only).
+     The actual animation is applied inline by FlowImage._render(). */
   .tube {
-    background-image: url("water_seamless.png");
-    background-repeat: repeat-y;
-    background-size: 113px 192px; /* taille exacte de la tuile */
-    animation: flowUp 2s linear infinite;
+    display: block;
   }
 
+  /* Scroll background upward by exactly one tile height */
   @keyframes flowUp {
     from {
       background-position: 0 0;
     }
     to {
       background-position: 0 -192px;
-    } /* = 1 tuile exactement */
+    }
+  }
+
+  /* Scroll background downward by exactly one tile height */
+  @keyframes flowDown {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 192px;
+    }
   }
 `;

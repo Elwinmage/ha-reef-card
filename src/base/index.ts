@@ -3,6 +3,7 @@
  */
 import { Button } from "./button";
 import { ClickImage } from "./click_image";
+import { FlowImage } from "./flow_image";
 import { Dialog } from "./dialog";
 import { ProgressBar } from "./progress_bar";
 import { ProgressCircle } from "./progress_circle";
@@ -13,6 +14,8 @@ import { RSSwitch } from "./switch";
 
 if (!customElements.get("click-image"))
   customElements.define("click-image", ClickImage);
+if (!customElements.get("flow-image"))
+  customElements.define("flow-image", FlowImage);
 if (!customElements.get("common-button"))
   customElements.define("common-button", Button);
 if (!customElements.get("common-dialog"))

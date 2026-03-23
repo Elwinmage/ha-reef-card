@@ -9,6 +9,20 @@ export const config = {
     width: "100%",
   },
   elements: {
+    flow: {
+      name: "speed",
+      type: "flow-image",
+      image: new URL("../../img/RSRUN/water_seamless.png", import.meta.url),
+      class: "tube",
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "25%",
+        left: "45%",
+        width: "10%",
+        height: "13%",
+      },
+    },
     pipe_1: {
       name: "missing_pump",
       type: "click-image",

@@ -98,6 +98,18 @@ export class RSRun extends RSDevice {
       <div class="pump_1">${this._pumps[2].litElement}</div>`;
   }
 
+  override _setting_hass(obj): void {
+    super._setting_hass(obj);
+    // Propagate hass to pump litElements via _setting_hass() directly —
+    // bypasses the Lit property setter so no requestUpdate() is triggered
+    // on the pump, which would restart the FlowImage CSS animation.
+    for (const pump of this._pumps) {
+      if (pump?.litElement?._setting_hass) {
+        pump.litElement._setting_hass(obj);
+      }
+    }
+  }
+
   override renderEditor(): TemplateResult {
     if (this.is_disabled()) {
       return html``;
