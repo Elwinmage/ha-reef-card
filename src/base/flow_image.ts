@@ -9,6 +9,10 @@
  *   ResizeObserver measurement so the animation runs uninterrupted.
  * - Overrides set hass to intercept speed state updates directly and mutate
  *   animation-duration/play-state on the DOM node — no re-render, no restart.
+ *
+ * Note: flowKeyframeSheet is initialized lazily (on first use) so that
+ * CSSStyleSheet.replaceSync is not called at module load time — this avoids
+ * failures in test environments (jsdom) where the API may not be available.
  */
 
 //----------------------------------------------------------------------------//
@@ -20,13 +24,21 @@ import style_animations from "../utils/animations.styles";
 import type { HassConfig } from "../types/index";
 //----------------------------------------------------------------------------//
 
-const flowKeyframeSheet = new CSSStyleSheet();
-flowKeyframeSheet.replaceSync(`
-  @keyframes flowDown {
-    from { background-position: 0 0; }
-    to   { background-position: 0 169px; }
+// Lazily initialized — created on first firstUpdated() call, not at module level
+let flowKeyframeSheet: CSSStyleSheet | null = null;
+
+function getFlowKeyframeSheet(): CSSStyleSheet {
+  if (!flowKeyframeSheet) {
+    flowKeyframeSheet = new CSSStyleSheet();
+    flowKeyframeSheet.replaceSync(`
+      @keyframes flowDown {
+        from { background-position: 0 0; }
+        to   { background-position: 0 169px; }
+      }
+    `);
   }
-`);
+  return flowKeyframeSheet;
+}
 
 export class FlowImage extends MyElement {
   static override styles = [style_animations, css``];
@@ -60,9 +72,10 @@ export class FlowImage extends MyElement {
 
   override firstUpdated() {
     if (this.shadowRoot) {
+      const sheet = getFlowKeyframeSheet();
       this.shadowRoot.adoptedStyleSheets = [
         ...this.shadowRoot.adoptedStyleSheets,
-        flowKeyframeSheet,
+        sheet,
       ];
     }
     this._syncAnimation();
@@ -75,7 +88,7 @@ export class FlowImage extends MyElement {
           this._tileHeightPx = Math.round(
             (w * FlowImage.TILE_H) / FlowImage.TILE_W,
           );
-          flowKeyframeSheet.replaceSync(`
+          getFlowKeyframeSheet().replaceSync(`
             @keyframes flowDown {
               from { background-position: 0 0; }
               to   { background-position: 0 ${this._tileHeightPx}px; }
@@ -115,7 +128,6 @@ export class FlowImage extends MyElement {
     if (speed === 0) {
       duration = maxDuration;
     } else {
-      // Clamp to [minSpeed, maxSpeed] then interpolate
       const clamped = Math.max(minSpeed, Math.min(maxSpeed, speed));
       duration =
         maxDuration -

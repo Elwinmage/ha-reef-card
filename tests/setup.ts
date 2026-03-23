@@ -54,3 +54,40 @@ RSDevice._helpersResolved = {
     return el;
   },
 };
+
+// Mock CSSStyleSheet.replaceSync — not available in jsdom
+if (typeof CSSStyleSheet.prototype.replaceSync === "undefined") {
+  CSSStyleSheet.prototype.replaceSync = function (_css: string) {};
+}
+if (typeof CSSStyleSheet.prototype.replace === "undefined") {
+  CSSStyleSheet.prototype.replace = function (_css: string) {
+    return Promise.resolve();
+  };
+}
+// Mock adoptedStyleSheets if not supported
+if (
+  !Object.prototype.hasOwnProperty.call(
+    Document.prototype,
+    "adoptedStyleSheets",
+  )
+) {
+  Object.defineProperty(Document.prototype, "adoptedStyleSheets", {
+    get() {
+      return [];
+    },
+    set() {},
+  });
+}
+if (
+  !Object.prototype.hasOwnProperty.call(
+    ShadowRoot.prototype,
+    "adoptedStyleSheets",
+  )
+) {
+  Object.defineProperty(ShadowRoot.prototype, "adoptedStyleSheets", {
+    get() {
+      return [];
+    },
+    set() {},
+  });
+}
