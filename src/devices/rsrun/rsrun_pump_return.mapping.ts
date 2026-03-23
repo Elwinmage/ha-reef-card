@@ -14,6 +14,7 @@ export const config = {
       type: "flow-image",
       image: new URL("../../img/RSRUN/water_seamless.png", import.meta.url),
       class: "tube",
+      "animation-name": "flowUp",
       elt_css: {
         flex: "0 0 auto",
         position: "absolute",

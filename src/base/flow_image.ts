@@ -31,9 +31,9 @@ function getFlowKeyframeSheet(): CSSStyleSheet {
   if (!flowKeyframeSheet) {
     flowKeyframeSheet = new CSSStyleSheet();
     flowKeyframeSheet.replaceSync(`
-      @keyframes flowDown {
+      @keyframes flowUp {
         from { background-position: 0 0; }
-        to   { background-position: 0 169px; }
+        to   { background-position: 0 -169px; }
       }
     `);
   }
@@ -89,9 +89,9 @@ export class FlowImage extends MyElement {
             (w * FlowImage.TILE_H) / FlowImage.TILE_W,
           );
           getFlowKeyframeSheet().replaceSync(`
-            @keyframes flowDown {
+            @keyframes flowUp {
               from { background-position: 0 0; }
-              to   { background-position: 0 ${this._tileHeightPx}px; }
+              to   { background-position: 0 -${this._tileHeightPx}px; }
             }
           `);
           this._resizeObserver?.disconnect();
@@ -148,7 +148,7 @@ export class FlowImage extends MyElement {
       `background-image: url('${imageSrc}')`,
       `background-repeat: repeat-y`,
       `background-size: 100% auto`,
-      `animation-name: flowDown`,
+      `animation-name: flowUp`,
       `animation-timing-function: linear`,
       `animation-iteration-count: infinite`,
       `width: 100%`,
