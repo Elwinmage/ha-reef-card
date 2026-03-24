@@ -14,7 +14,6 @@ import { MyI18n } from "../src/translations/myi18n";
 import { toTime } from "../src/utils/common";
 import { merge } from "../src/utils/merge";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import RSDevice from "../src/devices/device";
 
 class StubRSDevice extends RSDevice {
   override _render(_style: any = null, _substyle: any = null): any {

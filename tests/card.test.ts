@@ -6,7 +6,6 @@ import { ReefCard } from "../src/card";
 import { RSDevice } from "../src/devices/device";
 import { ReefCardEditor } from "../src/editor";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import RSDevice from "../src/devices/device";
 import "../src/devices/index";
 
 if (!customElements.get("reef-card"))
