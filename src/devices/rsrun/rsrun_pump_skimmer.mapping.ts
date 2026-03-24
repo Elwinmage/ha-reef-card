@@ -5,10 +5,25 @@ export const config = {
     "../../img/RSRUN/reefrun_skimmer_off.png",
     import.meta.url,
   ),
+  state_background_imgs: {
+    off: new URL("../../img/RSRUN/reefrun_skimmer_off.png", import.meta.url),
+    on: new URL("../../img/RSRUN/reefrun_skimmer_on.png", import.meta.url),
+    full: new URL("../../img/RSRUN/reefrun_skimmer_full.png", import.meta.url),
+  },
   css: {
     width: "100%",
   },
   elements: {
+    state: {
+      name: "mode",
+      master: true,
+      disabled_if: true,
+    },
+    speed: {
+      name: "speed",
+      master: true,
+      disabled_if: true,
+    },
     alim_cable_1: {
       name: "missing_pump",
       type: "click-image",
@@ -85,7 +100,8 @@ export const config = {
     sensor_controlled_in: {
       name: "sensor_controlled",
       type: "click-image",
-      disabled_if: "${state}==='off'",
+      disabled_if:
+        "${state}==='off' || entity.schedule_enabled?.state === 'on'",
       no_br_if_disabled: true,
       image: new URL("../../img/RSRUN/reefrun_sensor_in.png", import.meta.url),
       put_in: "sensor_in",

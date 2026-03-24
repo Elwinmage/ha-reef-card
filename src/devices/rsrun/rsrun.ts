@@ -91,7 +91,13 @@ export class RSRun extends RSDevice {
         );
         pump.id = pump_id;
         pump.entities = this._pumps[pump_id].entities;
+        // Pass parent-level entities (mode, ec_sensor_connected, …) so
+        // child pumps (skimmer) can access them via get_entity()
+        pump.parent_entities = this.entities;
         this._pumps[pump_id].litElement = pump;
+      } else {
+        // Keep parent_entities in sync on every hass update
+        this._pumps[pump_id].litElement.parent_entities = this.entities;
       }
     }
     return html` <div class="pump_0">${this._pumps[1].litElement}</div>

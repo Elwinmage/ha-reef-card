@@ -38,6 +38,10 @@ export class RSDevice extends LitElement {
 
   public entities: Record<string, any> = {};
 
+  // Parent device entities — populated by RSRun for child pumps so they
+  // can access parent-level data (mode, ec_sensor_connected, …)
+  public parent_entities: Record<string, any> = {};
+
   public config: DeviceConfig;
 
   protected _hass: HassConfig | null = null;

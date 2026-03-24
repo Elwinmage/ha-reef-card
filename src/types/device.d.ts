@@ -57,6 +57,7 @@ export interface HeadEntity {
 
 export interface PumpEntity {
   entities: Record<string, any>;
+  parent_entities?: Record<string, any>;
 }
 
 // ── RGB color ─────────────────────────────────────────────────────────────────
