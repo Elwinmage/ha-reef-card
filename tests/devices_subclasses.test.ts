@@ -3,10 +3,10 @@
 import { ClickImage } from "../src/base/click_image";
 import { MyElement } from "../src/base/element";
 import { RSDevice } from "../src/devices/device";
-import { RSAto } from "../src/devices/rsato/rsato";
-import { DosingQueue } from "../src/devices/rsdose/dosing_queue";
-import { RSDose, RSDose2, RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
+import { RSAto } from "../src/devices/redsea/rsato/rsato";
+import { DosingQueue } from "../src/devices/redsea/rsdose/dosing_queue";
+import { RSDose, RSDose2, RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
 import {
   RSLed,
   RSLed115,
@@ -15,11 +15,15 @@ import {
   RSLed50,
   RSLed60,
   RSLed90,
-} from "../src/devices/rsled/rsled";
-import { RSMat } from "../src/devices/rsmat/rsmat";
-import { NoDevice } from "../src/devices/rsnodevice/rsnodevice";
-import { RSRun } from "../src/devices/rsrun/rsrun";
-import { RSWave, RSWave25, RSWave45 } from "../src/devices/rswave/rswave";
+} from "../src/devices/redsea/rsled/rsled";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
+import { NoDevice } from "../src/devices/redsea/rsnodevice/rsnodevice";
+import { RSRun } from "../src/devices/redsea/rsrun/rsrun";
+import {
+  RSWave,
+  RSWave25,
+  RSWave45,
+} from "../src/devices/redsea/rswave/rswave";
 import { describe, expect, it, vi } from "vitest";
 
 function makeState(state: string, entity_id = "sensor.test"): any {

@@ -2,7 +2,7 @@
 
 import { html } from "lit";
 import { describe, expect, it, vi } from "vitest";
-import supplements_list from "../src/devices/rsdose/supplements";
+import supplements_list from "../src/devices/redsea/rsdose/supplements";
 
 describe("supplements.get_supplement_from_fullname() L44-49 — Bundle inner match", () => {
   it("returns bundle sub-supplement with scaled sizes when fullname matches inside a Bundle", () => {

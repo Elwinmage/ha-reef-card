@@ -3,8 +3,8 @@
 import { Dialog } from "../src/base/dialog";
 import { MyElement } from "../src/base/element";
 import { Sensor } from "../src/base/sensor";
-import { DoseHead } from "../src/devices/rsdose/dose_head";
-import { RSDose2, RSDose4 } from "../src/devices/rsdose/rsdose";
+import { DoseHead } from "../src/devices/redsea/rsdose/dose_head";
+import { RSDose2, RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
 import { run_action } from "../src/utils/actions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import RSDevice from "../src/devices/device";

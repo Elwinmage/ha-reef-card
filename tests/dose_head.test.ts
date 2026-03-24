@@ -2,16 +2,16 @@
 
 import { Dialog } from "../src/base/dialog";
 import { MyElement } from "../src/base/element";
-import { DoseHead } from "../src/devices/rsdose/dose_head";
+import { DoseHead } from "../src/devices/redsea/rsdose/dose_head";
 import {
   add_supplement,
   head_configuration,
 } from "../src/devices/rsdose/dose_head.dialog_func_ext";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
 import { html } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RSDevice from "../src/devices/device";
-import supplements_list from "../src/devices/rsdose/supplements";
+import supplements_list from "../src/devices/redsea/rsdose/supplements";
 
 const TAG = "dose-head-l217";
 if (!customElements.get(TAG)) {
@@ -1082,7 +1082,7 @@ describe("DoseHead hass setter", () => {
 });
 describe("DoseHead._render_container() L76-78 — 404 triggers fallback image", () => {
   async function makeHead(tag: string) {
-    const { DoseHead } = await import("../src/devices/rsdose/dose_head");
+    const { DoseHead } = await import("../src/devices/redsea/rsdose/dose_head");
     if (!customElements.get(tag)) {
       class StubDoseHead extends DoseHead {}
       customElements.define(tag, StubDoseHead);
@@ -1145,7 +1145,7 @@ describe("DoseHead._render_container() L76-78 — 404 triggers fallback image", 
 });
 describe("DoseHead.container_warning() L217 — boolean expression branches", () => {
   async function makeHead() {
-    const { DoseHead } = await import("../src/devices/rsdose/dose_head");
+    const { DoseHead } = await import("../src/devices/redsea/rsdose/dose_head");
     const tag = "stub-dose-head-warn-" + Math.random().toString(36).slice(2);
     class StubHead extends DoseHead {}
     customElements.define(tag, StubHead);
@@ -1249,7 +1249,7 @@ describe("DoseHead.container_warning() L217 — boolean expression branches", ()
 });
 describe("DoseHead", () => {
   async function makeHead() {
-    const { DoseHead } = await import("../src/devices/rsdose/dose_head");
+    const { DoseHead } = await import("../src/devices/redsea/rsdose/dose_head");
     const tag = uid("dh");
     class T extends DoseHead {}
     customElements.define(tag, T);
@@ -1359,7 +1359,7 @@ describe("DoseHead", () => {
 });
 describe("DoseHead.container_warning() — L216 and L217 reached", () => {
   async function makeDoseHead() {
-    const { DoseHead } = await import("../src/devices/rsdose/dose_head");
+    const { DoseHead } = await import("../src/devices/redsea/rsdose/dose_head");
     const tag = uid("dh-cw");
     class T extends DoseHead {}
     customElements.define(tag, T);

@@ -3,9 +3,9 @@
 import { ClickImage } from "../src/base/click_image";
 import { MyElement } from "../src/base/element";
 import { RSDevice } from "../src/devices/device";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
-import { RSMat } from "../src/devices/rsmat/rsmat";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
 import { OFF_COLOR } from "../src/utils/constants";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "../src/base/index";

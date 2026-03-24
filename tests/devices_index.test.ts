@@ -3,7 +3,7 @@
 import { Dialog } from "../src/base/dialog";
 import { MyElement } from "../src/base/element";
 import { Sensor } from "../src/base/sensor";
-import { RSDose2, RSDose4 } from "../src/devices/rsdose/rsdose";
+import { RSDose2, RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
 import {
   afterEach,
   beforeAll,

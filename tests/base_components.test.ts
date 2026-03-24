@@ -9,9 +9,9 @@ import { ProgressCircle } from "../src/base/progress_circle";
 import { Sensor } from "../src/base/sensor";
 import { RSSwitch } from "../src/base/switch";
 import { RSDevice } from "../src/devices/device";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
-import { RSMat } from "../src/devices/rsmat/rsmat";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 function makeState(
