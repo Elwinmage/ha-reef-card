@@ -6,9 +6,9 @@
 import "../base/index";
 
 // Import devices
-import { NoDevice } from "./rsnodevice";
-import { RSDose4, RSDose2, DoseHead, DosingQueue } from "./rsdose";
-import { RSMat } from "./rsmat";
+import { NoDevice } from "./redsea/rsnodevice";
+import { RSDose4, RSDose2, DoseHead, DosingQueue } from "./redsea/rsdose";
+import { RSMat } from "./redsea/rsmat";
 import {
   RSLed160,
   RSLed90,
@@ -16,10 +16,10 @@ import {
   RSLed170,
   RSLed115,
   RSLed60,
-} from "./rsled";
-import { RSRun, RSPump, RSReturn, RSSkimmer } from "./rsrun";
-import { RSAto } from "./rsato";
-import { RSWave25, RSWave45 } from "./rswave";
+} from "./redsea/rsled";
+import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
+import { RSAto } from "./redsea/rsato";
+import { RSWave25, RSWave45 } from "./redsea/rswave";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -62,9 +62,9 @@ if (!customElements.get("redsea-rswave45"))
   customElements.define("redsea-rswave45", RSWave25);
 
 // Export devices
-export { NoDevice } from "./rsnodevice";
-export { RSDose4, RSDose2, DoseHead, DosingQueue } from "./rsdose";
-export { RSMat } from "./rsmat";
+export { NoDevice } from "./redsea/rsnodevice";
+export { RSDose4, RSDose2, DoseHead, DosingQueue } from "./redsea/rsdose";
+export { RSMat } from "./redsea/rsmat";
 export {
   RSLed160,
   RSLed90,
@@ -72,7 +72,7 @@ export {
   RSLed170,
   RSLed115,
   RSLed60,
-} from "./rsled";
-export { RSRun } from "./rsrun";
-export { RSAto } from "./rsato";
-export { RSWave25, RSWave45 } from "./rswave";
+} from "./redsea/rsled";
+export { RSRun } from "./redsea/rsrun";
+export { RSAto } from "./redsea/rsato";
+export { RSWave25, RSWave45 } from "./redsea/rswave";

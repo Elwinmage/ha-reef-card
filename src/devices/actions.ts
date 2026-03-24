@@ -2,7 +2,7 @@
  * Specific dialog box action registery
  */
 
-import * as dose_head_dialog_func_ext from "./rsdose/dose_head.dialog_func_ext";
+import * as dose_head_dialog_func_ext from "./redsea/rsdose/dose_head.dialog_func_ext";
 
 export const actionRegistry: Record<
   string,
