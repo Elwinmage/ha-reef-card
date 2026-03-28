@@ -1,4 +1,4 @@
-version: 2
+: 2
 updates:
   # Mise à jour des Actions GitHub
   - package-ecosystem: "github-actions"
@@ -11,3 +11,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      dependencies: # Nom du groupe (libre)
+        patterns:
+          - "*" # Regroupe TOUTES les dépendances dans une seule PR
