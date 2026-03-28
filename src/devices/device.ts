@@ -200,13 +200,12 @@ export class RSDevice extends LitElement {
   }
 
   /**
-   * Check if new hass states impy a re-render and propagate for sub elements.
+   * Check if new hass states imply a re-render and propagate for sub elements.
    * @param obj: the new hass states
    */
   _setting_hass(obj) {
     this._hass = obj;
     let re_render = false;
-
     // Detect enable/disable change: refresh device.elements from hass.devices
     // so that is_disabled() always reads the current state.
     if (this.device?.elements && obj.devices) {

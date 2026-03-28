@@ -9,6 +9,42 @@ export const config = {
     width: "100%",
   },
   elements: {
+    control_1: {
+      name: "schedule_enabled",
+      type: "click-image",
+      icon: "state",
+      put_in: "ctrl_1",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-172%",
+        left: "93.2%",
+      },
+    },
+    control_2: {
+      name: "schedule_enabled",
+      type: "click-image",
+      put_in: "ctrl_2",
+      icon: "state",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-172%",
+        left: "-2%",
+      },
+    },
     flow: {
       name: "speed",
       type: "flow-image",
@@ -16,6 +52,7 @@ export const config = {
         "../../../img/redsea/RSRUN/water_seamless.png",
         import.meta.url,
       ),
+      //disabled_if: "entity.schedule_enabled?.state === 'off'",
       class: "tube",
       "animation-name": "flowUp",
       elt_css: {

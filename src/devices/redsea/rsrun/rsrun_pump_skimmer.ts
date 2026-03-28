@@ -79,47 +79,6 @@ export class RSSkimmer extends RSPump {
     }
   }
 
-  // Re-render when state, schedule_enabled or speed changes
-  override _setting_hass(obj): void {
-    const stateEntity = this.entities["state"];
-    const scheduleEntity = this.entities["schedule_enabled"];
-    const speedEntity = this.entities["speed"];
-
-    const prevState = stateEntity
-      ? this._hass?.states[stateEntity.entity_id]?.state
-      : undefined;
-    const prevSchedule = scheduleEntity
-      ? this._hass?.states[scheduleEntity.entity_id]?.state
-      : undefined;
-    const prevSpeed = speedEntity
-      ? this._hass?.states[speedEntity.entity_id]?.state
-      : undefined;
-
-    super._setting_hass(obj);
-
-    const newState = stateEntity
-      ? obj.states[stateEntity.entity_id]?.state
-      : undefined;
-    const newSchedule = scheduleEntity
-      ? obj.states[scheduleEntity.entity_id]?.state
-      : undefined;
-    const newSpeed = speedEntity
-      ? obj.states[speedEntity.entity_id]?.state
-      : undefined;
-
-    if (
-      newState !== prevState ||
-      newSchedule !== prevSchedule ||
-      newSpeed !== prevSpeed
-    ) {
-      this.to_render = true;
-      if (newSchedule !== prevSchedule || newSpeed !== prevSpeed) {
-        const elt = this._elements["sensor_controlled_in"];
-        if (elt) elt.requestUpdate();
-      }
-    }
-  }
-
   // Compute water animation background based on speed (40–100 → fast–slow)
   private _waterBackground(isOff: boolean): string {
     if (isOff) return "none";
@@ -177,6 +136,9 @@ export class RSSkimmer extends RSPump {
             : ""}
         </div>
         ${this._render_elements(this.is_on(), "sensor_in")}
+      </div>
+      <div>
+        ${this._render_elements(this.is_on(), "ctrl_" + this.id.toString())}
       </div>
     `;
   }

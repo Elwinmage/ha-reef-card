@@ -60,9 +60,15 @@ export class FlowImage extends MyElement {
       return;
     }
     const fresh = obj.states[this.stateObj.entity_id];
-    if (fresh && fresh.state !== this.stateObj.state) {
+    const schedEntity = this.device?.entities?.["schedule_enabled"];
+    if (
+      (fresh && fresh.state !== this.stateObj.state) ||
+      obj.states[schedEntity.entity_id].state !== schedEntity.state
+    ) {
       // Speed changed — update stateObj and sync animation directly, no re-render
+
       this.stateObj = fresh;
+
       this._hass = obj;
       this._syncAnimation();
     } else {
@@ -114,12 +120,18 @@ export class FlowImage extends MyElement {
     ) as HTMLDivElement | null;
     if (!div) return;
 
-    const speedRaw = parseFloat(this.stateObj?.state ?? "0");
+    const minSpeed = 40;
+    let speedRaw = parseFloat(this.stateObj?.state ?? "0");
+    const schedule_enabled =
+      this.device.get_entity("schedule_enabled").state === "on";
+    if (schedule_enabled && speedRaw === 0) {
+      speedRaw = minSpeed;
+    }
     const speed = isNaN(speedRaw) ? 0 : Math.max(0, Math.min(100, speedRaw));
-
+    console.log("SE", schedule_enabled);
     // speed=0 → paused (pump off)
     // speed 40–100 → duration 10s–0.5s (below 40 treated as minimum)
-    const minSpeed = 40;
+
     const maxSpeed = 100;
     const minDuration = 0.5; // speed=100 → fastest
     const maxDuration = 10; // speed=40  → slowest
@@ -136,7 +148,8 @@ export class FlowImage extends MyElement {
     }
 
     div.style.animationDuration = `${duration.toFixed(2)}s`;
-    div.style.animationPlayState = speed === 0 ? "paused" : "running";
+    div.style.animationPlayState =
+      speed === 0 || !schedule_enabled ? "paused" : "running";
   }
 
   protected override _render(_style: string = ""): any {

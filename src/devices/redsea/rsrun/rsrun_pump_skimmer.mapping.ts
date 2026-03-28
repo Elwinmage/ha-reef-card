@@ -23,6 +23,42 @@ export const config = {
     width: "100%",
   },
   elements: {
+    control_1: {
+      name: "schedule_enabled",
+      type: "click-image",
+      put_in: "ctrl_1",
+      icon: "state",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-14%",
+        left: "93.2%",
+      },
+    },
+    control_2: {
+      name: "schedule_enabled",
+      type: "click-image",
+      put_in: "ctrl_2",
+      icon: "state",
+      icon_color: "red",
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-14%",
+        left: "-2%",
+      },
+    },
     state: {
       name: "mode",
       master: true,

@@ -473,14 +473,14 @@ _SHORT_ENTITY_KEYS: frozenset[str] = frozenset({'ip'})
 # We map all three logical devices to the same folder; filtering is done by
 # restricting which TS files are scanned per variant (see DEVICE_TS_FILTER).
 CARD_DEVICE_FOLDERS: dict[str, str] = {
-    "rsdose":       "rsdose",
-    "rsled_g1":     "rsled",
-    "rsled_g2":     "rsled",
-    "rsled_virtual":"rsled",
-    "rsato":        "rsato",
-    "rsrun":        "rsrun",
-    "rswave":       "rswave",
-    "rsmat":        "rsmat",
+    "rsdose":       "redsea/rsdose",
+    "rsled_g1":     "redsea/rsled",
+    "rsled_g2":     "redsea/rsled",
+    "rsled_virtual":"redsea/rsled",
+    "rsato":        "redsea/rsato",
+    "rsrun":        "redsea/rsrun",
+    "rswave":       "redsea/rswave",
+    "rsmat":        "redsea/rsmat",
 }
 
 # Restrict TS file scanning per device variant.
@@ -499,7 +499,7 @@ SHARED_DIALOG_FILE = "devices/device.dialogs.ts"
 
 # Per-device extra dialog files (in addition to the shared one)
 DEVICE_EXTRA_DIALOG_FILES: dict[str, list[str]] = {
-    "rsdose": ["devices/rsdose/rsdose.dialogs.ts"],
+    "rsdose": ["devices/redsea/rsdose/rsdose.dialogs.ts"],
 }
 
 
@@ -521,7 +521,7 @@ def extract_card_entities(card_src_dir: Path) -> dict[str, set[str]]:
 
     result: dict[str, set[str]] = {}
 
-    for folder, device in CARD_DEVICE_FOLDERS.items():
+    for device, folder in CARD_DEVICE_FOLDERS.items():
         device_keys: set[str] = set(shared_keys)
         include_filter = DEVICE_TS_INCLUDE.get(device)  # None = include all
 
