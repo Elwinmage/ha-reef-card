@@ -1,3 +1,9 @@
+// ─── Color constants ──────────────────────────────────────────────────────────
+// Primary REDSEA brand color (red)
+
+const COLOR_RS_RGB = "197,91,90";
+// ──────────────────────────────────────────────────────────────────────────────
+
 export const config = {
   name: null,
   model: "RSRUN_RETURN",
@@ -8,7 +14,38 @@ export const config = {
   css: {
     width: "100%",
   },
+  color: COLOR_RS_RGB,
   elements: {
+    speed_1: {
+      name: "speed",
+      type: "progress-circle",
+      target: 100,
+      put_in: "ctrl_1",
+      no_value: true,
+      force_integer: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-184.2%",
+        left: "77.2%",
+        width: "25%",
+      },
+    },
+    speed_2: {
+      name: "speed",
+      type: "progress-circle",
+      target: 100,
+      put_in: "ctrl_2",
+      no_value: true,
+      force_integer: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-184.5%",
+        left: "-11.7%",
+        width: "25%",
+      },
+    },
     control_1: {
       name: "schedule_enabled",
       type: "click-image",
@@ -23,8 +60,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-172%",
-        left: "93.2%",
+        top: "-176%",
+        left: "84.2%",
       },
     },
     control_2: {
@@ -41,8 +78,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-172%",
-        left: "-2%",
+        top: "-176%",
+        left: "-4%",
       },
     },
     flow: {
@@ -110,7 +147,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "-134.5%",
-        left: "47.3%",
+        left: "38.2%",
       },
     },
     alim_cable_2: {
@@ -126,7 +163,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "-134.5%",
-        left: "-3.5%",
+        left: "-6.5%",
         transform: "scaleX(-1)",
       },
     },

@@ -1,6 +1,13 @@
+// ─── Color constants ──────────────────────────────────────────────────────────
+// Primary REDSEA brand color (red)
+
+const COLOR_RS_RGB = "197,91,90";
+// ──────────────────────────────────────────────────────────────────────────────
+
 export const config = {
   name: null,
   model: "RSRUN_SKIMMER",
+  color: COLOR_RS_RGB,
   background_img: new URL(
     "../../../img/redsea/RSRUN/reefrun_skimmer_off.png",
     import.meta.url,
@@ -23,6 +30,36 @@ export const config = {
     width: "100%",
   },
   elements: {
+    speed_1: {
+      name: "speed",
+      type: "progress-circle",
+      target: 100,
+      put_in: "ctrl_1",
+      no_value: true,
+      force_integer: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-19%",
+        left: "77.3%",
+        width: "25%",
+      },
+    },
+    speed_2: {
+      name: "speed",
+      type: "progress-circle",
+      target: 100,
+      put_in: "ctrl_2",
+      no_value: true,
+      force_integer: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "-18.8%",
+        left: "-11.7%",
+        width: "25%",
+      },
+    },
     control_1: {
       name: "schedule_enabled",
       type: "click-image",
@@ -37,8 +74,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-14%",
-        left: "93.2%",
+        top: "-15.4%",
+        left: "84.2%",
       },
     },
     control_2: {
@@ -55,8 +92,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-14%",
-        left: "-2%",
+        top: "-15.4%",
+        left: "-4%",
       },
     },
     state: {
@@ -82,7 +119,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "47.3%",
+        left: "38.3%",
       },
     },
     alim_cable_2: {
@@ -98,7 +135,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "-3.6%",
+        left: "-6.2%",
         transform: "scaleX(-1)",
       },
     },
@@ -117,7 +154,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "65.4%",
+        left: "60.2%",
       },
     },
     rsk_cable_2: {
@@ -135,7 +172,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "-12.6%",
+        left: "-17.2%",
         transform: "scaleX(-1)",
       },
     },

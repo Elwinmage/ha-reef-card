@@ -56,7 +56,7 @@ export class ProgressCircle extends SensorTarget {
    * @param _style: No used here
    */
   protected override _render(_style?: string): TemplateResult {
-    if (!this.hasTargetState()) {
+    if (!this.hasTargetState() && typeof this.conf.target !== "number") {
       return html`<div class="error">Missing state</div>`;
     }
 
@@ -66,6 +66,7 @@ export class ProgressCircle extends SensorTarget {
     } else {
       this.c = this.color;
     }
+    console.log("COLOR", this.device.is_on(), this.c);
 
     if (
       this.conf?.disabled_if &&
@@ -74,7 +75,12 @@ export class ProgressCircle extends SensorTarget {
       return html`<br />`;
     }
     const value = parseFloat(this.stateObj.state);
-    let target = parseFloat(this.stateObjTarget.state);
+    let target = 100;
+    if (typeof this.conf.target === "number") {
+      target = this.conf.target;
+    } else {
+      target = parseFloat(this.stateObjTarget.state);
+    }
     if (this.conf?.target_is_remaining) {
       target += value;
     }
@@ -103,6 +109,7 @@ export class ProgressCircle extends SensorTarget {
     //specific colors
     const center_color = this.conf?.colors?.center ?? "transparent";
 
+    console.log("PERCENT", percent);
     // range 0 to 565 for 200x200
     return html` <svg
       width="100%"

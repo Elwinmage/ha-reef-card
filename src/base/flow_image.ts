@@ -128,7 +128,6 @@ export class FlowImage extends MyElement {
       speedRaw = minSpeed;
     }
     const speed = isNaN(speedRaw) ? 0 : Math.max(0, Math.min(100, speedRaw));
-    console.log("SE", schedule_enabled);
     // speed=0 → paused (pump off)
     // speed 40–100 → duration 10s–0.5s (below 40 treated as minimum)
 

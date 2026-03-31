@@ -1,5 +1,10 @@
 # ha-reef-card 🌊 für HomeAssistant
 
+> Teil des **[ReefTech Project Ökosystems](https://elwinmage.github.io/reeftank/de.html)**
+
+<p align="center">
+  <img src="icon.png" width="50%"/>
+</p>
 [![GH-release](https://img.shields.io/github/v/release/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/releases)
 [![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
