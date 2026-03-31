@@ -1,8 +1,4 @@
-// ─── Color constants ──────────────────────────────────────────────────────────
-// Primary REDSEA brand color (red)
-
-const COLOR_RS_RGB = "197,91,90";
-// ──────────────────────────────────────────────────────────────────────────────
+import { COLOR_RS_RGB, COLOR_WHITE_60 } from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -13,6 +9,7 @@ export const config = {
   ),
   css: {
     width: "100%",
+    left: "-4%",
   },
   color: COLOR_RS_RGB,
   elements: {
@@ -96,7 +93,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "25%",
-        left: "45%",
+        left: "41%",
         width: "10%",
         height: "13%",
       },
@@ -114,7 +111,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "1.2%",
+        left: "-2.8%",
       },
     },
     pipe_2: {
@@ -130,7 +127,7 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "2%",
-        left: "41.2%",
+        left: "37.2%",
         transform: "scaleX(-1)",
       },
     },
@@ -163,8 +160,20 @@ export const config = {
         position: "absolute",
         width: "57%",
         top: "-134.5%",
-        left: "-6.5%",
+        left: "-6.1%",
         transform: "scaleX(-1)",
+      },
+    },
+    temperature: {
+      name: "temperature",
+      type: "common-sensor",
+      force_integer: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        color: COLOR_WHITE_60,
+        left: "66%",
+        top: "62%",
       },
     },
   },

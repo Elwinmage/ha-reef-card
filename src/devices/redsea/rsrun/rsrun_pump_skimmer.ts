@@ -121,7 +121,7 @@ export class RSSkimmer extends RSPump {
         ${this._render_elements(this.is_on(), "cables_" + this.id.toString())}
         ${this._render_elements(this.is_on(), "sensor")}
         <div class="skimmer-body">
-          <img class="device_img" alt="" src="${bg_img}" />
+          <img class="device_img" alt="" src="${bg_img}" style="${substyle}" />
           <div
             class="water-overlay"
             style="--water-play-state: ${waterPlayState}"

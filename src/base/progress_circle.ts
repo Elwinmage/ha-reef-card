@@ -66,8 +66,6 @@ export class ProgressCircle extends SensorTarget {
     } else {
       this.c = this.color;
     }
-    console.log("COLOR", this.device.is_on(), this.c);
-
     if (
       this.conf?.disabled_if &&
       this.evaluateCondition(this.conf.disabled_if)
@@ -109,7 +107,6 @@ export class ProgressCircle extends SensorTarget {
     //specific colors
     const center_color = this.conf?.colors?.center ?? "transparent";
 
-    console.log("PERCENT", percent);
     // range 0 to 565 for 200x200
     return html` <svg
       width="100%"

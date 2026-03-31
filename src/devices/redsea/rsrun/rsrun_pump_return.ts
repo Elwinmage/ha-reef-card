@@ -15,7 +15,7 @@ export class RSReturn extends RSPump {
       <div>
         ${this._render_elements(this.is_on(), "cables_" + this.id.toString())}
       </div>
-      <img class="device_img" alt="" src="${bg_img}" />
+      <img class="device_img" alt="" src="${bg_img}" style="${substyle}" />
       <div>${this._render_elements(this.is_on())}</div>
       <div>
         ${this._render_elements(this.is_on(), "ctrl_" + this.id.toString())}

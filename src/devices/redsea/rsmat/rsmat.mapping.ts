@@ -1,23 +1,16 @@
-// ─── Color constants ──────────────────────────────────────────────────────────
-// Primary RSMAT brand color (red)
-const COLOR_RSMAT_RGB = "197,91,90";
-const COLOR_RSMAT_HEX = "#c55b5a";
-const COLOR_RSMAT_RGBSTR = "rgb(197,91,90)";
-
-// Error / alert color (bright red)
-const COLOR_ERROR_HEX = "#ec2330";
-
-// Neutral transparent background (used for inactive panels)
-const COLOR_NEUTRAL_0 = "rgb(150,150,150,0)";
-
-// Semi-transparent white card background
-const COLOR_WHITE_60 = "rgba(255,255,255,0.6)";
-// ──────────────────────────────────────────────────────────────────────────────
+import {
+  COLOR_RS_RGB,
+  COLOR_RS_HEX,
+  COLOR_RS_RGBSTR,
+  COLOR_ERROR_HEX,
+  COLOR_NEUTRAL_0,
+  COLOR_WHITE_60,
+} from "../../../utils/colors";
 
 export const config = {
   name: null,
   model: "RSMAT",
-  color: COLOR_RSMAT_RGB,
+  color: COLOR_RS_RGB,
   background_img: new URL(
     "../../../img/redsea/RSMAT/RSMAT.png",
     import.meta.url,
@@ -174,7 +167,7 @@ export const config = {
         "text-align": "center",
         "padding-left": "30px",
         "padding-right": "30px",
-        "background-color": COLOR_RSMAT_RGBSTR,
+        "background-color": COLOR_RS_RGBSTR,
         transform: "skewY(12deg)",
         top: "44%",
         width: "30%",
@@ -205,7 +198,7 @@ export const config = {
         "text-align": "center",
         "padding-left": "30px",
         "padding-right": "30px",
-        "background-color": COLOR_RSMAT_RGBSTR,
+        "background-color": COLOR_RS_RGBSTR,
         transform: "skewY(12deg)",
         top: "44%",
         width: "30%",
@@ -223,7 +216,7 @@ export const config = {
       },
       conf: {
         type: "statistics-graph",
-        entities: [{ entity: "today_usage", color: COLOR_RSMAT_HEX }],
+        entities: [{ entity: "today_usage", color: COLOR_RS_HEX }],
         chart_type: "line",
         period: "hour",
         days_to_show: 7,
@@ -257,7 +250,7 @@ export const config = {
       },
       conf: {
         type: "statistics-graph",
-        entities: [{ entity: "today_usage", color: COLOR_RSMAT_HEX }],
+        entities: [{ entity: "today_usage", color: COLOR_RS_HEX }],
         chart_type: "line",
         period: "day",
         title: " ",
@@ -338,7 +331,7 @@ export const config = {
         transform: "skewY(8deg)",
         top: "19%",
         left: "20%",
-        color: COLOR_RSMAT_HEX,
+        color: COLOR_RS_HEX,
         "font-weight": "bolder",
       },
       tap_action: {
@@ -362,7 +355,7 @@ export const config = {
         transform: "skewY(6deg)",
         top: "6%",
         left: "38%",
-        color: COLOR_RSMAT_HEX,
+        color: COLOR_RS_HEX,
         "font-weight": "bolder",
       },
     },
@@ -412,7 +405,7 @@ export const config = {
         top: "32%",
         left: "23%",
         width: "19%",
-        color: COLOR_RSMAT_HEX,
+        color: COLOR_RS_HEX,
         "font-weight": "bolder",
       },
     },
@@ -445,7 +438,7 @@ export const config = {
       name: "auto_advance",
       type: "click-image",
       icon: "state",
-      icon_color: COLOR_RSMAT_RGBSTR,
+      icon_color: COLOR_RS_RGBSTR,
       master: true,
       tap_action: {
         domain: "switch",
@@ -477,7 +470,7 @@ export const config = {
         },
       ],
       css: {
-        color: COLOR_RSMAT_RGBSTR,
+        color: COLOR_RS_RGBSTR,
         transform: "skewY(-10deg) scaleX(1) scale(1.5)",
         position: "absolute",
         top: "26.5%",
@@ -507,7 +500,7 @@ export const config = {
       name: "scheduled_advance",
       type: "click-image",
       icon: "state",
-      icon_color: COLOR_RSMAT_RGBSTR,
+      icon_color: COLOR_RS_RGBSTR,
       css: {
         flex: "0 0 auto",
         position: "absolute",
@@ -546,7 +539,7 @@ export const config = {
       type: "click-image",
       disabled_if: "${state}!=='end_of_roll'",
       icon: "mdi:paper-roll",
-      icon_color: COLOR_RSMAT_RGBSTR,
+      icon_color: COLOR_RS_RGBSTR,
       class: "blink",
       css: {
         position: "absolute",
@@ -575,7 +568,7 @@ export const config = {
       disabled_if:
         "${state}==='auto' ||  ${state}==='end_of_roll' ||  ${state}==='maintenance' ||  ${state}==='off'",
       icon: "mdi:alert-decagram",
-      icon_color: COLOR_RSMAT_RGBSTR,
+      icon_color: COLOR_RS_RGBSTR,
       class: "blink-icon",
       css: {
         position: "absolute",

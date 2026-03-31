@@ -30,7 +30,7 @@ import { property } from "lit/decorators.js";
 import style_sensor from "./sensor.styles";
 import style_animations from "../utils/animations.styles";
 import { MyElement } from "./element";
-import { button_color } from "../utils/common";
+import { COLOR_BUTTON_RGB } from "../utils/colors";
 
 import type { SensorConfig } from "../types/index";
 
@@ -81,15 +81,22 @@ export class Sensor extends MyElement {
     const sclass = this.conf.class || "";
 
     if (this.conf?.icon) {
-      let color = "rgb(" + button_color + ")";
+      let color = "rgb(" + COLOR_BUTTON_RGB + ")";
       if (this.conf?.icon_color) {
         color = this.conf.icon_color;
       }
-      return html` <ha-icon
-        icon="${this.stateObj.attributes.icon || "mdi:help"}"
+      //      this._hass.entities?.[this.stateObj.entity_id]?.icon
+      //icon="${this.stateObj.attributes.icon || "mdi:help"}"
+      /*      return html` <ha-icon
+        icon="${this._hass.entities?.[this.stateObj.entity_id]?.icon || "mdi:help"}"
         style="color:${color}"
       >
-      </ha-icon>`;
+      </ha-icon>`;*/
+      return html`<ha-state-icon
+        .hass=${this._hass}
+        .stateObj=${this.stateObj}
+        style="color:${color}"
+      ></ha-state-icon>`;
     }
 
     let value: string | number = "";

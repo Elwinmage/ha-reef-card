@@ -1,8 +1,4 @@
-// ─── Color constants ──────────────────────────────────────────────────────────
-// Primary REDSEA brand color (red)
-
-const COLOR_RS_RGB = "197,91,90";
-// ──────────────────────────────────────────────────────────────────────────────
+import { COLOR_RS_RGB, COLOR_WHITE_60 } from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -28,6 +24,7 @@ export const config = {
   },
   css: {
     width: "100%",
+    top: "20%",
   },
   elements: {
     speed_1: {
@@ -40,8 +37,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-19%",
-        left: "77.3%",
+        top: "-18.8%",
+        left: "77.2%",
         width: "25%",
       },
     },
@@ -75,7 +72,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "-15.4%",
-        left: "84.2%",
+        left: "84.7%",
       },
     },
     control_2: {
@@ -100,11 +97,13 @@ export const config = {
       name: "mode",
       master: true,
       disabled_if: true,
+      type: "common-sensor",
     },
     speed: {
       name: "speed",
       master: true,
       disabled_if: true,
+      type: "common-sensor",
     },
     alim_cable_1: {
       name: "missing_pump",
@@ -211,6 +210,19 @@ export const config = {
         width: "41%",
         top: "4%",
         left: "28%",
+      },
+    },
+    temperature: {
+      name: "temperature",
+      type: "common-sensor",
+      force_integer: true,
+      put_in: "sensor_in",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        color: COLOR_WHITE_60,
+        top: "83%",
+        left: "39%",
       },
     },
   },
