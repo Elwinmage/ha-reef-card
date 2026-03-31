@@ -361,6 +361,8 @@ export class RSDevice extends LitElement {
         const entity = this._hass.entities[entity_id];
         if (entity.device_id === this.device.elements[0]?.id) {
           this.entities[entity.translation_key] = entity;
+          const domain = entity_id.split(".")[0];
+          this.entities[domain + "." + entity.translation_key] = entity;
         }
       }
     } else {
