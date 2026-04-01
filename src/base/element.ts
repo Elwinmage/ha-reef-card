@@ -410,7 +410,6 @@ export class MyElement extends LitElement {
    */
   async run_actions(actions: Action | Action[], timer?: number): Promise<void> {
     const actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
-
     // Separate HA service calls from UI navigation actions (dialog/exit-dialog)
     // Execution order:
     //   1. All HA service calls immediately (device processes them)
@@ -451,6 +450,23 @@ export class MyElement extends LitElement {
     // Step 3 : execute UI navigation actions
     for (const action of ui_actions) {
       switch (action.action) {
+        case "more-info":
+          const entityKey =
+            typeof action.data === "string"
+              ? action.data
+              : (action.data as ActionData)?.entity_id;
+          if (entityKey && this.device?.entities?.[entityKey]) {
+            this.dispatchEvent(
+              new CustomEvent("hass-more-info", {
+                bubbles: true,
+                composed: true,
+                detail: {
+                  entityId: this.device.entities[entityKey].entity_id,
+                },
+              }),
+            );
+          }
+          break;
         case "dialog":
           this.dispatchEvent(
             new CustomEvent("display-dialog", {

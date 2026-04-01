@@ -217,6 +217,11 @@ export const config = {
       type: "common-sensor",
       force_integer: true,
       put_in: "sensor_in",
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "temperature",
+      },
       css: {
         flex: "0 0 auto",
         position: "absolute",
