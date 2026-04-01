@@ -3,14 +3,15 @@
  */
 import { Button } from "./button";
 import { ClickImage } from "./click_image";
-import { FlowImage } from "./flow_image";
 import { Dialog } from "./dialog";
+import { FlowImage } from "./flow_image";
 import { ProgressBar } from "./progress_bar";
 import { ProgressCircle } from "./progress_circle";
 import { RSMessages } from "./messages";
-import { SensorTarget } from "./sensor_target";
-import { Sensor } from "./sensor";
 import { RSSwitch } from "./switch";
+import { Schedule } from "./schedule";
+import { Sensor } from "./sensor";
+import { SensorTarget } from "./sensor_target";
 
 if (!customElements.get("click-image"))
   customElements.define("click-image", ClickImage);
@@ -20,6 +21,8 @@ if (!customElements.get("common-button"))
   customElements.define("common-button", Button);
 if (!customElements.get("common-dialog"))
   customElements.define("common-dialog", Dialog);
+if (!customElements.get("common-schedule"))
+  customElements.define("common-schedule", Schedule);
 if (!customElements.get("common-sensor"))
   customElements.define("common-sensor", Sensor);
 if (!customElements.get("common-sensor-target"))
