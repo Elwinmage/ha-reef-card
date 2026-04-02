@@ -10,9 +10,10 @@ import i18n from "../../../translations/myi18n";
 import type { PumpEntity } from "../../../types/index";
 
 import style_rsrun from "./rsrun.styles";
+import style_common from "../../../utils/common.styles";
 
 export class RSRun extends RSDevice {
-  static styles = [style_rsrun];
+  static styles = [style_rsrun, style_common];
 
   _pumps: PumpEntity[] = [];
 

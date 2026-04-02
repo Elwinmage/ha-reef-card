@@ -100,6 +100,16 @@ export class RSSkimmer extends RSPump {
     const stateVal = this.get_entity("state")?.state ?? "";
     const scheduleVal = this.get_entity("schedule_enabled")?.state ?? "off";
 
+    //mode on/off grayscale — uses is_pump_on() (device_state + schedule_enabled)
+    const pumpOn = this.is_pump_on();
+    const off_style = !pumpOn
+      ? html`<style>
+          img {
+            filter: grayscale(90%);
+          }
+        </style>`
+      : html``;
+
     const isOff = scheduleVal === "off" || stateVal === "off";
 
     let bg_img: string;
@@ -118,9 +128,10 @@ export class RSSkimmer extends RSPump {
 
     return html`
       <div>
-        ${this._render_elements(this.is_on(), "cables_" + this.id.toString())}
-        ${this._render_elements(this.is_on(), "sensor")}
+        ${this._render_elements(pumpOn, "cables_" + this.id.toString())}
+        ${this._render_elements(pumpOn, "sensor")}
         <div class="skimmer-body">
+          ${off_style}
           <img class="device_img" alt="" src="${bg_img}" style="${substyle}" />
           <div
             class="water-overlay"
@@ -135,11 +146,9 @@ export class RSSkimmer extends RSPump {
               ></div>`
             : ""}
         </div>
-        ${this._render_elements(this.is_on(), "sensor_in")}
+        ${this._render_elements(pumpOn, "sensor_in")}
       </div>
-      <div>
-        ${this._render_elements(this.is_on(), "ctrl_" + this.id.toString())}
-      </div>
+      <div>${this._render_elements(pumpOn, "ctrl_" + this.id.toString())}</div>
     `;
   }
 }

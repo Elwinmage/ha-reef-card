@@ -19,6 +19,9 @@ export class RSPump extends RSDevice {
     this.initial_config = config;
   }
 
+  // Only check the parent device_state for masterOn.
+  // schedule_enabled is handled separately by each pump's render
+  // (greyscale without blocking clicks).
   override is_on(): boolean {
     if (!this._hass || !this.parent_entities["device_state"]) return false;
     return (
@@ -27,11 +30,20 @@ export class RSPump extends RSDevice {
     );
   }
 
-  // Re-render when state, schedule_enabled or speed changes
+  // True when this individual pump is active (schedule on + device on)
+  is_pump_on(): boolean {
+    if (!this.is_on()) return false;
+    const sched = this.get_entity("schedule_enabled");
+    return !sched || sched.state !== "off";
+  }
+
+  // Re-render when state, schedule_enabled, speed or parent device_state changes
   override _setting_hass(obj): void {
     const stateEntity = this.entities["state"];
     const scheduleEntity = this.entities["schedule_enabled"];
     const speedEntity = this.entities["speed"];
+    // device_state lives on the parent, track it to grey-out pumps
+    const deviceStateEntity = this.parent_entities?.["device_state"];
 
     const prevState = stateEntity
       ? this._hass?.states[stateEntity.entity_id]?.state
@@ -41,6 +53,9 @@ export class RSPump extends RSDevice {
       : undefined;
     const prevSpeed = speedEntity
       ? this._hass?.states[speedEntity.entity_id]?.state
+      : undefined;
+    const prevDeviceState = deviceStateEntity
+      ? this._hass?.states[deviceStateEntity.entity_id]?.state
       : undefined;
 
     super._setting_hass(obj);
@@ -54,11 +69,15 @@ export class RSPump extends RSDevice {
     const newSpeed = speedEntity
       ? obj.states[speedEntity.entity_id]?.state
       : undefined;
+    const newDeviceState = deviceStateEntity
+      ? obj.states[deviceStateEntity.entity_id]?.state
+      : undefined;
 
     if (
       newState !== prevState ||
       newSchedule !== prevSchedule ||
-      newSpeed !== prevSpeed
+      newSpeed !== prevSpeed ||
+      newDeviceState !== prevDeviceState
     ) {
       this.to_render = true;
       if (newSchedule !== prevSchedule || newSpeed !== prevSpeed) {

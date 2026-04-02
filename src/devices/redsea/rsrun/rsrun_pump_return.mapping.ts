@@ -49,6 +49,7 @@ export const config = {
       icon: "state",
       put_in: "ctrl_1",
       icon_color: "red",
+      click_when_off: true,
       tap_action: {
         domain: "switch",
         action: "toggle",
@@ -67,6 +68,7 @@ export const config = {
       put_in: "ctrl_2",
       icon: "state",
       icon_color: "red",
+      click_when_off: true,
       tap_action: {
         domain: "switch",
         action: "toggle",

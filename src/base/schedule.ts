@@ -132,8 +132,11 @@ export class Schedule extends MyElement {
   // ------------------------------------------------------------------
 
   protected override _render(_style?: string): TemplateResult {
+    console.log("STYLE", this.stateOn);
+    const style = this.stateOn ? "" : "filter:grayscale(90%)";
+
     return html`
-      <div class="schedule-container">
+      <div class="schedule-container" style="${style}">
         <canvas></canvas>
       </div>
     `;

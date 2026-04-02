@@ -11,15 +11,22 @@ export class RSReturn extends RSPump {
 
   override _render(style?: any, substyle?: any): TemplateResult {
     const bg_img = this.config.background_img ?? "";
+    const pumpOn = this.is_pump_on();
+    const off_style = !pumpOn
+      ? html`<style>
+          img {
+            filter: grayscale(90%);
+          }
+        </style>`
+      : html``;
     return html`
       <div>
-        ${this._render_elements(this.is_on(), "cables_" + this.id.toString())}
+        ${this._render_elements(pumpOn, "cables_" + this.id.toString())}
       </div>
+      ${off_style}
       <img class="device_img" alt="" src="${bg_img}" style="${substyle}" />
-      <div>${this._render_elements(this.is_on())}</div>
-      <div>
-        ${this._render_elements(this.is_on(), "ctrl_" + this.id.toString())}
-      </div>
+      <div>${this._render_elements(pumpOn)}</div>
+      <div>${this._render_elements(pumpOn, "ctrl_" + this.id.toString())}</div>
     `;
   }
 }
