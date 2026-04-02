@@ -132,7 +132,6 @@ export class Schedule extends MyElement {
   // ------------------------------------------------------------------
 
   protected override _render(_style?: string): TemplateResult {
-    console.log("STYLE", this.stateOn);
     const style = this.stateOn ? "" : "filter:grayscale(90%)";
 
     return html`

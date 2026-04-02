@@ -1,3 +1,5 @@
+import { COLOR_RS_HEX } from "../../../utils/colors";
+
 export const config = {
   name: null,
   model: "RSRUN",
@@ -40,27 +42,6 @@ export const config = {
       },
       "elt.css": {
         "background-color": "rgba(240,200,200,0.7)",
-      },
-    },
-    wifi_quality: {
-      name: "wifi_quality",
-      type: "common-sensor",
-      master: true,
-      label: false,
-      icon: true,
-      icon_color: "#ec2330",
-      tap_action: {
-        domain: "redsea_ui",
-        action: "dialog",
-        data: { type: "wifi" },
-      },
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        width: "5.5%",
-        height: "2%",
-        top: "0%",
-        right: "0%",
       },
     },
     device_state: {
@@ -110,7 +91,28 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "0%",
-        left: "12%",
+        right: "6%",
+      },
+    },
+    wifi_quality: {
+      name: "wifi_quality",
+      type: "common-sensor",
+      master: true,
+      label: false,
+      icon: true,
+      icon_color: "red",
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "wifi" },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "5.5%",
+        height: "2%",
+        top: "0%",
+        right: "0%",
       },
     },
   },
