@@ -243,7 +243,7 @@ export const config = {
         domain: "redsea_ui",
         action: "dialog",
         data: {
-          type: "config",
+          type: "config_return",
         },
       },
       css: {
@@ -263,7 +263,7 @@ export const config = {
         domain: "redsea_ui",
         action: "dialog",
         data: {
-          type: "config",
+          type: "config_return",
         },
       },
       css: {

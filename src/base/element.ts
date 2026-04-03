@@ -346,7 +346,11 @@ export class MyElement extends LitElement {
     if (!this._hass || !this.device) {
       throw new Error("Hass or device not initialized");
     }
-    const entity = this.device.entities[entity_translation_value];
+    // Look in own device entities first, then fall back to parent_entities
+    // (e.g. pump sub-device dialog referencing a parent RSRun entity)
+    const entity =
+      this.device.entities[entity_translation_value] ??
+      this.device.parent_entities?.[entity_translation_value];
     if (!entity) {
       throw new Error(`Entity ${entity_translation_value} not found`);
     }

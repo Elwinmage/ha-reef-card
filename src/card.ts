@@ -70,7 +70,7 @@ export class ReefCard extends LitElement {
     });
     this.addEventListener("config-dialog", (e: Event) => {
       if (this._dialog_box) {
-        this._dialog_box.set_conf((e as CustomEvent).detail.dialogs);
+        this._dialog_box.merge_conf((e as CustomEvent).detail.dialogs);
       }
     });
     this.addEventListener("quit-dialog", () => {

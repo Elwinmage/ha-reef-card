@@ -145,6 +145,13 @@ export class Dialog extends LitElement {
     this.config = config;
   }
 
+  // Merge new dialog definitions into the existing config so that
+  // sub-devices (e.g. pumps) can register their own dialogs without
+  // overwriting the parent device's dialogs.
+  merge_conf(config: unknown): void {
+    this.config = { ...(this.config as any), ...(config as any) };
+  }
+
   create_form(content_conf: any[]): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
@@ -228,18 +235,43 @@ export class Dialog extends LitElement {
       const clone = structuredClone(content_conf.conf);
       if ("entities" in content_conf.conf) {
         for (const pos in content_conf.conf.entities) {
-          if (typeof clone.entities[pos] === "string") {
-            clone.entities[pos] = this.elt.get_entity(
+          try {
+            if (typeof clone.entities[pos] === "string") {
+              clone.entities[pos] = this.elt.get_entity(
+                content_conf.conf.entities[pos],
+              ).entity_id;
+            } else {
+              clone.entities[pos].entity = this.elt.get_entity(
+                content_conf.conf.entities[pos].entity,
+              ).entity_id;
+            }
+          } catch (e) {
+            console.warn(
+              "Dialog: skipping unresolved entity",
               content_conf.conf.entities[pos],
-            ).entity_id;
-          } else {
-            clone.entities[pos].entity = this.elt.get_entity(
-              content_conf.conf.entities[pos].entity,
-            ).entity_id;
+              e.message,
+            );
+            // Remove unresolvable entity from the clone so the card doesn't crash
+            delete clone.entities[pos];
           }
         }
+        // Clean up gaps left by deleted entries
+        if (Array.isArray(clone.entities)) {
+          clone.entities = clone.entities.filter(Boolean);
+        }
       } else if ("entity" in content_conf.conf) {
-        clone.entity = this.elt.get_entity(content_conf.conf.entity).entity_id;
+        try {
+          clone.entity = this.elt.get_entity(
+            content_conf.conf.entity,
+          ).entity_id;
+        } catch (e) {
+          console.warn(
+            "Dialog: skipping unresolved entity",
+            content_conf.conf.entity,
+            e.message,
+          );
+          return;
+        }
       }
       content.setConfig(clone);
       content.hass = this._hass;

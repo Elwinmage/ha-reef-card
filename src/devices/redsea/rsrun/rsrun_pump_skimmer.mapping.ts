@@ -294,7 +294,7 @@ export const config = {
         domain: "redsea_ui",
         action: "dialog",
         data: {
-          type: "config",
+          type: "config_skimmer",
         },
       },
       css: {
@@ -314,7 +314,7 @@ export const config = {
         domain: "redsea_ui",
         action: "dialog",
         data: {
-          type: "config",
+          type: "config_skimmer",
         },
       },
       css: {
@@ -324,45 +324,45 @@ export const config = {
         left: "-5%",
       },
     },
-    configuration_sensor_1: {
-      name: "sensor_controlled",
-      type: "click-image",
-      put_in: "ctrl_1",
-      icon: "redsea:cog-s",
-      icon_color: COLOR_RS_HEX,
-      tap_action: {
-        domain: "redsea_ui",
-        action: "dialog",
-        data: {
-          type: "config",
-        },
-      },
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        top: "-5.1%",
-        left: "105.4%",
-      },
-    },
-    configuration_sensor_2: {
-      name: "sensor_controlled",
-      type: "click-image",
-      put_in: "ctrl_2",
-      icon: "redsea:cog-s",
-      icon_color: COLOR_RS_HEX,
-      tap_action: {
-        domain: "redsea_ui",
-        action: "dialog",
-        data: {
-          type: "config",
-        },
-      },
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        top: "-5.1%",
-        left: "-16.6%",
-      },
-    },
+    // configuration_sensor_1: {
+    //   name: "sensor_controlled",
+    //   type: "click-image",
+    //   put_in: "ctrl_1",
+    //   icon: "redsea:cog-s",
+    //   icon_color: COLOR_RS_HEX,
+    //   tap_action: {
+    //     domain: "redsea_ui",
+    //     action: "dialog",
+    //     data: {
+    //       type: "config",
+    //     },
+    //   },
+    //   css: {
+    //     flex: "0 0 auto",
+    //     position: "absolute",
+    //     top: "-5.1%",
+    //     left: "105.4%",
+    //   },
+    // },
+    // configuration_sensor_2: {
+    //   name: "sensor_controlled",
+    //   type: "click-image",
+    //   put_in: "ctrl_2",
+    //   icon: "redsea:cog-s",
+    //   icon_color: COLOR_RS_HEX,
+    //   tap_action: {
+    //     domain: "redsea_ui",
+    //     action: "dialog",
+    //     data: {
+    //       type: "config",
+    //     },
+    //   },
+    //   css: {
+    //     flex: "0 0 auto",
+    //     position: "absolute",
+    //     top: "-5.1%",
+    //     left: "-16.6%",
+    //   },
+    // },
   },
 };

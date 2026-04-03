@@ -47,10 +47,15 @@ export class RSRun extends RSDevice {
           pump_id = parseInt(fname[fname.length - 1]);
         }
         if (entity.device_id === d.id) {
+          const domain = entity_id.split(".")[0];
           if (pump_id === 0) {
             this.entities[entity.translation_key] = entity;
+            this.entities[domain + "." + entity.translation_key] = entity;
           } else {
             this._pumps[pump_id].entities[entity.translation_key] = entity;
+            this._pumps[pump_id].entities[
+              domain + "." + entity.translation_key
+            ] = entity;
           }
         }
       }
