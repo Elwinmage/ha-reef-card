@@ -71,9 +71,9 @@ export default css`
     min-height: 0;
   }
 
-  /* Left: chart preview */
+  /* Left: chart preview (reduced to ~40% width) */
   .editor-chart {
-    flex: 1;
+    flex: 0 0 40%;
     min-width: 0;
     min-height: 180px;
     position: relative;
@@ -86,48 +86,60 @@ export default css`
     background: rgba(0, 0, 0, 0.2);
   }
 
-  /* Right: point list */
+  /* Right: point list (takes remaining space) */
   .editor-list {
-    flex: 0 0 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex: 1;
+    min-width: 0;
     overflow-y: auto;
-    max-height: 300px;
   }
 
-  .editor-row {
-    display: flex;
+  /* ---- CSS Grid table ---- */
+  .grid-table {
+    display: grid;
+    gap: 4px 6px;
     align-items: center;
-    gap: 6px;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .editor-row input[type="time"] {
+  /* 3 cols: time | value | delete */
+  .cols-base {
+    grid-template-columns: auto 1fr 24px;
+  }
+
+  /* 4 cols: time | value | pulse | delete */
+  .cols-pulse {
+    grid-template-columns: auto 1fr 1fr 24px;
+  }
+
+  /* Header cells */
+  .gh {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.6;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  /* Inputs — fill their grid cell */
+  .grid-table input[type="time"],
+  .grid-table input[type="number"] {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 4px;
     color: inherit;
-    padding: 4px 6px;
+    padding: 4px 4px;
     font-size: 13px;
-    width: 80px;
     font-family: inherit;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
-  .editor-row input[type="number"] {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
-    color: inherit;
-    padding: 4px 6px;
-    font-size: 13px;
-    width: 52px;
+  .grid-table input[type="number"] {
     text-align: right;
-    font-family: inherit;
   }
 
-  .editor-row input:focus {
+  .grid-table input:focus {
     outline: none;
     border-color: rgba(0, 150, 255, 0.6);
   }

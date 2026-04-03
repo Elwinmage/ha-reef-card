@@ -33,6 +33,7 @@ import { property, state } from "lit/decorators.js";
 import { MyElement } from "./element";
 import style_schedule from "./schedule.styles";
 import style_animations from "../utils/animations.styles";
+import i18n from "../translations/myi18n.js";
 
 import type { BaseElementConfig } from "../types/index";
 
@@ -46,6 +47,9 @@ export interface ScheduleConfig extends BaseElementConfig {
   schedule_attribute?: string;
   time_field?: string;
   value_field?: string;
+  pulse_field?: string; // field name for pulse/pulsation (e.g. "pd"). If set, editor shows a pulse column.
+  min_pulse?: number; // pulse min value (default 0)
+  max_pulse?: number; // pulse max value (default 100)
   linear?: boolean;
   min_value?: number;
   max_value?: number;
@@ -61,6 +65,7 @@ export interface ScheduleConfig extends BaseElementConfig {
 interface SchedulePoint {
   minutes: number; // 0–1439
   value: number;
+  pulse?: number; // optional pulsation value
 }
 
 //----------------------------------------------------------------------------//
@@ -157,7 +162,14 @@ export class Schedule extends MyElement {
     // Clone current schedule into editable state
     this._editPoints = this._parseSchedule().map((p) => ({ ...p }));
     if (this._editPoints.length === 0) {
-      this._editPoints = [{ minutes: 0, value: this.conf?.min_value ?? 0 }];
+      const pt: SchedulePoint = {
+        minutes: 0,
+        value: this.conf?.min_value ?? 0,
+      };
+      if (this.conf?.pulse_field) {
+        pt.pulse = this.conf?.min_pulse ?? 0;
+      }
+      this._editPoints = [pt];
     }
     this._editing = true;
     // Draw editor chart after DOM update
@@ -189,12 +201,18 @@ export class Schedule extends MyElement {
     const unit = this.conf?.unit ?? "";
     const canAdd = this._editPoints.length < maxPts;
     const canDelete = this._editPoints.length > 1;
+    const hasPulse = !!this.conf?.pulse_field;
+    const minPulse = this.conf?.min_pulse ?? 0;
+    const maxPulse = this.conf?.max_pulse ?? 300;
+    const gridClass = hasPulse
+      ? "grid-table cols-pulse"
+      : "grid-table cols-base";
 
     return html`
       <div class="editor-overlay" @click=${this._onOverlayClick}>
         <div class="editor-panel" @click=${(e: Event) => e.stopPropagation()}>
           <div class="editor-header">
-            <h3>Schedule</h3>
+            <h3>${i18n._("sched_title")}</h3>
             <button class="btn-icon" @click=${this._closeEditor}>✕</button>
           </div>
 
@@ -204,11 +222,20 @@ export class Schedule extends MyElement {
               <canvas></canvas>
             </div>
 
-            <!-- Right: editable point list -->
+            <!-- Right: editable point grid -->
             <div class="editor-list">
-              ${this._editPoints.map(
-                (pt, i) => html`
-                  <div class="editor-row">
+              <div class="${gridClass}">
+                <!-- Header row -->
+                <span class="gh">${i18n._("sched_start")}</span>
+                <span class="gh">${i18n._("sched_intensity")}</span>
+                ${hasPulse
+                  ? html`<span class="gh">${i18n._("sched_pulse_time")}</span>`
+                  : nothing}
+                <span class="gh"></span>
+
+                <!-- Data rows -->
+                ${this._editPoints.map(
+                  (pt, i) => html`
                     <input
                       type="time"
                       .value=${this._minutesToTime(pt.minutes)}
@@ -220,10 +247,15 @@ export class Schedule extends MyElement {
                       max=${maxVal}
                       .value=${String(pt.value)}
                       @change=${(e: Event) => this._onValueChange(i, e)}
-                    />${unit
-                      ? html`<span style="font-size:12px;opacity:0.5"
-                          >${unit}</span
-                        >`
+                    />
+                    ${hasPulse
+                      ? html`<input
+                          type="number"
+                          min=${minPulse}
+                          max=${maxPulse}
+                          .value=${String(pt.pulse ?? 0)}
+                          @change=${(e: Event) => this._onPulseChange(i, e)}
+                        />`
                       : nothing}
                     <button
                       class="btn-icon delete"
@@ -232,9 +264,9 @@ export class Schedule extends MyElement {
                     >
                       −
                     </button>
-                  </div>
-                `,
-              )}
+                  `,
+                )}
+              </div>
             </div>
           </div>
 
@@ -244,14 +276,14 @@ export class Schedule extends MyElement {
               ?disabled=${!canAdd}
               @click=${this._addPoint}
             >
-              + Add
+              ${i18n._("sched_add")}
             </button>
             <div style="display:flex;gap:8px">
               <button class="btn-cancel" @click=${this._closeEditor}>
-                Cancel
+                ${i18n._("sched_cancel")}
               </button>
               <button class="btn-save" @click=${this._saveSchedule}>
-                Save
+                ${i18n._("sched_save")}
               </button>
             </div>
           </div>
@@ -292,6 +324,20 @@ export class Schedule extends MyElement {
     }
   }
 
+  private _onPulseChange(index: number, e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const val = Number(input.value);
+    const minPulse = this.conf?.min_pulse ?? 0;
+    const maxPulse = this.conf?.max_pulse ?? 100;
+    if (!isNaN(val)) {
+      this._editPoints[index].pulse = Math.max(
+        minPulse,
+        Math.min(maxPulse, val),
+      );
+      this.requestUpdate();
+    }
+  }
+
   private _addPoint(): void {
     const maxPts = this.conf?.max_points ?? 10;
     if (this._editPoints.length >= maxPts) return;
@@ -302,7 +348,11 @@ export class Schedule extends MyElement {
         : 0;
     const newMin = Math.min(lastMin + 60, TOTAL_MINUTES - 1);
     const defaultVal = this.conf?.min_value ?? 0;
-    this._editPoints.push({ minutes: newMin, value: defaultVal });
+    const pt: SchedulePoint = { minutes: newMin, value: defaultVal };
+    if (this.conf?.pulse_field) {
+      pt.pulse = this.conf?.min_pulse ?? 0;
+    }
+    this._editPoints.push(pt);
     this._sortEditPoints();
     this.requestUpdate();
   }
@@ -322,13 +372,19 @@ export class Schedule extends MyElement {
 
     const timeField = this.conf?.time_field ?? "st";
     const valueField = this.conf?.value_field ?? "ti";
+    const pulseField = this.conf?.pulse_field;
 
     // Rebuild the schedule array in the original format
-    const schedule = this._editPoints.map((pt) => ({
-      pd: 0,
-      [timeField]: pt.minutes,
-      [valueField]: pt.value,
-    }));
+    const schedule = this._editPoints.map((pt) => {
+      const entry: Record<string, number> = {
+        [timeField]: pt.minutes,
+        [valueField]: pt.value,
+      };
+      if (pulseField) {
+        entry[pulseField] = pt.pulse ?? 0;
+      }
+      return entry;
+    });
 
     // Resolve pump id and parent device_id for the redsea.request service
     const pumpId = (this.device as any)?.id;
@@ -682,6 +738,7 @@ export class Schedule extends MyElement {
 
     const timeField = this.conf?.time_field ?? "st";
     const valueField = this.conf?.value_field ?? "ti";
+    const pulseField = this.conf?.pulse_field;
 
     const points: SchedulePoint[] = [];
 
@@ -689,7 +746,11 @@ export class Schedule extends MyElement {
       const minutes = Number(entry[timeField]);
       const value = Number(entry[valueField]);
       if (!isNaN(minutes) && !isNaN(value)) {
-        points.push({ minutes, value });
+        const pt: SchedulePoint = { minutes, value };
+        if (pulseField && entry[pulseField] !== undefined) {
+          pt.pulse = Number(entry[pulseField]);
+        }
+        points.push(pt);
       }
     }
 
