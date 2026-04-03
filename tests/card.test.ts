@@ -124,10 +124,10 @@ describe("ReefCard — constructor", () => {
     ).not.toThrow();
   });
 
-  it("config-dialog: delegates to _dialog_box.set_conf()", () => {
+  it("config-dialog: delegates to _dialog_box.merge_conf()", () => {
     const card = makeCard();
     const mockSetConf = vi.fn();
-    card._dialog_box = { set_conf: mockSetConf };
+    card._dialog_box = { merge_conf: mockSetConf };
     card.dispatchEvent(
       new CustomEvent("config-dialog", { detail: { dialogs: { a: 1 } } }),
     );
