@@ -496,7 +496,7 @@ The background image changes according to the roll usage status, with 5 differen
     <td align="center"><img src="doc/img/rsmat/RSMAT_50_BASE.png" width="100%"/><br/><b>50%</b></td>
   </tr>
   <tr>
-    <td align="center"><img src="/img/rsmat/RSMAT_25_BASE.png" width="100%"/><br/><b>75%</b></td>
+    <td align="center"><img src="doc/img/rsmat/RSMAT_25_BASE.png" width="100%"/><br/><b>75%</b></td>
     <td align="center"><img src="doc/img/rsmat/RSMAT_0_BASE.png" width="100%"/><br/><b>100%</b></td>
     <td></td>
   </tr>
