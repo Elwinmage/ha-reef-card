@@ -97,10 +97,13 @@ export class RSRun extends RSDevice {
         // Pass parent-level entities (mode, ec_sensor_connected, …) so
         // child pumps (skimmer) can access them via get_entity()
         pump.parent_entities = this.entities;
+        // Pass parent HA device info so pumps can get device_id for service calls
+        pump.parent_device = this.device;
         this._pumps[pump_id].litElement = pump;
       } else {
-        // Keep parent_entities in sync on every hass update
+        // Keep parent_entities and parent_device in sync on every hass update
         this._pumps[pump_id].litElement.parent_entities = this.entities;
+        this._pumps[pump_id].litElement.parent_device = this.device;
       }
     }
 

@@ -42,6 +42,10 @@ export class RSDevice extends LitElement {
   // can access parent-level data (mode, ec_sensor_connected, …)
   public parent_entities: Record<string, any> = {};
 
+  // Parent HA device info — populated by RSRun for child pumps so they
+  // can access the parent device_id for service calls (e.g. redsea.request)
+  public parent_device: any = null;
+
   public config: DeviceConfig;
 
   protected _hass: HassConfig | null = null;

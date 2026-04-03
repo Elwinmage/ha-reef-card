@@ -130,6 +130,7 @@ Determines the rendering class. Possible values:
 | `"common-switch"`   | `Switch`         |
 | `"progress-bar"`    | `ProgressBar`    |
 | `"progress-circle"` | `ProgressCircle` |
+| `"common-schedule"` | `Schedule`       |
 | `"redsea-messages"` | `Messages`       |
 | `"hui-*"`           | Native HA card   |
 
@@ -493,6 +494,74 @@ Progress circle (same logic as `progress-bar`).
   no_value: false,
   colors: {
     center: "rgba(255,255,255,0.5)",
+  },
+}
+```
+
+---
+
+### `common-schedule`
+
+Displays a day-long schedule curve (00:00 → 23:59) on a canvas. Click to open an inline editor overlay with a live chart preview on the left and an editable time/value list on the right.
+
+The linked `stateObj` must expose an attribute (default `"schedule"`) containing an array of point objects, e.g.:
+
+```json
+[
+  { "pd": 0, "st": 0, "ti": 80 },
+  { "pd": 0, "st": 360, "ti": 60 },
+  { "pd": 0, "st": 720, "ti": 80 }
+]
+```
+
+| Option               | Type      | Default         | Description                                                        |
+| -------------------- | --------- | --------------- | ------------------------------------------------------------------ |
+| `schedule_attribute` | `string`  | `"schedule"`    | Attribute key on `stateObj` holding the schedule array             |
+| `time_field`         | `string`  | `"st"`          | Field name for minutes since midnight in each point                |
+| `value_field`        | `string`  | `"ti"`          | Field name for the value in each point                             |
+| `linear`             | `boolean` | `false`         | `true` = linear interpolation between points, `false` = step curve |
+| `min_value`          | `number`  | `0`             | Y axis minimum (also lower bound in the editor inputs)             |
+| `max_value`          | `number`  | `100` / auto    | Y axis maximum (also upper bound in the editor inputs)             |
+| `line_color`         | `string`  | device color    | Curve color as `"R,G,B"`                                           |
+| `fill_alpha`         | `number`  | `0.15`          | Fill opacity under the curve                                       |
+| `bg_color`           | `string`  | transparent     | Chart background as `"R,G,B,A"`                                    |
+| `label_color`        | `string`  | `"200,200,200"` | Axis labels & grid color as `"R,G,B"`                              |
+| `unit`               | `string`  | entity unit     | Unit label override (displayed on Y axis and in the editor)        |
+| `max_points`         | `number`  | `10`            | Maximum number of schedule points allowed in the editor            |
+
+#### Editor behaviour
+
+- **Click** on the chart opens a modal overlay.
+- **Left panel**: live preview of the schedule curve, updated in real time as values are edited.
+- **Right panel**: list of time/value pairs. Each row has a time input (`HH:MM`), a number input (clamped to `min_value`..`max_value`), and a delete button.
+- **Add**: inserts a new point (disabled when `max_points` is reached).
+- **Delete**: removes a point (disabled when only one point remains — at least one is always required).
+- Points are automatically sorted by time after each edit.
+- **Save**: dispatches a `schedule-save` CustomEvent (bubbles, composed) with `{ entity_id, attribute, schedule }` in the detail. The parent device or card must handle this event to call the appropriate HA service.
+- **Cancel** or clicking the backdrop closes the editor without saving.
+
+```ts
+{
+  type: "common-schedule",
+  name: "constant_speed",
+  schedule_attribute: "schedule",
+  time_field: "st",
+  value_field: "ti",
+  linear: false,
+  min_value: 0,
+  max_value: 100,
+  max_points: 10,
+  line_color: "0,150,255",
+  fill_alpha: 0.15,
+  unit: "%",
+  bg_color: "155,155,155,0.6",
+  label_color: "55,55,55",
+  css: {
+    position: "absolute",
+    top: "-102%",
+    left: "-11%",
+    width: "100%",
+    height: "100%",
   },
 }
 ```
