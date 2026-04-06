@@ -1,27 +1,11 @@
 /**
- * @file Schedule chart element with inline editor
+ * @file Schedule chart element with inline editor and preview
  * @module base.schedule
  *
- * Renders a day-long schedule curve (00:00 → 23:59) on a <canvas>.
+ * Renders a day-long schedule curve (00:00 - 23:59) on a <canvas>.
  * Click to open an editor overlay with live chart + editable point list.
- *
- * Configuration (via mapping):
- *   {
- *     name: "speed",
- *     type: "common-schedule",
- *     schedule_attribute: "schedule",   // stateObj attribute holding the array
- *     time_field: "st",                 // field name for minutes-since-midnight
- *     value_field: "ti",                // field name for the value
- *     linear: false,                    // false = step, true = linear interpolation
- *     min_value: 0,                     // Y axis minimum (default 0)
- *     max_value: 100,                   // Y axis maximum (auto-detected if omitted)
- *     line_color: "0,150,255",          // optional, R,G,B
- *     fill_alpha: 0.15,                 // optional, fill opacity under the curve
- *     bg_color: "0,0,0,0.6",           // optional, chart background rgba
- *     label_color: "200,200,200",       // optional, axis labels & grid R,G,B
- *     max_points: 10,                   // max number of schedule points (default 10)
- *     css: { ... }
- *   }
+ * Each row has a play button to preview that point's settings on the device.
+ * The row matching the current time is highlighted in red.
  */
 
 //----------------------------------------------------------------------------//
@@ -41,15 +25,14 @@ import type { BaseElementConfig } from "../types/index";
 //   Types
 //----------------------------------------------------------------------------//
 
-/** Configuration specific to the schedule element */
 export interface ScheduleConfig extends BaseElementConfig {
   name: string;
   schedule_attribute?: string;
   time_field?: string;
   value_field?: string;
-  pulse_field?: string; // field name for pulse/pulsation (e.g. "pd"). If set, editor shows a pulse column.
-  min_pulse?: number; // pulse min value (default 0)
-  max_pulse?: number; // pulse max value (default 100)
+  pulse_field?: string;
+  min_pulse?: number;
+  max_pulse?: number;
   linear?: boolean;
   min_value?: number;
   max_value?: number;
@@ -58,20 +41,19 @@ export interface ScheduleConfig extends BaseElementConfig {
   unit?: string;
   bg_color?: string;
   label_color?: string;
-  max_points?: number; // max editable points (default 10)
+  max_points?: number;
 }
 
-/** A single schedule point after parsing */
 interface SchedulePoint {
-  minutes: number; // 0–1439
+  minutes: number;
   value: number;
-  pulse?: number; // optional pulsation value
+  pulse?: number;
 }
 
 //----------------------------------------------------------------------------//
 //   Constants
 //----------------------------------------------------------------------------//
-const TOTAL_MINUTES = 24 * 60; // 1440
+const TOTAL_MINUTES = 24 * 60;
 const PADDING_TOP = 16;
 const PADDING_BOTTOM = 20;
 const PADDING_LEFT = 36;
@@ -90,6 +72,12 @@ export class Schedule extends MyElement {
   // Editor state
   @state() private _editing = false;
   @state() private _editPoints: SchedulePoint[] = [];
+
+  // Preview state
+  @state() private _previewRunning = false;
+  @state() private _previewRowIdx = -1; // which row triggered the preview (-1 = manual)
+  @state() private _previewValue = 0;
+  @state() private _previewPulse = 0;
 
   private _canvas: HTMLCanvasElement | null = null;
   private _editorCanvas: HTMLCanvasElement | null = null;
@@ -111,14 +99,12 @@ export class Schedule extends MyElement {
       this._ro = new ResizeObserver(() => this._draw());
       this._ro.observe(this._canvas);
     }
-    // Redraw every minute so the "now" bar stays current
     this._clockTimer = setInterval(() => this._draw(), 60_000);
     this._draw();
   }
 
   override updated(): void {
     this._draw();
-    // Also redraw the editor canvas if open
     if (this._editing) {
       this._drawEditorChart();
     }
@@ -140,7 +126,6 @@ export class Schedule extends MyElement {
 
   protected override _render(_style?: string): TemplateResult {
     const style = this.stateOn ? "" : "filter:grayscale(90%)";
-
     return html`
       <div
         class="schedule-container"
@@ -159,24 +144,21 @@ export class Schedule extends MyElement {
 
   private _openEditor(e: Event): void {
     e.stopPropagation();
-    // Clone current schedule into editable state
     this._editPoints = this._parseSchedule().map((p) => ({ ...p }));
     if (this._editPoints.length === 0) {
       const pt: SchedulePoint = {
         minutes: 0,
         value: this.conf?.min_value ?? 0,
       };
-      if (this.conf?.pulse_field) {
-        pt.pulse = this.conf?.min_pulse ?? 0;
-      }
+      if (this.conf?.pulse_field) pt.pulse = this.conf?.min_pulse ?? 0;
       this._editPoints = [pt];
     }
     this._editing = true;
-    // Draw editor chart after DOM update
     this.updateComplete.then(() => this._initEditorCanvas());
   }
 
   private _closeEditor(): void {
+    if (this._previewRunning) this._stopPreview();
     this._editing = false;
     this._editPoints = [];
     this._editorCanvas = null;
@@ -188,17 +170,26 @@ export class Schedule extends MyElement {
     if (this._editorCanvas) {
       const ro = new ResizeObserver(() => this._drawEditorChart());
       ro.observe(this._editorCanvas);
-      // Disconnect on close — simple approach: store ref
       (this as any)._editorRo = ro;
     }
     this._drawEditorChart();
+  }
+
+  /** Find which row index is "current" based on the time of day */
+  private _getCurrentRowIndex(nowMin: number): number {
+    if (this._editPoints.length === 0) return -1;
+    let idx = 0;
+    for (let i = 1; i < this._editPoints.length; i++) {
+      if (this._editPoints[i].minutes <= nowMin) idx = i;
+      else break;
+    }
+    return idx;
   }
 
   private _renderEditor(): TemplateResult {
     const maxPts = this.conf?.max_points ?? 10;
     const minVal = this.conf?.min_value ?? 0;
     const maxVal = this.conf?.max_value ?? 100;
-    const unit = this.conf?.unit ?? "";
     const canAdd = this._editPoints.length < maxPts;
     const canDelete = this._editPoints.length > 1;
     const hasPulse = !!this.conf?.pulse_field;
@@ -208,24 +199,26 @@ export class Schedule extends MyElement {
       ? "grid-table cols-pulse"
       : "grid-table cols-base";
 
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const currentRowIdx = this._getCurrentRowIndex(nowMin);
+
     return html`
       <div class="editor-overlay" @click=${this._onOverlayClick}>
         <div class="editor-panel" @click=${(e: Event) => e.stopPropagation()}>
           <div class="editor-header">
             <h3>${i18n._("sched_title")}</h3>
-            <button class="btn-icon" @click=${this._closeEditor}>✕</button>
+            <button class="btn-icon" @click=${this._closeEditor}>
+              &#x2715;
+            </button>
           </div>
 
           <div class="editor-body">
-            <!-- Left: live chart preview -->
-            <div class="editor-chart">
-              <canvas></canvas>
-            </div>
+            <div class="editor-chart"><canvas></canvas></div>
 
-            <!-- Right: editable point grid -->
             <div class="editor-list">
               <div class="${gridClass}">
-                <!-- Header row -->
+                <span class="gh"></span>
                 <span class="gh">${i18n._("sched_start")}</span>
                 <span class="gh">${i18n._("sched_intensity")}</span>
                 ${hasPulse
@@ -233,16 +226,28 @@ export class Schedule extends MyElement {
                   : nothing}
                 <span class="gh"></span>
 
-                <!-- Data rows -->
-                ${this._editPoints.map(
-                  (pt, i) => html`
+                ${this._editPoints.map((pt, i) => {
+                  const isCurrent = i === currentRowIdx;
+                  const cls = isCurrent ? "current-row" : "";
+                  const isActivePreview =
+                    this._previewRunning && this._previewRowIdx === i;
+                  return html`
+                    <button
+                      class="btn-icon ${isActivePreview ? "stop-row" : "play"}"
+                      @click=${() => this._togglePreviewRow(i)}
+                      title="${i18n._("sched_preview")}"
+                    >
+                      ${isActivePreview ? "\u25A0" : "\u25B6"}
+                    </button>
                     <input
                       type="time"
+                      class="${cls}"
                       .value=${this._minutesToTime(pt.minutes)}
                       @change=${(e: Event) => this._onTimeChange(i, e)}
                     />
                     <input
                       type="number"
+                      class="${cls}"
                       min=${minVal}
                       max=${maxVal}
                       .value=${String(pt.value)}
@@ -251,6 +256,7 @@ export class Schedule extends MyElement {
                     ${hasPulse
                       ? html`<input
                           type="number"
+                          class="${cls}"
                           min=${minPulse}
                           max=${maxPulse}
                           .value=${String(pt.pulse ?? 0)}
@@ -262,12 +268,52 @@ export class Schedule extends MyElement {
                       ?disabled=${!canDelete}
                       @click=${() => this._removePoint(i)}
                     >
-                      −
+                      &#x2212;
                     </button>
-                  `,
-                )}
+                  `;
+                })}
               </div>
             </div>
+          </div>
+
+          <!-- Preview panel -->
+          <div class="preview-bar">
+            <span class="preview-label">${i18n._("sched_preview")}</span>
+            <span
+              class="preview-status ${this._previewRunning ? "running" : ""}"
+            >
+              ${this._previewRunning
+                ? i18n._("sched_preview_running")
+                : i18n._("sched_preview_stopped")}
+            </span>
+            <input
+              type="number"
+              class="preview-input"
+              min=${minVal}
+              max=${maxVal}
+              .value=${String(this._previewValue)}
+              @change=${this._onPreviewValueChange}
+            />
+            ${hasPulse
+              ? html`<input
+                  type="number"
+                  class="preview-input"
+                  min=${minPulse}
+                  max=${maxPulse}
+                  .value=${String(this._previewPulse)}
+                  @change=${this._onPreviewPulseChange}
+                />`
+              : nothing}
+            ${this._previewRunning
+              ? html`<button class="btn-stop" @click=${this._stopPreview}>
+                  ${i18n._("sched_stop")}
+                </button>`
+              : html`<button
+                  class="btn-start"
+                  @click=${this._startPreviewFromBar}
+                >
+                  ${i18n._("sched_preview")}
+                </button>`}
           </div>
 
           <div class="editor-footer">
@@ -297,7 +343,6 @@ export class Schedule extends MyElement {
   // ------------------------------------------------------------------
 
   private _onOverlayClick(e: Event): void {
-    // Click on backdrop → close
     if ((e.target as HTMLElement).classList.contains("editor-overlay")) {
       this._closeEditor();
     }
@@ -328,7 +373,7 @@ export class Schedule extends MyElement {
     const input = e.target as HTMLInputElement;
     const val = Number(input.value);
     const minPulse = this.conf?.min_pulse ?? 0;
-    const maxPulse = this.conf?.max_pulse ?? 100;
+    const maxPulse = this.conf?.max_pulse ?? 300;
     if (!isNaN(val)) {
       this._editPoints[index].pulse = Math.max(
         minPulse,
@@ -341,17 +386,16 @@ export class Schedule extends MyElement {
   private _addPoint(): void {
     const maxPts = this.conf?.max_points ?? 10;
     if (this._editPoints.length >= maxPts) return;
-    // Default: add at next hour after last point
     const lastMin =
       this._editPoints.length > 0
         ? this._editPoints[this._editPoints.length - 1].minutes
         : 0;
     const newMin = Math.min(lastMin + 60, TOTAL_MINUTES - 1);
-    const defaultVal = this.conf?.min_value ?? 0;
-    const pt: SchedulePoint = { minutes: newMin, value: defaultVal };
-    if (this.conf?.pulse_field) {
-      pt.pulse = this.conf?.min_pulse ?? 0;
-    }
+    const pt: SchedulePoint = {
+      minutes: newMin,
+      value: this.conf?.min_value ?? 0,
+    };
+    if (this.conf?.pulse_field) pt.pulse = this.conf?.min_pulse ?? 0;
     this._editPoints.push(pt);
     this._sortEditPoints();
     this.requestUpdate();
@@ -367,6 +411,113 @@ export class Schedule extends MyElement {
     this._editPoints.sort((a, b) => a.minutes - b.minutes);
   }
 
+  // ------------------------------------------------------------------
+  //  Preview
+  // ------------------------------------------------------------------
+
+  /** Start preview from a row: PUT values then press preview_start button */
+  private _startPreview(index: number): void {
+    const pt = this._editPoints[index];
+    if (!pt) return;
+    this._previewValue = pt.value;
+    this._previewPulse = pt.pulse ?? 0;
+    this._previewRowIdx = index;
+    this._previewRunning = true;
+    this._sendPreviewValues();
+    // Press the HA preview_start button entity after sending values
+    this._pressButton("preview_start");
+  }
+
+  /** Stop preview: press the HA preview_stop button entity */
+  private _stopPreview(): void {
+    this._previewRunning = false;
+    this._previewRowIdx = -1;
+    this._pressButton("preview_stop");
+  }
+
+  /** Start preview from the preview bar using current bar values */
+  private _startPreviewFromBar(): void {
+    this._previewRowIdx = -1;
+    this._previewRunning = true;
+    this._sendPreviewValues();
+    this._pressButton("preview_start");
+  }
+
+  /** Toggle preview from a row icon: play if not running on this row, stop if it is */
+  private _togglePreviewRow(index: number): void {
+    if (this._previewRunning && this._previewRowIdx === index) {
+      this._stopPreview();
+    } else {
+      this._startPreview(index);
+    }
+  }
+
+  private _onPreviewValueChange(e: Event): void {
+    const val = Number((e.target as HTMLInputElement).value);
+    const minVal = this.conf?.min_value ?? 0;
+    const maxVal = this.conf?.max_value ?? 100;
+    if (!isNaN(val)) {
+      this._previewValue = Math.max(minVal, Math.min(maxVal, val));
+      if (this._previewRunning) this._sendPreviewValues();
+    }
+  }
+
+  private _onPreviewPulseChange(e: Event): void {
+    const val = Number((e.target as HTMLInputElement).value);
+    const minPulse = this.conf?.min_pulse ?? 0;
+    const maxPulse = this.conf?.max_pulse ?? 300;
+    if (!isNaN(val)) {
+      this._previewPulse = Math.max(minPulse, Math.min(maxPulse, val));
+      if (this._previewRunning) this._sendPreviewValues();
+    }
+  }
+
+  /** Send current preview values via PUT /preview */
+  private _sendPreviewValues(): void {
+    if (!this._hass) return;
+    const pumpId = (this.device as any)?.id;
+    const deviceId = (this.device as any)?.parent_device?.elements?.[0]
+      ?.primary_config_entry;
+    if (!pumpId || !deviceId) {
+      console.error("Preview: missing pump id or device_id");
+      return;
+    }
+
+    const valueField = this.conf?.value_field ?? "ti";
+    const pulseField = this.conf?.pulse_field;
+
+    const pumpData: Record<string, number> = {
+      [valueField]: this._previewValue,
+    };
+    if (pulseField) pumpData[pulseField] = this._previewPulse;
+
+    const data = {
+      device_id: deviceId,
+      access_path: "/preview",
+      method: "put",
+      data: { ["pump_" + pumpId]: pumpData },
+    };
+
+    console.debug("Schedule preview PUT", data);
+    this._hass.callService("redsea", "request", data);
+  }
+
+  /** Press a HA button entity (preview_start / preview_stop) on this pump */
+  private _pressButton(translationKey: string): void {
+    if (!this._hass) return;
+    const entity = (this.device as any)?.entities?.[translationKey];
+    if (!entity) {
+      console.error(`Preview: entity "${translationKey}" not found on pump`);
+      return;
+    }
+    console.debug(`Schedule: pressing ${translationKey}`, entity.entity_id);
+    this._hass.callService("button", "press", { entity_id: entity.entity_id });
+  }
+
+  // ------------------------------------------------------------------
+  //  Save
+  // ------------------------------------------------------------------
+
   private _saveSchedule(): void {
     if (!this.stateObj || !this._hass) return;
 
@@ -374,19 +525,15 @@ export class Schedule extends MyElement {
     const valueField = this.conf?.value_field ?? "ti";
     const pulseField = this.conf?.pulse_field;
 
-    // Rebuild the schedule array in the original format
     const schedule = this._editPoints.map((pt) => {
       const entry: Record<string, number> = {
         [timeField]: pt.minutes,
         [valueField]: pt.value,
       };
-      if (pulseField) {
-        entry[pulseField] = pt.pulse ?? 0;
-      }
+      if (pulseField) entry[pulseField] = pt.pulse ?? 0;
       return entry;
     });
 
-    // Resolve pump id and parent device_id for the redsea.request service
     const pumpId = (this.device as any)?.id;
     const deviceId = (this.device as any)?.parent_device?.elements?.[0]
       ?.primary_config_entry;
@@ -406,9 +553,8 @@ export class Schedule extends MyElement {
       data: { ["pump_" + pumpId]: { schedule } },
     };
 
-    console.debug("Schedule save — redsea.request", data);
+    console.debug("Schedule save", data);
     this._hass.callService("redsea", "request", data);
-
     this._closeEditor();
   }
 
@@ -423,7 +569,7 @@ export class Schedule extends MyElement {
   }
 
   // ------------------------------------------------------------------
-  //  Canvas drawing (main chart — unchanged logic)
+  //  Canvas drawing
   // ------------------------------------------------------------------
 
   private _draw(): void {
@@ -432,18 +578,12 @@ export class Schedule extends MyElement {
     this._drawOnCanvas(this._canvas, points, true);
   }
 
-  /** Draw the editor preview chart using the editable points */
   private _drawEditorChart(): void {
     if (!this._editorCanvas) return;
-    // Use edit points sorted by time
     const points = [...this._editPoints].sort((a, b) => a.minutes - b.minutes);
     this._drawOnCanvas(this._editorCanvas, points, false);
   }
 
-  /**
-   * Unified drawing routine used by both the main chart and editor preview.
-   * @param showNow  whether to draw the red "now" bar
-   */
   private _drawOnCanvas(
     canvas: HTMLCanvasElement,
     points: SchedulePoint[],
@@ -452,7 +592,6 @@ export class Schedule extends MyElement {
     const rect = canvas.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
 
-    // Hi-DPI support
     const dpr = window.devicePixelRatio || 1;
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
@@ -462,17 +601,14 @@ export class Schedule extends MyElement {
 
     const W = rect.width;
     const H = rect.height;
-
     ctx.clearRect(0, 0, W, H);
 
     const chartX = PADDING_LEFT;
     const chartY = PADDING_TOP;
     const chartW = W - PADDING_LEFT - PADDING_RIGHT;
     const chartH = H - PADDING_TOP - PADDING_BOTTOM;
-
     if (chartW <= 0 || chartH <= 0) return;
 
-    // Background fill
     if (this.conf?.bg_color) {
       ctx.fillStyle = `rgba(${this.conf.bg_color})`;
       ctx.fillRect(0, 0, W, H);
@@ -480,13 +616,11 @@ export class Schedule extends MyElement {
 
     if (points.length === 0) return;
 
-    // Y range
     const minVal = this.conf?.min_value ?? 0;
     const maxVal =
       this.conf?.max_value ??
       Math.max(100, ...points.map((p) => p.value)) * 1.05;
     const yRange = maxVal - minVal || 1;
-
     const xOf = (minutes: number): number =>
       chartX + (minutes / TOTAL_MINUTES) * chartW;
     const yOf = (value: number): number =>
@@ -495,7 +629,6 @@ export class Schedule extends MyElement {
     const unit =
       this.conf?.unit ?? this.stateObj?.attributes?.unit_of_measurement ?? "";
 
-    // Grid + labels
     this._drawGrid(
       ctx,
       chartX,
@@ -511,22 +644,18 @@ export class Schedule extends MyElement {
       this.conf?.label_color ?? "200,200,200",
     );
 
-    // Curve
     const rgb = this.conf?.line_color ?? this.c ?? "0,150,255";
     const lineColor = `rgb(${rgb})`;
     const fillAlpha = this.conf?.fill_alpha ?? 0.15;
     const fillColor = `rgba(${rgb},${fillAlpha})`;
     const linear = this.conf?.linear ?? false;
 
-    // Build path
     ctx.beginPath();
     const firstVal = points[0].value;
     ctx.moveTo(xOf(0), yOf(firstVal));
 
     if (linear) {
-      for (const pt of points) {
-        ctx.lineTo(xOf(pt.minutes), yOf(pt.value));
-      }
+      for (const pt of points) ctx.lineTo(xOf(pt.minutes), yOf(pt.value));
     } else {
       let prevY = yOf(firstVal);
       for (const pt of points) {
@@ -540,20 +669,17 @@ export class Schedule extends MyElement {
 
     const lastVal = points[points.length - 1].value;
     ctx.lineTo(xOf(TOTAL_MINUTES), yOf(lastVal));
-
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 2;
     ctx.lineJoin = "round";
     ctx.stroke();
 
-    // Fill under
     ctx.lineTo(xOf(TOTAL_MINUTES), yOf(minVal));
     ctx.lineTo(xOf(0), yOf(minVal));
     ctx.closePath();
     ctx.fillStyle = fillColor;
     ctx.fill();
 
-    // "Now" bar
     if (showNow) {
       const now = new Date();
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -585,13 +711,11 @@ export class Schedule extends MyElement {
 
       ctx.font = "bold 10px sans-serif";
       ctx.fillStyle = "rgba(255,40,40,0.9)";
-
       ctx.save();
       const textW = ctx.measureText(combinedLabel).width;
       const offset = 4;
       const rightSide = nowX + offset + 12 < chartX + chartW;
       const textCenterY = Math.min(nowY + textW / 2 + 8, chartY + chartH - 2);
-
       ctx.translate(nowX, textCenterY);
       ctx.rotate(-Math.PI / 2);
       ctx.textAlign = "center";
@@ -625,7 +749,6 @@ export class Schedule extends MyElement {
     const textColor = `rgba(${lc},0.7)`;
     const axisColor = `rgba(${lc},0.5)`;
 
-    // X axis
     const hourStep = isSmall ? 6 : 3;
     ctx.strokeStyle = gridColor;
     ctx.lineWidth = 0.5;
@@ -646,13 +769,14 @@ export class Schedule extends MyElement {
       ctx.lineTo(x, chartY + chartH + 3);
       ctx.stroke();
       ctx.strokeStyle = gridColor;
-      if (h < 24) {
-        const label = `${h.toString().padStart(2, "0")}h`;
-        ctx.fillText(label, x, chartY + chartH + 5);
-      }
+      if (h < 24)
+        ctx.fillText(
+          `${h.toString().padStart(2, "0")}h`,
+          x,
+          chartY + chartH + 5,
+        );
     }
 
-    // Y axis
     const yRange = maxVal - minVal;
     const yStep = this._niceStep(yRange, 4);
     ctx.textAlign = "right";
@@ -671,11 +795,13 @@ export class Schedule extends MyElement {
       ctx.lineTo(chartX, y);
       ctx.stroke();
       ctx.fillStyle = textColor;
-      const yLabel = unit ? `${Math.round(v)}${unit}` : String(Math.round(v));
-      ctx.fillText(yLabel, chartX - 5, y);
+      ctx.fillText(
+        unit ? `${Math.round(v)}${unit}` : String(Math.round(v)),
+        chartX - 5,
+        y,
+      );
     }
 
-    // Axis lines
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -708,16 +834,13 @@ export class Schedule extends MyElement {
   ): number {
     if (points.length === 0) return 0;
     if (minutes <= points[0].minutes) return points[0].value;
-    if (minutes >= points[points.length - 1].minutes) {
+    if (minutes >= points[points.length - 1].minutes)
       return points[points.length - 1].value;
-    }
     for (let i = 1; i < points.length; i++) {
       if (minutes <= points[i].minutes) {
         const prev = points[i - 1];
         const next = points[i];
-        if (!linear || prev.minutes === next.minutes) {
-          return prev.value;
-        }
+        if (!linear || prev.minutes === next.minutes) return prev.value;
         const t = (minutes - prev.minutes) / (next.minutes - prev.minutes);
         return prev.value + t * (next.value - prev.value);
       }
@@ -731,7 +854,6 @@ export class Schedule extends MyElement {
 
   private _parseSchedule(): SchedulePoint[] {
     if (!this.stateObj?.attributes) return [];
-
     const attrName = this.conf?.schedule_attribute ?? "schedule";
     const raw = this.stateObj.attributes[attrName];
     if (!Array.isArray(raw)) return [];
@@ -739,7 +861,6 @@ export class Schedule extends MyElement {
     const timeField = this.conf?.time_field ?? "st";
     const valueField = this.conf?.value_field ?? "ti";
     const pulseField = this.conf?.pulse_field;
-
     const points: SchedulePoint[] = [];
 
     for (const entry of raw) {
@@ -747,13 +868,11 @@ export class Schedule extends MyElement {
       const value = Number(entry[valueField]);
       if (!isNaN(minutes) && !isNaN(value)) {
         const pt: SchedulePoint = { minutes, value };
-        if (pulseField && entry[pulseField] !== undefined) {
+        if (pulseField && entry[pulseField] !== undefined)
           pt.pulse = Number(entry[pulseField]);
-        }
         points.push(pt);
       }
     }
-
     points.sort((a, b) => a.minutes - b.minutes);
     return points;
   }

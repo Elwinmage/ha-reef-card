@@ -41,11 +41,11 @@ export default css`
     color: var(--primary-text-color, #e0e0e0);
     border-radius: 12px;
     padding: 16px;
-    width: min(92vw, 640px);
-    max-height: 80vh;
+    width: min(92vw, 660px);
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   }
 
@@ -65,17 +65,17 @@ export default css`
 
   .editor-body {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     overflow: hidden;
     flex: 1;
     min-height: 0;
   }
 
-  /* Left: chart preview (reduced to ~40% width) */
+  /* Left: chart preview */
   .editor-chart {
-    flex: 0 0 40%;
+    flex: 0 0 38%;
     min-width: 0;
-    min-height: 180px;
+    min-height: 160px;
     position: relative;
   }
 
@@ -86,7 +86,7 @@ export default css`
     background: rgba(0, 0, 0, 0.2);
   }
 
-  /* Right: point list (takes remaining space) */
+  /* Right: point list */
   .editor-list {
     flex: 1;
     min-width: 0;
@@ -96,39 +96,39 @@ export default css`
   /* ---- CSS Grid table ---- */
   .grid-table {
     display: grid;
-    gap: 4px 6px;
+    gap: 3px 4px;
     align-items: center;
   }
 
-  /* 3 cols: time | value | delete */
+  /* play | time | value | delete */
   .cols-base {
-    grid-template-columns: auto 1fr 24px;
+    grid-template-columns: 22px auto 1fr 22px;
   }
 
-  /* 4 cols: time | value | pulse | delete */
+  /* play | time | value | pulse | delete */
   .cols-pulse {
-    grid-template-columns: auto 1fr 1fr 24px;
+    grid-template-columns: 22px auto 1fr 1fr 22px;
   }
 
   /* Header cells */
   .gh {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
-    opacity: 0.6;
+    opacity: 0.5;
     white-space: nowrap;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  /* Inputs — fill their grid cell */
+  /* Inputs */
   .grid-table input[type="time"],
   .grid-table input[type="number"] {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 4px;
     color: inherit;
-    padding: 4px 4px;
-    font-size: 13px;
+    padding: 3px 4px;
+    font-size: 12px;
     font-family: inherit;
     width: 100%;
     min-width: 0;
@@ -144,16 +144,29 @@ export default css`
     border-color: rgba(0, 150, 255, 0.6);
   }
 
+  /* Current time row highlight */
+  .grid-table input.current-row {
+    border-color: rgba(255, 60, 60, 0.7);
+    box-shadow: 0 0 0 1px rgba(255, 60, 60, 0.25);
+  }
+
+  /* ---- Icon buttons ---- */
+
   .btn-icon {
     background: none;
     border: none;
     color: inherit;
     cursor: pointer;
-    padding: 2px;
-    font-size: 16px;
+    padding: 1px;
+    font-size: 14px;
     line-height: 1;
-    opacity: 0.5;
+    opacity: 0.4;
     border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .btn-icon:hover {
@@ -165,11 +178,120 @@ export default css`
     color: #e55;
   }
 
+  .btn-icon.play {
+    color: #4a4;
+    font-size: 11px;
+  }
+
+  .btn-icon.play:hover {
+    color: #6d6;
+    background: rgba(80, 200, 80, 0.12);
+  }
+
+  .btn-icon.stop-row {
+    color: #e55;
+    font-size: 11px;
+  }
+
+  .btn-icon.stop-row:hover {
+    color: #f77;
+    background: rgba(255, 80, 80, 0.12);
+  }
+
+  /* ---- Preview bar ---- */
+
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+  }
+
+  .preview-label {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  .preview-status {
+    font-size: 11px;
+    opacity: 0.4;
+    min-width: 60px;
+  }
+
+  .preview-status.running {
+    color: #4a4;
+    opacity: 1;
+    font-weight: 500;
+  }
+
+  .preview-input {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: inherit;
+    padding: 3px 4px;
+    font-size: 12px;
+    font-family: inherit;
+    width: 56px;
+    text-align: right;
+    box-sizing: border-box;
+  }
+
+  .preview-input:focus {
+    outline: none;
+    border-color: rgba(0, 150, 255, 0.6);
+  }
+
+  .btn-stop {
+    background: rgba(255, 70, 70, 0.15);
+    border: 1px solid rgba(255, 70, 70, 0.3);
+    color: rgba(255, 70, 70, 0.9);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .btn-stop:hover {
+    background: rgba(255, 70, 70, 0.25);
+  }
+
+  .btn-stop:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .btn-start {
+    background: rgba(80, 200, 80, 0.15);
+    border: 1px solid rgba(80, 200, 80, 0.3);
+    color: rgba(80, 200, 80, 0.9);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .btn-start:hover {
+    background: rgba(80, 200, 80, 0.25);
+  }
+
+  /* ---- Footer ---- */
+
   .editor-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 8px;
+    padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     gap: 8px;
   }
@@ -179,8 +301,8 @@ export default css`
     border: 1px solid rgba(0, 150, 255, 0.3);
     color: rgba(0, 150, 255, 0.9);
     border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 5px 10px;
+    font-size: 12px;
     cursor: pointer;
     font-family: inherit;
   }
@@ -199,8 +321,8 @@ export default css`
     border: none;
     color: #fff;
     border-radius: 6px;
-    padding: 6px 16px;
-    font-size: 13px;
+    padding: 5px 14px;
+    font-size: 12px;
     cursor: pointer;
     font-weight: 500;
     font-family: inherit;
@@ -215,8 +337,8 @@ export default css`
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: inherit;
     border-radius: 6px;
-    padding: 6px 16px;
-    font-size: 13px;
+    padding: 5px 14px;
+    font-size: 12px;
     cursor: pointer;
     font-family: inherit;
   }
