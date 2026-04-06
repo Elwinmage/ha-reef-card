@@ -1,4 +1,4 @@
-import { COLOR_RS_HEX } from "../../../utils/colors";
+//import { COLOR_RS_HEX } from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -19,7 +19,7 @@ export const config = {
         position: "absolute",
         width: "100%",
         height: "15px",
-        top: "33%",
+        top: "88%",
         left: "0px",
       },
       "elt.css": {
@@ -37,7 +37,7 @@ export const config = {
         position: "absolute",
         width: "100%",
         height: "20px",
-        top: "37%",
+        top: "93%",
         left: "0px",
       },
       "elt.css": {
