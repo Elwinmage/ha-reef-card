@@ -273,6 +273,13 @@ export class Schedule extends MyElement {
                   `;
                 })}
               </div>
+              <button
+                class="btn-add"
+                ?disabled=${!canAdd}
+                @click=${this._addPoint}
+              >
+                ${i18n._("sched_add")}
+              </button>
             </div>
           </div>
 
@@ -327,13 +334,7 @@ export class Schedule extends MyElement {
           </div>
 
           <div class="editor-footer">
-            <button
-              class="btn-add"
-              ?disabled=${!canAdd}
-              @click=${this._addPoint}
-            >
-              ${i18n._("sched_add")}
-            </button>
+            <div></div>
             <div style="display:flex;gap:8px">
               <button class="btn-cancel" @click=${this._closeEditor}>
                 ${i18n._("sched_cancel")}

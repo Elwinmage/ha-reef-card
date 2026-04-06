@@ -318,6 +318,8 @@ export default css`
     font-size: 12px;
     cursor: pointer;
     font-family: inherit;
+    margin-top: 6px;
+    align-self: flex-start;
   }
 
   .btn-add:hover {
