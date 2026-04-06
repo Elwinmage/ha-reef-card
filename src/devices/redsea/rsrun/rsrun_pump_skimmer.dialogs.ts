@@ -13,6 +13,7 @@ export const dialogs_rsrun_pump_skimmer = {
             { entity: "select.model", name: { type: "entity" } },
             { entity: "name", name: { type: "entity" } },
             { entity: "state", name: { type: "entity" } },
+            { entity: "sensor_controlled_switch", name: { type: "entity" } },
             { entity: "fullcup_enabled", name: { type: "entity" } },
             { entity: "overskimming_enabled", name: { type: "entity" } },
             { entity: "overskimming_threshold", name: { type: "entity" } },
