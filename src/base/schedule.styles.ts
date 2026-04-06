@@ -248,6 +248,19 @@ export default css`
     border-color: rgba(0, 150, 255, 0.6);
   }
 
+  .preview-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .preview-field-label {
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0.45;
+    white-space: nowrap;
+  }
+
   .btn-stop {
     background: rgba(255, 70, 70, 0.15);
     border: 1px solid rgba(255, 70, 70, 0.3);

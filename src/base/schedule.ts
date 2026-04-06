@@ -286,23 +286,33 @@ export class Schedule extends MyElement {
                 ? i18n._("sched_preview_running")
                 : i18n._("sched_preview_stopped")}
             </span>
-            <input
-              type="number"
-              class="preview-input"
-              min=${minVal}
-              max=${maxVal}
-              .value=${String(this._previewValue)}
-              @change=${this._onPreviewValueChange}
-            />
+            <div class="preview-field">
+              <span class="preview-field-label"
+                >${i18n._("sched_intensity")}</span
+              >
+              <input
+                type="number"
+                class="preview-input"
+                min=${minVal}
+                max=${maxVal}
+                .value=${String(this._previewValue)}
+                @change=${this._onPreviewValueChange}
+              />
+            </div>
             ${hasPulse
-              ? html`<input
-                  type="number"
-                  class="preview-input"
-                  min=${minPulse}
-                  max=${maxPulse}
-                  .value=${String(this._previewPulse)}
-                  @change=${this._onPreviewPulseChange}
-                />`
+              ? html`<div class="preview-field">
+                  <span class="preview-field-label"
+                    >${i18n._("sched_pulse_time")}</span
+                  >
+                  <input
+                    type="number"
+                    class="preview-input"
+                    min=${minPulse}
+                    max=${maxPulse}
+                    .value=${String(this._previewPulse)}
+                    @change=${this._onPreviewPulseChange}
+                  />
+                </div>`
               : nothing}
             ${this._previewRunning
               ? html`<button class="btn-stop" @click=${this._stopPreview}>
@@ -680,6 +690,13 @@ export class Schedule extends MyElement {
     ctx.fillStyle = fillColor;
     ctx.fill();
 
+    // ------------------------------------------------------------------
+    //  Pulse oscillation overlay (return pumps only, when pulse_field is set)
+    // ------------------------------------------------------------------
+    if (this.conf?.pulse_field) {
+      this._drawPulseOverlay(ctx, points, xOf, yOf, minVal, chartW, rgb);
+    }
+
     if (showNow) {
       const now = new Date();
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -722,6 +739,110 @@ export class Schedule extends MyElement {
       ctx.textBaseline = rightSide ? "top" : "bottom";
       ctx.fillText(combinedLabel, 0, rightSide ? offset : -offset);
       ctx.restore();
+    }
+  }
+
+  // ------------------------------------------------------------------
+  //  Pulse oscillation overlay
+  // ------------------------------------------------------------------
+
+  /**
+   * Draw a schematic sinusoidal oscillation band for segments where pulse > 0.
+   *
+   * ReefRun pulse behaviour:
+   * - Intensity = max peak value (e.g. 70%)
+   * - Low threshold = fixed safe minimum (~30%)
+   * - Pulse duration = cycle period in seconds (5–300)
+   *
+   * The wave is drawn schematically (not to real time scale) between
+   * the low threshold and the intensity value. Shorter pulse = tighter waves.
+   */
+  private _drawPulseOverlay(
+    ctx: CanvasRenderingContext2D,
+    points: SchedulePoint[],
+    xOf: (m: number) => number,
+    yOf: (v: number) => number,
+    minVal: number,
+    chartW: number,
+    rgb: string,
+  ): void {
+    const PULSE_LOW_PCT = 30; // fixed low threshold (% of max_value range)
+    const lowVal = Math.max(minVal, PULSE_LOW_PCT);
+
+    for (let i = 0; i < points.length; i++) {
+      const pt = points[i];
+      if (!pt.pulse || pt.pulse <= 0) continue;
+      if (pt.value <= lowVal) continue; // no visible oscillation
+
+      // Segment time range: from this point to the next (or end of day)
+      const startMin = pt.minutes;
+      const endMin =
+        i + 1 < points.length ? points[i + 1].minutes : TOTAL_MINUTES;
+      if (endMin <= startMin) continue;
+
+      const x1 = xOf(startMin);
+      const x2 = xOf(endMin);
+      const segW = x2 - x1;
+      if (segW < 2) continue;
+
+      const yHigh = yOf(pt.value);
+      const yLow = yOf(lowVal);
+      const amplitude = (yLow - yHigh) / 2; // pixel amplitude
+      const yMid = (yHigh + yLow) / 2;
+
+      // Number of visible wave cycles: scale pulse duration schematically
+      // Short pulse (5s) → many cycles, long pulse (300s) → few cycles
+      // Use ~1 cycle per 8px minimum for readability
+      const maxCycles = Math.floor(segW / 8);
+      const rawCycles = Math.max(1, Math.round(segW / (pt.pulse * 0.4)));
+      const cycles = Math.min(rawCycles, maxCycles);
+
+      // Draw upper envelope (sine wave from intensity peak)
+      ctx.beginPath();
+      ctx.moveTo(x1, yMid);
+      const steps = Math.max(cycles * 12, 30);
+      for (let s = 0; s <= steps; s++) {
+        const t = s / steps;
+        const x = x1 + t * segW;
+        const y = yMid - amplitude * Math.sin(2 * Math.PI * cycles * t);
+        ctx.lineTo(x, y);
+      }
+
+      // Close back along the mid-line to create a filled band
+      // Draw lower envelope (mirrored)
+      for (let s = steps; s >= 0; s--) {
+        const t = s / steps;
+        const x = x1 + t * segW;
+        const y = yMid + amplitude * Math.sin(2 * Math.PI * cycles * t);
+        ctx.lineTo(x, y);
+      }
+
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${rgb},0.08)`;
+      ctx.fill();
+
+      // Draw the sine wave line itself
+      ctx.beginPath();
+      ctx.moveTo(x1, yMid);
+      for (let s = 0; s <= steps; s++) {
+        const t = s / steps;
+        const x = x1 + t * segW;
+        const y = yMid - amplitude * Math.sin(2 * Math.PI * cycles * t);
+        ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `rgba(${rgb},0.35)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Dashed lines for high and low boundaries
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = `rgba(${rgb},0.2)`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, yLow);
+      ctx.lineTo(x2, yLow);
+      ctx.stroke();
+      ctx.setLineDash([]);
     }
   }
 
