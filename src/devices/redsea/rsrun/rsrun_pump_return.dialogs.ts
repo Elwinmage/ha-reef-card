@@ -1,7 +1,7 @@
 export const dialogs_rsrun_pump_return = {
   config_return: {
     name: "config_return",
-    title_key: "${i18n._('config')}",
+    title_key: "${i18n._('config_return')}",
     close_cross: false,
     content: [
       {

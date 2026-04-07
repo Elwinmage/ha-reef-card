@@ -1,4 +1,4 @@
-//import { COLOR_RS_HEX } from "../../../utils/colors";
+import { COLOR_WHITE_60 } from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -113,6 +113,19 @@ export const config = {
         height: "2%",
         top: "0%",
         right: "0%",
+      },
+    },
+    mode: {
+      name: "mode",
+      type: "common-sensor",
+      translate_values: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        color: COLOR_WHITE_60,
+        width: "5.3%",
+        top: "1%",
+        left: "45%",
       },
     },
   },

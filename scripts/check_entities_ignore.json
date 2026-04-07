@@ -7,6 +7,10 @@
     "rswave"
   ],
   "ignore": {
-    "*": {}
+    "*": {},
+    "rsrun": {
+      "button": ["preview_save"],
+      "number": ["preview_speed"]
+    }
   }
 }

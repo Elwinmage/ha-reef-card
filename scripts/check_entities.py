@@ -450,6 +450,11 @@ CARD_ENTITY_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r'["\']?target["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
     # ${entity.key.state} — inline template expressions
     re.compile(r'\$\{entity\.([a-z_][a-z0-9_]*)'),
+    # _pressButton("key") — indirect callService via entity translation_key
+    re.compile(r'_pressButton\([\'"]([a-z_][a-z0-9_]*)[\'"]'),
+    # callService(..., { entity_id: ... }) patterns already covered above
+    # but also: this.device.entities["key"] or this.device?.entities?.["key"]
+    re.compile(r'\.entities\??\.\[?[\'"]([a-z_][a-z0-9_]*)[\'"]'),
 ]
 
 # get_entity('key') is only a reliable display reference when called from mapping
@@ -497,6 +502,13 @@ DEVICE_TS_INCLUDE: dict[str, set[str] | None] = {
 # Its entities are therefore available to every device.
 SHARED_DIALOG_FILE = "devices/device.dialogs.ts"
 
+# Base element files that reference device entities (e.g. schedule.ts calls
+# _pressButton("preview_start") which resolves via this.device.entities).
+# These are scanned for all devices that use the element.
+SHARED_BASE_FILES: list[str] = [
+    "base/schedule.ts",
+]
+
 # Per-device extra dialog files (in addition to the shared one)
 DEVICE_EXTRA_DIALOG_FILES: dict[str, list[str]] = {
     "rsdose": ["devices/redsea/rsdose/rsdose.dialogs.ts"],
@@ -511,13 +523,20 @@ def extract_card_entities(card_src_dir: Path) -> dict[str, set[str]]:
     For each device we collect:
       1. All entity/target/name keys from the device folder's .ts files
       2. Keys from device.dialogs.ts (common to ALL devices via import)
-      3. Keys from any per-device extra dialog files
+      3. Keys from shared base element files (e.g. schedule.ts)
+      4. Keys from any per-device extra dialog files
     """
     # Step A: shared dialog entities (common to all devices)
     shared_keys: set[str] = set()
     shared_file = card_src_dir / SHARED_DIALOG_FILE
     if shared_file.exists():
         shared_keys = _extract_keys_from_ts_file(shared_file)
+
+    # Step B: shared base element files (common to all devices)
+    for rel in SHARED_BASE_FILES:
+        base_file = card_src_dir / rel
+        if base_file.exists():
+            shared_keys.update(_extract_keys_from_ts_file(base_file))
 
     result: dict[str, set[str]] = {}
 
