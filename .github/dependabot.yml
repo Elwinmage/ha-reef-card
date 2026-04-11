@@ -1,17 +1,22 @@
-: 2
+version: 2
 updates:
-  # Mise à jour des Actions GitHub
+  # Update GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly" # Peut être daily, weekly ou monthly
-
-  # Mise à jour des dépendances (ex: npm, pip, gomod)
-  - package-ecosystem: "npm" # Remplacez par votre écosystème
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
-      dependencies: # Nom du groupe (libre)
+      github-actions:
         patterns:
-          - "*" # Regroupe TOUTES les dépendances dans une seule PR
+          - "*"  # Group all actions into a single PR
+
+  # Update npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"  # Group all npm dependencies into a single PR
+          
