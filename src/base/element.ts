@@ -87,6 +87,16 @@ export class MyElement extends LitElement {
         }
       }
     }
+    // Include parent entities (lower priority — don't overwrite local ones)
+    if (device?.parent_entities && hass?.states) {
+      for (const key in device.parent_entities) {
+        if (key in entitiesObj) continue;
+        const entity = device.parent_entities[key];
+        if (entity?.entity_id && hass.states[entity.entity_id]) {
+          entitiesObj[key] = hass.states[entity.entity_id];
+        }
+      }
+    }
     return entitiesObj;
   }
 
@@ -144,7 +154,9 @@ export class MyElement extends LitElement {
     if ("stateObj" in config && !config.stateObj) {
       elt.stateObj = null;
     } else {
-      const entityData = elt.device.entities[config.name];
+      const entityData =
+        elt.device.entities[config.name] ??
+        elt.device.parent_entities?.[config.name];
       if (entityData) {
         elt.stateObj = hass.states[entityData.entity_id] || null;
       }
@@ -294,7 +306,13 @@ export class MyElement extends LitElement {
       if (so && this.stateObj.state !== so.state) {
         this.stateObj = so;
         this.requestUpdate();
+        return;
       }
+    }
+    // If element has a disabled_if condition, re-render so the condition
+    // is re-evaluated when any referenced entity changes state.
+    if (this.conf?.disabled_if) {
+      this.requestUpdate();
     }
   }
 
@@ -346,8 +364,6 @@ export class MyElement extends LitElement {
     if (!this._hass || !this.device) {
       throw new Error("Hass or device not initialized");
     }
-    // Look in own device entities first, then fall back to parent_entities
-    // (e.g. pump sub-device dialog referencing a parent RSRun entity)
     const entity =
       this.device.entities[entity_translation_value] ??
       this.device.parent_entities?.[entity_translation_value];
@@ -459,13 +475,16 @@ export class MyElement extends LitElement {
             typeof action.data === "string"
               ? action.data
               : (action.data as ActionData)?.entity_id;
-          if (entityKey && this.device?.entities?.[entityKey]) {
+          const entityObj =
+            this.device?.entities?.[entityKey] ??
+            this.device?.parent_entities?.[entityKey];
+          if (entityKey && entityObj) {
             this.dispatchEvent(
               new CustomEvent("hass-more-info", {
                 bubbles: true,
                 composed: true,
                 detail: {
-                  entityId: this.device.entities[entityKey].entity_id,
+                  entityId: entityObj.entity_id,
                 },
               }),
             );

@@ -2,6 +2,7 @@ import {
   COLOR_RS_HEX,
   COLOR_RS_RGB,
   COLOR_WHITE_60,
+  COLOR_RS_RGBSTR,
 } from "../../../utils/colors";
 
 export const config = {
@@ -362,6 +363,87 @@ export const config = {
         position: "absolute",
         top: "-5.1%",
         left: "-17%",
+      },
+    },
+    fullcup: {
+      name: "fullcup_enabled",
+      type: "click-image",
+      icon: "state",
+      put_in: "ctrl",
+      disabled_if: "entity.sensor_controlled?.state === 'off'",
+      no_br_if_disabled: true,
+      icon_color: COLOR_RS_RGBSTR,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: { entity_id: "fullcup_enabled" },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "7.4%",
+        left: "67.7%",
+      },
+    },
+    fullcup_warning: {
+      name: "state",
+      type: "click-image",
+      image: new URL("../../../img/warning.svg", import.meta.url),
+      class: "blink",
+      put_in: "ctrl",
+      disabled_if:
+        " entity.state?.state !== 'full-cup' || entity.sensor_controlled?.state === 'off'",
+      no_br_if_disabled: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: { entity_id: "fullcup_enabled" },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "7.4%",
+        left: "57.7%",
+      },
+      elt_css: {
+        width: "24px",
+      },
+    },
+    overskimming: {
+      name: "overskimming_enabled",
+      type: "click-image",
+      icon: "state",
+      put_in: "ctrl",
+      disabled_if: "entity.sensor_controlled?.state === 'off'",
+      no_br_if_disabled: true,
+      icon_color: COLOR_RS_RGBSTR,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "11.4%",
+        left: "17.7%",
+      },
+    },
+    overskimming_percent: {
+      name: "overskimming_threshold",
+      type: "common-slider",
+      disabled_if:
+        "entity.sensor_controlled?.state === 'off' || entity.overskimming_enabled?.state === 'off'",
+      no_br_if_disabled: true,
+      put_in: "ctrl",
+      unit: "%",
+      slider_color: "255,0,0",
+      css: {
+        position: "absolute",
+        top: "15%",
+        left: "11.5%",
+        width: "60%",
+        height: "30px",
       },
     },
   },

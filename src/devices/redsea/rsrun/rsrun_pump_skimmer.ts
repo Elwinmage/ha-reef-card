@@ -152,6 +152,7 @@ export class RSSkimmer extends RSPump {
         ${this._render_elements(pumpOn, "sensor_in")}
       </div>
       <div>${this._render_elements(pumpOn, "ctrl_" + this.id.toString())}</div>
+      <div>${this._render_elements(pumpOn, "ctrl")}</div>
     `;
   }
 }

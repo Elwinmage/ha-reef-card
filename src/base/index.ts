@@ -12,6 +12,7 @@ import { RSSwitch } from "./switch";
 import { Schedule } from "./schedule";
 import { Sensor } from "./sensor";
 import { SensorTarget } from "./sensor_target";
+import { Slider } from "./slider";
 
 if (!customElements.get("click-image"))
   customElements.define("click-image", ClickImage);
@@ -27,6 +28,8 @@ if (!customElements.get("common-sensor"))
   customElements.define("common-sensor", Sensor);
 if (!customElements.get("common-sensor-target"))
   customElements.define("common-sensor-target", SensorTarget);
+if (!customElements.get("common-slider"))
+  customElements.define("common-slider", Slider);
 if (!customElements.get("common-switch"))
   customElements.define("common-switch", RSSwitch);
 if (!customElements.get("progress-bar"))
