@@ -430,17 +430,52 @@ export class MyElement extends LitElement {
    */
   async run_actions(actions: Action | Action[], timer?: number): Promise<void> {
     const actionsArray: Action[] = Array.isArray(actions) ? actions : [actions];
-    // Separate HA service calls from UI navigation actions (dialog/exit-dialog)
-    // Execution order:
-    //   1. All HA service calls immediately (device processes them)
-    //   2. Wait timer if set (device acknowledgement delay)
-    //   3. UI navigation actions (dialog switch / close)
-    const ha_actions = actionsArray.filter(
-      (a) => ("enabled" in a ? a.enabled : true) && a.domain !== "redsea_ui",
+    // Filter enabled actions
+    const enabledActions = actionsArray.filter((a) =>
+      "enabled" in a ? a.enabled : true,
     );
-    const ui_actions = actionsArray.filter(
-      (a) => ("enabled" in a ? a.enabled : true) && a.domain === "redsea_ui",
+
+    // Check if there are any wait actions
+    const hasWaitAction = enabledActions.some(
+      (a) => a.domain === "redsea_ui" && a.action === "wait",
     );
+
+    // If there are wait actions, process sequentially
+    if (hasWaitAction) {
+      for (const action of enabledActions) {
+        if (action.domain === "redsea_ui" && action.action === "wait") {
+          // Wait for specified duration (in seconds)
+          const duration = typeof action.data === "number" ? action.data : 1;
+          await this._wait_timer(duration);
+        } else if (action.domain !== "redsea_ui") {
+          // Execute HA service call
+          let a_data = structuredClone(action.data);
+
+          if (a_data === "default" && this.stateObj) {
+            a_data = { entity_id: this.stateObj.entity_id };
+          } else if (
+            typeof a_data === "object" &&
+            a_data !== null &&
+            "entity_id" in a_data
+          ) {
+            a_data.entity_id = this.get_entity(
+              (action.data as ActionData).entity_id,
+            ).entity_id;
+          }
+
+          console.debug("Call Service", action.domain, action.action, a_data);
+          this._hass?.callService(action.domain, action.action, a_data);
+        } else {
+          // Handle other UI actions
+          await this._execute_ui_action(action);
+        }
+      }
+      return;
+    }
+
+    // Original behavior: fire all HA service calls immediately
+    const ha_actions = enabledActions.filter((a) => a.domain !== "redsea_ui");
+    const ui_actions = enabledActions.filter((a) => a.domain === "redsea_ui");
 
     // Step 1 : fire all HA service calls immediately
     for (const action of ha_actions) {
@@ -469,141 +504,132 @@ export class MyElement extends LitElement {
 
     // Step 3 : execute UI navigation actions
     for (const action of ui_actions) {
-      switch (action.action) {
-        case "more-info":
-          const entityKey =
-            typeof action.data === "string"
-              ? action.data
-              : (action.data as ActionData)?.entity_id;
-          const entityObj =
-            this.device?.entities?.[entityKey] ??
-            this.device?.parent_entities?.[entityKey];
-          if (entityKey && entityObj) {
-            this.dispatchEvent(
-              new CustomEvent("hass-more-info", {
-                bubbles: true,
-                composed: true,
-                detail: {
-                  entityId: entityObj.entity_id,
-                },
-              }),
-            );
-          }
-          break;
-        case "dialog":
-          this.dispatchEvent(
-            new CustomEvent("display-dialog", {
-              bubbles: true,
-              composed: true,
-              detail: {
-                type: (action.data as ActionData).type,
-                overload_quit: (action.data as ActionData).overload_quit,
-                elt: this,
-              },
-            }),
-          );
-          break;
-        //exit dialog box
-        case "exit-dialog":
-          this.dispatchEvent(
-            new CustomEvent("quit-dialog", {
-              bubbles: true,
-              composed: true,
-              detail: {},
-            }),
-          );
-          break;
-        // display a short hass message box
-        case "message_box":
-          let str = "";
-          if (typeof action.data === "string") {
-            str = this.evaluate(action.data);
-          } else {
-            str = JSON.stringify(action.data);
-          }
-          this.msgbox(str);
-          break;
-        // Dispatch a named event up to the parent device for custom handling
-        case "device_event":
-          this.dispatchEvent(
-            new CustomEvent("device-event", {
-              bubbles: true,
-              composed: true,
-              detail: {
-                event: (action.data as any)?.event,
-                payload: (action.data as any)?.payload,
-              },
-            }),
-          );
-          break;
-        // Deep-merge a patch into this.device.config.elements and re-render
-        // Usage in tap_action:
-        //   domain: "redsea_ui", action: "update_conf"
-        //   data: { stats_week: { css: { display: "block" } }, stats_month: { css: { display: "none" } } }
-        case "update_conf":
-          if (
-            this.device?.config?.elements &&
-            action.data &&
-            typeof action.data === "object"
-          ) {
-            const patch = action.data as Record<string, any>;
-            for (const [elemName, elemPatch] of Object.entries(patch)) {
-              if (elemName in this.device.config.elements) {
-                const elemConf = this.device.config.elements[elemName];
-                // Cache key is now declarationKey (elemName) — matches device.ts _render_element fix
-                const cacheKey = elemName;
-                const cachedElt = (this.device as any)._elements?.[cacheKey];
-
-                // Store overrides persistently so they survive swapLeftRight re-renders
-                const overrides = (this.device as any)._conf_overrides;
-                if (overrides) {
-                  if (!overrides[elemName]) overrides[elemName] = {};
-                  for (const [key, val] of Object.entries(elemPatch as any)) {
-                    if (
-                      val !== null &&
-                      typeof val === "object" &&
-                      !Array.isArray(val)
-                    ) {
-                      overrides[elemName][key] = {
-                        ...(overrides[elemName][key] ?? {}),
-                        ...(val as any),
-                      };
-                    } else {
-                      overrides[elemName][key] = val;
-                    }
-                  }
-                }
-
-                if (cachedElt && (elemPatch as any).css) {
-                  if (elemConf.type?.startsWith("hui-")) {
-                    // hui-* cards: style.setProperty directly (created once, never re-rendered)
-                    for (const [prop, val] of Object.entries(
-                      (elemPatch as any).css,
-                    )) {
-                      cachedElt.style.setProperty(prop, val as string);
-                    }
-                  } else {
-                    // common-* elements: patch live conf.css + requestUpdate
-                    if (cachedElt.conf?.css) {
-                      Object.assign(cachedElt.conf.css, (elemPatch as any).css);
-                    }
-                    cachedElt.requestUpdate();
-                  }
-                }
-              }
-            }
-            this.device.requestUpdate();
-          }
-          break;
-      }
+      await this._execute_ui_action(action);
     }
   }
 
   /**
-   * Wait for a timer while showing a spinning indicator on the button that triggered the action.
-   * The button is greyed out and shows a rotating arrow + countdown during the wait.
-   * @param seconds - Number of seconds to wait
+   * Execute a single UI action
    */
+  private async _execute_ui_action(action: Action): Promise<void> {
+    switch (action.action) {
+      case "more-info":
+        const entityKey =
+          typeof action.data === "string"
+            ? action.data
+            : (action.data as ActionData)?.entity_id;
+        const entityObj =
+          this.device?.entities?.[entityKey] ??
+          this.device?.parent_entities?.[entityKey];
+        if (entityKey && entityObj) {
+          this.dispatchEvent(
+            new CustomEvent("hass-more-info", {
+              bubbles: true,
+              composed: true,
+              detail: {
+                entityId: entityObj.entity_id,
+              },
+            }),
+          );
+        }
+        break;
+      case "dialog":
+        this.dispatchEvent(
+          new CustomEvent("display-dialog", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              type: (action.data as ActionData).type,
+              overload_quit: (action.data as ActionData).overload_quit,
+              elt: this,
+            },
+          }),
+        );
+        break;
+      case "exit-dialog":
+        this.dispatchEvent(
+          new CustomEvent("quit-dialog", {
+            bubbles: true,
+            composed: true,
+            detail: {},
+          }),
+        );
+        break;
+      case "message_box":
+        let str = "";
+        if (typeof action.data === "string") {
+          str = this.evaluate(action.data);
+        } else {
+          str = JSON.stringify(action.data);
+        }
+        this.msgbox(str);
+        break;
+      case "device_event":
+        this.dispatchEvent(
+          new CustomEvent("device-event", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              event: (action.data as any)?.event,
+              payload: (action.data as any)?.payload,
+            },
+          }),
+        );
+        break;
+      case "update_conf":
+        if (
+          this.device?.config?.elements &&
+          action.data &&
+          typeof action.data === "object"
+        ) {
+          const patch = action.data as Record<string, any>;
+          for (const [elemName, elemPatch] of Object.entries(patch)) {
+            if (elemName in this.device.config.elements) {
+              const elemConf = this.device.config.elements[elemName];
+              const cacheKey = elemName;
+              const cachedElt = (this.device as any)._elements?.[cacheKey];
+
+              const overrides = (this.device as any)._conf_overrides;
+              if (overrides) {
+                if (!overrides[elemName]) overrides[elemName] = {};
+                for (const [key, val] of Object.entries(elemPatch as any)) {
+                  if (
+                    val !== null &&
+                    typeof val === "object" &&
+                    !Array.isArray(val)
+                  ) {
+                    overrides[elemName][key] = {
+                      ...(overrides[elemName][key] ?? {}),
+                      ...(val as any),
+                    };
+                  } else {
+                    overrides[elemName][key] = val;
+                  }
+                }
+              }
+
+              if (cachedElt && (elemPatch as any).css) {
+                if (elemConf.type?.startsWith("hui-")) {
+                  for (const [prop, val] of Object.entries(
+                    (elemPatch as any).css,
+                  )) {
+                    cachedElt.style.setProperty(prop, val as string);
+                  }
+                } else {
+                  if (cachedElt.conf?.css) {
+                    Object.assign(cachedElt.conf.css, (elemPatch as any).css);
+                  }
+                  cachedElt.requestUpdate();
+                }
+              }
+            }
+          }
+          this.device.requestUpdate();
+        }
+        break;
+    }
+  }
+
   async _wait_timer(seconds: number): Promise<void> {
     // The button is rendered as <div class="button"> inside this element's shadow root
     const btn = this.shadowRoot?.querySelector(".button") as HTMLElement | null;
@@ -621,7 +647,7 @@ export class MyElement extends LitElement {
 
     const update_label = () => {
       if (btn) {
-        btn.innerHTML = `<span style="display:inline-block;animation:timer-spin 1s linear infinite;font-size:1.1em">↻</span>`;
+        btn.innerHTML = `<span style="display:inline-block;animation:timer-spin 1s linear infinite;font-size:1.1em">↻</span> ${remaining}s`;
       }
     };
 

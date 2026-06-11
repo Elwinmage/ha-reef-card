@@ -235,6 +235,10 @@ export class Dialog extends LitElement {
       const clone = structuredClone(content_conf.conf);
       if ("entities" in content_conf.conf) {
         for (const pos in content_conf.conf.entities) {
+          // Skip dividers and other non-entity elements
+          if (content_conf.conf.entities[pos]?.type === "divider") {
+            continue;
+          }
           try {
             if (typeof clone.entities[pos] === "string") {
               clone.entities[pos] = this.elt.get_entity(
