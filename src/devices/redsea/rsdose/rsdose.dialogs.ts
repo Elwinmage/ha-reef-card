@@ -79,6 +79,7 @@ export const dialogs_rsdose = {
         conf: {
           type: "entities",
           entities: [
+            { entity: "dose_compensation", name: { type: "entity" } },
             { entity: "last_calibration", name: { type: "entity" } },
             { entity: "recalibration_required", name: { type: "entity" } },
           ],
