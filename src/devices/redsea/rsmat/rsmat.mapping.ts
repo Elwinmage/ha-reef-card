@@ -587,6 +587,27 @@ export const config = {
         data: { type: "end_error" },
       },
     },
+    maint_mat_carbon_replace: {
+      name: "maint_mat_carbon_replace",
+      type: "progress-bar",
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+      inverted: true,
+      colors: {
+        background: "rgba(0,0,0,0.6)",
+        fill: "#5d2105",
+      },
+      label:
+        "${entity.maint_mat_carbon_replace.attributes.days_left} ${i18n._('days')} ${i18n._('active_carbon_replace')}",
+      css: {
+        position: "absolute",
+        transform: "rotate(-90deg)",
+        top: "60%",
+        left: "70%",
+        width: "40%",
+      },
+    },
+
     last_message: {
       name: "last_message",
       type: "redsea-messages",

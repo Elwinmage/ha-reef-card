@@ -1,14 +1,31 @@
 /**
  * Implement a progress circle
- * Exemple  {
- *          name: "auto_dosed_today",
- *          target: "daily_dose",
- *          force_integer: true,
- *          type: "progress-circle",
- *          class: "today_dosing",
- *          put_in: "pump_state_labels",
- *          no_value: true,
- *         },
+ *
+ * Examples:
+ *
+ * 1) Classic state/target-based circle:
+ *   {
+ *     name: "auto_dosed_today",
+ *     target: "daily_dose",
+ *     force_integer: true,
+ *     type: "progress-circle",
+ *     class: "today_dosing",
+ *     no_value: true,
+ *   }
+ *
+ * 2) Attribute-based circle (e.g. RSMAT maintenance countdown):
+ *   {
+ *     name: "replace_activated_carbon",
+ *     type: "progress-circle",
+ *     value_attribute: "days_left",
+ *     target_attribute: "interval_days",
+ *     inverted: true,
+ *     colors: {
+ *       background: "black",
+ *       fill: "brown",
+ *       center: "rgba(255,255,255,0.2)",
+ *     },
+ *   }
  */
 
 //----------------------------------------------------------------------------//
@@ -57,6 +74,12 @@ export class ProgressCircle extends SensorTarget {
    */
   protected override _render(_style?: string): TemplateResult {
     if (!this.hasTargetState() && typeof this.conf.target !== "number") {
+      const why = !this.stateObj
+        ? `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`
+        : `stateObjTarget not resolved for target="${(this.conf as any)?.target}" — set target_attribute if the target lives in the entity's attributes`;
+      console.warn(
+        `[ProgressCircle - ${this.conf?.name}] Missing state: ${why}`,
+      );
       return html`<div class="error">Missing state</div>`;
     }
 
@@ -72,12 +95,13 @@ export class ProgressCircle extends SensorTarget {
     ) {
       return html`<br />`;
     }
-    const value = parseFloat(this.stateObj.state);
+    // Use SensorTarget helpers so value_attribute / target_attribute are honoured.
+    const value = this.getValue();
     let target = 100;
     if (typeof this.conf.target === "number") {
       target = this.conf.target;
     } else {
-      target = parseFloat(this.stateObjTarget.state);
+      target = this.getTargetValue();
     }
     if (this.conf?.target_is_remaining) {
       target += value;
@@ -104,8 +128,11 @@ export class ProgressCircle extends SensorTarget {
     if (fill < 0) {
       fill = 0;
     }
-    //specific colors
+    // Color overrides — defaults preserve legacy behaviour.
     const center_color = this.conf?.colors?.center ?? "transparent";
+    const bg_stroke = this.conf?.colors?.background ?? "rgba(150,150,150,0.6)";
+    // colors.fill wins over device/OFF colors when explicitly set.
+    const fill_stroke = this.conf?.colors?.fill ?? `rgb(${this.c})`;
 
     // range 0 to 565 for 200x200
     return html` <svg
@@ -121,14 +148,14 @@ export class ProgressCircle extends SensorTarget {
         cx="100"
         cy="100"
         fill="${center_color}"
-        stroke="rgba(150,150,150,0.6)"
+        stroke="${bg_stroke}"
         stroke-width="16px"
       ></circle>
       <circle
         r="90"
         cx="100"
         cy="100"
-        stroke="rgb(${this.c})"
+        stroke="${fill_stroke}"
         stroke-width="16px"
         stroke-linecap="round"
         stroke-dashoffset="${565 - (percent * 565) / 100}px"
@@ -138,7 +165,7 @@ export class ProgressCircle extends SensorTarget {
       <text
         x="115px"
         y="100px"
-        fill="rgb(${this.c})"
+        fill="${fill_stroke}"
         font-size="52px"
         font-weight="bold"
         text-anchor="middle"

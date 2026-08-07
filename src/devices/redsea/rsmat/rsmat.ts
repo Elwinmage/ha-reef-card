@@ -149,6 +149,13 @@ export class RSMat extends RSDevice {
     }
     this._populate_entities();
     this.update_config();
-    return html` <form>${this._editor_common()}</form>`;
+    return html` <form>
+      ${this._editor_common()}
+      <table>
+        <tr>
+          <td>${this.is_checked("maint_mat_carbon_replace")}</td>
+        </tr>
+      </table>
+    </form>`;
   }
 }

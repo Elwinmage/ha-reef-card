@@ -1,4 +1,5 @@
 {
+  "active_carbon_replace": "Carbone",
   "ask_add_supplement": "Richiedere un'immagine",
   "at_least_30m_between": "Tra inizio e fine devono intercorrere almeno 30 minuti",
   "brand_name": "Nome del marchio",
@@ -54,6 +55,7 @@
   "in_dev": "Attualmente in sviluppo",
   "last_alert_message": "Nascondi ultimo messaggio di avviso",
   "last_message": "Nascondi ultimo messaggio",
+  "maint_mat_carbon_replace": "Disattivare la sostituzione del carbone attivo",
   "maintenance": "Manutenzione in corso..",
   "manual_advance": "Avanzamento manuale",
   "min": "Minimo",

@@ -501,7 +501,7 @@ export class RSDevice extends LitElement {
 
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()
     // Requires _helpers (loaded async), skip until available
-    if (conf.type.startsWith("hui-")) {
+    if (conf.type?.startsWith("hui-")) {
       // Use instance _helpers or fallback to the shared resolved static
       const helpers = this._helpers ?? RSDevice._helpersResolved;
       if (!helpers) {
@@ -614,7 +614,7 @@ export class RSDevice extends LitElement {
    */
   is_checked(id) {
     let result = false;
-    if ("disabled_if" in this.config.elements[id]) {
+    if (this.config.elements[id] && "disabled_if" in this.config.elements[id]) {
       result = this.config.elements[id].disabled_if;
     }
     if (result) {

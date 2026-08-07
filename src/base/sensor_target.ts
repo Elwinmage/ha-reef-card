@@ -49,7 +49,9 @@ export class SensorTarget extends Sensor {
   }
 
   /**
-   * Override hass setter to also update stateObjTarget
+   * Override hass setter to also update stateObjTarget and re-render
+   * on attribute changes when value_attribute / target_attribute is used
+   * (button-like entities whose `state` never changes).
    */
   override set hass(obj: HassConfig) {
     super.hass = obj;
@@ -62,19 +64,54 @@ export class SensorTarget extends Sensor {
         this.requestUpdate();
       }
     }
+
+    // Attribute-based tracking: refresh stateObj and re-render when the
+    // tracked attributes change, since super.hass only reacts to state changes.
+    const valAttr = (this.conf as any)?.value_attribute;
+    const tgtAttr = (this.conf as any)?.target_attribute;
+    if ((valAttr || tgtAttr) && this.stateObj) {
+      const so = obj.states[this.stateObj.entity_id];
+      if (so) {
+        const prevAttrs = this.stateObj.attributes ?? {};
+        const nextAttrs = so.attributes ?? {};
+        const changed =
+          (valAttr && prevAttrs[valAttr] !== nextAttrs[valAttr]) ||
+          (tgtAttr && prevAttrs[tgtAttr] !== nextAttrs[tgtAttr]);
+        if (changed) {
+          this.stateObj = so;
+          this.requestUpdate();
+        }
+      }
+    }
   }
 
   /**
-   * Get numeric value from state object
+   * Get numeric value.
+   * If conf.value_attribute is set, read from stateObj.attributes[value_attribute]
+   * instead of stateObj.state. Useful for entities whose numeric progress lives
+   * in an attribute (e.g. button.*.days_left).
    */
   protected getValue(): number {
+    const attrKey = (this.conf as any)?.value_attribute;
+    if (attrKey && this.stateObj) {
+      const raw = this.stateObj.attributes?.[attrKey];
+      return parseFloat(String(raw ?? "0")) || 0;
+    }
     return parseFloat(this.stateObj?.state || "0") || 0;
   }
 
   /**
-   * Get numeric target value from target state object
+   * Get numeric target value.
+   * If conf.target_attribute is set, read from stateObj.attributes[target_attribute]
+   * (same entity as value — no external target entity needed).
+   * Otherwise, fall back to stateObjTarget.state.
    */
   protected getTargetValue(): number {
+    const attrKey = (this.conf as any)?.target_attribute;
+    if (attrKey && this.stateObj) {
+      const raw = this.stateObj.attributes?.[attrKey];
+      return parseFloat(String(raw ?? "0")) || 0;
+    }
     return parseFloat(this.stateObjTarget?.state || "0") || 0;
   }
 
@@ -88,10 +125,14 @@ export class SensorTarget extends Sensor {
   }
 
   /**
-   * Check if both state objects are available
+   * Check if a target reference is available.
+   * True when stateObjTarget is set, OR when conf.target_attribute is used
+   * (in which case the target lives in stateObj's attributes).
    */
   protected hasTargetState(): boolean {
-    return !!(this.stateObj && this.stateObjTarget);
+    if (!this.stateObj) return false;
+    if ((this.conf as any)?.target_attribute) return true;
+    return !!this.stateObjTarget;
   }
 
   /**

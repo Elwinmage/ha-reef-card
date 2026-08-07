@@ -1,4 +1,5 @@
 {
+  "active_carbon_replace": "Carvão",
   "ask_add_supplement": "Pedir imagem",
   "at_least_30m_between": "Entre o início e o fim devem existir pelo menos 30 minutos",
   "brand_name": "Nome da marca",
@@ -54,6 +55,7 @@
   "in_dev": "Atualmente em desenvolvimento",
   "last_alert_message": "Ocultar última mensagem de alerta",
   "last_message": "Ocultar última mensagem",
+  "maint_mat_carbon_replace": "Desativar a substituição do carvão ativo",
   "maintenance": "Manutenção em curso..",
   "manual_advance": "Avanço manual",
   "min": "Mínimo",
