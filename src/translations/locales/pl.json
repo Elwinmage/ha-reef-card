@@ -87,6 +87,8 @@
   "no": "Nie",
   "overskimming_calibration": "Kalibracja nadmiernego pieniowania",
   "priming": "Napełnianie przewodów",
+  "pump_type_return": "Powrotna",
+  "pump_type_skimmer": "Odpieniacz",
   "quick": "Szybki",
   "regular": "Regularny",
   "save": "Zapisz",

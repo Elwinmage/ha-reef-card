@@ -213,6 +213,68 @@ function index_notify_switches(hass: HassConfig): Record<string, string> {
   return index;
 }
 
+/**
+ * Build an index of the RSRUN per-pump descriptors, keyed by device_id.
+ *
+ * Each pump sub-device carries `sensor` entities whose `reef_role` is "type"
+ * ("return"/"skimmer") and "model" ("return-12000", "rsk-900"). Requiring
+ * BOTH on the same device is what makes this specific to ReefRun pumps:
+ * other Red Sea devices expose a `model` role on a `select` entity, and a
+ * lone `name` sensor, but never this pair on a sensor.
+ * @param hass: the hass states object
+ * @return a lookup table from device_id to the pump type and model
+ */
+function index_pump_details(
+  hass: HassConfig,
+): Record<string, { type: string | null; model: string | null }> {
+  const registry: Record<string, any> = (hass.entities as any) || {};
+  const found: Record<string, { type: string | null; model: string | null }> =
+    {};
+
+  for (const entity_id in hass.states) {
+    if (!entity_id.startsWith("sensor.")) {
+      continue;
+    }
+    const state = hass.states[entity_id];
+    const role = state?.attributes?.reef_role;
+    if (role !== "type" && role !== "model") {
+      continue;
+    }
+    const device_id = registry[entity_id]?.device_id;
+    if (!device_id) {
+      continue;
+    }
+    // Ignore unavailable/unknown states rather than printing them.
+    const value = state.state;
+    if (
+      typeof value !== "string" ||
+      value === "" ||
+      value === "unknown" ||
+      value === "unavailable"
+    ) {
+      continue;
+    }
+    const entry = (found[device_id] ??= { type: null, model: null });
+    if (role === "type") {
+      entry.type = value;
+    } else {
+      entry.model = value;
+    }
+  }
+
+  // Keep only devices exposing the pair.
+  const index: Record<string, { type: string | null; model: string | null }> =
+    {};
+  for (const device_id in found) {
+    const entry = found[device_id]!;
+    if (entry.type !== null && entry.model !== null) {
+      index[device_id] = entry;
+    }
+  }
+
+  return index;
+}
+
 /** Interval number entity resolved for one task. */
 interface IntervalRef {
   entity_id: string;
@@ -292,6 +354,7 @@ export function collect_maintenance_items(
   const devices: Record<string, any> = hass.devices || {};
   const notify_switches = index_notify_switches(hass);
   const interval_numbers = index_interval_numbers(hass);
+  const pump_details = index_pump_details(hass);
 
   for (const entity_id in hass.states) {
     const state = hass.states[entity_id];
@@ -327,6 +390,7 @@ export function collect_maintenance_items(
     const notify = attrs.notify !== false;
     const role_str = String(attrs.reef_role);
     const interval_ref = interval_numbers[`${device_id}|${role_str}`] ?? null;
+    const pump = device_id ? (pump_details[device_id] ?? null) : null;
 
     items.push({
       entity_id,
@@ -340,6 +404,8 @@ export function collect_maintenance_items(
       interval_min: interval_ref?.min ?? null,
       interval_max: interval_ref?.max ?? null,
       interval_step: interval_ref?.step ?? 1,
+      pump_type: pump?.type ?? null,
+      pump_model: pump?.model ?? null,
       name: friendly || humanize_task_key(String(attrs.task_key)),
       icon: typeof attrs.icon === "string" ? attrs.icon : null,
       device_id,
@@ -424,6 +490,10 @@ export function group_by_device(items: MaintenanceItem[]): MaintenanceGroup[] {
       group = {
         device_id: item.device_id,
         device_name: item.device_name,
+        // All items of a group share the same device, so the first one
+        // carries the pump details for the whole header.
+        pump_type: item.pump_type,
+        pump_model: item.pump_model,
         items: [],
       };
       index[key] = group;

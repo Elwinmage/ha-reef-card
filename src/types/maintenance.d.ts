@@ -37,6 +37,10 @@ export interface MaintenanceItem {
   interval_min: number | null;
   interval_max: number | null;
   interval_step: number;
+  /** RSRUN pump type ("return" / "skimmer"), null for other devices. */
+  pump_type: string | null;
+  /** RSRUN pump model ("return-12000", "rsk-900"), null for other devices. */
+  pump_model: string | null;
   /** Human readable task name (friendly_name without the device prefix). */
   name: string;
   /** MDI icon declared on the entity, if any. */
@@ -67,6 +71,10 @@ export interface MaintenanceItem {
 export interface MaintenanceGroup {
   device_id: string;
   device_name: string;
+  /** RSRUN pump type of the device, null when not a pump. */
+  pump_type: string | null;
+  /** RSRUN pump model of the device, null when not a pump. */
+  pump_model: string | null;
   items: MaintenanceItem[];
 }
 

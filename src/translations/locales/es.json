@@ -87,6 +87,8 @@
   "no": "No",
   "overskimming_calibration": "Calibración de espuma excesiva",
   "priming": "Cebado",
+  "pump_type_return": "Retorno",
+  "pump_type_skimmer": "Espumador",
   "quick": "Rápido",
   "regular": "Regular",
   "save": "Guardar",

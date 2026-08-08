@@ -696,6 +696,18 @@ and the integration converts back to days before storing. Bounds come from the
 entity itself, so the card can never write an out-of-range value. Only one
 editor stays open at a time. Set `show_interval: false` to hide the buttons.
 
+### ReefRun pumps
+
+ReefRun sub-devices are named "… pump 1" / "… pump 2", which says nothing about
+what each pump actually is. When the device exposes both a `type` and a `model`
+sensor, the card appends them in parentheses: **ReefRun pump 1 (return 12000)**,
+**ReefRun pump 2 (skimmer 900)**.
+
+The type is localized, and only the trailing figure of the model is kept
+(`return-12000` -> `12000`, `rsk-900` -> `900`) since the prefix is either
+redundant with the type or cryptic. Devices that are not pumps keep a plain
+name.
+
 ## Configuration
 
 ```yaml

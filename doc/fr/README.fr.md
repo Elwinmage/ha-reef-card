@@ -699,6 +699,18 @@ proviennent de l'entité elle-même, la carte ne peut donc jamais écrire une
 valeur hors plage. Un seul éditeur reste ouvert à la fois. Mettez
 `show_interval: false` pour masquer les boutons.
 
+### Pompes ReefRun
+
+Les sous-appareils ReefRun s'appellent « … pump 1 » / « … pump 2 », ce qui ne
+dit rien de ce qu'est réellement chaque pompe. Quand l'appareil expose à la fois
+un capteur `type` et un capteur `model`, la carte les ajoute entre parenthèses :
+**ReefRun pump 1 (Retour 12000)**, **ReefRun pump 2 (Écumeur 900)**.
+
+Le type est traduit, et seul le nombre final du modèle est conservé
+(`return-12000` -> `12000`, `rsk-900` -> `900`), le préfixe étant soit redondant
+avec le type, soit obscur. Les appareils qui ne sont pas des pompes gardent leur
+nom tel quel.
+
 ## Configuration
 
 ```yaml

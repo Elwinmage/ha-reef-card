@@ -87,6 +87,8 @@
   "no": "Non",
   "overskimming_calibration": "Calibration du débordement",
   "priming": "Amorçage",
+  "pump_type_return": "Retour",
+  "pump_type_skimmer": "Écumeur",
   "quick": "Turbo",
   "regular": "Standard",
   "save": "Sauvegarder",

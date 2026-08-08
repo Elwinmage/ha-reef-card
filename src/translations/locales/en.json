@@ -87,6 +87,8 @@
   "no": "No",
   "overskimming_calibration": "Overskimming calibration",
   "priming": "Priming",
+  "pump_type_return": "return",
+  "pump_type_skimmer": "skimmer",
   "quick": "Quick",
   "regular": "Regular",
   "save": "Save",

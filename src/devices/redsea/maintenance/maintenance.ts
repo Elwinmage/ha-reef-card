@@ -239,6 +239,51 @@ export class RSMaintenance extends RSDevice {
   }
 
   /**
+   * Build the parenthesised pump descriptor appended to a ReefRun sub-device
+   * name, e.g. "RSRUN-1234 pump 1" -> " (Retour 12000)".
+   *
+   * The type is localized (the integration translates the very same enum),
+   * and only the trailing figure of the model is kept: the "return-" /
+   * "rsk-" prefixes are either redundant with the type or cryptic.
+   * @param type: the raw `type` sensor state
+   * @param model: the raw `model` sensor state
+   * @return the suffix including surrounding parentheses, or "" when unknown
+   */
+  private _pump_suffix(type: string | null, model: string | null): string {
+    const parts: string[] = [];
+
+    if (type) {
+      // Fall back to the raw value so a pump type added later by the
+      // integration still displays something useful instead of the
+      // "translation string not found" placeholder.
+      const key = `pump_type_${type}`;
+      parts.push(i18n.hasTranslation(key) ? i18n._(key) : type);
+    }
+
+    if (model) {
+      const figure = model.match(/(\d+)\s*$/);
+      parts.push(figure ? figure[1]! : model);
+    }
+
+    return parts.length > 0 ? ` (${parts.join(" ")})` : "";
+  }
+
+  /**
+   * Full display name of a device, pump descriptor included.
+   * @param name: the Home Assistant device name
+   * @param type: the raw `type` sensor state
+   * @param model: the raw `model` sensor state
+   * @return the label shown in group headers and row subtitles
+   */
+  private _device_label(
+    name: string,
+    type: string | null,
+    model: string | null,
+  ): string {
+    return `${name}${this._pump_suffix(type, model)}`;
+  }
+
+  /**
    * Localized name of an interval unit.
    * @param unit: the unit reported by the number entity
    * @return the translated unit label
@@ -280,7 +325,12 @@ export class RSMaintenance extends RSDevice {
    * @return the tooltip text
    */
   private _row_title(item: MaintenanceItem): string {
-    const parts: string[] = [`${item.device_name} - ${item.name}`];
+    const device = this._device_label(
+      item.device_name,
+      item.pump_type,
+      item.pump_model,
+    );
+    const parts: string[] = [`${device} - ${item.name}`];
     if (item.interval_days > 0) {
       parts.push(
         `${i18n._("maintenance_interval")}: ${item.interval_days} ${i18n._("days_short")}`,
@@ -410,7 +460,12 @@ export class RSMaintenance extends RSDevice {
                 ${item.name}
                 ${with_device
                   ? html`<span class="maint-device">
-                      - ${item.device_name}</span
+                      -
+                      ${this._device_label(
+                        item.device_name,
+                        item.pump_type,
+                        item.pump_model,
+                      )}</span
                     >`
                   : ""}
               </span>
@@ -530,7 +585,13 @@ export class RSMaintenance extends RSDevice {
 
     return html`${group_by_device(items).map(
       (group) => html`
-        <div class="maint-group-title">${group.device_name}</div>
+        <div class="maint-group-title">
+          ${this._device_label(
+            group.device_name,
+            group.pump_type,
+            group.pump_model,
+          )}
+        </div>
         ${group.items.map((item) => this._render_row(item, options, false))}
       `,
     )}`;

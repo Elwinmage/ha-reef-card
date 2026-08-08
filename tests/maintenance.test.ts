@@ -121,6 +121,20 @@ function makeHass(): any {
         reef_role: "maint_mat_carbon_replace_notify",
       },
     },
+    // RSRUN pump descriptors (values taken from the RUN dashboard fixture)
+    "sensor.reefrun_pump_type": {
+      entity_id: "sensor.reefrun_pump_type",
+      state: "skimmer",
+      attributes: { friendly_name: "ReefRun Skimmer Type", reef_role: "type" },
+    },
+    "sensor.reefrun_pump_model": {
+      entity_id: "sensor.reefrun_pump_model",
+      state: "rsk-900",
+      attributes: {
+        friendly_name: "ReefRun Skimmer Model",
+        reef_role: "model",
+      },
+    },
     // Interval numbers: share the maint_ role prefix but are NOT tasks
     "number.reefled_clean_lenses_interval": {
       entity_id: "number.reefled_clean_lenses_interval",
@@ -163,6 +177,8 @@ function makeHass(): any {
     "switch.reefmat_carbon_notify": { device_id: "dev_mat" },
     "number.reefled_clean_lenses_interval": { device_id: "dev_led" },
     "number.reefmat_carbon_interval": { device_id: "dev_mat" },
+    "sensor.reefrun_pump_type": { device_id: "dev_run" },
+    "sensor.reefrun_pump_model": { device_id: "dev_run" },
     "button.disabled_task": { device_id: "dev_off" },
   };
 
@@ -415,6 +431,75 @@ describe("notification switch handling", () => {
   });
 });
 
+describe("RSRUN pump descriptor", () => {
+  it("attaches the pump type and model to the task", () => {
+    const items = collect_maintenance_items(makeHass());
+    const run = items.find((i) => i.entity_id === "button.reefrun_rotor")!;
+    expect(run.pump_type).toBe("skimmer");
+    expect(run.pump_model).toBe("rsk-900");
+  });
+
+  it("leaves non-pump devices untouched", () => {
+    const items = collect_maintenance_items(makeHass());
+    const led = items.find(
+      (i) => i.entity_id === "button.reefled_clean_lenses",
+    )!;
+    expect(led.pump_type).toBeNull();
+    expect(led.pump_model).toBeNull();
+  });
+
+  it("requires BOTH type and model on the same device", () => {
+    const hass = makeHass();
+    delete hass.states["sensor.reefrun_pump_model"];
+    const items = collect_maintenance_items(hass);
+    const run = items.find((i) => i.entity_id === "button.reefrun_rotor")!;
+    expect(run.pump_type).toBeNull();
+  });
+
+  it("ignores a model role carried by a non-sensor entity", () => {
+    const hass = makeHass();
+    // select.model exists on other Red Sea devices and must not match
+    hass.states["select.reefled_model"] = {
+      entity_id: "select.reefled_model",
+      state: "RSLED160",
+      attributes: { reef_role: "model" },
+    };
+    hass.states["sensor.reefled_type"] = {
+      entity_id: "sensor.reefled_type",
+      state: "led",
+      attributes: { reef_role: "type" },
+    };
+    hass.entities["select.reefled_model"] = { device_id: "dev_led" };
+    hass.entities["sensor.reefled_type"] = { device_id: "dev_led" };
+    const items = collect_maintenance_items(hass);
+    const led = items.find(
+      (i) => i.entity_id === "button.reefled_clean_lenses",
+    )!;
+    expect(led.pump_type).toBeNull();
+    expect(led.pump_model).toBeNull();
+  });
+
+  it("ignores unavailable sensor states", () => {
+    const hass = makeHass();
+    hass.states["sensor.reefrun_pump_model"].state = "unavailable";
+    const items = collect_maintenance_items(hass);
+    const run = items.find((i) => i.entity_id === "button.reefrun_rotor")!;
+    expect(run.pump_type).toBeNull();
+  });
+
+  it("carries the descriptor onto the device group", () => {
+    const items = sort_maintenance_items(
+      collect_maintenance_items(makeHass()),
+      "device",
+    );
+    const group = group_by_device(items).find(
+      (g) => g.device_id === "dev_run",
+    )!;
+    expect(group.pump_type).toBe("skimmer");
+    expect(group.pump_model).toBe("rsk-900");
+  });
+});
+
 describe("interval number handling", () => {
   it("resolves the companion interval number and its unit", () => {
     const items = collect_maintenance_items(makeHass());
@@ -636,8 +721,13 @@ describe("RSMaintenance element", () => {
     await elt.updateComplete;
     const titles = Array.from(
       elt.shadowRoot.querySelectorAll(".maint-group-title"),
-    ).map((n: any) => n.textContent.trim());
-    expect(titles).toEqual(["ReefLed 160", "ReefMat", "ReefRun Skimmer"]);
+    ).map((n: any) => n.textContent.trim().replace(/\s+/g, " "));
+    // The RSRUN group carries its pump descriptor, the others do not.
+    expect(titles).toEqual([
+      "ReefLed 160",
+      "ReefMat",
+      "ReefRun Skimmer (skimmer 900)",
+    ]);
     const names = Array.from(
       elt.shadowRoot.querySelectorAll(".maint-name"),
     ).map((n: any) => n.textContent.trim());
@@ -659,12 +749,12 @@ describe("RSMaintenance element", () => {
     );
     const devices = Array.from(
       elt.shadowRoot.querySelectorAll(".maint-device"),
-    ).map((n: any) => n.textContent.trim());
+    ).map((n: any) => n.textContent.trim().replace(/\s+/g, " "));
     expect(devices).toEqual([
       "- ReefLed 160",
       "- ReefMat",
       "- ReefLed 160",
-      "- ReefRun Skimmer",
+      "- ReefRun Skimmer (skimmer 900)",
     ]);
     document.body.removeChild(elt);
   });
@@ -987,6 +1077,53 @@ describe("RSMaintenance element", () => {
     await elt.updateComplete;
     expect(elt.shadowRoot.querySelectorAll(".maint-tune")).toHaveLength(0);
     document.body.removeChild(elt);
+  });
+
+  it("appends the pump descriptor to the group header", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    const titles = Array.from(
+      elt.shadowRoot.querySelectorAll(".maint-group-title"),
+    ).map((n: any) => n.textContent.trim().replace(/\s+/g, " "));
+    expect(titles).toContain("ReefRun Skimmer (skimmer 900)");
+    // Non-pump devices keep a plain name
+    expect(titles).toContain("ReefLed 160");
+    document.body.removeChild(elt);
+  });
+
+  it("appends the pump descriptor to the row subtitle in due mode", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    elt._set_sort("due");
+    await elt.updateComplete;
+    const devices = Array.from(
+      elt.shadowRoot.querySelectorAll(".maint-device"),
+    ).map((n: any) => n.textContent.trim().replace(/\s+/g, " "));
+    expect(devices).toContain("- ReefRun Skimmer (skimmer 900)");
+    document.body.removeChild(elt);
+  });
+
+  it("keeps only the trailing figure of the model", () => {
+    expect(elt._pump_suffix("return", "return-12000")).toBe(" (return 12000)");
+    expect(elt._pump_suffix("skimmer", "rsk-900")).toBe(" (skimmer 900)");
+  });
+
+  it("falls back on the raw model when it holds no figure", () => {
+    expect(elt._pump_suffix("return", "custom")).toBe(" (return custom)");
+  });
+
+  it("falls back on the raw type when it is not translated", () => {
+    expect(elt._pump_suffix("wavemaker", "rsw-45")).toBe(" (wavemaker 45)");
+  });
+
+  it("returns no suffix without pump details", () => {
+    expect(elt._pump_suffix(null, null)).toBe("");
+    expect(elt._device_label("ReefLed 160", null, null)).toBe("ReefLed 160");
+  });
+
+  it("handles a type without a model and the reverse", () => {
+    expect(elt._pump_suffix("return", null)).toBe(" (return)");
+    expect(elt._pump_suffix(null, "rsk-900")).toBe(" (900)");
   });
 
   it("provides a placeholder editor view", () => {
