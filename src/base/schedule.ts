@@ -6,6 +6,11 @@
  * Click to open an editor overlay with live chart + editable point list.
  * Each row has a play button to preview that point's settings on the device.
  * The row matching the current time is highlighted in red.
+ *
+ * When `current_entity` is set, the chart also shows the *measured* value at
+ * the current time: the dot moves to the real value and a coloured segment
+ * links it to the scheduled value, making any override (feed mode, level
+ * sensor, foam protection, ...) immediately visible.
  */
 
 //----------------------------------------------------------------------------//
@@ -19,7 +24,11 @@ import style_schedule from "./schedule.styles";
 import style_animations from "../utils/animations.styles";
 import i18n from "../translations/myi18n.js";
 
-import type { BaseElementConfig } from "../types/index";
+import type {
+  BaseElementConfig,
+  HassConfig,
+  StateObject,
+} from "../types/index";
 
 //----------------------------------------------------------------------------//
 //   Types
@@ -42,6 +51,26 @@ export interface ScheduleConfig extends BaseElementConfig {
   bg_color?: string;
   label_color?: string;
   max_points?: number;
+
+  // ---- Live deviation (scheduled value vs. measured value) ----
+  /**
+   * Translation key of the entity holding the real measured value
+   * (e.g. "speed" on a ReefRun pump). When set, the "now" marker is drawn at
+   * the measured value and a coloured segment shows the gap with the schedule.
+   */
+  current_entity?: string;
+  /**
+   * Read the measured value from an attribute instead of the entity state.
+   * Applies to `current_entity` when set, otherwise to this element's own
+   * stateObj.
+   */
+  current_attribute?: string;
+  /** RGB triplet used for the deviation segment (default: same as now marker) */
+  deviation_color?: string;
+  /** Minimum absolute gap (in value units) before a deviation is drawn */
+  deviation_threshold?: number;
+  /** Force-disable the deviation overlay even when current_entity resolves */
+  show_deviation?: boolean;
 }
 
 interface SchedulePoint {
@@ -58,6 +87,8 @@ const PADDING_TOP = 16;
 const PADDING_BOTTOM = 20;
 const PADDING_LEFT = 36;
 const PADDING_RIGHT = 8;
+/** Colour of the "now" cursor and, by default, of the deviation segment */
+const NOW_COLOR = "255,40,40";
 
 //----------------------------------------------------------------------------//
 //   Schedule element
@@ -84,8 +115,84 @@ export class Schedule extends MyElement {
   private _ro: ResizeObserver | null = null;
   private _clockTimer: ReturnType<typeof setInterval> | null = null;
 
+  /** Last known measured value, used to detect changes in the hass setter */
+  private _lastCurrentValue: number | null = null;
+  /** Serialized schedule attribute, used to detect changes in the hass setter */
+  private _lastScheduleRaw: string | null = null;
+
   constructor() {
     super();
+  }
+
+  // ------------------------------------------------------------------
+  //  Hass updates
+  // ------------------------------------------------------------------
+
+  /**
+   * The base setter only re-renders when this element's own entity *state*
+   * changes. Two things must also be tracked here:
+   *   - the measured value entity (e.g. "speed"), which is a different entity;
+   *   - the schedule attribute itself, which can change while the state does not.
+   */
+  override set hass(obj: HassConfig) {
+    super.hass = obj;
+
+    const current = this._getCurrentValue();
+    if (current !== this._lastCurrentValue) {
+      this._lastCurrentValue = current;
+      this.requestUpdate();
+    }
+
+    // Refresh stateObj when only the schedule attribute changed
+    if (this.stateObj) {
+      const so = obj?.states?.[this.stateObj.entity_id];
+      if (so) {
+        const attrName = this.conf?.schedule_attribute ?? "schedule";
+        const raw = JSON.stringify(so.attributes?.[attrName] ?? null);
+        if (this._lastScheduleRaw !== null && raw !== this._lastScheduleRaw) {
+          this.stateObj = so;
+          this.requestUpdate();
+        }
+        this._lastScheduleRaw = raw;
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  //  Measured (live) value
+  // ------------------------------------------------------------------
+
+  /** Resolve a hass state object from a translation key, without throwing */
+  private _resolveEntityState(key: string): StateObject | null {
+    const dev = this.device as any;
+    const entity = dev?.entities?.[key] ?? dev?.parent_entities?.[key];
+    if (!entity?.entity_id) return null;
+    return this._hass?.states?.[entity.entity_id] ?? null;
+  }
+
+  /**
+   * Current measured value (e.g. real pump speed), or null when the element is
+   * not configured for it or the value is not usable.
+   */
+  private _getCurrentValue(): number | null {
+    const entityKey = this.conf?.current_entity;
+    const attrName = this.conf?.current_attribute;
+    if (!entityKey && !attrName) return null;
+
+    let raw: unknown;
+    if (entityKey) {
+      const st = this._resolveEntityState(entityKey);
+      if (!st) return null;
+      raw = attrName ? st.attributes?.[attrName] : st.state;
+    } else {
+      raw = this.stateObj?.attributes?.[attrName as string];
+    }
+
+    if (raw === undefined || raw === null || raw === "") return null;
+    if (raw === "unavailable" || raw === "unknown" || raw === "none")
+      return null;
+    const value = Number(raw);
+    return isNaN(value) ? null : value;
   }
 
   // ------------------------------------------------------------------
@@ -699,48 +806,145 @@ export class Schedule extends MyElement {
     }
 
     if (showNow) {
-      const now = new Date();
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      const nowX = xOf(nowMinutes);
-      const nowValue = this._interpolateValue(points, nowMinutes, linear);
-      const nowY = yOf(nowValue);
-
-      ctx.strokeStyle = "rgba(255,40,40,0.9)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
-      ctx.beginPath();
-      ctx.moveTo(nowX, chartY);
-      ctx.lineTo(nowX, chartY + chartH);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = "rgba(255,40,40,0.9)";
-      ctx.beginPath();
-      ctx.arc(nowX, nowY, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-      const valueStr = Number.isInteger(nowValue)
-        ? String(nowValue)
-        : nowValue.toFixed(1);
-      const combinedLabel = unit
-        ? `${timeStr} ${valueStr}${unit}`
-        : `${timeStr} ${valueStr}`;
-
-      ctx.font = "bold 10px sans-serif";
-      ctx.fillStyle = "rgba(255,40,40,0.9)";
-      ctx.save();
-      const textW = ctx.measureText(combinedLabel).width;
-      const offset = 4;
-      const rightSide = nowX + offset + 12 < chartX + chartW;
-      const textCenterY = Math.min(nowY + textW / 2 + 8, chartY + chartH - 2);
-      ctx.translate(nowX, textCenterY);
-      ctx.rotate(-Math.PI / 2);
-      ctx.textAlign = "center";
-      ctx.textBaseline = rightSide ? "top" : "bottom";
-      ctx.fillText(combinedLabel, 0, rightSide ? offset : -offset);
-      ctx.restore();
+      this._drawNowMarker(
+        ctx,
+        points,
+        linear,
+        xOf,
+        yOf,
+        chartX,
+        chartY,
+        chartW,
+        chartH,
+        minVal,
+        maxVal,
+        unit,
+      );
     }
+  }
+
+  // ------------------------------------------------------------------
+  //  "Now" marker + live deviation
+  // ------------------------------------------------------------------
+
+  /**
+   * Draw the current time cursor.
+   *
+   * Without a measured value the marker simply sits on the schedule curve.
+   * With one (see `current_entity`), the dot moves to the measured value and a
+   * thick segment materialises the gap with what the schedule asked for — this
+   * is what happens when the device overrides the schedule (feed mode, ATO
+   * pause, skimmer foam protection, level sensor, ...).
+   */
+  private _drawNowMarker(
+    ctx: CanvasRenderingContext2D,
+    points: SchedulePoint[],
+    linear: boolean,
+    xOf: (m: number) => number,
+    yOf: (v: number) => number,
+    chartX: number,
+    chartY: number,
+    chartW: number,
+    chartH: number,
+    minVal: number,
+    maxVal: number,
+    unit: string,
+  ): void {
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const nowX = xOf(nowMinutes);
+
+    const schedValue = this._interpolateValue(points, nowMinutes, linear);
+    const schedY = yOf(schedValue);
+
+    // Measured value: only meaningful while the pump actually follows its
+    // schedule (stateOn is false when the device or the schedule is off).
+    const currentValue = this.stateOn ? this._getCurrentValue() : null;
+    const threshold = this.conf?.deviation_threshold ?? 1;
+    const hasDeviation =
+      this.conf?.show_deviation !== false &&
+      currentValue !== null &&
+      Math.abs(currentValue - schedValue) > threshold;
+
+    const nowColor = `rgba(${NOW_COLOR},0.9)`;
+    const devRgb = this.conf?.deviation_color ?? NOW_COLOR;
+
+    // Vertical time cursor
+    ctx.strokeStyle = nowColor;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(nowX, chartY);
+    ctx.lineTo(nowX, chartY + chartH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    let markerY = schedY;
+    let labelValue = schedValue;
+
+    if (hasDeviation) {
+      // Clamp for drawing only — the label keeps the raw measured value
+      const clamped = Math.min(
+        maxVal,
+        Math.max(minVal, currentValue as number),
+      );
+      const currentY = yOf(clamped);
+
+      // Gap between what the schedule asks and what the pump really does
+      ctx.strokeStyle = `rgba(${devRgb},0.85)`;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(nowX, schedY);
+      ctx.lineTo(nowX, currentY);
+      ctx.stroke();
+      ctx.lineCap = "butt";
+
+      // Small cap on the scheduled side, hollow so the filled dot below
+      // clearly reads as "the real value"
+      ctx.strokeStyle = `rgba(${devRgb},0.9)`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(nowX, schedY, 3, 0, Math.PI * 2);
+      ctx.stroke();
+
+      markerY = currentY;
+      labelValue = currentValue as number;
+    }
+
+    // Current point
+    ctx.fillStyle = hasDeviation ? `rgba(${devRgb},0.95)` : nowColor;
+    ctx.beginPath();
+    ctx.arc(nowX, markerY, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ---- Label ----
+    const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    const fmt = (v: number): string =>
+      Number.isInteger(v) ? String(v) : v.toFixed(1);
+    let combinedLabel = unit
+      ? `${timeStr} ${fmt(labelValue)}${unit}`
+      : `${timeStr} ${fmt(labelValue)}`;
+    if (hasDeviation) {
+      const delta = labelValue - schedValue;
+      combinedLabel += ` (${delta > 0 ? "+" : "-"}${fmt(Math.abs(delta))})`;
+    }
+
+    ctx.font = "bold 10px sans-serif";
+    ctx.fillStyle = hasDeviation ? `rgba(${devRgb},0.95)` : nowColor;
+    ctx.save();
+    const textW = ctx.measureText(combinedLabel).width;
+    const offset = 4;
+    const rightSide = nowX + offset + 12 < chartX + chartW;
+    // Anchor below the lowest of the two markers so the text never overlaps them
+    const anchorY = hasDeviation ? Math.max(schedY, markerY) : markerY;
+    const textCenterY = Math.min(anchorY + textW / 2 + 8, chartY + chartH - 2);
+    ctx.translate(nowX, textCenterY);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = rightSide ? "top" : "bottom";
+    ctx.fillText(combinedLabel, 0, rightSide ? offset : -offset);
+    ctx.restore();
   }
 
   // ------------------------------------------------------------------

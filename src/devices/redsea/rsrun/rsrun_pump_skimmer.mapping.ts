@@ -241,6 +241,9 @@ export const config = {
       name: "constant_speed",
       type: "common-schedule",
       schedule_attribute: "schedule",
+      // Live speed sensor: draws the gap between schedule and reality
+      current_entity: "speed",
+      deviation_threshold: 1,
       time_field: "st",
       value_field: "ti",
       linear: false,
@@ -265,6 +268,9 @@ export const config = {
       name: "constant_speed",
       type: "common-schedule",
       schedule_attribute: "schedule",
+      // Live speed sensor: draws the gap between schedule and reality
+      current_entity: "speed",
+      deviation_threshold: 1,
       time_field: "st",
       value_field: "ti",
       put_in: "ctrl_2",
