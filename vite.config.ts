@@ -14,6 +14,36 @@ import del from "rollup-plugin-delete";
 // Exemples:
 const COPY_TO_DIR = "/config/www/community/ha-reef-card";
 
+// Plugin Vite affichant l'heure de chaque build (utile en mode --watch,
+// où les rebuilds s'enchaînent sans repère temporel dans le terminal).
+function timestampPlugin() {
+  // Module-scoped rather than stored on the plugin context: rollup may reuse
+  // or clone the context between rebuilds.
+  let startedAt = 0;
+
+  const clock = (d: Date) =>
+    d.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+  return {
+    name: "build-timestamp",
+    buildStart() {
+      startedAt = Date.now();
+      console.log(`\n🕒 ${clock(new Date())} - build lancé`);
+    },
+    closeBundle() {
+      const ms = Date.now() - startedAt;
+      console.log(
+        `🕒 ${clock(new Date())} - build terminé en ${(ms / 1000).toFixed(2)}s`,
+      );
+    },
+  };
+}
+
 // Plugin Vite pour copier les fichiers
 function copyPlugin() {
   return {
@@ -155,5 +185,11 @@ export default defineConfig(({ mode }) => ({
     legalComments: "none",
   },
   // Ajouter le plugin de copie
-  plugins: [copyPlugin(), del({ targets: "dist/*", runOnce: true })],
+  // timestampPlugin en premier pour que son `buildStart` s'affiche avant
+  // les autres messages du build.
+  plugins: [
+    timestampPlugin(),
+    copyPlugin(),
+    del({ targets: "dist/*", runOnce: true }),
+  ],
 }));

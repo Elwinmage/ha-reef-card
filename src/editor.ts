@@ -12,6 +12,8 @@ import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n";
 import DeviceList from "./utils/common";
+import { has_maintenance_entities } from "./utils/maintenance";
+import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
 import { RSDevice } from "./devices/device";
 
@@ -92,6 +94,13 @@ export class ReefCardEditor extends LitElement {
     for (const d of this.devices_list.main_devices) {
       this.select_devices.push(d);
     }
+    // Virtual "Maintenance" entry, offered only when maintenance tasks exist.
+    if (has_maintenance_entities(this._hass)) {
+      this.select_devices.push({
+        value: MAINTENANCE_DEVICE_ID,
+        text: i18n._("maintenance_view"),
+      });
+    }
   }
 
   /**
@@ -118,7 +127,8 @@ export class ReefCardEditor extends LitElement {
                   (option) => html`
                     <option
                       value="${option.value}"
-                      ?selected=${this._config.device === option.text}
+                      ?selected=${this._config.device === option.text ||
+                      this._config.device === option.value}
                     >
                       ${option.text}
                     </option>
@@ -140,6 +150,20 @@ export class ReefCardEditor extends LitElement {
    */
   private device_conf(): TemplateResult {
     if (this._config?.device?.length > 0) {
+      // Maintenance overview: no HA device to resolve, render it directly.
+      if (this._config.device === MAINTENANCE_DEVICE_ID) {
+        const maint = RSDevice.create_device(
+          MAINTENANCE_TAG,
+          this._hass,
+          this._config,
+          { name: "", elements: [] } as any,
+        );
+        if (maint === null) {
+          return html``;
+        }
+        this.current_device = maint;
+        return html`${maint}`;
+      }
       const device = this.devices_list.get_by_name(this._config.device);
       if (!device) {
         return html``;
@@ -189,6 +213,9 @@ export class ReefCardEditor extends LitElement {
     let val = "unselected";
     if (elt.selectedIndex === 0) {
       delete newConfig.device;
+    } else if (elt.value === MAINTENANCE_DEVICE_ID) {
+      // Store the language independent id, not the translated label.
+      newConfig.device = MAINTENANCE_DEVICE_ID;
     } else {
       val = elt.options[elt.selectedIndex].text;
       newConfig.device = val;

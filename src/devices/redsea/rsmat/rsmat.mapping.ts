@@ -606,6 +606,11 @@ export const config = {
         left: "70%",
         width: "40%",
       },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "maint_mat_carbon_replace",
+      },
     },
 
     last_message: {

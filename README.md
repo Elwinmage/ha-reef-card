@@ -143,6 +143,7 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Maintenance](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation
@@ -643,6 +644,74 @@ Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/
 Planned.
 
 Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Maintenance
+
+Beyond the per-device views, the card offers a **Maintenance** view that gathers
+every maintenance task exposed by `ha-reefbeat-component` as if the whole
+maintenance subsystem were a single device.
+
+Each task is displayed as a progress bar showing how much of its interval has
+elapsed, with a color driven by the remaining time:
+
+| Color  | Meaning                                               |
+| ------ | ----------------------------------------------------- |
+| Green  | Up to date                                            |
+| Orange | Due soon (last 20% of the interval, at least one day) |
+| Red    | Overdue, the label switches to `+X d`                 |
+| Grey   | Never done yet (no reset recorded)                    |
+
+Tasks can be sorted **by equipment** (grouped, with one header per device) or
+**by due date** (a flat list, the most urgent first). Never-done tasks are
+always listed last. A checkbox hides the tasks that are still up to date.
+
+Clicking a row opens the Home Assistant more-info dialog of the task, and the
+round button on the right marks the task as done (it presses the underlying
+button entity, exactly like the more-info dialog would).
+
+The view only appears in the device selector when at least one maintenance task
+exists in your installation. New tasks added to the integration catalogue show
+up automatically, no card update needed.
+
+### Notifications
+
+Each task also gets a **notification switch** in the integration
+(`switch.*_notify`, shown as "<task name> (notifications)"). Turning it off
+mutes the overdue alert of that single task without touching its schedule: the
+progress bar keeps running, the row simply dims and the bell turns off.
+
+The bell on the right of each row toggles that switch directly. It is only
+shown when the integration exposes the switch. Set `show_notify: false` to hide
+the bells.
+
+The alert blueprint reads the very same setting, so muting a task in the card
+also silences the automation.
+
+### Changing the interval
+
+The calendar button on each row expands an inline slider that writes to the
+task's interval number entity. The slider works in the unit the integration
+advertises for that task (days, weeks or months, read from the entity's role),
+and the integration converts back to days before storing. Bounds come from the
+entity itself, so the card can never write an out-of-range value. Only one
+editor stays open at a time. Set `show_interval: false` to hide the buttons.
+
+## Configuration
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (default) or "due"
+  hide_ok: false # hide tasks that are neither overdue nor due soon
+  warning_ratio: 0.2 # share of the interval displayed in orange
+  show_reset: true # show the "mark as done" button on each row
+  show_notify: true # show the mute/unmute bell on each row
+  show_interval: true # show the interval editor button on each row
+```
+
+All `maintenance` keys are optional. `sort` and `hide_ok` only set the initial
+state: the user can still change them from the view itself.
 
 # FAQ
 

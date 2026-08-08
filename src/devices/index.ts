@@ -20,6 +20,7 @@ import {
 import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
+import { RSMaintenance } from "./redsea/maintenance";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -60,6 +61,8 @@ if (!customElements.get("redsea-rswave25"))
   customElements.define("redsea-rswave25", RSWave45);
 if (!customElements.get("redsea-rswave45"))
   customElements.define("redsea-rswave45", RSWave25);
+if (!customElements.get("redsea-maintenance"))
+  customElements.define("redsea-maintenance", RSMaintenance);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -76,3 +79,4 @@ export {
 export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";
 export { RSWave25, RSWave45 } from "./redsea/rswave";
+export { RSMaintenance } from "./redsea/maintenance";

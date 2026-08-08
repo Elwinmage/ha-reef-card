@@ -140,6 +140,7 @@ Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-com
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Maintenance](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation
@@ -640,6 +641,81 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 Planifié.
 
 Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Maintenance
+
+En plus des vues par appareil, la carte propose une vue **Maintenance** qui
+regroupe toutes les échéances de maintenance exposées par
+`ha-reefbeat-component`, comme si l'ensemble du sous-système de maintenance
+était un appareil à part entière.
+
+Chaque tâche est affichée sous forme de barre de progression indiquant la part
+de l'intervalle déjà écoulée, avec une couleur qui dépend du temps restant :
+
+| Couleur | Signification                                                    |
+| ------- | ---------------------------------------------------------------- |
+| Vert    | À jour                                                           |
+| Orange  | Échéance proche (derniers 20% de l'intervalle, au moins un jour) |
+| Rouge   | Échéance dépassée, le libellé passe à `+X j`                     |
+| Gris    | Jamais effectuée (aucune remise à zéro enregistrée)              |
+
+Les tâches peuvent être triées **par équipement** (regroupées, avec un en-tête
+par appareil) ou **par échéance** (liste unique, la plus urgente en premier).
+Les tâches jamais effectuées sont toujours placées en fin de liste. Une case à
+cocher permet de masquer les tâches encore à jour.
+
+Un clic sur une ligne ouvre la fenêtre d'informations Home Assistant de la
+tâche, et le bouton rond à droite marque la tâche comme effectuée (il actionne
+l'entité `button` sous-jacente, exactement comme le ferait la fenêtre
+d'informations).
+
+La vue n'apparaît dans le sélecteur d'appareils que si au moins une tâche de
+maintenance existe dans votre installation. Les nouvelles tâches ajoutées au
+catalogue de l'intégration apparaissent automatiquement, sans mise à jour de la
+carte.
+
+### Notifications
+
+Chaque tâche dispose aussi d'un **interrupteur de notification** dans
+l'intégration (`switch.*_notify`, affiché « <nom de la tâche> (notifications) »).
+Le désactiver coupe l'alerte de retard de cette seule tâche sans toucher à son
+échéancier : la barre de progression continue d'avancer, la ligne est
+simplement estompée et la cloche s'éteint.
+
+La cloche à droite de chaque ligne bascule directement cet interrupteur. Elle
+n'apparaît que si l'intégration expose l'interrupteur. Mettez
+`show_notify: false` pour masquer les cloches.
+
+Le blueprint d'alertes lit exactement le même réglage : couper une tâche depuis
+la carte fait donc aussi taire l'automatisation.
+
+### Modifier l'intervalle
+
+Le bouton calendrier de chaque ligne déplie un curseur qui écrit dans l'entité
+`number` d'intervalle de la tâche. Le curseur travaille dans l'unité que
+l'intégration annonce pour cette tâche (jours, semaines ou mois, lue depuis son
+rôle), et l'intégration reconvertit en jours avant stockage. Les bornes
+proviennent de l'entité elle-même, la carte ne peut donc jamais écrire une
+valeur hors plage. Un seul éditeur reste ouvert à la fois. Mettez
+`show_interval: false` pour masquer les boutons.
+
+## Configuration
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (défaut) ou "due"
+  hide_ok: false # masquer les tâches ni dépassées ni proches
+  warning_ratio: 0.2 # part de l'intervalle affichée en orange
+  show_reset: true # afficher le bouton « marquer comme effectuée »
+  show_notify: true # afficher la cloche activer/couper les alertes
+  show_interval: true # afficher le bouton de modification de l'intervalle
+```
+
+Toutes les clés de `maintenance` sont optionnelles. `sort` et `hide_ok` ne
+définissent que l'état initial : l'utilisateur peut toujours les modifier
+depuis la vue elle-même.
 
 # FAQ
 

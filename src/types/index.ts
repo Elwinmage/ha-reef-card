@@ -51,6 +51,16 @@ export type {
   SafeEvalContext,
 } from "./element";
 
+// ── Maintenance overview ──────────────────────────────────────────────────────
+export type {
+  MaintenanceStatus,
+  MaintenanceSort,
+  MaintenanceUnit,
+  MaintenanceItem,
+  MaintenanceGroup,
+  MaintenanceCollectOptions,
+} from "./maintenance";
+
 // ── Schedule (ReefDose) ────────────────────────────────────────────────────────
 export type { Schedule, ScheduleFixed, ScheduleVariable } from "./schedule";
 
@@ -76,3 +86,9 @@ export type { DeviceInfo as DeviceInfoAlias } from "./device";
 
 // Export constants
 export { OFF_COLOR } from "../utils/constants";
+export {
+  MAINTENANCE_DEVICE_ID,
+  MAINTENANCE_TAG,
+  MAINTENANCE_ROLE_PREFIX,
+  MAINTENANCE_WARNING_RATIO,
+} from "../utils/constants";
