@@ -11,7 +11,8 @@ export const dialogs_rsrun_pump_return = {
           entities: [
             { entity: "type", name: { type: "entity" } },
             { entity: "model", name: { type: "entity" } },
-            { entity: "name", name: { type: "entity" } },
+            // Editable name (text entity), not the read-only sensor
+            { entity: "pump_name", name: { type: "entity" } },
             { entity: "state", name: { type: "entity" } },
             { entity: "reconnect_pump", name: { type: "entity" } },
           ],

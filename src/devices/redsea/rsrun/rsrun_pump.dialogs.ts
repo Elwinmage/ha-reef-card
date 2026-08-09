@@ -29,7 +29,8 @@ export const dialogs_rsrun_pump = {
           entities: [
             { entity: "type", name: { type: "entity" } },
             { entity: "select.model", name: { type: "entity" } },
-            { entity: "name", name: { type: "entity" } },
+            // Editable name (text entity), not the read-only sensor
+            { entity: "pump_name", name: { type: "entity" } },
           ],
         },
       },
@@ -53,7 +54,7 @@ export const dialogs_rsrun_pump = {
             action: "press",
             data: { entity_id: "detect_pump" },
           },
-          { domain: "redsea_ui", action: "wait", data: 10 },
+          { domain: "redsea_ui", action: "wait", data: 3 },
           {
             domain: "button",
             action: "press",
@@ -87,7 +88,7 @@ export const dialogs_rsrun_pump = {
           action: "press",
           data: { entity_id: "delete_pump" },
         },
-        { domain: "redsea_ui", action: "wait", data: 5 },
+        { domain: "redsea_ui", action: "wait", data: 2 },
         {
           domain: "button",
           action: "press",
