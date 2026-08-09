@@ -632,9 +632,94 @@ Ces lignes peuvent être masquées via l'intefrace d'edition de la carte.
 
 # ReefRun
 
-Planifié.
+La carte ReefRun présente le contrôleur et ses deux pompes telles qu'elles sont
+physiquement câblées : la pompe de remontée d'un côté, le DC Skimmer de l'autre,
+chacune avec son câble et sa tuyauterie.
 
-Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+La carte est divisée en 5 zones :
+
+1. Configuration / informations Wifi
+2. Corps de la pompe, vitesse et débit d'eau en direct
+3. Dialogue de configuration de la pompe (icône engrenage)
+4. Programme journalier avec le curseur de position courante
+5. Coupelle de l'écumeur et animation de mousse
+
+## États d'une pompe
+
+Le corps de la pompe reflète ce que fait réellement l'appareil, un coup d'œil
+suffit :
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_running.png" width="100%"/><br/><b>En marche</b><br/>Corps coloré, eau animée à la vitesse courante</td>
+    <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Arrêtée</b><br/>Corps grisé, pas de flux</td>
+    <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Débranchée</b><br/>Corps grisé, câble d'alimentation clignotant</td>
+  </tr>
+</table>
+
+Un câble qui clignote signifie que le ReefRun remonte `missing_pump` : la pompe
+est configurée mais le contrôleur ne la voit plus. Vérifiez la prise avant de
+chercher plus loin.
+
+## Ajouter une pompe
+
+Lorsqu'une pompe est branchée sur un emplacement jamais configuré, la carte
+affiche un visuel d'**ajout** à la place de la pompe :
+
+<img src="../img/rsrun/add_pump.png"/>
+
+Un clic ouvre le dialogue de configuration, où **Détecter et ajouter** demande
+au contrôleur ce qui est branché et l'enregistre en une seule opération. Le
+modèle détecté n'est qu'une suggestion et se trompe parfois : la liste des
+modèles reste donc modifiable ensuite, pour un DC Skimmer choisissez rsk-300,
+rsk-600 ou rsk-900. Le nom de la pompe s'édite dans le même dialogue.
+
+Le visuel n'apparaît que si une pompe est réellement branchée : un emplacement
+vide reste vide. Ceux qui n'ont qu'une seule pompe peuvent le masquer
+complètement depuis l'éditeur de carte.
+
+<img src="../img/rsrun/editor.png"/>
+
+## Programme horaire
+
+<img src="../img/rsrun/schedule.png"/>
+
+La courbe bleue est la vitesse programmée sur 24 heures. Le trait rouge vertical
+marque l'heure courante, et le point qui s'y trouve la vitesse demandée par le
+programme.
+
+Quand la pompe ne suit pas son programme — mode nourrissage, détection de
+coupelle pleine, protection contre le sur-écumage — le point se déplace sur la
+vitesse **réelle** et un segment rouge matérialise l'écart, chiffré à côté :
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Un clic sur le graphique ouvre l'éditeur de programme : ajout et suppression de
+points, modification des heures et des vitesses, aperçu d'un point sur
+l'appareil, puis enregistrement.
+
+## Dialogue de configuration
+
+<span>Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30"/> d'une
+pompe pour ouvrir sa configuration : type, modèle, nom, état, reconnexion et
+suppression.</span>
+
+<img src="../img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Supprimer la pompe** remet ses réglages aux valeurs d'usine : le programme
+> horaire et le pilotage par sonde sont perdus. Une confirmation est toujours
+> demandée.
+
+## Écumeur
+
+<img src="../img/rsrun/skimmer.png"/>
+
+L'écumeur affiche le niveau de mousse et anime les bulles lorsqu'il tourne. Les
+sondes de coupelle pleine et de sur-écumage, leur calibration et les délais de
+réaction sont accessibles depuis le dialogue de configuration.
 
 # ReefWave
 

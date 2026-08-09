@@ -140,6 +140,7 @@ Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-comp
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Manutenzione](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installazione
@@ -631,15 +632,191 @@ Queste righe possono essere nascoste tramite l'interfaccia dell'editor della sch
 
 # ReefRun
 
-Pianificato.
+La card ReefRun mostra il controller e le sue due pompe così come sono
+fisicamente collegate: la pompa di risalita da un lato, il DC Skimmer
+dall'altro, ciascuna con il proprio cavo e le proprie tubazioni.
 
-Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+La card è divisa in 5 zone:
+
+1. Configurazione / informazioni Wifi
+2. Corpo della pompa, velocità e flusso d'acqua in tempo reale
+3. Finestra di configurazione della pompa (icona ingranaggio)
+4. Programmazione giornaliera con il cursore della posizione attuale
+5. Bicchiere dello schiumatoio e animazione della schiuma
+
+## Stati di una pompa
+
+Il corpo della pompa riflette ciò che l'apparecchio sta davvero facendo, basta
+un'occhiata:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_running.png" width="100%"/><br/><b>In funzione</b><br/>Corpo colorato, acqua animata alla velocità attuale</td>
+    <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Ferma</b><br/>Corpo in grigio, nessun flusso</td>
+    <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Scollegata</b><br/>Corpo in grigio, cavo di alimentazione lampeggiante</td>
+  </tr>
+</table>
+
+Un cavo che lampeggia significa che il ReefRun segnala `missing_pump`: la pompa
+è configurata ma il controller non la vede più. Controlla la spina prima di
+cercare altrove.
+
+## Aggiungere una pompa
+
+Quando una pompa viene collegata a una presa mai configurata, la card mostra un
+segnaposto di **aggiunta** al posto della pompa:
+
+<img src="../img/rsrun/add_pump.png"/>
+
+Un clic apre la finestra di configurazione, dove **Rileva e aggiungi** chiede al
+controller cosa è collegato e lo registra in un solo passaggio. Il modello
+rilevato è solo un suggerimento e a volte sbaglia, perciò l'elenco dei modelli
+resta modificabile: per un DC Skimmer scegli rsk-300, rsk-600 o rsk-900. Il nome
+della pompa si modifica nella stessa finestra.
+
+Il segnaposto compare solo se una pompa è davvero collegata: una presa vuota
+resta vuota. Chi ha una sola pompa può nasconderlo del tutto dall'editor della
+card.
+
+<img src="../img/rsrun/editor.png"/>
+
+## Programmazione
+
+<img src="../img/rsrun/schedule.png"/>
+
+La curva blu è la velocità programmata sulle 24 ore. La linea rossa verticale
+segna l'ora attuale, e il punto su di essa la velocità richiesta dalla
+programmazione.
+
+Quando la pompa non segue la programmazione — modalità alimentazione, rilevamento
+di bicchiere pieno, protezione dalla sovra-schiumazione — il punto si sposta
+sulla velocità **reale** e un segmento rosso materializza lo scarto, con il
+valore accanto:
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Un clic sul grafico apre l'editor della programmazione: aggiungere o rimuovere
+punti, modificare orari e velocità, provare un punto sull'apparecchio e salvare.
+
+## Finestra di configurazione
+
+<span>Clicca sull'icona <img src="../img/rsdose/cog_icon.png" width="30"/> di una
+pompa per aprirne la configurazione: tipo, modello, nome, stato, riconnessione e
+rimozione.</span>
+
+<img src="../img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Rimuovi la pompa** riporta le sue impostazioni ai valori di fabbrica: la
+> programmazione e il controllo tramite sonda vanno persi. Viene sempre chiesta
+> una conferma.
+
+## Schiumatoio
+
+<img src="../img/rsrun/skimmer.png"/>
+
+Lo schiumatoio mostra il livello di schiuma e anima le bolle quando è in
+funzione. Le sonde di bicchiere pieno e di sovra-schiumazione, la loro
+calibrazione e i ritardi di reazione sono raggiungibili dalla finestra di
+configurazione.
 
 # ReefWave
 
 Pianificato.
 
 Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Manutenzione
+
+Oltre alle viste per apparecchio, la card offre una vista **Manutenzione** che
+raccoglie tutte le attività di manutenzione esposte da `ha-reefbeat-component`,
+come se l'intero sottosistema di manutenzione fosse un unico dispositivo.
+
+Ogni attività è mostrata come una barra di avanzamento che indica quanta parte
+del suo intervallo è trascorsa, con un colore legato al tempo rimanente:
+
+| Colore    | Significato                                                 |
+| --------- | ----------------------------------------------------------- |
+| Verde     | In regola                                                   |
+| Arancione | In scadenza (ultimo 20 % dell'intervallo, almeno un giorno) |
+| Rosso     | Scaduta, l'etichetta diventa `+X g`                         |
+| Grigio    | Mai eseguita (nessun azzeramento registrato)                |
+
+Le attività si possono ordinare **per apparecchio** (raggruppate, con
+un'intestazione per dispositivo) o **per scadenza** (un elenco piatto, la più
+urgente per prima). Le attività mai eseguite restano sempre in fondo. Nella
+barra degli strumenti ci sono due filtri: una casella che nasconde le attività
+ancora in regola e un pulsante **Nascondi silenziate / Mostra silenziate** che
+nasconde le attività il cui interruttore di notifica è spento. Il pulsante parte
+in posizione «mostra», così silenziare un avviso non fa mai sparire da solo una
+scadenza. Questo valore predefinito è configurabile dall'editor della card (o con
+`hide_muted` più avanti), e il pulsante ha comunque la precedenza in qualsiasi
+momento.
+
+Cliccando una riga si apre la finestra more-info di Home Assistant
+dell'attività, e il pulsante rotondo a destra la segna come eseguita (preme
+l'entità pulsante sottostante, esattamente come farebbe la finestra more-info).
+
+La vista compare nel selettore dei dispositivi solo quando esiste almeno
+un'attività di manutenzione nel tuo impianto. Le nuove attività aggiunte al
+catalogo dell'integrazione compaiono automaticamente, senza aggiornare la card.
+
+### Notifiche
+
+Ogni attività riceve anche un **interruttore di notifica** nell'integrazione
+(`switch.*_notify`, mostrato come «<nome dell'attività> (notifiche)»).
+Spegnerlo silenzia l'avviso di scadenza di quella sola attività senza toccarne
+la programmazione: la barra di avanzamento continua a scorrere, la riga si
+attenua e la campanella si spegne.
+
+La campanella a destra di ogni riga commuta direttamente quell'interruttore.
+Compare solo quando l'integrazione espone l'interruttore. Usa
+`show_notify: false` per nascondere le campanelle.
+
+Il blueprint degli avvisi legge esattamente la stessa impostazione, quindi
+silenziare un'attività nella card silenzia anche l'automazione.
+
+### Cambiare l'intervallo
+
+Il pulsante calendario di ogni riga apre un cursore in linea che scrive
+sull'entità numerica dell'intervallo dell'attività. Il cursore lavora nell'unità
+che l'integrazione dichiara per quell'attività (giorni, settimane o mesi, letta
+dal ruolo dell'entità), e l'integrazione riconverte in giorni prima di salvare.
+I limiti provengono dall'entità stessa, quindi la card non può mai scrivere un
+valore fuori intervallo. Resta aperto un solo editor per volta. Usa
+`show_interval: false` per nascondere i pulsanti.
+
+### Pompe ReefRun
+
+I sottodispositivi ReefRun si chiamano «… pompa 1» / «… pompa 2», il che non
+dice nulla su cosa sia davvero ciascuna pompa. Quando il dispositivo espone sia
+un sensore `type` sia un sensore `model`, la card li aggiunge tra parentesi:
+**ReefRun pompa 1 (risalita 12000)**, **ReefRun pompa 2 (schiumatoio 900)**.
+
+Il tipo viene tradotto e del modello si conserva solo la cifra finale
+(`return-12000` -> `12000`, `rsk-900` -> `900`), dato che il prefisso è
+ridondante con il tipo oppure criptico. I dispositivi che non sono pompe
+mantengono un nome semplice.
+
+## Configurazione
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (predefinito) o "due"
+  hide_ok: false # nascondi le attività né scadute né in scadenza
+  hide_muted: false # nascondi le attività con le notifiche spente
+  warning_ratio: 0.2 # quota dell'intervallo mostrata in arancione
+  show_reset: true # mostra il pulsante "segna come eseguita" su ogni riga
+  show_notify: true # mostra la campanella silenzia/riattiva su ogni riga
+  show_interval: true # mostra il pulsante di modifica dell'intervallo su ogni riga
+```
+
+Tutte le chiavi di `maintenance` sono opzionali. `sort` e `hide_ok` impostano
+solo lo stato iniziale: l'utente può cambiarli dalla vista stessa.
 
 # FAQ
 

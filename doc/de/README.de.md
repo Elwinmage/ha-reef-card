@@ -140,6 +140,7 @@ In Kombination mit [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefb
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Wartung](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation
@@ -787,15 +788,192 @@ Hacer clic en <img src="../img/mdi/mdi_delete-empty.png" width="20"/> borra el m
 
 # ReefRun
 
-Geplant.
+Die ReefRun-Karte zeigt den Controller und seine beiden Pumpen so, wie sie
+physisch angeschlossen sind: die Rückförderpumpe auf der einen Seite, der DC
+Skimmer auf der anderen, jede mit eigenem Kabel und eigener Verrohrung.
 
-Möchten Sie, dass es schneller unterstützt wird? Stimmen Sie [hier](https://github.com/Elwinmage/ha-reef-card/discussions/22) ab.
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+Die Karte ist in 5 Zonen gegliedert:
+
+1. Konfiguration / WLAN-Informationen
+2. Pumpenkörper, Drehzahl und Wasserfluss in Echtzeit
+3. Konfigurationsdialog der Pumpe (Zahnrad-Symbol)
+4. Tagesprogramm mit dem Cursor der aktuellen Position
+5. Abschäumerbecher und Schaumanimation
+
+## Zustände einer Pumpe
+
+Der Pumpenkörper spiegelt wider, was das Gerät tatsächlich tut — ein Blick
+genügt:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_running.png" width="100%"/><br/><b>In Betrieb</b><br/>Farbiger Körper, Wasser mit der aktuellen Drehzahl animiert</td>
+    <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Gestoppt</b><br/>Ausgegrauter Körper, kein Fluss</td>
+    <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Getrennt</b><br/>Ausgegrauter Körper, blinkendes Stromkabel</td>
+  </tr>
+</table>
+
+Ein blinkendes Kabel bedeutet, dass der ReefRun `missing_pump` meldet: die Pumpe
+ist konfiguriert, aber der Controller sieht sie nicht mehr. Prüfe den Stecker,
+bevor du weiter suchst.
+
+## Eine Pumpe hinzufügen
+
+Steckt eine Pumpe in einem nie konfigurierten Anschluss, zeigt die Karte an
+ihrer Stelle einen **Hinzufügen**-Platzhalter:
+
+<img src="../img/rsrun/add_pump.png"/>
+
+Ein Klick öffnet den Konfigurationsdialog, in dem **Erkennen und hinzufügen** den
+Controller fragt, was angeschlossen ist, und es in einem Schritt registriert. Das
+erkannte Modell ist nur ein Vorschlag und liegt gelegentlich daneben, deshalb
+bleibt die Modellliste danach änderbar: für einen DC Skimmer wählst du rsk-300,
+rsk-600 oder rsk-900. Der Pumpenname lässt sich im selben Dialog bearbeiten.
+
+Der Platzhalter erscheint nur, wenn wirklich eine Pumpe angeschlossen ist — ein
+leerer Anschluss bleibt leer. Wer nur eine Pumpe betreibt, kann ihn im
+Karteneditor vollständig ausblenden.
+
+<img src="../img/rsrun/editor.png"/>
+
+## Zeitprogramm
+
+<img src="../img/rsrun/schedule.png"/>
+
+Die blaue Kurve ist die programmierte Drehzahl über 24 Stunden. Die senkrechte
+rote Linie markiert die aktuelle Uhrzeit, der Punkt darauf die vom Programm
+geforderte Drehzahl.
+
+Folgt die Pumpe ihrem Programm nicht — Fütterungsmodus, Erkennung des vollen
+Bechers, Schutz vor Überschäumen —, wandert der Punkt auf die **tatsächliche**
+Drehzahl und ein rotes Segment macht die Abweichung sichtbar, mit dem Wert
+daneben:
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Ein Klick auf das Diagramm öffnet den Programmeditor: Punkte hinzufügen oder
+entfernen, Zeiten und Drehzahlen ändern, einen Punkt am Gerät vorab testen und
+speichern.
+
+## Konfigurationsdialog
+
+<span>Klicke auf das Symbol <img src="../img/rsdose/cog_icon.png" width="30"/> einer
+Pumpe, um ihre Konfiguration zu öffnen: Typ, Modell, Name, Zustand, erneute
+Verbindung und Löschen.</span>
+
+<img src="../img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Pumpe löschen** setzt ihre Einstellungen auf die Werkswerte zurück:
+> Zeitprogramm und Sondensteuerung gehen verloren. Es wird immer eine Bestätigung
+> verlangt.
+
+## Abschäumer
+
+<img src="../img/rsrun/skimmer.png"/>
+
+Der Abschäumer zeigt den Schaumstand und animiert die Blasen im Betrieb. Die
+Sonden für vollen Becher und Überschäumen, ihre Kalibrierung und die
+Reaktionsverzögerungen sind über den Konfigurationsdialog erreichbar.
 
 # ReefWave
 
 Geplant.
 
 Möchten Sie, dass es schneller unterstützt wird? Stimmen Sie [hier](https://github.com/Elwinmage/ha-reef-card/discussions/22) ab.
+
+# Wartung
+
+Über die gerätebezogenen Ansichten hinaus bietet die Karte eine
+**Wartungsansicht**, die alle von `ha-reefbeat-component` bereitgestellten
+Wartungsaufgaben zusammenfasst, als wäre das gesamte Wartungssystem ein einziges
+Gerät.
+
+Jede Aufgabe erscheint als Fortschrittsbalken, der zeigt, welcher Teil ihres
+Intervalls verstrichen ist, mit einer Farbe je nach Restzeit:
+
+| Farbe  | Bedeutung                                                    |
+| ------ | ------------------------------------------------------------ |
+| Grün   | Aktuell                                                      |
+| Orange | Bald fällig (letzte 20 % des Intervalls, mindestens ein Tag) |
+| Rot    | Überfällig, die Beschriftung wechselt zu `+X d`              |
+| Grau   | Nie ausgeführt (kein Zurücksetzen erfasst)                   |
+
+Aufgaben lassen sich **nach Gerät** (gruppiert, mit einer Überschrift je Gerät)
+oder **nach Fälligkeit** (flache Liste, die dringendste zuerst) sortieren. Nie
+ausgeführte Aufgaben stehen immer am Ende. In der Werkzeugleiste gibt es zwei
+Filter: ein Kontrollkästchen, das noch aktuelle Aufgaben ausblendet, und eine
+Schaltfläche **Stumme ausblenden / Stumme anzeigen**, die Aufgaben mit
+ausgeschaltetem Benachrichtigungsschalter ausblendet. Die Schaltfläche startet in
+der Stellung „anzeigen“, sodass das Stummschalten einer Meldung nie von selbst
+eine Frist verschwinden lässt. Dieser Standardwert ist im Karteneditor (oder über
+`hide_muted` weiter unten) einstellbar, und die Schaltfläche hat jederzeit
+Vorrang.
+
+Ein Klick auf eine Zeile öffnet den more-info-Dialog von Home Assistant für die
+Aufgabe; die runde Schaltfläche rechts hakt sie ab (sie drückt die
+zugrundeliegende Button-Entität, genau wie es der more-info-Dialog täte).
+
+Die Ansicht erscheint nur dann in der Geräteauswahl, wenn in deiner Installation
+mindestens eine Wartungsaufgabe existiert. Neue Aufgaben im Katalog der
+Integration tauchen automatisch auf, ohne Aktualisierung der Karte.
+
+### Benachrichtigungen
+
+Jede Aufgabe erhält zusätzlich einen **Benachrichtigungsschalter** in der
+Integration (`switch.*_notify`, angezeigt als „<Aufgabenname>
+(Benachrichtigungen)“). Ihn auszuschalten macht die Überfälligkeitsmeldung genau
+dieser Aufgabe stumm, ohne ihren Zeitplan zu ändern: der Fortschrittsbalken läuft
+weiter, die Zeile wird nur blasser und die Glocke erlischt.
+
+Die Glocke rechts in jeder Zeile schaltet diesen Schalter direkt um. Sie wird nur
+angezeigt, wenn die Integration den Schalter bereitstellt. Mit
+`show_notify: false` blendest du die Glocken aus.
+
+Das Alarm-Blueprint liest exakt dieselbe Einstellung: eine in der Karte
+stummgeschaltete Aufgabe schweigt also auch in der Automatisierung.
+
+### Intervall ändern
+
+Die Kalenderschaltfläche jeder Zeile klappt einen Schieberegler aus, der in die
+Zahlen-Entität des Aufgabenintervalls schreibt. Der Regler arbeitet in der
+Einheit, die die Integration für diese Aufgabe angibt (Tage, Wochen oder Monate,
+aus der Rolle der Entität gelesen), und die Integration rechnet vor dem Speichern
+wieder in Tage um. Die Grenzen stammen aus der Entität selbst, sodass die Karte
+nie einen Wert außerhalb des Bereichs schreiben kann. Es bleibt immer nur ein
+Editor geöffnet. Mit `show_interval: false` blendest du die Schaltflächen aus.
+
+### ReefRun-Pumpen
+
+ReefRun-Untergeräte heißen „… Pumpe 1“ / „… Pumpe 2“, was nichts darüber aussagt,
+was die jeweilige Pumpe wirklich ist. Stellt das Gerät sowohl einen `type`- als
+auch einen `model`-Sensor bereit, ergänzt die Karte beides in Klammern:
+**ReefRun Pumpe 1 (Rückförderung 12000)**, **ReefRun Pumpe 2 (Abschäumer 900)**.
+
+Der Typ wird übersetzt, vom Modell bleibt nur die abschließende Zahl
+(`return-12000` -> `12000`, `rsk-900` -> `900`), da das Präfix entweder den Typ
+wiederholt oder kryptisch ist. Geräte, die keine Pumpen sind, behalten einen
+schlichten Namen.
+
+## Konfiguration
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (Standard) oder "due"
+  hide_ok: false # Aufgaben ausblenden, die weder überfällig noch bald fällig sind
+  hide_muted: false # Aufgaben mit ausgeschalteten Benachrichtigungen ausblenden
+  warning_ratio: 0.2 # Anteil des Intervalls, der orange dargestellt wird
+  show_reset: true # Schaltfläche "als erledigt markieren" in jeder Zeile anzeigen
+  show_notify: true # Glocke zum Stummschalten/Aktivieren in jeder Zeile anzeigen
+  show_interval: true # Schaltfläche zur Intervallbearbeitung in jeder Zeile anzeigen
+```
+
+Alle `maintenance`-Schlüssel sind optional. `sort` und `hide_ok` legen nur den
+Anfangszustand fest: der Nutzer kann sie in der Ansicht selbst ändern.
 
 # FAQ
 

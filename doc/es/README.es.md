@@ -140,6 +140,7 @@ Combinada con [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Mantenimiento](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Instalación
@@ -631,15 +632,188 @@ Estas líneas pueden ocultarse mediante la interfaz del editor de la tarjeta.
 
 # ReefRun
 
-Planificado.
+La tarjeta ReefRun muestra el controlador y sus dos bombas tal y como están
+físicamente conectadas: la bomba de retorno a un lado, el DC Skimmer al otro,
+cada una con su cable y su tubería.
 
-¿Desea que sea compatible más rápido? Vote [aquí](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+La tarjeta se divide en 5 zonas:
+
+1. Configuración / información Wifi
+2. Cuerpo de la bomba, velocidad y caudal de agua en directo
+3. Diálogo de configuración de la bomba (icono de engranaje)
+4. Programación diaria con el cursor de posición actual
+5. Copa del skimmer y animación de espuma
+
+## Estados de una bomba
+
+El cuerpo de la bomba refleja lo que hace realmente el aparato, basta un vistazo:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_running.png" width="100%"/><br/><b>En marcha</b><br/>Cuerpo con color, agua animada a la velocidad actual</td>
+    <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Parada</b><br/>Cuerpo en gris, sin caudal</td>
+    <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Desconectada</b><br/>Cuerpo en gris, cable de alimentación parpadeando</td>
+  </tr>
+</table>
+
+Un cable que parpadea significa que el ReefRun informa `missing_pump`: la bomba
+está configurada pero el controlador ya no la ve. Comprueba el enchufe antes de
+buscar más lejos.
+
+## Añadir una bomba
+
+Cuando se enchufa una bomba en una toma nunca configurada, la tarjeta muestra un
+marcador de **añadir** en lugar de la bomba:
+
+<img src="../img/rsrun/add_pump.png"/>
+
+Al hacer clic se abre el diálogo de configuración, donde **Detectar y añadir**
+pregunta al controlador qué hay conectado y lo registra en un solo paso. El
+modelo detectado es solo una sugerencia y a veces se equivoca, así que la lista
+de modelos sigue siendo editable después: para un DC Skimmer elige rsk-300,
+rsk-600 o rsk-900. El nombre de la bomba se edita en el mismo diálogo.
+
+El marcador solo aparece si hay realmente una bomba conectada: una toma vacía
+sigue vacía. Quien solo tenga una bomba puede ocultarlo por completo desde el
+editor de la tarjeta.
+
+<img src="../img/rsrun/editor.png"/>
+
+## Programación
+
+<img src="../img/rsrun/schedule.png"/>
+
+La curva azul es la velocidad programada a lo largo de 24 horas. La línea roja
+vertical marca la hora actual, y el punto sobre ella la velocidad que pide la
+programación.
+
+Cuando la bomba no sigue su programación —modo alimentación, detección de copa
+llena, protección contra sobre-espumado— el punto se desplaza a la velocidad
+**real** y un segmento rojo materializa la diferencia, con su valor al lado:
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Al hacer clic en el gráfico se abre el editor de programación: añadir o eliminar
+puntos, editar horas y velocidades, previsualizar un punto en el aparato y
+guardar.
+
+## Diálogo de configuración
+
+<span>Haz clic en el icono <img src="../img/rsdose/cog_icon.png" width="30"/> de una
+bomba para abrir su configuración: tipo, modelo, nombre, estado, reconexión y
+eliminación.</span>
+
+<img src="../img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Eliminar la bomba** restaura sus ajustes de fábrica: se pierden la
+> programación y el control por sonda. Siempre se pide confirmación.
+
+## Skimmer
+
+<img src="../img/rsrun/skimmer.png"/>
+
+El skimmer muestra el nivel de espuma y anima las burbujas cuando funciona. Las
+sondas de copa llena y de sobre-espumado, su calibración y los retardos de
+reacción son accesibles desde el diálogo de configuración.
 
 # ReefWave
 
 Planificado.
 
 ¿Desea que sea compatible más rápido? Vote [aquí](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Mantenimiento
+
+Más allá de las vistas por dispositivo, la tarjeta ofrece una vista
+**Mantenimiento** que reúne todas las tareas de mantenimiento expuestas por
+`ha-reefbeat-component`, como si todo el subsistema de mantenimiento fuera un
+único dispositivo.
+
+Cada tarea se muestra como una barra de progreso que indica qué parte de su
+intervalo ha transcurrido, con un color que depende del tiempo restante:
+
+| Color   | Significado                                                   |
+| ------- | ------------------------------------------------------------- |
+| Verde   | Al día                                                        |
+| Naranja | Próxima a vencer (último 20 % del intervalo, al menos un día) |
+| Rojo    | Vencida, la etiqueta pasa a `+X d`                            |
+| Gris    | Nunca realizada (ningún reinicio registrado)                  |
+
+Las tareas se pueden ordenar **por equipo** (agrupadas, con una cabecera por
+dispositivo) o **por vencimiento** (una lista plana, la más urgente primero).
+Las tareas nunca realizadas se listan siempre al final. En la barra de
+herramientas hay dos filtros: una casilla que oculta las tareas todavía al día y
+un botón **Ocultar silenciadas / Mostrar silenciadas** que oculta las tareas
+cuyo interruptor de notificación está apagado. El botón arranca en posición
+«mostrar», de modo que silenciar una alerta nunca hace desaparecer un
+vencimiento por sí solo. Ese valor por defecto se configura desde el editor de
+la tarjeta (o con `hide_muted` más abajo), y el botón sigue teniendo prioridad
+en cualquier momento.
+
+Al hacer clic en una fila se abre el diálogo more-info de Home Assistant de la
+tarea, y el botón redondo de la derecha la marca como hecha (pulsa la entidad
+botón subyacente, exactamente como haría el diálogo more-info).
+
+La vista solo aparece en el selector de dispositivos cuando existe al menos una
+tarea de mantenimiento en tu instalación. Las nuevas tareas añadidas al catálogo
+de la integración aparecen automáticamente, sin actualizar la tarjeta.
+
+### Notificaciones
+
+Cada tarea recibe además un **interruptor de notificación** en la integración
+(`switch.*_notify`, mostrado como «<nombre de la tarea> (notificaciones)»).
+Apagarlo silencia la alerta de vencimiento de esa única tarea sin tocar su
+programación: la barra de progreso sigue avanzando, la fila simplemente se
+atenúa y la campana se apaga.
+
+La campana a la derecha de cada fila conmuta ese interruptor directamente. Solo
+se muestra cuando la integración expone el interruptor. Usa `show_notify: false`
+para ocultar las campanas.
+
+El blueprint de alertas lee exactamente el mismo ajuste, así que silenciar una
+tarea en la tarjeta silencia también la automatización.
+
+### Cambiar el intervalo
+
+El botón de calendario de cada fila despliega un control deslizante en línea que
+escribe en la entidad numérica del intervalo de la tarea. El control funciona en
+la unidad que la integración anuncia para esa tarea (días, semanas o meses,
+leída del rol de la entidad), y la integración vuelve a convertir a días antes
+de guardar. Los límites vienen de la propia entidad, así que la tarjeta nunca
+puede escribir un valor fuera de rango. Solo permanece abierto un editor a la
+vez. Usa `show_interval: false` para ocultar los botones.
+
+### Bombas ReefRun
+
+Los subdispositivos ReefRun se llaman «… bomba 1» / «… bomba 2», lo que no dice
+nada sobre lo que es realmente cada bomba. Cuando el dispositivo expone a la vez
+un sensor `type` y un sensor `model`, la tarjeta los añade entre paréntesis:
+**ReefRun bomba 1 (retorno 12000)**, **ReefRun bomba 2 (skimmer 900)**.
+
+El tipo se traduce y solo se conserva la cifra final del modelo (`return-12000`
+-> `12000`, `rsk-900` -> `900`), ya que el prefijo o es redundante con el tipo o
+es críptico. Los dispositivos que no son bombas conservan un nombre simple.
+
+## Configuración
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (por defecto) o "due"
+  hide_ok: false # ocultar las tareas ni vencidas ni próximas a vencer
+  hide_muted: false # ocultar las tareas con las notificaciones apagadas
+  warning_ratio: 0.2 # parte del intervalo mostrada en naranja
+  show_reset: true # mostrar el botón "marcar como hecha" en cada fila
+  show_notify: true # mostrar la campana de silenciar/activar en cada fila
+  show_interval: true # mostrar el botón de edición del intervalo en cada fila
+```
+
+Todas las claves de `maintenance` son opcionales. `sort` y `hide_ok` solo fijan
+el estado inicial: el usuario puede cambiarlos desde la propia vista.
 
 # FAQ
 

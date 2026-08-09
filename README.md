@@ -635,9 +635,90 @@ These lines can be hidden via the card editor interface.
 
 # ReefRun
 
-Planned.
+The ReefRun card shows the controller and its two pumps as they are physically
+wired: the return pump on one side, the DC Skimmer on the other, each with its
+own cable and plumbing.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<img src="doc/img/rsrun/rsrun_zones.png"/>
+
+The card is divided into 5 zones:
+
+1. Configuration / Wifi information
+2. Pump body, speed and live water flow
+3. Pump configuration dialog (cog icon)
+4. Daily schedule with the live position cursor
+5. Skimmer cup and foam animation
+
+## Pump states
+
+The pump body reflects what the device is actually doing, so a glance is enough:
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/img/rsrun/state_running.png" width="100%"/><br/><b>Running</b><br/>Colored body, water animated at the current speed</td>
+    <td align="center"><img src="doc/img/rsrun/state_off.png" width="100%"/><br/><b>Stopped</b><br/>Greyed body, no flow</td>
+    <td align="center"><img src="doc/img/rsrun/state_missing.png" width="100%"/><br/><b>Disconnected</b><br/>Greyed body, blinking power cable</td>
+  </tr>
+</table>
+
+A blinking cable means the ReefRun reports `missing_pump`: the pump is
+configured but the controller no longer sees it. Check the plug before looking
+any further.
+
+## Adding a pump
+
+When a pump is plugged into a socket that was never configured, the card shows
+an **add** placeholder in place of the pump:
+
+<img src="doc/img/rsrun/add_pump.png"/>
+
+Clicking it opens the configuration dialog, where **Detect and add** asks the
+controller what is connected and registers it in one step. The detected model is
+only a suggestion and is occasionally wrong, so the model list stays editable
+afterwards: for a DC Skimmer, pick rsk-300, rsk-600 or rsk-900. The pump name can
+be edited in the same dialog.
+
+The placeholder only appears when a pump is really connected — an empty socket
+stays empty. Users running a single pump can hide it entirely from the card
+editor.
+
+<img src="doc/img/rsrun/editor.png"/>
+
+## Schedule
+
+<img src="doc/img/rsrun/schedule.png"/>
+
+The blue curve is the programmed speed over 24 hours. The vertical red line
+marks the current time, and the dot on it the speed the schedule is asking for.
+
+When the pump does not follow its schedule — feed mode, full-cup detection,
+overskimming protection — the dot moves down to the **real** speed and a red
+segment materializes the gap, labelled with the difference:
+
+<img src="doc/img/rsrun/schedule_deviation.png"/>
+
+Clicking the chart opens the schedule editor: add or remove points, edit times
+and speeds, preview a point on the device, then save.
+
+## Configuration dialog
+
+<span>Click the <img src="doc/img/rsdose/cog_icon.png" width="30"/> icon of a pump
+to open its configuration: type, model, name, state, reconnection and
+deletion.</span>
+
+<img src="doc/img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Delete pump** restores the pump settings to their factory defaults: the
+> schedule and the sensor control are lost. A confirmation is always asked.
+
+## Skimmer
+
+<img src="doc/img/rsrun/skimmer.png"/>
+
+The skimmer displays the foam level and animates the bubbles when running. The
+full-cup and overskimming sensors, their calibration and the reaction delays are
+reachable from the configuration dialog.
 
 # ReefWave
 

@@ -140,6 +140,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Konserwacja](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Instalacja
@@ -631,15 +632,184 @@ Linie te można ukryć za pomocą interfejsu edytora karty.
 
 # ReefRun
 
-Zaplanowano.
+Karta ReefRun pokazuje sterownik i jego dwie pompy tak, jak są fizycznie
+podłączone: pompa powrotna po jednej stronie, DC Skimmer po drugiej, każda z
+własnym kablem i orurowaniem.
 
-Chcesz, żeby było obsługiwane szybciej? Zagłosuj [tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+Karta jest podzielona na 5 stref:
+
+1. Konfiguracja / informacje Wifi
+2. Korpus pompy, prędkość i przepływ wody na żywo
+3. Okno konfiguracji pompy (ikona koła zębatego)
+4. Harmonogram dobowy z kursorem bieżącej pozycji
+5. Kubek odpieniacza i animacja piany
+
+## Stany pompy
+
+Korpus pompy odzwierciedla to, co urządzenie naprawdę robi — wystarczy rzut oka:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_running.png" width="100%"/><br/><b>Pracuje</b><br/>Kolorowy korpus, woda animowana z bieżącą prędkością</td>
+    <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Zatrzymana</b><br/>Wyszarzony korpus, brak przepływu</td>
+    <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Odłączona</b><br/>Wyszarzony korpus, migający kabel zasilania</td>
+  </tr>
+</table>
+
+Migający kabel oznacza, że ReefRun zgłasza `missing_pump`: pompa jest
+skonfigurowana, ale sterownik już jej nie widzi. Sprawdź wtyczkę, zanim
+poszukasz dalej.
+
+## Dodawanie pompy
+
+Gdy pompa zostanie podłączona do nigdy nieskonfigurowanego gniazda, karta
+pokazuje w jej miejscu symbol **dodawania**:
+
+<img src="../img/rsrun/add_pump.png"/>
+
+Kliknięcie otwiera okno konfiguracji, w którym **Wykryj i dodaj** pyta sterownik,
+co jest podłączone, i rejestruje to w jednym kroku. Wykryty model to tylko
+sugestia i czasem bywa błędny, więc lista modeli pozostaje później edytowalna:
+dla DC Skimmera wybierz rsk-300, rsk-600 lub rsk-900. Nazwę pompy edytuje się w
+tym samym oknie.
+
+Symbol pojawia się tylko wtedy, gdy pompa jest naprawdę podłączona — puste
+gniazdo pozostaje puste. Kto ma tylko jedną pompę, może go całkowicie ukryć w
+edytorze karty.
+
+<img src="../img/rsrun/editor.png"/>
+
+## Harmonogram
+
+<img src="../img/rsrun/schedule.png"/>
+
+Niebieska krzywa to zaprogramowana prędkość w ciągu doby. Pionowa czerwona linia
+oznacza bieżącą godzinę, a punkt na niej — prędkość wymaganą przez harmonogram.
+
+Gdy pompa nie realizuje harmonogramu — tryb karmienia, wykrycie pełnego kubka,
+ochrona przed nadmiernym odpienianiem — punkt przesuwa się na **rzeczywistą**
+prędkość, a czerwony odcinek pokazuje różnicę wraz z jej wartością:
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Kliknięcie wykresu otwiera edytor harmonogramu: dodawanie i usuwanie punktów,
+zmiana godzin i prędkości, podgląd punktu na urządzeniu oraz zapis.
+
+## Okno konfiguracji
+
+<span>Kliknij ikonę <img src="../img/rsdose/cog_icon.png" width="30"/> pompy, aby
+otworzyć jej konfigurację: typ, model, nazwa, stan, ponowne połączenie i
+usunięcie.</span>
+
+<img src="../img/rsrun/config_dialog.png"/>
+
+> [!CAUTION]
+> **Usuń pompę** przywraca jej ustawienia fabryczne: harmonogram i sterowanie
+> sondą zostaną utracone. Zawsze wymagane jest potwierdzenie.
+
+## Odpieniacz
+
+<img src="../img/rsrun/skimmer.png"/>
+
+Odpieniacz pokazuje poziom piany i animuje bąbelki podczas pracy. Sondy pełnego
+kubka i nadmiernego odpieniania, ich kalibracja oraz opóźnienia reakcji są
+dostępne z okna konfiguracji.
 
 # ReefWave
 
 Zaplanowano.
 
 Chcesz, żeby było obsługiwane szybciej? Zagłosuj [tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Konserwacja
+
+Poza widokami poszczególnych urządzeń karta oferuje widok **Konserwacja**, który
+zbiera wszystkie zadania konserwacyjne udostępniane przez
+`ha-reefbeat-component`, tak jakby cały podsystem konserwacji był jednym
+urządzeniem.
+
+Każde zadanie jest pokazane jako pasek postępu wskazujący, jaka część jego
+interwału już minęła, w kolorze zależnym od pozostałego czasu:
+
+| Kolor        | Znaczenie                                                   |
+| ------------ | ----------------------------------------------------------- |
+| Zielony      | Aktualne                                                    |
+| Pomarańczowy | Wkrótce termin (ostatnie 20 % interwału, co najmniej dzień) |
+| Czerwony     | Po terminie, etykieta zmienia się na `+X d`                 |
+| Szary        | Nigdy nie wykonane (brak zapisanego zerowania)              |
+
+Zadania można sortować **według sprzętu** (pogrupowane, z nagłówkiem dla każdego
+urządzenia) lub **według terminu** (płaska lista, najpilniejsze na górze).
+Zadania nigdy niewykonane zawsze trafiają na koniec. Na pasku narzędzi są dwa
+filtry: pole wyboru ukrywające zadania wciąż aktualne oraz przycisk **Ukryj
+wyciszone / Pokaż wyciszone**, który ukrywa zadania z wyłączonym przełącznikiem
+powiadomień. Przycisk startuje w położeniu „pokaż”, więc wyciszenie alertu nigdy
+samo z siebie nie sprawia, że termin znika. Tę wartość domyślną ustawia się w
+edytorze karty (lub kluczem `hide_muted` poniżej), a przycisk i tak ma
+pierwszeństwo w każdej chwili.
+
+Kliknięcie wiersza otwiera okno more-info Home Assistant dla danego zadania, a
+okrągły przycisk po prawej oznacza je jako wykonane (naciska leżącą u podstaw
+encję przycisku, dokładnie tak jak zrobiłoby okno more-info).
+
+Widok pojawia się w selektorze urządzeń tylko wtedy, gdy w instalacji istnieje
+co najmniej jedno zadanie konserwacyjne. Nowe zadania dodane do katalogu
+integracji pojawiają się automatycznie, bez aktualizacji karty.
+
+### Powiadomienia
+
+Każde zadanie ma też **przełącznik powiadomień** w integracji
+(`switch.*_notify`, wyświetlany jako „<nazwa zadania> (powiadomienia)”).
+Wyłączenie go wycisza alert o przekroczeniu terminu tego jednego zadania, nie
+zmieniając jego harmonogramu: pasek postępu nadal biegnie, wiersz po prostu
+przygasa, a dzwonek gaśnie.
+
+Dzwonek po prawej stronie wiersza przełącza ten przełącznik bezpośrednio.
+Pojawia się tylko wtedy, gdy integracja udostępnia przełącznik. Ustaw
+`show_notify: false`, aby ukryć dzwonki.
+
+Blueprint alertów czyta dokładnie to samo ustawienie, więc wyciszenie zadania w
+karcie wycisza także automatyzację.
+
+### Zmiana interwału
+
+Przycisk kalendarza w każdym wierszu rozwija suwak zapisujący do encji liczbowej
+interwału zadania. Suwak działa w jednostce ogłaszanej przez integrację dla tego
+zadania (dni, tygodnie lub miesiące, odczytanej z roli encji), a integracja
+przelicza z powrotem na dni przed zapisem. Granice pochodzą z samej encji, więc
+karta nigdy nie zapisze wartości spoza zakresu. Naraz otwarty pozostaje tylko
+jeden edytor. Ustaw `show_interval: false`, aby ukryć przyciski.
+
+### Pompy ReefRun
+
+Podurządzenia ReefRun noszą nazwy „… pompa 1” / „… pompa 2”, co nic nie mówi o
+tym, czym każda pompa naprawdę jest. Gdy urządzenie udostępnia zarówno sensor
+`type`, jak i `model`, karta dopisuje je w nawiasie: **ReefRun pompa 1 (powrotna 12000)**, **ReefRun pompa 2 (odpieniacz 900)**.
+
+Typ jest tłumaczony, a z modelu zachowywana jest tylko końcowa liczba
+(`return-12000` -> `12000`, `rsk-900` -> `900`), ponieważ przedrostek jest albo
+powtórzeniem typu, albo nieczytelny. Urządzenia niebędące pompami zachowują
+zwykłą nazwę.
+
+## Konfiguracja
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (domyślnie) lub "due"
+  hide_ok: false # ukryj zadania ani po terminie, ani zbliżające się
+  hide_muted: false # ukryj zadania z wyłączonymi powiadomieniami
+  warning_ratio: 0.2 # część interwału pokazywana na pomarańczowo
+  show_reset: true # pokaż przycisk „oznacz jako wykonane” w każdym wierszu
+  show_notify: true # pokaż dzwonek wyciszenia/włączenia w każdym wierszu
+  show_interval: true # pokaż przycisk edycji interwału w każdym wierszu
+```
+
+Wszystkie klucze `maintenance` są opcjonalne. `sort` i `hide_ok` ustalają tylko
+stan początkowy: użytkownik może je zmienić z poziomu samego widoku.
 
 # FAQ
 
