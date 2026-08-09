@@ -886,6 +886,12 @@ Möchten Sie, dass es schneller unterstützt wird? Stimmen Sie [hier](https://gi
 
 # Wartung
 
+Die Wartungsansicht von ha-reef-card in Aktion:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 Über die gerätebezogenen Ansichten hinaus bietet die Karte eine
 **Wartungsansicht**, die alle von `ha-reefbeat-component` bereitgestellten
 Wartungsaufgaben zusammenfasst, als wäre das gesamte Wartungssystem ein einziges
@@ -956,6 +962,20 @@ Der Typ wird übersetzt, vom Modell bleibt nur die abschließende Zahl
 (`return-12000` -> `12000`, `rsk-900` -> `900`), da das Präfix entweder den Typ
 wiederholt oder kryptisch ist. Geräte, die keine Pumpen sind, behalten einen
 schlichten Namen.
+
+## Symbole
+
+| Symbol                                                                                                   | Rolle                                                                             |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Aufgabe erledigt.** Hakt die Aufgabe ab und startet ihren Countdown neu.        |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Stumm / laut.** Schaltet den Benachrichtigungsschalter genau dieser Aufgabe um. |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Intervall ändern.** Klappt einen Schieberegler für das Aufgabenintervall aus.   |
+
+## Editor
+
+Der Standardzustand der Filter und die Sichtbarkeit der drei Schaltflächen werden im Karteneditor festgelegt.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Konfiguration
 

@@ -726,6 +726,12 @@ Deseja que seja suportado mais rapidamente? Vote [aqui](https://github.com/Elwin
 
 # Manutenção
 
+A vista de manutenção do ha-reef-card em ação:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 Para além das vistas por aparelho, o cartão oferece uma vista **Manutenção** que
 reúne todas as tarefas de manutenção expostas pelo `ha-reefbeat-component`, como
 se todo o subsistema de manutenção fosse um único aparelho.
@@ -793,6 +799,20 @@ sensor `type` e um sensor `model`, o cartão acrescenta-os entre parênteses:
 O tipo é traduzido e apenas o número final do modelo é mantido (`return-12000`
 -> `12000`, `rsk-900` -> `900`), já que o prefixo ou é redundante com o tipo ou
 é críptico. Os aparelhos que não são bombas mantêm um nome simples.
+
+## Ícones
+
+| Ícone                                                                                                    | Função                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Tarefa realizada.** Marca a tarefa como feita e reinicia a sua contagem decrescente. |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Silenciar / ativar.** Comuta o interruptor de notificação apenas dessa tarefa.       |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Alterar o intervalo.** Abre um cursor ligado ao intervalo da tarefa.                 |
+
+## Editor
+
+O estado por omissão dos filtros e a visibilidade dos três botões definem-se no editor do cartão.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Configuração
 

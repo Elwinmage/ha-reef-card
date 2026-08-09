@@ -727,6 +727,12 @@ Planificado.
 
 # Mantenimiento
 
+La vista de mantenimiento de ha-reef-card en acción:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 Más allá de las vistas por dispositivo, la tarjeta ofrece una vista
 **Mantenimiento** que reúne todas las tareas de mantenimiento expuestas por
 `ha-reefbeat-component`, como si todo el subsistema de mantenimiento fuera un
@@ -796,6 +802,20 @@ un sensor `type` y un sensor `model`, la tarjeta los añade entre paréntesis:
 El tipo se traduce y solo se conserva la cifra final del modelo (`return-12000`
 -> `12000`, `rsk-900` -> `900`), ya que el prefijo o es redundante con el tipo o
 es críptico. Los dispositivos que no son bombas conservan un nombre simple.
+
+## Iconos
+
+| Icono                                                                                                    | Función                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Tarea realizada.** Marca la tarea como hecha y reinicia su cuenta atrás.                 |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Silenciar / activar.** Conmuta el interruptor de notificación de esa única tarea.        |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Cambiar el intervalo.** Despliega un control deslizante ligado al intervalo de la tarea. |
+
+## Editor
+
+El estado por defecto de los filtros y la visibilidad de los tres botones se ajustan desde el editor de la tarjeta.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Configuración
 

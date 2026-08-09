@@ -725,6 +725,12 @@ Chcesz, żeby było obsługiwane szybciej? Zagłosuj [tutaj](https://github.com/
 
 # Konserwacja
 
+Widok konserwacji w ha-reef-card w akcji:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 Poza widokami poszczególnych urządzeń karta oferuje widok **Konserwacja**, który
 zbiera wszystkie zadania konserwacyjne udostępniane przez
 `ha-reefbeat-component`, tak jakby cały podsystem konserwacji był jednym
@@ -792,6 +798,20 @@ Typ jest tłumaczony, a z modelu zachowywana jest tylko końcowa liczba
 (`return-12000` -> `12000`, `rsk-900` -> `900`), ponieważ przedrostek jest albo
 powtórzeniem typu, albo nieczytelny. Urządzenia niebędące pompami zachowują
 zwykłą nazwę.
+
+## Ikony
+
+| Ikona                                                                                                    | Rola                                                                              |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Zadanie wykonane.** Oznacza zadanie jako wykonane i restartuje jego odliczanie. |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Wycisz / włącz.** Przełącza przełącznik powiadomień tego jednego zadania.       |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Zmień interwał.** Rozwija suwak powiązany z interwałem zadania.                 |
+
+## Edytor
+
+Domyślny stan filtrów i widoczność trzech przycisków ustawia się w edytorze karty.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Konfiguracja
 

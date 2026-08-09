@@ -728,6 +728,12 @@ Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/
 
 # Maintenance
 
+The maintenance view of ha-reef-card in action:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="doc/img/maintenance/overview.png"/>
+
 Beyond the per-device views, the card offers a **Maintenance** view that gathers
 every maintenance task exposed by `ha-reefbeat-component` as if the whole
 maintenance subsystem were a single device.
@@ -793,6 +799,20 @@ The type is localized, and only the trailing figure of the model is kept
 (`return-12000` -> `12000`, `rsk-900` -> `900`) since the prefix is either
 redundant with the type or cryptic. Devices that are not pumps keep a plain
 name.
+
+## Icons
+
+| Icon                                                                                                       | Role                                                                          |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| <img src="doc/img/mdi/mdi_check.png" width="20"/>                                                          | **Task done.** Marks the task as performed and restarts its countdown.        |
+| <img src="doc/img/mdi/mdi_bell-ring.png" width="20"/> <img src="doc/img/mdi/mdi_bell-off.png" width="20"/> | **Mute / unmute.** Toggles the notification switch of that single task.       |
+| <img src="doc/img/mdi/mdi_calendar-edit.png" width="20"/>                                                  | **Change the interval.** Expands an inline slider bound to the task interval. |
+
+## Editor
+
+The default state of the filters and the visibility of the three buttons are set from the card editor.
+
+<img src="doc/img/maintenance/editor.png"/>
 
 ## Configuration
 

@@ -729,6 +729,12 @@ Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github
 
 # Maintenance
 
+La vue maintenance de ha-reef-card en action :
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 En plus des vues par appareil, la carte propose une vue **Maintenance** qui
 regroupe toutes les échéances de maintenance exposées par
 `ha-reefbeat-component`, comme si l'ensemble du sous-système de maintenance
@@ -800,6 +806,20 @@ Le type est traduit, et seul le nombre final du modèle est conservé
 (`return-12000` -> `12000`, `rsk-900` -> `900`), le préfixe étant soit redondant
 avec le type, soit obscur. Les appareils qui ne sont pas des pompes gardent leur
 nom tel quel.
+
+## Icônes
+
+| Icône                                                                                                    | Rôle                                                                             |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Tâche réalisée.** Marque la tâche comme faite et relance son compte à rebours. |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Sourdine.** Bascule l'interrupteur de notification de cette seule tâche.       |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Changer l'intervalle.** Déplie un curseur relié à l'intervalle de la tâche.    |
+
+## Éditeur
+
+L'état par défaut des filtres et la visibilité des trois boutons se règlent depuis l'éditeur de carte.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Configuration
 

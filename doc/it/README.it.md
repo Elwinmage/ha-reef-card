@@ -730,6 +730,12 @@ Volete che sia supportato più rapidamente? Votate [qui](https://github.com/Elwi
 
 # Manutenzione
 
+La vista manutenzione di ha-reef-card in azione:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+<img src="../img/maintenance/overview.png"/>
+
 Oltre alle viste per apparecchio, la card offre una vista **Manutenzione** che
 raccoglie tutte le attività di manutenzione esposte da `ha-reefbeat-component`,
 come se l'intero sottosistema di manutenzione fosse un unico dispositivo.
@@ -799,6 +805,20 @@ Il tipo viene tradotto e del modello si conserva solo la cifra finale
 (`return-12000` -> `12000`, `rsk-900` -> `900`), dato che il prefisso è
 ridondante con il tipo oppure criptico. I dispositivi che non sono pompe
 mantengono un nome semplice.
+
+## Icone
+
+| Icona                                                                                                    | Ruolo                                                                                     |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Attività eseguita.** Segna l'attività come svolta e riavvia il suo conto alla rovescia. |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Silenzia / riattiva.** Commuta l'interruttore di notifica di quella sola attività.      |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Cambia l'intervallo.** Apre un cursore collegato all'intervallo dell'attività.          |
+
+## Editor
+
+Lo stato predefinito dei filtri e la visibilità dei tre pulsanti si impostano dall'editor della card.
+
+<img src="../img/maintenance/editor.png"/>
 
 ## Configurazione
 
