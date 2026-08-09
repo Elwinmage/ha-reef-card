@@ -37,11 +37,48 @@ export class RSPump extends RSDevice {
     return !sched || sched.state !== "off";
   }
 
-  // Re-render when state, schedule_enabled, speed or parent device_state changes
+  /**
+   * Interpret a Home Assistant boolean-ish value.
+   * Covers binary_sensor states ("on"/"off"), raw JSON booleans and the
+   * string forms the ReefBeat API sometimes returns ("true"/"false").
+   * @param value: the raw state or attribute value
+   * @return true only for an explicitly positive value
+   */
+  private static _is_true(value: unknown): boolean {
+    if (value === true) return true;
+    if (typeof value === "number") return value === 1;
+    if (typeof value !== "string") return false;
+    const v = value.trim().toLowerCase();
+    return v === "on" || v === "true" || v === "1" || v === "yes";
+  }
+
+  /**
+   * True when the ReefRun reports this pump as disconnected.
+   *
+   * The value comes from `missing_pump` in the /dashboard payload. It is read
+   * from the dedicated entity when the integration exposes one, and falls back
+   * to a `missing_pump` attribute carried by the pump `state` sensor.
+   * @return true when the pump is physically missing
+   */
+  is_missing(): boolean {
+    const entity = this.get_entity("missing_pump");
+    if (entity?.state !== undefined) {
+      return RSPump._is_true(entity.state);
+    }
+    const attr = this.get_entity("state")?.attributes?.["missing_pump"];
+    if (attr !== undefined) {
+      return RSPump._is_true(attr);
+    }
+    return false;
+  }
+
+  // Re-render when state, schedule_enabled, speed, missing_pump or parent
+  // device_state changes
   override _setting_hass(obj): void {
     const stateEntity = this.entities["state"];
     const scheduleEntity = this.entities["schedule_enabled"];
     const speedEntity = this.entities["speed"];
+    const missingEntity = this.entities["missing_pump"];
     // device_state lives on the parent, track it to grey-out pumps
     const deviceStateEntity = this.parent_entities?.["device_state"];
 
@@ -57,6 +94,11 @@ export class RSPump extends RSDevice {
     const prevDeviceState = deviceStateEntity
       ? this._hass?.states[deviceStateEntity.entity_id]?.state
       : undefined;
+    const prevMissing = missingEntity
+      ? this._hass?.states[missingEntity.entity_id]?.state
+      : this._hass?.states[stateEntity?.entity_id]?.attributes?.[
+          "missing_pump"
+        ];
 
     super._setting_hass(obj);
 
@@ -72,17 +114,34 @@ export class RSPump extends RSDevice {
     const newDeviceState = deviceStateEntity
       ? obj.states[deviceStateEntity.entity_id]?.state
       : undefined;
+    const newMissing = missingEntity
+      ? obj.states[missingEntity.entity_id]?.state
+      : obj.states[stateEntity?.entity_id]?.attributes?.["missing_pump"];
 
     if (
       newState !== prevState ||
       newSchedule !== prevSchedule ||
       newSpeed !== prevSpeed ||
-      newDeviceState !== prevDeviceState
+      newDeviceState !== prevDeviceState ||
+      newMissing !== prevMissing
     ) {
       this.to_render = true;
       if (newSchedule !== prevSchedule || newSpeed !== prevSpeed) {
         const elt = this._elements["sensor_controlled_in"];
         if (elt) elt.requestUpdate();
+      }
+      if (newMissing !== prevMissing) {
+        // Elements whose class is an expression (blinking cables) are not
+        // bound to a state that changed, so refresh them explicitly.
+        for (const key in this._elements) {
+          const elt = this._elements[key];
+          if (
+            typeof elt?.conf?.class === "string" &&
+            elt.conf.class.includes("${")
+          ) {
+            elt.requestUpdate();
+          }
+        }
       }
     }
   }

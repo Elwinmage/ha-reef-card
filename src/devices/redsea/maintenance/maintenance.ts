@@ -66,6 +66,9 @@ export class RSMaintenance extends RSDevice {
   @state()
   private _hide_ok: boolean = default_options.hide_ok;
 
+  @state()
+  private _hide_muted: boolean = default_options.hide_muted;
+
   // entity_id of the task whose interval editor is currently expanded.
   @state()
   private _editing: string | null = null;
@@ -107,6 +110,10 @@ export class RSMaintenance extends RSDevice {
         typeof user.hide_ok === "boolean"
           ? user.hide_ok
           : default_options.hide_ok,
+      hide_muted:
+        typeof user.hide_muted === "boolean"
+          ? user.hide_muted
+          : default_options.hide_muted,
       warning_ratio:
         Number.isFinite(ratio) && ratio > 0 && ratio < 1
           ? ratio
@@ -201,6 +208,15 @@ export class RSMaintenance extends RSDevice {
     this._hass?.callService("switch", "toggle", {
       entity_id: item.notify_entity_id,
     });
+  }
+
+  /**
+   * Toggle the "hide muted tasks" filter, i.e. tasks whose notification
+   * switch is off.
+   */
+  private _toggle_hide_muted(): void {
+    this._hide_muted = !this._hide_muted;
+    this.requestUpdate();
   }
 
   /**
@@ -409,15 +425,34 @@ export class RSMaintenance extends RSDevice {
             ${i18n._("sort_by_due_date")}
           </button>
         </div>
-        <label class="maint-filter">
-          <input
-            id="hide-ok"
-            type="checkbox"
-            .checked="${this._hide_ok}"
-            @change="${() => this._toggle_hide_ok()}"
-          />
-          ${i18n._("maintenance_hide_ok")}
-        </label>
+        <div class="maint-filters">
+          <label class="maint-filter">
+            <input
+              id="hide-ok"
+              type="checkbox"
+              .checked="${this._hide_ok}"
+              @change="${() => this._toggle_hide_ok()}"
+            />
+            ${i18n._("maintenance_hide_ok")}
+          </label>
+          <button
+            id="hide-muted"
+            class="maint-mute-filter ${this._hide_muted ? "active" : ""}"
+            title="${this._hide_muted
+              ? i18n._("maintenance_show_muted")
+              : i18n._("maintenance_hide_muted")}"
+            @click="${() => this._toggle_hide_muted()}"
+          >
+            <ha-icon
+              icon="${this._hide_muted ? "mdi:bell-off-outline" : "mdi:bell"}"
+            ></ha-icon>
+            <span>
+              ${this._hide_muted
+                ? i18n._("maintenance_show_muted")
+                : i18n._("maintenance_hide_muted")}
+            </span>
+          </button>
+        </div>
       </div>
     `;
   }
@@ -601,6 +636,11 @@ export class RSMaintenance extends RSDevice {
    * Render the whole maintenance overview.
    */
   override render(): TemplateResult {
+    // render() fully overrides RSDevice.render(), so the editor-mode branch
+    // has to be reproduced here.
+    if (this.isEditorMode) {
+      return this.renderEditor();
+    }
     this.update_config();
 
     const options = this._read_options();
@@ -608,13 +648,17 @@ export class RSMaintenance extends RSDevice {
     if (!this._options_applied) {
       this._sort = options.sort;
       this._hide_ok = options.hide_ok;
+      this._hide_muted = options.hide_muted;
       this._options_applied = true;
     }
 
     const all = collect_maintenance_items(this._hass, {
       warning_ratio: options.warning_ratio,
     });
-    const visible = this._hide_ok ? all.filter((i) => i.status !== "ok") : all;
+    let visible = this._hide_ok ? all.filter((i) => i.status !== "ok") : all;
+    if (this._hide_muted) {
+      visible = visible.filter((i) => i.notify);
+    }
     const sorted = sort_maintenance_items(visible, this._sort);
 
     return html`
@@ -632,10 +676,58 @@ export class RSMaintenance extends RSDevice {
   }
 
   /**
-   * The maintenance overview has no per-device editor options for now.
+   * Persist a maintenance view option into the card configuration.
+   * The maintenance view is a pseudo device, so it cannot use
+   * `handleChangedDeviceEvent` (which keys options by device name): options
+   * live under the top level `maintenance` key instead.
+   * @param key: the option name
+   * @param value: the new value
+   */
+  private _update_option(key: string, value: unknown): void {
+    const newConfig = JSON.parse(JSON.stringify(this.user_config ?? {}));
+    newConfig.maintenance = { ...(newConfig.maintenance ?? {}), [key]: value };
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: newConfig },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  /**
+   * Editor view: lets the user pick the default state of the
+   * "hide muted tasks" filter.
    */
   override renderEditor(): TemplateResult {
-    return html`<p>${i18n._("maintenance_no_editor")}</p>`;
+    const options = this._read_options();
+    // `_editor_common()` is deliberately not used: it renders
+    // last_message / last_alert_message toggles, which this pseudo device
+    // does not have, and it needs `config.elements` to be populated.
+    return html`
+      <form class="maint-editor-form">
+        <table>
+          <tr>
+            <td>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="hide_muted"
+                  .checked="${options.hide_muted}"
+                  @change="${(e: Event) =>
+                    this._update_option(
+                      "hide_muted",
+                      (e.currentTarget as HTMLInputElement).checked,
+                    )}"
+                />
+                <span class="slider round"></span>
+              </label>
+              <label>${i18n._("maintenance_hide_muted_default")}</label>
+            </td>
+          </tr>
+        </table>
+      </form>
+    `;
   }
 }
 

@@ -1126,8 +1126,156 @@ describe("RSMaintenance element", () => {
     expect(elt._pump_suffix(null, "rsk-900")).toBe(" (900)");
   });
 
-  it("provides a placeholder editor view", () => {
-    expect(elt.renderEditor()).toBeTruthy();
+  // ── Muted filter ──────────────────────────────────────────────────────
+
+  it("shows every task by default, muted ones included", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt._hide_muted).toBe(false);
+    // 4 tasks, one of which (carbon) has notify: false
+    expect(elt.shadowRoot.querySelectorAll(".maint-row")).toHaveLength(4);
+    document.body.removeChild(elt);
+  });
+
+  it("hides muted tasks when the toolbar button is pressed", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    elt.shadowRoot.querySelector("#hide-muted").click();
+    await elt.updateComplete;
+    expect(elt._hide_muted).toBe(true);
+    expect(elt.shadowRoot.querySelectorAll(".maint-row")).toHaveLength(3);
+    // No muted row is left
+    expect(elt.shadowRoot.querySelectorAll(".maint-row.muted")).toHaveLength(0);
+    document.body.removeChild(elt);
+  });
+
+  it("restores muted tasks on a second press", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    const button = () => elt.shadowRoot.querySelector("#hide-muted");
+    button().click();
+    await elt.updateComplete;
+    button().click();
+    await elt.updateComplete;
+    expect(elt._hide_muted).toBe(false);
+    expect(elt.shadowRoot.querySelectorAll(".maint-row")).toHaveLength(4);
+    document.body.removeChild(elt);
+  });
+
+  it("marks the muted filter button as active and flips its label", async () => {
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector("#hide-muted").className).not.toContain(
+      "active",
+    );
+    const before = elt.shadowRoot
+      .querySelector("#hide-muted")
+      .textContent.trim();
+    elt.shadowRoot.querySelector("#hide-muted").click();
+    await elt.updateComplete;
+    const after = elt.shadowRoot.querySelector("#hide-muted");
+    expect(after.className).toContain("active");
+    expect(after.textContent.trim()).not.toBe(before);
+    document.body.removeChild(elt);
+  });
+
+  it("takes the initial muted filter state from the configuration", async () => {
+    elt.setConfig({ maintenance: { hide_muted: true } });
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt._hide_muted).toBe(true);
+    expect(elt.shadowRoot.querySelectorAll(".maint-row")).toHaveLength(3);
+    document.body.removeChild(elt);
+  });
+
+  it("combines the muted filter with the up-to-date filter", async () => {
+    elt.setConfig({ maintenance: { hide_ok: true, hide_muted: true } });
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    // ok task (fan, 120 d) dropped by hide_ok, carbon dropped by hide_muted
+    const names = Array.from(
+      elt.shadowRoot.querySelectorAll(".maint-name"),
+    ).map((n: any) => n.textContent.trim());
+    expect(names).toEqual(["Clean lenses", "Clean rotor"]);
+    document.body.removeChild(elt);
+  });
+
+  // ── Editor ────────────────────────────────────────────────────────────
+
+  it("renders the options form in editor mode", async () => {
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector(".maint-editor-form")).toBeTruthy();
+    // The task list is replaced by the form
+    expect(elt.shadowRoot.querySelectorAll(".maint-row")).toHaveLength(0);
+    document.body.removeChild(elt);
+  });
+
+  it("reflects the stored default in the editor switch", async () => {
+    elt.setConfig({ maintenance: { hide_muted: true } });
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector("#hide_muted").checked).toBe(true);
+    document.body.removeChild(elt);
+  });
+
+  it("defaults the editor switch to off", async () => {
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector("#hide_muted").checked).toBe(false);
+    document.body.removeChild(elt);
+  });
+
+  it("emits config-changed when the editor switch is toggled", async () => {
+    elt.setConfig({ device: "__maintenance__" });
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+
+    let config: any = null;
+    elt.addEventListener("config-changed", (e: any) => {
+      config = e.detail.config;
+    });
+
+    const box = elt.shadowRoot.querySelector("#hide_muted");
+    box.checked = true;
+    box.dispatchEvent(new Event("change"));
+
+    expect(config).toEqual({
+      device: "__maintenance__",
+      maintenance: { hide_muted: true },
+    });
+    document.body.removeChild(elt);
+  });
+
+  it("keeps the other maintenance options when writing one", () => {
+    elt.setConfig({
+      device: "__maintenance__",
+      maintenance: { sort: "due", show_reset: false },
+    });
+    let config: any = null;
+    elt.addEventListener("config-changed", (e: any) => {
+      config = e.detail.config;
+    });
+    elt._update_option("hide_muted", true);
+    expect(config.maintenance).toEqual({
+      sort: "due",
+      show_reset: false,
+      hide_muted: true,
+    });
+  });
+
+  it("writes an option even without any prior configuration", () => {
+    elt.setConfig({});
+    let config: any = null;
+    elt.addEventListener("config-changed", (e: any) => {
+      config = e.detail.config;
+    });
+    elt._update_option("hide_muted", false);
+    expect(config.maintenance).toEqual({ hide_muted: false });
   });
 
   it("switches the sort mode from the toolbar buttons", async () => {

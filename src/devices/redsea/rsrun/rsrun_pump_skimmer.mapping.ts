@@ -115,6 +115,8 @@ export const config = {
     alim_cable_1: {
       name: "missing_pump",
       type: "click-image",
+      // Blink the power cable while the RSRun reports the pump as missing
+      class: "${device.is_missing() ? 'blink-fast' : ''}",
       image: new URL(
         "../../../img/redsea/RSRUN/reefrun_cable.png",
         import.meta.url,
@@ -131,6 +133,8 @@ export const config = {
     alim_cable_2: {
       name: "missing_pump",
       type: "click-image",
+      // Blink the power cable while the RSRun reports the pump as missing
+      class: "${device.is_missing() ? 'blink-fast' : ''}",
       image: new URL(
         "../../../img/redsea/RSRUN/reefrun_cable.png",
         import.meta.url,

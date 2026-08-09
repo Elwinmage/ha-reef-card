@@ -358,6 +358,30 @@ export class MyElement extends LitElement {
   }
 
   /**
+   * Resolve the CSS class list of the wrapper div.
+   *
+   * A static string is returned as-is. A string containing a `${...}`
+   * template is evaluated against the usual context, which allows a mapping
+   * to switch a class on an entity state, e.g.:
+   *   class: "${device.is_missing() ? 'blink-fast' : ''}"
+   *   class: "${entity.missing_pump?.state === 'on' ? 'blink' : ''}"
+   * @return the class attribute to apply
+   */
+  get_class(): string {
+    const cls = this.conf?.class;
+    if (typeof cls !== "string" || cls.length === 0) {
+      return "";
+    }
+    if (!cls.includes("${")) {
+      return cls;
+    }
+    const evaluated = this.evaluate(cls);
+    // A failed evaluation returns undefined: fall back to no class rather
+    // than injecting "undefined" into the DOM.
+    return typeof evaluated === "string" ? evaluated.trim() : "";
+  }
+
+  /**
    * Get hass entity from it's tranlation name
    */
   get_entity(entity_translation_value: string): StateObject {
@@ -412,7 +436,7 @@ export class MyElement extends LitElement {
     }
 
     return html`
-      <div class="${this.conf?.class || ""}" style="${this.get_style()}">
+      <div class="${this.get_class()}" style="${this.get_style()}">
         ${this._render(this.get_style("elt_css"))}
       </div>
     `;

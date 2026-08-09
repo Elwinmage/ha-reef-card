@@ -14,7 +14,12 @@ export class RSReturn extends RSPump {
 
   override _render(style?: any, substyle?: any): TemplateResult {
     const bg_img = this.config.background_img ?? "";
-    const pumpOn = this.is_pump_on();
+    // A disconnected pump is shown greyed out, exactly like a stopped one.
+    // Only the pump body is affected: the cables live in their own shadow
+    // roots and keep their blink animation (see the `class` expression in
+    // rsrun_pump_return.mapping.ts).
+    const missing = this.is_missing();
+    const pumpOn = this.is_pump_on() && !missing;
     const off_style = !pumpOn
       ? html`<style>
           img {

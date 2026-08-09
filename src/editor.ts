@@ -161,6 +161,9 @@ export class ReefCardEditor extends LitElement {
         if (maint === null) {
           return html``;
         }
+        // Enable card editor mode so the view renders its options form
+        // instead of the task list.
+        maint.isEditorMode = true;
         this.current_device = maint;
         return html`${maint}`;
       }

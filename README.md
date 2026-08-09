@@ -663,7 +663,12 @@ elapsed, with a color driven by the remaining time:
 
 Tasks can be sorted **by equipment** (grouped, with one header per device) or
 **by due date** (a flat list, the most urgent first). Never-done tasks are
-always listed last. A checkbox hides the tasks that are still up to date.
+always listed last. Two filters sit in the toolbar: a checkbox hiding tasks that are still up to
+date, and a **Hide muted / Show muted** button hiding the tasks whose
+notification switch is off. The button starts in the "show" position, so
+silencing an alert never makes a deadline disappear on its own. That default is
+configurable from the card editor (or with `hide_muted` below), and the button
+still overrides it at any time.
 
 Clicking a row opens the Home Assistant more-info dialog of the task, and the
 round button on the right marks the task as done (it presses the underlying
@@ -716,6 +721,7 @@ device: __maintenance__
 maintenance:
   sort: due # "device" (default) or "due"
   hide_ok: false # hide tasks that are neither overdue nor due soon
+  hide_muted: false # hide tasks whose notifications are turned off
   warning_ratio: 0.2 # share of the interval displayed in orange
   show_reset: true # show the "mark as done" button on each row
   show_notify: true # show the mute/unmute bell on each row

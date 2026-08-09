@@ -103,8 +103,12 @@ export class RSSkimmer extends RSPump {
     const stateVal = this.get_entity("state")?.state ?? "";
     const scheduleVal = this.get_entity("schedule_enabled")?.state ?? "off";
 
+    // A disconnected pump is greyed out and shown stopped: no water, no foam.
+    // The cables keep animating (own shadow root, see the mapping `class`).
+    const missing = this.is_missing();
+
     //mode on/off grayscale — uses is_pump_on() (device_state + schedule_enabled)
-    const pumpOn = this.is_pump_on();
+    const pumpOn = this.is_pump_on() && !missing;
     const off_style = !pumpOn
       ? html`<style>
           img {
@@ -113,7 +117,7 @@ export class RSSkimmer extends RSPump {
         </style>`
       : html``;
 
-    const isOff = scheduleVal === "off" || stateVal === "off";
+    const isOff = scheduleVal === "off" || stateVal === "off" || missing;
 
     let bg_img: string;
     if (isOff) {

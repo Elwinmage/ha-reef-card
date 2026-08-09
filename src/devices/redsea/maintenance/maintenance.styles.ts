@@ -118,6 +118,40 @@ export default css`
     font-size: 0.8em;
   }
 
+  .maint-filters {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .maint-mute-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid var(--maint-divider);
+    border-radius: 16px;
+    color: var(--maint-text-soft);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    padding: 3px 10px;
+    --mdc-icon-size: 15px;
+  }
+
+  .maint-mute-filter:hover {
+    color: var(--primary-color, #03a9f4);
+    border-color: var(--primary-color, #03a9f4);
+  }
+
+  .maint-mute-filter.active {
+    background-color: var(--primary-color, #03a9f4);
+    border-color: var(--primary-color, #03a9f4);
+    color: white;
+    font-weight: 600;
+  }
+
   /* ── Groups & rows ──────────────────────────────────────────────────── */
 
   .maint-group-title {
@@ -343,6 +377,68 @@ export default css`
     accent-color: var(--primary-color, #03a9f4);
     cursor: pointer;
     min-width: 0;
+  }
+
+  /* ── Editor form ────────────────────────────────────────────────────── */
+
+  .maint-editor-form {
+    color: var(--maint-text);
+    font-size: 0.9em;
+    padding: 4px 0;
+  }
+
+  .maint-editor-form td {
+    padding: 6px 0;
+  }
+
+  .maint-editor-form .switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .maint-editor-form .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .maint-editor-form .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+  }
+
+  .maint-editor-form .slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+  }
+
+  .maint-editor-form input:checked + .slider {
+    background-color: var(--primary-color, #03a9f4);
+  }
+
+  .maint-editor-form input:checked + .slider:before {
+    transform: translateX(13px);
+  }
+
+  .maint-editor-form .slider.round {
+    border-radius: 17px;
+  }
+
+  .maint-editor-form .slider.round:before {
+    border-radius: 50%;
   }
 
   /* ── Empty state ────────────────────────────────────────────────────── */

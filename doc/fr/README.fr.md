@@ -661,8 +661,13 @@ de l'intervalle déjà écoulée, avec une couleur qui dépend du temps restant 
 
 Les tâches peuvent être triées **par équipement** (regroupées, avec un en-tête
 par appareil) ou **par échéance** (liste unique, la plus urgente en premier).
-Les tâches jamais effectuées sont toujours placées en fin de liste. Une case à
-cocher permet de masquer les tâches encore à jour.
+Les tâches jamais effectuées sont toujours placées en fin de liste. Deux filtres se trouvent dans la barre d'outils : une case à cocher masquant
+les tâches encore à jour, et un bouton **Masquer / Afficher les silencieuses**
+masquant les tâches dont l'interrupteur de notification est coupé. Le bouton
+démarre en position « afficher », pour que couper une alerte ne fasse jamais
+disparaître une échéance de lui-même. Ce défaut se règle depuis l'éditeur de
+carte (ou via `hide_muted` ci-dessous), et le bouton permet toujours de le
+contourner ponctuellement.
 
 Un clic sur une ligne ouvre la fenêtre d'informations Home Assistant de la
 tâche, et le bouton rond à droite marque la tâche comme effectuée (il actionne
@@ -719,6 +724,7 @@ device: __maintenance__
 maintenance:
   sort: due # "device" (défaut) ou "due"
   hide_ok: false # masquer les tâches ni dépassées ni proches
+  hide_muted: false # masquer les tâches dont les notifications sont coupées
   warning_ratio: 0.2 # part de l'intervalle affichée en orange
   show_reset: true # afficher le bouton « marquer comme effectuée »
   show_notify: true # afficher la cloche activer/couper les alertes
