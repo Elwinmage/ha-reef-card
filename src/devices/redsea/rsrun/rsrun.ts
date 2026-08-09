@@ -83,8 +83,16 @@ export class RSRun extends RSDevice {
     for (const pump_id of [1, 2]) {
       const pump_type =
         this._hass.states[this._pumps[pump_id].entities["type"].entity_id]
-          .state;
-      console.log("Pump: ", pump_id, ", type: ", pump_type);
+          ?.state ?? "unknown";
+      // A pump added (or deleted) at runtime changes type, which changes the
+      // custom element to instantiate: drop the cached one and rebuild it.
+      if (
+        this._pumps[pump_id].litElement !== null &&
+        this._pumps[pump_id].type !== pump_type
+      ) {
+        this._pumps[pump_id].litElement = null;
+      }
+      this._pumps[pump_id].type = pump_type;
       if (this._pumps[pump_id].litElement === null) {
         const pump = RSDevice.create_device(
           "redsea-rsrun-" + pump_type,
@@ -99,8 +107,10 @@ export class RSRun extends RSDevice {
         pump.parent_entities = this.entities;
         // Pass parent HA device info so pumps can get device_id for service calls
         pump.parent_device = this.device;
+        (pump as any).show_add_pump = this.show_add_pump();
         this._pumps[pump_id].litElement = pump;
       } else {
+        this._pumps[pump_id].litElement.show_add_pump = this.show_add_pump();
         // Keep parent_entities and parent_device in sync on every hass update
         this._pumps[pump_id].litElement.parent_entities = this.entities;
         this._pumps[pump_id].litElement.parent_device = this.device;
@@ -123,12 +133,28 @@ export class RSRun extends RSDevice {
     }
   }
 
+  /**
+   * Whether the "add a pump" placeholder may be drawn on unconfigured slots.
+   * Users running a single pump can hide it from the card editor.
+   * @return true when the placeholder is allowed
+   */
+  show_add_pump(): boolean {
+    return this.get_config_flag("hide_add_pump") !== true;
+  }
+
   override renderEditor(): TemplateResult {
     if (this.is_disabled()) {
       return html``;
     }
     this._populate_entities();
     this.update_config();
-    return html` <form>${this._editor_common()}</form>`;
+    return html` <form>
+      ${this._editor_common()}
+      <table>
+        <tr>
+          <td>${this.is_config_checked("hide_add_pump")}</td>
+        </tr>
+      </table>
+    </form>`;
   }
 }

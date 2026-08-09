@@ -2,6 +2,7 @@ import { html } from "lit";
 import { RSDevice } from "../../device";
 
 import { config } from "./rsrun_pump.mapping";
+import { dialogs_rsrun_pump } from "./rsrun_pump.dialogs";
 
 import type { PumpEntity } from "../../../types/index";
 
@@ -9,14 +10,53 @@ export class RSPump extends RSDevice {
   protected;
   id: 1 | 2;
 
+  /** Set by the parent RSRun from the card editor configuration */
+  show_add_pump: boolean = true;
+
+  /**
+   * Render a not-yet-configured pump slot.
+   *
+   * Nothing is drawn unless a pump is really plugged in, so an empty ReefRun
+   * socket stays empty instead of inviting the user to configure thin air.
+   * @return the add-pump placeholder, or an empty template
+   */
   override _render(style?: any, substyle?: any): TemplateResult {
-    console.log("***Render UNKNOWN");
-    return html``;
+    if (!this.show_add_pump || !this.is_connected_pump()) {
+      return html``;
+    }
+    return html`<div class="device_bg">
+      ${style}
+      <div>${this._render_elements(this.is_on())}</div>
+    </div>`;
   }
 
   constructor() {
     super();
     this.initial_config = config;
+    this.load_dialogs([dialogs_rsrun_pump]);
+  }
+
+  /**
+   * True while the ReefRun has not been told what this pump is.
+   * @return true when /dashboard reports type "unknown"
+   */
+  is_unknown(): boolean {
+    const type = this.get_entity("type")?.state;
+    return !type || type === "unknown";
+  }
+
+  /**
+   * True when a pump is physically plugged into an unconfigured slot.
+   *
+   * An unknown slot reports missing_pump false whether a pump is connected or
+   * not, so `temperature` is the only discriminator: it stays at 0 on an empty
+   * socket and reads the real probe value as soon as a pump is plugged in.
+   * @return true when hardware is detected on this slot
+   */
+  is_connected_pump(): boolean {
+    const raw = this.get_entity("temperature")?.state;
+    const temperature = Number(raw);
+    return raw !== undefined && !isNaN(temperature) && temperature !== 0;
   }
 
   // Only check the parent device_state for masterOn.
@@ -79,6 +119,9 @@ export class RSPump extends RSDevice {
     const scheduleEntity = this.entities["schedule_enabled"];
     const speedEntity = this.entities["speed"];
     const missingEntity = this.entities["missing_pump"];
+    // type/temperature drive the not-yet-configured placeholder
+    const typeEntity = this.entities["type"];
+    const temperatureEntity = this.entities["temperature"];
     // device_state lives on the parent, track it to grey-out pumps
     const deviceStateEntity = this.parent_entities?.["device_state"];
 
@@ -100,6 +143,13 @@ export class RSPump extends RSDevice {
           "missing_pump"
         ];
 
+    const prevType = typeEntity
+      ? this._hass?.states[typeEntity.entity_id]?.state
+      : undefined;
+    const prevTemperature = temperatureEntity
+      ? this._hass?.states[temperatureEntity.entity_id]?.state
+      : undefined;
+
     super._setting_hass(obj);
 
     const newState = stateEntity
@@ -117,13 +167,21 @@ export class RSPump extends RSDevice {
     const newMissing = missingEntity
       ? obj.states[missingEntity.entity_id]?.state
       : obj.states[stateEntity?.entity_id]?.attributes?.["missing_pump"];
+    const newType = typeEntity
+      ? obj.states[typeEntity.entity_id]?.state
+      : undefined;
+    const newTemperature = temperatureEntity
+      ? obj.states[temperatureEntity.entity_id]?.state
+      : undefined;
 
     if (
       newState !== prevState ||
       newSchedule !== prevSchedule ||
       newSpeed !== prevSpeed ||
       newDeviceState !== prevDeviceState ||
-      newMissing !== prevMissing
+      newMissing !== prevMissing ||
+      newType !== prevType ||
+      newTemperature !== prevTemperature
     ) {
       this.to_render = true;
       if (newSchedule !== prevSchedule || newSpeed !== prevSpeed) {

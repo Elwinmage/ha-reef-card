@@ -5,6 +5,7 @@ import { config } from "./rsrun_pump_skimmer.mapping";
 
 import style_skimmer from "./rsrun_pump_skimmer.styles";
 
+import { dialogs_rsrun_pump } from "./rsrun_pump.dialogs";
 import { dialogs_rsrun_pump_skimmer } from "./rsrun_pump_skimmer.dialogs";
 
 export class RSSkimmer extends RSPump {
@@ -22,7 +23,7 @@ export class RSSkimmer extends RSPump {
   constructor() {
     super();
     this.initial_config = config;
-    this.load_dialogs([dialogs_rsrun_pump_skimmer]);
+    this.load_dialogs([dialogs_rsrun_pump, dialogs_rsrun_pump_skimmer]);
   }
 
   override connectedCallback() {
