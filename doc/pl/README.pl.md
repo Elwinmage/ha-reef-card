@@ -633,18 +633,20 @@ Linie te można ukryć za pomocą interfejsu edytora karty.
 # ReefRun
 
 Karta ReefRun pokazuje sterownik i jego dwie pompy tak, jak są fizycznie
-podłączone: pompa powrotna po jednej stronie, DC Skimmer po drugiej, każda z
-własnym kablem i orurowaniem.
+podłączone, każda z własnym kablem i orurowaniem. Pompa 1 jest po lewej
+stronie, pompa 2 po prawej — zwykle pompa powrotna i DC Skimmer, ale każde
+gniazdo przyjmuje dowolny z tych modeli.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-Karta jest podzielona na 5 stref:
+Karta jest podzielona na 6 stref:
 
-1. Konfiguracja / informacje Wifi
-2. Korpus pompy, prędkość i przepływ wody na żywo
-3. Okno konfiguracji pompy (ikona koła zębatego)
-4. Harmonogram dobowy z kursorem bieżącej pozycji
-5. Kubek odpieniacza i animacja piany
+1. Stan zasilania i tryb konserwacji
+2. Informacje o baterii i Wifi
+3. Sterownik: tryb pracy, przyciski pomp i kalibracje
+4. Pompa 1: harmonogram dobowy, korpus z przepływem wody na żywo, temperatura
+5. Pompa 2: harmonogram dobowy, korpus z przepływem wody na żywo, temperatura
+6. Ostatni komunikat i ostatni alert
 
 ## Stany pompy
 
@@ -656,11 +658,23 @@ Korpus pompy odzwierciedla to, co urządzenie naprawdę robi — wystarczy rzut 
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Zatrzymana</b><br/>Wyszarzony korpus, brak przepływu</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Odłączona</b><br/>Wyszarzony korpus, migający kabel zasilania</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Pełny kubek</b><br/>Tylko odpieniacz: render pełnego kubka, piana ograniczona do pasma pod pokrywą</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Migający kabel oznacza, że ReefRun zgłasza `missing_pump`: pompa jest
 skonfigurowana, ale sterownik już jej nie widzi. Sprawdź wtyczkę, zanim
 poszukasz dalej.
+
+Stan pełnego kubka zgłasza czujnik piany w komorze zbiorczej. Korpus przełącza
+się na własny render, a animacja piany zmniejsza się do wąskiego pasma pod
+pokrywą — niezależnie od tego, czy samopoziomowanie jest włączone. Migająca
+ikona ostrzeżenia obok przełącznika pełnego kubka pojawia się tylko wtedy, gdy
+`sensor_controlled` jest włączony, ponieważ przy wyłączonym czujniku sterownik
+nie reaguje na pełny kubek.
 
 ## Dodawanie pompy
 

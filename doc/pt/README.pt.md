@@ -633,18 +633,20 @@ Linie te można ukryć za pomocą interfejsu edytora karty.
 # ReefRun
 
 O cartão ReefRun mostra o controlador e as suas duas bombas tal como estão
-fisicamente ligadas: a bomba de retorno de um lado, o DC Skimmer do outro, cada
-uma com o seu cabo e a sua tubagem.
+fisicamente ligadas, cada uma com o seu cabo e a sua tubagem. A bomba 1 é a da
+esquerda e a bomba 2 a da direita — normalmente a bomba de retorno e o DC
+Skimmer, mas cada tomada aceita qualquer um dos modelos.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-O cartão está dividido em 5 zonas:
+O cartão está dividido em 6 zonas:
 
-1. Configuração / informações Wifi
-2. Corpo da bomba, velocidade e caudal de água em direto
-3. Diálogo de configuração da bomba (ícone de engrenagem)
-4. Programação diária com o cursor da posição atual
-5. Copo do escumador e animação de espuma
+1. Estado de alimentação e modo de manutenção
+2. Informações de bateria e Wifi
+3. Controlador: modo de funcionamento, botões das bombas e calibrações
+4. Bomba 1: programação diária, corpo com caudal de água em direto, temperatura
+5. Bomba 2: programação diária, corpo com caudal de água em direto, temperatura
+6. Última mensagem e último alerta
 
 ## Estados de uma bomba
 
@@ -656,11 +658,23 @@ O corpo da bomba reflete o que o aparelho está mesmo a fazer, basta um relance:
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Parada</b><br/>Corpo acinzentado, sem caudal</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Desligada</b><br/>Corpo acinzentado, cabo de alimentação a piscar</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Copo cheio</b><br/>Apenas escumador: render de copo cheio, espuma reduzida a uma faixa sob a tampa</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Um cabo a piscar significa que o ReefRun comunica `missing_pump`: a bomba está
 configurada mas o controlador já não a vê. Verifique a ficha antes de procurar
 mais longe.
+
+O estado de copo cheio é comunicado pelo sensor de espuma situado na câmara de
+recolha. O corpo muda para o seu próprio render e a animação de espuma reduz-se
+a uma faixa fina sob a tampa, esteja ou não a autorregulação ativa. O ícone de
+alerta a piscar junto ao interruptor de copo cheio só aparece se
+`sensor_controlled` estiver ativo, pois com o sensor desativado o controlador
+não age perante um copo cheio.
 
 ## Adicionar uma bomba
 

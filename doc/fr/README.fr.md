@@ -633,18 +633,20 @@ Ces lignes peuvent être masquées via l'intefrace d'edition de la carte.
 # ReefRun
 
 La carte ReefRun présente le contrôleur et ses deux pompes telles qu'elles sont
-physiquement câblées : la pompe de remontée d'un côté, le DC Skimmer de l'autre,
-chacune avec son câble et sa tuyauterie.
+physiquement câblées, chacune avec son câble et sa tuyauterie. La pompe 1 est
+celle de gauche, la pompe 2 celle de droite — typiquement la pompe de remontée
+et le DC Skimmer, mais chaque prise accepte l'un ou l'autre modèle.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-La carte est divisée en 5 zones :
+La carte est divisée en 6 zones :
 
-1. Configuration / informations Wifi
-2. Corps de la pompe, vitesse et débit d'eau en direct
-3. Dialogue de configuration de la pompe (icône engrenage)
-4. Programme journalier avec le curseur de position courante
-5. Coupelle de l'écumeur et animation de mousse
+1. État d'alimentation et mode maintenance
+2. Informations batterie et Wifi
+3. Contrôleur : mode de fonctionnement, boutons des pompes et calibrations
+4. Pompe 1 : programme journalier, corps avec débit d'eau en direct, température
+5. Pompe 2 : programme journalier, corps avec débit d'eau en direct, température
+6. Dernier message et dernière alerte
 
 ## États d'une pompe
 
@@ -657,11 +659,23 @@ suffit :
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Arrêtée</b><br/>Corps grisé, pas de flux</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Débranchée</b><br/>Corps grisé, câble d'alimentation clignotant</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Godet plein</b><br/>Écumeur uniquement : rendu godet plein, mousse réduite à une bande sous le couvercle</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Un câble qui clignote signifie que le ReefRun remonte `missing_pump` : la pompe
 est configurée mais le contrôleur ne la voit plus. Vérifiez la prise avant de
 chercher plus loin.
+
+L'état godet plein est remonté par le capteur d'écume situé dans le godet
+collecteur. Le corps bascule sur son propre rendu et l'animation de mousse se
+réduit à une fine bande sous le couvercle, que l'auto-régulation soit activée ou
+non. L'icône d'alerte clignotante à côté de l'interrupteur godet plein
+n'apparaît que si `sensor_controlled` est actif, puisque capteur désactivé le
+contrôleur n'agit pas sur un godet plein.
 
 ## Ajouter une pompe
 

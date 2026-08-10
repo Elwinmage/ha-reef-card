@@ -633,18 +633,20 @@ Queste righe possono essere nascoste tramite l'interfaccia dell'editor della sch
 # ReefRun
 
 La card ReefRun mostra il controller e le sue due pompe così come sono
-fisicamente collegate: la pompa di risalita da un lato, il DC Skimmer
-dall'altro, ciascuna con il proprio cavo e le proprie tubazioni.
+fisicamente collegate, ciascuna con il proprio cavo e le proprie tubazioni. La
+pompa 1 è quella di sinistra, la pompa 2 quella di destra — di solito la pompa
+di risalita e il DC Skimmer, ma ogni presa accetta entrambi i modelli.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-La card è divisa in 5 zone:
+La card è divisa in 6 zone:
 
-1. Configurazione / informazioni Wifi
-2. Corpo della pompa, velocità e flusso d'acqua in tempo reale
-3. Finestra di configurazione della pompa (icona ingranaggio)
-4. Programmazione giornaliera con il cursore della posizione attuale
-5. Bicchiere dello schiumatoio e animazione della schiuma
+1. Stato di alimentazione e modalità manutenzione
+2. Informazioni batteria e Wifi
+3. Controller: modalità di funzionamento, pulsanti delle pompe e calibrazioni
+4. Pompa 1: programmazione giornaliera, corpo con flusso d'acqua in tempo reale, temperatura
+5. Pompa 2: programmazione giornaliera, corpo con flusso d'acqua in tempo reale, temperatura
+6. Ultimo messaggio e ultimo allarme
 
 ## Stati di una pompa
 
@@ -657,11 +659,23 @@ un'occhiata:
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Ferma</b><br/>Corpo in grigio, nessun flusso</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Scollegata</b><br/>Corpo in grigio, cavo di alimentazione lampeggiante</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Bicchiere pieno</b><br/>Solo schiumatoio: render a bicchiere pieno, schiuma ridotta a una banda sotto il coperchio</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Un cavo che lampeggia significa che il ReefRun segnala `missing_pump`: la pompa
 è configurata ma il controller non la vede più. Controlla la spina prima di
 cercare altrove.
+
+Lo stato di bicchiere pieno è segnalato dal sensore di schiuma nella camera di
+raccolta. Il corpo passa al proprio render e l'animazione della schiuma si
+riduce a una banda sottile sotto il coperchio, che l'autoregolazione sia attiva
+o meno. L'icona di avviso lampeggiante accanto all'interruttore bicchiere pieno
+compare solo se `sensor_controlled` è attivo, perché con il sensore disattivato
+il controller non interviene.
 
 ## Aggiungere una pompa
 

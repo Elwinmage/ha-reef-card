@@ -636,18 +636,20 @@ These lines can be hidden via the card editor interface.
 # ReefRun
 
 The ReefRun card shows the controller and its two pumps as they are physically
-wired: the return pump on one side, the DC Skimmer on the other, each with its
-own cable and plumbing.
+wired, each with its own cable and plumbing. Pump 1 is the one on the left of
+the card, pump 2 the one on the right — typically the return pump and the DC
+Skimmer, but either socket accepts either model.
 
 <img src="doc/img/rsrun/rsrun_zones.png"/>
 
-The card is divided into 5 zones:
+The card is divided into 6 zones:
 
-1. Configuration / Wifi information
-2. Pump body, speed and live water flow
-3. Pump configuration dialog (cog icon)
-4. Daily schedule with the live position cursor
-5. Skimmer cup and foam animation
+1. Power state and maintenance mode
+2. Battery and Wifi information
+3. Controller: operating mode, pump buttons and calibrations
+4. Pump 1: daily schedule, body with live water flow, temperature
+5. Pump 2: daily schedule, body with live water flow, temperature
+6. Last message and last alert
 
 ## Pump states
 
@@ -659,11 +661,22 @@ The pump body reflects what the device is actually doing, so a glance is enough:
     <td align="center"><img src="doc/img/rsrun/state_off.png" width="100%"/><br/><b>Stopped</b><br/>Greyed body, no flow</td>
     <td align="center"><img src="doc/img/rsrun/state_missing.png" width="100%"/><br/><b>Disconnected</b><br/>Greyed body, blinking power cable</td>
   </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rsrun/state_fullcup.png" width="100%"/><br/><b>Full cup</b><br/>Skimmer only: full-cup render, foam reduced to a band under the lid</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 A blinking cable means the ReefRun reports `missing_pump`: the pump is
 configured but the controller no longer sees it. Check the plug before looking
 any further.
+
+The full-cup state is reported by the skim sensor in the collection chamber. The
+body switches to its own render and the foam animation collapses to a thin band
+under the lid, whether or not self-leveling is enabled. The blinking warning
+icon next to the full-cup switch only appears when `sensor_controlled` is on,
+since with the sensor disabled the controller takes no action on a full cup.
 
 ## Adding a pump
 

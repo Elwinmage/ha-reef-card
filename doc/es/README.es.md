@@ -633,18 +633,20 @@ Estas líneas pueden ocultarse mediante la interfaz del editor de la tarjeta.
 # ReefRun
 
 La tarjeta ReefRun muestra el controlador y sus dos bombas tal y como están
-físicamente conectadas: la bomba de retorno a un lado, el DC Skimmer al otro,
-cada una con su cable y su tubería.
+físicamente conectadas, cada una con su cable y su tubería. La bomba 1 es la de
+la izquierda y la bomba 2 la de la derecha — normalmente la bomba de retorno y
+el DC Skimmer, pero cada toma admite cualquiera de los dos modelos.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-La tarjeta se divide en 5 zonas:
+La tarjeta se divide en 6 zonas:
 
-1. Configuración / información Wifi
-2. Cuerpo de la bomba, velocidad y caudal de agua en directo
-3. Diálogo de configuración de la bomba (icono de engranaje)
-4. Programación diaria con el cursor de posición actual
-5. Copa del skimmer y animación de espuma
+1. Estado de alimentación y modo mantenimiento
+2. Información de batería y Wifi
+3. Controlador: modo de funcionamiento, botones de las bombas y calibraciones
+4. Bomba 1: programación diaria, cuerpo con caudal de agua en directo, temperatura
+5. Bomba 2: programación diaria, cuerpo con caudal de agua en directo, temperatura
+6. Último mensaje y última alerta
 
 ## Estados de una bomba
 
@@ -656,11 +658,23 @@ El cuerpo de la bomba refleja lo que hace realmente el aparato, basta un vistazo
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Parada</b><br/>Cuerpo en gris, sin caudal</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Desconectada</b><br/>Cuerpo en gris, cable de alimentación parpadeando</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Copa llena</b><br/>Solo skimmer: render de copa llena, espuma reducida a una banda bajo la tapa</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Un cable que parpadea significa que el ReefRun informa `missing_pump`: la bomba
 está configurada pero el controlador ya no la ve. Comprueba el enchufe antes de
 buscar más lejos.
+
+El estado de copa llena lo informa el sensor de espuma situado en la cámara de
+recogida. El cuerpo cambia a su propio render y la animación de espuma se reduce
+a una banda fina bajo la tapa, esté o no activada la autorregulación. El icono
+de alerta parpadeante junto al interruptor de copa llena solo aparece si
+`sensor_controlled` está activo, ya que con el sensor desactivado el controlador
+no actúa ante una copa llena.
 
 ## Añadir una bomba
 

@@ -789,18 +789,20 @@ Hacer clic en <img src="../img/mdi/mdi_delete-empty.png" width="20"/> borra el m
 # ReefRun
 
 Die ReefRun-Karte zeigt den Controller und seine beiden Pumpen so, wie sie
-physisch angeschlossen sind: die Rückförderpumpe auf der einen Seite, der DC
-Skimmer auf der anderen, jede mit eigenem Kabel und eigener Verrohrung.
+physisch angeschlossen sind, jede mit eigenem Kabel und eigener Verrohrung.
+Pumpe 1 ist die linke, Pumpe 2 die rechte — typischerweise die Rückförderpumpe
+und der DC Skimmer, aber jeder Anschluss nimmt beide Modelle auf.
 
 <img src="../img/rsrun/rsrun_zones.png"/>
 
-Die Karte ist in 5 Zonen gegliedert:
+Die Karte ist in 6 Zonen gegliedert:
 
-1. Konfiguration / WLAN-Informationen
-2. Pumpenkörper, Drehzahl und Wasserfluss in Echtzeit
-3. Konfigurationsdialog der Pumpe (Zahnrad-Symbol)
-4. Tagesprogramm mit dem Cursor der aktuellen Position
-5. Abschäumerbecher und Schaumanimation
+1. Versorgungszustand und Wartungsmodus
+2. Batterie- und WLAN-Informationen
+3. Controller: Betriebsart, Pumpentasten und Kalibrierungen
+4. Pumpe 1: Tagesprogramm, Körper mit Wasserfluss in Echtzeit, Temperatur
+5. Pumpe 2: Tagesprogramm, Körper mit Wasserfluss in Echtzeit, Temperatur
+6. Letzte Meldung und letzte Warnung
 
 ## Zustände einer Pumpe
 
@@ -813,11 +815,23 @@ genügt:
     <td align="center"><img src="../img/rsrun/state_off.png" width="100%"/><br/><b>Gestoppt</b><br/>Ausgegrauter Körper, kein Fluss</td>
     <td align="center"><img src="../img/rsrun/state_missing.png" width="100%"/><br/><b>Getrennt</b><br/>Ausgegrauter Körper, blinkendes Stromkabel</td>
   </tr>
+  <tr>
+    <td align="center"><img src="../img/rsrun/state_fullcup.png" width="100%"/><br/><b>Voller Becher</b><br/>Nur Abschäumer: Darstellung mit vollem Becher, Schaum auf ein Band unter dem Deckel reduziert</td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 Ein blinkendes Kabel bedeutet, dass der ReefRun `missing_pump` meldet: die Pumpe
 ist konfiguriert, aber der Controller sieht sie nicht mehr. Prüfe den Stecker,
 bevor du weiter suchst.
+
+Der Zustand „voller Becher“ wird vom Skim-Sensor in der Sammelkammer gemeldet.
+Der Körper wechselt auf seine eigene Darstellung und die Schaumanimation
+schrumpft auf ein schmales Band unter dem Deckel — unabhängig davon, ob die
+Selbstnivellierung aktiv ist. Das blinkende Warnsymbol neben dem Schalter für
+den vollen Becher erscheint nur, wenn `sensor_controlled` eingeschaltet ist,
+denn bei deaktiviertem Sensor unternimmt der Controller nichts.
 
 ## Eine Pumpe hinzufügen
 
