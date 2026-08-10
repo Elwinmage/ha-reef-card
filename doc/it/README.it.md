@@ -27,7 +27,22 @@ La vostra lingua non è ancora supportata e volete contribuire alla traduzione? 
 
 La **Reef card** per Home Assistant vi aiuta a gestire il vostro acquario di barriera corallina.
 
-Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), supporta automaticamente i vostri dispositivi Redsea (ReefBeat).
+Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), supporta automaticamente i vostri
+dispositivi Redsea (ReefBeat).
+
+## Progetti correlati
+
+Questa card fa parte di un insieme di progetti per un acquario di barriera
+gestito da Home Assistant:
+
+| Progetto                                                                          | Ruolo                                                                                                                                                                         |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**ha-reef-card**](https://github.com/Elwinmage/ha-reef-card)                     | Questa card. Una vista grafica interattiva di ogni dispositivo sulla dashboard, e l'unico modo per modificare gli orari avanzati.                                             |
+| [**ha-reefbeat-component**](https://github.com/Elwinmage/ha-reefbeat-component)   | Integrazione dei dispositivi Red Sea ReefBeat, controllati localmente e senza cloud: ReefATO+, ReefDose, ReefLed, ReefMat, ReefRun e ReefWave. È quella che alimenta la card. |
+| [**ha-aquamedic-component**](https://github.com/Elwinmage/ha-aquamedic-component) | Integrazione delle pompe Aqua Medic tramite l'API cloud Gizwits: movimentatori EcoDrift e SmartDrift, pompe di risalita DC Runner.                                            |
+| [**reefbeatEnergyBackup**](https://github.com/Elwinmage/reefbeatEnergyBackup)     | Backup a batteria in caso di blackout. Pacco 24V LiFePO₄ gestito da un Raspberry Pi, con riduzione progressiva della velocità delle pompe in base allo stato di carica.       |
+
+Tutti sono documentati insieme nella [pagina del progetto](https://elwinmage.github.io/reeftank/).
 
 > [!TIP]
 > La lista delle funzionalità future è disponibile [qui](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
@@ -45,7 +60,7 @@ Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-comp
   </th>
   <tr>
     <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>❌</td>
+    <td>RSATO+</td><td>☑️</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSATO+.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
@@ -111,7 +126,7 @@ Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-comp
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
-    <td>RSRUN</td><td>☑</td>
+    <td>RSRUN</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>

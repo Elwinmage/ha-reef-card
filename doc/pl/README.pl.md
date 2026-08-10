@@ -27,7 +27,22 @@ Twój język nie jest jeszcze obsługiwany i chcesz pomóc w tłumaczeniu? Post�
 
 **Reef card** dla Home Assistant pomaga zarządzać akwarium rafowym.
 
-W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) automatycznie obsługuje urządzenia Redsea (ReefBeat).
+W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) automatycznie obsługuje urządzenia
+Redsea (ReefBeat).
+
+## Powiązane projekty
+
+Ta karta jest częścią zestawu projektów dla akwarium rafowego zarządzanego z
+Home Assistant:
+
+| Projekt                                                                           | Rola                                                                                                                                                         |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [**ha-reef-card**](https://github.com/Elwinmage/ha-reef-card)                     | Ta karta. Interaktywny widok graficzny każdego urządzenia na pulpicie i jedyny sposób na edycję zaawansowanych harmonogramów.                                |
+| [**ha-reefbeat-component**](https://github.com/Elwinmage/ha-reefbeat-component)   | Integracja urządzeń Red Sea ReefBeat, sterowanych lokalnie i bez chmury: ReefATO+, ReefDose, ReefLed, ReefMat, ReefRun i ReefWave. To ona zasila kartę.      |
+| [**ha-aquamedic-component**](https://github.com/Elwinmage/ha-aquamedic-component) | Integracja pomp Aqua Medic przez API chmury Gizwits: falowniki EcoDrift i SmartDrift, pompy powrotne DC Runner.                                              |
+| [**reefbeatEnergyBackup**](https://github.com/Elwinmage/reefbeatEnergyBackup)     | Zasilanie awaryjne z akumulatora. Pakiet 24V LiFePO₄ sterowany przez Raspberry Pi, ze stopniowym ograniczaniem prędkości pomp zależnie od stanu naładowania. |
+
+Wszystkie są opisane razem na [stronie projektu](https://elwinmage.github.io/reeftank/).
 
 > [!TIP]
 > Lista planowanych funkcji jest dostępna [tutaj](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
@@ -45,7 +60,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
   </th>
   <tr>
     <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>❌</td>
+    <td>RSATO+</td><td>☑️</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSATO+.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
@@ -111,7 +126,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
-    <td>RSRUN</td><td>☑</td>
+    <td>RSRUN</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>
