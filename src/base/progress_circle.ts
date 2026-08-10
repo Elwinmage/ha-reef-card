@@ -83,8 +83,12 @@ export class ProgressCircle extends SensorTarget {
       return html`<div class="error">Missing state</div>`;
     }
 
-    // Set this.c based on DEVICE state (not stateObj state)
-    if (!this.device.is_on()) {
+    // Grey out from the state of the group this circle belongs to. On a
+    // ReefRun pump that is is_pump_on() (device on AND schedule enabled), so
+    // the speed ring follows the body instead of staying coloured when only
+    // the schedule is switched off. Falls back to the device state for
+    // elements the device rendered without a group state.
+    if (!(this.groupOn ?? this.device.is_on())) {
       this.c = OFF_COLOR;
     } else {
       this.c = this.color;

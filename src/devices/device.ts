@@ -580,10 +580,17 @@ export class RSDevice extends LitElement {
       element = this._elements[elementKey];
       if (element) {
         element.stateOn = state;
+        element.groupOn = state;
       }
     } else {
       if (this._hass) {
         element = MyElement.create_element(this._hass, conf, this);
+        if (element) {
+          // Without this the first render of a freshly created element uses
+          // the whole-device state instead of the group's.
+          element.stateOn = state;
+          element.groupOn = state;
+        }
         this._elements[elementKey] = element;
       }
     }

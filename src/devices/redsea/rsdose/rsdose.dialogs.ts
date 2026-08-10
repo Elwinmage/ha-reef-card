@@ -81,6 +81,7 @@ export const dialogs_rsdose = {
           entities: [
             { entity: "last_calibration", name: { type: "entity" } },
             { entity: "recalibration_required", name: { type: "entity" } },
+            { entity: "schedule_enabled", name: { type: "entity" } },
           ],
         },
       },

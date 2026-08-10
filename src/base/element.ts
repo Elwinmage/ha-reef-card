@@ -43,6 +43,20 @@ export class MyElement extends LitElement {
   @property({ type: Boolean })
   stateOn: boolean = false;
 
+  /**
+   * State of the group this element was rendered into.
+   *
+   * `stateOn` cannot be used for that: Sensor.updated() rewrites it from the
+   * element's own entity ("on"/"off"), which is meaningless for a numeric
+   * sensor such as a pump speed or a dosed volume. That rewrite also destroys
+   * `stateOn` as a change trigger — it is left at false, so assigning false
+   * again is a no-op and Lit schedules no update. `groupOn` is written only by
+   * `_render_element`, so it stays a reliable signal. It is reactive: setting
+   * it queues a re-render. null means the device never provided one.
+   */
+  @property({ attribute: false })
+  groupOn: boolean | null = null;
+
   // Internal states
   //@state(hasChanged()
   protected _hass: HassConfig | null = null;
