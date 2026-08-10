@@ -1,7 +1,7 @@
 /**
  * Tests for the "pump plugged but not configured" flow:
- *   - RSPump.is_unknown() / is_connected_pump()
- *   - the add_pump placeholder is only drawn for a real, unconfigured pump
+ *   - RSPump.is_unknown()
+ *   - the add_pump placeholder is drawn on every unconfigured slot
  *   - the shared add_pump / confirm_delete_pump dialogs are registered
  *   - the device-level editor flag that hides the placeholder
  */
@@ -54,36 +54,18 @@ describe("RSPump — unconfigured slot detection", () => {
     delete pump.entities.type;
     expect(pump.is_unknown()).toBe(true);
   });
-
-  it("uses temperature to tell an empty socket from a plugged pump", () => {
-    // Empty socket: /dashboard reports temperature 0
-    expect(makePump("unknown", "0").is_connected_pump()).toBe(false);
-    // Pump plugged but not added yet
-    expect(makePump("unknown", "36.463409423828125").is_connected_pump()).toBe(
-      true,
-    );
-  });
-
-  it("ignores non numeric temperatures", () => {
-    expect(makePump("unknown", "unavailable").is_connected_pump()).toBe(false);
-    expect(makePump("unknown", "unknown").is_connected_pump()).toBe(false);
-  });
 });
 
 describe("RSPump — add_pump placeholder", () => {
-  it("draws nothing on an empty socket", () => {
-    const pump = makePump("unknown", "0");
-    pump._render_elements = vi.fn(() => "ELEMENTS");
-    const tpl: any = pump._render();
-    expect(pump._render_elements).not.toHaveBeenCalled();
-    expect(tpl.values ?? []).toHaveLength(0);
-  });
-
-  it("draws the placeholder when a pump is plugged in", () => {
-    const pump = makePump("unknown", "36.4");
-    pump._render_elements = vi.fn(() => "ELEMENTS");
-    pump._render();
-    expect(pump._render_elements).toHaveBeenCalled();
+  it("draws the placeholder on an unconfigured slot, temperature 0 included", () => {
+    // The controller reports temperature 0 on a slot it knows nothing about,
+    // whether or not a pump is plugged in: the placeholder shows either way.
+    for (const temperature of ["0", "36.4", "unavailable"]) {
+      const pump = makePump("unknown", temperature);
+      pump._render_elements = vi.fn(() => "ELEMENTS");
+      pump._render();
+      expect(pump._render_elements).toHaveBeenCalled();
+    }
   });
 
   it("draws nothing when the placeholder is disabled from the editor", () => {

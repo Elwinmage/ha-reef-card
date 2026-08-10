@@ -600,6 +600,21 @@ export class MyElement extends LitElement {
           }),
         );
         break;
+      case "open_schedule": {
+        // data is the mapping key of the schedule element to open, e.g.
+        // "schedule_1". Elements are cached on the device under that key.
+        const key =
+          typeof action.data === "string"
+            ? action.data
+            : ((action.data as any)?.element as string | undefined);
+        const target = key ? (this.device as any)?._elements?.[key] : undefined;
+        if (target && typeof target.openEditor === "function") {
+          target.openEditor();
+        } else {
+          console.debug("open_schedule: no schedule element named", key);
+        }
+        break;
+      }
       case "update_conf":
         if (
           this.device?.config?.elements &&

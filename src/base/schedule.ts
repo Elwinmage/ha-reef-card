@@ -249,8 +249,11 @@ export class Schedule extends MyElement {
   //  Editor overlay
   // ------------------------------------------------------------------
 
-  private _openEditor(e: Event): void {
-    e.stopPropagation();
+  /**
+   * Open the editor from outside the element, e.g. on a long press on the
+   * pump's play/pause icon. Public counterpart of the container click handler.
+   */
+  public openEditor(): void {
     this._editPoints = this._parseSchedule().map((p) => ({ ...p }));
     if (this._editPoints.length === 0) {
       const pt: SchedulePoint = {
@@ -262,6 +265,11 @@ export class Schedule extends MyElement {
     }
     this._editing = true;
     this.updateComplete.then(() => this._initEditorCanvas());
+  }
+
+  private _openEditor(e: Event): void {
+    e.stopPropagation();
+    this.openEditor();
   }
 
   private _closeEditor(): void {

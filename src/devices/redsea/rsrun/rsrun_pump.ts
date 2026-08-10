@@ -16,12 +16,15 @@ export class RSPump extends RSDevice {
   /**
    * Render a not-yet-configured pump slot.
    *
-   * Nothing is drawn unless a pump is really plugged in, so an empty ReefRun
-   * socket stays empty instead of inviting the user to configure thin air.
+   * The placeholder is drawn on every unconfigured slot. The controller does
+   * not report whether hardware is physically plugged into a slot it knows
+   * nothing about, so an empty socket and a plugged-but-unconfigured pump are
+   * indistinguishable. Users who never intend to use the second slot can hide
+   * the placeholder from the card editor.
    * @return the add-pump placeholder, or an empty template
    */
   override _render(style?: any, substyle?: any): TemplateResult {
-    if (!this.show_add_pump || !this.is_connected_pump()) {
+    if (!this.show_add_pump) {
       return html``;
     }
     return html`<div class="device_bg">
@@ -43,20 +46,6 @@ export class RSPump extends RSDevice {
   is_unknown(): boolean {
     const type = this.get_entity("type")?.state;
     return !type || type === "unknown";
-  }
-
-  /**
-   * True when a pump is physically plugged into an unconfigured slot.
-   *
-   * An unknown slot reports missing_pump false whether a pump is connected or
-   * not, so `temperature` is the only discriminator: it stays at 0 on an empty
-   * socket and reads the real probe value as soon as a pump is plugged in.
-   * @return true when hardware is detected on this slot
-   */
-  is_connected_pump(): boolean {
-    const raw = this.get_entity("temperature")?.state;
-    const temperature = Number(raw);
-    return raw !== undefined && !isNaN(temperature) && temperature !== 0;
   }
 
   // Only check the parent device_state for masterOn.
@@ -119,7 +108,7 @@ export class RSPump extends RSDevice {
     const scheduleEntity = this.entities["schedule_enabled"];
     const speedEntity = this.entities["speed"];
     const missingEntity = this.entities["missing_pump"];
-    // type/temperature drive the not-yet-configured placeholder
+    // type drives the not-yet-configured placeholder
     const typeEntity = this.entities["type"];
     const temperatureEntity = this.entities["temperature"];
     // device_state lives on the parent, track it to grey-out pumps

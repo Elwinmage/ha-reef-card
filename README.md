@@ -635,6 +635,8 @@ These lines can be hidden via the card editor interface.
 
 # ReefRun
 
+[![Watch the video](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
+
 The ReefRun card shows the controller and its two pumps as they are physically
 wired, each with its own cable and plumbing. Pump 1 is the one on the left of
 the card, pump 2 the one on the right — typically the return pump and the DC
@@ -651,39 +653,108 @@ The card is divided into 6 zones:
 5. Pump 2: daily schedule, body with live water flow, temperature
 6. Last message and last alert
 
+## Power state and maintenance mode
+
+<img src="doc/img/rsrun/zone_1.png" >
+
+<span>The maintenance switch <img src="doc/img/mdi/mdi_account-wrench.png" width="20"/> switches to maintenance mode.</span>
+
+<img src="doc/img/rsrun/maintenance.png" >
+
+<span>The on/off switch <img src="doc/img/mdi/mdi_power-plug.png" width="20"/> switches the reef dual controler between on and off states.</span>
+
+<img src="doc/img/rsrun/off_mode.png" >
+
+## Configuration / Wifi Information
+
+<img src="doc/img/rsrun/zone_2.png"/>
+
+---
+
+<span>This icon <img src="doc/img/mdi/battery.png" width="30" /> indicate the battery elevel of the Dual Controler.</span>
+
+<span>Click the icon <img src="doc/img/mdi/wifi_icon.png" width="30" /> to manage the network settings.</span>
+
+<img src="doc/img/rsrun/zone_2_dialog_wifi.png"/>
+
+## Controller: operating mode, pump buttons and calibrations
+
+<img src="doc/img/rsrun/zone_3.png"/>
+
+### Pump settings
+
+A click on <img src="doc/img/mdi/cog-1.png" width="5%"/> or <img src="doc/img/mdi/cog-2.png" width="5%"/> will open the pump configuration dialog box for pump 1 or 2.
+
+<img src="doc/img/rsrun/zone_3_return_pump.png"/>
+<img src="doc/img/rsrun/zone_3_skimmer.png"/>
+
+> [!CAUTION]
+> **Delete pump** restores the pump settings to their factory defaults: the
+> schedule and the sensor control are lost. A confirmation is always asked.
+
+### Sensor settings
+
+A click on <img src="doc/img/mdi/cog-s.png" width="5%"/> will open the sensor configuration dialog box.
+<img src="doc/img/rsrun/zone_3_sensor.png"/>
+
+### Pump Play/Pause <img src="doc/img/mdi/play.png" width="5%"/> / <img src="doc/img/mdi/pause.png" width="5%"/>
+
+A click toggle the individual pump on or off.
+
+The red ring indicates the current speed.
+<img src="doc/img/rsrun/speed.png"/>
+
+To change the current speed hold <img src="doc/img/mdi/play.png" width="5%"/> / <img src="doc/img/mdi/pause.png" width="5%"/> or click on the schedule:
+
+<img src="doc/img/rsrun/schedule.png"/>
+
 ## Pump states
 
-The pump body reflects what the device is actually doing, so a glance is enough:
+The pump body reflects what the device is actually doing, so a glance is enough.
+The two pump types do not have the same states, so they are described
+separately.
+
+## Pump 1 & 2
+
+### Return pump
+
+<img src="src/img/redsea/RSRUN/reefrun_return.png" width="30%"/>
+
+A single artwork covers every state, the card only changes how it is drawn:
+
+- **Running** — full colors, water animated at the current speed.
+- **Stopped** — the same artwork greyed out, no flow.
+- **Disconnected** — the same greying, plus a blinking power cable.
+
+### Skimmer
+
+Three distinct artworks, one per state of the cup:
 
 <table>
   <tr>
-    <td align="center"><img src="doc/img/rsrun/state_running.png" width="100%"/><br/><b>Running</b><br/>Colored body, water animated at the current speed</td>
-    <td align="center"><img src="doc/img/rsrun/state_off.png" width="100%"/><br/><b>Stopped</b><br/>Greyed body, no flow</td>
-    <td align="center"><img src="doc/img/rsrun/state_missing.png" width="100%"/><br/><b>Disconnected</b><br/>Greyed body, blinking power cable</td>
-  </tr>
-  <tr>
-    <td align="center"><img src="doc/img/rsrun/state_fullcup.png" width="100%"/><br/><b>Full cup</b><br/>Skimmer only: full-cup render, foam reduced to a band under the lid</td>
-    <td></td>
-    <td></td>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_on.png" width="100%"/><br/><b>Running</b><br/>Foam in the cup, rising bubbles, water animated</td>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_full.png" width="100%"/><br/><b>Full cup</b><br/>Foam reduced to a band under the lid</td>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_off.png" width="100%"/><br/><b>Stopped</b><br/>Empty cup, greyed out, no bubbles</td>
   </tr>
 </table>
 
-A blinking cable means the ReefRun reports `missing_pump`: the pump is
-configured but the controller no longer sees it. Check the plug before looking
-any further.
+A disconnected skimmer looks exactly like a stopped one: only the blinking cable
+tells them apart. That blink means the ReefRun reports `missing_pump`, so the
+pump is configured but the controller no longer sees it. Check the plug before
+looking any further.
 
 The full-cup state is reported by the skim sensor in the collection chamber. The
-body switches to its own render and the foam animation collapses to a thin band
-under the lid, whether or not self-leveling is enabled. The blinking warning
-icon next to the full-cup switch only appears when `sensor_controlled` is on,
-since with the sensor disabled the controller takes no action on a full cup.
+body switches to its own artwork and the foam animation collapses to a thin band
+under the lid, whether or not self-leveling is enabled. The blinking warning icon
+next to the full-cup switch only appears when `sensor_controlled` is on, since
+with the sensor disabled the controller takes no action on a full cup.
 
-## Adding a pump
+### Adding a pump
 
-When a pump is plugged into a socket that was never configured, the card shows
-an **add** placeholder in place of the pump:
+A port with no pump configured shows an **add** placeholder instead of a pump
+body:
 
-<img src="doc/img/rsrun/add_pump.png"/>
+<img src="src/img/redsea/RSRUN/add_pump.png" width="20%"/>
 
 Clicking it opens the configuration dialog, where **Detect and add** asks the
 controller what is connected and registers it in one step. The detected model is
@@ -691,13 +762,13 @@ only a suggestion and is occasionally wrong, so the model list stays editable
 afterwards: for a DC Skimmer, pick rsk-300, rsk-600 or rsk-900. The pump name can
 be edited in the same dialog.
 
-The placeholder only appears when a pump is really connected — an empty socket
-stays empty. Users running a single pump can hide it entirely from the card
-editor.
+The placeholder sits on every unconfigured port, so it also shows up on a port
+you never intend to use. Users running a single pump can hide it entirely from
+the card editor.
 
 <img src="doc/img/rsrun/editor.png"/>
 
-## Schedule
+### Schedule
 
 <img src="doc/img/rsrun/schedule.png"/>
 
@@ -710,28 +781,26 @@ segment materializes the gap, labelled with the difference:
 
 <img src="doc/img/rsrun/schedule_deviation.png"/>
 
-Clicking the chart opens the schedule editor: add or remove points, edit times
-and speeds, preview a point on the device, then save.
+Clicking the chart opens the schedule editor: add or remove points, edit times and speeds, preview a point on the device, then save.
 
-## Configuration dialog
+<img src="doc/img/rsrun/schedule_editor.png"/>
 
-<span>Click the <img src="doc/img/rsdose/cog_icon.png" width="30"/> icon of a pump
-to open its configuration: type, model, name, state, reconnection and
-deletion.</span>
+## Messages
 
-<img src="doc/img/rsrun/config_dialog.png"/>
+<img src="doc/img/rsrun/zone_6.png"/>
 
-> [!CAUTION]
-> **Delete pump** restores the pump settings to their factory defaults: the
-> schedule and the sensor control are lost. A confirmation is always asked.
+---
 
-## Skimmer
+This zone displays the latest system messages from the ReefMat. It has two lines:
 
-<img src="doc/img/rsrun/skimmer.png"/>
+- The grey line shows the **last message** received.
+- The pink line shows the **last alert**, preceded by the ⚠ symbol.
 
-The skimmer displays the foam level and animates the bubbles when running. The
-full-cup and overskimming sensors, their calibration and the reaction delays are
-reachable from the configuration dialog.
+Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
+
+These lines can be hidden via the card editor interface.
+
+<img src="doc/img/rsrun/editor_2.png" />
 
 # ReefWave
 

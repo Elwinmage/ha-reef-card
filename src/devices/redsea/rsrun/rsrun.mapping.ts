@@ -14,6 +14,8 @@ export const config = {
     last_message: {
       name: "last_message",
       type: "redsea-messages",
+      // Absolutely positioned: never emit a <br> that shifts the flow
+      no_br_if_disabled: true,
       css: {
         flex: "0 0 auto",
         position: "absolute",
@@ -30,6 +32,8 @@ export const config = {
     last_alert_message: {
       name: "last_alert_message",
       type: "redsea-messages",
+      // Absolutely positioned: never emit a <br> that shifts the flow
+      no_br_if_disabled: true,
       label: "'⚠'",
       css: {
         color: "red",

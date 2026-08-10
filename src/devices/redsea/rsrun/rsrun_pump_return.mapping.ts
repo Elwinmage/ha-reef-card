@@ -59,6 +59,12 @@ export const config = {
         action: "toggle",
         data: "default",
       },
+      // Long press jumps straight to this pump's schedule editor
+      hold_action: {
+        domain: "redsea_ui",
+        action: "open_schedule",
+        data: "schedule_1",
+      },
       css: {
         flex: "0 0 auto",
         position: "absolute",
@@ -77,6 +83,12 @@ export const config = {
         domain: "switch",
         action: "toggle",
         data: "default",
+      },
+      // Long press jumps straight to this pump's schedule editor
+      hold_action: {
+        domain: "redsea_ui",
+        action: "open_schedule",
+        data: "schedule_2",
       },
       css: {
         flex: "0 0 auto",
