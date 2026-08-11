@@ -10,6 +10,7 @@ import { RSPump } from "../src/devices/redsea/rsrun/rsrun_pump";
 import { dialogs_rsrun_pump } from "../src/devices/redsea/rsrun/rsrun_pump.dialogs";
 import { dialogs_rsrun_pump_return } from "../src/devices/redsea/rsrun/rsrun_pump_return.dialogs";
 import { dialogs_rsrun_pump_skimmer } from "../src/devices/redsea/rsrun/rsrun_pump_skimmer.dialogs";
+import { actionRegistry } from "../src/devices/actions";
 import { describe, expect, it, vi } from "vitest";
 
 if (!customElements.get("test-unknown-pump")) {
@@ -111,9 +112,16 @@ describe("Pump dialogs", () => {
       action: "press",
       data: { entity_id: "detect_pump" },
     });
-    // The model row must stay editable so a wrong detection can be corrected
-    const rows = dlg.content[1].conf.entities.map((e: any) => e.entity);
-    expect(rows).toContain("select.model");
+    // Rows are built at runtime from the detected type, and must be
+    // refreshed when the detection lands
+    expect(dlg.content[1]).toMatchObject({
+      view: "extend",
+      extend: "rsrun_pump_dialog_func_ext",
+      re_render: true,
+    });
+    expect(actionRegistry["rsrun_pump_dialog_func_ext"]?.add_pump).toBeTypeOf(
+      "function",
+    );
   });
 
   it("guards delete_pump behind a confirmation", () => {

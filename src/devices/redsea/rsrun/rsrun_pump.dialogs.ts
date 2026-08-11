@@ -6,7 +6,9 @@
  *                          detect-and-add button, then lets the user pick the
  *                          exact model — the ReefRun detection is only a
  *                          suggestion and can be wrong (a rsk-900 is reported
- *                          as rsk-300 on some firmwares).
+ *                          as rsk-300 on some firmwares). Its rows are built
+ *                          at runtime from the detected type, see
+ *                          rsrun_pump.dialog_func_ext.
  *  - confirm_delete_pump : confirmation asked before wiping a pump config,
  *                          because DELETE /pump/{id}/settings also resets the
  *                          schedule and the sensor_controlled flag.
@@ -23,16 +25,13 @@ export const dialogs_rsrun_pump = {
         value: "${i18n._('add_pump_text')}",
       },
       {
-        view: "hui-entities-card",
-        conf: {
-          type: "entities",
-          entities: [
-            { entity: "type", name: { type: "entity" } },
-            { entity: "select.model", name: { type: "entity" } },
-            // Editable name (text entity), not the read-only sensor
-            { entity: "pump_name", name: { type: "entity" } },
-          ],
-        },
+        // Rows depend on what the detection returned: only the type before
+        // it runs, then model + editable name once the pump is known. The
+        // model entity is a sensor for a return pump and a select for a
+        // skimmer, so the card cannot be described statically.
+        view: "extend",
+        extend: "rsrun_pump_dialog_func_ext",
+        re_render: true,
       },
     ],
     // Center button: run the detection. The dialog stays open so the rows
@@ -54,7 +53,7 @@ export const dialogs_rsrun_pump = {
             action: "press",
             data: { entity_id: "detect_pump" },
           },
-          { domain: "redsea_ui", action: "wait", data: 3 },
+          { domain: "redsea_ui", action: "wait", data: 6 },
           {
             domain: "button",
             action: "press",
@@ -88,7 +87,7 @@ export const dialogs_rsrun_pump = {
           action: "press",
           data: { entity_id: "delete_pump" },
         },
-        { domain: "redsea_ui", action: "wait", data: 2 },
+        { domain: "redsea_ui", action: "wait", data: 6 },
         {
           domain: "button",
           action: "press",
