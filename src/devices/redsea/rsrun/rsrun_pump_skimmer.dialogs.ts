@@ -11,10 +11,10 @@ export const dialogs_rsrun_pump_skimmer = {
           entities: [
             { entity: "type", name: { type: "entity" } },
             { entity: "select.model", name: { type: "entity" } },
-            // Editable name (text entity), not the read-only sensor
             { entity: "pump_name", name: { type: "entity" } },
             { entity: "state", name: { type: "entity" } },
             { entity: "reconnect_pump", name: { type: "entity" } },
+            { entity: "delete_emergency", name: { type: "entity" } },
           ],
         },
       },

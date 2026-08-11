@@ -15,6 +15,7 @@ export const dialogs_rsrun_pump_return = {
             { entity: "pump_name", name: { type: "entity" } },
             { entity: "state", name: { type: "entity" } },
             { entity: "reconnect_pump", name: { type: "entity" } },
+            { entity: "delete_emergency", name: { type: "entity" } },
           ],
         },
       },
