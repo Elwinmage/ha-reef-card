@@ -1168,8 +1168,7 @@ export class Schedule extends MyElement {
   ): number {
     if (points.length === 0) return 0;
     if (minutes <= points[0].minutes) return points[0].value;
-    if (minutes >= points[points.length - 1].minutes)
-      return points[points.length - 1].value;
+    // Past the last point the loop falls through to the tail return below
     for (let i = 1; i < points.length; i++) {
       if (minutes <= points[i].minutes) {
         const prev = points[i - 1];

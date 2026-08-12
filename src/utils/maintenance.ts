@@ -315,7 +315,8 @@ function index_interval_numbers(hass: HassConfig): Record<string, IntervalRef> {
       continue;
     }
 
-    const attrs = state.attributes || {};
+    // reef_role was read from them above, so attributes is always there
+    const attrs = state.attributes;
     const raw = Number(state.state);
     const device_id = registry[entity_id]?.device_id || "";
     const step = Number(attrs.step);

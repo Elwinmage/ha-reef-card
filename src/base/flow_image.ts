@@ -53,6 +53,30 @@ export class FlowImage extends MyElement {
     super();
   }
 
+  /**
+   * True while the pump is actually pushing water.
+   *
+   * Three independent things stop it, and all of them must pause the
+   * animation: the global on/off switch (`device_state`, which lives on the
+   * parent RSRun, not on the pump), the pump schedule, and the speed itself.
+   * @param hass: the Home Assistant object to read the states from
+   * @return false as soon as one of them reports the pump stopped
+   */
+  private _is_running(hass: HassConfig | null | undefined): boolean {
+    if (!hass?.states) return false;
+    const device: any = this.device;
+    const schedule = device?.entities?.["schedule_enabled"];
+    if (schedule && hass.states[schedule.entity_id]?.state === "off") {
+      return false;
+    }
+    // device_state is only exposed by the parent, hence parent_entities
+    const master = device?.parent_entities?.["device_state"];
+    if (master && hass.states[master.entity_id]?.state === "off") {
+      return false;
+    }
+    return true;
+  }
+
   // Intercept hass updates to sync animation speed without re-rendering
   override set hass(obj: HassConfig) {
     if (!obj?.states || !this.stateObj?.entity_id) {
@@ -60,15 +84,14 @@ export class FlowImage extends MyElement {
       return;
     }
     const fresh = obj.states[this.stateObj.entity_id];
-    const schedEntity = this.device?.entities?.["schedule_enabled"];
-    if (
-      (fresh && fresh.state !== this.stateObj.state) ||
-      obj.states[schedEntity.entity_id].state !== schedEntity.state
-    ) {
-      // Speed changed — update stateObj and sync animation directly, no re-render
-
-      this.stateObj = fresh;
-
+    const speed_changed = Boolean(fresh) && fresh.state !== this.stateObj.state;
+    const run_changed = this._is_running(obj) !== this._is_running(this._hass);
+    if (speed_changed || run_changed) {
+      // Speed or run state changed — update stateObj and sync the animation
+      // directly, no re-render (a re-render would restart the CSS animation)
+      if (fresh) {
+        this.stateObj = fresh;
+      }
       this._hass = obj;
       this._syncAnimation();
     } else {
@@ -122,9 +145,8 @@ export class FlowImage extends MyElement {
 
     const minSpeed = 40;
     let speedRaw = parseFloat(this.stateObj?.state ?? "0");
-    const schedule_enabled =
-      this.device.get_entity("schedule_enabled").state === "on";
-    if (schedule_enabled && speedRaw === 0) {
+    const running = this._is_running(this._hass);
+    if (running && speedRaw === 0) {
       speedRaw = minSpeed;
     }
     const speed = isNaN(speedRaw) ? 0 : Math.max(0, Math.min(100, speedRaw));
@@ -148,7 +170,7 @@ export class FlowImage extends MyElement {
 
     div.style.animationDuration = `${duration.toFixed(2)}s`;
     div.style.animationPlayState =
-      speed === 0 || !schedule_enabled ? "paused" : "running";
+      speed === 0 || !running ? "paused" : "running";
   }
 
   protected override _render(_style: string = ""): any {

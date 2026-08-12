@@ -9,7 +9,7 @@ import { dialogs_rsrun_pump } from "./rsrun_pump.dialogs";
 import { dialogs_rsrun_pump_skimmer } from "./rsrun_pump_skimmer.dialogs";
 
 export class RSSkimmer extends RSPump {
-  static override styles = [...((RSPump as any).styles ?? []), style_skimmer];
+  static override styles = [...(RSPump as any).styles, style_skimmer];
 
   // Foam bubble config (from calibration)
   private static readonly BUBBLE_COUNT = 5;
@@ -102,7 +102,6 @@ export class RSSkimmer extends RSPump {
 
   override _render(style?: any, substyle?: any): TemplateResult {
     const stateVal = this.get_entity("state")?.state ?? "";
-    const scheduleVal = this.get_entity("schedule_enabled")?.state ?? "off";
 
     // A disconnected pump is greyed out and shown stopped: no water, no foam.
     // The cables keep animating (own shadow root, see the mapping `class`).
@@ -118,7 +117,11 @@ export class RSSkimmer extends RSPump {
         </style>`
       : html``;
 
-    const isOff = scheduleVal === "off" || stateVal === "off" || missing;
+    // Same condition as the greyscale filter, so the body image and the
+    // water/foam animations always agree with it. pumpOn already covers the
+    // global on/off switch (device_state on the parent RSRun), the pump
+    // schedule and a disconnected pump; only the reported pump state is left.
+    const isOff = !pumpOn || stateVal === "off";
 
     let bg_img: string;
     if (isOff) {

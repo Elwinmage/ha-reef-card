@@ -36,3 +36,9 @@ repos:
         entry: python scripts/supplement_img.py
         language: python
         pass_filenames: false
+
+      - id: coverage
+        name: Tests coverage
+        language: system
+        entry: npm run test:coverage
+        pass_filenames: false

@@ -121,7 +121,8 @@ export function add_pump(elt: any, hass: any, shadowRoot: any): void {
     previous.remove();
   }
 
-  const entities = (ROWS_BY_TYPE[type] ?? ROWS_BY_TYPE.unknown)
+  // read_type() only ever returns a key of ROWS_BY_TYPE
+  const entities = ROWS_BY_TYPE[type]
     .map((candidates) => resolve(device, hass, candidates))
     .filter((entity_id): entity_id is string => entity_id !== null)
     .map((entity) => ({ entity, name: { type: "entity" } }));

@@ -31,8 +31,12 @@ export class RSRun extends RSDevice {
 
   _populate_entities(): void {
     this.update_config();
-    for (const pump_id of [0, 1, 2]) {
-      this._pumps.push({ entities: {}, litElement: null });
+    // Called again by renderEditor: only seed the slots once, otherwise the
+    // array grows on every call and _setting_hass walks dead entries.
+    if (this._pumps.length === 0) {
+      for (const _pump_id of [0, 1, 2]) {
+        this._pumps.push({ entities: {}, litElement: null });
+      }
     }
     if (!this._hass) return;
 
@@ -60,7 +64,6 @@ export class RSRun extends RSDevice {
         }
       }
     }
-    console.log("PUMPS", this._pumps);
   }
 
   _render(style?: any, substyle?: any): TemplateResult {
@@ -81,9 +84,12 @@ export class RSRun extends RSDevice {
 
   _render_pumps(state: boolean): TemplateResult {
     for (const pump_id of [1, 2]) {
-      const pump_type =
-        this._hass.states[this._pumps[pump_id].entities["type"].entity_id]
-          ?.state ?? "unknown";
+      // A stale or disabled registry entry leaves no `type` at all: fall
+      // back to the unconfigured slot rather than breaking the whole card.
+      const type_entity = this._pumps[pump_id].entities["type"];
+      const pump_type = type_entity
+        ? (this._hass.states[type_entity.entity_id]?.state ?? "unknown")
+        : "unknown";
       // A pump added (or deleted) at runtime changes type, which changes the
       // custom element to instantiate: drop the cached one and rebuild it.
       if (
