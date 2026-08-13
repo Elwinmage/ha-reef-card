@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Masquer les silencieuses",
   "maintenance_hide_muted_default": "Masquer par défaut les tâches silencieuses",
   "maintenance_hide_ok": "Masquer les tâches à jour",
+  "maintenance_hide_ok_default": "Masquer par défaut les tâches à jour",
   "maintenance_interval": "Intervalle",
   "maintenance_last_reset": "Dernière fois",
   "maintenance_mark_done": "Marquer comme effectuée",

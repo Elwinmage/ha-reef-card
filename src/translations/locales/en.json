@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Hide muted",
   "maintenance_hide_muted_default": "Hide muted tasks by default",
   "maintenance_hide_ok": "Hide up to date tasks",
+  "maintenance_hide_ok_default": "Hide up to date tasks by default",
   "maintenance_interval": "Interval",
   "maintenance_last_reset": "Last done",
   "maintenance_mark_done": "Mark as done",

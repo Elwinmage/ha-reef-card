@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Ukryj wyciszone",
   "maintenance_hide_muted_default": "Domyślnie ukrywaj wyciszone zadania",
   "maintenance_hide_ok": "Ukryj aktualne zadania",
+  "maintenance_hide_ok_default": "Domyślnie ukrywaj aktualne zadania",
   "maintenance_interval": "Interwał",
   "maintenance_last_reset": "Ostatnio wykonano",
   "maintenance_mark_done": "Oznacz jako wykonane",

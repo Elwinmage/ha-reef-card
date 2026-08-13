@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Stumme ausblenden",
   "maintenance_hide_muted_default": "Stummgeschaltete Aufgaben standardmäßig ausblenden",
   "maintenance_hide_ok": "Aktuelle Aufgaben ausblenden",
+  "maintenance_hide_ok_default": "Aktuelle Aufgaben standardmäßig ausblenden",
   "maintenance_interval": "Intervall",
   "maintenance_last_reset": "Zuletzt erledigt",
   "maintenance_mark_done": "Als erledigt markieren",

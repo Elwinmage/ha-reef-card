@@ -697,7 +697,7 @@ export class RSMaintenance extends RSDevice {
 
   /**
    * Editor view: lets the user pick the default state of the
-   * "hide muted tasks" filter.
+   * "hide up to date tasks" and "hide muted tasks" filters.
    */
   override renderEditor(): TemplateResult {
     const options = this._read_options();
@@ -707,6 +707,24 @@ export class RSMaintenance extends RSDevice {
     return html`
       <form class="maint-editor-form">
         <table>
+          <tr>
+            <td>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="hide_ok"
+                  .checked="${options.hide_ok}"
+                  @change="${(e: Event) =>
+                    this._update_option(
+                      "hide_ok",
+                      (e.currentTarget as HTMLInputElement).checked,
+                    )}"
+                />
+                <span class="slider round"></span>
+              </label>
+              <label>${i18n._("maintenance_hide_ok_default")}</label>
+            </td>
+          </tr>
           <tr>
             <td>
               <label class="switch">

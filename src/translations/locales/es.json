@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Ocultar silenciadas",
   "maintenance_hide_muted_default": "Ocultar por defecto las tareas silenciadas",
   "maintenance_hide_ok": "Ocultar las tareas al día",
+  "maintenance_hide_ok_default": "Ocultar por defecto las tareas al día",
   "maintenance_interval": "Intervalo",
   "maintenance_last_reset": "Última vez",
   "maintenance_mark_done": "Marcar como realizada",

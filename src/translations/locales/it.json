@@ -72,6 +72,7 @@
   "maintenance_hide_muted": "Nascondi silenziate",
   "maintenance_hide_muted_default": "Nascondi per impostazione predefinita le attività silenziate",
   "maintenance_hide_ok": "Nascondi le attività aggiornate",
+  "maintenance_hide_ok_default": "Nascondi per impostazione predefinita le attività aggiornate",
   "maintenance_interval": "Intervallo",
   "maintenance_last_reset": "Ultima volta",
   "maintenance_mark_done": "Segna come eseguita",

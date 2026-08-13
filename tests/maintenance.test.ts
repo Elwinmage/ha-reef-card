@@ -1251,6 +1251,69 @@ describe("RSMaintenance element", () => {
     document.body.removeChild(elt);
   });
 
+  it("reflects the stored hide-up-to-date default in the editor", async () => {
+    elt.setConfig({ maintenance: { hide_ok: true } });
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector("#hide_ok").checked).toBe(true);
+    document.body.removeChild(elt);
+  });
+
+  it("defaults the hide-up-to-date editor switch to off", async () => {
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    expect(elt.shadowRoot.querySelector("#hide_ok").checked).toBe(false);
+    document.body.removeChild(elt);
+  });
+
+  it("emits config-changed when the hide-up-to-date switch is toggled", async () => {
+    elt.setConfig({ device: "__maintenance__" });
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+
+    let config: any = null;
+    elt.addEventListener("config-changed", (e: any) => {
+      config = e.detail.config;
+    });
+
+    const box = elt.shadowRoot.querySelector("#hide_ok");
+    box.checked = true;
+    box.dispatchEvent(new Event("change"));
+
+    expect(config).toEqual({
+      device: "__maintenance__",
+      maintenance: { hide_ok: true },
+    });
+    document.body.removeChild(elt);
+  });
+
+  it("hides up to date tasks on first render when configured", async () => {
+    elt.setConfig({ maintenance: { hide_ok: true } });
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    const rows = elt.shadowRoot.querySelectorAll(".maint-row");
+    expect(rows.length).toBeGreaterThan(0);
+    expect(elt._hide_ok).toBe(true);
+    document.body.removeChild(elt);
+  });
+
+  it("still lets the user re-show them from the toolbar", async () => {
+    elt.setConfig({ maintenance: { hide_ok: true } });
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+    const before = elt.shadowRoot.querySelectorAll(".maint-row").length;
+    elt._toggle_hide_ok();
+    await elt.updateComplete;
+    expect(elt._hide_ok).toBe(false);
+    expect(
+      elt.shadowRoot.querySelectorAll(".maint-row").length,
+    ).toBeGreaterThan(before);
+    document.body.removeChild(elt);
+  });
+
   it("keeps the other maintenance options when writing one", () => {
     elt.setConfig({
       device: "__maintenance__",
