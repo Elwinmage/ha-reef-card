@@ -1,6 +1,6 @@
 {
   "name": "ha-reef-card",
-  "version": "v0.2.2",
+  "version": "v0.3.0",
   "type": "module",
   "description": "Home Assistant Reef Tank Card - TypeScript Strict Version",
   "scripts": {
