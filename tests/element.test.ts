@@ -3,9 +3,9 @@
 import { ClickImage } from "../src/base/click_image";
 import { MyElement } from "../src/base/element";
 import { RSDevice } from "../src/devices/device";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
-import { RSMat } from "../src/devices/rsmat/rsmat";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
 import { OFF_COLOR } from "../src/utils/constants";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "../src/base/index";
@@ -885,6 +885,48 @@ describe("run_actions() — UI action branches", () => {
       { domain: "redsea_ui", action: "device_event", data: null },
     ]);
     expect(fired).toBe(true);
+  });
+
+  it("open_schedule: string data calls openEditor() on the cached element", async () => {
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const openEditor = vi.fn();
+    el.device = { _elements: { schedule_1: { openEditor } } } as any;
+    await el.run_actions([
+      { domain: "redsea_ui", action: "open_schedule", data: "schedule_1" },
+    ]);
+    expect(openEditor).toHaveBeenCalledTimes(1);
+  });
+
+  it("open_schedule: object data resolves the element key", async () => {
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const openEditor = vi.fn();
+    el.device = { _elements: { schedule_2: { openEditor } } } as any;
+    await el.run_actions([
+      {
+        domain: "redsea_ui",
+        action: "open_schedule",
+        data: { element: "schedule_2" },
+      },
+    ]);
+    expect(openEditor).toHaveBeenCalledTimes(1);
+  });
+
+  it("open_schedule: unknown key or missing device is a no-op", async () => {
+    const el = makeEl();
+    el._hass = makeHass_B();
+    const debug = vi.spyOn(console, "debug").mockImplementation(() => {});
+    el.device = { _elements: {} } as any;
+    await el.run_actions([
+      { domain: "redsea_ui", action: "open_schedule", data: "nope" },
+    ]);
+    el.device = undefined as any;
+    await el.run_actions([
+      { domain: "redsea_ui", action: "open_schedule", data: null },
+    ]);
+    expect(debug).toHaveBeenCalled();
+    debug.mockRestore();
   });
 
   it("L502: update_conf patches device.config.elements and calls requestUpdate", async () => {

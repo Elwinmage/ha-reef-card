@@ -3,6 +3,7 @@
 import { Sensor } from "../src/base/sensor";
 import { RSSwitch } from "../src/base/switch";
 import { MyI18n } from "../src/translations/myi18n";
+import { RSDevice } from "../src/devices/device";
 import { attachClickHandlers } from "../src/utils/click_handler";
 import {
   create_hour,
@@ -15,8 +16,6 @@ import {
 } from "../src/utils/common";
 import { merge } from "../src/utils/merge";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import RSDevice from "../src/devices/device";
-import DeviceList from "../src/utils/common";
 
 function makeHass(devices: Record<string, any> = {}): any {
   return { states: {}, callService: vi.fn(), devices };

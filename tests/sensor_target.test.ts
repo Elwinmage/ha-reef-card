@@ -690,3 +690,564 @@ describe("SensorTarget", () => {
     expect(el.stateObjTarget.state).toBe("10");
   });
 });
+
+// ---------------------------------------------------------------------------//
+// Attribute-based value/target (value_attribute, target_attribute)
+// ---------------------------------------------------------------------------//
+describe("SensorTarget.getValue() — value_attribute", () => {
+  it("reads numeric value from stateObj.attributes[value_attribute]", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", value_attribute: "days_left" };
+    elt.stateObj = makeState("unknown", "button.rsmat", { days_left: 2 });
+    expect(elt.getValue()).toBe(2);
+  });
+
+  it("returns 0 when the attribute is missing", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", value_attribute: "days_left" };
+    elt.stateObj = makeState("unknown", "button.rsmat", {});
+    expect(elt.getValue()).toBe(0);
+  });
+
+  it("returns 0 when the attribute is non-numeric", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", value_attribute: "days_left" };
+    elt.stateObj = makeState("unknown", "button.rsmat", { days_left: "n/a" });
+    expect(elt.getValue()).toBe(0);
+  });
+
+  it("falls back to state when value_attribute unset", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x" };
+    elt.stateObj = makeState("42");
+    expect(elt.getValue()).toBe(42);
+  });
+
+  it("returns 0 when stateObj is null even if value_attribute is set", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", value_attribute: "days_left" };
+    elt.stateObj = null;
+    expect(elt.getValue()).toBe(0);
+  });
+});
+
+describe("SensorTarget.getTargetValue() — target_attribute", () => {
+  it("reads numeric target from stateObj.attributes[target_attribute]", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", target_attribute: "interval_days" };
+    elt.stateObj = makeState("unknown", "button.rsmat", { interval_days: 25 });
+    expect(elt.getTargetValue()).toBe(25);
+  });
+
+  it("returns 0 when the target attribute is missing", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", target_attribute: "interval_days" };
+    elt.stateObj = makeState("unknown", "button.rsmat", {});
+    expect(elt.getTargetValue()).toBe(0);
+  });
+
+  it("falls back to stateObjTarget.state when target_attribute unset", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x" };
+    elt.stateObjTarget = makeState("77");
+    expect(elt.getTargetValue()).toBe(77);
+  });
+
+  it("returns 0 when stateObj is null even if target_attribute is set", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", target_attribute: "interval_days" };
+    elt.stateObj = null;
+    expect(elt.getTargetValue()).toBe(0);
+  });
+});
+
+describe("SensorTarget.hasTargetState() — target_attribute short-circuits stateObjTarget requirement", () => {
+  it("returns true when target_attribute is set and stateObj is present, even without stateObjTarget", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", target_attribute: "interval_days" };
+    elt.stateObj = makeState("unknown", "button.rsmat", { interval_days: 25 });
+    elt.stateObjTarget = null;
+    expect(elt.hasTargetState()).toBe(true);
+  });
+
+  it("still returns false when stateObj is null even with target_attribute", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x", target_attribute: "interval_days" };
+    elt.stateObj = null;
+    elt.stateObjTarget = null;
+    expect(elt.hasTargetState()).toBe(false);
+  });
+
+  it("keeps legacy behaviour when target_attribute is unset", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x" };
+    elt.stateObj = makeState("1");
+    elt.stateObjTarget = null;
+    expect(elt.hasTargetState()).toBe(false);
+  });
+});
+
+describe("SensorTarget.getPercentage() — RSMAT attribute scenario", () => {
+  it("computes percentage from days_left / interval_days attributes", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = {
+      name: "carbon",
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+    };
+    elt.stateObj = makeState("unknown", "button.carbon", {
+      days_left: 2,
+      interval_days: 25,
+    });
+    // 2 * 100 / 25 = 8 (remaining)
+    expect(elt.getPercentage()).toBe(8);
+  });
+});
+
+// ---------------------------------------------------------------------------//
+// ProgressBar — colors + inverted + attribute-based rendering
+// ---------------------------------------------------------------------------//
+describe("ProgressBar._render() — new options", () => {
+  function makeBar(overrides: Record<string, any> = {}): any {
+    const el = new StubProgressBar() as any;
+    el.conf = {
+      name: "bar",
+      target: "t",
+      ...overrides,
+    };
+    el.stateObj = makeState("50", "sensor.v");
+    el.stateObjTarget = makeState("100", "sensor.t");
+    el.device = makeDevice(true);
+    el.color = "51,151,232";
+    el.c = "51,151,232";
+    el.alpha = 1;
+    el.label = "";
+    el.evaluate = (v: any) => v || "";
+    return el;
+  }
+
+  it("applies inverted percentage (100 - p)", () => {
+    // Re-enable the real _render for this test.
+    const el = makeBar({ inverted: true });
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    // 50/100 = 50 → inverted = 50; we mainly check it doesn't throw and returns a template.
+  });
+
+  it("renders using colors.fill and colors.background overrides", () => {
+    const el = makeBar({
+      colors: { background: "black", fill: "brown" },
+    });
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    // Verify the rendered strings/values embed our custom colors.
+    const strings = (result as any).strings.join("|");
+    const values = (result as any).values.join("|");
+    expect(values).toContain("brown");
+    expect(values).toContain("black");
+    // --progress-fill-color is in the template's constant strings;
+    // --progress-bg-color is inlined in the container's style attribute value.
+    expect(strings).toContain("--progress-fill-color");
+    expect(values).toContain("--progress-bg-color");
+  });
+
+  it("reads value from value_attribute and target from target_attribute", () => {
+    const el = makeBar({
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+      inverted: true,
+    });
+    // Override stateObj to look like the RSMAT button.
+    el.stateObj = makeState("unknown", "button.rsmat", {
+      days_left: 2,
+      interval_days: 25,
+    });
+    el.stateObjTarget = null; // Should not be required.
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    // 2*100/25 = 8, inverted → 92
+    const values = (result as any).values.join("|");
+    expect(values).toContain(92);
+  });
+
+  it("clamps out-of-range percent for display (>100)", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const el = makeBar();
+    el.stateObj = makeState("500", "sensor.v"); // 500 > 100 → 500%
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const values = (result as any).values.join("|");
+    expect(values).toContain(100); // Clamped
+    spy.mockRestore();
+  });
+
+  it("clamps out-of-range percent for display (<0 via inverted)", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const el = makeBar({ inverted: true });
+    el.stateObj = makeState("500", "sensor.v"); // 500% inverted → -400%
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const values = (result as any).values.join("|");
+    expect(values).toContain(0); // Clamped
+    spy.mockRestore();
+  });
+
+  it("uses device color as fill when colors.fill is not set", () => {
+    const el = makeBar();
+    const result = ProgressBar.prototype["_render"].call(el);
+    const values = (result as any).values.join("|");
+    expect(values).toContain("rgb(51,151,232)");
+  });
+
+  it("renders the user-provided unit next to the label (evaluated for i18n)", () => {
+    const el = makeBar({
+      label: "5 ",
+      unit: "${i18n._('days')}",
+    });
+    // Mock evaluate so that i18n-like expressions resolve.
+    el.evaluate = (v: any) => {
+      if (typeof v === "string" && v.includes("i18n._('days')")) return "jours";
+      return v || "";
+    };
+    const result = ProgressBar.prototype["_render"].call(el);
+    // Collect all text content from the template tree.
+    const collect = (n: any): string => {
+      if (n == null) return "";
+      if (typeof n === "string" || typeof n === "number") return String(n);
+      if (Array.isArray(n)) return n.map(collect).join("|");
+      if (n.strings && n.values) {
+        return n.strings.join("|") + "|" + n.values.map(collect).join("|");
+      }
+      return "";
+    };
+    const flat = collect(result);
+    expect(flat).toContain("jours");
+    // Label text and unit both appear.
+    expect(flat).toContain("5 ");
+    // The percent value's "%" is still rendered.
+    expect(flat).toContain("%");
+  });
+
+  it("does not render a unit span when conf.unit is unset", () => {
+    const el = makeBar({ label: "static text" });
+    const result = ProgressBar.prototype["_render"].call(el);
+    const collect = (n: any): string => {
+      if (n == null) return "";
+      if (typeof n === "string" || typeof n === "number") return String(n);
+      if (Array.isArray(n)) return n.map(collect).join("|");
+      if (n.strings && n.values) {
+        return n.strings.join("|") + "|" + n.values.map(collect).join("|");
+      }
+      return "";
+    };
+    const flat = collect(result);
+    // No <span class="unit"> wrapper without conf.unit.
+    expect(flat).not.toContain('class="unit"');
+  });
+
+  it("skips unit even when conf.unit expression evaluates to empty string", () => {
+    const el = makeBar({ label: "x", unit: "${empty}" });
+    el.evaluate = () => ""; // Force empty
+    const result = ProgressBar.prototype["_render"].call(el);
+    const collect = (n: any): string => {
+      if (n == null) return "";
+      if (typeof n === "string" || typeof n === "number") return String(n);
+      if (Array.isArray(n)) return n.map(collect).join("|");
+      if (n.strings && n.values) {
+        return n.strings.join("|") + "|" + n.values.map(collect).join("|");
+      }
+      return "";
+    };
+    const flat = collect(result);
+    // With empty userUnit, the ternary falls to the "" branch — no <span class="unit"> wrapper.
+    expect(flat).not.toContain('class="unit"');
+  });
+});
+
+// ---------------------------------------------------------------------------//
+// ProgressCircle — colors.background + colors.fill + attribute-based
+// ---------------------------------------------------------------------------//
+describe("ProgressCircle._render() — new options", () => {
+  it("uses colors.background for the track stroke", () => {
+    const c = makeCircle("50", "100", true);
+    c.conf = {
+      ...c.conf,
+      colors: { background: "#123456", center: "transparent" },
+    };
+    const result = ProgressCircle.prototype["_render"].call(c);
+    expect(result).toBeDefined();
+    const values = (result as any).values.join("|");
+    expect(values).toContain("#123456");
+  });
+
+  it("uses colors.fill for progress stroke and text (overrides device color)", () => {
+    const c = makeCircle("50", "100", true);
+    c.conf = {
+      ...c.conf,
+      colors: { fill: "hotpink", center: "transparent" },
+    };
+    const result = ProgressCircle.prototype["_render"].call(c);
+    const values = (result as any).values.join("|");
+    // "hotpink" should appear twice: once for stroke, once for text fill.
+    const flat = values.toLowerCase();
+    expect(flat).toContain("hotpink");
+    expect(flat.match(/hotpink/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("preserves legacy default background stroke when colors.background is unset", () => {
+    const c = makeCircle("50", "100", true);
+    const result = ProgressCircle.prototype["_render"].call(c);
+    const values = (result as any).values.join("|");
+    expect(values).toContain("rgba(150,150,150,0.6)");
+  });
+
+  it("reads value/target from attributes (RSMAT scenario)", () => {
+    const c = makeCircle("50", "100", true);
+    c.conf = {
+      name: "carbon",
+      class: "carbon_circle",
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+      inverted: true,
+    };
+    c.stateObj = makeState("unknown", "button.rsmat", {
+      days_left: 2,
+      interval_days: 25,
+    });
+    c.stateObjTarget = null; // Not required with target_attribute.
+    // hasTargetState must be true so we don't hit the error branch.
+    const result = ProgressCircle.prototype["_render"].call(c);
+    expect(result).toBeDefined();
+    // 2*100/25 = 8, inverted → 92
+    const values = (result as any).values.join("|");
+    expect(values).toContain(92);
+  });
+
+  it("uses conf.target as a fixed numeric target when it is a number", () => {
+    const c = makeCircle("50", "100", true);
+    c.conf = { name: "n", class: "c", target: 200 };
+    // value = 50, target = 200 → percent = 25
+    const result = ProgressCircle.prototype["_render"].call(c);
+    expect(result).toBeDefined();
+    const values = (result as any).values.join("|");
+    expect(values).toContain(25);
+  });
+});
+
+// ---------------------------------------------------------------------------//
+// hass setter — attribute-driven refresh
+// ---------------------------------------------------------------------------//
+describe("SensorTarget hass setter — attribute-based refresh", () => {
+  function makeAttrEl(): any {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = {
+      name: "carbon",
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+    };
+    elt.stateObj = makeState("unknown", "button.carbon", {
+      days_left: 5,
+      interval_days: 25,
+    });
+    elt.stateObjTarget = null;
+    elt.requestUpdate = vi.fn();
+    return elt;
+  }
+
+  it("refreshes and re-renders when value_attribute changes", () => {
+    const elt = makeAttrEl();
+    elt.hass = {
+      states: {
+        "button.carbon": makeState("unknown", "button.carbon", {
+          days_left: 4,
+          interval_days: 25,
+        }),
+      },
+      callService: vi.fn(),
+      entities: [],
+    };
+    expect(elt.stateObj.attributes.days_left).toBe(4);
+    expect(elt.requestUpdate).toHaveBeenCalled();
+  });
+
+  it("refreshes and re-renders when target_attribute changes", () => {
+    const elt = makeAttrEl();
+    elt.hass = {
+      states: {
+        "button.carbon": makeState("unknown", "button.carbon", {
+          days_left: 5,
+          interval_days: 30, // Interval changed.
+        }),
+      },
+      callService: vi.fn(),
+      entities: [],
+    };
+    expect(elt.stateObj.attributes.interval_days).toBe(30);
+    expect(elt.requestUpdate).toHaveBeenCalled();
+  });
+
+  it("does not re-render when tracked attributes are unchanged", () => {
+    const elt = makeAttrEl();
+    elt.hass = {
+      states: {
+        "button.carbon": makeState("unknown", "button.carbon", {
+          days_left: 5,
+          interval_days: 25,
+        }),
+      },
+      callService: vi.fn(),
+      entities: [],
+    };
+    expect(elt.requestUpdate).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when neither value_attribute nor target_attribute is set", () => {
+    const elt = new StubSensorTarget() as any;
+    elt.conf = { name: "x" };
+    elt.stateObj = makeState("5", "sensor.plain");
+    elt.stateObjTarget = null;
+    elt.requestUpdate = vi.fn();
+    elt.hass = {
+      states: { "sensor.plain": makeState("5", "sensor.plain") },
+      callService: vi.fn(),
+      entities: [],
+    };
+    expect(elt.requestUpdate).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when entity is absent from new hass states", () => {
+    const elt = makeAttrEl();
+    elt.hass = { states: {}, callService: vi.fn(), entities: [] };
+    // stateObj should not be replaced.
+    expect(elt.stateObj.attributes.days_left).toBe(5);
+    expect(elt.requestUpdate).not.toHaveBeenCalled();
+  });
+
+  it("does not touch stateObj when it is null (our branch doesn't crash)", () => {
+    const elt = makeAttrEl();
+    elt.stateObj = null;
+    expect(() => {
+      elt.hass = {
+        states: {
+          "button.carbon": makeState("unknown", "button.carbon", {
+            days_left: 1,
+          }),
+        },
+        callService: vi.fn(),
+        entities: [],
+      };
+    }).not.toThrow();
+    expect(elt.stateObj).toBeNull();
+  });
+
+  it("handles missing attributes on either stateObj or new state (?? {} fallback)", () => {
+    const elt = makeAttrEl();
+    // Wipe attributes from current stateObj to hit the `?? {}` fallback.
+    elt.stateObj = { entity_id: "button.carbon", state: "unknown" } as any;
+    // Lit's reactive property system calls requestUpdate on any stateObj
+    // assignment — clear the mock so only our branch's calls (if any) count.
+    vi.clearAllMocks();
+    elt.hass = {
+      states: {
+        // New state also has no attributes property → both fallbacks used.
+        "button.carbon": {
+          entity_id: "button.carbon",
+          state: "unknown",
+        } as any,
+      },
+      callService: vi.fn(),
+      entities: [],
+    };
+    // Both undefined → undefined !== undefined is false → no change → no update.
+    expect(elt.requestUpdate).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------//
+// Diagnostic warnings on missing state
+// ---------------------------------------------------------------------------//
+describe("ProgressBar/Circle — missing-state diagnostics", () => {
+  it("ProgressBar warns when stateObj is not resolved", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const el = new StubProgressBar() as any;
+    el.conf = { name: "carbon", target: "interval" };
+    el.stateObj = null;
+    el.stateObjTarget = null;
+    el.device = makeDevice(true);
+    el.color = "1,1,1";
+    el.evaluate = (v: any) => v || "";
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const msg = String(spy.mock.calls[0][0]);
+    expect(msg).toContain("stateObj not resolved");
+    expect(msg).toContain("carbon");
+    spy.mockRestore();
+  });
+
+  it("ProgressBar warns when target_attribute is set but stateObj is null (still 'stateObj not resolved')", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const el = new StubProgressBar() as any;
+    el.conf = {
+      name: "carbon",
+      value_attribute: "days_left",
+      target_attribute: "interval_days",
+    };
+    el.stateObj = null;
+    el.stateObjTarget = null;
+    el.device = makeDevice(true);
+    el.color = "1,1,1";
+    el.evaluate = (v: any) => v || "";
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("ProgressBar warns when stateObjTarget missing (legacy target key)", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const el = new StubProgressBar() as any;
+    el.conf = { name: "v", target: "t" };
+    el.stateObj = makeState("5", "sensor.v");
+    el.stateObjTarget = null;
+    el.device = makeDevice(true);
+    el.color = "1,1,1";
+    el.evaluate = (v: any) => v || "";
+    const result = ProgressBar.prototype["_render"].call(el);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const msg = String(spy.mock.calls[0][0]);
+    expect(msg).toContain("stateObjTarget not resolved");
+    spy.mockRestore();
+  });
+
+  it("ProgressCircle warns when stateObj not resolved (non-numeric target)", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const c = makeCircle();
+    c.conf = { name: "cc", target: "tt" };
+    c.stateObj = null;
+    c.stateObjTarget = null;
+    const result = ProgressCircle.prototype["_render"].call(c);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const msg = String(spy.mock.calls[0][0]);
+    expect(msg).toContain("stateObj not resolved");
+    spy.mockRestore();
+  });
+
+  it("ProgressCircle warns when stateObjTarget missing (legacy target key)", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const c = makeCircle();
+    c.conf = { name: "cc", target: "tt" };
+    c.stateObj = makeState("5", "sensor.v");
+    c.stateObjTarget = null;
+    const result = ProgressCircle.prototype["_render"].call(c);
+    expect(result).toBeDefined();
+    expect(spy).toHaveBeenCalled();
+    const msg = String(spy.mock.calls[0][0]);
+    expect(msg).toContain("stateObjTarget not resolved");
+    spy.mockRestore();
+  });
+});

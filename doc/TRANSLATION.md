@@ -17,7 +17,7 @@
 <kbd><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/i18n/commit_changes.png" /></kbd>
 
 8. Update the commit message and indicate the new language
-11. Select Create a new branche and then "Propose changes"
+9. Select Create a new branche and then "Propose changes"
 
 <kbd><img src="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/img/i18n/propose_changes.png" /></kbd>
 

@@ -1,4 +1,4 @@
-version: 2
+: 2
 updates:
   # Update GitHub Actions
   - package-ecosystem: "github-actions"
@@ -8,7 +8,7 @@ updates:
     groups:
       github-actions:
         patterns:
-          - "*"  # Group all actions into a single PR
+          - "*" # Group all actions into a single PR
 
   # Update npm dependencies
   - package-ecosystem: "npm"
@@ -18,5 +18,4 @@ updates:
     groups:
       dependencies:
         patterns:
-          - "*"  # Group all npm dependencies into a single PR
-          
+          - "*" # Group all npm dependencies into a single PR

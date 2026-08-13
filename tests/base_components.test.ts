@@ -9,9 +9,10 @@ import { ProgressCircle } from "../src/base/progress_circle";
 import { Sensor } from "../src/base/sensor";
 import { RSSwitch } from "../src/base/switch";
 import { RSDevice } from "../src/devices/device";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
-import { RSMat } from "../src/devices/rsmat/rsmat";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
+import { OFF_COLOR } from "../src/utils/constants";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 function makeState(
@@ -880,6 +881,52 @@ describe("ProgressCircle._render()", () => {
     const c = makeCircle("50", "100", false);
     const result = c._render("");
     expect(result).toBeDefined();
+  });
+
+  it("greys out from groupOn even when the device itself is on", () => {
+    // ReefRun case: the pump's schedule is disabled, so the group is off
+    // while device.is_on() (master power) stays true.
+    const c = makeCircle("50", "100", true);
+    c.groupOn = false;
+    c._render("");
+    expect(c.c).toBe(OFF_COLOR);
+  });
+
+  it("keeps its colour when groupOn is true", () => {
+    const c = makeCircle("50", "100", true);
+    c.groupOn = true;
+    c._render("");
+    expect(c.c).toBe("0,200,100");
+  });
+
+  it("falls back to the device state when groupOn was never set", () => {
+    const on = makeCircle("50", "100", true);
+    expect(on.groupOn).toBeNull();
+    on._render("");
+    expect(on.c).toBe("0,200,100");
+
+    const off = makeCircle("50", "100", false);
+    off._render("");
+    expect(off.c).toBe(OFF_COLOR);
+  });
+
+  it("declares groupOn as a reactive property so a change re-renders", () => {
+    // Without this, _render_element could set groupOn=false and the circle
+    // would keep its old colour until the page is reloaded. stateOn cannot
+    // carry the signal: Sensor.updated() pins it to false on a numeric
+    // sensor, so re-assigning false triggers nothing.
+    const props = (ProgressCircle as any).elementProperties;
+    expect(props.has("groupOn")).toBe(true);
+  });
+
+  it("ignores stateOn, which Sensor.updated() rewrites from its own entity", () => {
+    // A speed sensor reads "50", never "on", so Sensor.updated() leaves
+    // stateOn false. That must not grey a running pump's ring.
+    const c = makeCircle("50", "100", true);
+    c.groupOn = true;
+    c.stateOn = false;
+    c._render("");
+    expect(c.c).toBe("0,200,100");
   });
 
   it("returns <br> when disabled_if condition is true", () => {

@@ -52,7 +52,7 @@ export class ClickImage extends MyElement {
           ></ha-icon>
         `;
       }
-      if (icon.startsWith("mdi:")) {
+      if (icon.startsWith("mdi:") || icon.startsWith("redsea:")) {
         return html`
           <ha-icon
             class="click-icon"

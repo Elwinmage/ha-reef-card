@@ -1,4 +1,7 @@
 # ha-reef-card 🌊 for HomeAssistant
+
+> Part of the [**ReefTech Project Ecosystem**](https://elwinmage.github.io/reeftank/)
+
 <p align="center">
   <img src="icon.png"  width="50%"/>
 </p>
@@ -24,7 +27,22 @@ Your language is not yet supported and you want to help with the translation? Fo
 
 The **Reef card** for Home Assistant helps you manage your reef aquarium.
 
-Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), it automatically supports your Redsea (ReefBeat) devices.
+Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), it automatically supports your
+Redsea (ReefBeat) devices.
+
+## Related projects
+
+This card is part of a set of projects for a reef tank managed from Home
+Assistant:
+
+| Project                                                                           | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [**ha-reef-card**](https://github.com/Elwinmage/ha-reef-card)                     | This card. An interactive graphical view of each device on your dashboard, and the only way to edit advanced schedules.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| [**ha-reefbeat-component**](https://github.com/Elwinmage/ha-reefbeat-component)   | Integration for Red Sea ReefBeat devices, controlled locally with no cloud: ReefATO+, ReefControl, ReefControl-Power, ReefDose, ReefLed, ReefMat, ReefRun and ReefWave. This is what feeds the card.<br />[**ReefBeat watch**](https://github.com/Elwinmage/ha-reefbeat-component/tree/main/blueprints/automation) — the alert blueprint shipped with that integration. Notifies you about overdue maintenance and calibrations, abnormal modes, low battery and unreachable devices, on the mobile devices you pick. [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/refs/heads/main/blueprints/automation/redsea_alerts.en.yaml) |
+| [**ha-aquamedic-component**](https://github.com/Elwinmage/ha-aquamedic-component) | Integration for Aqua Medic pumps through the Gizwits cloud API: EcoDrift and SmartDrift wavemakers, DC Runner return pumps.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| [**reefbeatEnergyBackup**](https://github.com/Elwinmage/reefbeatEnergyBackup)     | Battery backup for power outages. 24V LiFePO₄ pack driven by a Raspberry Pi, with pump speed degraded progressively according to the state of charge.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+All of them, and more reef projects, are documented together on the [project page](https://elwinmage.github.io/reeftank/).
 
 > [!NOTE]
 > If you have non-Redsea devices and want them to be supported, you can request it [here](https://github.com/Elwinmage/ha-reef-card/discussions/2).
@@ -45,7 +63,7 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
   </th>
   <tr>
     <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>❌</td>
+    <td>RSATO+</td><td>☑️</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSATO+.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
@@ -111,7 +129,7 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
-    <td>RSRUN</td><td>☑</td>
+    <td>RSRUN</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>
@@ -140,6 +158,7 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Maintenance](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation
@@ -631,15 +650,286 @@ These lines can be hidden via the card editor interface.
 
 # ReefRun
 
-Planned.
+ReefRun with ha-reef-card in action:
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+[![Watch the video](https://img.youtube.com/vi/Xxv38OPqiGI/0.jpg)](https://www.youtube.com/watch?v=Xxv38OPqiGI)
+
+The ReefRun card shows the controller and its two pumps as they are physically
+wired, each with its own cable and plumbing. Pump 1 is the one on the left of
+the card, pump 2 the one on the right — typically the return pump and the DC
+Skimmer, but either socket accepts either model.
+
+<img src="doc/img/rsrun/rsrun_zones.png"/>
+
+The card is divided into 6 zones:
+
+1. Power state and maintenance mode
+2. Battery and Wifi information
+3. Controller: operating mode, pump buttons and calibrations
+4. Pump 1: daily schedule, body with live water flow, temperature
+5. Pump 2: daily schedule, body with live water flow, temperature
+6. Last message and last alert
+
+## Power state and maintenance mode
+
+<img src="doc/img/rsrun/zone_1.png" >
+
+<span>The maintenance switch <img src="doc/img/mdi/mdi_account-wrench.png" width="20"/> switches to maintenance mode.</span>
+
+<img src="doc/img/rsrun/maintenance.png" >
+
+<span>The on/off switch <img src="doc/img/mdi/mdi_power-plug.png" width="20"/> switches the reef dual controler between on and off states.</span>
+
+<img src="doc/img/rsrun/off_mode.png" >
+
+## Configuration / Wifi Information
+
+<img src="doc/img/rsrun/zone_2.png"/>
+
+---
+
+<span>This icon <img src="doc/img/mdi/battery.png" width="30" /> indicate the battery elevel of the Dual Controler.</span>
+
+<span>Click the icon <img src="doc/img/mdi/wifi_icon.png" width="30" /> to manage the network settings.</span>
+
+<img src="doc/img/rsrun/zone_2_dialog_wifi.png"/>
+
+## Controller: operating mode, pump buttons and calibrations
+
+<img src="doc/img/rsrun/zone_3.png"/>
+
+### Pump settings
+
+A click on <img src="doc/img/mdi/cog-1.png" width="5%"/> or <img src="doc/img/mdi/cog-2.png" width="5%"/> will open the pump configuration dialog box for pump 1 or 2.
+
+<img src="doc/img/rsrun/zone_3_return_pump.png"/>
+<img src="doc/img/rsrun/zone_3_skimmer.png"/>
+
+> [!CAUTION]
+> **Delete pump** restores the pump settings to their factory defaults: the
+> schedule and the sensor control are lost. A confirmation is always asked.
+
+### Sensor settings
+
+A click on <img src="doc/img/mdi/cog-s.png" width="5%"/> will open the sensor configuration dialog box.
+<img src="doc/img/rsrun/zone_3_sensor.png"/>
+
+### Pump Play/Pause <img src="doc/img/mdi/play.png" width="5%"/> / <img src="doc/img/mdi/pause.png" width="5%"/>
+
+A click toggle the individual pump on or off.
+
+The red ring indicates the current speed.
+<img src="doc/img/rsrun/speed.png"/>
+
+To change the current speed hold <img src="doc/img/mdi/play.png" width="5%"/> / <img src="doc/img/mdi/pause.png" width="5%"/> or click on the schedule:
+
+<img src="doc/img/rsrun/schedule.png"/>
+
+## Pump states
+
+The pump body reflects what the device is actually doing, so a glance is enough.
+The two pump types do not have the same states, so they are described
+separately.
+
+## Pump 1 & 2
+
+### Return pump
+
+<img src="src/img/redsea/RSRUN/reefrun_return.png" width="30%"/>
+
+A single artwork covers every state, the card only changes how it is drawn:
+
+- **Running** — full colors, water animated at the current speed.
+- **Stopped** — the same artwork greyed out, no flow.
+- **Disconnected** — the same greying, plus a blinking power cable.
+
+### Skimmer
+
+Three distinct artworks, one per state of the cup:
+
+<table>
+  <tr>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_on.png" width="100%"/><br/><b>Running</b><br/>Foam in the cup, rising bubbles, water animated</td>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_full.png" width="100%"/><br/><b>Full cup</b><br/>Foam reduced to a band under the lid</td>
+    <td align="center"><img src="src/img/redsea/RSRUN/reefrun_skimmer_off.png" width="100%"/><br/><b>Stopped</b><br/>Empty cup, greyed out, no bubbles</td>
+  </tr>
+</table>
+
+A disconnected skimmer looks exactly like a stopped one: only the blinking cable
+tells them apart. That blink means the ReefRun reports `missing_pump`, so the
+pump is configured but the controller no longer sees it. Check the plug before
+looking any further.
+
+The full-cup state is reported by the skim sensor in the collection chamber. The
+body switches to its own artwork and the foam animation collapses to a thin band
+under the lid, whether or not self-leveling is enabled. The blinking warning icon
+next to the full-cup switch only appears when `sensor_controlled` is on, since
+with the sensor disabled the controller takes no action on a full cup.
+
+### Adding a pump
+
+A port with no pump configured shows an **add** placeholder instead of a pump
+body:
+
+<img src="src/img/redsea/RSRUN/add_pump.png" width="20%"/>
+
+Clicking it opens the configuration dialog, where **Detect and add** asks the
+controller what is connected and registers it in one step. The detected model is
+only a suggestion and is occasionally wrong, so the model list stays editable
+afterwards: for a DC Skimmer, pick rsk-300, rsk-600 or rsk-900. The pump name can
+be edited in the same dialog.
+
+The placeholder sits on every unconfigured port, so it also shows up on a port
+you never intend to use. Users running a single pump can hide it entirely from
+the card editor.
+
+<img src="doc/img/rsrun/editor.png"/>
+
+### Schedule
+
+<img src="doc/img/rsrun/schedule.png"/>
+
+The blue curve is the programmed speed over 24 hours. The vertical red line
+marks the current time, and the dot on it the speed the schedule is asking for.
+
+When the pump does not follow its schedule — feed mode, full-cup detection,
+overskimming protection — the dot moves down to the **real** speed and a red
+segment materializes the gap, labelled with the difference:
+
+<img src="doc/img/rsrun/schedule_deviation.png"/>
+
+Clicking the chart opens the schedule editor: add or remove points, edit times and speeds, preview a point on the device, then save.
+
+<img src="doc/img/rsrun/schedule_editor.png"/>
+
+## Messages
+
+<img src="doc/img/rsrun/zone_6.png"/>
+
+---
+
+This zone displays the latest system messages from the ReefMat. It has two lines:
+
+- The grey line shows the **last message** received.
+- The pink line shows the **last alert**, preceded by the ⚠ symbol.
+
+Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
+
+These lines can be hidden via the card editor interface.
+
+<img src="doc/img/rsrun/editor_2.png" />
 
 # ReefWave
 
 Planned.
 
 Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Maintenance
+
+The maintenance view of ha-reef-card in action:
+
+[![Watch the video](https://img.youtube.com/vi/Ko46fHonOP4/0.jpg)](https://www.youtube.com/watch?v=Ko46fHonOP4)
+
+<img src="doc/img/maintenance/overview.png"/>
+
+Beyond the per-device views, the card offers a **Maintenance** view that gathers
+every maintenance task exposed by `ha-reefbeat-component` as if the whole
+maintenance subsystem were a single device.
+
+Each task is displayed as a progress bar showing how much of its interval has
+elapsed, with a color driven by the remaining time:
+
+| Color  | Meaning                                               |
+| ------ | ----------------------------------------------------- |
+| Green  | Up to date                                            |
+| Orange | Due soon (last 20% of the interval, at least one day) |
+| Red    | Overdue, the label switches to `+X d`                 |
+| Grey   | Never done yet (no reset recorded)                    |
+
+Tasks can be sorted **by equipment** (grouped, with one header per device) or
+**by due date** (a flat list, the most urgent first). Never-done tasks are
+always listed last. Two filters sit in the toolbar: a checkbox hiding tasks that are still up to
+date, and a **Hide muted / Show muted** button hiding the tasks whose
+notification switch is off. The button starts in the "show" position, so
+silencing an alert never makes a deadline disappear on its own. That default is
+configurable from the card editor (or with `hide_muted` below), and the button
+still overrides it at any time.
+
+Clicking a row opens the Home Assistant more-info dialog of the task, and the
+round button on the right marks the task as done (it presses the underlying
+button entity, exactly like the more-info dialog would).
+
+The view only appears in the device selector when at least one maintenance task
+exists in your installation. New tasks added to the integration catalogue show
+up automatically, no card update needed.
+
+### Notifications
+
+Each task also gets a **notification switch** in the integration
+(`switch.*_notify`, shown as "<task name> (notifications)"). Turning it off
+mutes the overdue alert of that single task without touching its schedule: the
+progress bar keeps running, the row simply dims and the bell turns off.
+
+The bell on the right of each row toggles that switch directly. It is only
+shown when the integration exposes the switch. Set `show_notify: false` to hide
+the bells.
+
+The alert blueprint reads the very same setting, so muting a task in the card
+also silences the automation.
+
+### Changing the interval
+
+The calendar button on each row expands an inline slider that writes to the
+task's interval number entity. The slider works in the unit the integration
+advertises for that task (days, weeks or months, read from the entity's role),
+and the integration converts back to days before storing. Bounds come from the
+entity itself, so the card can never write an out-of-range value. Only one
+editor stays open at a time. Set `show_interval: false` to hide the buttons.
+
+### ReefRun pumps
+
+ReefRun sub-devices are named "… pump 1" / "… pump 2", which says nothing about
+what each pump actually is. When the device exposes both a `type` and a `model`
+sensor, the card appends them in parentheses: **ReefRun pump 1 (return 12000)**,
+**ReefRun pump 2 (skimmer 900)**.
+
+The type is localized, and only the trailing figure of the model is kept
+(`return-12000` -> `12000`, `rsk-900` -> `900`) since the prefix is either
+redundant with the type or cryptic. Devices that are not pumps keep a plain
+name.
+
+## Icons
+
+| Icon                                                                                                       | Role                                                                          |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| <img src="doc/img/mdi/mdi_check.png" width="20"/>                                                          | **Task done.** Marks the task as performed and restarts its countdown.        |
+| <img src="doc/img/mdi/mdi_bell-ring.png" width="20"/> <img src="doc/img/mdi/mdi_bell-off.png" width="20"/> | **Mute / unmute.** Toggles the notification switch of that single task.       |
+| <img src="doc/img/mdi/mdi_calendar-edit.png" width="20"/>                                                  | **Change the interval.** Expands an inline slider bound to the task interval. |
+
+## Editor
+
+The default state of the filters and the visibility of the three buttons are set from the card editor.
+
+<img src="doc/img/maintenance/editor.png"/>
+
+## Configuration
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (default) or "due"
+  hide_ok: false # hide tasks that are neither overdue nor due soon
+  hide_muted: false # hide tasks whose notifications are turned off
+  warning_ratio: 0.2 # share of the interval displayed in orange
+  show_reset: true # show the "mark as done" button on each row
+  show_notify: true # show the mute/unmute bell on each row
+  show_interval: true # show the interval editor button on each row
+```
+
+All `maintenance` keys are optional. `sort` and `hide_ok` only set the initial
+state: the user can still change them from the view itself.
 
 # FAQ
 

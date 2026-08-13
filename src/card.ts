@@ -12,6 +12,8 @@ import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n.js";
 import DeviceList from "./utils/common";
+import { has_maintenance_entities } from "./utils/maintenance";
+import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
 import { RSDevice } from "./devices/device";
 import { Dialog } from "./base/dialog";
@@ -70,7 +72,7 @@ export class ReefCard extends LitElement {
     });
     this.addEventListener("config-dialog", (e: Event) => {
       if (this._dialog_box) {
-        this._dialog_box.set_conf((e as CustomEvent).detail.dialogs);
+        this._dialog_box.merge_conf((e as CustomEvent).detail.dialogs);
       }
     });
     this.addEventListener("quit-dialog", () => {
@@ -148,9 +150,15 @@ export class ReefCard extends LitElement {
     }
     //If a device as been specialy selected, set it as current device and display it
     if (this.user_config["device"]) {
-      this.select_devices.map((dev) =>
-        this._set_current_device_from_name(dev, this.user_config.device),
-      );
+      // The maintenance overview is a virtual device: it is matched on its
+      // language independent id rather than on a localized display name.
+      if (ReefCard.is_maintenance_selector(this.user_config.device)) {
+        this._set_current_device(MAINTENANCE_DEVICE_ID);
+      } else {
+        this.select_devices.map((dev) =>
+          this._set_current_device_from_name(dev, this.user_config.device),
+        );
+      }
       this.current_device.hass = this._hass;
       return html` ${this.messages} ${this.current_device} `;
     }
@@ -169,8 +177,10 @@ export class ReefCard extends LitElement {
         (option) => html`
           <option
             value="${option.value}"
-            ?selected=${this.current_device?.device?.elements?.[0]
-              ?.primary_config_entry === option.value}
+            ?selected=${option.value === MAINTENANCE_DEVICE_ID
+              ? this.current_device?.is_maintenance === true
+              : this.current_device?.device?.elements?.[0]
+                  ?.primary_config_entry === option.value}
           >
             ${option.text}
           </option>
@@ -190,6 +200,32 @@ export class ReefCard extends LitElement {
     for (const d of this.devices_list.main_devices) {
       this.select_devices.push(d);
     }
+    // Only offer the maintenance overview when at least one maintenance
+    // task entity exists in this installation.
+    if (has_maintenance_entities(this._hass)) {
+      this.select_devices.push({
+        value: MAINTENANCE_DEVICE_ID,
+        text: i18n._("maintenance_view"),
+      });
+    }
+  }
+
+  /**
+   * Tell whether a device selector refers to the maintenance overview.
+   * Accepts the virtual id, the plain "maintenance" keyword and the localized
+   * label, so configurations written by hand keep working.
+   * @param name: the value stored in the card configuration
+   * @return true when the maintenance overview is requested
+   */
+  static is_maintenance_selector(name: unknown): boolean {
+    if (typeof name !== "string") {
+      return false;
+    }
+    return (
+      name === MAINTENANCE_DEVICE_ID ||
+      name.toLowerCase() === "maintenance" ||
+      name === i18n._("maintenance_view")
+    );
   }
 
   /**
@@ -212,6 +248,19 @@ export class ReefCard extends LitElement {
     // No device selected, display redsea logo
     if (device_id === "unselected") {
       this.current_device = this.no_device;
+      return;
+    }
+    // Maintenance overview: build it once so the user sort/filter choices
+    // are not reset on every render.
+    if (ReefCard.is_maintenance_selector(device_id)) {
+      if (this.current_device?.is_maintenance !== true) {
+        this.current_device = RSDevice.create_device(
+          MAINTENANCE_TAG,
+          this._hass,
+          this.user_config,
+          { name: "", elements: [] } as any,
+        );
+      }
       return;
     }
     // The current device has not change, so no update

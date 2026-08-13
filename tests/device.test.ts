@@ -6,15 +6,14 @@ import { MyElement } from "../src/base/element";
 import { Sensor } from "../src/base/sensor";
 import { RSSwitch } from "../src/base/switch";
 import { RSDevice } from "../src/devices/device";
-import { DoseHead } from "../src/devices/rsdose/dose_head";
-import { RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
-import { RSMat } from "../src/devices/rsmat/rsmat";
+import { DoseHead } from "../src/devices/redsea/rsdose/dose_head";
+import { RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
+import { RSMat } from "../src/devices/redsea/rsmat/rsmat";
 import { MyI18n } from "../src/translations/myi18n";
 import { toTime } from "../src/utils/common";
 import { merge } from "../src/utils/merge";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import RSDevice from "../src/devices/device";
 
 class StubRSDevice extends RSDevice {
   override _render(_style: any = null, _substyle: any = null): any {

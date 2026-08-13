@@ -104,7 +104,8 @@ export interface BaseElementConfig {
   name?: string; // Optional - not all elements have a name
   class?: string;
   label?: DynamicValue<string> | boolean;
-  target?: string;
+  // Widened to allow progress-circle's numeric target usage.
+  target?: string | number;
   stateObj?: boolean;
   disabled_if?: DisabledCondition;
   timer?: number;
@@ -132,9 +133,40 @@ export interface SensorConfig extends BaseElementConfig {
 
 export interface ProgressConfig extends BaseElementConfig {
   name: string; // Progress elements require a name
-  target?: string;
+  /**
+   * Target reference:
+   * - string: translation_key of a sibling entity whose state provides the target
+   * - number: a fixed numeric target (progress-circle only)
+   */
+  target?: string | number;
   label?: DynamicValue<string>;
   no_value?: boolean;
+  /** Force integer rendering (also used by SensorTarget) */
+  force_integer?: boolean;
+  /**
+   * When set, read the current value from stateObj.attributes[value_attribute]
+   * instead of stateObj.state. Useful for entities whose numeric progress
+   * is exposed as an attribute (e.g. button.*.days_left).
+   */
+  value_attribute?: string;
+  /**
+   * When set, read the target value from stateObj.attributes[target_attribute]
+   * (same entity, no external target needed). Takes precedence over `target`.
+   */
+  target_attribute?: string;
+  /** Invert the computed percentage (100 - p). */
+  inverted?: boolean;
+  /** Treat `target` as the remaining amount; effective target = target + value. */
+  target_is_remaining?: boolean;
+  /** Optional color overrides. */
+  colors?: {
+    /** Bar/track background color (progress-bar container, progress-circle track stroke). */
+    background?: string;
+    /** Progression color; overrides the device color when set. */
+    fill?: string;
+    /** progress-circle only: center disc fill color. */
+    center?: string;
+  };
 }
 
 export interface ButtonConfig extends BaseElementConfig {

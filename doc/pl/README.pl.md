@@ -1,5 +1,11 @@
 # ha-reef-card 🌊 dla HomeAssistant
 
+> Część **[Ekosystemu ReefTech Project](https://elwinmage.github.io/reeftank/pl.html)**
+
+<p align="center">
+  <img src="../../icon.png" width="50%"/>
+</p>
+
 [![GH-release](https://img.shields.io/github/v/release/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/releases)
 [![GH-last-commit](https://img.shields.io/github/last-commit/Elwinmage/ha-reef-card.svg?style=flat-square)](https://github.com/Elwinmage/ha-reef-card/commits/main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -21,7 +27,22 @@ Twój język nie jest jeszcze obsługiwany i chcesz pomóc w tłumaczeniu? Post�
 
 **Reef card** dla Home Assistant pomaga zarządzać akwarium rafowym.
 
-W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) automatycznie obsługuje urządzenia Redsea (ReefBeat).
+W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) automatycznie obsługuje urządzenia
+Redsea (ReefBeat).
+
+## Powiązane projekty
+
+Ta karta jest częścią zestawu projektów dla akwarium rafowego zarządzanego z
+Home Assistant:
+
+| Projekt                                                                           | Rola                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**ha-reef-card**](https://github.com/Elwinmage/ha-reef-card)                     | Ta karta. Interaktywny widok graficzny każdego urządzenia na pulpicie i jedyny sposób na edycję zaawansowanych harmonogramów.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| [**ha-reefbeat-component**](https://github.com/Elwinmage/ha-reefbeat-component)   | Integracja urządzeń Red Sea ReefBeat, sterowanych lokalnie i bez chmury: ReefATO+, ReefControl, ReefControl-Power, ReefDose, ReefLed, ReefMat, ReefRun i ReefWave. To ona zasila kartę.<br />[**ReefBeat watch**](https://github.com/Elwinmage/ha-reefbeat-component/tree/main/blueprints/automation) — blueprint alertów dostarczany z tą integracją. Powiadamia o zaległych konserwacjach i kalibracjach, nietypowych trybach, niskim poziomie baterii i niedostępnych urządzeniach, na wybranych przez Ciebie urządzeniach mobilnych. [![Otwórz swoją instancję Home Assistant i wyświetl okno importu blueprintu.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/refs/heads/main/blueprints/automation/redsea_alerts.en.yaml) |
+| [**ha-aquamedic-component**](https://github.com/Elwinmage/ha-aquamedic-component) | Integracja pomp Aqua Medic przez API chmury Gizwits: falowniki EcoDrift i SmartDrift, pompy powrotne DC Runner.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| [**reefbeatEnergyBackup**](https://github.com/Elwinmage/reefbeatEnergyBackup)     | Zasilanie awaryjne z akumulatora. Pakiet 24V LiFePO₄ sterowany przez Raspberry Pi, ze stopniowym ograniczaniem prędkości pomp zależnie od stanu naładowania.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+Wszystkie, a także inne projekty rafowe, są opisane razem na [stronie projektu](https://elwinmage.github.io/reeftank/).
 
 > [!TIP]
 > Lista planowanych funkcji jest dostępna [tutaj](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)<br />
@@ -39,7 +60,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
   </th>
   <tr>
     <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>❌</td>
+    <td>RSATO+</td><td>☑️</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSATO+.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
@@ -105,7 +126,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
   </tr>
   <tr>
     <td><a href="#reefrun">ReefRun</a></td>
-    <td>RSRUN</td><td>☑</td>
+    <td>RSRUN</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsrun,all label:enhancement" style="text-decoration:none">📆</a>
@@ -134,6 +155,7 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
+- [Konserwacja](https://github.com/Elwinmage/ha-reef-card/#maintenance)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Instalacja
@@ -625,15 +647,290 @@ Linie te można ukryć za pomocą interfejsu edytora karty.
 
 # ReefRun
 
-Zaplanowano.
+ReefRun z ha-reef-card w akcji:
 
-Chcesz, żeby było obsługiwane szybciej? Zagłosuj [tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+[![Obejrzyj wideo](https://img.youtube.com/vi/Xxv38OPqiGI/0.jpg)](https://www.youtube.com/watch?v=Xxv38OPqiGI)
+
+Karta ReefRun pokazuje sterownik i jego dwie pompy tak, jak są fizycznie
+podłączone, każda z własnym kablem i orurowaniem. Pompa 1 jest po lewej
+stronie, pompa 2 po prawej — zwykle pompa powrotna i DC Skimmer, ale każde
+gniazdo przyjmuje dowolny z tych modeli.
+
+<img src="../img/rsrun/rsrun_zones.png"/>
+
+Karta jest podzielona na 6 stref:
+
+1. Stan zasilania i tryb konserwacji
+2. Informacje o baterii i Wifi
+3. Sterownik: tryb pracy, przyciski pomp i kalibracje
+4. Pompa 1: harmonogram dobowy, korpus z przepływem wody na żywo, temperatura
+5. Pompa 2: harmonogram dobowy, korpus z przepływem wody na żywo, temperatura
+6. Ostatni komunikat i ostatni alert
+
+## Stan zasilania i tryb konserwacji
+
+<img src="../img/rsrun/zone_1.png" >
+
+<span>Przełącznik konserwacji <img src="../img/mdi/mdi_account-wrench.png" width="20"/> włącza tryb konserwacji.</span>
+
+<img src="../img/rsrun/maintenance.png" >
+
+<span>Przełącznik wł./wył. <img src="../img/mdi/mdi_power-plug.png" width="20"/> włącza i wyłącza Reef Dual Controller.</span>
+
+<img src="../img/rsrun/off_mode.png" >
+
+## Informacje o baterii i Wifi
+
+<img src="../img/rsrun/zone_2.png"/>
+
+---
+
+<span>Ta ikona <img src="../img/mdi/battery.png" width="30" /> pokazuje poziom baterii Dual Controllera.</span>
+
+<span>Kliknij ikonę <img src="../img/mdi/wifi_icon.png" width="30" />, aby zarządzać ustawieniami sieci.</span>
+
+<img src="../img/rsrun/zone_2_dialog_wifi.png"/>
+
+## Sterownik: tryb pracy, przyciski pomp i kalibracje
+
+<img src="../img/rsrun/zone_3.png"/>
+
+### Ustawienia pomp
+
+Kliknięcie <img src="../img/mdi/cog-1.png" width="5%"/> lub <img src="../img/mdi/cog-2.png" width="5%"/> otwiera okno konfiguracji pompy 1 lub 2.
+
+<img src="../img/rsrun/zone_3_return_pump.png"/>
+<img src="../img/rsrun/zone_3_skimmer.png"/>
+
+> [!CAUTION]
+> **Usunięcie pompy** przywraca jej ustawienia fabryczne: harmonogram i
+> sterowanie czujnikiem zostają utracone. Zawsze wymagane jest potwierdzenie.
+
+### Ustawienia czujnika
+
+Kliknięcie <img src="../img/mdi/cog-s.png" width="5%"/> otwiera okno konfiguracji czujnika.
+<img src="../img/rsrun/zone_3_sensor.png"/>
+
+### Play/pauza pompy <img src="../img/mdi/play.png" width="5%"/> / <img src="../img/mdi/pause.png" width="5%"/>
+
+Kliknięcie włącza lub wyłącza daną pompę.
+
+Czerwony pierścień pokazuje bieżącą prędkość.
+<img src="../img/rsrun/speed.png"/>
+
+Aby zmienić bieżącą prędkość, przytrzymaj <img src="../img/mdi/play.png" width="5%"/> / <img src="../img/mdi/pause.png" width="5%"/> albo kliknij harmonogram:
+
+<img src="../img/rsrun/schedule.png"/>
+
+## Stany pompy
+
+Korpus pompy odzwierciedla to, co urządzenie naprawdę robi — wystarczy rzut oka.
+Oba typy pomp nie mają tych samych stanów, dlatego opisano je osobno.
+
+## Pompy 1 i 2
+
+### Pompa powrotna
+
+<img src="../../src/img/redsea/RSRUN/reefrun_return.png" width="30%"/>
+
+Jedna ilustracja obejmuje wszystkie stany, karta zmienia tylko sposób jej
+rysowania:
+
+- **Pracuje** — pełne kolory, woda animowana z bieżącą prędkością.
+- **Zatrzymana** — ta sama ilustracja wyszarzona, brak przepływu.
+- **Odłączona** — to samo wyszarzenie oraz migający kabel zasilania.
+
+### Odpieniacz
+
+Trzy odrębne ilustracje, po jednej na stan kubka:
+
+<table>
+  <tr>
+    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_on.png" width="100%"/><br/><b>Pracuje</b><br/>Piana w kubku, unoszące się pęcherzyki, animowana woda</td>
+    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_full.png" width="100%"/><br/><b>Pełny kubek</b><br/>Piana ograniczona do pasma pod pokrywą</td>
+    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_off.png" width="100%"/><br/><b>Zatrzymany</b><br/>Pusty kubek, wyszarzony, bez pęcherzyków</td>
+  </tr>
+</table>
+
+Odłączony odpieniacz wygląda dokładnie tak samo jak zatrzymany: rozróżnia je
+tylko migający kabel. To miganie oznacza, że ReefRun zgłasza `missing_pump`,
+czyli pompa jest skonfigurowana, ale sterownik już jej nie widzi. Sprawdź
+wtyczkę, zanim poszukasz dalej.
+
+Stan pełnego kubka zgłasza czujnik piany w komorze zbiorczej. Korpus przełącza
+się na własną ilustrację, a animacja piany zmniejsza się do wąskiego pasma pod
+pokrywą — niezależnie od tego, czy samopoziomowanie jest włączone. Migająca
+ikona ostrzeżenia obok przełącznika pełnego kubka pojawia się tylko wtedy, gdy
+`sensor_controlled` jest włączony, ponieważ przy wyłączonym czujniku sterownik
+nie reaguje na pełny kubek.
+
+### Dodawanie pompy
+
+Gniazdo bez skonfigurowanej pompy pokazuje symbol **dodawania** zamiast korpusu
+pompy:
+
+<img src="../../src/img/redsea/RSRUN/add_pump.png" width="20%"/>
+
+Kliknięcie otwiera okno konfiguracji, w którym **Wykryj i dodaj** pyta sterownik,
+co jest podłączone, i rejestruje to w jednym kroku. Wykryty model to tylko
+sugestia i czasem bywa błędny, więc lista modeli pozostaje później edytowalna:
+dla DC Skimmera wybierz rsk-300, rsk-600 lub rsk-900. Nazwę pompy edytuje się w
+tym samym oknie.
+
+Symbol znajduje się na każdym nieskonfigurowanym gnieździe, pojawia się więc też
+tam, gdzie nigdy nie zamierzasz nic podłączać. Kto ma tylko jedną pompę, może go
+całkowicie ukryć w edytorze karty.
+
+<img src="../img/rsrun/editor.png"/>
+
+### Harmonogram
+
+<img src="../img/rsrun/schedule.png"/>
+
+Niebieska krzywa to zaprogramowana prędkość w ciągu 24 godzin. Pionowa czerwona
+linia oznacza bieżącą godzinę, a punkt na niej prędkość wymaganą przez
+harmonogram.
+
+Gdy pompa nie realizuje harmonogramu — tryb karmienia, wykrycie pełnego kubka,
+ochrona przed nadmiernym odpienianiem — punkt przesuwa się na **rzeczywistą**
+prędkość, a czerwony odcinek obrazuje różnicę wraz z jej wartością:
+
+<img src="../img/rsrun/schedule_deviation.png"/>
+
+Kliknięcie wykresu otwiera edytor harmonogramu: dodawanie i usuwanie punktów, zmiana godzin i prędkości, podgląd punktu na urządzeniu oraz zapis.
+
+<img src="../img/rsrun/schedule_editor.png"/>
+
+## Komunikaty
+
+<img src="../img/rsrun/zone_6.png"/>
+
+---
+
+Ta strefa pokazuje najnowsze komunikaty systemowe ReefRun. Ma dwie linie:
+
+- Szara linia pokazuje **ostatni otrzymany komunikat**.
+- Różowa linia pokazuje **ostatni alert**, poprzedzony symbolem ⚠.
+
+Kliknięcie ikony <img src="../img/mdi/mdi_delete-empty.png" width="20"/> czyści odpowiedni komunikat.
+
+Te linie można ukryć w edytorze karty.
+
+<img src="../img/rsrun/editor_2.png" />
 
 # ReefWave
 
 Zaplanowano.
 
 Chcesz, żeby było obsługiwane szybciej? Zagłosuj [tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+
+# Konserwacja
+
+Widok konserwacji w ha-reef-card w akcji:
+
+[![Obejrzyj wideo](https://img.youtube.com/vi/Ko46fHonOP4/0.jpg)](https://www.youtube.com/watch?v=Ko46fHonOP4)
+
+<img src="../img/maintenance/overview.png"/>
+
+Poza widokami poszczególnych urządzeń karta oferuje widok **Konserwacja**, który
+zbiera wszystkie zadania konserwacyjne udostępniane przez
+`ha-reefbeat-component`, tak jakby cały podsystem konserwacji był jednym
+urządzeniem.
+
+Każde zadanie jest pokazane jako pasek postępu wskazujący, jaka część jego
+interwału już minęła, w kolorze zależnym od pozostałego czasu:
+
+| Kolor        | Znaczenie                                                   |
+| ------------ | ----------------------------------------------------------- |
+| Zielony      | Aktualne                                                    |
+| Pomarańczowy | Wkrótce termin (ostatnie 20 % interwału, co najmniej dzień) |
+| Czerwony     | Po terminie, etykieta zmienia się na `+X d`                 |
+| Szary        | Nigdy nie wykonane (brak zapisanego zerowania)              |
+
+Zadania można sortować **według sprzętu** (pogrupowane, z nagłówkiem dla każdego
+urządzenia) lub **według terminu** (płaska lista, najpilniejsze na górze).
+Zadania nigdy niewykonane zawsze trafiają na koniec. Na pasku narzędzi są dwa
+filtry: pole wyboru ukrywające zadania wciąż aktualne oraz przycisk **Ukryj
+wyciszone / Pokaż wyciszone**, który ukrywa zadania z wyłączonym przełącznikiem
+powiadomień. Przycisk startuje w położeniu „pokaż”, więc wyciszenie alertu nigdy
+samo z siebie nie sprawia, że termin znika. Tę wartość domyślną ustawia się w
+edytorze karty (lub kluczem `hide_muted` poniżej), a przycisk i tak ma
+pierwszeństwo w każdej chwili.
+
+Kliknięcie wiersza otwiera okno more-info Home Assistant dla danego zadania, a
+okrągły przycisk po prawej oznacza je jako wykonane (naciska leżącą u podstaw
+encję przycisku, dokładnie tak jak zrobiłoby okno more-info).
+
+Widok pojawia się w selektorze urządzeń tylko wtedy, gdy w instalacji istnieje
+co najmniej jedno zadanie konserwacyjne. Nowe zadania dodane do katalogu
+integracji pojawiają się automatycznie, bez aktualizacji karty.
+
+### Powiadomienia
+
+Każde zadanie ma też **przełącznik powiadomień** w integracji
+(`switch.*_notify`, wyświetlany jako „<nazwa zadania> (powiadomienia)”).
+Wyłączenie go wycisza alert o przekroczeniu terminu tego jednego zadania, nie
+zmieniając jego harmonogramu: pasek postępu nadal biegnie, wiersz po prostu
+przygasa, a dzwonek gaśnie.
+
+Dzwonek po prawej stronie wiersza przełącza ten przełącznik bezpośrednio.
+Pojawia się tylko wtedy, gdy integracja udostępnia przełącznik. Ustaw
+`show_notify: false`, aby ukryć dzwonki.
+
+Blueprint alertów czyta dokładnie to samo ustawienie, więc wyciszenie zadania w
+karcie wycisza także automatyzację.
+
+### Zmiana interwału
+
+Przycisk kalendarza w każdym wierszu rozwija suwak zapisujący do encji liczbowej
+interwału zadania. Suwak działa w jednostce ogłaszanej przez integrację dla tego
+zadania (dni, tygodnie lub miesiące, odczytanej z roli encji), a integracja
+przelicza z powrotem na dni przed zapisem. Granice pochodzą z samej encji, więc
+karta nigdy nie zapisze wartości spoza zakresu. Naraz otwarty pozostaje tylko
+jeden edytor. Ustaw `show_interval: false`, aby ukryć przyciski.
+
+### Pompy ReefRun
+
+Podurządzenia ReefRun noszą nazwy „… pompa 1” / „… pompa 2”, co nic nie mówi o
+tym, czym każda pompa naprawdę jest. Gdy urządzenie udostępnia zarówno sensor
+`type`, jak i `model`, karta dopisuje je w nawiasie: **ReefRun pompa 1 (powrotna 12000)**, **ReefRun pompa 2 (odpieniacz 900)**.
+
+Typ jest tłumaczony, a z modelu zachowywana jest tylko końcowa liczba
+(`return-12000` -> `12000`, `rsk-900` -> `900`), ponieważ przedrostek jest albo
+powtórzeniem typu, albo nieczytelny. Urządzenia niebędące pompami zachowują
+zwykłą nazwę.
+
+## Ikony
+
+| Ikona                                                                                                    | Rola                                                                              |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Zadanie wykonane.** Oznacza zadanie jako wykonane i restartuje jego odliczanie. |
+| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Wycisz / włącz.** Przełącza przełącznik powiadomień tego jednego zadania.       |
+| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Zmień interwał.** Rozwija suwak powiązany z interwałem zadania.                 |
+
+## Edytor
+
+Domyślny stan filtrów i widoczność trzech przycisków ustawia się w edytorze karty.
+
+<img src="../img/maintenance/editor.png"/>
+
+## Konfiguracja
+
+```yaml
+type: custom:reef-card
+device: __maintenance__
+maintenance:
+  sort: due # "device" (domyślnie) lub "due"
+  hide_ok: false # ukryj zadania ani po terminie, ani zbliżające się
+  hide_muted: false # ukryj zadania z wyłączonymi powiadomieniami
+  warning_ratio: 0.2 # część interwału pokazywana na pomarańczowo
+  show_reset: true # pokaż przycisk „oznacz jako wykonane” w każdym wierszu
+  show_notify: true # pokaż dzwonek wyciszenia/włączenia w każdym wierszu
+  show_interval: true # pokaż przycisk edycji interwału w każdym wierszu
+```
+
+Wszystkie klucze `maintenance` są opcjonalne. `sort` i `hide_ok` ustalają tylko
+stan początkowy: użytkownik może je zmienić z poziomu samego widoku.
 
 # FAQ
 

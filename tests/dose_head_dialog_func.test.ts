@@ -2,7 +2,7 @@
 
 import { Dialog } from "../src/base/dialog";
 import { MyElement } from "../src/base/element";
-import { DoseHead } from "../src/devices/rsdose/dose_head";
+import { DoseHead } from "../src/devices/redsea/rsdose/dose_head";
 import {
   add_supplement,
   compare_interval,
@@ -10,7 +10,7 @@ import {
   head_configuration,
   set_container_volume,
   set_manual_head_volume,
-} from "../src/devices/rsdose/dose_head.dialog_func_ext";
+} from "../src/devices/redsea/rsdose/dose_head.dialog_func_ext";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RSDevice from "../src/devices/device";
 
@@ -1155,7 +1155,7 @@ describe("compare_interval() — a.st>b.st and a.st===b.st branches (L558-561)",
 describe("dose_head.dialog_func_ext.ts", () => {
   it("L65: current_uid = selected_supplement when supplement is null", async () => {
     const { add_supplement } =
-      await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
 
     const mockCc = document.createElement("div");
     mockCc.dataset.supplementUid = "some-name";
@@ -1175,7 +1175,7 @@ describe("dose_head.dialog_func_ext.ts", () => {
 
   it("L65: current_uid = '__none__' when get_entity returns state=null", async () => {
     const { add_supplement } =
-      await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
     const mockCc = document.createElement("div");
     mockCc.dataset.supplementUid = "__none__";
     mockCc.querySelectorAll = vi.fn().mockReturnValue([]);
@@ -1193,7 +1193,8 @@ describe("dose_head.dialog_func_ext.ts", () => {
   });
 
   it("L558-559: compare_interval returns 1 when a.st > b.st", async () => {
-    const mod = await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+    const mod =
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
 
     const compareInterval = (mod as any).compare_interval;
     if (compareInterval) {
@@ -1206,7 +1207,7 @@ describe("dose_head.dialog_func_ext.ts", () => {
 
   it("L278: removes existing #schedule form before rebuilding", async () => {
     const { render_schedule } =
-      await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
     if (!render_schedule) return;
 
     const removeMock = vi.fn();
@@ -1264,7 +1265,7 @@ describe("dose_head.dialog_func_ext.ts — L559, L65 3rd branch, L278", () => {
 
     try {
       const { head_configuration } =
-        await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+        await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
 
       const container = document.createElement("div");
       container.innerHTML = `
@@ -1344,7 +1345,7 @@ describe("dose_head.dialog_func_ext.ts — L559, L65 3rd branch, L278", () => {
 
   it("L65: uses supplement.uid when supplement is found (supplement?.uid branch)", async () => {
     const { add_supplement } =
-      await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
 
     const realFullname = "Red Sea - Calcium (Powder)";
     const realUid = "0e63ba83-3ec4-445e-a3dd-7f2dbdc7f964";
@@ -1368,7 +1369,7 @@ describe("dose_head.dialog_func_ext.ts — L559, L65 3rd branch, L278", () => {
 
   it("L278: removes existing #schedule form when it exists", async () => {
     const { head_configuration } =
-      await import("../src/devices/rsdose/dose_head.dialog_func_ext");
+      await import("../src/devices/redsea/rsdose/dose_head.dialog_func_ext");
 
     const removeMock = vi.fn();
 

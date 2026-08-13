@@ -9,8 +9,6 @@
  *     - toTime
  *     - rgToHex
  *     - hexToRgb
- *   + Colors:
- *     - button_color
  *   + Devices:
  *     - DeviceList
  *
@@ -178,14 +176,6 @@ export function rgbToHex(orig: string): string {
     return orig;
   }
 }
-
-/**
- * Color of off elements
- */
-/**
- * blue color for buttons
- */
-export const button_color: string = "51,151,232";
 
 /**
  * Convert time number representing seconds from midnight  to a string with the following format "HH:MM:SS"

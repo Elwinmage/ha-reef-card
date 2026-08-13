@@ -2,15 +2,15 @@
 
 import { Dialog } from "../src/base/dialog";
 import { Sensor } from "../src/base/sensor";
-import { DoseHead } from "../src/devices/rsdose/dose_head";
-import { RSDose, RSDose2, RSDose4 } from "../src/devices/rsdose/rsdose";
-import { config2 } from "../src/devices/rsdose/rsdose2.mapping";
-import { config4 } from "../src/devices/rsdose/rsdose4.mapping";
+import { DoseHead } from "../src/devices/redsea/rsdose/dose_head";
+import { RSDose, RSDose2, RSDose4 } from "../src/devices/redsea/rsdose/rsdose";
+import { config2 } from "../src/devices/redsea/rsdose/rsdose2.mapping";
+import { config4 } from "../src/devices/redsea/rsdose/rsdose4.mapping";
 import { hexToRgb, rgbToHex } from "../src/utils/common";
 import { merge } from "../src/utils/merge";
 import { describe, expect, it, vi } from "vitest";
 import RSDevice from "../src/devices/device";
-import supplements_list from "../src/devices/rsdose/supplements";
+import supplements_list from "../src/devices/redsea/rsdose/supplements";
 import "../src/devices/index";
 
 function parse_head_id(identLabel: string): number {

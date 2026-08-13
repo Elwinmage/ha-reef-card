@@ -122,4 +122,56 @@ export default css`
   .blink-icon-scale > * {
     animation: blink-scale 1s ease-in-out infinite;
   }
+
+  .wate_mouvement {
+    border: none;
+    position: absolute;
+    overflow: hidden;
+    background-color: rgba(224, 241, 250, 0.1);
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 75%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 100%
+    );
+    background-size: 100% 100px;
+    animation: water-flow 1s linear infinite;
+  }
+
+  @keyframes water-flow {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 100px;
+    }
+  }
+
+  /* .tube — wrapper class for flow-image elements (identification only).
+     The actual animation is applied inline by FlowImage._render(). */
+  .tube {
+    display: block;
+  }
+
+  /* Scroll background upward by exactly one tile height */
+  @keyframes flowUp {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 -192px;
+    }
+  }
+
+  /* Scroll background downward by exactly one tile height */
+  @keyframes flowDown {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 192px;
+    }
+  }
 `;

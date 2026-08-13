@@ -4,12 +4,13 @@
     "rsled_g1",
     "rsled_g2",
     "rsled_virtual",
-    "rsrun",
     "rswave"
   ],
   "ignore": {
-    "*": {
-      "button": ["firmware_update"]
+    "*": {},
+    "rsrun": {
+      "button": ["preview_save"],
+      "number": ["preview_speed"]
     }
   }
 }

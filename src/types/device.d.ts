@@ -55,6 +55,15 @@ export interface HeadEntity {
   dose_head?: any;
 }
 
+export interface PumpEntity {
+  entities: Record<string, any>;
+  parent_entities?: Record<string, any>;
+  /** Cached custom element rendering this pump, rebuilt when `type` changes */
+  litElement?: any;
+  /** Last known pump type from the `type` sensor ("return", "skimmer", …) */
+  type?: string;
+}
+
 // ── RGB color ─────────────────────────────────────────────────────────────────
 
 export interface RGB {

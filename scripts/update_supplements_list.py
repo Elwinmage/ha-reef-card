@@ -7,7 +7,7 @@ Paths are resolved relative to this script's location:
     scripts/
       update_supplements_list.py   <- this file
       supplements_list.py          <- local copy (synced from component)
-    src/devices/rsdose/
+    src/devices/redsea/rsdose/
       supplements_list.ts          <- generated TypeScript output
 
   ha-reefbeat-component/           <- sibling directory of ha-reef-card
@@ -34,7 +34,7 @@ ONLINE_URL = (
 )
 LOCAL_SOURCE = COMPONENT_DIR / "custom_components" / "redsea" / "supplements_list.py"
 CURRENT_COPY = SCRIPT_DIR / "supplements_list.py"
-TS_OUTPUT    = CARD_DIR / "src" / "devices" / "rsdose" / "supplements_list.ts"
+TS_OUTPUT    = CARD_DIR / "src" / "devices" / "redsea" / "rsdose" / "supplements_list.ts"
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
             "Resolved paths (relative to this script):\n"
             "  Source  : <sibling>/ha-reefbeat-component/custom_components/redsea/supplements_list.py\n"
             "  Copy    : scripts/supplements_list.py\n"
-            "  Output  : src/devices/rsdose/supplements_list.ts\n"
+            "  Output  : src/devices/redsea/rsdose/supplements_list.ts\n"
             "\n"
             "Examples:\n"
             "  python update_supplements_list.py\n"
@@ -72,7 +72,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         metavar="FILE",
-        help="Override output file path (default: src/devices/rsdose/supplements_list.ts)",
+        help="Override output file path (default: src/devices/redsea/rsdose/supplements_list.ts)",
     )
     return parser.parse_args()
 

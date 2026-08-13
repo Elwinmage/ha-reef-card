@@ -38,6 +38,14 @@ export class RSDevice extends LitElement {
 
   public entities: Record<string, any> = {};
 
+  // Parent device entities — populated by RSRun for child pumps so they
+  // can access parent-level data (mode, ec_sensor_connected, …)
+  public parent_entities: Record<string, any> = {};
+
+  // Parent HA device info — populated by RSRun for child pumps so they
+  // can access the parent device_id for service calls (e.g. redsea.request)
+  public parent_device: any = null;
+
   public config: DeviceConfig;
 
   protected _hass: HassConfig | null = null;
@@ -156,6 +164,7 @@ export class RSDevice extends LitElement {
     } else {
       this.masterOn = true;
     }
+
     return this._render(style, substyle);
   }
 
@@ -195,13 +204,12 @@ export class RSDevice extends LitElement {
   }
 
   /**
-   * Check if new hass states impy a re-render and propagate for sub elements.
+   * Check if new hass states imply a re-render and propagate for sub elements.
    * @param obj: the new hass states
    */
   _setting_hass(obj) {
     this._hass = obj;
     let re_render = false;
-
     // Detect enable/disable change: refresh device.elements from hass.devices
     // so that is_disabled() always reads the current state.
     if (this.device?.elements && obj.devices) {
@@ -357,6 +365,8 @@ export class RSDevice extends LitElement {
         const entity = this._hass.entities[entity_id];
         if (entity.device_id === this.device.elements[0]?.id) {
           this.entities[entity.translation_key] = entity;
+          const domain = entity_id.split(".")[0];
+          this.entities[domain + "." + entity.translation_key] = entity;
         }
       }
     } else {
@@ -491,7 +501,7 @@ export class RSDevice extends LitElement {
 
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()
     // Requires _helpers (loaded async), skip until available
-    if (conf.type.startsWith("hui-")) {
+    if (conf.type?.startsWith("hui-")) {
       // Use instance _helpers or fallback to the shared resolved static
       const helpers = this._helpers ?? RSDevice._helpersResolved;
       if (!helpers) {
@@ -570,10 +580,17 @@ export class RSDevice extends LitElement {
       element = this._elements[elementKey];
       if (element) {
         element.stateOn = state;
+        element.groupOn = state;
       }
     } else {
       if (this._hass) {
         element = MyElement.create_element(this._hass, conf, this);
+        if (element) {
+          // Without this the first render of a freshly created element uses
+          // the whole-device state instead of the group's.
+          element.stateOn = state;
+          element.groupOn = state;
+        }
         this._elements[elementKey] = element;
       }
     }
@@ -604,7 +621,7 @@ export class RSDevice extends LitElement {
    */
   is_checked(id) {
     let result = false;
-    if ("disabled_if" in this.config.elements[id]) {
+    if (this.config.elements[id] && "disabled_if" in this.config.elements[id]) {
       result = this.config.elements[id].disabled_if;
     }
     if (result) {
@@ -634,6 +651,68 @@ export class RSDevice extends LitElement {
       `;
     }
   } // end of function is_checked
+
+  /**
+   * Read a plain boolean flag stored at device level in the user config.
+   * Unlike is_checked(), this is not tied to an element of the mapping.
+   * @param key: the flag name
+   * @return the stored value, or undefined when never set
+   */
+  get_config_flag(key: string): boolean | undefined {
+    return this.config?.[key];
+  }
+
+  /**
+   * Render an editor switch bound to a device-level flag.
+   * @param key: the flag name
+   * @return the switch template
+   */
+  is_config_checked(key: string) {
+    const checked = this.get_config_flag(key) === true;
+    return html`
+      <label class="switch">
+        <input
+          type="checkbox"
+          id="${key}"
+          @change="${this.handleChangedConfigFlagEvent}"
+          ?checked="${checked}"
+        />
+        <span class="slider round"></span>
+      </label>
+      <label>${i18n._(key)}</label>
+    `;
+  }
+
+  /**
+   * Persist a device-level flag toggled from the editor.
+   */
+  handleChangedConfigFlagEvent(changedEvent) {
+    const value = changedEvent.currentTarget.checked;
+    const key = changedEvent.target.id;
+    const model = this.config.model;
+    const newVal = {
+      conf: {
+        [model]: {
+          devices: {
+            [this.device.name]: { [key]: value },
+          },
+        },
+      },
+    };
+    let newConfig = JSON.parse(JSON.stringify(this.user_config));
+    try {
+      newConfig.conf[model].devices[this.device.name][key] = value;
+    } catch {
+      newConfig = merge(newConfig, newVal);
+    }
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: newConfig },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
 
   _editor_common() {
     return html`<style>
