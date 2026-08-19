@@ -41,6 +41,7 @@ export type {
   ElementConfig,
   SensorConfig,
   ProgressConfig,
+  WaterLevelConfig,
   ButtonConfig,
   DialogContentConfig,
   DialogConfig,

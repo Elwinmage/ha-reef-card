@@ -1,3 +1,5 @@
+import { COLOR_WHITE_60, COLOR_ERROR_HEX } from "../../../utils/colors";
+
 export const config = {
   name: null,
   model: "RSATO",
@@ -7,31 +9,6 @@ export const config = {
   ),
   css: {
     width: "100%",
-  },
-  dialogs: {
-    wifi: {
-      name: "wifi",
-      title_key: "${i18n._('wifi')}",
-      close_cross: false,
-      content: [
-        {
-          view: "hui-entities-card",
-          conf: {
-            type: "entities",
-            entities: [
-              { entity: "wifi_ssid", name: { type: "entity" } },
-              { entity: "ip", name: { type: "entity" } },
-              { entity: "wifi_signal", name: { type: "entity" } },
-              { entity: "wifi_quality", name: { type: "entity" } },
-              { entity: "cloud_connect", name: { type: "entity" } },
-              { entity: "cloud_state", name: { type: "entity" } },
-              { entity: "cloud_account", name: { type: "entity" } },
-              { entity: "use_cloud_api", name: { type: "entity" } },
-            ],
-          },
-        },
-      ],
-    },
   },
 
   elements: {
@@ -72,17 +49,61 @@ export const config = {
         "background-color": "rgba(240,200,200,0.7)",
       },
     },
-    device_states: {
-      type: "hui-entities-card",
-      conf: {
-        type: "entities",
-        entities: [
-          { entity: "device_state", name: { type: "entity" } },
-          { entity: "maintenance", name: { type: "entity" } },
-        ],
+    device_state: {
+      name: "device_state",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "5.5%",
+        left: "75%",
       },
     },
-
+    maintenance: {
+      name: "maintenance",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "5.5%",
+        left: "81%",
+      },
+    },
+    configuration: {
+      name: "configuration",
+      type: "click-image",
+      icon: "mdi:cog",
+      icon_color: COLOR_ERROR_HEX,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "config",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "5.5%",
+        left: "87%",
+      },
+    },
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",
@@ -100,8 +121,184 @@ export const config = {
         position: "absolute",
         width: "5.5%",
         height: "2%",
-        top: "0%",
-        right: "0%",
+        top: "5.5%",
+        left: "93%",
+      },
+    },
+    auto_fill: {
+      name: "auto_fill",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "10%",
+        left: "81%",
+      },
+    },
+    mode: {
+      name: "mode",
+      type: "common-sensor",
+      translate_values: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        color: COLOR_WHITE_60,
+        width: "5.3%",
+        top: "1.5%",
+        left: "80%",
+      },
+    },
+    fill: {
+      name: "fill",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "button",
+        action: "press",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "38%",
+        left: "17%",
+      },
+    },
+    stop_fill: {
+      name: "stop_fill",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "button",
+        action: "press",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "38%",
+        left: "26%",
+      },
+    },
+    resume: {
+      name: "resume",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "button",
+        action: "press",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "54%",
+        left: "17%",
+      },
+    },
+    // RO reservoir: a genuine volume ratio. volume_left is in mL and
+    // ato_tank_volume in L, hence target_factor. min_percent is the residue
+    // the pump cannot siphon, so an "empty" tank still shows a water line;
+    // max_percent is the container rim in the background picture.
+    volume_left: {
+      name: "volume_left",
+      type: "water-level",
+      target: "ato_tank_volume",
+      target_factor: 1000,
+      min_percent: 10,
+      max_percent: 95,
+      warn_below: 10,
+      wave: true,
+      css: {
+        position: "absolute",
+        top: "59.5%",
+        left: "0%",
+        width: "26%",
+        height: "36%",
+      },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "ato_tank",
+        },
+      },
+    },
+
+    // Sump probe: the state names a hole on the probe bar, not a fraction of
+    // a volume, so each value maps to a fixed height. min/max stay 0/100 so
+    // the levels below are read directly as a percentage of the box, which
+    // makes them measurable straight off the background picture.
+    // "error" is deliberately absent: it renders the no-reading mark.
+    water_level: {
+      name: "sensor.water_level",
+      type: "water-level",
+      levels: {
+        below: 50.3,
+        desired_level_1: 58.3,
+        desired_level_2: 64.7,
+        above: 80,
+      },
+      min_percent: 0,
+      max_percent: 100,
+      // Both ends of the probe are abnormal: below means the ATO is not
+      // keeping up, above means it overfilled. "error" never reaches here —
+      // it has no level, so it renders the blinking no-reading mark.
+      warn_states: ["below", "above"],
+      wave: true,
+      // The level comes from sensor.water_level; the overlay shows the
+      // binary_sensor instead. Both register as "water_level", hence the
+      // domain prefix.
+      value_entity: "binary_sensor.water_level",
+      css: {
+        position: "absolute",
+        top: "49.5%",
+        left: "51.5%",
+        width: "48.5%",
+        height: "45%",
+      },
+    },
+    current_read: {
+      name: "current_read",
+      type: "common-sensor",
+      text_color: "rgb(240,240,240)",
+      round: 1,
+      css: {
+        position: "absolute",
+        top: "91%",
+        left: "54%",
+        width: "40%",
+      },
+    },
+    days_till_empty: {
+      name: "days_till_empty",
+      type: "common-sensor",
+      text_color: "rgb(240,240,240)",
+      round: 1,
+      css: {
+        position: "absolute",
+        top: "80%",
+        left: "4%",
+        width: "40%",
+      },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "days_till_empty",
       },
     },
   },

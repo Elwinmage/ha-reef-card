@@ -126,7 +126,25 @@ export type ElementConfig = BaseElementConfig;
 export interface SensorConfig extends BaseElementConfig {
   name: string; // Sensors require a name
   prefix?: string;
+  /**
+   * Legacy integer rendering. Prefer `round`.
+   * Kept because it is used in 16 mappings, and because its behaviour differs
+   * between elements: common-sensor rounds, common-sensor-target floors.
+   */
   force_integer?: boolean;
+  /**
+   * Decimals to display: round(2) -> "12.34", round(0) -> "12".
+   * Consistent across every element, unlike force_integer. Non-numeric states
+   * are left untouched. Applied after force_integer when both are set.
+   */
+  round?: number;
+  /**
+   * Colour of the rendered text, unit included.
+   * Use this rather than `css: { color }` when a `unit_css` is also set, since
+   * the unit span would otherwise be able to diverge. Accepts the
+   * `$DEVICE-COLOR$` / `$DEVICE-COLOR-ALPHA$` tokens.
+   */
+  text_color?: DynamicValue<string>;
   unit?: DynamicValue<string>;
   label?: DynamicValue<string>;
 }
@@ -136,13 +154,26 @@ export interface ProgressConfig extends BaseElementConfig {
   /**
    * Target reference:
    * - string: translation_key of a sibling entity whose state provides the target
-   * - number: a fixed numeric target (progress-circle only)
+   * - number: a fixed numeric target, resolved without any entity lookup.
+   *   Honoured by progress-bar, progress-circle and common-sensor-target.
+   *   `target_attribute` still takes precedence when both are set.
    */
   target?: string | number;
+  /**
+   * Multiplier applied to the resolved target, for when value and target are
+   * reported in different units. volume_left is in mL and ato_tank_volume in
+   * L, so target_factor: 1000 makes the ratio meaningful without adding a
+   * template sensor in Home Assistant.
+   */
+  target_factor?: number;
   label?: DynamicValue<string>;
   no_value?: boolean;
-  /** Force integer rendering (also used by SensorTarget) */
+  /** Force integer rendering (also used by SensorTarget). Prefer `round`. */
   force_integer?: boolean;
+  /** Decimals to display; round(0) is an integer. See SensorConfig.round. */
+  round?: number;
+  /** Colour of the rendered text, unit included. See SensorConfig.text_color. */
+  text_color?: DynamicValue<string>;
   /**
    * When set, read the current value from stateObj.attributes[value_attribute]
    * instead of stateObj.state. Useful for entities whose numeric progress
@@ -166,7 +197,81 @@ export interface ProgressConfig extends BaseElementConfig {
     fill?: string;
     /** progress-circle only: center disc fill color. */
     center?: string;
+    /** water-level only: tint used below warn_below and for a missing reading. */
+    warn?: string;
   };
+}
+
+/**
+ * Configuration of a `water-level` element: a translucent body of water drawn
+ * over the device picture, high enough to read at a glance but transparent
+ * enough that pumps and probes stay visible through it.
+ */
+export interface WaterLevelConfig extends ProgressConfig {
+  /**
+   * Discrete mode: maps an entity state to a water height (0-100).
+   *
+   * The ATO optical probe reports a mark on the glass ("desire_level_1",
+   * "below", ...), not a volume ratio, so the height cannot be derived from
+   * value/target. Any state absent from this map — "error", unknown,
+   * unavailable — renders the no-reading mark instead of an empty tank.
+   */
+  levels?: Record<string, number>;
+
+  /**
+   * Water surface height when the level reads 0 %, as a percentage of the
+   * element box. Also the geometric offset of the glass in the background
+   * picture: the RO reservoir keeps a residue the pump cannot siphon, so its
+   * empty state is a low water line rather than a dry tank.
+   */
+  min_percent?: number;
+
+  /** Water surface height when the level reads 100 %. Defaults to 100. */
+  max_percent?: number;
+
+  /** Animated surface. On by default; disabled under prefers-reduced-motion. */
+  wave?: boolean;
+
+  /** Ratio mode: below this level (0-100), the element raises an alert. */
+  warn_below?: number;
+
+  /**
+   * Discrete mode: states that raise an alert. There is no ordering to compare
+   * against here — "above" is as abnormal as "below" — so they are listed.
+   */
+  warn_states?: string[];
+
+  /**
+   * Alerting pulses the water between colors.fill and colors.warn. Set false
+   * for a static warning tint. Always static under prefers-reduced-motion.
+   */
+  warn_blink?: boolean;
+
+  /**
+   * Water opacity, flat over the whole submerged area. Defaults to 0.45.
+   * The fill is composited with mix-blend-mode: multiply, so it darkens the
+   * picture behind instead of averaging toward the water colour — pumps and
+   * probes stay readable through it.
+   */
+  opacity?: number;
+
+  /**
+   * Show the reading at the bottom-right of the submerged area: a percentage
+   * in ratio mode, the translated state in discrete mode. On by default.
+   */
+  show_value?: boolean;
+
+  /**
+   * Entity displayed in the overlay, when it differs from the entity driving
+   * the water height. Its state goes through Home Assistant's own state
+   * translations, which a `label` expression cannot do.
+   *
+   * Use a domain-prefixed key whenever several domains expose the same
+   * translation_key — binary_sensor.water_level and sensor.water_level both
+   * register as "water_level", and the bare key resolves to whichever the
+   * entity registry yielded last.
+   */
+  value_entity?: string;
 }
 
 export interface ButtonConfig extends BaseElementConfig {

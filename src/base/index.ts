@@ -13,6 +13,7 @@ import { Schedule } from "./schedule";
 import { Sensor } from "./sensor";
 import { SensorTarget } from "./sensor_target";
 import { Slider } from "./slider";
+import { WaterLevel } from "./water_level";
 
 if (!customElements.get("click-image"))
   customElements.define("click-image", ClickImage);
@@ -36,5 +37,7 @@ if (!customElements.get("progress-bar"))
   customElements.define("progress-bar", ProgressBar);
 if (!customElements.get("progress-circle"))
   customElements.define("progress-circle", ProgressCircle);
+if (!customElements.get("water-level"))
+  customElements.define("water-level", WaterLevel);
 if (!customElements.get("redsea-messages"))
   customElements.define("redsea-messages", RSMessages);

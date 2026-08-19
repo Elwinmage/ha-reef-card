@@ -7,10 +7,9 @@ This script verifies:
 2. All keys in translation files are used in the code
 
 Usage:
-    python verify_translations.py
+    python scripts/check_translations.py
 """
 
-import os
 import re
 import json
 from pathlib import Path
@@ -30,9 +29,11 @@ class TranslationVerifier:
     """Verifies translation key consistency between code and translation files"""
     
     # Keys that are used dynamically (not detected by static analysis)
-    # Only day names are truly dynamic (used in loops/variables)
+    # because they are built at runtime from a variable
     DYNAMIC_KEYS = {
         'day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7',  # Day names
+        # Built as `pump_type_${type}` in maintenance.ts::_pump_suffix()
+        'pump_type_return', 'pump_type_skimmer',
     }
     
     # Keys to ignore completely (template/placeholder keys)
@@ -45,10 +46,17 @@ class TranslationVerifier:
         'canNotFindTranslation',  # Critical fallback message when translation not found
     }
     
+    # Language used as the reference of the consistency check, when available
+    REFERENCE_LANG = 'en'
+
     def __init__(self, src_dir: str = "src", translations_dir: str = "src/translations/locales"):
-        base_path = os.path.dirname(__file__) + "/../"
-        self.src_dir = Path(base_path+src_dir)
-        self.translations_dir = Path(base_path+translations_dir)
+        # Resolve everything from the repository root so the script behaves the
+        # same way whatever the current working directory is (pre-commit runs it
+        # from the repo root, a developer may run it from scripts/).
+        base_path = Path(__file__).resolve().parent.parent
+        self.src_dir = base_path / src_dir
+        self.translations_dir = base_path / translations_dir
+        self.report_path = base_path / "translation_report.txt"
         self.code_keys: Set[str] = set()
         self.translation_keys: Dict[str, Set[str]] = {}
         self.errors: List[str] = []
@@ -60,13 +68,80 @@ class TranslationVerifier:
             print(f"{RED}Error: Translation directory not found: {self.translations_dir}{NC}")
             return []
         
-        files = list(self.translations_dir.glob("*.json"))
+        # Sorted: glob() order is filesystem dependent, and the consistency
+        # check reports would otherwise change from one machine to another.
+        files = sorted(self.translations_dir.glob("*.json"))
         print(f"{BLUE}Found {len(files)} translation file(s):{NC}")
         for f in files:
             print(f"  - {f.name}")
         print()
         return files
     
+    def _reference_language(self) -> str:
+        """
+        Pick the language used as the reference of the consistency check.
+        REFERENCE_LANG when present, otherwise the first one alphabetically, so
+        the reference never depends on the filesystem enumeration order.
+        """
+        languages = sorted(self.translation_keys)
+        if self.REFERENCE_LANG in languages:
+            return self.REFERENCE_LANG
+        return languages[0]
+
+    @staticmethod
+    def _split_call_args(text: str, open_index: int) -> Tuple[List[str], int]:
+        """
+        Split the arguments of a call whose '(' is at open_index.
+
+        Brackets, strings and template literals are tracked so an argument like
+        `Array.from({ length: 24 }, (x, i) => ...)` stays in one piece instead
+        of being cut on its inner commas.
+
+        Returns:
+            Tuple of (list of raw argument strings, offset of the matching ')')
+            The offset is -1 when the call is never closed (truncated file).
+        """
+        args: List[str] = []
+        current: List[str] = []
+        depth = 0
+        quote = None
+        i = open_index
+
+        while i < len(text):
+            char = text[i]
+
+            if quote is not None:
+                # Inside a string: only the closing quote matters
+                if char == '\\':
+                    current.append(text[i:i + 2])
+                    i += 2
+                    continue
+                if char == quote:
+                    quote = None
+                current.append(char)
+            elif char in "'\"`":
+                quote = char
+                current.append(char)
+            elif char in '([{':
+                depth += 1
+                if not (depth == 1 and i == open_index):
+                    current.append(char)
+            elif char in ')]}':
+                depth -= 1
+                if depth == 0:
+                    args.append(''.join(current))
+                    return [arg.strip() for arg in args], i
+                current.append(char)
+            elif char == ',' and depth == 1:
+                args.append(''.join(current))
+                current = []
+            else:
+                current.append(char)
+
+            i += 1
+
+        return [arg.strip() for arg in args], -1
+
     def extract_keys_from_code(self) -> Set[str]:
         """Extract all i18n._() keys from TypeScript files"""
         print(f"{BLUE}Scanning code for translation keys...{NC}")
@@ -79,19 +154,16 @@ class TranslationVerifier:
         
         # Pattern to match i18n._('key') or i18n._("key")
         pattern_i18n = r"i18n\._\(['\"]([^'\"]+)['\"]\)"
-        
-        # Pattern to match create_select('id', ['opt1', 'opt2', ...]) - multiline-aware
-        pattern_select_with_array = r"create_select\(\s*['\"]([^'\"]+)['\"][\s\S]*?,\s*\[([^\]]+)\]"
 
-        # Pattern to match create_select('id', ...) - multiline-aware, just ID
-        pattern_select_id = r"create_select\(\s*['\"]([^'\"]+)['\"]"
+        # Pattern to match is_checked('id') / is_config_checked('key').
+        # Both render a <label>${i18n._(id)}</label>, so the id is a key.
+        pattern_is_checked = r"\bis_(?:config_)?checked\(['\"]([^'\"]+)['\"]\)"
 
-        # Pattern to match create_hour('id', ...) - multiline-aware
-        pattern_hour = r"create_hour\(\s*['\"]([^'\"]+)['\"]"
-
-        # Pattern to match is_checked('id') or is_checked("id")
-        # These IDs are element names that appear in config.elements[id]
-        pattern_is_checked = r"is_checked\(['\"]([^'\"]+)['\"]\)"
+        # Pattern to match the opening of a create_select( / create_hour( call.
+        # The arguments are then split by _split_call_args() instead of a regex:
+        # a regex cannot tell which "[...]" belongs to which call, and would
+        # happily attach the option array of one call to the previous one.
+        pattern_form_call = r"\b(create_select|create_hour)\s*\("
 
         for ts_file in self.src_dir.rglob("*.ts"):
             # Skip .d.ts files
@@ -101,6 +173,7 @@ class TranslationVerifier:
             try:
                 file_content = ts_file.read_text(encoding='utf-8')
                 lines = file_content.split('\n')
+                file_has_keys = False
 
                 # Helper: find line number from character offset in file_content
                 def offset_to_line(offset, _fc=file_content):
@@ -116,83 +189,58 @@ class TranslationVerifier:
                         'line_after': _lines[line_num].strip() if line_num < len(_lines) else '',
                     }
 
-                # --- Multiline scan: create_select with array ---
-                seen_select_positions = set()
-                for match in re.finditer(pattern_select_with_array, file_content, re.DOTALL):
-                    line_num = offset_to_line(match.start())
-                    id_key = match.group(1)
-                    keys.add(id_key)
-                    ctx = make_context(line_num)
-                    self.key_locations[id_key].append(ctx)
-                    seen_select_positions.add(match.start())
-                    # Options become keys (translation=true by default)
-                    options_str = match.group(2)
-                    for opt_key in re.findall(r"['\"]([^'\"]+)['\"]", options_str):
-                        keys.add(opt_key)
-                        self.key_locations[opt_key].append(ctx)
+                # Helper: register a key, skipping the template placeholders
+                def add_key(key, context=None, _keys=keys):
+                    nonlocal file_has_keys
+                    if key in self.IGNORED_KEYS:
+                        return
+                    _keys.add(key)
+                    file_has_keys = True
+                    if context is not None:
+                        self.key_locations[key].append(context)
 
-                # --- Multiline scan: create_select without array (just ID) ---
-                for match in re.finditer(pattern_select_id, file_content, re.DOTALL):
-                    if match.start() in seen_select_positions:
-                        continue  # Already handled by the array variant
-                    line_num = offset_to_line(match.start())
-                    id_key = match.group(1)
-                    keys.add(id_key)
-                    self.key_locations[id_key].append(make_context(line_num))
+                # --- Scan: create_select() / create_hour() ---
+                for match in re.finditer(pattern_form_call, file_content):
+                    func_name = match.group(1)
+                    args, close_index = self._split_call_args(file_content, match.end() - 1)
 
-                # --- Multiline scan: create_hour ---
-                for match in re.finditer(pattern_hour, file_content, re.DOTALL):
-                    line_num = offset_to_line(match.start())
-                    id_key = match.group(1)
-                    keys.add(id_key)
-                    self.key_locations[id_key].append(make_context(line_num))
+                    if close_index < 0 or not args:
+                        continue
+
+                    ctx = make_context(offset_to_line(match.start()))
+
+                    # First argument is the element id, and also its label key.
+                    # A non literal id (or the function definition itself) can
+                    # not be checked statically, so the call is skipped.
+                    id_match = re.fullmatch(r"['\"]([^'\"]+)['\"]", args[0])
+                    if not id_match:
+                        continue
+                    add_key(id_match.group(1), ctx)
+
+                    if func_name != 'create_select' or len(args) < 2:
+                        continue
+
+                    # 4th argument is `translation` (default true): when it is
+                    # explicitly false the options are displayed as is.
+                    if len(args) >= 4 and args[3] == 'false':
+                        continue
+
+                    # Only a literal array holds keys. A computed list such as
+                    # Array.from({ length: 24 }, ...) is never translated.
+                    options = args[1]
+                    if not (options.startswith('[') and options.endswith(']')):
+                        continue
+
+                    for opt_key in re.findall(r"['\"]([^'\"]+)['\"]", options):
+                        add_key(opt_key, ctx)
 
                 # --- Line-by-line scan: i18n._() and is_checked() ---
                 for line_num, line in enumerate(lines, 1):
-                    # 1. Find i18n._() calls
-                    matches_i18n = re.finditer(pattern_i18n, line)
+                    for pattern in (pattern_i18n, pattern_is_checked):
+                        for match in re.finditer(pattern, line):
+                            add_key(match.group(1), make_context(line_num))
 
-                    for match in matches_i18n:
-                        key = match.group(1)
-
-                        # Skip ignored keys
-                        if key in self.IGNORED_KEYS:
-                            continue
-
-                        keys.add(key)
-
-                        # Store location and context
-                        context = {
-                            'file': str(ts_file.relative_to(self.src_dir)),
-                            'line': line_num,
-                            'line_before': lines[line_num - 2].strip() if line_num > 1 else '',
-                            'line_current': line.strip(),
-                            'line_after': lines[line_num].strip() if line_num < len(lines) else '',
-                        }
-                        self.key_locations[key].append(context)
-
-                    # 4. Find is_checked() calls
-                    matches_is_checked = re.finditer(pattern_is_checked, line)
-
-                    for match in matches_is_checked:
-                        # ID becomes a key (element name used as translation key)
-                        id_key = match.group(1)
-                        keys.add(id_key)
-
-                        # Store location
-                        context = {
-                            'file': str(ts_file.relative_to(self.src_dir)),
-                            'line': line_num,
-                            'line_before': lines[line_num - 2].strip() if line_num > 1 else '',
-                            'line_current': line.strip(),
-                            'line_after': lines[line_num].strip() if line_num < len(lines) else '',
-                        }
-                        self.key_locations[id_key].append(context)
-
-                if (re.search(pattern_i18n, file_content) or
-                        re.search(pattern_select_with_array, file_content, re.DOTALL) or
-                        re.search(pattern_hour, file_content, re.DOTALL) or
-                        re.search(pattern_is_checked, file_content)):
+                if file_has_keys:
                     files_scanned += 1
                     
             except Exception as e:
@@ -380,16 +428,16 @@ class TranslationVerifier:
             return True
         
         # Get all languages
-        languages = list(self.translation_keys.keys())
-        base_lang = languages[0]
+        base_lang = self._reference_language()
         base_keys = self.translation_keys[base_lang]
+        languages = [lang for lang in sorted(self.translation_keys) if lang != base_lang]
         
         print(f"Using {base_lang}.json as reference ({len(base_keys)} keys)")
         print()
         
         all_consistent = True
         
-        for lang in languages[1:]:
+        for lang in languages:
             lang_keys = self.translation_keys[lang]
             
             # Keys in base but not in this language
@@ -550,15 +598,15 @@ class TranslationVerifier:
         report.append("")
         
         if len(self.translation_keys) >= 2:
-            languages = list(self.translation_keys.keys())
-            base_lang = languages[0]
+            base_lang = self._reference_language()
             base_keys = self.translation_keys[base_lang]
+            languages = [lang for lang in sorted(self.translation_keys) if lang != base_lang]
             
             report.append(f"Using {base_lang}.json as reference ({len(base_keys)} keys)")
             report.append("")
             
             all_consistent = True
-            for lang in languages[1:]:
+            for lang in languages:
                 lang_keys = self.translation_keys[lang]
                 missing = sorted(base_keys - lang_keys)
                 extra = sorted(lang_keys - base_keys)
@@ -591,9 +639,10 @@ class TranslationVerifier:
         
         return "\n".join(report)
     
-    def save_report(self, filename: str = "translation_report.txt"):
-        """Save detailed report to file"""
+    def save_report(self, filename=None):
+        """Save detailed report to file, at the repository root by default"""
         report = self.generate_report()
+        filename = Path(filename) if filename else self.report_path
         
         try:
             with open(filename, 'w', encoding='utf-8') as f:

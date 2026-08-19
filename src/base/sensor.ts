@@ -7,6 +7,8 @@
  *      label: false,
  *      icon: true,
  *      icon_color: "#ec2330",
+ *      round: 2,               // 12.3456 -> "12.35"
+ *      text_color: "$DEVICE-COLOR$",   // value + unit share the colour
  *      tap_action: {
  *        domain: "redsea_ui",
  *        action: "dialog",
@@ -31,6 +33,7 @@ import style_sensor from "./sensor.styles";
 import style_animations from "../utils/animations.styles";
 import { MyElement } from "./element";
 import { COLOR_BUTTON_RGB } from "../utils/colors";
+import { OFF_COLOR } from "../utils/constants";
 
 import type { SensorConfig } from "../types/index";
 
@@ -67,6 +70,69 @@ export class Sensor extends MyElement {
     if (this.stateObj) {
       this.stateOn = this.stateObj.state === "on";
     }
+  }
+
+  /**
+   * Number of decimals to render, or null when the value is left untouched.
+   *
+   * `round` is the general form: round(2) keeps two decimals, round(0) yields
+   * an integer. `force_integer` predates it and is kept working, but it is
+   * NOT folded into round(0) here on purpose: this class rounds while
+   * SensorTarget floors, and silently changing either would shift displayed
+   * doses. New configs should use `round`.
+   */
+  protected round_digits(): number | null {
+    const digits = (this.conf as any)?.round;
+    if (typeof digits === "number" && Number.isFinite(digits) && digits >= 0) {
+      return Math.floor(digits);
+    }
+    return null;
+  }
+
+  /**
+   * Apply `round` to a value, leaving non-numeric values alone.
+   */
+  protected apply_round(value: string | number): string | number {
+    const digits = this.round_digits();
+    if (digits === null) return value;
+    const numeric = typeof value === "number" ? value : parseFloat(value);
+    if (isNaN(numeric)) return value;
+    return numeric.toFixed(digits);
+  }
+
+  /**
+   * Resolve conf.text_color into a usable CSS colour.
+   *
+   * A literal such as "red" or "#ec2330" is used as is: evaluate() would treat
+   * it as a JS expression and return undefined. Only a real template — one
+   * containing ${...} — is evaluated. The device-colour tokens are honoured
+   * here too, so text_color behaves like the css block.
+   */
+  protected resolve_text_color(): string {
+    const raw = this.conf?.text_color;
+    if (!raw) return "";
+
+    let value: string;
+    if (typeof raw === "string" && !raw.includes("${")) {
+      value = raw;
+    } else {
+      value = String(this.evaluate(raw) ?? "");
+    }
+    value = value.replaceAll('"', "");
+
+    if (
+      this.device &&
+      (value === "$DEVICE-COLOR$" || value === "$DEVICE-COLOR-ALPHA$")
+    ) {
+      const device_color = this.device.is_on()
+        ? this.device.config.color
+        : OFF_COLOR;
+      value =
+        value === "$DEVICE-COLOR$"
+          ? `rgb(${device_color})`
+          : `rgba(${device_color},${this.device.config.alpha})`;
+    }
+    return value;
   }
 
   /**
@@ -121,14 +187,23 @@ export class Sensor extends MyElement {
           value = Math.round(numValue).toString();
         }
       }
+      value = this.apply_round(value);
       if (this.conf.prefix) {
         value = this.evaluate(this.conf.prefix).replaceAll('"', "") + value;
       }
     }
 
-    return html`${value}
+    // text_color colours the value AND the unit, which `css: {color}` cannot
+    // guarantee once unit_css sets its own colour. Wrapping both in one span
+    // keeps them consistent whatever unit_css does.
+    const text_color = this.resolve_text_color();
+    const body = html`${value}
     ${unit
       ? html`<span style=${this.get_style("unit_css")}>${unit}</span>`
       : ""}`;
+
+    return text_color
+      ? html`<span style="color:${text_color}">${body}</span>`
+      : body;
   }
 }

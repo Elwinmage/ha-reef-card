@@ -1,11 +1,5 @@
 {
-  "dev_in_progress": [
-    "rsato",
-    "rsled_g1",
-    "rsled_g2",
-    "rsled_virtual",
-    "rswave"
-  ],
+  "dev_in_progress": ["rsled_g1", "rsled_g2", "rsled_virtual", "rswave"],
   "ignore": {
     "*": {},
     "rsrun": {

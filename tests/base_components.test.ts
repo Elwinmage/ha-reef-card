@@ -1194,3 +1194,186 @@ describe("ClickImage._render() — L42 branch coverage", () => {
     expect(result).toBeDefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// round / text_color on common-sensor
+// ---------------------------------------------------------------------------
+describe("Sensor round and text_color", () => {
+  let sensor: any;
+  beforeEach(() => {
+    sensor = new StubSensor();
+    sensor.device = makeDevice();
+    sensor._hass = makeHass();
+    sensor.stateObj = makeState("12.3456", "sensor.x", {
+      unit_of_measurement: "mL",
+    });
+  });
+
+  it("round(2) keeps two decimals", () => {
+    sensor.conf = { name: "x", round: 2 };
+    expect(sensor.apply_round("12.3456")).toBe("12.35");
+  });
+
+  it("round(0) yields an integer", () => {
+    sensor.conf = { name: "x", round: 0 };
+    expect(sensor.apply_round("12.6")).toBe("13");
+  });
+
+  it("round pads missing decimals", () => {
+    sensor.conf = { name: "x", round: 2 };
+    expect(sensor.apply_round("12")).toBe("12.00");
+  });
+
+  it("leaves the value untouched without round", () => {
+    sensor.conf = { name: "x" };
+    expect(sensor.apply_round("12.3456")).toBe("12.3456");
+  });
+
+  it("leaves non-numeric states untouched", () => {
+    sensor.conf = { name: "x", round: 2 };
+    expect(sensor.apply_round("unavailable")).toBe("unavailable");
+  });
+
+  it("ignores a negative round", () => {
+    sensor.conf = { name: "x", round: -1 };
+    expect(sensor.round_digits()).toBeNull();
+  });
+
+  it("ignores a non-numeric round", () => {
+    sensor.conf = { name: "x", round: "two" as any };
+    expect(sensor.round_digits()).toBeNull();
+  });
+
+  it("accepts a numeric value as well as a string", () => {
+    sensor.conf = { name: "x", round: 1 };
+    expect(sensor.apply_round(3.14159)).toBe("3.1");
+  });
+
+  // The stub overrides _render, so reach the real implementation explicitly
+  const realRender = (elt: any) =>
+    (Sensor.prototype as any)._render.call(elt, "");
+
+  it("force_integer still works on its own", () => {
+    sensor.conf = { name: "x", force_integer: true, type: "common-sensor" };
+    expect(() => realRender(sensor)).not.toThrow();
+    expect(sensor.round_digits()).toBeNull();
+  });
+
+  it("renders without text_color when unset", () => {
+    sensor.conf = { name: "x", type: "common-sensor" };
+    expect(() => realRender(sensor)).not.toThrow();
+  });
+
+  it("renders with text_color set", () => {
+    sensor.conf = { name: "x", type: "common-sensor", text_color: "red" };
+    expect(() => realRender(sensor)).not.toThrow();
+  });
+
+  it("renders with text_color and no unit", () => {
+    sensor.stateObj = makeState("5", "sensor.x", {});
+    sensor.conf = {
+      name: "x",
+      type: "common-sensor",
+      text_color: "red",
+      unit: "",
+    };
+    expect(() => realRender(sensor)).not.toThrow();
+  });
+
+  it("renders round applied to the displayed value", () => {
+    sensor.conf = { name: "x", type: "common-sensor", round: 2 };
+    expect(() => realRender(sensor)).not.toThrow();
+  });
+});
+
+describe("get_style device-colour tokens", () => {
+  it("substitutes $DEVICE-COLOR$ on any property, not just background", () => {
+    const sensor: any = new StubSensor();
+    sensor.device = makeDevice();
+    sensor._hass = makeHass();
+    sensor.conf = {
+      name: "x",
+      css: { color: "$DEVICE-COLOR$", "background-color": "$DEVICE-COLOR$" },
+    };
+    const style = sensor.get_style("css");
+    expect(style).toContain("color:rgb(");
+    expect(style).not.toContain("$DEVICE-COLOR$");
+  });
+
+  it("substitutes $DEVICE-COLOR-ALPHA$ on any property", () => {
+    const sensor: any = new StubSensor();
+    sensor.device = makeDevice();
+    sensor._hass = makeHass();
+    sensor.conf = {
+      name: "x",
+      css: { "border-color": "$DEVICE-COLOR-ALPHA$" },
+    };
+    expect(sensor.get_style("css")).toContain("border-color:rgba(");
+  });
+});
+
+describe("Sensor resolve_text_color", () => {
+  function makeSensor(text_color: any, device_on = true): any {
+    const s: any = new StubSensor();
+    s.device = makeDevice(device_on);
+    s._hass = makeHass();
+    s.stateObj = makeState("1", "sensor.x");
+    s.conf = { name: "x", text_color };
+    return s;
+  }
+
+  it("returns '' when unset", () => {
+    expect(makeSensor(undefined).resolve_text_color()).toBe("");
+  });
+
+  it("uses a literal colour as is", () => {
+    expect(makeSensor("red").resolve_text_color()).toBe("red");
+  });
+
+  it("uses a hex literal as is", () => {
+    expect(makeSensor("#ec2330").resolve_text_color()).toBe("#ec2330");
+  });
+
+  it("evaluates a template expression", () => {
+    const s = makeSensor("${'blue'}");
+    expect(s.resolve_text_color()).toBe("blue");
+  });
+
+  it("accepts a DynamicValue object", () => {
+    const s = makeSensor({ expression: "${'green'}" });
+    expect(s.resolve_text_color()).toBe("green");
+  });
+
+  it("coerces a nullish evaluation to an empty string", () => {
+    const s = makeSensor("${''}");
+    s.evaluate = () => null;
+    expect(s.resolve_text_color()).toBe("");
+  });
+
+  it("falls back to '' when a template evaluates to nothing", () => {
+    const s = makeSensor("${undefined_variable_xyz}");
+    expect(typeof s.resolve_text_color()).toBe("string");
+  });
+
+  it("substitutes $DEVICE-COLOR$ when the device is on", () => {
+    expect(makeSensor("$DEVICE-COLOR$").resolve_text_color()).toContain("rgb(");
+  });
+
+  it("substitutes $DEVICE-COLOR-ALPHA$", () => {
+    expect(makeSensor("$DEVICE-COLOR-ALPHA$").resolve_text_color()).toContain(
+      "rgba(",
+    );
+  });
+
+  it("uses the off colour when the device is off", () => {
+    const out = makeSensor("$DEVICE-COLOR$", false).resolve_text_color();
+    expect(out).toContain("rgb(");
+  });
+
+  it("leaves the token untouched without a device", () => {
+    const s: any = new StubSensor();
+    s._hass = makeHass();
+    s.conf = { name: "x", text_color: "$DEVICE-COLOR$" };
+    expect(s.resolve_text_color()).toBe("$DEVICE-COLOR$");
+  });
+});

@@ -357,11 +357,15 @@ export class MyElement extends LitElement {
         if (!this.device.is_on()) {
           device_color = OFF_COLOR;
         }
-        if (o_style["background-color"] === "$DEVICE-COLOR$") {
-          o_style["background-color"] = "rgb(" + device_color + ")";
-        } else if (o_style["background-color"] === "$DEVICE-COLOR-ALPHA$") {
-          o_style["background-color"] =
-            "rgba(" + device_color + "," + this.device.config.alpha + ")";
+        // The device-colour tokens apply to any property, not just
+        // background-color: `color`, `border-color` and friends need them too.
+        for (const [key, val] of Object.entries(o_style)) {
+          if (val === "$DEVICE-COLOR$") {
+            o_style[key] = "rgb(" + device_color + ")";
+          } else if (val === "$DEVICE-COLOR-ALPHA$") {
+            o_style[key] =
+              "rgba(" + device_color + "," + this.device.config.alpha + ")";
+          }
         }
       }
       style = Object.entries(o_style)
