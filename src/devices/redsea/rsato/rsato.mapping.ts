@@ -219,9 +219,9 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         color: COLOR_WHITE_60,
-        width: "5.3%",
+        width: "27.3%",
         top: "1.5%",
-        left: "80%",
+        left: "74%",
       },
     },
     fill: {
@@ -381,7 +381,8 @@ export const config = {
       disabled_if: "!device.has_pump()",
       no_br_if_disabled: true,
       text_color: "rgb(240,240,240)",
-      round: 1,
+      round: 0,
+      unit: "${i18n._('days')}",
       css: {
         position: "absolute",
         top: "80%",
