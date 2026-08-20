@@ -56,4 +56,4 @@ jobs:
           # 🎯 C'EST CETTE LIGNE QUI FAIT LA DIFFÉRENCE :
           #  artifacts: "dist/ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
           # allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
