@@ -54,6 +54,6 @@ jobs:
           prerelease: true # Passe à false si tu veux des versions stables
           tag: ${{ github.event.inputs.tag }}
           # 🎯 C'EST CETTE LIGNE QUI FAIT LA DIFFÉRENCE :
-          artifacts: "dist/ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          #  artifacts: "dist/ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
+          # allowUpdates: true
+        token: ${{ secrets.GITHUB_TOKEN }}
