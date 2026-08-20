@@ -12,6 +12,69 @@ export const config = {
   },
 
   elements: {
+    // --- Optional accessories --------------------------------------------
+    // Both overlays are full-canvas PNGs with a transparent background, so
+    // they need no positioning: they are simply stacked over background_img.
+    //
+    // They are declared FIRST on purpose. Elements paint in declaration
+    // order, so anything below stays visually and functionally on top of
+    // them. pointer-events is disabled as well: a full-canvas image would
+    // otherwise swallow every click aimed at the controls underneath,
+    // including over its transparent areas.
+    pump: {
+      // Bound to `mode`: that is the entity carrying both presence and fault
+      // for the pump, and a class holding a "${...}" expression is only
+      // re-evaluated when the element's own stateObj changes.
+      name: "mode",
+      type: "click-image",
+      image: new URL(
+        "../../../img/redsea/RSATO/rsato_pump.png",
+        import.meta.url,
+      ),
+      // No pump paired: draw nothing at all.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
+      // Paired but faulty: blink under a light red tint.
+      class: "${device.pump_alert() ? 'blink-alert' : ''}",
+      css: {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        "pointer-events": "none",
+      },
+      elt_css: {
+        display: "block",
+        width: "100%",
+      },
+    },
+    leak: {
+      // Bound to the PROBLEM sensor so a leak re-renders the element on its
+      // own. Presence is read from the probe's separate `connected` flag
+      // inside has_leak_sensor(), and the disabled_if below already forces a
+      // re-render on every update, so both transitions are covered.
+      name: "status",
+      type: "click-image",
+      image: new URL("../../../img/redsea/RSATO/leak.png", import.meta.url),
+      disabled_if: "!device.has_leak_sensor()",
+      no_br_if_disabled: true,
+      // Three states: leaking, plugged in but disarmed, normal.
+      class:
+        "${device.leak_alert() ? 'blink-alert' : " +
+        "(device.leak_sensor_armed() ? '' : 'muted')}",
+      css: {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        "pointer-events": "none",
+      },
+      elt_css: {
+        display: "block",
+        width: "100%",
+      },
+    },
+
     last_message: {
       name: "last_message",
       type: "redsea-messages",
@@ -128,6 +191,11 @@ export const config = {
     auto_fill: {
       name: "auto_fill",
       type: "click-image",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       icon: "state",
       icon_color: "red",
       master: true,
@@ -159,6 +227,11 @@ export const config = {
     fill: {
       name: "fill",
       type: "click-image",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       icon: "state",
       icon_color: "red",
       master: true,
@@ -177,6 +250,11 @@ export const config = {
     stop_fill: {
       name: "stop_fill",
       type: "click-image",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       icon: "state",
       icon_color: "red",
       master: true,
@@ -195,6 +273,11 @@ export const config = {
     resume: {
       name: "resume",
       type: "click-image",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       icon: "state",
       icon_color: "red",
       master: true,
@@ -217,6 +300,11 @@ export const config = {
     volume_left: {
       name: "volume_left",
       type: "water-level",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       target: "ato_tank_volume",
       target_factor: 1000,
       min_percent: 10,
@@ -287,6 +375,11 @@ export const config = {
     days_till_empty: {
       name: "days_till_empty",
       type: "common-sensor",
+      // Meaningless without a pump: no_br_if_disabled is required because the
+      // element is absolutely positioned — a bare <br> would fall back into
+      // the normal flow and shift the rest of the card.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
       text_color: "rgb(240,240,240)",
       round: 1,
       css: {
