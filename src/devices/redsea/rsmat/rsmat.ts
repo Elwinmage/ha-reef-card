@@ -24,9 +24,14 @@ export class RSMat extends RSDevice {
     elements: null,
   };
 
-  connectedCallback() {
-    super.connectedCallback();
+  /** Untouched reference to the mapping, before any left/right swap. */
+  _originalConfig: typeof config | null = null;
+
+  override async connectedCallback() {
+    // Stored before awaiting the base, so the reference is available to the
+    // very first render rather than one module load later.
     this._originalConfig = config; // store original reference once
+    await super.connectedCallback();
   }
 
   private swapLeftRight = (obj: any): any => {

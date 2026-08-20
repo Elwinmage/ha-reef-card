@@ -169,7 +169,7 @@ export class RSDevice extends LitElement {
     return this._render(style, substyle);
   }
 
-  _render(style?: any, substyle?: any) {
+  _render(style?: any, substyle?: any): TemplateResult {
     return html` <div class="device_bg">
       ${style}
       <img
@@ -630,7 +630,7 @@ export class RSDevice extends LitElement {
     }
     // Re-apply persistent CSS overrides (survive swapLeftRight config recreation)
     if (element && this._conf_overrides[elementKey]?.css) {
-      Object.assign(element.conf.css, this._conf_overrides[elementKey].css);
+      element.merge_css(this._conf_overrides[elementKey].css);
     }
     return html`${element}`;
   }

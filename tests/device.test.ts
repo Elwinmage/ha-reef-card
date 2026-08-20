@@ -2065,12 +2065,16 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
       "common-switch.relay": { css: { opacity: "0.5" } },
     };
 
-    // Create a real-like element with conf.css so Object.assign can run
+    // The device goes through MyElement.merge_css(), a public seam, rather
+    // than assigning into the protected `conf` from outside the class.
     const fakeElem: any = {
       conf: { css: {} },
       hass: null,
       stateOn: false,
       requestUpdate: vi.fn(),
+      merge_css(css: Record<string, string>) {
+        this.conf.css = { ...this.conf.css, ...css };
+      },
     };
     vi.spyOn(MyElement, "create_element").mockReturnValue(fakeElem);
 
@@ -2079,6 +2083,41 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
 
     expect(fakeElem.conf.css.opacity).toBe("0.5");
     vi.restoreAllMocks();
+  });
+
+  /** MyElement extends LitElement: jsdom refuses to construct one unregistered. */
+  let merge_css_seq = 0;
+  function makeElement(): any {
+    const tag = `merge-css-test-${merge_css_seq++}`;
+    class T extends MyElement {}
+    customElements.define(tag, T);
+    return new T();
+  }
+
+  it("merges the override without dropping the element's own css", () => {
+    // Regression guard for the seam: merge_css must add to the existing css,
+    // not replace it, or a positioned element loses its coordinates.
+    const el: any = makeElement();
+    el.conf = { css: { top: "10%", left: "20%" } };
+    el.merge_css({ opacity: "0.5", top: "30%" });
+    expect(el.conf.css).toEqual({
+      top: "30%",
+      left: "20%",
+      opacity: "0.5",
+    });
+  });
+
+  it("ignores a css merge on an element with no conf", () => {
+    const el: any = makeElement();
+    el.conf = undefined;
+    expect(() => el.merge_css({ opacity: "0.5" })).not.toThrow();
+  });
+
+  it("creates the css object when the conf has none", () => {
+    const el: any = makeElement();
+    el.conf = {};
+    el.merge_css({ opacity: "0.5" });
+    expect(el.conf.css).toEqual({ opacity: "0.5" });
   });
 
   it("L571 fallback branch: elementKey uses type.name when declarationKey is undefined", () => {

@@ -106,7 +106,7 @@ export class RSRun extends RSDevice {
           null,
           {} as any,
         );
-        pump.id = pump_id;
+        (pump as any).pump_id = pump_id;
         pump.entities = this._pumps[pump_id].entities;
         // Pass parent-level entities (mode, ec_sensor_connected, …) so
         // child pumps (skimmer) can access them via get_entity()

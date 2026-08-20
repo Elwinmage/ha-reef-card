@@ -7,6 +7,7 @@
 //   IMPORT
 //----------------------------------------------------------------------------//
 import { html, LitElement } from "lit";
+import type { CSSResultGroup } from "lit";
 import { property, state } from "lit/decorators.js";
 
 import type {
@@ -35,7 +36,10 @@ import style_animations from "../utils/animations.styles";
  */
 export class MyElement extends LitElement {
   // Inject animation keyframes into every element's shadow DOM
-  static override styles = [style_animations];
+  // Typed as Lit does (ReactiveElement.styles), not inferred as CSSResult[]:
+  // subclasses legitimately assign a single CSSResult or a nested group, and
+  // the narrower inferred type made every one of them a TS2417.
+  static override styles: CSSResultGroup = [style_animations];
   // Public reactive properties
   @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
@@ -224,6 +228,22 @@ export class MyElement extends LitElement {
         this._longclick();
       },
     });
+  }
+
+  /**
+   * Merge extra CSS into this element's own configuration.
+   *
+   * The device re-applies persistent overrides after a config rebuild, which
+   * used to poke at the protected `conf` from outside the class. This is the
+   * same operation with a public seam, and it tolerates an element whose conf
+   * carries no `css` yet.
+   * @param css: the properties to merge in
+   */
+  merge_css(css: Record<string, string>): void {
+    if (!this.conf) {
+      return;
+    }
+    this.conf.css = { ...(this.conf.css ?? {}), ...css };
   }
 
   /**

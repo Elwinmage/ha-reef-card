@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, TemplateResult } from "lit";
 import { RSDevice } from "../../device";
 
 import { config } from "./rsrun_pump.mapping";
@@ -7,8 +7,14 @@ import { dialogs_rsrun_pump } from "./rsrun_pump.dialogs";
 import type { PumpEntity } from "../../../types/index";
 
 export class RSPump extends RSDevice {
-  protected;
-  id: 1 | 2;
+  /**
+   * Slot this pump occupies on the controller.
+   *
+   * Deliberately not called `id`: that name is taken by HTMLElement, where it
+   * is a string mirrored into the DOM `id` attribute. Shadowing it with a
+   * number made this class unusable as a custom element.
+   */
+  pump_id: 1 | 2 = 1;
 
   /** Set by the parent RSRun from the card editor configuration */
   show_add_pump: boolean = true;

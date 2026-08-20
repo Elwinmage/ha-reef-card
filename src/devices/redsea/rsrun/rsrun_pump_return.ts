@@ -30,12 +30,14 @@ export class RSReturn extends RSPump {
       : html``;
     return html`
       <div>
-        ${this._render_elements(pumpOn, "cables_" + this.id.toString())}
+        ${this._render_elements(pumpOn, "cables_" + this.pump_id.toString())}
       </div>
       ${off_style}
       <img class="device_img" alt="" src="${bg_img}" style="${substyle}" />
       <div>${this._render_elements(pumpOn)}</div>
-      <div>${this._render_elements(pumpOn, "ctrl_" + this.id.toString())}</div>
+      <div>
+        ${this._render_elements(pumpOn, "ctrl_" + this.pump_id.toString())}
+      </div>
     `;
   }
 }
