@@ -42,11 +42,18 @@ jobs:
               sha: '${{steps.update_manifest.outputs.tag_sha}}'
             })
 
-      # --- Si tu as une étape de build (ex: npm run build) avant la release ---
-      # - name: Build JS
-      #   run: |
-      #     npm ci
-      #     npm run build
+      - name: Build HACS zip release
+        run: |
+          # HACS unzips the release asset named after hacs.json "filename"
+          # straight into www/community/ha-reef-card/, so the archive must
+          # contain the *content* of dist/, not the dist/ folder itself.
+          #
+          # Also regenerate the .gz: HACS only creates it when it writes a .js
+          # file individually, never when extracting an archive. Without it,
+          # a stale .gz would keep being served by the /hacsfiles endpoint.
+          gzip -9 -k -f dist/ha-reef-card.js
+          cd dist && zip -r "${GITHUB_WORKSPACE}/ha-reef-card.js" .
+          unzip -l "${GITHUB_WORKSPACE}/ha-reef-card.js"
 
       - name: Create Release with Assets
         uses: ncipollo/release-action@v1
@@ -54,6 +61,6 @@ jobs:
           prerelease: true # Passe à false si tu veux des versions stables
           tag: ${{ github.event.inputs.tag }}
           # 🎯 C'EST CETTE LIGNE QUI FAIT LA DIFFÉRENCE :
-          artifacts: "dist/ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
+          artifacts: "ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
