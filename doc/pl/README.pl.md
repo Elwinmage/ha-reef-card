@@ -459,7 +459,7 @@ Oto lista obsługiwanych obrazów dla suplementów, pogrupowanych według marki.
 </details>
 
 <details>
-<summary><b>Tropic Marin &nbsp; <sup>5/14 🖼️</sup></b></summary>
+<summary><b>Tropic Marin &nbsp; <sup>6/14 🖼️</sup></b></summary>
 
 <table>
 <tr><td>❌</td><td colspan='2'>A Element</td></tr>
@@ -473,7 +473,7 @@ Oto lista obsługiwanych obrazów dla suplementów, pogrupowanych według marki.
 <tr><td>❌</td><td colspan='2'>Elimi-NP</td></tr>
 <tr><td>❌</td><td colspan='2'>K Element</td></tr>
 <tr><td>❌</td><td colspan='2'>Liquid Buffer</td></tr>
-<tr><td>❌</td><td colspan='2'>NP-Bacto-Balance</td></tr>
+<tr><td>✅</td><td>NP-Bacto-Balance</td><td><img style='width:20%;' src='../../public/img/supplements/43b51c1f-0363-4ef5-be89-f129e512e25b.supplement.png'/></td></tr>
 <tr><td>❌</td><td colspan='2'>Plus-NP</td></tr>
 <tr><td>✅</td><td>Potassium</td><td><img style='width:20%;' src='../../public/img/supplements/964e897e-9668-4fc8-9cd9-e8c42a27cf85.supplement.png'/></td></tr>
 </table>
