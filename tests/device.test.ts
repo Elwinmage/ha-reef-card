@@ -681,6 +681,115 @@ describe("RSDevice._render_element() L481 — existing hui-entities-card gets ha
     expect(fakeCard.hass).toBe(dev._hass);
   });
 });
+describe("RSDevice._render_element() — disabled_if on a hui-* element", () => {
+  /**
+   * A hui-* element never builds a MyElement, so the disabled_if that
+   * MyElement.render() would have evaluated has to be handled by the device.
+   * Without it a native card cannot be conditionally hidden at all.
+   */
+  function makeHuiDev() {
+    const dev = makeDev_B();
+    dev._hass = makeHass_B();
+    dev.entities = {};
+    // Already cached, so the test never reaches loadCardHelpers().
+    dev._elements["hui-statistics-graph-card.usage"] = {
+      setConfig: vi.fn(),
+      hass: null as any,
+    };
+    return dev;
+  }
+
+  const conf = (extra: any = {}) => ({
+    type: "hui-statistics-graph-card",
+    name: "usage",
+    conf: { entities: [] },
+    ...extra,
+  });
+
+  it("renders the card when the condition is false", () => {
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => true;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(result).not.toBeNull();
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBe(
+      dev._hass,
+    );
+  });
+
+  it("hides the card when the condition is true", () => {
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => false;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()", no_br_if_disabled: true }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    // The cached card was left untouched: the branch returned before it.
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBeNull();
+    expect(JSON.stringify(result.strings)).not.toContain("br");
+  });
+
+  it("emits a <br> when no_br_if_disabled is not set", () => {
+    // Same rule as MyElement: an absolutely positioned element needs the flag,
+    // an inline one wants the line break.
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => false;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(JSON.stringify(result.strings)).toContain("br");
+  });
+
+  it("reads entity states in the condition", () => {
+    const dev = makeHuiDev();
+    dev.entities = { mode: { entity_id: "sensor.mode" } };
+    dev._hass = {
+      states: { "sensor.mode": { entity_id: "sensor.mode", state: "empty" } },
+    } as any;
+    dev._elements["hui-statistics-graph-card.usage"] = {
+      setConfig: vi.fn(),
+      hass: null as any,
+    };
+    const result = dev._render_element(
+      conf({
+        disabled_if: "entity.mode?.state === 'empty'",
+        no_br_if_disabled: true,
+      }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBeNull();
+    expect(JSON.stringify(result.strings)).not.toContain("br");
+  });
+
+  it("shows the card when the condition throws", () => {
+    // SafeEval answers false on a throwing expression, so a broken condition
+    // fails open: the card stays visible and the mistake stays findable,
+    // rather than an element silently disappearing.
+    const dev = makeHuiDev();
+    const result = dev._render_element(
+      conf({ disabled_if: "device.nope().boom" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(result).not.toBeNull();
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBe(
+      dev._hass,
+    );
+  });
+});
+
 describe("RSDevice._render_element() L488-490 — existing element stateOn updated", () => {
   it("updates stateOn on an existing element when conf.name is in _elements", () => {
     const dev = makeDev_B();

@@ -15,6 +15,7 @@ import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
 
 import { MyElement } from "../base/element";
+import { SafeEval } from "../utils/SafeEval";
 
 import { dialogs_device } from "./device.dialogs";
 
@@ -479,6 +480,30 @@ export class RSDevice extends LitElement {
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
+  /**
+   * Evaluate a `disabled_if` expression against this device.
+   *
+   * Same context as MyElement: `device`, `entity`, `config` and `i18n`, minus
+   * `stateObj`, which only an element bound to an entity has.
+   *
+   * SafeEval.evaluateCondition() already swallows a throwing expression and
+   * answers false, so a broken condition leaves the element visible rather
+   * than blanking it out — which is the right way round: a mistake stays
+   * findable instead of making a card silently disappear.
+   * @param expression: the condition to evaluate
+   * @param conf: the element configuration, exposed as `config`
+   * @return true when the element should be hidden
+   */
+  evaluate_condition(expression: string, conf: any): boolean {
+    const context = {
+      entity: MyElement.createEntitiesContext(this, this._hass),
+      device: this,
+      config: conf,
+      i18n: i18n,
+    };
+    return new SafeEval(context).evaluateCondition(expression) === true;
+  }
+
   _render_element(
     conf: any,
     state: boolean,
@@ -497,6 +522,15 @@ export class RSDevice extends LitElement {
       sensor_put_in !== put_in
     ) {
       return html``;
+    }
+
+    // hui-* elements never build a MyElement, so the disabled_if that
+    // MyElement.render() would have evaluated has to be handled here or it is
+    // silently ignored — a native card cannot be conditionally hidden.
+    if (conf.type?.startsWith("hui-") && conf.disabled_if) {
+      if (this.evaluate_condition(conf.disabled_if, conf)) {
+        return conf.no_br_if_disabled ? html`` : html`<br />`;
+      }
     }
 
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()

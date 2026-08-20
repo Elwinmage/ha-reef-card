@@ -1,4 +1,8 @@
-import { COLOR_WHITE_60, COLOR_ERROR_HEX } from "../../../utils/colors";
+import {
+  COLOR_WHITE_60,
+  COLOR_WHITE_HEX,
+  COLOR_ERROR_HEX,
+} from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -332,6 +336,59 @@ export const config = {
     // the levels below are read directly as a percentage of the box, which
     // makes them measurable straight off the background picture.
     // "error" is deliberately absent: it renders the no-reading mark.
+    // Daily ATO consumption, drawn inside the sump.
+    //
+    // Reads the long-term statistics, so `today_volume_usage` must carry a
+    // `state_class` on the integration side — without one no statistic is
+    // recorded and the card renders an empty frame.
+    //
+    // `stat_types: ["max"]` with `period: "day"` is what turns a counter that
+    // resets every night into a daily total: the highest value of the day is
+    // the volume dosed that day. A "mean" would average the ramp and report
+    // roughly half of it.
+    //
+    // Declared before water_level so the wave animation paints over the
+    // chart rather than the other way round.
+    today_usage_chart: {
+      name: "today_volume_usage",
+      type: "hui-statistics-graph-card",
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "today_volume_usage",
+      },
+      conf: {
+        type: "statistics-graph",
+        entities: [{ entity: "today_volume_usage", color: COLOR_WHITE_HEX }],
+        chart_type: "bar",
+        period: "day",
+        days_to_show: 14,
+        stat_types: ["max"],
+        title: " ",
+        min_y_axis: 0,
+        hide_legend: true,
+        logarithmic_scale: false,
+      },
+      // Nothing is dosed without a pump, so the chart would be flat at zero.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        display: "block",
+        top: "58%",
+        left: "54%",
+        width: "44%",
+        height: "34%",
+        // The card sits on top of the animated sump water, so its own
+        // background has to get out of the way — otherwise it hides the wave
+        // it is supposed to float on.
+        "--ha-card-background": "transparent",
+        "--ha-card-box-shadow": "none",
+        "--ha-card-border-width": "0",
+        "--graph-color-1": COLOR_WHITE_HEX,
+      },
+    },
     water_level: {
       name: "sensor.water_level",
       type: "water-level",

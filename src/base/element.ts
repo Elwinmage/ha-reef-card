@@ -87,10 +87,7 @@ export class MyElement extends LitElement {
    * @param hass: the hass states
    * @return a context to help evaluate dynamic strings
    */
-  private static createEntitiesContext(
-    device: any,
-    hass: any,
-  ): Record<string, any> {
+  static createEntitiesContext(device: any, hass: any): Record<string, any> {
     const entitiesObj: Record<string, any> = {};
 
     if (device?.entities && hass?.states) {
