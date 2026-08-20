@@ -24,4 +24,13 @@ export default css`
   .click-icon {
     display: inline-block;
   }
+
+  /* An <img> with no elt_css renders at its intrinsic size and ignores the
+     width its wrapper was given, which is how a positioned overlay ends up
+     spilling over the card. This only ever clamps: an image already smaller
+     than its wrapper is untouched. Elements that must *fill* their wrapper
+     still say so with elt_css.width. */
+  .click-image {
+    max-width: 100%;
+  }
 `;

@@ -228,6 +228,10 @@ export const config2 = {
         },
       },
       calibration: {
+        // Fills the positioned box below instead of rendering at its own size
+        elt_css: {
+          width: "100%",
+        },
         css: {
           //"flex": "0 0 auto",
           position: "absolute",

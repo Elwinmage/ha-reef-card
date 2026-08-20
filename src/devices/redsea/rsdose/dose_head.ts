@@ -103,6 +103,10 @@ export class DoseHead extends RSDevice {
             },
           ],
           css: this.config.calibration.css,
+          // The mapping positions this overlay precisely (width/left/top), so
+          // the image has to fill that box rather than keep its own size. The
+          // fallback covers a user config that replaced `calibration` whole.
+          elt_css: this.config.calibration.elt_css ?? { width: "100%" },
         };
         calibration = MyElement.create_element(this._hass, conf, this);
       }
