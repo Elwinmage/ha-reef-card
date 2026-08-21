@@ -132,6 +132,7 @@
   "test_calibration_description": "Placez le récipient gradué vide à la sortie de la tête et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'",
   "test_calibration_validation": "La valeur est elle égale à 4 mL +/- (0.05mL)?",
   "timer": "Minuteur",
+  "today_volume_usage": "Volume du jour",
   "unit_days": "jours",
   "unit_months": "mois",
   "unit_weeks": "semaines",

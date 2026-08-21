@@ -132,6 +132,7 @@
   "test_calibration_description": "Leeren Messbehälter am Auslass des Kopfes platzieren und 'Kalibrierung testen' drücken oder 'Abschließen' drücken",
   "test_calibration_validation": "Ist der Wert gleich 4 mL +/- (0,05 mL)?",
   "timer": "Timer",
+  "today_volume_usage": "Tagesvolumen",
   "unit_days": "Tage",
   "unit_months": "Monate",
   "unit_weeks": "Wochen",

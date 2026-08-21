@@ -481,6 +481,59 @@ export class RSDevice extends LitElement {
    * @put_in: a grouping div to put element on
    */
   /**
+   * Evaluate every `${...}` template found in a native card configuration.
+   *
+   * A `hui-*` block goes straight to `createCardElement()`, so it never passes
+   * through the SafeEval that MyElement applies to labels and classes. Without
+   * this, a mapping shared across seven locales can only carry hard-coded
+   * strings — `name: "${i18n._('<key>')}"` would reach the legend verbatim.
+   *
+   * Walks the whole structure in place: templates turn up in `name`, `title`,
+   * axis labels, and any option a card may add later, so the key names are not
+   * hardcoded. Strings without `${` are left untouched, which keeps entity ids
+   * and colours safe from the evaluator.
+   *
+   * @param node: the value to walk, mutated in place for objects and arrays
+   * @param evaluator: the SafeEval bound to this device
+   * @return the value with its templates resolved
+   */
+  private _resolve_templates(node: any, evaluator: SafeEval): any {
+    if (typeof node === "string") {
+      // The evaluator is only worth its cost on an actual template, and this
+      // also guarantees a plain string is returned unchanged rather than
+      // round-tripped through the expression parser.
+      return node.includes("${") ? evaluator.evaluate(node) : node;
+    }
+    if (Array.isArray(node)) {
+      for (let pos = 0; pos < node.length; pos++) {
+        node[pos] = this._resolve_templates(node[pos], evaluator);
+      }
+      return node;
+    }
+    if (node && typeof node === "object") {
+      for (const key of Object.keys(node)) {
+        node[key] = this._resolve_templates(node[key], evaluator);
+      }
+      return node;
+    }
+    return node;
+  }
+
+  /**
+   * Build the SafeEval used for both `disabled_if` and card templates.
+   * @param conf: the element configuration, exposed as `config`
+   * @return an evaluator bound to this device
+   */
+  private _evaluator(conf: any): SafeEval {
+    return new SafeEval({
+      entity: MyElement.createEntitiesContext(this, this._hass),
+      device: this,
+      config: conf,
+      i18n: i18n,
+    });
+  }
+
+  /**
    * Evaluate a `disabled_if` expression against this device.
    *
    * Same context as MyElement: `device`, `entity`, `config` and `i18n`, minus
@@ -495,13 +548,7 @@ export class RSDevice extends LitElement {
    * @return true when the element should be hidden
    */
   evaluate_condition(expression: string, conf: any): boolean {
-    const context = {
-      entity: MyElement.createEntitiesContext(this, this._hass),
-      device: this,
-      config: conf,
-      i18n: i18n,
-    };
-    return new SafeEval(context).evaluateCondition(expression) === true;
+    return this._evaluator(conf).evaluateCondition(expression) === true;
   }
 
   _render_element(
@@ -547,7 +594,10 @@ export class RSDevice extends LitElement {
       if (!(key in this._elements)) {
         if (this._hass && conf.conf) {
           // Resolve translation_key -> real entity_id, exactly like dialog.ts
-          const clone = structuredClone(conf.conf);
+          const clone = this._resolve_templates(
+            structuredClone(conf.conf),
+            this._evaluator(conf),
+          );
           if (clone?.entity) {
             const e = clone.entity;
             if (typeof e === "string") {

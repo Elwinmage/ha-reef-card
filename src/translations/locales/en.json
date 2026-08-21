@@ -132,6 +132,7 @@
   "test_calibration_description": "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'",
   "test_calibration_validation": "Is the value equal to 4 mL +/- (0.05mL)?",
   "timer": "Timer",
+  "today_volume_usage": "Daily volume",
   "unit_days": "days",
   "unit_months": "months",
   "unit_weeks": "weeks",

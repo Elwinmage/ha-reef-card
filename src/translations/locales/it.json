@@ -132,6 +132,7 @@
   "test_calibration_description": "Posizionare il contenitore graduato vuoto all'uscita della testina e premere 'Testa calibrazione' oppure premere 'Termina'",
   "test_calibration_validation": "Il valore è uguale a 4 mL +/- (0,05 mL)?",
   "timer": "Timer",
+  "today_volume_usage": "Volume oggi",
   "unit_days": "giorni",
   "unit_months": "mesi",
   "unit_weeks": "settimane",

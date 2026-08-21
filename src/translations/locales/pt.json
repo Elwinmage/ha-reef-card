@@ -132,6 +132,7 @@
   "test_calibration_description": "Colocar o recipiente graduado vazio na saída da cabeça e premir 'Testar calibração' ou premir 'Terminar'",
   "test_calibration_validation": "O valor é igual a 4 mL +/- (0,05 mL)?",
   "timer": "Temporizador",
+  "today_volume_usage": "Volume do dia",
   "unit_days": "dias",
   "unit_months": "meses",
   "unit_weeks": "semanas",

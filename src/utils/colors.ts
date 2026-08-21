@@ -16,6 +16,10 @@ export const COLOR_WHITE_60 = "rgba(255,255,255,0.6)";
 /** Opaque white. Charts want a hex colour, they do not accept rgba(). */
 export const COLOR_WHITE_HEX = "#ffffff";
 
+// Graph
+export const COLOR_ORANGE_HEX = "#dd772d";
+export const COLOR_BLUE_HEX = "#282dc9";
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Button color
 export const COLOR_BUTTON_RGB: string = "51,151,232";

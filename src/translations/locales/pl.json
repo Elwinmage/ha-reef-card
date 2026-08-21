@@ -132,6 +132,7 @@
   "test_calibration_description": "Umieść pusty pojemnik miarowy przy wylocie głowicy i naciśnij 'Testuj kalibrację' lub naciśnij 'Zakończ'",
   "test_calibration_validation": "Czy wartość wynosi 4 mL +/- (0,05 mL)?",
   "timer": "Timer",
+  "today_volume_usage": "Objętość dnia",
   "unit_days": "dni",
   "unit_months": "miesiące",
   "unit_weeks": "tygodnie",

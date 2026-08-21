@@ -1,6 +1,9 @@
 import {
   COLOR_WHITE_60,
   COLOR_WHITE_HEX,
+  COLOR_BLUE_HEX,
+  COLOR_RS_HEX,
+  COLOR_ORANGE_HEX,
   COLOR_ERROR_HEX,
 } from "../../../utils/colors";
 
@@ -336,59 +339,6 @@ export const config = {
     // the levels below are read directly as a percentage of the box, which
     // makes them measurable straight off the background picture.
     // "error" is deliberately absent: it renders the no-reading mark.
-    // Daily ATO consumption, drawn inside the sump.
-    //
-    // Reads the long-term statistics, so `today_volume_usage` must carry a
-    // `state_class` on the integration side — without one no statistic is
-    // recorded and the card renders an empty frame.
-    //
-    // `stat_types: ["max"]` with `period: "day"` is what turns a counter that
-    // resets every night into a daily total: the highest value of the day is
-    // the volume dosed that day. A "mean" would average the ramp and report
-    // roughly half of it.
-    //
-    // Declared before water_level so the wave animation paints over the
-    // chart rather than the other way round.
-    today_usage_chart: {
-      name: "today_volume_usage",
-      type: "hui-statistics-graph-card",
-      tap_action: {
-        domain: "redsea_ui",
-        action: "more-info",
-        data: "today_volume_usage",
-      },
-      conf: {
-        type: "statistics-graph",
-        entities: [{ entity: "today_volume_usage", color: COLOR_WHITE_HEX }],
-        chart_type: "bar",
-        period: "day",
-        days_to_show: 14,
-        stat_types: ["max"],
-        title: " ",
-        min_y_axis: 0,
-        hide_legend: true,
-        logarithmic_scale: false,
-      },
-      // Nothing is dosed without a pump, so the chart would be flat at zero.
-      disabled_if: "!device.has_pump()",
-      no_br_if_disabled: true,
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        display: "block",
-        top: "58%",
-        left: "54%",
-        width: "44%",
-        height: "34%",
-        // The card sits on top of the animated sump water, so its own
-        // background has to get out of the way — otherwise it hides the wave
-        // it is supposed to float on.
-        "--ha-card-background": "transparent",
-        "--ha-card-box-shadow": "none",
-        "--ha-card-border-width": "0",
-        "--graph-color-1": COLOR_WHITE_HEX,
-      },
-    },
     water_level: {
       name: "sensor.water_level",
       type: "water-level",
@@ -415,6 +365,49 @@ export const config = {
         left: "51.5%",
         width: "48.5%",
         height: "45%",
+      },
+    },
+    // Same data as today_usage_chart, drawn as a bare SVG sparkline instead of
+    // a native card: no axes, no header, and above all no minimum height, so
+    // it holds its proportions whatever the card width. Keep one of the two
+    // and drop the other.
+    today_usage_sparkline: {
+      name: "today_volume_usage",
+      type: "history-chart",
+      // Pinned to the calendar day: today_volume_usage resets at midnight, so
+      // a rolling 24h window would straddle two days and show the reset as a
+      // cliff in the middle of the chart.
+      window: "today",
+      // Set to true to print the resolved entity ids and the number of points
+      // read into the browser console, when the chart stays empty.
+      debug: false,
+      step: true,
+      baseline: "zero",
+      unit: "",
+      // Light panel behind the chart, so the grid reads over the sump water.
+      bg_color: "255,255,255,0.35",
+      axis_color: "40,40,40",
+      // Axis label size. A box under 160px wide drops two pixels off it on
+      // its own, so this is the size on a wide card.
+      font_size: 10,
+      entities: [
+        {
+          entity: "today_volume_usage",
+          color: COLOR_ORANGE_HEX,
+          fill: true,
+          fill_color: "rgba(255, 152, 0, 0.25)",
+        },
+        { entity: "daily_volume_average", color: COLOR_RS_HEX },
+      ],
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
+      css: {
+        position: "absolute",
+        top: "61%",
+        left: "61%",
+        width: "39%",
+        height: "30%",
+        "pointer-events": "none",
       },
     },
     current_read: {
