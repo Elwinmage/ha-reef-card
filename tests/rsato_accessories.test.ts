@@ -134,10 +134,74 @@ describe("RSAto leak probe", () => {
     expect(makeAto({ connected: "on", status: "on" }).leak_alert()).toBe(true);
   });
 
+  it("raises an alert from the raw status sensor alone", () => {
+    // The binary_sensor is computed by the integration from the payload, so
+    // forcing leak_sensor_status in the developer tools moves the sensor
+    // without moving the binary_sensor.
+    const device = makeAto({
+      connected: "on",
+      status: "off",
+      leak_sensor_status: "aquarium_water_leak",
+    });
+    expect(device.leak_alert()).toBe(true);
+  });
+
+  it("raises an alert on an RO/DI leak too", () => {
+    expect(
+      makeAto({ leak_sensor_status: "rodi_water_leak" }).leak_alert(),
+    ).toBe(true);
+  });
+
+  it("raises no alert on a raw dry reading", () => {
+    expect(makeAto({ leak_sensor_status: "dry" }).leak_alert()).toBe(false);
+  });
+
+  it("raises no alert on an unreadable raw status", () => {
+    // unknown / unavailable are not leaks, and a probe that dropped off the
+    // bus must not fire the alarm.
+    expect(makeAto({ leak_sensor_status: "unknown" }).leak_alert()).toBe(false);
+    expect(makeAto({ leak_sensor_status: "unavailable" }).leak_alert()).toBe(
+      false,
+    );
+    expect(makeAto().leak_alert()).toBe(false);
+  });
+
   it("raises no alert on a dry probe", () => {
     expect(makeAto({ connected: "on", status: "off" }).leak_alert()).toBe(
       false,
     );
+  });
+});
+
+describe("RSAto leak source", () => {
+  it("reports no source without a leak", () => {
+    expect(
+      makeAto({ connected: "on", status: "off" }).leak_source(),
+    ).toBeNull();
+  });
+
+  it("names the aquarium side", () => {
+    expect(
+      makeAto({ leak_sensor_status: "aquarium_water_leak" }).leak_source(),
+    ).toBe("aquarium");
+  });
+
+  it("names the RO/DI side", () => {
+    expect(
+      makeAto({ leak_sensor_status: "rodi_water_leak" }).leak_source(),
+    ).toBe("rodi");
+  });
+
+  it("admits it does not know when only the binary sensor fired", () => {
+    // Better than guessing a side: the picture must not claim to know more
+    // than the device said.
+    expect(makeAto({ status: "on" }).leak_source()).toBe("unknown");
+    expect(
+      makeAto({
+        status: "on",
+        leak_sensor_status: "unavailable",
+      }).leak_source(),
+    ).toBe("unknown");
   });
 });
 
@@ -213,9 +277,118 @@ describe("RSATO mapping", () => {
     }
   });
 
+  it("draws one puddle per leak source, on its own side", () => {
+    // Position carries the meaning: left under the RO reservoir, right under
+    // the sump, so no label is needed on a strip 3% of the card high.
+    const rodi = elements["leak_puddle_rodi"];
+    const aquarium = elements["leak_puddle_aquarium"];
+    const unknown = elements["leak_puddle_unknown"];
+
+    expect(rodi.disabled_if).toBe("device.leak_source() !== 'rodi'");
+    expect(aquarium.disabled_if).toBe("device.leak_source() !== 'aquarium'");
+    expect(unknown.disabled_if).toBe("device.leak_source() !== 'unknown'");
+
+    // The RO/DI puddle sits left of the aquarium one.
+    expect(parseFloat(rodi.css.left)).toBeLessThan(
+      parseFloat(aquarium.css.left),
+    );
+    // An unknown side spreads over both halves rather than guessing one.
+    expect(parseFloat(unknown.css.width)).toBeGreaterThan(
+      parseFloat(rodi.css.width),
+    );
+  });
+
+  it("draws every puddle as a threshold, not a gauge", () => {
+    for (const key of [
+      "leak_puddle_rodi",
+      "leak_puddle_aquarium",
+      "leak_puddle_unknown",
+    ]) {
+      const puddle = elements[key];
+      expect(puddle.no_br_if_disabled).toBe(true);
+      // A fixed height: no state lookup that could fall through to the
+      // no-reading mark, and no percentage printed on a puddle.
+      expect(puddle.level).toBe(100);
+      expect(puddle.levels).toBeUndefined();
+      expect(puddle.show_value).toBe(false);
+      expect(puddle.css["pointer-events"]).toBe("none");
+      // No fill override: the puddle takes the device colour, like the water
+      // in the two tanks.
+      expect(puddle.colors).toBeUndefined();
+    }
+  });
+
   it("keeps the sump probe visible without a pump", () => {
     // The sump level comes from the controller itself, not from the pump.
     expect(elements["water_level"].disabled_if).toBeUndefined();
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   Background alert
+//----------------------------------------------------------------------------//
+
+describe("RSAto background picture", () => {
+  function render(device: any): string {
+    device.config = { background_img: "", elements: {} };
+    const result: any = device._render(null, "");
+    return result.strings.join("") + result.values.join("");
+  }
+
+  it("blinks the picture on a level probe fault", () => {
+    // The probe is part of the background picture and has no overlay of its
+    // own, so the picture itself carries the alert.
+    const device = makeAto({ is_sensor_error: "on" });
+    expect(render(device)).toContain("blink-alert");
+  });
+
+  it("blinks on the softer check_sensor flag too", () => {
+    expect(render(makeAto({ check_sensor: "on" }))).toContain("blink-alert");
+  });
+
+  it("re-renders when the probe fault appears or clears", () => {
+    // RSDevice only re-runs _render() for a master element or a device
+    // enable/disable, so a plain sensor change would leave a stale class.
+    const device = makeAto({ is_sensor_error: "off" });
+    device.requestUpdate = vi.fn();
+    device._elements = {};
+
+    device._setting_hass({
+      states: {
+        "sensor.is_sensor_error": {
+          entity_id: "sensor.is_sensor_error",
+          state: "on",
+        },
+      },
+    });
+    expect(device.requestUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-render while the probe state is unchanged", () => {
+    // Requesting an update on every hass push would redraw the whole device
+    // several times a second.
+    const device = makeAto({ is_sensor_error: "off" });
+    device.requestUpdate = vi.fn();
+    device._elements = {};
+
+    const hass = {
+      states: {
+        "sensor.is_sensor_error": {
+          entity_id: "sensor.is_sensor_error",
+          state: "off",
+        },
+      },
+    };
+    device._setting_hass(hass);
+    device._setting_hass(hass);
+    expect(device.requestUpdate).not.toHaveBeenCalled();
+  });
+
+  it("leaves the picture alone when the probe is healthy", () => {
+    const device = makeAto({ is_sensor_error: "off", check_sensor: "off" });
+    const text = render(device);
+    expect(text).toContain("device_img");
+    expect(text).not.toContain("blink-alert");
   });
 });
 

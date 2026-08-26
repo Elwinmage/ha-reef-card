@@ -20,6 +20,7 @@ import { SafeEval } from "../utils/SafeEval";
 import { dialogs_device } from "./device.dialogs";
 
 import style_common from "../utils/common.styles";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 @customElement("rs-device")
@@ -69,7 +70,10 @@ export class RSDevice extends LitElement {
 
   protected state: boolean = false;
 
-  static styles = [style_common];
+  // Animations too: a device can put a class such as `blink-alert` on its own
+  // background picture, and those keyframes live in MyElement's stylesheet,
+  // which does not reach the device's shadow root.
+  static styles = [style_common, style_animations];
 
   private _helpers: any;
 

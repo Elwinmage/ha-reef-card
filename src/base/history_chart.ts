@@ -57,7 +57,15 @@
  *                  One is enough: a counter holds its value between changes,
  *                  so a lone sample is an honest flat line, and a day that has
  *                  seen a single fill would otherwise draw nothing at all.
- *   refresh        seconds between two reads at most (default 60)
+ *   refresh        seconds between two reads at most (default 60, or 1 in
+ *                  demo mode where the whole point is to move)
+ *   demo_seconds   demo aid, off by default. Compresses time: the last N real
+ *                  seconds of recorded history are stretched across the whole
+ *                  `window`, so a 24h axis fills in 30s. The recorder cannot
+ *                  be back-dated, so this is the only way to film a day of
+ *                  history without waiting one. The clock is anchored on the
+ *                  oldest sample in that rolling window, not on when the card
+ *                  was opened, so it works whenever the writes start.
  *
  * All series share one vertical scale, anchored on the highest value seen
  * across them. Per-series scales would make two unrelated curves look
@@ -133,6 +141,9 @@ export class HistoryChart extends MyElement {
   /** Follows the box so a percentage-sized chart redraws when it changes. */
   private _ro: ResizeObserver | null = null;
 
+  /** Wall-clock instant the demo compression started from. */
+  private _demo_start = 0;
+
   /**
    * Start reading as soon as the element is on screen.
    */
@@ -196,6 +207,72 @@ export class HistoryChart extends MyElement {
     // A narrow overlay gets a smaller font rather than fewer pixels of chart:
     // shrinking the labels buys back more room than dropping a grid line.
     return width < NARROW_WIDTH ? Math.max(6, size - 2) : size;
+  }
+
+  /**
+   * Number of real seconds a full window is compressed into, 0 when off.
+   */
+  get demo_seconds(): number {
+    const raw = Number(this.conf?.demo_seconds);
+    return Number.isFinite(raw) && raw > 0 ? raw : 0;
+  }
+
+  /**
+   * The real interval to read from the recorder.
+   *
+   * In demo mode this is the handful of seconds since the element appeared,
+   * not the displayed window: the recorder holds nothing older, because the
+   * data is being written live and history cannot be back-dated.
+   *
+   * @return the first and last instant to ask the recorder for
+   */
+  fetch_window(): { start: number; end: number } {
+    const demo = this.demo_seconds;
+    if (demo === 0) {
+      return this.display_window();
+    }
+    // Rolling, not anchored on when the card was opened. A fixed anchor only
+    // worked if the writes began within `demo` seconds of the dashboard
+    // loading; open the page first and start the script five minutes later,
+    // and every sample lands past the end of the compressed day, clamped onto
+    // the right edge — a vertical line nobody can see.
+    const now = Date.now();
+    return { start: now - demo * 1000, end: now };
+  }
+
+  /**
+   * Project a real instant onto the displayed axis.
+   *
+   * Identity outside demo mode. Inside it, the real seconds elapsed are
+   * stretched by `window span / demo_seconds`, which is what turns half a
+   * minute of live writes into a full day on screen.
+   *
+   * @param stamp: a wall-clock instant
+   * @return where it belongs on the axis
+   */
+  compress(stamp: number): number {
+    const demo = this.demo_seconds;
+    if (demo === 0) {
+      return stamp;
+    }
+    const axis = this.display_window();
+    const factor = (axis.end - axis.start) / (demo * 1000);
+    const placed = axis.start + (stamp - this._demo_start) * factor;
+    // Clamped to the axis: the recorder stores whole seconds, so a sample
+    // written a few hundred milliseconds before the demo started comes back
+    // rounded down, and the factor turns that into a point drawn an hour off
+    // the left edge.
+    return Math.min(axis.end, Math.max(axis.start, placed));
+  }
+
+  /**
+   * The instant a curve should be held out to.
+   *
+   * @return the right-hand end of the drawn data, on the axis
+   */
+  present(): number {
+    const fetched = this.fetch_window();
+    return Math.min(this.compress(fetched.end), this.display_window().end);
   }
 
   /**
@@ -331,15 +408,21 @@ export class HistoryChart extends MyElement {
       return;
     }
 
-    const refresh = Number(this.conf?.refresh ?? 60) * 1000;
     const now = Date.now();
+    if (this._demo_start === 0) {
+      this._demo_start = now;
+    }
+    // A demo that only redraws once a minute does not move; the whole point
+    // is a curve growing on screen.
+    const default_refresh = this.demo_seconds > 0 ? 1 : 60;
+    const refresh = Number(this.conf?.refresh ?? default_refresh) * 1000;
     if (this._fetching || now - this._last_fetch < refresh) {
       return;
     }
     this._fetching = true;
 
     try {
-      const span = this.display_window();
+      const span = this.fetch_window();
       // Never ask beyond the present: the recorder has nothing there, and a
       // "today" window runs to tomorrow's midnight.
       const end = new Date(Math.min(now, span.end));
@@ -353,10 +436,48 @@ export class HistoryChart extends MyElement {
         // small on entities that have been updating all day.
         minimal_response: true,
         no_attributes: true,
+        // Every recorded change, not the "significant" subset: this is a
+        // numeric curve, and the filter defaults to true.
+        significant_changes_only: false,
       });
-      for (const s of wanted) {
-        s.points = HistoryChart.parse_history(answer, s.entity_id);
+      const parsed = wanted.map((s) =>
+        HistoryChart.parse_history(answer, s.entity_id),
+      );
+
+      if (this.demo_seconds > 0) {
+        // Anchored on the oldest sample in the rolling window, so the curve
+        // starts at the left edge as soon as the writes begin and only fills
+        // the axis once `demo_seconds` of them exist. Falling back to the
+        // window start keeps an empty read from moving the anchor.
+        const oldest = parsed
+          .flat()
+          .reduce(
+            (acc, point) => Math.min(acc, point.t),
+            Number.POSITIVE_INFINITY,
+          );
+        // Clamped into the window. `include_start_time_state` defaults to
+        // true, so the first row carries the state in force when the window
+        // opened — timestamped whenever it last changed, possibly hours ago.
+        // Anchoring on that would stretch the compression over those hours
+        // and squeeze every real sample onto the right edge.
+        this._demo_start = Math.max(
+          span.start,
+          Number.isFinite(oldest) ? oldest : span.start,
+        );
       }
+
+      wanted.forEach((s, index) => {
+        // parsed was built by mapping over `wanted`, so the index always
+        // resolves; the cast avoids a guard that can never fire.
+        const points = parsed[index] as HistoryPoint[];
+        // Compressed on the way in, so everything downstream — the scale, the
+        // staircase, the hold-to-now — works on axis time and needs no
+        // knowledge of the demo mode.
+        s.points =
+          this.demo_seconds > 0
+            ? points.map((point) => ({ t: this.compress(point.t), v: point.v }))
+            : points;
+      });
       this.series = wanted;
       this._last_fetch = Date.now();
       if (this.conf?.debug) {
@@ -717,7 +838,7 @@ export class HistoryChart extends MyElement {
     // No emptiness guard: draw() only ever passes series that
     // drawable_series() kept, so there is at least one sample and previous_y
     // has been set.
-    const edge = x_of(Math.min(Date.now(), this.display_window().end));
+    const edge = x_of(this.present());
     if (edge > coords[coords.length - 1]![0]) {
       coords.push([edge, previous_y as number]);
     }

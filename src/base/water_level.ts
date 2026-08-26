@@ -33,6 +33,18 @@
  *   }
  *   Any state missing from `levels` (typically "error", but also unknown /
  *   unavailable) renders the no-reading mark instead of an empty tank.
+ *
+ * 3) Fixed mode — a constant height, for water whose presence is the whole
+ *    information and whose depth means nothing. Used for the puddle a leak
+ *    probe reports: the probe is a threshold, not a gauge. `disabled_if`
+ *    decides whether the element exists at all, so no state is consulted and
+ *    no no-reading mark can appear:
+ *   {
+ *     name: "status",
+ *     type: "water-level",
+ *     level: 100,
+ *     disabled_if: "!device.leak_alert()",
+ *   }
  */
 
 //----------------------------------------------------------------------------//
@@ -111,6 +123,11 @@ export class WaterLevel extends ProgressBar {
    * the state itself, so only stateObj has to resolve.
    */
   protected override hasTargetState(): boolean {
+    // A fixed level needs neither a target nor a readable state: its height
+    // is a constant and its presence is decided by disabled_if.
+    if (typeof this.conf?.level === "number") {
+      return true;
+    }
     if (this.conf?.levels) {
       return !!this.stateObj;
     }
@@ -124,6 +141,13 @@ export class WaterLevel extends ProgressBar {
    */
   protected resolveLevel(): number | null {
     const state = this.stateObj?.state;
+
+    // Fixed mode: the height carries no information, only the presence does.
+    // Checked first so a threshold probe whose own state is unreadable still
+    // draws water rather than the no-reading mark.
+    if (typeof this.conf?.level === "number") {
+      return this.conf.level;
+    }
 
     // Discrete mode: the state names a mark on the glass.
     if (this.conf?.levels) {
@@ -212,7 +236,10 @@ export class WaterLevel extends ProgressBar {
     // domain-prefixed key is the reliable one.
     const stateObj = this.resolveValueStateObj();
 
-    if (this.conf?.levels) {
+    // Discrete and fixed modes both name a state rather than a proportion. In
+    // fixed mode the height is a constant, so printing it as a percentage
+    // would put a meaningless "100%" on a puddle whose depth means nothing.
+    if (this.conf?.levels || typeof this.conf?.level === "number") {
       // formatEntityState applies Home Assistant's own state translations,
       // which a label expression cannot reach: the SafeEval context exposes
       // entity states, not the hass helpers.

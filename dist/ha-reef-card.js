@@ -65,7 +65,7 @@ const { is: vg, defineProperty: qg, getOwnPropertyDescriptor: yg, getOwnProperty
   return I;
 } }, aI = (e, A) => !vg(e, A), vI = { attribute: !0, type: String, converter: KA, reflect: !1, useDefault: !1, hasChanged: aI };
 Symbol.metadata ??= /* @__PURE__ */ Symbol("metadata"), HA.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-let EA = class extends HTMLElement {
+let tA = class extends HTMLElement {
   static addInitializer(A) {
     this._$Ei(), (this.l ??= []).push(A);
   }
@@ -246,10 +246,10 @@ let EA = class extends HTMLElement {
   firstUpdated(A) {
   }
 };
-EA.elementStyles = [], EA.shadowRootOptions = { mode: "open" }, EA[oA("elementProperties")] = /* @__PURE__ */ new Map(), EA[oA("finalized")] = /* @__PURE__ */ new Map(), Xg?.({ ReactiveElement: EA }), (HA.reactiveElementVersions ??= []).push("2.1.2");
+tA.elementStyles = [], tA.shadowRootOptions = { mode: "open" }, tA[oA("elementProperties")] = /* @__PURE__ */ new Map(), tA[oA("finalized")] = /* @__PURE__ */ new Map(), Xg?.({ ReactiveElement: tA }), (HA.reactiveElementVersions ??= []).push("2.1.2");
 const MI = globalThis, qI = (e) => e, SA = MI.trustedTypes, yI = SA ? SA.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, zg = "$lit$", T = `lit$${Math.random().toFixed(9).slice(2)}$`, Gg = "?" + T, _g = `<${Gg}>`, iA = document, wA = () => iA.createComment(""), rA = (e) => e === null || typeof e != "object" && typeof e != "function", YI = Array.isArray, $g = (e) => YI(e) || typeof e?.[Symbol.iterator] == "function", vA = `[ 	
 \f\r]`, lA = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, bI = /-->/g, TI = />/g, $ = RegExp(`>|${vA}(?:([^\\s"'>=/]+)(${vA}*=${vA}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), LI = /'/g, fI = /"/g, hg = /^(?:script|style|textarea|title)$/i, lg = (e) => (A, ...I) => ({ _$litType$: e, strings: A, values: I }), E = lg(1), qA = lg(2), xA = /* @__PURE__ */ Symbol.for("lit-noChange"), B = /* @__PURE__ */ Symbol.for("lit-nothing"), XI = /* @__PURE__ */ new WeakMap(), IA = iA.createTreeWalker(iA, 129);
+\f\r"'\`<>=]|("|')|))|$)`, "g"), LI = /'/g, fI = /"/g, hg = /^(?:script|style|textarea|title)$/i, lg = (e) => (A, ...I) => ({ _$litType$: e, strings: A, values: I }), t = lg(1), qA = lg(2), xA = /* @__PURE__ */ Symbol.for("lit-noChange"), B = /* @__PURE__ */ Symbol.for("lit-nothing"), XI = /* @__PURE__ */ new WeakMap(), IA = iA.createTreeWalker(iA, 129);
 function mg(e, A) {
   if (!YI(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return yI !== void 0 ? yI.createHTML(A) : A;
@@ -259,8 +259,8 @@ const Ai = (e, A) => {
   let i, C = A === 2 ? "<svg>" : A === 3 ? "<math>" : "", c = lA;
   for (let a = 0; a < I; a++) {
     const s = e[a];
-    let M, t, Y = -1, z = 0;
-    for (; z < s.length && (c.lastIndex = z, t = c.exec(s), t !== null); ) z = c.lastIndex, c === lA ? t[1] === "!--" ? c = bI : t[1] !== void 0 ? c = TI : t[2] !== void 0 ? (hg.test(t[2]) && (i = RegExp("</" + t[2], "g")), c = $) : t[3] !== void 0 && (c = $) : c === $ ? t[0] === ">" ? (c = i ?? lA, Y = -1) : t[1] === void 0 ? Y = -2 : (Y = c.lastIndex - t[2].length, M = t[1], c = t[3] === void 0 ? $ : t[3] === '"' ? fI : LI) : c === fI || c === LI ? c = $ : c === bI || c === TI ? c = lA : (c = $, i = void 0);
+    let M, n, Y = -1, z = 0;
+    for (; z < s.length && (c.lastIndex = z, n = c.exec(s), n !== null); ) z = c.lastIndex, c === lA ? n[1] === "!--" ? c = bI : n[1] !== void 0 ? c = TI : n[2] !== void 0 ? (hg.test(n[2]) && (i = RegExp("</" + n[2], "g")), c = $) : n[3] !== void 0 && (c = $) : c === $ ? n[0] === ">" ? (c = i ?? lA, Y = -1) : n[1] === void 0 ? Y = -2 : (Y = c.lastIndex - n[2].length, M = n[1], c = n[3] === void 0 ? $ : n[3] === '"' ? fI : LI) : c === fI || c === LI ? c = $ : c === bI || c === TI ? c = lA : (c = $, i = void 0);
     const x = c === $ && e[a + 1].startsWith("/>") ? " " : "";
     C += c === lA ? s + _g : Y >= 0 ? (g.push(M), s.slice(0, Y) + zg + s.slice(Y) + T + x) : s + T + (Y === -2 ? a : x);
   }
@@ -271,7 +271,7 @@ class jA {
     let i;
     this.parts = [];
     let C = 0, c = 0;
-    const a = A.length - 1, s = this.parts, [M, t] = Ai(A, I);
+    const a = A.length - 1, s = this.parts, [M, n] = Ai(A, I);
     if (this.el = jA.createElement(M, g), IA.currentNode = this.el.content, I === 2 || I === 3) {
       const Y = this.el.content.firstChild;
       Y.replaceWith(...Y.childNodes);
@@ -279,7 +279,7 @@ class jA {
     for (; (i = IA.nextNode()) !== null && s.length < a; ) {
       if (i.nodeType === 1) {
         if (i.hasAttributes()) for (const Y of i.getAttributeNames()) if (Y.endsWith(zg)) {
-          const z = t[c++], x = i.getAttribute(Y).split(T), G = /([.?@])?(.*)/.exec(z);
+          const z = n[c++], x = i.getAttribute(Y).split(T), G = /([.?@])?(.*)/.exec(z);
           s.push({ type: 1, index: C, name: G[2], strings: x, ctor: G[1] === "." ? gi : G[1] === "?" ? ii : G[1] === "@" ? Ci : NA }), i.removeAttribute(Y);
         } else Y.startsWith(T) && (s.push({ type: 6, index: C }), i.removeAttribute(Y));
         if (hg.test(i.tagName)) {
@@ -472,8 +472,8 @@ const si = (e, A, I) => {
   }
   return i._$AI(e), i;
 };
-const EI = globalThis;
-class q extends EA {
+const tI = globalThis;
+class q extends tA {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -495,16 +495,16 @@ class q extends EA {
     return xA;
   }
 }
-q._$litElement$ = !0, q.finalized = !0, EI.litElementHydrateSupport?.({ LitElement: q });
-const ai = EI.litElementPolyfillSupport;
+q._$litElement$ = !0, q.finalized = !0, tI.litElementHydrateSupport?.({ LitElement: q });
+const ai = tI.litElementPolyfillSupport;
 ai?.({ LitElement: q });
-(EI.litElementVersions ??= []).push("4.2.2");
+(tI.litElementVersions ??= []).push("4.2.2");
 const Mi = (e) => (A, I) => {
   I !== void 0 ? I.addInitializer(() => {
     customElements.define(e, A);
   }) : customElements.define(e, A);
 };
-const Yi = { attribute: !0, type: String, converter: KA, reflect: !1, hasChanged: aI }, Ei = (e = Yi, A, I) => {
+const Yi = { attribute: !0, type: String, converter: KA, reflect: !1, hasChanged: aI }, ti = (e = Yi, A, I) => {
   const { kind: g, metadata: i } = I;
   let C = globalThis.litPropertyMetadata.get(i);
   if (C === void 0 && globalThis.litPropertyMetadata.set(i, C = /* @__PURE__ */ new Map()), g === "setter" && ((e = Object.create(e)).wrapped = !0), C.set(I.name, e), g === "accessor") {
@@ -526,7 +526,7 @@ const Yi = { attribute: !0, type: String, converter: KA, reflect: !1, hasChanged
   throw Error("Unsupported decorator location: " + g);
 };
 function d(e) {
-  return (A, I) => typeof I == "object" ? Ei(e, A, I) : ((g, i, C) => {
+  return (A, I) => typeof I == "object" ? ti(e, A, I) : ((g, i, C) => {
     const c = i.hasOwnProperty(C);
     return i.constructor.createProperty(C, g), c ? Object.getOwnPropertyDescriptor(i, C) : void 0;
   })(e, A, I);
@@ -534,10 +534,10 @@ function d(e) {
 function S(e) {
   return d({ ...e, state: !0, attribute: !1 });
 }
-const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine Pumpe angeschlossen, aber noch nicht konfiguriert. Starten Sie die Erkennung und prüfen Sie das erkannte Modell: der Vorschlag des ReefRun ist nicht immer richtig.", zi = "Bild anfordern", Gi = "Zwischen Start und Ende müssen mindestens 30 Minuten liegen", hi = "ATO-Vorratsbehälter", li = "Markenname", mi = "Kalibrierung", oi = "Leeren Messbehälter am Auslass des Kopfes platzieren", wi = "Welchen Wert lesen Sie ab?", ri = "Übersetzungszeichenfolge nicht gefunden: ", ji = "Zeitplan kann nicht gespeichert werden: ", Wi = "Abbrechen", Oi = "Konfiguration", pi = "Rückförderpumpe Konfiguration", Ri = "Abschäumer-Sensor Konfiguration", Di = "Abschäumer Konfiguration", Bi = "Diese Pumpe löschen?", Ui = "Die Pumpeneinstellungen werden zurückgesetzt. Zeitplan und Sensorsteuerung gehen verloren.", Ki = "Benutzerdefiniert", Si = "Benutzerdefinierter Vorlauf", Qi = `Tagesdurchschnitt
-`, di = "Tagesdosis (mL)", ki = "Montag", ui = "Dienstag", Fi = "Mittwoch", Zi = "Donnerstag", Ji = "Freitag", Hi = "Samstag", Ni = "Sonntag", Vi = "Tage", Pi = "Verbleibende Tage", vi = "T", qi = "Pumpe löschen", yi = "Löschvorgang läuft", bi = "Erkennen und hinzufügen", Ti = "Entwicklung geplant", Li = "Neues Nahrungsergänzungsmittel zum Kopf hinzufügen", fi = "Nahrungsergänzungsmittel für Kopf löschen", Xi = "Behälter bearbeiten", _i = "Gerät in HomeAssistant deaktiviert!", $i = "Anzeigename", AC = "Dosen", IC = "Dosierung", gC = "Leer", iC = "Ende", CC = "Endzeit kann nicht vor der Startzeit liegen", eC = "Fehler erkannt", cC = "Beheben Sie die Anomalie und klicken Sie auf 'Fehler behoben'.", sC = "Rollenende in: ", aC = "Fehler behoben", MC = "Fertig", YC = "Abschließen", EC = "Vollbecherkalibrierung", tC = "Kopf", nC = "Kopfkonfiguration", xC = "Kopffarben", zC = "Manuelle Schnelldosen", GC = "Platzhalter zum Hinzufügen ausblenden", hC = "Stunde", lC = "Stündlich", mC = "Letzte Alarmmeldung ausblenden", oC = "Letzte Meldung ausblenden", wC = "Aktivkohlewochessel deaktivieren", rC = "Wartung läuft..", jC = "Alles aktuell", WC = "bald fällig", OC = "Intervall ändern", pC = "Alle", RC = "Stumme ausblenden", DC = "Stummgeschaltete Aufgaben standardmäßig ausblenden", BC = "Aktuelle Aufgaben ausblenden", UC = "Aktuelle Aufgaben standardmäßig ausblenden", KC = "Intervall", SC = "Zuletzt erledigt", QC = "Als erledigt markieren", dC = "Benachrichtigungen für diese Aufgabe deaktivieren", kC = "nie durchgeführt", uC = "Keine Wartungsaufgabe erkannt", FC = "überfällig", ZC = "Stumme anzeigen", JC = "heute", HC = "Benachrichtigungen für diese Aufgabe aktivieren", NC = "Wartung", VC = "Manueller Vorlauf", PC = "Minimum", vC = "Die Mindestdosis für diesen Zeitplantyp beträgt 5 mL", qC = "Monatlich", yC = "Name", bC = "Anzahl der Dosen", TC = "Neue Rolle", LC = "Für eine neue Rolle den folgenden Wert auf das Minimum setzen; andernfalls den Durchmesser der aktuellen Rolle eingeben.", fC = "Weiter", XC = "Nein", _C = "Überschäumungskalibrierung", $C = "Befüllung", Ae = "Rückförder", Ie = "Abschäumer", ge = "Schnell", ie = "Regelmäßig", Ce = "Speichern", ee = "Zeitplan speichern", ce = "+ Hinzufügen", se = "Abbrechen", ae = "Intensität (%)", Me = "Vorschau", Ye = "Läuft…", Ee = "Gestoppt", te = "Pulszeit (s)", ne = "Speichern", xe = "Start", ze = "Stopp", Ge = "Zeitplan", he = "Zeitplantyp", le = "Geplanter Vorlauf", me = "Zeitplan gespeichert", oe = "Gerät auswählen", we = "Kalibrierungswert setzen", re = "Behältervolumen", je = "Manuelles Volumen", We = "Kurzname", Oe = "Einzeln", pe = "Größen", Re = "Nach Fälligkeit", De = "Nach Gerät", Be = "Geschwindigkeit", Ue = "Start", Ke = "Kalibrierung starten", Se = "Kalibrierung testen", Qe = "Leeren Messbehälter am Auslass des Kopfes platzieren und 'Kalibrierung testen' drücken oder 'Abschließen' drücken", de = "Ist der Wert gleich 4 mL +/- (0,05 mL)?", ke = "Timer", ue = "Tagesvolumen", Fe = "Tage", Ze = "Monate", Je = "Wochen", He = "Volumen (mL)", Ne = "Für das nächste unterstützte Gerät abstimmen", Ve = "Wöchentlich", Pe = "Flüstern", ve = "WLAN", qe = "Ja", ye = {
-  active_carbon_replace: ti,
-  add_pump: ni,
+const ni = "Kohle", Ei = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine Pumpe angeschlossen, aber noch nicht konfiguriert. Starten Sie die Erkennung und prüfen Sie das erkannte Modell: der Vorschlag des ReefRun ist nicht immer richtig.", zi = "Bild anfordern", Gi = "Zwischen Start und Ende müssen mindestens 30 Minuten liegen", hi = "ATO-Vorratsbehälter", li = "Markenname", mi = "Kalibrierung", oi = "Leeren Messbehälter am Auslass des Kopfes platzieren", wi = "Welchen Wert lesen Sie ab?", ri = "Übersetzungszeichenfolge nicht gefunden: ", ji = "Zeitplan kann nicht gespeichert werden: ", Wi = "Abbrechen", Oi = "Konfiguration", pi = "Rückförderpumpe Konfiguration", Ri = "Abschäumer-Sensor Konfiguration", Di = "Abschäumer Konfiguration", Bi = "Diese Pumpe löschen?", Ui = "Die Pumpeneinstellungen werden zurückgesetzt. Zeitplan und Sensorsteuerung gehen verloren.", Ki = "Benutzerdefiniert", Si = "Benutzerdefinierter Vorlauf", Qi = `Tagesdurchschnitt
+`, di = "Tagesdosis (mL)", ki = "Montag", ui = "Dienstag", Fi = "Mittwoch", Zi = "Donnerstag", Ji = "Freitag", Hi = "Samstag", Ni = "Sonntag", Vi = "Tage", Pi = "Verbleibende Tage", vi = "T", qi = "Pumpe löschen", yi = "Löschvorgang läuft", bi = "Erkennen und hinzufügen", Ti = "Entwicklung geplant", Li = "Neues Nahrungsergänzungsmittel zum Kopf hinzufügen", fi = "Nahrungsergänzungsmittel für Kopf löschen", Xi = "Behälter bearbeiten", _i = "Gerät in HomeAssistant deaktiviert!", $i = "Anzeigename", AC = "Dosen", IC = "Dosierung", gC = "Leer", iC = "Ende", CC = "Endzeit kann nicht vor der Startzeit liegen", eC = "Fehler erkannt", cC = "Beheben Sie die Anomalie und klicken Sie auf 'Fehler behoben'.", sC = "Rollenende in: ", aC = "Fehler behoben", MC = "Fertig", YC = "Abschließen", tC = "Vollbecherkalibrierung", nC = "Kopf", EC = "Kopfkonfiguration", xC = "Kopffarben", zC = "Manuelle Schnelldosen", GC = "Platzhalter zum Hinzufügen ausblenden", hC = "Stunde", lC = "Stündlich", mC = "Letzte Alarmmeldung ausblenden", oC = "Letzte Meldung ausblenden", wC = "Aktivkohlewochessel deaktivieren", rC = "Wartung läuft..", jC = "Alles aktuell", WC = "bald fällig", OC = "Intervall ändern", pC = "Alle", RC = "Stumme ausblenden", DC = "Stummgeschaltete Aufgaben standardmäßig ausblenden", BC = "Aktuelle Aufgaben ausblenden", UC = "Aktuelle Aufgaben standardmäßig ausblenden", KC = "Intervall", SC = "Zuletzt erledigt", QC = "Als erledigt markieren", dC = "Benachrichtigungen für diese Aufgabe deaktivieren", kC = "nie durchgeführt", uC = "Keine Wartungsaufgabe erkannt", FC = "überfällig", ZC = "Stumme anzeigen", JC = "heute", HC = "Benachrichtigungen für diese Aufgabe aktivieren", NC = "Wartung", VC = "Manueller Vorlauf", PC = "Minimum", vC = "Die Mindestdosis für diesen Zeitplantyp beträgt 5 mL", qC = "Monatlich", yC = "Name", bC = "Anzahl der Dosen", TC = "Neue Rolle", LC = "Für eine neue Rolle den folgenden Wert auf das Minimum setzen; andernfalls den Durchmesser der aktuellen Rolle eingeben.", fC = "Weiter", XC = "Nein", _C = "Überschäumungskalibrierung", $C = "Befüllung", Ae = "Rückförder", Ie = "Abschäumer", ge = "Schnell", ie = "Regelmäßig", Ce = "Speichern", ee = "Zeitplan speichern", ce = "+ Hinzufügen", se = "Abbrechen", ae = "Intensität (%)", Me = "Vorschau", Ye = "Läuft…", te = "Gestoppt", ne = "Pulszeit (s)", Ee = "Speichern", xe = "Start", ze = "Stopp", Ge = "Zeitplan", he = "Zeitplantyp", le = "Geplanter Vorlauf", me = "Zeitplan gespeichert", oe = "Gerät auswählen", we = "Kalibrierungswert setzen", re = "Behältervolumen", je = "Manuelles Volumen", We = "Kurzname", Oe = "Einzeln", pe = "Größen", Re = "Nach Fälligkeit", De = "Nach Gerät", Be = "Geschwindigkeit", Ue = "Start", Ke = "Kalibrierung starten", Se = "Kalibrierung testen", Qe = "Leeren Messbehälter am Auslass des Kopfes platzieren und 'Kalibrierung testen' drücken oder 'Abschließen' drücken", de = "Ist der Wert gleich 4 mL +/- (0,05 mL)?", ke = "Timer", ue = "Tagesvolumen", Fe = "Tage", Ze = "Monate", Je = "Wochen", He = "Volumen (mL)", Ne = "Für das nächste unterstützte Gerät abstimmen", Ve = "Wöchentlich", Pe = "Flüstern", ve = "WLAN", qe = "Ja", ye = {
+  active_carbon_replace: ni,
+  add_pump: Ei,
   add_pump_text: xi,
   ask_add_supplement: zi,
   at_least_30m_between: Gi,
@@ -590,9 +590,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   error_corrected: aC,
   exit: MC,
   finish: YC,
-  fullcup_calibration: EC,
-  head: tC,
-  head_configuration: nC,
+  fullcup_calibration: tC,
+  head: nC,
+  head_configuration: EC,
   heads_colors: xC,
   heads_shortcuts: zC,
   hide_add_pump: GC,
@@ -644,9 +644,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   sched_intensity: ae,
   sched_preview: Me,
   sched_preview_running: Ye,
-  sched_preview_stopped: Ee,
-  sched_pulse_time: te,
-  sched_save: ne,
+  sched_preview_stopped: te,
+  sched_pulse_time: ne,
+  sched_save: Ee,
   sched_start: xe,
   sched_stop: ze,
   sched_title: Ge,
@@ -679,8 +679,8 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   whisper: Pe,
   wifi: ve,
   yes: qe
-}, be = "Carbon", Te = "Add a pump", Le = "A pump is plugged into this socket but is not configured yet. Run the detection, then check the detected model: the ReefRun suggestion is not always right.", fe = "Ask for picture", Xe = "Between start and end should be at least 30 minutes", _e = "ATO reservoir", $e = "Brand Name", Ac = "Calibration", Ic = "Place the empty graduated container at the outlet of the head", gc = "What value are you reading?", ic = "Can not find translation string: ", Cc = "Can not save schedule: ", ec = "Cancel", cc = "Configuration", sc = "Return pump configuration", ac = "Skimmer sensor configuration", Mc = "Skimmer configuration", Yc = "Delete this pump?", Ec = "The pump settings will be restored to default. Its schedule and its sensor control will be lost.", tc = "Custom", nc = "Custom advance", xc = `Daily average
-`, zc = "Daily dose (mL)", Gc = "Monday", hc = "Tuesday", lc = "Wednesday", mc = "Thrusday", oc = "Friday", wc = "Saturday", rc = "Sunday", jc = "Days", Wc = "Days Left", Oc = "d", pc = "Delete pump", Rc = "Deletion in progress", Dc = "Detect and add", Bc = "Developpement planned", Uc = "Add new supplement to head", Kc = "Delete supplement for head", Sc = "Edit Container", Qc = "Device disabled in HomeAssistant!", dc = "Display Name", kc = "Doses", uc = "Dosing", Fc = "Empty", Zc = "End", Jc = "End time cannot be earlier than start time", Hc = "Error detected", Nc = "Fix the anomaly and click 'Error fixed'.", Vc = "End of roll in: ", Pc = "Error fixed", vc = "Done", qc = "Finish", yc = "Full Cup Calibration", bc = "Head", Tc = "Configuration head", Lc = "Heads Colors", fc = "Manual Shorcut Doses", Xc = "Hide the add-a-pump placeholder", _c = "Hour", $c = "Hourly", As = "Hide Last Alert Message", Is = "Hide Last Message", gs = "Disable Active Carbon Replacement", is = "Maintenance in progress..", Cs = "All up to date", es = "due soon", cs = "Change the interval", ss = "Every", as = "Hide muted", Ms = "Hide muted tasks by default", Ys = "Hide up to date tasks", Es = "Hide up to date tasks by default", ts = "Interval", ns = "Last done", xs = "Mark as done", zs = "Mute alerts for this task", Gs = "never done", hs = "No maintenance task detected", ls = "overdue", ms = "Show muted", os = "today", ws = "Enable alerts for this task", rs = "Maintenance", js = "Manual advance", Ws = "Minimum", Os = "The minimal dose for this type of schedule is 5mL", ps = "Monthly", Rs = "Name", Ds = "Number of doses", Bs = "New roll", Us = "For a new roll, set the following value to the minimum; otherwise, enter the diameter of your current roll.", Ks = "Next", Ss = "No", Qs = "Overskimming calibration", ds = "Priming", ks = "return", us = "skimmer", Fs = "Quick", Zs = "Regular", Js = "Save", Hs = "Save schedule", Ns = "+ Add", Vs = "Cancel", Ps = "Intensity (%)", vs = "Preview", qs = "Running…", ys = "Stopped", bs = "Pulse time (s)", Ts = "Save", Ls = "Start", fs = "Stop", Xs = "Schedule", _s = "Schedule type", $s = "Scheduled advance", Aa = "Schedule saved", Ia = "Select a device", ga = "Set calibration value", ia = "Container Volume", Ca = "Manual volume", ea = "Short Name", ca = "Single", sa = "Sizes", aa = "By due date", Ma = "By equipment", Ya = "Speed", Ea = "Start", ta = "Start Calibration", na = "Test calibration", xa = "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'", za = "Is the value equal to 4 mL +/- (0.05mL)?", Ga = "Timer", ha = "Daily volume", la = "days", ma = "months", oa = "weeks", wa = "Volume (mL)", ra = "Vote for next supported device", ja = "Weekly", Wa = "Whisper", Oa = "Wifi", pa = "Yes", Ra = {
+}, be = "Carbon", Te = "Add a pump", Le = "A pump is plugged into this socket but is not configured yet. Run the detection, then check the detected model: the ReefRun suggestion is not always right.", fe = "Ask for picture", Xe = "Between start and end should be at least 30 minutes", _e = "ATO reservoir", $e = "Brand Name", Ac = "Calibration", Ic = "Place the empty graduated container at the outlet of the head", gc = "What value are you reading?", ic = "Can not find translation string: ", Cc = "Can not save schedule: ", ec = "Cancel", cc = "Configuration", sc = "Return pump configuration", ac = "Skimmer sensor configuration", Mc = "Skimmer configuration", Yc = "Delete this pump?", tc = "The pump settings will be restored to default. Its schedule and its sensor control will be lost.", nc = "Custom", Ec = "Custom advance", xc = `Daily average
+`, zc = "Daily dose (mL)", Gc = "Monday", hc = "Tuesday", lc = "Wednesday", mc = "Thrusday", oc = "Friday", wc = "Saturday", rc = "Sunday", jc = "Days", Wc = "Days Left", Oc = "d", pc = "Delete pump", Rc = "Deletion in progress", Dc = "Detect and add", Bc = "Developpement planned", Uc = "Add new supplement to head", Kc = "Delete supplement for head", Sc = "Edit Container", Qc = "Device disabled in HomeAssistant!", dc = "Display Name", kc = "Doses", uc = "Dosing", Fc = "Empty", Zc = "End", Jc = "End time cannot be earlier than start time", Hc = "Error detected", Nc = "Fix the anomaly and click 'Error fixed'.", Vc = "End of roll in: ", Pc = "Error fixed", vc = "Done", qc = "Finish", yc = "Full Cup Calibration", bc = "Head", Tc = "Configuration head", Lc = "Heads Colors", fc = "Manual Shorcut Doses", Xc = "Hide the add-a-pump placeholder", _c = "Hour", $c = "Hourly", As = "Hide Last Alert Message", Is = "Hide Last Message", gs = "Disable Active Carbon Replacement", is = "Maintenance in progress..", Cs = "All up to date", es = "due soon", cs = "Change the interval", ss = "Every", as = "Hide muted", Ms = "Hide muted tasks by default", Ys = "Hide up to date tasks", ts = "Hide up to date tasks by default", ns = "Interval", Es = "Last done", xs = "Mark as done", zs = "Mute alerts for this task", Gs = "never done", hs = "No maintenance task detected", ls = "overdue", ms = "Show muted", os = "today", ws = "Enable alerts for this task", rs = "Maintenance", js = "Manual advance", Ws = "Minimum", Os = "The minimal dose for this type of schedule is 5mL", ps = "Monthly", Rs = "Name", Ds = "Number of doses", Bs = "New roll", Us = "For a new roll, set the following value to the minimum; otherwise, enter the diameter of your current roll.", Ks = "Next", Ss = "No", Qs = "Overskimming calibration", ds = "Priming", ks = "return", us = "skimmer", Fs = "Quick", Zs = "Regular", Js = "Save", Hs = "Save schedule", Ns = "+ Add", Vs = "Cancel", Ps = "Intensity (%)", vs = "Preview", qs = "Running…", ys = "Stopped", bs = "Pulse time (s)", Ts = "Save", Ls = "Start", fs = "Stop", Xs = "Schedule", _s = "Schedule type", $s = "Scheduled advance", Aa = "Schedule saved", Ia = "Select a device", ga = "Set calibration value", ia = "Container Volume", Ca = "Manual volume", ea = "Short Name", ca = "Single", sa = "Sizes", aa = "By due date", Ma = "By equipment", Ya = "Speed", ta = "Start", na = "Start Calibration", Ea = "Test calibration", xa = "Place the empty graduated container at the outlet of the head and press 'Test calibration' or press 'Finish'", za = "Is the value equal to 4 mL +/- (0.05mL)?", Ga = "Timer", ha = "Daily volume", la = "days", ma = "months", oa = "weeks", wa = "Volume (mL)", ra = "Vote for next supported device", ja = "Weekly", Wa = "Whisper", Oa = "Wifi", pa = "Yes", Ra = {
   active_carbon_replace: be,
   add_pump: Te,
   add_pump_text: Le,
@@ -699,9 +699,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   config_sensor: ac,
   config_skimmer: Mc,
   confirm_delete_pump: Yc,
-  confirm_delete_pump_text: Ec,
-  custom: tc,
-  custom_advance: nc,
+  confirm_delete_pump_text: tc,
+  custom: nc,
+  custom_advance: Ec,
   daily_average: xc,
   daily_dose: zc,
   day_1: Gc,
@@ -754,9 +754,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   maintenance_hide_muted: as,
   maintenance_hide_muted_default: Ms,
   maintenance_hide_ok: Ys,
-  maintenance_hide_ok_default: Es,
-  maintenance_interval: ts,
-  maintenance_last_reset: ns,
+  maintenance_hide_ok_default: ts,
+  maintenance_interval: ns,
+  maintenance_last_reset: Es,
   maintenance_mark_done: xs,
   maintenance_mute: zs,
   maintenance_never_done: Gs,
@@ -808,9 +808,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   sort_by_due_date: aa,
   sort_by_equipment: Ma,
   speed: Ya,
-  st: Ea,
-  start_calibration: ta,
-  test_calibration: na,
+  st: ta,
+  start_calibration: na,
+  test_calibration: Ea,
   test_calibration_description: xa,
   test_calibration_validation: za,
   timer: Ga,
@@ -825,7 +825,7 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   wifi: Oa,
   yes: pa
 }, Da = "Carbón", Ba = "Añadir una bomba", Ua = "Hay una bomba conectada en esta toma pero aún no está configurada. Ejecute la detección y compruebe el modelo detectado: la sugerencia del ReefRun no siempre es correcta.", Ka = "Solicitar imagen", Sa = "Entre el inicio y el fin deben haber al menos 30 minutos", Qa = "Depósito ATO", da = "Nombre de marca", ka = "Calibración", ua = "Coloca el recipiente graduado vacío en la salida del cabezal", Fa = "¿Qué valor estás leyendo?", Za = "No se encuentra la cadena de traducción: ", Ja = "No se puede guardar la programación: ", Ha = "Cancelar", Na = "Configuración", Va = "Configuración de la bomba de retorno", Pa = "Configuración del sensor del skimmer", va = "Configuración del skimmer", qa = "¿Eliminar esta bomba?", ya = "Los ajustes de la bomba volverán a los valores por defecto. Se perderán su programación y su control por sonda.", ba = "Personalizado", Ta = "Avance personalizado", La = `Promedio diario
-`, fa = "Dosis diaria (mL)", Xa = "Lunes", _a = "Martes", $a = "Miércoles", AM = "Jueves", IM = "Viernes", gM = "Sábado", iM = "Domingo", CM = "Días", eM = "Días restantes", cM = "d", sM = "Eliminar la bomba", aM = "Eliminación en curso", MM = "Detectar y añadir", YM = "Desarrollo planificado", EM = "Añadir nuevo suplemento al cabezal", tM = "Eliminar suplemento del cabezal", nM = "Editar recipiente", xM = "¡Dispositivo desactivado en HomeAssistant!", zM = "Nombre visible", GM = "Dosis", hM = "Dosificación", lM = "Vacío", mM = "Fin", oM = "La hora de fin no puede ser anterior a la hora de inicio", wM = "Error detectado", rM = "Corrija la anomalía y haga clic en 'Error corregido'.", jM = "Fin del rollo en: ", WM = "Error corregido", OM = "Hecho", pM = "Finalizar", RM = "Calibración de taza llena", DM = "Cabezal", BM = "Configuración del cabezal", UM = "Colores de cabezales", KM = "Dosis manuales rápidas", SM = "Ocultar el espacio para añadir una bomba", QM = "Hora", dM = "Por hora", kM = "Ocultar último mensaje de alerta", uM = "Ocultar último mensaje", FM = "Desactivar el reemplazo de carbón activo", ZM = "Mantenimiento en curso..", JM = "Todo al día", HM = "próxima", NM = "Modificar el intervalo", VM = "Cada", PM = "Ocultar silenciadas", vM = "Ocultar por defecto las tareas silenciadas", qM = "Ocultar las tareas al día", yM = "Ocultar por defecto las tareas al día", bM = "Intervalo", TM = "Última vez", LM = "Marcar como realizada", fM = "Desactivar las alertas de esta tarea", XM = "nunca realizada", _M = "No se ha detectado ninguna tarea de mantenimiento", $M = "atrasada", AY = "Mostrar silenciadas", IY = "hoy", gY = "Activar las alertas de esta tarea", iY = "Mantenimiento", CY = "Avance manual", eY = "Mínimo", cY = "La dosis mínima para este tipo de programación es de 5 mL", sY = "Mensual", aY = "Nombre", MY = "Número de dosis", YY = "Nuevo rollo", EY = "Para un rollo nuevo, establece el siguiente valor al mínimo; de lo contrario, introduce el diámetro de tu rollo actual.", tY = "Siguiente", nY = "No", xY = "Calibración de espuma excesiva", zY = "Cebado", GY = "Retorno", hY = "Espumador", lY = "Rápido", mY = "Regular", oY = "Guardar", wY = "Guardar programación", rY = "+ Añadir", jY = "Cancelar", WY = "Intensidad (%)", OY = "Vista previa", pY = "En curso…", RY = "Detenido", DY = "Tiempo de pulso (s)", BY = "Guardar", UY = "Inicio", KY = "Parar", SY = "Horario", QY = "Tipo de programación", dY = "Avance programado", kY = "Programación guardada", uY = "Seleccionar un dispositivo", FY = "Establecer valor de calibración", ZY = "Volumen del recipiente", JY = "Volumen manual", HY = "Nombre corto", NY = "Único", VY = "Tamaños", PY = "Por vencimiento", vY = "Por equipo", qY = "Velocidad", yY = "Inicio", bY = "Iniciar calibración", TY = "Probar calibración", LY = "Coloca el recipiente graduado vacío en la salida del cabezal y pulsa 'Probar calibración' o pulsa 'Finalizar'", fY = "¿El valor es igual a 4 mL +/- (0,05 mL)?", XY = "Temporizador", _Y = "Volumen día", $Y = "días", AE = "meses", IE = "semanas", gE = "Volumen (mL)", iE = "Votar por el próximo dispositivo compatible", CE = "Semanal", eE = "Susurro", cE = "WiFi", sE = "Sí", aE = {
+`, fa = "Dosis diaria (mL)", Xa = "Lunes", _a = "Martes", $a = "Miércoles", AM = "Jueves", IM = "Viernes", gM = "Sábado", iM = "Domingo", CM = "Días", eM = "Días restantes", cM = "d", sM = "Eliminar la bomba", aM = "Eliminación en curso", MM = "Detectar y añadir", YM = "Desarrollo planificado", tM = "Añadir nuevo suplemento al cabezal", nM = "Eliminar suplemento del cabezal", EM = "Editar recipiente", xM = "¡Dispositivo desactivado en HomeAssistant!", zM = "Nombre visible", GM = "Dosis", hM = "Dosificación", lM = "Vacío", mM = "Fin", oM = "La hora de fin no puede ser anterior a la hora de inicio", wM = "Error detectado", rM = "Corrija la anomalía y haga clic en 'Error corregido'.", jM = "Fin del rollo en: ", WM = "Error corregido", OM = "Hecho", pM = "Finalizar", RM = "Calibración de taza llena", DM = "Cabezal", BM = "Configuración del cabezal", UM = "Colores de cabezales", KM = "Dosis manuales rápidas", SM = "Ocultar el espacio para añadir una bomba", QM = "Hora", dM = "Por hora", kM = "Ocultar último mensaje de alerta", uM = "Ocultar último mensaje", FM = "Desactivar el reemplazo de carbón activo", ZM = "Mantenimiento en curso..", JM = "Todo al día", HM = "próxima", NM = "Modificar el intervalo", VM = "Cada", PM = "Ocultar silenciadas", vM = "Ocultar por defecto las tareas silenciadas", qM = "Ocultar las tareas al día", yM = "Ocultar por defecto las tareas al día", bM = "Intervalo", TM = "Última vez", LM = "Marcar como realizada", fM = "Desactivar las alertas de esta tarea", XM = "nunca realizada", _M = "No se ha detectado ninguna tarea de mantenimiento", $M = "atrasada", AY = "Mostrar silenciadas", IY = "hoy", gY = "Activar las alertas de esta tarea", iY = "Mantenimiento", CY = "Avance manual", eY = "Mínimo", cY = "La dosis mínima para este tipo de programación es de 5 mL", sY = "Mensual", aY = "Nombre", MY = "Número de dosis", YY = "Nuevo rollo", tY = "Para un rollo nuevo, establece el siguiente valor al mínimo; de lo contrario, introduce el diámetro de tu rollo actual.", nY = "Siguiente", EY = "No", xY = "Calibración de espuma excesiva", zY = "Cebado", GY = "Retorno", hY = "Espumador", lY = "Rápido", mY = "Regular", oY = "Guardar", wY = "Guardar programación", rY = "+ Añadir", jY = "Cancelar", WY = "Intensidad (%)", OY = "Vista previa", pY = "En curso…", RY = "Detenido", DY = "Tiempo de pulso (s)", BY = "Guardar", UY = "Inicio", KY = "Parar", SY = "Horario", QY = "Tipo de programación", dY = "Avance programado", kY = "Programación guardada", uY = "Seleccionar un dispositivo", FY = "Establecer valor de calibración", ZY = "Volumen del recipiente", JY = "Volumen manual", HY = "Nombre corto", NY = "Único", VY = "Tamaños", PY = "Por vencimiento", vY = "Por equipo", qY = "Velocidad", yY = "Inicio", bY = "Iniciar calibración", TY = "Probar calibración", LY = "Coloca el recipiente graduado vacío en la salida del cabezal y pulsa 'Probar calibración' o pulsa 'Finalizar'", fY = "¿El valor es igual a 4 mL +/- (0,05 mL)?", XY = "Temporizador", _Y = "Volumen día", $Y = "días", At = "meses", It = "semanas", gt = "Volumen (mL)", it = "Votar por el próximo dispositivo compatible", Ct = "Semanal", et = "Susurro", ct = "WiFi", st = "Sí", at = {
   active_carbon_replace: Da,
   add_pump: Ba,
   add_pump_text: Ua,
@@ -864,9 +864,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   delete_wait: aM,
   detect_and_add_pump: MM,
   dev_planned: YM,
-  dialog_add_supplement_title: EM,
-  dialog_delete_supplement_title: tM,
-  dialog_edit_container: nM,
+  dialog_add_supplement_title: tM,
+  dialog_delete_supplement_title: nM,
+  dialog_edit_container: EM,
   disabledInHa: xM,
   display_name: zM,
   doses: GM,
@@ -918,9 +918,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   name: aY,
   nd: MY,
   new_roll: YY,
-  new_roll_info: EY,
-  next: tY,
-  no: nY,
+  new_roll_info: tY,
+  next: nY,
+  no: EY,
   overskimming_calibration: xY,
   priming: zY,
   pump_type_return: GY,
@@ -961,170 +961,170 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   timer: XY,
   today_volume_usage: _Y,
   unit_days: $Y,
-  unit_months: AE,
-  unit_weeks: IE,
-  volume: gE,
-  vote_next_device: iE,
-  weekly: CE,
-  whisper: eE,
-  wifi: cE,
-  yes: sE
-}, ME = "Charbon", YE = "Ajouter une pompe", EE = "Une pompe est branchée sur cet emplacement mais n'est pas encore configurée. Lancez la détection, puis vérifiez le modèle détecté : la suggestion du ReefRun n'est pas toujours juste.", tE = "Demande d'image", nE = "Il faut au moins 30 minimum entre l'heure de début et de fin", xE = "Réservoir ATO", zE = "Marque", GE = "Calibration", hE = "Placez le récipient gradué vide à la sortie de la tête", lE = "Quelle valeur lisez vous?", mE = "Traduction introuvable pour: ", oE = "Impossible de sauvegarder la plannification: ", wE = "Annuler", rE = "Configuration", jE = "Configuration de la pompe de retour", WE = "Configuration du capteur de l'écumeur", OE = "Configuration de l'écumeur", pE = "Supprimer cette pompe ?", RE = "Les réglages de la pompe seront remis par défaut. Son programme horaire et son pilotage par sonde seront perdus.", DE = "Personnalidé", BE = "Avance personnalisée", UE = `Moyenne journalière
-`, KE = "Dose journalière (mL)", SE = "Lundi", QE = "Mardi", dE = "Mercredi", kE = "Jeudi", uE = "Vendredi", FE = "Samedi", ZE = "Dimanche", JE = "Jours", HE = "Jours restant", NE = "j", VE = "Supprimer la pompe", PE = "Suppression en cours", vE = "Détecter et ajouter", qE = "Developpement planifié", yE = "Nouveau Supplément pour la tête", bE = "Supprimer le Supplément de la tête", TE = "Edition du Conteneur", LE = "Périphérique désactivé dans HomeAssistant!", fE = "Nom d'affichage", XE = "Doses", _E = "Distribution de", $E = "Vide", At = "Fin", It = "L'heure de fin ne peut pas être plus tôt que celle du début.", gt = "Erreur détectée", it = "Corrigez l'anomalie et cliquez sur 'Erreur corrigée'.", Ct = "Fin du rouleau dans: ", et = "Erreur corrigée", ct = "Terminer", st = "Fin", at = "Calibration coupe pleine", Mt = "Tête", Yt = "Configuration tête", Et = "Couleur des têtes", tt = "Raccourcis doses manuelles", nt = "Masquer l'emplacement d'ajout de pompe", xt = "Heure", zt = "Horaire", Gt = "Cacher le dernier message d'alerte", ht = "Cacher le dernier message", lt = "Désactiver le remplacement du charbon actif", mt = "Maintenance en cours...", ot = "Tout est à jour", wt = "bientôt", rt = "Modifier l'intervalle", jt = "Tous les", Wt = "Masquer les silencieuses", Ot = "Masquer par défaut les tâches silencieuses", pt = "Masquer les tâches à jour", Rt = "Masquer par défaut les tâches à jour", Dt = "Intervalle", Bt = "Dernière fois", Ut = "Marquer comme effectuée", Kt = "Désactiver les alertes de cette tâche", St = "jamais effectuée", Qt = "Aucune tâche de maintenance détectée", dt = "en retard", kt = "Afficher les silencieuses", ut = "aujourd'hui", Ft = "Activer les alertes de cette tâche", Zt = "Maintenance", Jt = "Avance manuelle", Ht = "Minimum", Nt = "La dose minimale pour cette planification est de  5ml", Vt = "Mensuel", Pt = "Nom", vt = "Nombre de doses", qt = "Nouveau rouleau", yt = "Pour un nouveau rouleau, mettez la valeur suivante au minimum ; sinon, entrez le diamètre de votre rouleau actuel.", bt = "Suivant", Tt = "Non", Lt = "Calibration du débordement", ft = "Amorçage", Xt = "Retour", _t = "Écumeur", $t = "Turbo", An = "Standard", In = "Sauvegarder", gn = "Save schedule", Cn = "+ Ajouter", en = "Annuler", cn = "Intensité (%)", sn = "Aperçu", an = "En cours…", Mn = "Arrêté", Yn = "Pulsation (s)", En = "Enregistrer", tn = "Début", nn = "Stop", xn = "Planning", zn = "Type de plannification", Gn = "Avance planifiée", hn = "Planning sauvegardé", ln = "Choissisez un équipement", mn = "Valider la valeur", on = "Volume du supplément", wn = "Volume manuel", rn = "Nom court", jn = "Unique", Wn = "Tailles", On = "Par échéance", pn = "Par équipement", Rn = "Vitesse", Dn = "Début", Bn = "Démarrer la Calibration", Un = "Testez la calibration", Kn = "Placez le récipient gradué vide à la sortie de la tête et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'", Sn = "La valeur est elle égale à 4 mL +/- (0.05mL)?", Qn = "Minuteur", dn = "Volume du jour", kn = "jours", un = "mois", Fn = "semaines", Zn = "Volume (mL)", Jn = "Votez pour le prochain périphérique à être supporté", Hn = "Hebdomadaire", Nn = "Silencieux", Vn = "Wifi", Pn = "Oui", vn = {
-  active_carbon_replace: ME,
-  add_pump: YE,
-  add_pump_text: EE,
-  ask_add_supplement: tE,
-  at_least_30m_between: nE,
-  ato_tank: xE,
-  brand_name: zE,
-  calibration: GE,
-  calibration_step_1: hE,
-  calibration_step_2: lE,
-  canNotFindTranslation: mE,
-  can_not_save: oE,
-  cancel: wE,
-  config: rE,
-  config_return: jE,
-  config_sensor: WE,
-  config_skimmer: OE,
-  confirm_delete_pump: pE,
-  confirm_delete_pump_text: RE,
-  custom: DE,
-  custom_advance: BE,
-  daily_average: UE,
-  daily_dose: KE,
-  day_1: SE,
-  day_2: QE,
-  day_3: dE,
-  day_4: kE,
-  day_5: uE,
-  day_6: FE,
-  day_7: ZE,
-  days: JE,
-  days_left: HE,
-  days_short: NE,
+  unit_months: At,
+  unit_weeks: It,
+  volume: gt,
+  vote_next_device: it,
+  weekly: Ct,
+  whisper: et,
+  wifi: ct,
+  yes: st
+}, Mt = "Charbon", Yt = "Ajouter une pompe", tt = "Une pompe est branchée sur cet emplacement mais n'est pas encore configurée. Lancez la détection, puis vérifiez le modèle détecté : la suggestion du ReefRun n'est pas toujours juste.", nt = "Demande d'image", Et = "Il faut au moins 30 minimum entre l'heure de début et de fin", xt = "Réservoir ATO", zt = "Marque", Gt = "Calibration", ht = "Placez le récipient gradué vide à la sortie de la tête", lt = "Quelle valeur lisez vous?", mt = "Traduction introuvable pour: ", ot = "Impossible de sauvegarder la plannification: ", wt = "Annuler", rt = "Configuration", jt = "Configuration de la pompe de retour", Wt = "Configuration du capteur de l'écumeur", Ot = "Configuration de l'écumeur", pt = "Supprimer cette pompe ?", Rt = "Les réglages de la pompe seront remis par défaut. Son programme horaire et son pilotage par sonde seront perdus.", Dt = "Personnalidé", Bt = "Avance personnalisée", Ut = `Moyenne journalière
+`, Kt = "Dose journalière (mL)", St = "Lundi", Qt = "Mardi", dt = "Mercredi", kt = "Jeudi", ut = "Vendredi", Ft = "Samedi", Zt = "Dimanche", Jt = "Jours", Ht = "Jours restant", Nt = "j", Vt = "Supprimer la pompe", Pt = "Suppression en cours", vt = "Détecter et ajouter", qt = "Developpement planifié", yt = "Nouveau Supplément pour la tête", bt = "Supprimer le Supplément de la tête", Tt = "Edition du Conteneur", Lt = "Périphérique désactivé dans HomeAssistant!", ft = "Nom d'affichage", Xt = "Doses", _t = "Distribution de", $t = "Vide", An = "Fin", In = "L'heure de fin ne peut pas être plus tôt que celle du début.", gn = "Erreur détectée", Cn = "Corrigez l'anomalie et cliquez sur 'Erreur corrigée'.", en = "Fin du rouleau dans: ", cn = "Erreur corrigée", sn = "Terminer", an = "Fin", Mn = "Calibration coupe pleine", Yn = "Tête", tn = "Configuration tête", nn = "Couleur des têtes", En = "Raccourcis doses manuelles", xn = "Masquer l'emplacement d'ajout de pompe", zn = "Heure", Gn = "Horaire", hn = "Cacher le dernier message d'alerte", ln = "Cacher le dernier message", mn = "Désactiver le remplacement du charbon actif", on = "Maintenance en cours...", wn = "Tout est à jour", rn = "bientôt", jn = "Modifier l'intervalle", Wn = "Tous les", On = "Masquer les silencieuses", pn = "Masquer par défaut les tâches silencieuses", Rn = "Masquer les tâches à jour", Dn = "Masquer par défaut les tâches à jour", Bn = "Intervalle", Un = "Dernière fois", Kn = "Marquer comme effectuée", Sn = "Désactiver les alertes de cette tâche", Qn = "jamais effectuée", dn = "Aucune tâche de maintenance détectée", kn = "en retard", un = "Afficher les silencieuses", Fn = "aujourd'hui", Zn = "Activer les alertes de cette tâche", Jn = "Maintenance", Hn = "Avance manuelle", Nn = "Minimum", Vn = "La dose minimale pour cette planification est de  5ml", Pn = "Mensuel", vn = "Nom", qn = "Nombre de doses", yn = "Nouveau rouleau", bn = "Pour un nouveau rouleau, mettez la valeur suivante au minimum ; sinon, entrez le diamètre de votre rouleau actuel.", Tn = "Suivant", Ln = "Non", fn = "Calibration du débordement", Xn = "Amorçage", _n = "Retour", $n = "Écumeur", AE = "Turbo", IE = "Standard", gE = "Sauvegarder", iE = "Save schedule", CE = "+ Ajouter", eE = "Annuler", cE = "Intensité (%)", sE = "Aperçu", aE = "En cours…", ME = "Arrêté", YE = "Pulsation (s)", tE = "Enregistrer", nE = "Début", EE = "Stop", xE = "Planning", zE = "Type de plannification", GE = "Avance planifiée", hE = "Planning sauvegardé", lE = "Choissisez un équipement", mE = "Valider la valeur", oE = "Volume du supplément", wE = "Volume manuel", rE = "Nom court", jE = "Unique", WE = "Tailles", OE = "Par échéance", pE = "Par équipement", RE = "Vitesse", DE = "Début", BE = "Démarrer la Calibration", UE = "Testez la calibration", KE = "Placez le récipient gradué vide à la sortie de la tête et appuyez sur 'Tester la calibration' ou Appuyez sur 'Fin'", SE = "La valeur est elle égale à 4 mL +/- (0.05mL)?", QE = "Minuteur", dE = "Volume du jour", kE = "jours", uE = "mois", FE = "semaines", ZE = "Volume (mL)", JE = "Votez pour le prochain périphérique à être supporté", HE = "Hebdomadaire", NE = "Silencieux", VE = "Wifi", PE = "Oui", vE = {
+  active_carbon_replace: Mt,
+  add_pump: Yt,
+  add_pump_text: tt,
+  ask_add_supplement: nt,
+  at_least_30m_between: Et,
+  ato_tank: xt,
+  brand_name: zt,
+  calibration: Gt,
+  calibration_step_1: ht,
+  calibration_step_2: lt,
+  canNotFindTranslation: mt,
+  can_not_save: ot,
+  cancel: wt,
+  config: rt,
+  config_return: jt,
+  config_sensor: Wt,
+  config_skimmer: Ot,
+  confirm_delete_pump: pt,
+  confirm_delete_pump_text: Rt,
+  custom: Dt,
+  custom_advance: Bt,
+  daily_average: Ut,
+  daily_dose: Kt,
+  day_1: St,
+  day_2: Qt,
+  day_3: dt,
+  day_4: kt,
+  day_5: ut,
+  day_6: Ft,
+  day_7: Zt,
+  days: Jt,
+  days_left: Ht,
+  days_short: Nt,
   delete: "Supprimer",
-  delete_pump: VE,
-  delete_wait: PE,
-  detect_and_add_pump: vE,
-  dev_planned: qE,
-  dialog_add_supplement_title: yE,
-  dialog_delete_supplement_title: bE,
-  dialog_edit_container: TE,
-  disabledInHa: LE,
-  display_name: fE,
-  doses: XE,
-  dosing: _E,
-  empty: $E,
-  end: At,
-  end_earlier_than_start: It,
-  end_error: gt,
-  end_error_info: it,
-  end_of_roll: Ct,
-  error_corrected: et,
-  exit: ct,
-  finish: st,
-  fullcup_calibration: at,
-  head: Mt,
-  head_configuration: Yt,
-  heads_colors: Et,
-  heads_shortcuts: tt,
-  hide_add_pump: nt,
-  hour: xt,
-  hourly: zt,
-  last_alert_message: Gt,
-  last_message: ht,
-  maint_mat_carbon_replace: lt,
-  maintenance: mt,
-  maintenance_all_ok: ot,
-  maintenance_due_soon: wt,
-  maintenance_edit_interval: rt,
-  maintenance_every: jt,
-  maintenance_hide_muted: Wt,
-  maintenance_hide_muted_default: Ot,
-  maintenance_hide_ok: pt,
-  maintenance_hide_ok_default: Rt,
-  maintenance_interval: Dt,
-  maintenance_last_reset: Bt,
-  maintenance_mark_done: Ut,
-  maintenance_mute: Kt,
-  maintenance_never_done: St,
-  maintenance_no_task: Qt,
-  maintenance_overdue: dt,
-  maintenance_show_muted: kt,
-  maintenance_today: ut,
-  maintenance_unmute: Ft,
-  maintenance_view: Zt,
-  manual_advance: Jt,
-  min: Ht,
-  min_dose: Nt,
-  monthly: Vt,
-  name: Pt,
-  nd: vt,
-  new_roll: qt,
-  new_roll_info: yt,
-  next: bt,
-  no: Tt,
-  overskimming_calibration: Lt,
-  priming: ft,
-  pump_type_return: Xt,
-  pump_type_skimmer: _t,
-  quick: $t,
-  regular: An,
-  save: In,
-  save_schedule: gn,
-  sched_add: Cn,
-  sched_cancel: en,
-  sched_intensity: cn,
-  sched_preview: sn,
-  sched_preview_running: an,
-  sched_preview_stopped: Mn,
-  sched_pulse_time: Yn,
-  sched_save: En,
-  sched_start: tn,
-  sched_stop: nn,
-  sched_title: xn,
-  schedule: zn,
-  schedule_advance: Gn,
-  schedule_saved: hn,
-  select_device: ln,
-  set_calibration: mn,
-  set_container_volume: on,
-  set_manual_head_volume: wn,
-  short_name: rn,
-  single: jn,
-  sizes: Wn,
-  sort_by_due_date: On,
-  sort_by_equipment: pn,
-  speed: Rn,
-  st: Dn,
-  start_calibration: Bn,
-  test_calibration: Un,
-  test_calibration_description: Kn,
-  test_calibration_validation: Sn,
-  timer: Qn,
-  today_volume_usage: dn,
-  unit_days: kn,
-  unit_months: un,
-  unit_weeks: Fn,
-  volume: Zn,
-  vote_next_device: Jn,
-  weekly: Hn,
-  whisper: Nn,
-  wifi: Vn,
-  yes: Pn
-}, qn = "Carbone", yn = "Aggiungi una pompa", bn = "Una pompa è collegata a questa presa ma non è ancora configurata. Avvia il rilevamento, poi controlla il modello rilevato: il suggerimento del ReefRun non è sempre corretto.", Tn = "Richiedere un'immagine", Ln = "Tra inizio e fine devono intercorrere almeno 30 minuti", fn = "Serbatoio ATO", Xn = "Nome del marchio", _n = "Calibrazione", $n = "Posizionare il contenitore graduato vuoto all'uscita della testina", Ax = "Quale valore stai leggendo?", Ix = "Stringa di traduzione non trovata: ", gx = "Impossibile salvare la programmazione: ", ix = "Annulla", Cx = "Configurazione", ex = "Configurazione pompa di ritorno", cx = "Configurazione sensore skimmer", sx = "Configurazione skimmer", ax = "Eliminare questa pompa?", Mx = "Le impostazioni della pompa torneranno ai valori predefiniti. La programmazione e il controllo tramite sonda andranno persi.", Yx = "Personalizzato", Ex = "Avanzamento personalizzato", tx = `Media giornaliera
-`, nx = "Dose giornaliera (mL)", xx = "Lunedì", zx = "Martedì", Gx = "Mercoledì", hx = "Giovedì", lx = "Venerdì", mx = "Sabato", ox = "Domenica", wx = "Giorni", rx = "Giorni rimanenti", jx = "g", Wx = "Elimina la pompa", Ox = "Eliminazione in corso", px = "Rileva e aggiungi", Rx = "Sviluppo pianificato", Dx = "Aggiungi nuovo integratore alla testina", Bx = "Elimina integratore dalla testina", Ux = "Modifica contenitore", Kx = "Dispositivo disabilitato in HomeAssistant!", Sx = "Nome visualizzato", Qx = "Dosi", dx = "Dosaggio", kx = "Vuoto", ux = "Fine", Fx = "L'ora di fine non può essere precedente all'ora di inizio", Zx = "Errore rilevato", Jx = "Correggi l'anomalia e fai clic su 'Errore corretto'.", Hx = "Fine del rotolo in: ", Nx = "Errore corretto", Vx = "Fatto", Px = "Termina", vx = "Calibrazione tazza piena", qx = "Testina", yx = "Configurazione testina", bx = "Colori delle testine", Tx = "Dosi manuali rapide", Lx = "Nascondi lo spazio per aggiungere una pompa", fx = "Ora", Xx = "Ogni ora", _x = "Nascondi ultimo messaggio di avviso", $x = "Nascondi ultimo messaggio", Az = "Disattivare la sostituzione del carbone attivo", Iz = "Manutenzione in corso..", gz = "Tutto aggiornato", iz = "in scadenza", Cz = "Modificare l'intervallo", ez = "Ogni", cz = "Nascondi silenziate", sz = "Nascondi per impostazione predefinita le attività silenziate", az = "Nascondi le attività aggiornate", Mz = "Nascondi per impostazione predefinita le attività aggiornate", Yz = "Intervallo", Ez = "Ultima volta", tz = "Segna come eseguita", nz = "Disattiva gli avvisi di questa attività", xz = "mai eseguita", zz = "Nessuna attività di manutenzione rilevata", Gz = "in ritardo", hz = "Mostra silenziate", lz = "oggi", mz = "Attiva gli avvisi di questa attività", oz = "Manutenzione", wz = "Avanzamento manuale", rz = "Minimo", jz = "La dose minima per questo tipo di programmazione è di 5 mL", Wz = "Mensile", Oz = "Nome", pz = "Numero di dosi", Rz = "Nuovo rotolo", Dz = "Per un nuovo rotolo, imposta il valore seguente al minimo; altrimenti inserisci il diametro del tuo rotolo attuale.", Bz = "Avanti", Uz = "No", Kz = "Calibrazione sovra-schiumatura", Sz = "Preparazione", Qz = "Ritorno", dz = "Schiumatoio", kz = "Rapido", uz = "Regolare", Fz = "Salva", Zz = "Salva programmazione", Jz = "+ Aggiungi", Hz = "Annulla", Nz = "Intensità (%)", Vz = "Anteprima", Pz = "In corso…", vz = "Fermo", qz = "Tempo impulso (s)", yz = "Salva", bz = "Inizio", Tz = "Ferma", Lz = "Programma", fz = "Tipo di programmazione", Xz = "Avanzamento programmato", _z = "Programmazione salvata", $z = "Seleziona un dispositivo", AG = "Imposta valore di calibrazione", IG = "Volume del contenitore", gG = "Volume manuale", iG = "Nome breve", CG = "Singolo", eG = "Dimensioni", cG = "Per scadenza", sG = "Per apparecchio", aG = "Velocità", MG = "Inizio", YG = "Avvia calibrazione", EG = "Testa calibrazione", tG = "Posizionare il contenitore graduato vuoto all'uscita della testina e premere 'Testa calibrazione' oppure premere 'Termina'", nG = "Il valore è uguale a 4 mL +/- (0,05 mL)?", xG = "Timer", zG = "Volume oggi", GG = "giorni", hG = "mesi", lG = "settimane", mG = "Volume (mL)", oG = "Vota per il prossimo dispositivo supportato", wG = "Settimanale", rG = "Sussurro", jG = "WiFi", WG = "Sì", OG = {
-  active_carbon_replace: qn,
-  add_pump: yn,
-  add_pump_text: bn,
-  ask_add_supplement: Tn,
-  at_least_30m_between: Ln,
-  ato_tank: fn,
-  brand_name: Xn,
-  calibration: _n,
-  calibration_step_1: $n,
+  delete_pump: Vt,
+  delete_wait: Pt,
+  detect_and_add_pump: vt,
+  dev_planned: qt,
+  dialog_add_supplement_title: yt,
+  dialog_delete_supplement_title: bt,
+  dialog_edit_container: Tt,
+  disabledInHa: Lt,
+  display_name: ft,
+  doses: Xt,
+  dosing: _t,
+  empty: $t,
+  end: An,
+  end_earlier_than_start: In,
+  end_error: gn,
+  end_error_info: Cn,
+  end_of_roll: en,
+  error_corrected: cn,
+  exit: sn,
+  finish: an,
+  fullcup_calibration: Mn,
+  head: Yn,
+  head_configuration: tn,
+  heads_colors: nn,
+  heads_shortcuts: En,
+  hide_add_pump: xn,
+  hour: zn,
+  hourly: Gn,
+  last_alert_message: hn,
+  last_message: ln,
+  maint_mat_carbon_replace: mn,
+  maintenance: on,
+  maintenance_all_ok: wn,
+  maintenance_due_soon: rn,
+  maintenance_edit_interval: jn,
+  maintenance_every: Wn,
+  maintenance_hide_muted: On,
+  maintenance_hide_muted_default: pn,
+  maintenance_hide_ok: Rn,
+  maintenance_hide_ok_default: Dn,
+  maintenance_interval: Bn,
+  maintenance_last_reset: Un,
+  maintenance_mark_done: Kn,
+  maintenance_mute: Sn,
+  maintenance_never_done: Qn,
+  maintenance_no_task: dn,
+  maintenance_overdue: kn,
+  maintenance_show_muted: un,
+  maintenance_today: Fn,
+  maintenance_unmute: Zn,
+  maintenance_view: Jn,
+  manual_advance: Hn,
+  min: Nn,
+  min_dose: Vn,
+  monthly: Pn,
+  name: vn,
+  nd: qn,
+  new_roll: yn,
+  new_roll_info: bn,
+  next: Tn,
+  no: Ln,
+  overskimming_calibration: fn,
+  priming: Xn,
+  pump_type_return: _n,
+  pump_type_skimmer: $n,
+  quick: AE,
+  regular: IE,
+  save: gE,
+  save_schedule: iE,
+  sched_add: CE,
+  sched_cancel: eE,
+  sched_intensity: cE,
+  sched_preview: sE,
+  sched_preview_running: aE,
+  sched_preview_stopped: ME,
+  sched_pulse_time: YE,
+  sched_save: tE,
+  sched_start: nE,
+  sched_stop: EE,
+  sched_title: xE,
+  schedule: zE,
+  schedule_advance: GE,
+  schedule_saved: hE,
+  select_device: lE,
+  set_calibration: mE,
+  set_container_volume: oE,
+  set_manual_head_volume: wE,
+  short_name: rE,
+  single: jE,
+  sizes: WE,
+  sort_by_due_date: OE,
+  sort_by_equipment: pE,
+  speed: RE,
+  st: DE,
+  start_calibration: BE,
+  test_calibration: UE,
+  test_calibration_description: KE,
+  test_calibration_validation: SE,
+  timer: QE,
+  today_volume_usage: dE,
+  unit_days: kE,
+  unit_months: uE,
+  unit_weeks: FE,
+  volume: ZE,
+  vote_next_device: JE,
+  weekly: HE,
+  whisper: NE,
+  wifi: VE,
+  yes: PE
+}, qE = "Carbone", yE = "Aggiungi una pompa", bE = "Una pompa è collegata a questa presa ma non è ancora configurata. Avvia il rilevamento, poi controlla il modello rilevato: il suggerimento del ReefRun non è sempre corretto.", TE = "Richiedere un'immagine", LE = "Tra inizio e fine devono intercorrere almeno 30 minuti", fE = "Serbatoio ATO", XE = "Nome del marchio", _E = "Calibrazione", $E = "Posizionare il contenitore graduato vuoto all'uscita della testina", Ax = "Quale valore stai leggendo?", Ix = "Stringa di traduzione non trovata: ", gx = "Impossibile salvare la programmazione: ", ix = "Annulla", Cx = "Configurazione", ex = "Configurazione pompa di ritorno", cx = "Configurazione sensore skimmer", sx = "Configurazione skimmer", ax = "Eliminare questa pompa?", Mx = "Le impostazioni della pompa torneranno ai valori predefiniti. La programmazione e il controllo tramite sonda andranno persi.", Yx = "Personalizzato", tx = "Avanzamento personalizzato", nx = `Media giornaliera
+`, Ex = "Dose giornaliera (mL)", xx = "Lunedì", zx = "Martedì", Gx = "Mercoledì", hx = "Giovedì", lx = "Venerdì", mx = "Sabato", ox = "Domenica", wx = "Giorni", rx = "Giorni rimanenti", jx = "g", Wx = "Elimina la pompa", Ox = "Eliminazione in corso", px = "Rileva e aggiungi", Rx = "Sviluppo pianificato", Dx = "Aggiungi nuovo integratore alla testina", Bx = "Elimina integratore dalla testina", Ux = "Modifica contenitore", Kx = "Dispositivo disabilitato in HomeAssistant!", Sx = "Nome visualizzato", Qx = "Dosi", dx = "Dosaggio", kx = "Vuoto", ux = "Fine", Fx = "L'ora di fine non può essere precedente all'ora di inizio", Zx = "Errore rilevato", Jx = "Correggi l'anomalia e fai clic su 'Errore corretto'.", Hx = "Fine del rotolo in: ", Nx = "Errore corretto", Vx = "Fatto", Px = "Termina", vx = "Calibrazione tazza piena", qx = "Testina", yx = "Configurazione testina", bx = "Colori delle testine", Tx = "Dosi manuali rapide", Lx = "Nascondi lo spazio per aggiungere una pompa", fx = "Ora", Xx = "Ogni ora", _x = "Nascondi ultimo messaggio di avviso", $x = "Nascondi ultimo messaggio", Az = "Disattivare la sostituzione del carbone attivo", Iz = "Manutenzione in corso..", gz = "Tutto aggiornato", iz = "in scadenza", Cz = "Modificare l'intervallo", ez = "Ogni", cz = "Nascondi silenziate", sz = "Nascondi per impostazione predefinita le attività silenziate", az = "Nascondi le attività aggiornate", Mz = "Nascondi per impostazione predefinita le attività aggiornate", Yz = "Intervallo", tz = "Ultima volta", nz = "Segna come eseguita", Ez = "Disattiva gli avvisi di questa attività", xz = "mai eseguita", zz = "Nessuna attività di manutenzione rilevata", Gz = "in ritardo", hz = "Mostra silenziate", lz = "oggi", mz = "Attiva gli avvisi di questa attività", oz = "Manutenzione", wz = "Avanzamento manuale", rz = "Minimo", jz = "La dose minima per questo tipo di programmazione è di 5 mL", Wz = "Mensile", Oz = "Nome", pz = "Numero di dosi", Rz = "Nuovo rotolo", Dz = "Per un nuovo rotolo, imposta il valore seguente al minimo; altrimenti inserisci il diametro del tuo rotolo attuale.", Bz = "Avanti", Uz = "No", Kz = "Calibrazione sovra-schiumatura", Sz = "Preparazione", Qz = "Ritorno", dz = "Schiumatoio", kz = "Rapido", uz = "Regolare", Fz = "Salva", Zz = "Salva programmazione", Jz = "+ Aggiungi", Hz = "Annulla", Nz = "Intensità (%)", Vz = "Anteprima", Pz = "In corso…", vz = "Fermo", qz = "Tempo impulso (s)", yz = "Salva", bz = "Inizio", Tz = "Ferma", Lz = "Programma", fz = "Tipo di programmazione", Xz = "Avanzamento programmato", _z = "Programmazione salvata", $z = "Seleziona un dispositivo", AG = "Imposta valore di calibrazione", IG = "Volume del contenitore", gG = "Volume manuale", iG = "Nome breve", CG = "Singolo", eG = "Dimensioni", cG = "Per scadenza", sG = "Per apparecchio", aG = "Velocità", MG = "Inizio", YG = "Avvia calibrazione", tG = "Testa calibrazione", nG = "Posizionare il contenitore graduato vuoto all'uscita della testina e premere 'Testa calibrazione' oppure premere 'Termina'", EG = "Il valore è uguale a 4 mL +/- (0,05 mL)?", xG = "Timer", zG = "Volume oggi", GG = "giorni", hG = "mesi", lG = "settimane", mG = "Volume (mL)", oG = "Vota per il prossimo dispositivo supportato", wG = "Settimanale", rG = "Sussurro", jG = "WiFi", WG = "Sì", OG = {
+  active_carbon_replace: qE,
+  add_pump: yE,
+  add_pump_text: bE,
+  ask_add_supplement: TE,
+  at_least_30m_between: LE,
+  ato_tank: fE,
+  brand_name: XE,
+  calibration: _E,
+  calibration_step_1: $E,
   calibration_step_2: Ax,
   canNotFindTranslation: Ix,
   can_not_save: gx,
@@ -1136,9 +1136,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   confirm_delete_pump: ax,
   confirm_delete_pump_text: Mx,
   custom: Yx,
-  custom_advance: Ex,
-  daily_average: tx,
-  daily_dose: nx,
+  custom_advance: tx,
+  daily_average: nx,
+  daily_dose: Ex,
   day_1: xx,
   day_2: zx,
   day_3: Gx,
@@ -1191,9 +1191,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   maintenance_hide_ok: az,
   maintenance_hide_ok_default: Mz,
   maintenance_interval: Yz,
-  maintenance_last_reset: Ez,
-  maintenance_mark_done: tz,
-  maintenance_mute: nz,
+  maintenance_last_reset: tz,
+  maintenance_mark_done: nz,
+  maintenance_mute: Ez,
   maintenance_never_done: xz,
   maintenance_no_task: zz,
   maintenance_overdue: Gz,
@@ -1245,9 +1245,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   speed: aG,
   st: MG,
   start_calibration: YG,
-  test_calibration: EG,
-  test_calibration_description: tG,
-  test_calibration_validation: nG,
+  test_calibration: tG,
+  test_calibration_description: nG,
+  test_calibration_validation: EG,
   timer: xG,
   today_volume_usage: zG,
   unit_days: GG,
@@ -1260,7 +1260,7 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   wifi: jG,
   yes: WG
 }, pG = "Węgiel", RG = "Dodaj pompę", DG = "Do tego gniazda podłączono pompę, ale nie została jeszcze skonfigurowana. Uruchom wykrywanie, a następnie sprawdź wykryty model: sugestia ReefRun nie zawsze jest poprawna.", BG = "Poproś o zdjęcie", UG = "Między startem a końcem musi być co najmniej 30 minut", KG = "Zbiornik ATO", SG = "Nazwa marki", QG = "Kalibracja", dG = "Umieść pusty pojemnik miarowy przy wylocie głowicy", kG = "Jaki odczytałeś wynik?", uG = "Nie można znaleźć ciągu tłumaczenia: ", FG = "Nie można zapisać harmonogramu: ", ZG = "Anuluj", JG = "Konfiguracja", HG = "Konfiguracja pompy zwrotnej", NG = "Konfiguracja czujnika skimmera", VG = "Konfiguracja skimmera", PG = "Usunąć tę pompę?", vG = "Ustawienia pompy zostaną przywrócone do domyślnych. Harmonogram i sterowanie sondą zostaną utracone.", qG = "Niestandardowy", yG = "Niestandardowe przesunięcie", bG = `Dzienna średnia
-`, TG = "Dzienna dawka (mL)", LG = "Poniedziałek", fG = "Wtorek", XG = "Środa", _G = "Czwartek", $G = "Piątek", Ah = "Sobota", Ih = "Niedziela", gh = "Dni", ih = "Pozostałe dni", Ch = "d", eh = "Usuń pompę", ch = "Trwa usuwanie", sh = "Wykryj i dodaj", ah = "Planowany rozwój", Mh = "Dodaj nowy suplement do głowicy", Yh = "Usuń suplement z głowicy", Eh = "Edytuj pojemnik", th = "Urządzenie wyłączone w HomeAssistant!", nh = "Wyświetlana nazwa", xh = "Dawki", zh = "Dozowanie", Gh = "Pusty", hh = "Koniec", lh = "Czas zakończenia nie może być wcześniejszy niż czas rozpoczęcia", mh = "Wykryto błąd", oh = "Napraw anomalię i kliknij 'Błąd naprawiony'.", wh = "Koniec rolki za: ", rh = "Błąd naprawiony", jh = "Gotowe", Wh = "Zakończ", Oh = "Kalibracja pełnego kubka", ph = "Głowica", Rh = "Konfiguracja głowicy", Dh = "Kolory głowic", Bh = "Ręczne szybkie dawki", Uh = "Ukryj miejsce dodawania pompy", Kh = "Godzina", Sh = "Co godzinę", Qh = "Ukryj ostatni komunikat alertu", dh = "Ukryj ostatni komunikat", kh = "Wyłącz wymianę węgla aktywnego", uh = "Konserwacja w toku..", Fh = "Wszystko aktualne", Zh = "wkrótce", Jh = "Zmień interwał", Hh = "Co", Nh = "Ukryj wyciszone", Vh = "Domyślnie ukrywaj wyciszone zadania", Ph = "Ukryj aktualne zadania", vh = "Domyślnie ukrywaj aktualne zadania", qh = "Interwał", yh = "Ostatnio wykonano", bh = "Oznacz jako wykonane", Th = "Wyłącz powiadomienia dla tego zadania", Lh = "nigdy nie wykonano", fh = "Nie wykryto żadnego zadania konserwacji", Xh = "zaległe", _h = "Pokaż wyciszone", $h = "dzisiaj", Al = "Włącz powiadomienia dla tego zadania", Il = "Konserwacja", gl = "Ręczne przesunięcie", il = "Minimum", Cl = "Minimalna dawka dla tego typu harmonogramu wynosi 5 mL", el = "Miesięczny", cl = "Nazwa", sl = "Liczba dawek", al = "Nowa rolka", Ml = "W przypadku nowej rolki ustaw poniższą wartość na minimum; w przeciwnym razie wprowadź średnicę bieżącej rolki.", Yl = "Dalej", El = "Nie", tl = "Kalibracja nadmiernego pieniowania", nl = "Napełnianie przewodów", xl = "Powrotna", zl = "Odpieniacz", Gl = "Szybki", hl = "Regularny", ll = "Zapisz", ml = "Zapisz harmonogram", ol = "+ Dodaj", wl = "Anuluj", rl = "Intensywność (%)", jl = "Podgląd", Wl = "Działa…", Ol = "Zatrzymany", pl = "Czas impulsu (s)", Rl = "Zapisz", Dl = "Start", Bl = "Stop", Ul = "Harmonogram", Kl = "Typ harmonogramu", Sl = "Zaplanowane przesunięcie", Ql = "Harmonogram zapisany", dl = "Wybierz urządzenie", kl = "Ustaw wartość kalibracji", ul = "Objętość pojemnika", Fl = "Objętość ręczna", Zl = "Skrócona nazwa", Jl = "Jednorazowy", Hl = "Rozmiary", Nl = "Wg terminu", Vl = "Wg urządzenia", Pl = "Prędkość", vl = "Start", ql = "Rozpocznij kalibrację", yl = "Testuj kalibrację", bl = "Umieść pusty pojemnik miarowy przy wylocie głowicy i naciśnij 'Testuj kalibrację' lub naciśnij 'Zakończ'", Tl = "Czy wartość wynosi 4 mL +/- (0,05 mL)?", Ll = "Timer", fl = "Objętość dnia", Xl = "dni", _l = "miesiące", $l = "tygodnie", Am = "Objętość (mL)", Im = "Zagłosuj na następne obsługiwane urządzenie", gm = "Tygodniowy", im = "Szept", Cm = "WiFi", em = "Tak", cm = {
+`, TG = "Dzienna dawka (mL)", LG = "Poniedziałek", fG = "Wtorek", XG = "Środa", _G = "Czwartek", $G = "Piątek", Ah = "Sobota", Ih = "Niedziela", gh = "Dni", ih = "Pozostałe dni", Ch = "d", eh = "Usuń pompę", ch = "Trwa usuwanie", sh = "Wykryj i dodaj", ah = "Planowany rozwój", Mh = "Dodaj nowy suplement do głowicy", Yh = "Usuń suplement z głowicy", th = "Edytuj pojemnik", nh = "Urządzenie wyłączone w HomeAssistant!", Eh = "Wyświetlana nazwa", xh = "Dawki", zh = "Dozowanie", Gh = "Pusty", hh = "Koniec", lh = "Czas zakończenia nie może być wcześniejszy niż czas rozpoczęcia", mh = "Wykryto błąd", oh = "Napraw anomalię i kliknij 'Błąd naprawiony'.", wh = "Koniec rolki za: ", rh = "Błąd naprawiony", jh = "Gotowe", Wh = "Zakończ", Oh = "Kalibracja pełnego kubka", ph = "Głowica", Rh = "Konfiguracja głowicy", Dh = "Kolory głowic", Bh = "Ręczne szybkie dawki", Uh = "Ukryj miejsce dodawania pompy", Kh = "Godzina", Sh = "Co godzinę", Qh = "Ukryj ostatni komunikat alertu", dh = "Ukryj ostatni komunikat", kh = "Wyłącz wymianę węgla aktywnego", uh = "Konserwacja w toku..", Fh = "Wszystko aktualne", Zh = "wkrótce", Jh = "Zmień interwał", Hh = "Co", Nh = "Ukryj wyciszone", Vh = "Domyślnie ukrywaj wyciszone zadania", Ph = "Ukryj aktualne zadania", vh = "Domyślnie ukrywaj aktualne zadania", qh = "Interwał", yh = "Ostatnio wykonano", bh = "Oznacz jako wykonane", Th = "Wyłącz powiadomienia dla tego zadania", Lh = "nigdy nie wykonano", fh = "Nie wykryto żadnego zadania konserwacji", Xh = "zaległe", _h = "Pokaż wyciszone", $h = "dzisiaj", Al = "Włącz powiadomienia dla tego zadania", Il = "Konserwacja", gl = "Ręczne przesunięcie", il = "Minimum", Cl = "Minimalna dawka dla tego typu harmonogramu wynosi 5 mL", el = "Miesięczny", cl = "Nazwa", sl = "Liczba dawek", al = "Nowa rolka", Ml = "W przypadku nowej rolki ustaw poniższą wartość na minimum; w przeciwnym razie wprowadź średnicę bieżącej rolki.", Yl = "Dalej", tl = "Nie", nl = "Kalibracja nadmiernego pieniowania", El = "Napełnianie przewodów", xl = "Powrotna", zl = "Odpieniacz", Gl = "Szybki", hl = "Regularny", ll = "Zapisz", ml = "Zapisz harmonogram", ol = "+ Dodaj", wl = "Anuluj", rl = "Intensywność (%)", jl = "Podgląd", Wl = "Działa…", Ol = "Zatrzymany", pl = "Czas impulsu (s)", Rl = "Zapisz", Dl = "Start", Bl = "Stop", Ul = "Harmonogram", Kl = "Typ harmonogramu", Sl = "Zaplanowane przesunięcie", Ql = "Harmonogram zapisany", dl = "Wybierz urządzenie", kl = "Ustaw wartość kalibracji", ul = "Objętość pojemnika", Fl = "Objętość ręczna", Zl = "Skrócona nazwa", Jl = "Jednorazowy", Hl = "Rozmiary", Nl = "Wg terminu", Vl = "Wg urządzenia", Pl = "Prędkość", vl = "Start", ql = "Rozpocznij kalibrację", yl = "Testuj kalibrację", bl = "Umieść pusty pojemnik miarowy przy wylocie głowicy i naciśnij 'Testuj kalibrację' lub naciśnij 'Zakończ'", Tl = "Czy wartość wynosi 4 mL +/- (0,05 mL)?", Ll = "Timer", fl = "Objętość dnia", Xl = "dni", _l = "miesiące", $l = "tygodnie", Am = "Objętość (mL)", Im = "Zagłosuj na następne obsługiwane urządzenie", gm = "Tygodniowy", im = "Szept", Cm = "WiFi", em = "Tak", cm = {
   active_carbon_replace: pG,
   add_pump: RG,
   add_pump_text: DG,
@@ -1301,9 +1301,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   dev_planned: ah,
   dialog_add_supplement_title: Mh,
   dialog_delete_supplement_title: Yh,
-  dialog_edit_container: Eh,
-  disabledInHa: th,
-  display_name: nh,
+  dialog_edit_container: th,
+  disabledInHa: nh,
+  display_name: Eh,
   doses: xh,
   dosing: zh,
   empty: Gh,
@@ -1355,9 +1355,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   new_roll: al,
   new_roll_info: Ml,
   next: Yl,
-  no: El,
-  overskimming_calibration: tl,
-  priming: nl,
+  no: tl,
+  overskimming_calibration: nl,
+  priming: El,
   pump_type_return: xl,
   pump_type_skimmer: zl,
   quick: Gl,
@@ -1404,15 +1404,15 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   whisper: im,
   wifi: Cm,
   yes: em
-}, sm = "Carvão", am = "Adicionar uma bomba", Mm = "Está ligada uma bomba a esta tomada, mas ainda não está configurada. Execute a deteção e verifique o modelo detetado: a sugestão do ReefRun nem sempre está correta.", Ym = "Pedir imagem", Em = "Entre o início e o fim devem existir pelo menos 30 minutos", tm = "Reservatório ATO", nm = "Nome da marca", xm = "Calibração", zm = "Colocar o recipiente graduado vazio na saída da cabeça", Gm = "Que valor está a ler?", hm = "Não é possível encontrar a cadeia de tradução: ", lm = "Não é possível guardar o agendamento: ", mm = "Cancelar", om = "Configuração", wm = "Configuração da bomba de retorno", rm = "Configuração do sensor do skimmer", jm = "Configuração do skimmer", Wm = "Eliminar esta bomba?", Om = "As definições da bomba serão repostas para os valores predefinidos. O programa horário e o controlo por sonda serão perdidos.", pm = "Personalizado", Rm = "Avanço personalizado", Dm = `Média diária
-`, Bm = "Dose diária (mL)", Um = "Segunda-feira", Km = "Terça-feira", Sm = "Quarta-feira", Qm = "Quinta-feira", dm = "Sexta-feira", km = "Sábado", um = "Domingo", Fm = "Dias", Zm = "Dias restantes", Jm = "d", Hm = "Eliminar a bomba", Nm = "Eliminação em curso", Vm = "Detetar e adicionar", Pm = "Desenvolvimento planeado", vm = "Adicionar novo suplemento à cabeça", qm = "Eliminar suplemento da cabeça", ym = "Editar recipiente", bm = "Dispositivo desativado no HomeAssistant!", Tm = "Nome visível", Lm = "Doses", fm = "Dosagem", Xm = "Vazio", _m = "Fim", $m = "A hora de fim não pode ser anterior à hora de início", Ao = "Erro detetado", Io = "Corrija a anomalia e clique em 'Erro corrigido'.", go = "Fim do rolo em: ", io = "Erro corrigido", Co = "Concluído", eo = "Terminar", co = "Calibração de xícara cheia", so = "Cabeça", ao = "Configuração da cabeça", Mo = "Cores das cabeças", Yo = "Doses manuais rápidas", Eo = "Ocultar o espaço para adicionar uma bomba", to = "Hora", no = "Por hora", xo = "Ocultar última mensagem de alerta", zo = "Ocultar última mensagem", Go = "Desativar a substituição do carvão ativo", ho = "Manutenção em curso..", lo = "Tudo em dia", mo = "em breve", oo = "Alterar o intervalo", wo = "A cada", ro = "Ocultar silenciadas", jo = "Ocultar por omissão as tarefas silenciadas", Wo = "Ocultar as tarefas em dia", Oo = "Ocultar por omissão as tarefas em dia", po = "Intervalo", Ro = "Última vez", Do = "Marcar como realizada", Bo = "Desativar os alertas desta tarefa", Uo = "nunca realizada", Ko = "Nenhuma tarefa de manutenção detetada", So = "em atraso", Qo = "Mostrar silenciadas", ko = "hoje", uo = "Ativar os alertas desta tarefa", Fo = "Manutenção", Zo = "Avanço manual", Jo = "Mínimo", Ho = "A dose mínima para este tipo de agendamento é de 5 mL", No = "Mensal", Vo = "Nome", Po = "Número de doses", vo = "Novo rolo", qo = "Para um rolo novo, defina o valor seguinte para o mínimo; caso contrário, introduza o diâmetro do seu rolo atual.", yo = "Seguinte", bo = "Não", To = "Calibração de espuma excessiva", Lo = "Preparação", fo = "Retorno", Xo = "Escumador", _o = "Rápido", $o = "Regular", Aw = "Guardar", Iw = "Guardar agendamento", gw = "+ Adicionar", iw = "Cancelar", Cw = "Intensidade (%)", ew = "Pré-visualização", cw = "A executar…", sw = "Parado", aw = "Tempo de pulso (s)", Mw = "Guardar", Yw = "Início", Ew = "Parar", tw = "Horário", nw = "Tipo de agendamento", xw = "Avanço agendado", zw = "Agendamento guardado", Gw = "Selecionar um dispositivo", hw = "Definir valor de calibração", lw = "Volume do recipiente", mw = "Volume manual", ow = "Nome curto", ww = "Único", rw = "Tamanhos", jw = "Por prazo", Ww = "Por equipamento", Ow = "Velocidade", pw = "Início", Rw = "Iniciar calibração", Dw = "Testar calibração", Bw = "Colocar o recipiente graduado vazio na saída da cabeça e premir 'Testar calibração' ou premir 'Terminar'", Uw = "O valor é igual a 4 mL +/- (0,05 mL)?", Kw = "Temporizador", Sw = "Volume do dia", Qw = "dias", dw = "meses", kw = "semanas", uw = "Volume (mL)", Fw = "Votar no próximo dispositivo suportado", Zw = "Semanal", Jw = "Sussurro", Hw = "WiFi", Nw = "Sim", Vw = {
+}, sm = "Carvão", am = "Adicionar uma bomba", Mm = "Está ligada uma bomba a esta tomada, mas ainda não está configurada. Execute a deteção e verifique o modelo detetado: a sugestão do ReefRun nem sempre está correta.", Ym = "Pedir imagem", tm = "Entre o início e o fim devem existir pelo menos 30 minutos", nm = "Reservatório ATO", Em = "Nome da marca", xm = "Calibração", zm = "Colocar o recipiente graduado vazio na saída da cabeça", Gm = "Que valor está a ler?", hm = "Não é possível encontrar a cadeia de tradução: ", lm = "Não é possível guardar o agendamento: ", mm = "Cancelar", om = "Configuração", wm = "Configuração da bomba de retorno", rm = "Configuração do sensor do skimmer", jm = "Configuração do skimmer", Wm = "Eliminar esta bomba?", Om = "As definições da bomba serão repostas para os valores predefinidos. O programa horário e o controlo por sonda serão perdidos.", pm = "Personalizado", Rm = "Avanço personalizado", Dm = `Média diária
+`, Bm = "Dose diária (mL)", Um = "Segunda-feira", Km = "Terça-feira", Sm = "Quarta-feira", Qm = "Quinta-feira", dm = "Sexta-feira", km = "Sábado", um = "Domingo", Fm = "Dias", Zm = "Dias restantes", Jm = "d", Hm = "Eliminar a bomba", Nm = "Eliminação em curso", Vm = "Detetar e adicionar", Pm = "Desenvolvimento planeado", vm = "Adicionar novo suplemento à cabeça", qm = "Eliminar suplemento da cabeça", ym = "Editar recipiente", bm = "Dispositivo desativado no HomeAssistant!", Tm = "Nome visível", Lm = "Doses", fm = "Dosagem", Xm = "Vazio", _m = "Fim", $m = "A hora de fim não pode ser anterior à hora de início", Ao = "Erro detetado", Io = "Corrija a anomalia e clique em 'Erro corrigido'.", go = "Fim do rolo em: ", io = "Erro corrigido", Co = "Concluído", eo = "Terminar", co = "Calibração de xícara cheia", so = "Cabeça", ao = "Configuração da cabeça", Mo = "Cores das cabeças", Yo = "Doses manuais rápidas", to = "Ocultar o espaço para adicionar uma bomba", no = "Hora", Eo = "Por hora", xo = "Ocultar última mensagem de alerta", zo = "Ocultar última mensagem", Go = "Desativar a substituição do carvão ativo", ho = "Manutenção em curso..", lo = "Tudo em dia", mo = "em breve", oo = "Alterar o intervalo", wo = "A cada", ro = "Ocultar silenciadas", jo = "Ocultar por omissão as tarefas silenciadas", Wo = "Ocultar as tarefas em dia", Oo = "Ocultar por omissão as tarefas em dia", po = "Intervalo", Ro = "Última vez", Do = "Marcar como realizada", Bo = "Desativar os alertas desta tarefa", Uo = "nunca realizada", Ko = "Nenhuma tarefa de manutenção detetada", So = "em atraso", Qo = "Mostrar silenciadas", ko = "hoje", uo = "Ativar os alertas desta tarefa", Fo = "Manutenção", Zo = "Avanço manual", Jo = "Mínimo", Ho = "A dose mínima para este tipo de agendamento é de 5 mL", No = "Mensal", Vo = "Nome", Po = "Número de doses", vo = "Novo rolo", qo = "Para um rolo novo, defina o valor seguinte para o mínimo; caso contrário, introduza o diâmetro do seu rolo atual.", yo = "Seguinte", bo = "Não", To = "Calibração de espuma excessiva", Lo = "Preparação", fo = "Retorno", Xo = "Escumador", _o = "Rápido", $o = "Regular", Aw = "Guardar", Iw = "Guardar agendamento", gw = "+ Adicionar", iw = "Cancelar", Cw = "Intensidade (%)", ew = "Pré-visualização", cw = "A executar…", sw = "Parado", aw = "Tempo de pulso (s)", Mw = "Guardar", Yw = "Início", tw = "Parar", nw = "Horário", Ew = "Tipo de agendamento", xw = "Avanço agendado", zw = "Agendamento guardado", Gw = "Selecionar um dispositivo", hw = "Definir valor de calibração", lw = "Volume do recipiente", mw = "Volume manual", ow = "Nome curto", ww = "Único", rw = "Tamanhos", jw = "Por prazo", Ww = "Por equipamento", Ow = "Velocidade", pw = "Início", Rw = "Iniciar calibração", Dw = "Testar calibração", Bw = "Colocar o recipiente graduado vazio na saída da cabeça e premir 'Testar calibração' ou premir 'Terminar'", Uw = "O valor é igual a 4 mL +/- (0,05 mL)?", Kw = "Temporizador", Sw = "Volume do dia", Qw = "dias", dw = "meses", kw = "semanas", uw = "Volume (mL)", Fw = "Votar no próximo dispositivo suportado", Zw = "Semanal", Jw = "Sussurro", Hw = "WiFi", Nw = "Sim", Vw = {
   active_carbon_replace: sm,
   add_pump: am,
   add_pump_text: Mm,
   ask_add_supplement: Ym,
-  at_least_30m_between: Em,
-  ato_tank: tm,
-  brand_name: nm,
+  at_least_30m_between: tm,
+  ato_tank: nm,
+  brand_name: Em,
   calibration: xm,
   calibration_step_1: zm,
   calibration_step_2: Gm,
@@ -1465,9 +1465,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   head_configuration: ao,
   heads_colors: Mo,
   heads_shortcuts: Yo,
-  hide_add_pump: Eo,
-  hour: to,
-  hourly: no,
+  hide_add_pump: to,
+  hour: no,
+  hourly: Eo,
   last_alert_message: xo,
   last_message: zo,
   maint_mat_carbon_replace: Go,
@@ -1518,9 +1518,9 @@ const ti = "Kohle", ni = "Pumpe hinzufügen", xi = "An diesem Anschluss ist eine
   sched_pulse_time: aw,
   sched_save: Mw,
   sched_start: Yw,
-  sched_stop: Ew,
-  sched_title: tw,
-  schedule: nw,
+  sched_stop: tw,
+  sched_title: nw,
+  schedule: Ew,
   schedule_advance: xw,
   schedule_saved: zw,
   select_device: Gw,
@@ -1567,8 +1567,8 @@ class Pw {
     ], this.dictionaries = /* @__PURE__ */ new Map([
       ["de", ye],
       ["en", Ra],
-      ["es", aE],
-      ["fr", vn],
+      ["es", at],
+      ["fr", vE],
       ["it", OG],
       ["pl", cm],
       ["pt", Vw]
@@ -1735,7 +1735,7 @@ class Pw {
     console.debug(`Dictionary for '${A}' merged`);
   }
 }
-const n = new Pw();
+const E = new Pw();
 class og {
   /**
    * Constructor
@@ -1819,22 +1819,22 @@ function QA(e) {
 }
 function CA(e, A, I = null, g = !0, i = "", C = 1) {
   const c = document.createElement("div"), a = document.createElement("label");
-  a.htmlFor = e, a.innerHTML = n._(e);
+  a.htmlFor = e, a.innerHTML = E._(e);
   const s = document.createElement("select");
   s.id = e + "_" + C;
   for (const M of A) {
-    const t = document.createElement("option");
-    t.value = M, g ? t.innerHTML = n._(M) + i : t.innerHTML = M + i, I !== null && I === M && (t.selected = !0), s.appendChild(t);
+    const n = document.createElement("option");
+    n.value = M, g ? n.innerHTML = E._(M) + i : n.innerHTML = M + i, I !== null && I === M && (n.selected = !0), s.appendChild(n);
   }
   return c.appendChild(a), c.appendChild(s), c;
 }
 function dA(e, A = 0, I = 1) {
   const g = document.createElement("div"), i = document.createElement("label");
-  i.htmlFor = e, i.innerHTML = n._(e);
+  i.htmlFor = e, i.innerHTML = E._(e);
   const C = document.createElement("input");
   return C.type = "time", C.id = e + "_" + I, C.value = bw(A), g.appendChild(i), g.appendChild(C), g;
 }
-const eA = "150,150,150", L = "__maintenance__", wg = "redsea-maintenance", tI = "maint_", _I = "_notify", $I = "_interval_", nI = 0.2;
+const eA = "150,150,150", L = "__maintenance__", wg = "redsea-maintenance", nI = "maint_", _I = "_notify", $I = "_interval_", EI = 0.2;
 function Tw(e, A) {
   const I = Number(e);
   return Number.isFinite(I) ? I : A;
@@ -1852,10 +1852,10 @@ function fw(e) {
 function Xw(e, A) {
   return e ? A && e.startsWith(A + " ") ? e.slice(A.length + 1) : e : "";
 }
-function _w(e, A = nI) {
+function _w(e, A = EI) {
   return e <= 0 ? 0 : Math.max(1, Math.round(e * A));
 }
-function $w(e, A, I = nI) {
+function $w(e, A, I = EI) {
   return e === null ? "never" : e < 0 ? "overdue" : e <= _w(A, I) ? "warning" : "ok";
 }
 function Ar(e, A) {
@@ -1872,7 +1872,7 @@ function rg(e, A) {
   if (typeof g == "string" && !g.startsWith("button."))
     return !1;
   const i = I.reef_role;
-  return typeof i != "string" || !i.startsWith(tI) ? !1 : typeof I.task_key == "string" && I.task_key.length > 0;
+  return typeof i != "string" || !i.startsWith(nI) ? !1 : typeof I.task_key == "string" && I.task_key.length > 0;
 }
 function Ir(e) {
   const A = {}, I = e.entities || {};
@@ -1880,7 +1880,7 @@ function Ir(e) {
     if (!g.startsWith("switch."))
       continue;
     const i = e.states[g]?.attributes?.reef_role;
-    if (typeof i != "string" || !i.startsWith(tI) || !i.endsWith(_I))
+    if (typeof i != "string" || !i.startsWith(nI) || !i.endsWith(_I))
       continue;
     const C = i.slice(0, -_I.length), c = I[g]?.device_id || "";
     A[`${c}|${C}`] = g;
@@ -1917,7 +1917,7 @@ function ir(e) {
     if (!g.startsWith("number."))
       continue;
     const i = e.states[g], C = i?.attributes?.reef_role;
-    if (typeof C != "string" || !C.startsWith(tI))
+    if (typeof C != "string" || !C.startsWith(nI))
       continue;
     const c = C.lastIndexOf($I);
     if (c < 0)
@@ -1925,8 +1925,8 @@ function ir(e) {
     const a = C.slice(c + $I.length);
     if (a !== "days" && a !== "weeks" && a !== "months")
       continue;
-    const s = i.attributes, M = Number(i.state), t = I[g]?.device_id || "", Y = Number(s.step);
-    A[`${t}|${C.slice(0, c)}`] = {
+    const s = i.attributes, M = Number(i.state), n = I[g]?.device_id || "", Y = Number(s.step);
+    A[`${n}|${C.slice(0, c)}`] = {
       entity_id: g,
       unit: a,
       value: Number.isFinite(M) ? M : null,
@@ -1941,12 +1941,12 @@ function Ag(e, A = {}) {
   const I = [];
   if (!e?.states)
     return I;
-  const g = A.warning_ratio ?? nI, i = e.entities || {}, C = e.devices || {}, c = Ir(e), a = ir(e), s = gr(e);
+  const g = A.warning_ratio ?? EI, i = e.entities || {}, C = e.devices || {}, c = Ir(e), a = ir(e), s = gr(e);
   for (const M in e.states) {
-    const t = e.states[M];
-    if (!rg(t, M))
+    const n = e.states[M];
+    if (!rg(n, M))
       continue;
-    const Y = t.attributes, x = i[M]?.device_id || "", G = x ? C[x] : void 0;
+    const Y = n.attributes, x = i[M]?.device_id || "", G = x ? C[x] : void 0;
     if (G?.disabled_by)
       continue;
     const O = G?.name_by_user || G?.name || Y.device_name || "", h = Math.max(0, Tw(Y.interval_days, 0)), l = Lw(Y.days_left), w = l !== null && l < 0, p = Xw(
@@ -2040,7 +2040,7 @@ function bA(e, ...A) {
       )) : Object.assign(e, { [g]: I[g] });
   return bA(e, ...A);
 }
-function tA(e, A) {
+function nA(e, A) {
   return bA(structuredClone(e), A);
 }
 function ar(e, A, I) {
@@ -2048,27 +2048,27 @@ function ar(e, A, I) {
   function M() {
     C !== null && (clearTimeout(C), C = null);
   }
-  function t() {
+  function n() {
     c !== null && (clearTimeout(c), c = null);
   }
   e.addEventListener("pointerdown", (Y) => {
-    a = !1, s = !1, M(), t(), C = window.setTimeout(() => {
+    a = !1, s = !1, M(), n(), C = window.setTimeout(() => {
       a = !0, A.onHold?.(Y);
     }, 500);
   }), e.addEventListener("pointerup", M), e.addEventListener("pointerleave", M), e.addEventListener("pointercancel", M), e.addEventListener("click", (Y) => {
-    a || (t(), c = window.setTimeout(() => {
+    a || (n(), c = window.setTimeout(() => {
       s || A.onClick?.(Y), c = null, s = !1;
     }, 250));
   }), e.addEventListener("dblclick", (Y) => {
-    a || (s = !0, t(), A.onDoubleClick?.(Y));
+    a || (s = !0, n(), A.onDoubleClick?.(Y));
   }), e.addEventListener("contextmenu", (Y) => Y.preventDefault());
 }
 class WA {
   constructor(A = {}) {
     this.context = {
       ...A,
-      i18n: n,
-      iconv: n,
+      i18n: E,
+      iconv: E,
       Math,
       parseFloat,
       parseInt,
@@ -2156,7 +2156,7 @@ class WA {
       /(i18n|iconv)\._\(\s*['"]([^'"]+)['"]\s*\)/g,
       (I, g, i) => {
         try {
-          return `"${n._(i)}"`;
+          return `"${E._(i)}"`;
         } catch {
           return `"${i}"`;
         }
@@ -2277,8 +2277,8 @@ class WA {
   resetContext(A = {}) {
     this.context = {
       ...A,
-      i18n: n,
-      iconv: n,
+      i18n: E,
+      iconv: E,
       Math,
       parseFloat,
       parseInt,
@@ -2615,7 +2615,7 @@ const P = (f = class extends q {
           config: I,
           state: c.stateObj?.state,
           name: I.name,
-          i18n: n
+          i18n: E
         };
         c.evalCtx = new WA(s), C = c.evaluate(I.label);
       }
@@ -2650,7 +2650,7 @@ const P = (f = class extends q {
       config: this.conf,
       state: this.stateObj?.state,
       name: this.conf.name,
-      i18n: n
+      i18n: E
     };
     this.evalCtx = new WA(I);
   }
@@ -2763,7 +2763,7 @@ const P = (f = class extends q {
    * Must be overrided by buttons, switch, click-image,progres-* ...
    */
   _render(A) {
-    return E``;
+    return t``;
   }
   /*
    * Render component template
@@ -2773,7 +2773,7 @@ const P = (f = class extends q {
    *   - call the _render() function of elements
    */
   render() {
-    return this.stateObj !== null && this.stateObj.state, this.evaluateCondition(this.conf?.disabled_if) ? this.conf?.no_br_if_disabled ? E`` : E`<br />` : (this.stateOn ? this.c = this.color : this.c = eA, E`
+    return this.stateObj !== null && this.stateObj.state, this.evaluateCondition(this.conf?.disabled_if) ? this.conf?.no_br_if_disabled ? t`` : t`<br />` : (this.stateOn ? this.c = this.color : this.c = eA, t`
       <div class="${this.get_class()}" style="${this.get_style()}">
         ${this._render(this.get_style("elt_css"))}
       </div>
@@ -2880,7 +2880,7 @@ const P = (f = class extends q {
           const C = A.data;
           for (const [c, a] of Object.entries(C))
             if (c in this.device.config.elements) {
-              const s = this.device.config.elements[c], M = c, t = this.device._elements?.[M], Y = this.device._conf_overrides;
+              const s = this.device.config.elements[c], M = c, n = this.device._elements?.[M], Y = this.device._conf_overrides;
               if (Y) {
                 Y[c] || (Y[c] = {});
                 for (const [z, x] of Object.entries(a))
@@ -2889,14 +2889,14 @@ const P = (f = class extends q {
                     ...x
                   } : Y[c][z] = x;
               }
-              if (t && a.css)
+              if (n && a.css)
                 if (s.type?.startsWith("hui-"))
                   for (const [z, x] of Object.entries(
                     a.css
                   ))
-                    t.style.setProperty(z, x);
+                    n.style.setProperty(z, x);
                 else
-                  t.conf?.css && Object.assign(t.conf.css, a.css), t.requestUpdate();
+                  n.conf?.css && Object.assign(n.conf.css, a.css), n.requestUpdate();
             }
           this.device.requestUpdate();
         }
@@ -3036,8 +3036,8 @@ const hA = {
     background-color: rgba(255, 0, 0, 0.5);
   }
 `;
-var Yr = Object.defineProperty, Er = Object.getOwnPropertyDescriptor, Wg = (e, A, I, g) => {
-  for (var i = g > 1 ? void 0 : g ? Er(A, I) : A, C = e.length - 1, c; C >= 0; C--)
+var Yr = Object.defineProperty, tr = Object.getOwnPropertyDescriptor, Wg = (e, A, I, g) => {
+  for (var i = g > 1 ? void 0 : g ? tr(A, I) : A, C = e.length - 1, c; C >= 0; C--)
     (c = e[C]) && (i = (g ? c(A, I, i) : c(i)) || i);
   return g && i && Yr(A, I, i), i;
 };
@@ -3068,7 +3068,7 @@ let o = class extends q {
   load_dialogs(e) {
     this.dialogs = {};
     for (const A of e)
-      this.dialogs = tA(this.dialogs, A);
+      this.dialogs = nA(this.dialogs, A);
   }
   /**
    * Render device
@@ -3077,28 +3077,28 @@ let o = class extends q {
     if (this.isEditorMode)
       return this.renderEditor();
     this.update_config(), this.to_render = !1, console.debug("Render ", this.config.model, this.device?.name);
-    let e = E``;
+    let e = t``;
     this._populate_entities();
     let A = "";
     this.config?.css && (A = this.get_style(this.config));
     const I = this._render_disabled(A);
     if (I.reason !== null) {
-      const g = I.maintenance_element ? E`${I.maintenance_element}` : E``;
-      return E`
+      const g = I.maintenance_element ? t`${I.maintenance_element}` : t``;
+      return t`
         <div class="device_bg">
           <img class="device_img_disabled" id=d_img" alt=""  src='${this.config.background_img}' style="${I.substyle}"/>
           <p class='disabled_in_ha'>${I.reason}</p>
          ${g}
         </div">`;
     }
-    return this.is_on() ? this.masterOn = !0 : (e = E`<style>
+    return this.is_on() ? this.masterOn = !0 : (e = t`<style>
         img {
           filter: grayscale(90%);
         }
       </style>`, this.masterOn = !1), this._render(e, A);
   }
   _render(e, A) {
-    return E` <div class="device_bg">
+    return t` <div class="device_bg">
       ${e}
       <img
         class="device_img"
@@ -3113,10 +3113,10 @@ let o = class extends q {
         style="background-color:rgba(135,135,135,0.7);position:absolute;top:0%;width:100%;height: 100%;text-align:center;"
       >
         <div style="background-color:rgba(255,255,255,0.7);border-radius:30px">
-          <h1 style="color:red;">${n._("dev_planned")}</h1>
+          <h1 style="color:red;">${E._("dev_planned")}</h1>
           <h2>
             <a href="https://github.com/Elwinmage/ha-reef-card/discussions/22"
-              >${n._("vote_next_device")}</a
+              >${E._("vote_next_device")}</a
             >
           </h2>
         </div>
@@ -3128,7 +3128,7 @@ let o = class extends q {
    * Override this method in your component for specific editor view  for this component
    */
   renderEditor() {
-    return E`<p>No editor configuration available for this device</p>`;
+    return t`<p>No editor configuration available for this device</p>`;
   }
   /**
    * Check if new hass states imply a re-render and propagate for sub elements.
@@ -3206,7 +3206,7 @@ let o = class extends q {
       const e = this.device.elements[0].model;
       if (e && e in this.user_config.conf) {
         const A = this.user_config.conf[e];
-        "common" in A && this.applyLeaves(A.common), "devices" in A && this.device.name in A.devices && (this.config = tA(
+        "common" in A && this.applyLeaves(A.common), "devices" in A && this.device.name in A.devices && (this.config = nA(
           this.config,
           this.user_config.conf[e].devices[this.device.name]
         ));
@@ -3259,9 +3259,9 @@ let o = class extends q {
    */
   _render_disabled(e = null) {
     let A = null;
-    this.is_disabled() ? A = n._("disabledInHa") : this._hass && this.entities.maintenance && this._hass.states[this.entities.maintenance.entity_id]?.state === "on" && (A = n._("maintenance"));
+    this.is_disabled() ? A = E._("disabledInHa") : this._hass && this.entities.maintenance && this._hass.states[this.entities.maintenance.entity_id]?.state === "on" && (A = E._("maintenance"));
     let I = null;
-    if (A === n._("maintenance") && this.config?.elements)
+    if (A === E._("maintenance") && this.config?.elements)
       for (const g in this.config.elements) {
         const i = this.config.elements[g];
         if (i.name === "maintenance" && this._hass) {
@@ -3344,7 +3344,7 @@ let o = class extends q {
       entity: D.createEntitiesContext(this, this._hass),
       device: this,
       config: e,
-      i18n: n
+      i18n: E
     });
   }
   /**
@@ -3367,13 +3367,13 @@ let o = class extends q {
   _render_element(e, A, I, g) {
     let i = null;
     if ("put_in" in e && (i = e.put_in), "disabled" in e && e.disabled === !0 || i !== I)
-      return E``;
+      return t``;
     if (e.type?.startsWith("hui-") && e.disabled_if && this.evaluate_condition(e.disabled_if, e))
-      return e.no_br_if_disabled ? E`` : E`<br />`;
+      return e.no_br_if_disabled ? t`` : t`<br />`;
     if (e.type?.startsWith("hui-")) {
       const a = this._helpers ?? o._helpersResolved;
       if (!a)
-        return E``;
+        return t``;
       const s = g ?? e.type + "." + (e.name || "device_states");
       if (s in this._elements)
         this._elements[s].hass = this._hass;
@@ -3390,27 +3390,27 @@ let o = class extends q {
             const z = e.conf.entities[Y];
             typeof z == "string" ? M.entities[Y] = this.get_entity(z)?.entity_id ?? z : M.entities[Y].entity = this.get_entity(z.entity)?.entity_id ?? z.entity;
           }
-        const t = a.createCardElement(M);
+        const n = a.createCardElement(M);
         if (e.css)
           for (const [Y, z] of Object.entries(e.css))
-            Y !== "shadow_css" && t.style.setProperty(Y, z);
-        if (t.hass = this._hass, e.css?.shadow_css) {
+            Y !== "shadow_css" && n.style.setProperty(Y, z);
+        if (n.hass = this._hass, e.css?.shadow_css) {
           const Y = e.css.shadow_css, z = () => {
-            if (t.shadowRoot) {
+            if (n.shadowRoot) {
               const x = document.createElement("style");
-              x.textContent = Y, t.shadowRoot.appendChild(x);
+              x.textContent = Y, n.shadowRoot.appendChild(x);
             } else
               requestAnimationFrame(z);
           };
           requestAnimationFrame(z);
         }
-        this._elements[s] = t;
+        this._elements[s] = n;
       }
-      return E`${this._elements[s]}`;
+      return t`${this._elements[s]}`;
     }
     let C = null;
     const c = g ?? e.type + "." + e.name;
-    return c in this._elements ? (C = this._elements[c], C && (C.stateOn = A, C.groupOn = A)) : this._hass && (C = D.create_element(this._hass, e, this), C && (C.stateOn = A, C.groupOn = A), this._elements[c] = C), C && this._conf_overrides[c]?.css && C.merge_css(this._conf_overrides[c].css), E`${C}`;
+    return c in this._elements ? (C = this._elements[c], C && (C.stateOn = A, C.groupOn = A)) : this._hass && (C = D.create_element(this._hass, e, this), C && (C.stateOn = A, C.groupOn = A), this._elements[c] = C), C && this._conf_overrides[c]?.css && C.merge_css(this._conf_overrides[c].css), t`${C}`;
   }
   /*
    * Render all elements that are declared in the configuration of the device
@@ -3421,7 +3421,7 @@ let o = class extends q {
     const I = [];
     for (const g in this.config.elements)
       I.push({ conf: this.config.elements[g], key: g });
-    return E`${I.map(
+    return t`${I.map(
       ({ conf: g, key: i }) => this._render_element(g, e, A, i)
     )}`;
   }
@@ -3430,7 +3430,7 @@ let o = class extends q {
    */
   is_checked(e) {
     let A = !1;
-    return this.config.elements[e] && "disabled_if" in this.config.elements[e] && (A = this.config.elements[e].disabled_if), A ? E`
+    return this.config.elements[e] && "disabled_if" in this.config.elements[e] && (A = this.config.elements[e].disabled_if), A ? t`
         <label class="switch">
           <input
             type="checkbox"
@@ -3440,8 +3440,8 @@ let o = class extends q {
           />
           <span class="slider round"></span>
         </label>
-        <label>${n._(e)}</label>
-      ` : E`
+        <label>${E._(e)}</label>
+      ` : t`
         <label class="switch">
           <input
             type="checkbox"
@@ -3450,7 +3450,7 @@ let o = class extends q {
           />
           <span class="slider round"></span>
         </label>
-        <label>${n._(e)}</label>
+        <label>${E._(e)}</label>
       `;
   }
   // end of function is_checked
@@ -3470,7 +3470,7 @@ let o = class extends q {
    */
   is_config_checked(e) {
     const A = this.get_config_flag(e) === !0;
-    return E`
+    return t`
       <label class="switch">
         <input
           type="checkbox"
@@ -3480,7 +3480,7 @@ let o = class extends q {
         />
         <span class="slider round"></span>
       </label>
-      <label>${n._(e)}</label>
+      <label>${E._(e)}</label>
     `;
   }
   /**
@@ -3500,7 +3500,7 @@ let o = class extends q {
     try {
       C.conf[g].devices[this.device.name][I] = A;
     } catch {
-      C = tA(C, i);
+      C = nA(C, i);
     }
     this.dispatchEvent(
       new CustomEvent("config-changed", {
@@ -3511,7 +3511,7 @@ let o = class extends q {
     );
   }
   _editor_common() {
-    return E`<style>
+    return t`<style>
         /* The switch - the box around the slider */
         .switch {
           position: relative;
@@ -3598,7 +3598,7 @@ let o = class extends q {
     try {
       g.conf[this.config.model].devices[this.device.name].elements[e.target.id].disabled_if = A;
     } catch {
-      g = tA(g, I);
+      g = nA(g, I);
     }
     const i = new CustomEvent("config-changed", {
       detail: { config: g },
@@ -3610,7 +3610,7 @@ let o = class extends q {
 };
 o._helpersPromise = null;
 o._helpersResolved = null;
-o.styles = [xI];
+o.styles = [xI, Z];
 Wg([
   d({
     type: Boolean,
@@ -3620,7 +3620,7 @@ Wg([
 o = Wg([
   Mi("rs-device")
 ], o);
-const tr = [
+const nr = [
   {
     uid: "0e63ba83-3ec4-445e-a3dd-7f2dbdc7f964",
     name: "Calcium (Powder)",
@@ -4735,9 +4735,9 @@ const tr = [
     fullname: "RedSea - ReefCare Program"
   }
 ];
-class nr {
+class Er {
   constructor() {
-    this._list = tr;
+    this._list = nr;
   }
   //end of constructor
   get_supplement_from_uid(A) {
@@ -4779,7 +4779,7 @@ class nr {
   }
   //end of function get_supplement
 }
-const TA = new nr();
+const TA = new Er();
 function xr(e, A, I) {
   if (e.device.config.shortcut)
     for (const g of e.device.config.shortcut.split(",")) {
@@ -4835,7 +4835,7 @@ function zr(e, A, I) {
   if (c !== null && c.remove(), i) {
     const s = "/hacsfiles/ha-reef-card/img/supplements/" + i.uid + ".supplement.png", M = new XMLHttpRequest();
     M.open("HEAD", s, !1), M.send(), M.status !== 404 && (C = s);
-    const t = customElements.get("click-image"), Y = new t(), z = {
+    const n = customElements.get("click-image"), Y = new n(), z = {
       name: "supplement",
       type: "click-image",
       image: C,
@@ -4845,9 +4845,9 @@ function zr(e, A, I) {
     const x = document.createElement("div");
     x.style.cssText = "display: inline-block", x.id = "add-supplement", x.dataset.supplementUid = a, I.querySelector("#dialog-content").appendChild(x), x.appendChild(Y);
     const G = document.createElement("div");
-    G.innerHTML = "<h1 style='text-decoration:underline'>" + i.fullname + "</h1>", G.innerHTML += "<h2><span style='color:#009ac7'>" + n._("name") + ":</span> " + i.name + "</h2>", G.innerHTML += "<h2><span style='color:#d32625'>" + n._("brand_name") + ":</span> " + i.brand_name + "</h2>", G.innerHTML += "<h2><span style='color:rgb(175,50,175)'>" + n._("display_name") + ":</span> " + i.display_name + "</h2>", G.innerHTML += "<h2><span style='color:rgb(70,170,70)'>" + n._("short_name") + ":</span> " + i.short_name + "</h2>", "sizes" in i && i.sizes.length > 0 && (G.innerHTML += "<h2><span style='color:#c3d737'>" + n._("sizes") + ":</span> " + i.sizes + " mL</h2>"), G.innerHTML += "<h3><span style='color:rgb(190,190,190)'>UID:</span> " + i.uid + "</h3>", G.style.cssText = "display: inline-block;width: 70%;position:relative;", x.appendChild(G);
+    G.innerHTML = "<h1 style='text-decoration:underline'>" + i.fullname + "</h1>", G.innerHTML += "<h2><span style='color:#009ac7'>" + E._("name") + ":</span> " + i.name + "</h2>", G.innerHTML += "<h2><span style='color:#d32625'>" + E._("brand_name") + ":</span> " + i.brand_name + "</h2>", G.innerHTML += "<h2><span style='color:rgb(175,50,175)'>" + E._("display_name") + ":</span> " + i.display_name + "</h2>", G.innerHTML += "<h2><span style='color:rgb(70,170,70)'>" + E._("short_name") + ":</span> " + i.short_name + "</h2>", "sizes" in i && i.sizes.length > 0 && (G.innerHTML += "<h2><span style='color:#c3d737'>" + E._("sizes") + ":</span> " + i.sizes + " mL</h2>"), G.innerHTML += "<h3><span style='color:rgb(190,190,190)'>UID:</span> " + i.uid + "</h3>", G.style.cssText = "display: inline-block;width: 70%;position:relative;", x.appendChild(G);
   } else {
-    const s = customElements.get("hui-entities-card"), M = new s(), t = {
+    const s = customElements.get("hui-entities-card"), M = new s(), n = {
       type: "entities",
       entities: [
         {
@@ -4864,7 +4864,7 @@ function zr(e, A, I) {
         }
       ]
     };
-    M.setConfig(t), M.hass = A, M.device = e.device;
+    M.setConfig(n), M.hass = A, M.device = e.device;
     const Y = document.createElement("div");
     Y.id = "add-supplement", Y.dataset.supplementUid = a, Y.appendChild(M), I.querySelector("#dialog-content").appendChild(Y);
   }
@@ -4944,7 +4944,7 @@ function pg(e, A, I, g = null) {
     Or(Y, e, A, I);
   }), i.appendChild(C);
   let c = null;
-  c = I.createElement("label"), c.innerHTML = n._("daily_dose"), i.appendChild(c);
+  c = I.createElement("label"), c.innerHTML = E._("daily_dose"), i.appendChild(c);
   const a = I.createElement("input");
   a.type = "number", a.id = "dailydose", a.min = 0.1, a.step = 0.1, a.max = 300, a.value = e.device.get_entity("daily_dose").state, i.appendChild(a);
   const s = "head_configuration_schedule_" + g.type, M = Ug[s]?.(
@@ -4954,21 +4954,21 @@ function pg(e, A, I, g = null) {
     I,
     i
   );
-  c = I.createElement("label"), c.innerHTML = n._("days"), i.appendChild(c);
+  c = I.createElement("label"), c.innerHTML = E._("days"), i.appendChild(c);
   for (let Y = 1; Y < 8; Y++) {
     const z = "day_" + String(Y);
     c = I.createElement("input"), c.className = "days", c.type = "checkbox", c.value = z, c.id = z, g && g.days && !g.days.includes(Y) ? c.checked = !1 : c.checked = !0;
     const x = I.createElement("label");
-    x.innerHTML = n._("day_" + String(Y))[0], x.className = "days", x.htmlFor = z, i.appendChild(x), i.appendChild(c);
+    x.innerHTML = E._("day_" + String(Y))[0], x.className = "days", x.htmlFor = z, i.appendChild(x), i.appendChild(c);
   }
-  const t = I.createElement("button");
-  t.innerHTML = n._("save_schedule"), t.style.width = "100%", t.type = "button", t.addEventListener(
+  const n = I.createElement("button");
+  n.innerHTML = E._("save_schedule"), n.style.width = "100%", n.type = "button", n.addEventListener(
     "click",
     function(Y) {
       Y.preventDefault(), Rg(Y, I, i, e, A);
     },
     !1
-  ), i.appendChild(t), I.querySelector("#dialog-content").appendChild(M);
+  ), i.appendChild(n), I.querySelector("#dialog-content").appendChild(M);
 }
 function hr(e, A, I, g, i) {
   return i.appendChild(dA("hour", e.time)), i.appendChild(
@@ -5047,7 +5047,7 @@ function Rg(e, A, I, g, i) {
         bubbles: !0,
         composed: !0,
         detail: {
-          message: n._("schedule_saved")
+          message: E._("schedule_saved")
         }
       })
     );
@@ -5063,7 +5063,7 @@ function wr(e, A, I, g) {
       bubbles: !0,
       composed: !0,
       detail: {
-        message: n._("can_not_save") + n._("min_dose")
+        message: E._("can_not_save") + E._("min_dose")
       }
     })
   ), null) : (g.min = parseInt(e.querySelector("#min_1").value), g.mode = e.querySelector("#speed_1").value, g);
@@ -5077,18 +5077,18 @@ function rr(e, A, I, g) {
       i.querySelector("#end_" + c).value
     );
     if (s - a < 30) {
-      let z = n._("at_least_30m_between");
-      return s - a < 0 && (z = n._("end_earlier_than_start")), e.dispatchEvent(
+      let z = E._("at_least_30m_between");
+      return s - a < 0 && (z = E._("end_earlier_than_start")), e.dispatchEvent(
         new CustomEvent("hass-notification", {
           bubbles: !0,
           composed: !0,
           detail: {
-            message: n._("can_not_save") + z
+            message: E._("can_not_save") + z
           }
         })
       ), null;
     }
-    const M = parseInt(i.querySelector("#nd_" + c).value), t = i.querySelector("#speed_" + c).value, Y = { st: a, end: s, nd: M, mode: t };
+    const M = parseInt(i.querySelector("#nd_" + c).value), n = i.querySelector("#speed_" + c).value, Y = { st: a, end: s, nd: M, mode: n };
     g.intervals.push(Y);
   }
   return g.intervals.sort(zI), g.type = e.querySelector("#schedule_1").value, g;
@@ -5103,8 +5103,8 @@ function jr(e, A, I, g) {
       i.querySelector("#st_" + c).value
     ), s = parseFloat(
       i.querySelector("#volume_" + c).value
-    ), M = i.querySelector("#speed_" + c).value, t = { st: a, volume: s, mode: M };
-    g.intervals.push(t);
+    ), M = i.querySelector("#speed_" + c).value, n = { st: a, volume: s, mode: M };
+    g.intervals.push(n);
   }
   return g.intervals.sort(zI), g.type = e.querySelector("#schedule_1").value, g;
 }
@@ -5118,7 +5118,7 @@ function gg(e, A, I) {
   console.debug("INTERVAL", A.nd);
   const a = CA(
     "nd",
-    Array.from({ length: 24 }, (M, t) => (t + 1).toString()),
+    Array.from({ length: 24 }, (M, n) => (n + 1).toString()),
     A.nd.toString(),
     !1,
     "",
@@ -5151,7 +5151,7 @@ function ig(e, A, I) {
   g.className = "interval", g.id = "interval_" + i;
   const C = dA("st", A.st, i), c = e.createElement("div");
   let a = null;
-  a = e.createElement("label"), a.innerHTML = n._("volume");
+  a = e.createElement("label"), a.innerHTML = E._("volume");
   const s = e.createElement("input");
   s.type = "number", s.min = 0.1, s.set = 0.1, s.max = 300, s.id = "volume_" + i, s.value = "1", s.className = "volume", s.addEventListener("change", () => {
     Bg(e);
@@ -5168,8 +5168,8 @@ function ig(e, A, I) {
   const M = e.createElement("button");
   M.className = "delete_button", i === 0 && (M.style.visibility = "hidden"), M.addEventListener(
     "click",
-    function(t) {
-      t.preventDefault(), Dg(i, I);
+    function(n) {
+      n.preventDefault(), Dg(i, I);
     },
     !1
   ), g.appendChild(M), I.appendChild(g);
@@ -5246,14 +5246,14 @@ function Br(e, A, I) {
   const C = Rr(g, A), c = I.querySelector("#" + Cg);
   if (c) {
     if (c.dataset.pumpType === C) {
-      c.querySelectorAll("*").forEach((t) => {
-        "hass" in t && (t.hass = A);
+      c.querySelectorAll("*").forEach((n) => {
+        "hass" in n && (n.hass = A);
       });
       return;
     }
     c.remove();
   }
-  const a = Kg[C].map((t) => Sg(g, A, t)).filter((t) => t !== null).map((t) => ({ entity: t, name: { type: "entity" } }));
+  const a = Kg[C].map((n) => Sg(g, A, n)).filter((n) => n !== null).map((n) => ({ entity: n, name: { type: "entity" } }));
   if (a.length === 0) return;
   const s = Dr(a, A, g);
   if (!s) return;
@@ -5532,7 +5532,7 @@ const Qg = r`
     if (!this.evalCtx) {
       const A = {
         config: this.elt.device.config,
-        i18n: n
+        i18n: E
       };
       this.evalCtx = new WA(A);
     }
@@ -5823,7 +5823,7 @@ const GI = (X = class extends q {
       return;
     return this.user_config.device ? (X.is_maintenance_selector(this.user_config.device) ? this._set_current_device(L) : this.select_devices.map(
       (A) => this._set_current_device_from_name(A, this.user_config.device)
-    ), this.current_device.hass = this._hass, E` ${this.messages} ${this.current_device} `) : E`
+    ), this.current_device.hass = this._hass, t` ${this.messages} ${this.current_device} `) : t`
       ${this.device_select()} ${this.messages} ${this.current_device}
     `;
   }
@@ -5831,9 +5831,9 @@ const GI = (X = class extends q {
    * Display select html element to choose a redsea device
    */
   device_select() {
-    return E` <select id="device" @change="${this.onChanges}">
+    return t` <select id="device" @change="${this.onChanges}">
       ${this.select_devices.map(
-      (A) => E`
+      (A) => t`
           <option
             value="${A.value}"
             ?selected=${A.value === L ? this.current_device?.is_maintenance === !0 : this.current_device?.device?.elements?.[0]?.primary_config_entry === A.value}
@@ -5849,13 +5849,13 @@ const GI = (X = class extends q {
    */
   init_devices() {
     this.devices_list = new og(this._hass), this.select_devices = [
-      { value: "unselected", text: n._("select_device") }
+      { value: "unselected", text: E._("select_device") }
     ];
     for (const A of this.devices_list.main_devices)
       this.select_devices.push(A);
     jg(this._hass) && this.select_devices.push({
       value: L,
-      text: n._("maintenance_view")
+      text: E._("maintenance_view")
     });
   }
   /**
@@ -5866,7 +5866,7 @@ const GI = (X = class extends q {
    * @return true when the maintenance overview is requested
    */
   static is_maintenance_selector(A) {
-    return typeof A != "string" ? !1 : A === L || A.toLowerCase() === "maintenance" || A === n._("maintenance_view");
+    return typeof A != "string" ? !1 : A === L || A.toLowerCase() === "maintenance" || A === E._("maintenance_view");
   }
   /**
    * Set the device  to display according to it's name
@@ -5965,20 +5965,20 @@ const wI = class wI extends q {
    */
   init_devices() {
     this.devices_list = new og(this._hass), this.select_devices = [
-      { value: "unselected", text: n._("select_device") }
+      { value: "unselected", text: E._("select_device") }
     ];
     for (const A of this.devices_list.main_devices)
       this.select_devices.push(A);
     jg(this._hass) && this.select_devices.push({
       value: L,
-      text: n._("maintenance_view")
+      text: E._("maintenance_view")
     });
   }
   /**
    * Render the editor card
    */
   render() {
-    return console.debug("Render Editor"), this._config ? (this.first_init === !0 && (this.first_init = !1, this.init_devices()), E`
+    return console.debug("Render Editor"), this._config ? (this.first_init === !0 && (this.first_init = !1, this.init_devices()), t`
         <div class="card-config">
           <div class="tabs">
             <div class="tab">
@@ -5989,7 +5989,7 @@ const wI = class wI extends q {
                 @change="${this.handleChangedEvent}"
               >
                 ${this.select_devices.map(
-      (A) => E`
+      (A) => t`
                     <option
                       value="${A.value}"
                       ?selected=${this._config.device === A.text || this._config.device === A.value}
@@ -6003,7 +6003,7 @@ const wI = class wI extends q {
             ${this.device_conf()}
           </div>
         </div>
-      `) : E``;
+      `) : t``;
   }
   /**
    *
@@ -6017,14 +6017,14 @@ const wI = class wI extends q {
           this._config,
           { name: "", elements: [] }
         );
-        return i === null ? E`` : (i.isEditorMode = !0, this.current_device = i, E`${i}`);
+        return i === null ? t`` : (i.isEditorMode = !0, this.current_device = i, t`${i}`);
       }
       const A = this.devices_list.get_by_name(this._config.device);
       if (!A)
-        return E``;
+        return t``;
       const I = A.elements[0]?.model;
       if (!I)
-        return E``;
+        return t``;
       const g = o.create_device(
         "redsea-" + I.toLowerCase(),
         this._hass,
@@ -6032,9 +6032,9 @@ const wI = class wI extends q {
         A
       );
       if (g !== null)
-        return g.isEditorMode = !0, this.current_device = g, E`${g}`;
+        return g.isEditorMode = !0, this.current_device = g, t`${g}`;
     }
-    return E``;
+    return t``;
   }
   /**
    * force to reload de card if a new devioce is selected.
@@ -6129,8 +6129,8 @@ font-size: 0.7em;
    */
   _render(A) {
     this.conf?.class;
-    const I = this.conf?.icon ? E`<ha-icon icon="${this.conf.icon}"></ha-icon>` : null;
-    return E`
+    const I = this.conf?.icon ? t`<ha-icon icon="${this.conf.icon}"></ha-icon>` : null;
+    return t`
       <div class="button" id="${this.conf?.name || ""}">
         ${I}${this.label}
       </div>
@@ -6164,7 +6164,7 @@ const jI = class jI extends D {
     if (g) {
       if (g === "state") {
         const C = this.get_entity(this.conf.name);
-        return C.state === "off" && (i = "#666666"), E`
+        return C.state === "off" && (i = "#666666"), t`
           <ha-icon
             class="click-icon"
             .icon="${C.attributes.icon}"
@@ -6173,7 +6173,7 @@ const jI = class jI extends D {
         `;
       }
       if (g.startsWith("mdi:") || g.startsWith("redsea:"))
-        return E`
+        return t`
           <ha-icon
             class="click-icon"
             .icon="${g}"
@@ -6181,7 +6181,7 @@ const jI = class jI extends D {
           ></ha-icon>
         `;
     }
-    return E`
+    return t`
       <img
         class="click-image"
         src="${I}"
@@ -6270,8 +6270,8 @@ const AA = class AA extends D {
     if (C === 0)
       M = s;
     else {
-      const t = Math.max(I, Math.min(c, C));
-      M = s - (t - I) / (c - I) * (s - a);
+      const n = Math.max(I, Math.min(c, C));
+      M = s - (n - I) / (c - I) * (s - a);
     }
     A.style.animationDuration = `${M.toFixed(2)}s`, A.style.animationPlayState = C === 0 || !i ? "paused" : "running";
   }
@@ -6287,7 +6287,7 @@ const AA = class AA extends D {
       "height: 100%",
       A
     ].filter(Boolean).join("; ");
-    return E`<div class="flow-div" style="${g}"></div>`;
+    return t`<div class="flow-div" style="${g}"></div>`;
   }
 };
 AA.styles = [Z, r``], AA.TILE_W = 113, AA.TILE_H = 192;
@@ -6321,7 +6321,7 @@ const sg = 6, Hr = 4, ag = 3, Mg = 160;
 var N;
 const Fg = (N = class extends D {
   constructor() {
-    super(...arguments), this.series = [], this._last_fetch = 0, this._fetching = !1, this._canvas = null, this._ro = null;
+    super(...arguments), this.series = [], this._last_fetch = 0, this._fetching = !1, this._canvas = null, this._ro = null, this._demo_start = 0;
   }
   /**
    * Start reading as soon as the element is on screen.
@@ -6371,6 +6371,55 @@ const Fg = (N = class extends D {
     return A < Mg ? Math.max(6, g - 2) : g;
   }
   /**
+   * Number of real seconds a full window is compressed into, 0 when off.
+   */
+  get demo_seconds() {
+    const A = Number(this.conf?.demo_seconds);
+    return Number.isFinite(A) && A > 0 ? A : 0;
+  }
+  /**
+   * The real interval to read from the recorder.
+   *
+   * In demo mode this is the handful of seconds since the element appeared,
+   * not the displayed window: the recorder holds nothing older, because the
+   * data is being written live and history cannot be back-dated.
+   *
+   * @return the first and last instant to ask the recorder for
+   */
+  fetch_window() {
+    const A = this.demo_seconds;
+    if (A === 0)
+      return this.display_window();
+    const I = Date.now();
+    return { start: I - A * 1e3, end: I };
+  }
+  /**
+   * Project a real instant onto the displayed axis.
+   *
+   * Identity outside demo mode. Inside it, the real seconds elapsed are
+   * stretched by `window span / demo_seconds`, which is what turns half a
+   * minute of live writes into a full day on screen.
+   *
+   * @param stamp: a wall-clock instant
+   * @return where it belongs on the axis
+   */
+  compress(A) {
+    const I = this.demo_seconds;
+    if (I === 0)
+      return A;
+    const g = this.display_window(), i = (g.end - g.start) / (I * 1e3), C = g.start + (A - this._demo_start) * i;
+    return Math.min(g.end, Math.max(g.start, C));
+  }
+  /**
+   * The instant a curve should be held out to.
+   *
+   * @return the right-hand end of the drawn data, on the axis
+   */
+  present() {
+    const A = this.fetch_window();
+    return Math.min(this.compress(A.end), this.display_window().end);
+  }
+  /**
    * The span the x axis covers, which is not the span of the samples.
    *
    * In "today" mode the axis is pinned to the calendar day so the curve grows
@@ -6410,12 +6459,12 @@ const Fg = (N = class extends D {
       const M = this.resolve_entity_id(s);
       if (!M)
         continue;
-      const t = typeof a == "string" ? {} : a;
+      const n = typeof a == "string" ? {} : a;
       c.push({
         entity_id: M,
-        color: t.color || g,
-        fill: N.series_fill(t, i, Array.isArray(A)),
-        stroke_width: Number(t.stroke_width ?? C),
+        color: n.color || g,
+        fill: N.series_fill(n, i, Array.isArray(A)),
+        stroke_width: Number(n.stroke_width ?? C),
         points: []
       });
     }
@@ -6469,31 +6518,49 @@ const Fg = (N = class extends D {
     const A = this.series_config(), I = this._hass;
     if (A.length === 0 || typeof I?.callWS != "function")
       return;
-    const g = Number(this.conf?.refresh ?? 60) * 1e3, i = Date.now();
-    if (!(this._fetching || i - this._last_fetch < g)) {
+    const g = Date.now();
+    this._demo_start === 0 && (this._demo_start = g);
+    const i = this.demo_seconds > 0 ? 1 : 60, C = Number(this.conf?.refresh ?? i) * 1e3;
+    if (!(this._fetching || g - this._last_fetch < C)) {
       this._fetching = !0;
       try {
-        const C = this.display_window(), c = new Date(Math.min(i, C.end)), a = new Date(C.start), s = await I.callWS({
+        const c = this.fetch_window(), a = new Date(Math.min(g, c.end)), s = new Date(c.start), M = await I.callWS({
           type: "history/history_during_period",
-          start_time: a.toISOString(),
-          end_time: c.toISOString(),
-          entity_ids: A.map((M) => M.entity_id),
+          start_time: s.toISOString(),
+          end_time: a.toISOString(),
+          entity_ids: A.map((Y) => Y.entity_id),
           // The chart only needs numbers: skipping attributes keeps the payload
           // small on entities that have been updating all day.
           minimal_response: !0,
-          no_attributes: !0
-        });
-        for (const M of A)
-          M.points = N.parse_history(s, M.entity_id);
-        this.series = A, this._last_fetch = Date.now(), this.conf?.debug && console.info(
-          "history-chart",
-          a.toISOString(),
-          "->",
-          c.toISOString(),
-          A.map((M) => `${M.entity_id}: ${M.points.length} point(s)`)
+          no_attributes: !0,
+          // Every recorded change, not the "significant" subset: this is a
+          // numeric curve, and the filter defaults to true.
+          significant_changes_only: !1
+        }), n = A.map(
+          (Y) => N.parse_history(M, Y.entity_id)
         );
-      } catch (C) {
-        console.debug("history-chart: no history", C), this.series = [];
+        if (this.demo_seconds > 0) {
+          const Y = n.flat().reduce(
+            (z, x) => Math.min(z, x.t),
+            Number.POSITIVE_INFINITY
+          );
+          this._demo_start = Math.max(
+            c.start,
+            Number.isFinite(Y) ? Y : c.start
+          );
+        }
+        A.forEach((Y, z) => {
+          const x = n[z];
+          Y.points = this.demo_seconds > 0 ? x.map((G) => ({ t: this.compress(G.t), v: G.v })) : x;
+        }), this.series = A, this._last_fetch = Date.now(), this.conf?.debug && console.info(
+          "history-chart",
+          s.toISOString(),
+          "->",
+          a.toISOString(),
+          A.map((Y) => `${Y.entity_id}: ${Y.points.length} point(s)`)
+        );
+      } catch (c) {
+        console.debug("history-chart: no history", c), this.series = [];
       } finally {
         this._fetching = !1;
       }
@@ -6536,7 +6603,7 @@ const Fg = (N = class extends D {
    * @return the projection parameters
    */
   build_scale(A) {
-    const I = A.flatMap((M) => M.points.map((t) => t.v)), g = this.display_window(), i = g.start, C = g.end - i || 1, c = Math.max(...I), a = this.conf?.baseline === "min" ? Math.min(...I) : Math.min(0, ...I), s = c - a || 1;
+    const I = A.flatMap((M) => M.points.map((n) => n.v)), g = this.display_window(), i = g.start, C = g.end - i || 1, c = Math.max(...I), a = this.conf?.baseline === "min" ? Math.min(...I) : Math.min(0, ...I), s = c - a || 1;
     return { first: i, span: C, low: a, range: s };
   }
   /**
@@ -6601,15 +6668,15 @@ const Fg = (N = class extends D {
       return;
     const c = this.build_scale(C), a = this.font_size(I.width);
     i.font = `${a}px sans-serif`;
-    const s = this.measure_gutter(i, c, a), M = sg, t = I.width - s - Hr, Y = I.height - sg - (a + 5);
-    if (t <= 0 || Y <= 0)
+    const s = this.measure_gutter(i, c, a), M = sg, n = I.width - s - Hr, Y = I.height - sg - (a + 5);
+    if (n <= 0 || Y <= 0)
       return;
-    const z = (G) => s + (G - c.first) / c.span * t, x = (G) => M + Y - (G - c.low) / c.range * Y;
+    const z = (G) => s + (G - c.first) / c.span * n, x = (G) => M + Y - (G - c.low) / c.range * Y;
     this.draw_grid(
       i,
       s,
       M,
-      t,
+      n,
       Y,
       c,
       x,
@@ -6634,8 +6701,8 @@ const Fg = (N = class extends D {
     const i = this.conf?.unit ?? "", C = N.nice_step(I.range, 4), c = I.low + I.range;
     let a = 0;
     for (let s = Math.ceil(I.low / C) * C; s <= c; s += C) {
-      const M = `${Math.round(s)}${i}`, t = typeof A.measureText == "function" ? A.measureText(M).width : M.length * g * 0.6;
-      a = Math.max(a, t);
+      const M = `${Math.round(s)}${i}`, n = typeof A.measureText == "function" ? A.measureText(M).width : M.length * g * 0.6;
+      a = Math.max(a, n);
     }
     return a + ag * 2;
   }
@@ -6647,9 +6714,9 @@ const Fg = (N = class extends D {
    * fixed 00h..24h ruler.
    */
   draw_grid(A, I, g, i, C, c, a, s) {
-    const M = this.conf?.axis_color ?? "40,40,40", t = i < Mg, Y = `rgba(${M},0.15)`, z = `rgba(${M},0.7)`, x = `rgba(${M},0.5)`, G = this.conf?.unit ?? "";
+    const M = this.conf?.axis_color ?? "40,40,40", n = i < Mg, Y = `rgba(${M},0.15)`, z = `rgba(${M},0.7)`, x = `rgba(${M},0.5)`, G = this.conf?.unit ?? "";
     A.lineWidth = 0.5;
-    const O = c.span / 3600 / 1e3, h = Math.max(1, Math.round(O / (t ? 3 : 6)));
+    const O = c.span / 3600 / 1e3, h = Math.max(1, Math.round(O / (n ? 3 : 6)));
     A.textAlign = "center", A.textBaseline = "top";
     for (let p = 0; p < O; p += h) {
       const j = c.first + p * 3600 * 1e3, W = I + (j - c.first) / c.span * i;
@@ -6657,7 +6724,7 @@ const Fg = (N = class extends D {
       const m = new Date(j).getHours().toString().padStart(2, "0");
       A.fillText(`${m}h`, W, g + C + 2);
     }
-    const l = c.low + c.range, w = N.nice_step(c.range, t ? 2 : 4);
+    const l = c.low + c.range, w = N.nice_step(c.range, n ? 2 : 4);
     A.textAlign = "right", A.textBaseline = "middle";
     for (let p = Math.ceil(c.low / w) * w; p <= l; p += w) {
       const j = a(p);
@@ -6675,8 +6742,8 @@ const Fg = (N = class extends D {
       const z = C(Y.t), x = c(Y.v);
       a && M !== null && s.push([z, M]), s.push([z, x]), M = x;
     }
-    const t = C(Math.min(Date.now(), this.display_window().end));
-    if (t > s[s.length - 1][0] && s.push([t, M]), I.fill !== "none") {
+    const n = C(this.present());
+    if (n > s[s.length - 1][0] && s.push([n, M]), I.fill !== "none") {
       A.beginPath(), A.moveTo(s[0][0], g + i);
       for (const [Y, z] of s)
         A.lineTo(Y, z);
@@ -6692,7 +6759,7 @@ const Fg = (N = class extends D {
    * @param _style: the style built from `elt_css`
    */
   _render(A = "") {
-    return E`
+    return t`
       <div class="history-chart-container" style="${A}">
         <canvas></canvas>
       </div>
@@ -6775,10 +6842,10 @@ const WI = class WI extends D {
    */
   _render(A) {
     if (!this.conf)
-      return E``;
+      return t``;
     if (this.conf.class, this.conf?.icon) {
       let c = "rgb(" + Pr + ")";
-      return this.conf?.icon_color && (c = this.conf.icon_color), E`<ha-state-icon
+      return this.conf?.icon_color && (c = this.conf.icon_color), t`<ha-state-icon
         .hass=${this._hass}
         .stateObj=${this.stateObj}
         style="color:${c}"
@@ -6792,9 +6859,9 @@ const WI = class WI extends D {
       }
       I = this.apply_round(I), this.conf.prefix && (I = this.evaluate(this.conf.prefix).replaceAll('"', "") + I);
     }
-    const i = this.resolve_text_color(), C = E`${I}
-    ${g ? E`<span style=${this.get_style("unit_css")}>${g}</span>` : ""}`;
-    return i ? E`<span style="color:${i}">${C}</span>` : C;
+    const i = this.resolve_text_color(), C = t`${I}
+    ${g ? t`<span style=${this.get_style("unit_css")}>${g}</span>` : ""}`;
+    return i ? t`<span style="color:${i}">${C}</span>` : C;
   }
 };
 WI.styles = [
@@ -6916,7 +6983,7 @@ const OI = class OI extends pA {
    */
   _render(A) {
     if (!this.hasTargetState())
-      return E`<div class="error">Missing state</div>`;
+      return t`<div class="error">Missing state</div>`;
     let I = this.getValue(), g = this.getTargetValue();
     this.conf.force_integer && (I = Math.floor(I), g = Math.floor(g));
     const i = this.apply_round(I), C = this.apply_round(g), c = this.evaluate(
@@ -6924,7 +6991,7 @@ const OI = class OI extends pA {
     ), a = this.conf?.class || "sensor", s = this.get_style("css");
     `${this.c}${this.alpha}`;
     const M = this.resolve_text_color();
-    return E`
+    return t`
       <div
         class="${a}"
         id="${this.conf.name}"
@@ -7036,23 +7103,23 @@ const pI = class pI extends _ {
   _render(A) {
     if (!this.hasTargetState()) {
       const Y = this.stateObj ? `stateObjTarget not resolved for target="${this.conf?.target}" — use a number for a fixed target, or target_attribute if it lives in the entity's attributes` : `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`;
-      return console.warn(`[ProgressBar - ${this.conf?.name}] Missing state: ${Y}`), E`<div class="error">Missing state</div>`;
+      return console.warn(`[ProgressBar - ${this.conf?.name}] Missing state: ${Y}`), t`<div class="error">Missing state</div>`;
     }
     this.applyStateColor();
     const I = this.resolveDisplayPercent(), g = this.conf?.class || "progress-bar";
     let i = this.label || "";
     typeof this.conf.label != "boolean" && (i = this.evaluate(this.conf.label) || "");
-    const C = this.conf?.unit && this.evaluate(this.conf.unit) || "", c = "%", a = Math.max(0, I - 1), s = this.resolveFillColor(), M = this.conf?.colors?.background, t = M ? `--progress-bg-color: ${M};` : "";
-    return E`
+    const C = this.conf?.unit && this.evaluate(this.conf.unit) || "", c = "%", a = Math.max(0, I - 1), s = this.resolveFillColor(), M = this.conf?.colors?.background, n = M ? `--progress-bg-color: ${M};` : "";
+    return t`
       <div class="${g}">
-        <div class="progress-bar-container" style="${t}">
+        <div class="progress-bar-container" style="${n}">
           <div
             class="progress-bar-fill"
             style="width: ${a}%; --progress-fill-color: ${s}"
           ></div>
         </div>
-        ${i ? E`<span class="progress-label"
-              >${i}${C ? E`<span class="unit">${C}</span>` : ""}</span
+        ${i ? t`<span class="progress-label"
+              >${i}${C ? t`<span class="unit">${C}</span>` : ""}</span
             >` : ""}
         <span class="progress-value">${I}${c}</span>
       </div>
@@ -7100,10 +7167,10 @@ const RI = class RI extends _ {
       const M = this.stateObj ? `stateObjTarget not resolved for target="${this.conf?.target}" — set target_attribute if the target lives in the entity's attributes` : `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`;
       return console.warn(
         `[ProgressCircle - ${this.conf?.name}] Missing state: ${M}`
-      ), E`<div class="error">Missing state</div>`;
+      ), t`<div class="error">Missing state</div>`;
     }
     if (this.groupOn ?? this.device.is_on() ? this.c = this.color : this.c = eA, this.conf?.disabled_if && this.evaluateCondition(this.conf.disabled_if))
-      return E`<br />`;
+      return t`<br />`;
     const I = this.getValue();
     let g = this.getTargetValue();
     this.conf?.target_is_remaining && (g += I);
@@ -7112,7 +7179,7 @@ const RI = class RI extends _ {
     let C = "";
     "no_value" in this.conf && this.conf.no_value && (C = "visibility: hidden;");
     const c = this.conf?.colors?.center ?? "transparent", a = this.conf?.colors?.background ?? "rgba(150,150,150,0.6)", s = this.conf?.colors?.fill ?? `rgb(${this.c})`;
-    return E` <svg
+    return t` <svg
       width="100%"
       height="100%"
       viewBox="-25 -25 250 250"
@@ -7185,7 +7252,7 @@ const Ij = r``, DI = class DI extends D {
     const I = this.conf?.class || "";
     let g = null, i = this.get_style("elt.css");
     if (!this.stateObj)
-      return E``;
+      return t``;
     let C = this.stateObj.state;
     if (C === "unavailable" || C === "unknown" || C.length === 0)
       C = "", i = "", g = null;
@@ -7212,7 +7279,7 @@ const Ij = r``, DI = class DI extends D {
       };
       this._hass && this.device && (g = D.create_element(this._hass, c, this.device));
     }
-    return E`
+    return t`
       <div style=${i}>
         <marquee class="${I}">${C}</marquee>
         ${g}
@@ -7293,12 +7360,12 @@ const gj = r`
    */
   _render(A) {
     if (this.conf.style === "switch")
-      return E` <label>${this.label}</label>
+      return t` <label>${this.label}</label>
         <div class="switch_${this.stateObj.state}">
           <div class="switch_in_${this.stateObj.state}"></div>
         </div>`;
     if (this.conf.style === "button")
-      return "color" in this.conf && (this.color = this.conf.color), "alpha" in this.conf && (this.alpha = this.conf.alpha), E`
+      return "color" in this.conf && (this.color = this.conf.color), "alpha" in this.conf && (this.alpha = this.conf.alpha), t`
         <style>
           #${this.conf.name} {
             background-color: rgba(${this.color}, ${this.alpha});
@@ -7680,7 +7747,7 @@ var Cj = Object.defineProperty, aA = (e, A, I, g) => {
     (c = e[C]) && (i = c(A, I, i) || i);
   return i && Cj(A, I, i), i;
 };
-const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class UI extends D {
+const mA = 1440, Yg = 16, ej = 20, tg = 36, cj = 8, ng = "255,40,40", UI = class UI extends D {
   constructor() {
     super(), this._editing = !1, this._editPoints = [], this._previewRunning = !1, this._previewRowIdx = -1, this._previewValue = 0, this._previewPulse = 0, this._canvas = null, this._editorCanvas = null, this._ro = null, this._clockTimer = null, this._lastCurrentValue = null, this._lastScheduleRaw = null;
   }
@@ -7748,7 +7815,7 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
   // ------------------------------------------------------------------
   _render(A) {
     const I = this.stateOn ? "" : "filter:grayscale(90%)";
-    return E`
+    return t`
       <div
         class="schedule-container"
         style="${I}"
@@ -7798,12 +7865,12 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
     return I;
   }
   _renderEditor() {
-    const A = this.conf?.max_points ?? 10, I = this.conf?.min_value ?? 0, g = this.conf?.max_value ?? 100, i = this._editPoints.length < A, C = this._editPoints.length > 1, c = !!this.conf?.pulse_field, a = this.conf?.min_pulse ?? 0, s = this.conf?.max_pulse ?? 300, M = c ? "grid-table cols-pulse" : "grid-table cols-base", t = /* @__PURE__ */ new Date(), Y = t.getHours() * 60 + t.getMinutes(), z = this._getCurrentRowIndex(Y);
-    return E`
+    const A = this.conf?.max_points ?? 10, I = this.conf?.min_value ?? 0, g = this.conf?.max_value ?? 100, i = this._editPoints.length < A, C = this._editPoints.length > 1, c = !!this.conf?.pulse_field, a = this.conf?.min_pulse ?? 0, s = this.conf?.max_pulse ?? 300, M = c ? "grid-table cols-pulse" : "grid-table cols-base", n = /* @__PURE__ */ new Date(), Y = n.getHours() * 60 + n.getMinutes(), z = this._getCurrentRowIndex(Y);
+    return t`
       <div class="editor-overlay" @click=${this._onOverlayClick}>
         <div class="editor-panel" @click=${(x) => x.stopPropagation()}>
           <div class="editor-header">
-            <h3>${n._("sched_title")}</h3>
+            <h3>${E._("sched_title")}</h3>
             <button class="btn-icon" @click=${this._closeEditor}>
               &#x2715;
             </button>
@@ -7815,18 +7882,18 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
             <div class="editor-list">
               <div class="${M}">
                 <span class="gh"></span>
-                <span class="gh">${n._("sched_start")}</span>
-                <span class="gh">${n._("sched_intensity")}</span>
-                ${c ? E`<span class="gh">${n._("sched_pulse_time")}</span>` : B}
+                <span class="gh">${E._("sched_start")}</span>
+                <span class="gh">${E._("sched_intensity")}</span>
+                ${c ? t`<span class="gh">${E._("sched_pulse_time")}</span>` : B}
                 <span class="gh"></span>
 
                 ${this._editPoints.map((x, G) => {
       const h = G === z ? "current-row" : "", l = this._previewRunning && this._previewRowIdx === G;
-      return E`
+      return t`
                     <button
                       class="btn-icon ${l ? "stop-row" : "play"}"
                       @click=${() => this._togglePreviewRow(G)}
-                      title="${n._("sched_preview")}"
+                      title="${E._("sched_preview")}"
                     >
                       ${l ? "■" : "▶"}
                     </button>
@@ -7844,7 +7911,7 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
                       .value=${String(x.value)}
                       @change=${(w) => this._onValueChange(G, w)}
                     />
-                    ${c ? E`<input
+                    ${c ? t`<input
                           type="number"
                           class="${h}"
                           min=${a}
@@ -7867,22 +7934,22 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
                 ?disabled=${!i}
                 @click=${this._addPoint}
               >
-                ${n._("sched_add")}
+                ${E._("sched_add")}
               </button>
             </div>
           </div>
 
           <!-- Preview panel -->
           <div class="preview-bar">
-            <span class="preview-label">${n._("sched_preview")}</span>
+            <span class="preview-label">${E._("sched_preview")}</span>
             <span
               class="preview-status ${this._previewRunning ? "running" : ""}"
             >
-              ${this._previewRunning ? n._("sched_preview_running") : n._("sched_preview_stopped")}
+              ${this._previewRunning ? E._("sched_preview_running") : E._("sched_preview_stopped")}
             </span>
             <div class="preview-field">
               <span class="preview-field-label"
-                >${n._("sched_intensity")}</span
+                >${E._("sched_intensity")}</span
               >
               <input
                 type="number"
@@ -7893,9 +7960,9 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
                 @change=${this._onPreviewValueChange}
               />
             </div>
-            ${c ? E`<div class="preview-field">
+            ${c ? t`<div class="preview-field">
                   <span class="preview-field-label"
-                    >${n._("sched_pulse_time")}</span
+                    >${E._("sched_pulse_time")}</span
                   >
                   <input
                     type="number"
@@ -7906,13 +7973,13 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
                     @change=${this._onPreviewPulseChange}
                   />
                 </div>` : B}
-            ${this._previewRunning ? E`<button class="btn-stop" @click=${this._stopPreview}>
-                  ${n._("sched_stop")}
-                </button>` : E`<button
+            ${this._previewRunning ? t`<button class="btn-stop" @click=${this._stopPreview}>
+                  ${E._("sched_stop")}
+                </button>` : t`<button
                   class="btn-start"
                   @click=${this._startPreviewFromBar}
                 >
-                  ${n._("sched_preview")}
+                  ${E._("sched_preview")}
                 </button>`}
           </div>
 
@@ -7920,10 +7987,10 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
             <div></div>
             <div style="display:flex;gap:8px">
               <button class="btn-cancel" @click=${this._closeEditor}>
-                ${n._("sched_cancel")}
+                ${E._("sched_cancel")}
               </button>
               <button class="btn-save" @click=${this._saveSchedule}>
-                ${n._("sched_save")}
+                ${E._("sched_save")}
               </button>
             </div>
           </div>
@@ -8082,13 +8149,13 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
     c.scale(C, C);
     const a = i.width, s = i.height;
     c.clearRect(0, 0, a, s);
-    const M = Eg, t = Yg, Y = a - Eg - cj, z = s - Yg - ej;
+    const M = tg, n = Yg, Y = a - tg - cj, z = s - Yg - ej;
     if (Y <= 0 || z <= 0 || (this.conf?.bg_color && (c.fillStyle = `rgba(${this.conf.bg_color})`, c.fillRect(0, 0, a, s)), I.length === 0)) return;
-    const x = this.conf?.min_value ?? 0, G = this.conf?.max_value ?? Math.max(100, ...I.map((R) => R.value)) * 1.05, O = G - x || 1, h = (R) => M + R / mA * Y, l = (R) => t + z - (R - x) / O * z, w = this.conf?.unit ?? this.stateObj?.attributes?.unit_of_measurement ?? "";
+    const x = this.conf?.min_value ?? 0, G = this.conf?.max_value ?? Math.max(100, ...I.map((R) => R.value)) * 1.05, O = G - x || 1, h = (R) => M + R / mA * Y, l = (R) => n + z - (R - x) / O * z, w = this.conf?.unit ?? this.stateObj?.attributes?.unit_of_measurement ?? "";
     this._drawGrid(
       c,
       M,
-      t,
+      n,
       Y,
       z,
       x,
@@ -8119,7 +8186,7 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
       h,
       l,
       M,
-      t,
+      n,
       Y,
       z,
       x,
@@ -8139,14 +8206,14 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
    * is what happens when the device overrides the schedule (feed mode, ATO
    * pause, skimmer foam protection, level sensor, ...).
    */
-  _drawNowMarker(A, I, g, i, C, c, a, s, M, t, Y, z) {
-    const x = /* @__PURE__ */ new Date(), G = x.getHours() * 60 + x.getMinutes(), O = i(G), h = this._interpolateValue(I, G, g), l = C(h), w = this.stateOn ? this._getCurrentValue() : null, p = this.conf?.deviation_threshold ?? 1, j = this.conf?.show_deviation !== !1 && w !== null && Math.abs(w - h) > p, W = `rgba(${tg},0.9)`, m = this.conf?.deviation_color ?? tg;
+  _drawNowMarker(A, I, g, i, C, c, a, s, M, n, Y, z) {
+    const x = /* @__PURE__ */ new Date(), G = x.getHours() * 60 + x.getMinutes(), O = i(G), h = this._interpolateValue(I, G, g), l = C(h), w = this.stateOn ? this._getCurrentValue() : null, p = this.conf?.deviation_threshold ?? 1, j = this.conf?.show_deviation !== !1 && w !== null && Math.abs(w - h) > p, W = `rgba(${ng},0.9)`, m = this.conf?.deviation_color ?? ng;
     A.strokeStyle = W, A.lineWidth = 1.5, A.setLineDash([4, 3]), A.beginPath(), A.moveTo(O, a), A.lineTo(O, a + M), A.stroke(), A.setLineDash([]);
     let U = l, K = h;
     if (j) {
       const b = Math.min(
         Y,
-        Math.max(t, w)
+        Math.max(n, w)
       ), HI = C(b);
       A.strokeStyle = `rgba(${m},0.85)`, A.lineWidth = 3, A.lineCap = "round", A.beginPath(), A.moveTo(O, l), A.lineTo(O, HI), A.stroke(), A.lineCap = "butt", A.strokeStyle = `rgba(${m},0.9)`, A.lineWidth = 1.5, A.beginPath(), A.arc(O, l, 3, 0, Math.PI * 2), A.stroke(), U = HI, K = w;
     }
@@ -8177,10 +8244,10 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
    */
   _drawPulseOverlay(A, I, g, i, C, c, a) {
     const M = Math.max(C, 30);
-    for (let t = 0; t < I.length; t++) {
-      const Y = I[t];
+    for (let n = 0; n < I.length; n++) {
+      const Y = I[n];
       if (!Y.pulse || Y.pulse <= 0 || Y.value <= M) continue;
-      const z = Y.minutes, x = t + 1 < I.length ? I[t + 1].minutes : mA;
+      const z = Y.minutes, x = n + 1 < I.length ? I[n + 1].minutes : mA;
       if (x <= z) continue;
       const G = g(z), O = g(x), h = O - G;
       if (h < 2) continue;
@@ -8206,8 +8273,8 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
   // ------------------------------------------------------------------
   //  Grid & labels
   // ------------------------------------------------------------------
-  _drawGrid(A, I, g, i, C, c, a, s, M, t, Y, z) {
-    const x = t < 200, G = `rgba(${z},0.12)`, O = `rgba(${z},0.35)`, h = `rgba(${z},0.7)`, l = `rgba(${z},0.5)`, w = x ? 6 : 3;
+  _drawGrid(A, I, g, i, C, c, a, s, M, n, Y, z) {
+    const x = n < 200, G = `rgba(${z},0.12)`, O = `rgba(${z},0.35)`, h = `rgba(${z},0.7)`, l = `rgba(${z},0.5)`, w = x ? 6 : 3;
     A.strokeStyle = G, A.lineWidth = 0.5, A.fillStyle = h, A.font = `${x ? 8 : 10}px sans-serif`, A.textAlign = "center", A.textBaseline = "top";
     for (let W = 0; W <= 24; W += w) {
       const m = s(W * 60);
@@ -8260,8 +8327,8 @@ const mA = 1440, Yg = 16, ej = 20, Eg = 36, cj = 8, tg = "255,40,40", UI = class
     for (const a of I) {
       const s = Number(a[g]), M = Number(a[i]);
       if (!isNaN(s) && !isNaN(M)) {
-        const t = { minutes: s, value: M };
-        C && a[C] !== void 0 && (t.pulse = Number(a[C])), c.push(t);
+        const n = { minutes: s, value: M };
+        C && a[C] !== void 0 && (n.pulse = Number(a[C])), c.push(n);
       }
     }
     return c.sort((a, s) => a.minutes - s.minutes), c;
@@ -8384,9 +8451,9 @@ const KI = class KI extends D {
   // ------------------------------------------------------------------
   _render(A) {
     if (!this.conf || !this.stateObj)
-      return E``;
+      return t``;
     const I = this.stateObj.attributes ?? {}, g = this.conf.min ?? I.min ?? 0, i = this.conf.max ?? I.max ?? 100, C = this._displayValue ?? (Number(this.stateObj.state) || 0), c = this.conf.unit ?? I.unit_of_measurement ?? "", a = (C - g) / (i - g) * 100, s = this.conf.slider_color ? `--slider-color: rgb(${this.conf.slider_color})` : "";
-    return E`
+    return t`
       <div
         class="slider-container"
         style="${s}"
@@ -8552,12 +8619,12 @@ const Yj = r`
     }
   }
 `;
-var Ej = Object.defineProperty, tj = (e, A, I, g) => {
+var tj = Object.defineProperty, nj = (e, A, I, g) => {
   for (var i = void 0, C = e.length - 1, c; C >= 0; C--)
     (c = e[C]) && (i = c(A, I, i) || i);
-  return i && Ej(A, I, i), i;
+  return i && tj(A, I, i), i;
 };
-const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
+const Ej = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
   "M -100 0",
   "q 25 -3.5 50 0 q 25 3.5 50 0",
   "q 25 -3.5 50 0 q 25 3.5 50 0",
@@ -8576,7 +8643,7 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
    * the state itself, so only stateObj has to resolve.
    */
   hasTargetState() {
-    return this.conf?.levels ? !!this.stateObj : super.hasTargetState();
+    return typeof this.conf?.level == "number" ? !0 : this.conf?.levels ? !!this.stateObj : super.hasTargetState();
   }
   /**
    * Resolve the water level as a 0-100 figure, or null when there is no
@@ -8585,6 +8652,8 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
    */
   resolveLevel() {
     const A = this.stateObj?.state;
+    if (typeof this.conf?.level == "number")
+      return this.conf.level;
     if (this.conf?.levels) {
       if (A === void 0) return null;
       const I = this.conf.levels[A];
@@ -8609,7 +8678,7 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
    * warn_below overrides both so a low reservoir is visible at a glance.
    */
   resolveWaterColor() {
-    return this.conf?.colors?.fill ?? nj;
+    return this.conf?.colors?.fill ?? Ej;
   }
   /** Tint used while alerting, and for the no-reading mark. */
   resolveWarnColor() {
@@ -8648,7 +8717,7 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
     if (this.conf?.label && typeof this.conf.label != "boolean")
       return this.evaluate(this.conf.label) || "";
     const I = this.resolveValueStateObj();
-    return this.conf?.levels ? this._hass?.formatEntityState?.(I) || I?.state || "" : A === null ? "--" : `${Math.round(A)}%`;
+    return this.conf?.levels || typeof this.conf?.level == "number" ? this._hass?.formatEntityState?.(I) || I?.state || "" : A === null ? "--" : `${Math.round(A)}%`;
   }
   /** Entity whose state is displayed; defaults to the level entity. */
   resolveValueStateObj() {
@@ -8687,7 +8756,7 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
     if (!I)
       return "";
     const g = this.resolve_text_color() || "white";
-    return E`<span class="wl-value" style="color:${g}">${I}</span>`;
+    return t`<span class="wl-value" style="color:${g}">${I}</span>`;
   }
   /**
    * Render
@@ -8696,12 +8765,12 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
   _render(A) {
     if (!this.hasTargetState()) {
       const Y = this.stateObj ? `stateObjTarget not resolved for target="${this.conf?.target}" — use a number for a fixed target, target_attribute, or levels for a discrete probe` : `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`;
-      return console.warn(`[WaterLevel - ${this.conf?.name}] Missing state: ${Y}`), E`<div class="error">Missing state</div>`;
+      return console.warn(`[WaterLevel - ${this.conf?.name}] Missing state: ${Y}`), t`<div class="error">Missing state</div>`;
     }
     this.applyStateColor();
     const I = this.resolveLevel(), g = this.isAlerting(I), i = g && this.conf?.warn_blink !== !1, C = g ? this.resolveWarnColor() : this.resolveWaterColor(), c = i ? " wl-alert" : "", a = this.conf?.opacity ?? zj;
     if (I === null)
-      return E`
+      return t`
         <div class="wl-root">
           <svg
             class="water-level"
@@ -8714,8 +8783,8 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
           ${this.renderValue(null)}
         </div>
       `;
-    const s = this.mapToBox(I), M = Math.round((100 - s) * 100) / 100, t = this.conf?.wave !== !1;
-    return E`
+    const s = this.mapToBox(I), M = Math.round((100 - s) * 100) / 100, n = this.conf?.wave !== !1;
+    return t`
       <div class="wl-root">
         <svg
           class="water-level"
@@ -8724,7 +8793,7 @@ const nj = "rgb(48,124,214)", xj = "rgb(232,150,48)", zj = 0.45, Gj = [
           xmlns="http://www.w3.org/2000/svg"
         >
           <g class="wl-body wl-blend" style="--wl-offset: ${M}px">
-            ${t ? qA`<path
+            ${n ? qA`<path
                     class="wl-wave${c}"
                     style="${this.alertStyle()}"
                     d="${Gj}"
@@ -8758,7 +8827,7 @@ SI.styles = [
     `
 ];
 let ZA = SI;
-tj([
+nj([
   d({ type: Object })
 ], ZA.prototype, "conf");
 customElements.get("click-image") || customElements.define("click-image", fA);
@@ -8804,7 +8873,7 @@ const hj = r`
     return this._render();
   }
   _render() {
-    return this.update_config(), E`
+    return this.update_config(), t`
       <div class="device_bg">
         <img class="device_img" src="${this.config.background_img}" />
       </div>
@@ -10358,12 +10427,12 @@ const mj = {
   }
   _render_head(A, I) {
     let g = null;
-    const i = tA(
+    const i = nA(
       this.config.heads.common,
       this.config.heads["head_" + A]
     ), C = this._heads[A]?.entities.schedule_enabled?.entity_id, c = this._heads[A]?.entities.supplement?.entity_id;
     if (!C || !c || !this._hass.states[C] || !this._hass.states[c]?.attributes?.supplement)
-      return E``;
+      return t``;
     let a = this._hass.states[C].state === "on";
     this.is_on() || (a = !1);
     const s = this._hass.states[c].attributes.supplement.short_name;
@@ -10372,7 +10441,7 @@ const mj = {
       this._hass,
       i,
       this
-    ), g.entities = this._heads[A].entities, g.stock_alert = this.get_entity("stock_alert_days").state, g.state_on = a, g.update_state(this.is_on()), this._heads[A].dose_head = g, g.config = i, g.bundle = this.bundle, g.masterOn = I), E`
+    ), g.entities = this._heads[A].entities, g.stock_alert = this.get_entity("stock_alert_days").state, g.state_on = a, g.update_state(this.is_on()), this._heads[A].dose_head = g, g.config = i, g.bundle = this.bundle, g.masterOn = I), t`
       <div
         class="head"
         id="head_${A}"
@@ -10387,7 +10456,7 @@ const mj = {
       this._hass,
       this.config.dosing_queue,
       this
-    ), this.dosing_queue.color_list = this.supplement_color), this.dosing_queue.update_state(this.is_on()), E` <div class="device_bg">
+    ), this.dosing_queue.color_list = this.supplement_color), this.dosing_queue.update_state(this.is_on()), t` <div class="device_bg">
       ${A}
       <img
         class="device_img"
@@ -10409,7 +10478,7 @@ const mj = {
     const I = qw(
       "rgb(" + this.config.heads["head_" + A].color + ");"
     ), g = this.config.heads["head_" + A].shortcut;
-    return E`
+    return t`
              <tr>
                <td class="config_color">
 <input type="color" id="head_${A}-color" value="${I}" @change="${this.handleChangedEvent}" @input="${this.handleChangedEvent}" list="RedSeaColors" />
@@ -10425,7 +10494,7 @@ const mj = {
                    <option>#d9d326</option>
                    <option>#FFFFFF</option>
                 </datalist>
-                <label class="tab-label">${n._("head")} ${A}: ${this._hass.states[this._heads[A].entities.supplement.entity_id].state}</label>
+                <label class="tab-label">${E._("head")} ${A}: ${this._hass.states[this._heads[A].entities.supplement.entity_id].state}</label>
               </td>
               <td>
                 <input type="text" id="head_${A}-shortcut" value="${g}" @change="${this.handleChangedEvent}" ></input>
@@ -10450,7 +10519,7 @@ const mj = {
     try {
       c.conf[this.config.model].devices[this.device.name].heads[A.target.head][i] = I;
     } catch {
-      c = tA(c, C);
+      c = nA(c, C);
     }
     const a = new CustomEvent("config-changed", {
       detail: { config: c },
@@ -10461,13 +10530,13 @@ const mj = {
   }
   // end of function handleChangedEvent
   renderEditor() {
-    return this.is_disabled() ? E`` : (this._populate_entities_with_heads(), this.update_config(), E` <hr />
+    return this.is_disabled() ? t`` : (this._populate_entities_with_heads(), this.update_config(), t` <hr />
       <form id="heads_colors">
         ${this._editor_common()}
         <table>
           <tr>
-            <td class="config_header">${n._("heads_colors")}</td>
-            <td>${n._("heads_shortcuts")}</td>
+            <td class="config_header">${E._("heads_colors")}</td>
+            <td>${E._("heads_shortcuts")}</td>
           </tr>
           ${Array.from({ length: this.config.heads_nb }, (A, I) => I + 1).map(
       (A) => this._editor_head_color(A)
@@ -10537,7 +10606,7 @@ const Oj = r`
   }
   _pipe_path() {
     let A = this.config.color;
-    return this.state_on || (A = eA), E`
+    return this.state_on || (A = eA), t`
       <svg viewBox="0 0 86 56" style="fill:rgb(${A});">
         <path
           d="M 14,0 C 13,12 10,18 7,25 0,34 0,45  0,55 L 12,55 c 0,-8 -0,-16 6,-24 4,-8 8,-17 8,-35 z"
@@ -10553,7 +10622,7 @@ const Oj = r`
   }
   _render(A = null, I = null) {
     if (this.to_render = !1, this.state_on = this.is_on(), console.debug("Render dose_head n°", this.config.id), !this.entities || !this.entities.supplement || !this._hass || !this._hass.states[this.entities.supplement.entity_id] || !this._hass.states[this.entities.supplement.entity_id].attributes?.supplement)
-      return E`<p>Waiting for supplement data...</p>`;
+      return t`<p>Waiting for supplement data...</p>`;
     if (this.supplement = this._hass.states[this.entities.supplement.entity_id], this.supplement.attributes.supplement.uid !== "null") {
       let g = "", i = this.config.color + "," + this.config.alpha;
       if (this.entities.head_state && this._hass.states[this.entities.head_state.entity_id] && this._hass.states[this.entities.head_state.entity_id].state === "not-setup") {
@@ -10578,7 +10647,7 @@ const Oj = r`
         };
         g = D.create_element(this._hass, C, this);
       }
-      return this.state_on || (i = eA + "," + this.config.alpha), E`
+      return this.state_on || (i = eA + "," + this.config.alpha), t`
         ${this._render_container()}
         <div class="pipe" style="${this.get_style(this.config.pipe)}">
           ${this._pipe_path()}
@@ -10614,7 +10683,7 @@ const Oj = r`
           width: "100%"
         }
       }, i = D.create_element(this._hass, g, this);
-      return E` <div
+      return t` <div
         class="container"
         style="${this.get_style(this.config.container)}"
       >
@@ -10641,7 +10710,7 @@ const Oj = r`
     this.device_state !== A && (this.device_state = A), this.requestUpdate();
   }
   _render_ask() {
-    return this.supplement_info && !this.supplement.attributes.supplement.is_name_editable ? E`<a
+    return this.supplement_info && !this.supplement.attributes.supplement.is_name_editable ? t`<a
         class="addSupplement"
         target="_blank"
         href="https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(
@@ -10655,36 +10724,36 @@ const Oj = r`
       null,
       "%0D%0A"
     )}"
-        >+${n._("ask_add_supplement")}+</a
-      >` : E``;
+        >+${E._("ask_add_supplement")}+</a
+      >` : t``;
   }
   _render_supplement_info() {
-    return this.supplement_info ? E`${this._render_elements(!0, "supplement_info")}` : null;
+    return this.supplement_info ? t`${this._render_elements(!0, "supplement_info")}` : null;
   }
   _render_container() {
     if (!this.supplement)
-      return E``;
+      return t``;
     const A = this.supplement.attributes.supplement.uid;
-    let I = null, g = E``;
+    let I = null, g = t``;
     this.supplement_info = !1, I = "/hacsfiles/ha-reef-card/img/supplements/" + A + ".supplement.png";
     const i = new XMLHttpRequest();
     i.open("HEAD", I, !1), i.send(), i.status === 404 && (I = "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png", this.supplement_info = !0);
-    let C = E``;
-    this.state_on || (C = E`<style>
+    let C = t``;
+    this.state_on || (C = t`<style>
         img#id_${A} {
           filter: grayscale(90%);
         }
       </style>`);
     try {
-      this.container_warning() && (g = E`<img class='warning' src='${new URL("data:image/svg+xml,%3c?xml%20version='1.0'%20encoding='UTF-8'%20standalone='no'?%3e%3c!--%20Created%20with%20Inkscape%20(http://www.inkscape.org/)%20--%3e%3csvg%20width='420'%20height='373'%20version='1.0'%20viewBox='0%200%20413.435%20365.722'%20xml:space='preserve'%20xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cradialGradient%20id='radialGradient5217'%20cx='173.78099'%20cy='150.8327'%20r='206.90388'%20gradientTransform='matrix(-.6101056%20.6619819%20-.6829184%20-.6294014%20402.98608%2080.149634)'%20gradientUnits='userSpaceOnUse'%3e%3cstop%20stop-color='%23fff'%20stop-opacity='.62886596'%20offset='0'/%3e%3cstop%20stop-color='%23fff'%20stop-opacity='0'%20offset='1'/%3e%3c/radialGradient%3e%3c/defs%3e%3cpath%20d='m222.26365%2025.584927s-5.08917-11.009168-15.54612-11.008183c-10.45694%200-15.55891%2011.007199-15.55891%2011.007199l-173.398344%20300.352227s-6.988026%209.9116-1.76005%2018.96877c5.228962%209.05618%2017.313059%207.96944%2017.313059%207.96944l346.812425%200.0108s12.07819%201.09659%2017.30617-7.95958c5.22896-9.05521-1.75316-18.97665-1.75316-18.97665z'%20fill='%23ff0'%20stroke='%23df1800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='21.6560879'/%3e%3cpath%20d='m242.83732%20138.13685c-1.03034%204.04893-19.71542%2077.84991-22.03608%2086.52577-2.31969%208.67678-4.5118%2016.8988-6.57922%2024.66516%200%200-1.07382%204.89998-6.69134%204.89998h-1.69337c-5.61751%200-6.69134-4.89998-6.69134-4.89998-2.06742-7.76636-4.25855-15.98838-6.57921-24.66516-2.31969-8.67586-21.00188-82.47684-22.03511-86.52577-13.23865-51.86614%2085.91354-53.300703%2072.30567%200z'/%3e%3ccircle%20cx='206.7175'%20cy='301.47748'%20r='25.593596'/%3e%3cg%20transform='translate(-.70632766)'%3e%3cpath%20d='m207.42187%203.7486992c-16.63266%200-23.8644%2014.1152908-24.94757%2016.4266348l-173.402518%20300.355186h0.030761c-1.4836084%202.12838-10.0855663%2015.39543-1.7841664%2029.77712%208.3221269%2014.41332%2024.1723809%2013.59831%2026.7009729%2013.38125%200.0415-4e-3%200.150685%203e-3%200.184569%200l346.620471%200.0308v-0.0308c2.57607%200.22046%2018.3955%201.03671%2026.70097-13.35049%208.33158-14.42812-0.34665-27.75027-1.78416-29.80788h0.0308l-173.31027-300.139855-0.12305-0.215331c-1.09705-2.341335-8.30365-16.4281987-24.91681-16.4266348z'%20fill='url(%23radialGradient5217)'/%3e%3c/g%3e%3c/svg%3e", import.meta.url)}'/ style="${this.get_style(
+      this.container_warning() && (g = t`<img class='warning' src='${new URL("data:image/svg+xml,%3c?xml%20version='1.0'%20encoding='UTF-8'%20standalone='no'?%3e%3c!--%20Created%20with%20Inkscape%20(http://www.inkscape.org/)%20--%3e%3csvg%20width='420'%20height='373'%20version='1.0'%20viewBox='0%200%20413.435%20365.722'%20xml:space='preserve'%20xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cradialGradient%20id='radialGradient5217'%20cx='173.78099'%20cy='150.8327'%20r='206.90388'%20gradientTransform='matrix(-.6101056%20.6619819%20-.6829184%20-.6294014%20402.98608%2080.149634)'%20gradientUnits='userSpaceOnUse'%3e%3cstop%20stop-color='%23fff'%20stop-opacity='.62886596'%20offset='0'/%3e%3cstop%20stop-color='%23fff'%20stop-opacity='0'%20offset='1'/%3e%3c/radialGradient%3e%3c/defs%3e%3cpath%20d='m222.26365%2025.584927s-5.08917-11.009168-15.54612-11.008183c-10.45694%200-15.55891%2011.007199-15.55891%2011.007199l-173.398344%20300.352227s-6.988026%209.9116-1.76005%2018.96877c5.228962%209.05618%2017.313059%207.96944%2017.313059%207.96944l346.812425%200.0108s12.07819%201.09659%2017.30617-7.95958c5.22896-9.05521-1.75316-18.97665-1.75316-18.97665z'%20fill='%23ff0'%20stroke='%23df1800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='21.6560879'/%3e%3cpath%20d='m242.83732%20138.13685c-1.03034%204.04893-19.71542%2077.84991-22.03608%2086.52577-2.31969%208.67678-4.5118%2016.8988-6.57922%2024.66516%200%200-1.07382%204.89998-6.69134%204.89998h-1.69337c-5.61751%200-6.69134-4.89998-6.69134-4.89998-2.06742-7.76636-4.25855-15.98838-6.57921-24.66516-2.31969-8.67586-21.00188-82.47684-22.03511-86.52577-13.23865-51.86614%2085.91354-53.300703%2072.30567%200z'/%3e%3ccircle%20cx='206.7175'%20cy='301.47748'%20r='25.593596'/%3e%3cg%20transform='translate(-.70632766)'%3e%3cpath%20d='m207.42187%203.7486992c-16.63266%200-23.8644%2014.1152908-24.94757%2016.4266348l-173.402518%20300.355186h0.030761c-1.4836084%202.12838-10.0855663%2015.39543-1.7841664%2029.77712%208.3221269%2014.41332%2024.1723809%2013.59831%2026.7009729%2013.38125%200.0415-4e-3%200.150685%203e-3%200.184569%200l346.620471%200.0308v-0.0308c2.57607%200.22046%2018.3955%201.03671%2026.70097-13.35049%208.33158-14.42812-0.34665-27.75027-1.78416-29.80788h0.0308l-173.31027-300.139855-0.12305-0.215331c-1.09705-2.341335-8.30365-16.4281987-24.91681-16.4266348z'%20fill='url(%23radialGradient5217)'/%3e%3c/g%3e%3c/svg%3e", import.meta.url)}'/ style="${this.get_style(
         this.config.warning
       )}" /><div class="warning" style="${this.get_style(
         this.config.warning_label
-      )}">${n._("empty")}</div>`);
+      )}">${E._("empty")}</div>`);
     } catch (c) {
       console.warn("Could not check stock alert:", c);
     }
-    return E`
+    return t`
       <div class="container" style="${this.get_style(this.config.container)}">
         ${C}
         <img id="id_${A}" src="${I}" width="100%" />
@@ -10715,7 +10784,7 @@ const pj = r`
     };
   }
   _render_slot_schedule(A) {
-    return this.color_list[A.head], E` <div
+    return this.color_list[A.head], t` <div
       class="slot"
       style="background-color: rgb(${this.color_list[A.head]})"
     >
@@ -10736,17 +10805,17 @@ const pj = r`
     I && I.attributes?.queue !== this.stateObj.attributes?.queue && (this._hass = A, this.stateObj = I, this.requestUpdate());
   }
   render() {
-    return this.schedule = this.stateObj?.attributes?.queue, this.stateOn && this.schedule?.length ? E`
+    return this.schedule = this.stateObj?.attributes?.queue, this.stateOn && this.schedule?.length ? t`
         <div style="${this.get_style("css")}">
           ${this.schedule.map((A) => this._render_slot_schedule(A))}
         </div>
-      ` : E``;
+      ` : t``;
   }
   // else    }
 };
 uI.styles = [pj];
 let gI = uI;
-const ng = {
+const Eg = {
   name: null,
   model: "RSMAT",
   color: hI,
@@ -11520,15 +11589,15 @@ class Dj extends o {
         return I;
       }
       return A;
-    }, this.initial_config = ng, this.load_dialogs([hA, Rj]);
+    }, this.initial_config = Eg, this.load_dialogs([hA, Rj]);
   }
   async connectedCallback() {
-    this._originalConfig = ng, await super.connectedCallback();
+    this._originalConfig = Eg, await super.connectedCallback();
   }
   _render_disabled(A = null) {
     const I = super._render_disabled(A);
     let g = I.maintenance_element;
-    if (I.reason === n._("maintenance")) {
+    if (I.reason === E._("maintenance")) {
       const i = this.get_entity("position");
       if (i && (this.invert_position = i?.state === "left", this.invert_position)) {
         A += ";transform:scaleX(-1)", this.config = this.swapLeftRight(this.config);
@@ -11552,21 +11621,21 @@ class Dj extends o {
     i !== this.invert_position && (this._elements = {}), this.invert_position = i, this.invert_position && (I += ";transform:scaleX(-1)", this.config = this.swapLeftRight(this.config));
     const C = parseInt(
       this.get_entity("remaining_length")?.state ?? "0"
-    ), c = parseInt(this.get_entity("total_usage")?.state ?? "0"), a = 100 - c * 100 / (c + C), M = [0, 25, 50, 75, 100].reduce((Y, z) => Math.abs(z - a) < Math.abs(Y - a) ? z : Y), t = this.config.state_background_imgs?.[`percent_${M}`] ?? "";
-    return console.log("CONFIG:", this.config), E` <div class="device_bg">
+    ), c = parseInt(this.get_entity("total_usage")?.state ?? "0"), a = 100 - c * 100 / (c + C), M = [0, 25, 50, 75, 100].reduce((Y, z) => Math.abs(z - a) < Math.abs(Y - a) ? z : Y), n = this.config.state_background_imgs?.[`percent_${M}`] ?? "";
+    return console.log("CONFIG:", this.config), t` <div class="device_bg">
       ${A}
       <img
         class="device_img"
         id="rsdevice_img"
         alt=""
-        src="${t}"
+        src="${n}"
         style="${I}"
       />
       <div>${this._render_elements(this.is_on())}</div>
     </div>`;
   }
   renderEditor() {
-    return this.is_disabled() ? E`` : (this._populate_entities(), this.update_config(), E` <form>
+    return this.is_disabled() ? t`` : (this._populate_entities(), this.update_config(), t` <form>
       ${this._editor_common()}
       <table>
         <tr>
@@ -11738,7 +11807,7 @@ class VA extends o {
     }, this.initial_config = Bj;
   }
   renderEditor() {
-    return E``;
+    return t``;
   }
 }
 class Kj extends VA {
@@ -11950,7 +12019,7 @@ const Fj = {
   }
   _render(A, I) {
     const g = this.config.background_img ?? "";
-    return E` <div class="device_bg">
+    return t` <div class="device_bg">
       ${A}
       <img
         class="device_img"
@@ -11977,7 +12046,7 @@ const Fj = {
       } else
         this._pumps[I].litElement.show_add_pump = this.show_add_pump(), this._pumps[I].litElement.parent_entities = this.entities, this._pumps[I].litElement.parent_device = this.device;
     }
-    return E` <div class="pump_0">${this._pumps[1].litElement}</div>
+    return t` <div class="pump_0">${this._pumps[1].litElement}</div>
       <div class="pump_1">${this._pumps[2].litElement}</div>`;
   }
   _setting_hass(A) {
@@ -11994,7 +12063,7 @@ const Fj = {
     return this.get_config_flag("hide_add_pump") !== !0;
   }
   renderEditor() {
-    return this.is_disabled() ? E`` : (this._populate_entities(), this.update_config(), E` <form>
+    return this.is_disabled() ? t`` : (this._populate_entities(), this.update_config(), t` <form>
       ${this._editor_common()}
       <table>
         <tr>
@@ -12129,10 +12198,10 @@ class cA extends o {
    * @return the add-pump placeholder, or an empty template
    */
   _render(A, I) {
-    return this.show_add_pump ? E`<div class="device_bg">
+    return this.show_add_pump ? t`<div class="device_bg">
       ${A}
       <div>${this._render_elements(this.is_on())}</div>
-    </div>` : E``;
+    </div>` : t``;
   }
   /**
    * True while the ReefRun has not been told what this pump is.
@@ -12186,11 +12255,11 @@ class cA extends o {
   // Re-render when state, schedule_enabled, speed, missing_pump or parent
   // device_state changes
   _setting_hass(A) {
-    const I = this.entities.state, g = this.entities.schedule_enabled, i = this.entities.speed, C = this.entities.missing_pump, c = this.entities.type, a = this.entities.temperature, s = this.parent_entities?.device_state, M = I ? this._hass?.states[I.entity_id]?.state : void 0, t = g ? this._hass?.states[g.entity_id]?.state : void 0, Y = i ? this._hass?.states[i.entity_id]?.state : void 0, z = s ? this._hass?.states[s.entity_id]?.state : void 0, x = C ? this._hass?.states[C.entity_id]?.state : this._hass?.states[I?.entity_id]?.attributes?.missing_pump, G = c ? this._hass?.states[c.entity_id]?.state : void 0, O = a ? this._hass?.states[a.entity_id]?.state : void 0;
+    const I = this.entities.state, g = this.entities.schedule_enabled, i = this.entities.speed, C = this.entities.missing_pump, c = this.entities.type, a = this.entities.temperature, s = this.parent_entities?.device_state, M = I ? this._hass?.states[I.entity_id]?.state : void 0, n = g ? this._hass?.states[g.entity_id]?.state : void 0, Y = i ? this._hass?.states[i.entity_id]?.state : void 0, z = s ? this._hass?.states[s.entity_id]?.state : void 0, x = C ? this._hass?.states[C.entity_id]?.state : this._hass?.states[I?.entity_id]?.attributes?.missing_pump, G = c ? this._hass?.states[c.entity_id]?.state : void 0, O = a ? this._hass?.states[a.entity_id]?.state : void 0;
     super._setting_hass(A);
     const h = I ? A.states[I.entity_id]?.state : void 0, l = g ? A.states[g.entity_id]?.state : void 0, w = i ? A.states[i.entity_id]?.state : void 0, p = s ? A.states[s.entity_id]?.state : void 0, j = C ? A.states[C.entity_id]?.state : A.states[I?.entity_id]?.attributes?.missing_pump, W = c ? A.states[c.entity_id]?.state : void 0, m = a ? A.states[a.entity_id]?.state : void 0;
-    if (h !== M || l !== t || w !== Y || p !== z || j !== x || W !== G || m !== O) {
-      if (this.to_render = !0, l !== t || w !== Y) {
+    if (h !== M || l !== n || w !== Y || p !== z || j !== x || W !== G || m !== O) {
+      if (this.to_render = !0, l !== n || w !== Y) {
         const U = this._elements.sensor_controlled_in;
         U && U.requestUpdate();
       }
@@ -12549,12 +12618,12 @@ class Pj extends cA {
     super(), this.initial_config = Nj, this.load_dialogs([mI, Vj]);
   }
   _render(A, I) {
-    const g = this.config.background_img ?? "", i = this.is_missing(), C = this.is_pump_on() && !i, c = C ? E`` : E`<style>
+    const g = this.config.background_img ?? "", i = this.is_missing(), C = this.is_pump_on() && !i, c = C ? t`` : t`<style>
           img {
             filter: grayscale(90%);
           }
         </style>`;
-    return E`
+    return t`
       <div>
         ${this._render_elements(C, "cables_" + this.pump_id.toString())}
       </div>
@@ -13404,15 +13473,15 @@ const vj = {
     animation: skimmerWater ${C}s linear infinite;`;
   }
   _render(A, I) {
-    const g = this.get_entity("state")?.state ?? "", i = this.is_missing(), C = this.is_pump_on() && !i, c = C ? E`` : E`<style>
+    const g = this.get_entity("state")?.state ?? "", i = this.is_missing(), C = this.is_pump_on() && !i, c = C ? t`` : t`<style>
           img {
             filter: grayscale(90%);
           }
         </style>`, a = !C || g === "off";
     let s;
     a ? s = this.config.state_background_imgs.off.toString() : g === "full-cup" ? s = this.config.state_background_imgs.full.toString() : s = this.config.state_background_imgs.on.toString();
-    const M = this._waterBackground(a), t = a ? "paused" : "running", z = g === "full-cup" ? "foam-overlay--full" : "foam-overlay";
-    return E`
+    const M = this._waterBackground(a), n = a ? "paused" : "running", z = g === "full-cup" ? "foam-overlay--full" : "foam-overlay";
+    return t`
       <div>
         ${this._render_elements(C, "cables_" + this.pump_id.toString())}
         ${this._render_elements(C, "sensor")}
@@ -13421,13 +13490,13 @@ const vj = {
           <img class="device_img" alt="" src="${s}" style="${I}" />
           <div
             class="water-overlay"
-            style="--water-play-state: ${t}"
+            style="--water-play-state: ${n}"
           >
             <div class="water-inner" style="${M}"></div>
           </div>
-          ${a ? "" : E`<div
+          ${a ? "" : t`<div
                 class="${z}"
-                style="--water-play-state: ${t}"
+                style="--water-play-state: ${n}"
               ></div>`}
         </div>
         ${this._render_elements(C, "sensor_in")}
@@ -13789,10 +13858,12 @@ const bj = {
         height: "45%"
       }
     },
-    // Same data as today_usage_chart, drawn as a bare SVG sparkline instead of
-    // a native card: no axes, no header, and above all no minimum height, so
-    // it holds its proportions whatever the card width. Keep one of the two
-    // and drop the other.
+    // Daily ATO consumption against its running average, drawn on a canvas
+    // rather than through a native statistics card: no card chrome, no header
+    // and above all no minimum height, so the chart holds its proportions
+    // whatever the card width. That last point is why the
+    // hui-statistics-graph-card version was dropped — it refused to shrink
+    // below a pixel floor and spilled over the picture on a narrow card.
     today_usage_sparkline: {
       name: "today_volume_usage",
       type: "history-chart",
@@ -13803,6 +13874,11 @@ const bj = {
       // Set to true to print the resolved entity ids and the number of points
       // read into the browser console, when the chart stays empty.
       debug: !1,
+      // Demo aid, off in normal use. Set to 30 and run scripts/ato_timelapse
+      // to watch a full day draw itself in 30 seconds: the recorder cannot be
+      // back-dated, so the seconds actually written are stretched across the
+      // whole axis instead.
+      demo_seconds: 30,
       step: !0,
       baseline: "zero",
       unit: "",
@@ -13829,6 +13905,75 @@ const bj = {
         left: "61%",
         width: "39%",
         height: "30%",
+        "pointer-events": "none"
+      }
+    },
+    // Puddle on the floor when the leak probe is wet.
+    //
+    // The firmware says which side the water came from, and that is the half
+    // of the information worth showing: salt water on the floor is not the
+    // same problem as fresh water. Rather than writing it out — the strip is
+    // three percent of the card high, no label fits — the puddle is drawn on
+    // the matching side of the picture: on the left under the RO reservoir,
+    // on the right under the sump. Position carries the meaning, which is
+    // what a photo-realistic card is for.
+    //
+    // Rendered as a water-level rather than a flat rectangle so it gets the
+    // same wave and the same tint as the water in the two tanks. `level` is a
+    // constant: the probe is a threshold, not a gauge, so only the presence
+    // carries information, and show_value is off because a percentage of a
+    // puddle means nothing.
+    leak_puddle_rodi: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'rodi'",
+      no_br_if_disabled: !0,
+      level: 100,
+      show_value: !1,
+      wave: !0,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "26.5%",
+        width: "11.5%",
+        height: "3%",
+        "pointer-events": "none"
+      }
+    },
+    leak_puddle_aquarium: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'aquarium'",
+      no_br_if_disabled: !0,
+      level: 100,
+      show_value: !1,
+      wave: !0,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "38%",
+        width: "11.5%",
+        height: "3%",
+        "pointer-events": "none"
+      }
+    },
+    // Water reported without a readable side: spread over the whole strip
+    // rather than guessing one, so the picture never claims to know more than
+    // the device said.
+    leak_puddle_unknown: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'unknown'",
+      no_br_if_disabled: !0,
+      level: 100,
+      show_value: !1,
+      wave: !0,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "26.5%",
+        width: "23%",
+        height: "3%",
         "pointer-events": "none"
       }
     },
@@ -13905,13 +14050,13 @@ const bj = {
       }
     ]
   }
-}, nA = class nA extends o {
+}, EA = class EA extends o {
   constructor() {
     super(), this.device = {
       model: "RSATO",
       name: "",
       elements: null
-    }, this.initial_config = bj, this.load_dialogs([hA, Tj]);
+    }, this._level_alert = !1, this.initial_config = bj, this.load_dialogs([hA, Tj]);
   }
   /**
    * Current device mode, as reported by the `/mode` endpoint.
@@ -13937,14 +14082,14 @@ const bj = {
    * @return false only when the device explicitly reports a missing pump
    */
   has_pump() {
-    return !nA.NO_PUMP_MODES.has(this._mode());
+    return !EA.NO_PUMP_MODES.has(this._mode());
   }
   /**
    * Whether the attached pump is prevented from filling.
    * @return true when the device mode names a pump-blocking condition
    */
   pump_alert() {
-    return nA.PUMP_FAULT_MODES.has(this._mode());
+    return EA.PUMP_FAULT_MODES.has(this._mode());
   }
   /**
    * Whether a leak probe is plugged in.
@@ -13974,7 +14119,27 @@ const bj = {
    * @return true when water is detected, on either the tank or the RO/DI side
    */
   leak_alert() {
-    return this._is_on("status");
+    if (this._is_on("status"))
+      return !0;
+    const A = this.get_entity("leak_sensor_status")?.state;
+    return A === void 0 || A === "unknown" || A === "unavailable" ? !1 : A !== "dry";
+  }
+  /**
+   * Which side a detected leak came from.
+   *
+   * The firmware distinguishes the aquarium loop from the RO/DI feed, which
+   * is the useful half of the information: it says whether salt water is on
+   * the floor or fresh water is. The card uses it to put the puddle on the
+   * matching side of the picture.
+   *
+   * @return "aquarium", "rodi", "unknown" when a leak is reported without a
+   *   readable side, or null when there is no leak
+   */
+  leak_source() {
+    if (!this.leak_alert())
+      return null;
+    const A = this.get_entity("leak_sensor_status")?.state;
+    return A === "aquarium_water_leak" ? "aquarium" : A === "rodi_water_leak" ? "rodi" : "unknown";
   }
   /**
    * Whether the water-level probe needs attention.
@@ -13987,12 +14152,25 @@ const bj = {
   level_sensor_alert() {
     return this._is_on("check_sensor") || this._is_on("is_sensor_error");
   }
+  /**
+   * Watch the level-probe fault so the background picture follows it.
+   *
+   * The class is built in `_render()`, which RSDevice only re-runs when a
+   * `master` element changed or a device was enabled — a plain sensor moving
+   * leaves the picture with a stale class. Elements carrying a `disabled_if`
+   * refresh themselves, the background has no such hook.
+   */
+  _setting_hass(A) {
+    super._setting_hass(A);
+    const I = this.level_sensor_alert();
+    I !== this._level_alert && (this._level_alert = I, this.requestUpdate());
+  }
   _render(A, I) {
-    const g = this.config.background_img ?? "";
-    return E` <div class="device_bg">
+    const g = this.config.background_img ?? "", i = this.level_sensor_alert() ? " blink-alert" : "";
+    return t` <div class="device_bg">
       ${A}
       <img
-        class="device_img"
+        class="device_img${i}"
         id="rsdevice_img"
         alt=""
         src="${g}"
@@ -14002,17 +14180,17 @@ const bj = {
     </div>`;
   }
   renderEditor() {
-    return E``;
+    return t``;
   }
 };
-nA.NO_PUMP_MODES = /* @__PURE__ */ new Set(["missing_pump"]), nA.PUMP_FAULT_MODES = /* @__PURE__ */ new Set([
+EA.NO_PUMP_MODES = /* @__PURE__ */ new Set(["missing_pump"]), EA.PUMP_FAULT_MODES = /* @__PURE__ */ new Set([
   "malfunction",
   "stalled",
   "pump_timeout",
   "empty",
   "missing_sensor"
 ]);
-let eI = nA;
+let eI = EA;
 const Lj = {
   name: null,
   model: "RSWAVE",
@@ -14099,7 +14277,7 @@ class Jg extends o {
     }, this.initial_config = Lj, this.load_dialogs([hA]);
   }
   renderEditor() {
-    return E``;
+    return t``;
   }
 }
 class fj extends Jg {
@@ -14705,7 +14883,7 @@ const ZI = class ZI extends o {
     const g = [];
     if (A) {
       const i = `pump_type_${A}`;
-      g.push(n.hasTranslation(i) ? n._(i) : A);
+      g.push(E.hasTranslation(i) ? E._(i) : A);
     }
     if (I) {
       const i = I.match(/(\d+)\s*$/);
@@ -14731,11 +14909,11 @@ const ZI = class ZI extends o {
   _unit_label(A) {
     switch (A) {
       case "days":
-        return n._("unit_days");
+        return E._("unit_days");
       case "weeks":
-        return n._("unit_weeks");
+        return E._("unit_weeks");
       case "months":
-        return n._("unit_months");
+        return E._("unit_months");
       default:
         return "";
     }
@@ -14746,7 +14924,7 @@ const ZI = class ZI extends o {
    * @return the label displayed on the right of the row
    */
   _remaining_label(A) {
-    return A.days_left === null ? n._("maintenance_never_done") : A.days_left < 0 ? `+${A.overdue_days} ${n._("days_short")}` : A.days_left === 0 ? n._("maintenance_today") : `${A.days_left} ${n._("days_short")}`;
+    return A.days_left === null ? E._("maintenance_never_done") : A.days_left < 0 ? `+${A.overdue_days} ${E._("days_short")}` : A.days_left === 0 ? E._("maintenance_today") : `${A.days_left} ${E._("days_short")}`;
   }
   /**
    * Build the accessible title of a row (native browser tooltip).
@@ -14760,11 +14938,11 @@ const ZI = class ZI extends o {
       A.pump_model
     )} - ${A.name}`];
     if (A.interval_days > 0 && g.push(
-      `${n._("maintenance_interval")}: ${A.interval_days} ${n._("days_short")}`
+      `${E._("maintenance_interval")}: ${A.interval_days} ${E._("days_short")}`
     ), A.last_reset) {
       const i = new Date(A.last_reset);
       Number.isNaN(i.getTime()) || g.push(
-        `${n._("maintenance_last_reset")}: ${i.toLocaleDateString()}`
+        `${E._("maintenance_last_reset")}: ${i.toLocaleDateString()}`
       );
     }
     return g.join(`
@@ -14777,28 +14955,28 @@ const ZI = class ZI extends o {
   _render_counters(A) {
     const I = cr(A), g = [];
     return I.overdue > 0 && g.push(
-      E`<span class="maint-badge overdue"
-          >${I.overdue} ${n._("maintenance_overdue")}</span
+      t`<span class="maint-badge overdue"
+          >${I.overdue} ${E._("maintenance_overdue")}</span
         >`
     ), I.warning > 0 && g.push(
-      E`<span class="maint-badge warning"
-          >${I.warning} ${n._("maintenance_due_soon")}</span
+      t`<span class="maint-badge warning"
+          >${I.warning} ${E._("maintenance_due_soon")}</span
         >`
     ), I.never > 0 && g.push(
-      E`<span class="maint-badge never"
-          >${I.never} ${n._("maintenance_never_done")}</span
+      t`<span class="maint-badge never"
+          >${I.never} ${E._("maintenance_never_done")}</span
         >`
     ), g.length === 0 && I.total > 0 && g.push(
-      E`<span class="maint-badge ok"
-          >${n._("maintenance_all_ok")}</span
+      t`<span class="maint-badge ok"
+          >${E._("maintenance_all_ok")}</span
         >`
-    ), E`<div class="maint-counters">${g}</div>`;
+    ), t`<div class="maint-counters">${g}</div>`;
   }
   /**
    * Render the sort selector and the filter toggle.
    */
   _render_toolbar() {
-    return E`
+    return t`
       <div class="maint-toolbar">
         <div class="maint-sort">
           <button
@@ -14806,14 +14984,14 @@ const ZI = class ZI extends o {
             class="${this._sort === "device" ? "active" : ""}"
             @click="${() => this._set_sort("device")}"
           >
-            ${n._("sort_by_equipment")}
+            ${E._("sort_by_equipment")}
           </button>
           <button
             id="sort-due"
             class="${this._sort === "due" ? "active" : ""}"
             @click="${() => this._set_sort("due")}"
           >
-            ${n._("sort_by_due_date")}
+            ${E._("sort_by_due_date")}
           </button>
         </div>
         <div class="maint-filters">
@@ -14824,19 +15002,19 @@ const ZI = class ZI extends o {
               .checked="${this._hide_ok}"
               @change="${() => this._toggle_hide_ok()}"
             />
-            ${n._("maintenance_hide_ok")}
+            ${E._("maintenance_hide_ok")}
           </label>
           <button
             id="hide-muted"
             class="maint-mute-filter ${this._hide_muted ? "active" : ""}"
-            title="${this._hide_muted ? n._("maintenance_show_muted") : n._("maintenance_hide_muted")}"
+            title="${this._hide_muted ? E._("maintenance_show_muted") : E._("maintenance_hide_muted")}"
             @click="${() => this._toggle_hide_muted()}"
           >
             <ha-icon
               icon="${this._hide_muted ? "mdi:bell-off-outline" : "mdi:bell"}"
             ></ha-icon>
             <span>
-              ${this._hide_muted ? n._("maintenance_show_muted") : n._("maintenance_hide_muted")}
+              ${this._hide_muted ? E._("maintenance_show_muted") : E._("maintenance_hide_muted")}
             </span>
           </button>
         </div>
@@ -14851,13 +15029,13 @@ const ZI = class ZI extends o {
    */
   _render_row(A, I, g) {
     const i = A.status === "overdue" ? 100 : A.percent;
-    return E`
+    return t`
       <div class="maint-entry">
         <div
           class="maint-row ${A.notify ? "" : "muted"}"
           title="${this._row_title(A)}"
         >
-          ${A.icon ? E`<ha-icon class="maint-icon" icon="${A.icon}"></ha-icon>` : E`<ha-icon
+          ${A.icon ? t`<ha-icon class="maint-icon" icon="${A.icon}"></ha-icon>` : t`<ha-icon
                 class="maint-icon"
                 icon="mdi:wrench-check"
               ></ha-icon>`}
@@ -14871,7 +15049,7 @@ const ZI = class ZI extends o {
             <div class="maint-line">
               <span class="maint-name">
                 ${A.name}
-                ${g ? E`<span class="maint-device">
+                ${g ? t`<span class="maint-device">
                       -
                       ${this._device_label(
       A.device_name,
@@ -14891,25 +15069,25 @@ const ZI = class ZI extends o {
               ></div>
             </div>
           </div>
-          ${I.show_interval && A.interval_entity_id ? E`<button
+          ${I.show_interval && A.interval_entity_id ? t`<button
                 class="maint-tune ${this._editing === A.entity_id ? "open" : ""}"
-                title="${n._("maintenance_edit_interval")}"
+                title="${E._("maintenance_edit_interval")}"
                 @click="${() => this._toggle_editor(A)}"
               >
                 <ha-icon icon="mdi:calendar-edit"></ha-icon>
               </button>` : ""}
-          ${I.show_notify && A.notify_entity_id ? E`<button
+          ${I.show_notify && A.notify_entity_id ? t`<button
                 class="maint-bell ${A.notify ? "on" : "off"}"
-                title="${A.notify ? n._("maintenance_mute") : n._("maintenance_unmute")}"
+                title="${A.notify ? E._("maintenance_mute") : E._("maintenance_unmute")}"
                 @click="${() => this._toggle_notify(A)}"
               >
                 <ha-icon
                   icon="${A.notify ? "mdi:bell-ring" : "mdi:bell-off"}"
                 ></ha-icon>
               </button>` : ""}
-          ${I.show_reset ? E`<button
+          ${I.show_reset ? t`<button
                 class="maint-done"
-                title="${n._("maintenance_mark_done")}"
+                title="${E._("maintenance_mark_done")}"
                 @click="${() => this._mark_done(A)}"
               >
                 <ha-icon icon="mdi:check"></ha-icon>
@@ -14927,11 +15105,11 @@ const ZI = class ZI extends o {
    */
   _render_interval_editor(A) {
     const I = this._unit_label(A.interval_unit), g = A.interval_min ?? 1, i = A.interval_max ?? 365, C = A.interval_value ?? g;
-    return E`
+    return t`
       <div class="maint-editor">
         <div class="maint-editor-line">
           <span class="maint-editor-label">
-            ${n._("maintenance_every")}
+            ${E._("maintenance_every")}
           </span>
           <span class="maint-editor-value">${C} ${I}</span>
         </div>
@@ -14960,10 +15138,10 @@ const ZI = class ZI extends o {
    * @param options: the effective view options
    */
   _render_list(A, I) {
-    return A.length === 0 ? E`<div class="maint-empty">
-        ${this._hide_ok ? n._("maintenance_all_ok") : n._("maintenance_no_task")}
-      </div>` : this._sort === "due" ? E`${A.map((g) => this._render_row(g, I, !0))}` : E`${er(A).map(
-      (g) => E`
+    return A.length === 0 ? t`<div class="maint-empty">
+        ${this._hide_ok ? E._("maintenance_all_ok") : E._("maintenance_no_task")}
+      </div>` : this._sort === "due" ? t`${A.map((g) => this._render_row(g, I, !0))}` : t`${er(A).map(
+      (g) => t`
         <div class="maint-group-title">
           ${this._device_label(
         g.device_name,
@@ -14990,12 +15168,12 @@ const ZI = class ZI extends o {
     let g = this._hide_ok ? I.filter((C) => C.status !== "ok") : I;
     this._hide_muted && (g = g.filter((C) => C.notify));
     const i = Cr(g, this._sort);
-    return E`
+    return t`
       <div class="maint-root">
         <div class="maint-header">
           <div class="maint-title">
             <ha-icon icon="mdi:wrench-clock"></ha-icon>
-            ${n._("maintenance_view")}
+            ${E._("maintenance_view")}
           </div>
           ${this._render_counters(I)}
         </div>
@@ -15027,7 +15205,7 @@ const ZI = class ZI extends o {
    */
   renderEditor() {
     const A = this._read_options();
-    return E`
+    return t`
       <form class="maint-editor-form">
         <table>
           <tr>
@@ -15044,7 +15222,7 @@ const ZI = class ZI extends o {
                 />
                 <span class="slider round"></span>
               </label>
-              <label>${n._("maintenance_hide_ok_default")}</label>
+              <label>${E._("maintenance_hide_ok_default")}</label>
             </td>
           </tr>
           <tr>
@@ -15061,7 +15239,7 @@ const ZI = class ZI extends o {
                 />
                 <span class="slider round"></span>
               </label>
-              <label>${n._("maintenance_hide_muted_default")}</label>
+              <label>${E._("maintenance_hide_muted_default")}</label>
             </td>
           </tr>
         </table>

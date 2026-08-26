@@ -109,7 +109,45 @@ export class RSAto extends RSDevice {
    * @return true when water is detected, on either the tank or the RO/DI side
    */
   leak_alert(): boolean {
-    return this._is_on("status");
+    if (this._is_on("status")) {
+      return true;
+    }
+    // Fall back to the raw firmware value. The binary_sensor is computed by
+    // the integration from the payload, so forcing `leak_sensor_status` in the
+    // developer tools moves the sensor without moving the binary_sensor — and
+    // the card would ignore a leak that is plainly displayed next to it.
+    const raw = this.get_entity("leak_sensor_status")?.state;
+    if (raw === undefined || raw === "unknown" || raw === "unavailable") {
+      return false;
+    }
+    return raw !== "dry";
+  }
+
+  /**
+   * Which side a detected leak came from.
+   *
+   * The firmware distinguishes the aquarium loop from the RO/DI feed, which
+   * is the useful half of the information: it says whether salt water is on
+   * the floor or fresh water is. The card uses it to put the puddle on the
+   * matching side of the picture.
+   *
+   * @return "aquarium", "rodi", "unknown" when a leak is reported without a
+   *   readable side, or null when there is no leak
+   */
+  leak_source(): "aquarium" | "rodi" | "unknown" | null {
+    if (!this.leak_alert()) {
+      return null;
+    }
+    const raw = this.get_entity("leak_sensor_status")?.state;
+    if (raw === "aquarium_water_leak") {
+      return "aquarium";
+    }
+    if (raw === "rodi_water_leak") {
+      return "rodi";
+    }
+    // The PROBLEM sensor fired but the raw status is missing or unreadable:
+    // there is water, the side is not knowable.
+    return "unknown";
   }
 
   /**
@@ -124,12 +162,36 @@ export class RSAto extends RSDevice {
     return this._is_on("check_sensor") || this._is_on("is_sensor_error");
   }
 
+  /** Last known level-probe fault, to re-render only when it flips. */
+  private _level_alert = false;
+
+  /**
+   * Watch the level-probe fault so the background picture follows it.
+   *
+   * The class is built in `_render()`, which RSDevice only re-runs when a
+   * `master` element changed or a device was enabled — a plain sensor moving
+   * leaves the picture with a stale class. Elements carrying a `disabled_if`
+   * refresh themselves, the background has no such hook.
+   */
+  override _setting_hass(obj: any): void {
+    super._setting_hass(obj);
+    const alert = this.level_sensor_alert();
+    if (alert !== this._level_alert) {
+      this._level_alert = alert;
+      this.requestUpdate();
+    }
+  }
+
   _render(style?: any, substyle?: any): TemplateResult {
     const bg_img = this.config.background_img ?? "";
+    // A level probe fault has no overlay of its own — the probe is part of
+    // the background picture — so the whole picture blinks instead, the same
+    // red tint the pump and the leak probe use for their own faults.
+    const alert = this.level_sensor_alert() ? " blink-alert" : "";
     return html` <div class="device_bg">
       ${style}
       <img
-        class="device_img"
+        class="device_img${alert}"
         id="rsdevice_img"
         alt=""
         src="${bg_img}"

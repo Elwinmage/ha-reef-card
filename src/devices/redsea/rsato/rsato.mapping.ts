@@ -1,7 +1,5 @@
 import {
   COLOR_WHITE_60,
-  COLOR_WHITE_HEX,
-  COLOR_BLUE_HEX,
   COLOR_RS_HEX,
   COLOR_ORANGE_HEX,
   COLOR_ERROR_HEX,
@@ -367,10 +365,12 @@ export const config = {
         height: "45%",
       },
     },
-    // Same data as today_usage_chart, drawn as a bare SVG sparkline instead of
-    // a native card: no axes, no header, and above all no minimum height, so
-    // it holds its proportions whatever the card width. Keep one of the two
-    // and drop the other.
+    // Daily ATO consumption against its running average, drawn on a canvas
+    // rather than through a native statistics card: no card chrome, no header
+    // and above all no minimum height, so the chart holds its proportions
+    // whatever the card width. That last point is why the
+    // hui-statistics-graph-card version was dropped — it refused to shrink
+    // below a pixel floor and spilled over the picture on a narrow card.
     today_usage_sparkline: {
       name: "today_volume_usage",
       type: "history-chart",
@@ -381,6 +381,11 @@ export const config = {
       // Set to true to print the resolved entity ids and the number of points
       // read into the browser console, when the chart stays empty.
       debug: false,
+      // Demo aid, off in normal use. Set to 30 and run scripts/ato_timelapse
+      // to watch a full day draw itself in 30 seconds: the recorder cannot be
+      // back-dated, so the seconds actually written are stretched across the
+      // whole axis instead.
+      demo_seconds: 30,
       step: true,
       baseline: "zero",
       unit: "",
@@ -407,6 +412,75 @@ export const config = {
         left: "61%",
         width: "39%",
         height: "30%",
+        "pointer-events": "none",
+      },
+    },
+    // Puddle on the floor when the leak probe is wet.
+    //
+    // The firmware says which side the water came from, and that is the half
+    // of the information worth showing: salt water on the floor is not the
+    // same problem as fresh water. Rather than writing it out — the strip is
+    // three percent of the card high, no label fits — the puddle is drawn on
+    // the matching side of the picture: on the left under the RO reservoir,
+    // on the right under the sump. Position carries the meaning, which is
+    // what a photo-realistic card is for.
+    //
+    // Rendered as a water-level rather than a flat rectangle so it gets the
+    // same wave and the same tint as the water in the two tanks. `level` is a
+    // constant: the probe is a threshold, not a gauge, so only the presence
+    // carries information, and show_value is off because a percentage of a
+    // puddle means nothing.
+    leak_puddle_rodi: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'rodi'",
+      no_br_if_disabled: true,
+      level: 100,
+      show_value: false,
+      wave: true,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "26.5%",
+        width: "11.5%",
+        height: "3%",
+        "pointer-events": "none",
+      },
+    },
+    leak_puddle_aquarium: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'aquarium'",
+      no_br_if_disabled: true,
+      level: 100,
+      show_value: false,
+      wave: true,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "38%",
+        width: "11.5%",
+        height: "3%",
+        "pointer-events": "none",
+      },
+    },
+    // Water reported without a readable side: spread over the whole strip
+    // rather than guessing one, so the picture never claims to know more than
+    // the device said.
+    leak_puddle_unknown: {
+      name: "status",
+      type: "water-level",
+      disabled_if: "device.leak_source() !== 'unknown'",
+      no_br_if_disabled: true,
+      level: 100,
+      show_value: false,
+      wave: true,
+      css: {
+        position: "absolute",
+        top: "93%",
+        left: "26.5%",
+        width: "23%",
+        height: "3%",
         "pointer-events": "none",
       },
     },

@@ -503,6 +503,219 @@ describe("HistoryChart.measure_gutter", () => {
   });
 });
 
+describe("HistoryChart demo compression", () => {
+  // The recorder cannot be back-dated, so filming a day of history means
+  // stretching the seconds actually written across the whole axis.
+  const DAY = 24 * 3600 * 1000;
+
+  function demoChart(seconds: number): any {
+    const el = makeChart({ window: "today", demo_seconds: seconds });
+    el._demo_start = Date.now();
+    return el;
+  }
+
+  it("is off by default", () => {
+    const el = makeChart();
+    expect(el.demo_seconds).toBe(0);
+    const stamp = Date.now() - 1234;
+    // Identity: a real instant stays where it is.
+    expect(el.compress(stamp)).toBe(stamp);
+  });
+
+  it("ignores an unusable duration", () => {
+    expect(makeChart({ demo_seconds: 0 }).demo_seconds).toBe(0);
+    expect(makeChart({ demo_seconds: -5 }).demo_seconds).toBe(0);
+    expect(makeChart({ demo_seconds: "fast" }).demo_seconds).toBe(0);
+  });
+
+  it("stretches elapsed seconds across the whole window", () => {
+    const el = demoChart(30);
+    const axis = el.display_window();
+    // Nothing elapsed: the start of the axis.
+    expect(el.compress(el._demo_start)).toBe(axis.start);
+    // Half the demo: halfway through the day.
+    expect(el.compress(el._demo_start + 15000)).toBe(axis.start + DAY / 2);
+    // The full demo: the far edge.
+    expect(el.compress(el._demo_start + 30000)).toBe(axis.end);
+  });
+
+  it("clamps a sample to the axis", () => {
+    // The recorder stores whole seconds, so a sample written just before the
+    // demo started comes back rounded down — and the factor turns a few
+    // hundred milliseconds into an hour off the left edge.
+    const el = demoChart(30);
+    const axis = el.display_window();
+    expect(el.compress(el._demo_start - 900)).toBe(axis.start);
+    expect(el.compress(el._demo_start + 60000)).toBe(axis.end);
+  });
+
+  it("reads a rolling window of the last demo seconds", () => {
+    // Asking for the whole day would return the real history of the entity,
+    // which is not what is being filmed. Rolling, not anchored on when the
+    // card opened: otherwise starting the writes five minutes after the
+    // dashboard loaded puts every sample past the end of the compressed day.
+    const el = demoChart(30);
+    const window = el.fetch_window();
+    expect(window.end - window.start).toBe(30000);
+    expect(Math.abs(window.end - Date.now())).toBeLessThan(2000);
+  });
+
+  it("anchors on the oldest sample actually read", async () => {
+    const el = makeChart({ window: "today", demo_seconds: 30, refresh: 0 });
+    const oldest = Date.now() - 8000;
+    const callWS = vi.fn().mockResolvedValue(
+      makeAnswer({
+        "sensor.usage": [
+          [Math.round(oldest / 1000), 5],
+          [Math.round(Date.now() / 1000), 9],
+        ],
+      }),
+    );
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+
+    // Anchored on the data, so the curve starts at the left edge whenever the
+    // writes began.
+    expect(Math.abs(el._demo_start - oldest)).toBeLessThan(1500);
+    const axis = el.display_window();
+    expect(el.series[0].points[0].t).toBeCloseTo(axis.start, -3);
+    // Eight of thirty seconds elapsed: about a quarter of the day.
+    const ratio =
+      (el.series[0].points[1].t - axis.start) / (axis.end - axis.start);
+    expect(ratio).toBeGreaterThan(0.15);
+    expect(ratio).toBeLessThan(0.45);
+  });
+
+  it("never anchors before the rolling window", async () => {
+    // include_start_time_state defaults to true, so the first row carries the
+    // state in force when the window opened, timestamped whenever it last
+    // changed — possibly hours earlier. Anchoring on that would squeeze every
+    // real sample onto the right edge.
+    const el = makeChart({ window: "today", demo_seconds: 30, refresh: 0 });
+    const ancient = Date.now() - 6 * 3600 * 1000;
+    const callWS = vi.fn().mockResolvedValue(
+      makeAnswer({
+        "sensor.usage": [
+          [Math.round(ancient / 1000), 5],
+          [Math.round(Date.now() / 1000), 9],
+        ],
+      }),
+    );
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+    expect(el._demo_start).toBeGreaterThanOrEqual(Date.now() - 31000);
+  });
+
+  it("asks for every recorded change", async () => {
+    // significant_changes_only defaults to true; a numeric curve wants the
+    // lot.
+    const el = makeChart({ demo_seconds: 30, refresh: 0 });
+    const callWS = vi.fn().mockResolvedValue(makeAnswer({}));
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+    expect(callWS.mock.calls[0]![0].significant_changes_only).toBe(false);
+  });
+
+  it("ignores a stale start-of-window sample when anchoring", async () => {
+    // `include_start_time_state` defaults to true, so the first row carries
+    // the state in force when the window opened — timestamped whenever it
+    // last changed, possibly hours earlier. Anchoring on that stretches the
+    // compression over those hours and clamps every real sample onto the
+    // right edge: a vertical line nobody can see.
+    const el = makeChart({ window: "today", demo_seconds: 30, refresh: 0 });
+    const now = Date.now();
+    const stale = now - 4 * 3600 * 1000;
+    const callWS = vi.fn().mockResolvedValue(
+      makeAnswer({
+        "sensor.usage": [
+          [Math.round(stale / 1000), 5],
+          [Math.round((now - 10000) / 1000), 7],
+          [Math.round(now / 1000), 9],
+        ],
+      }),
+    );
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+
+    // Anchored inside the rolling window, not four hours back.
+    expect(el._demo_start).toBeGreaterThanOrEqual(now - 31000);
+
+    const axis = el.display_window();
+    const span = axis.end - axis.start;
+    const xs = el.series[0].points.map((p: any) => p.t);
+    // No exact edge comparison: the recorder stores whole seconds and the
+    // milliseconds between this line and the read are amplified 2880 times,
+    // so what matters is the spread, not the landing point.
+    const ratios = xs.map((t: number) => (t - axis.start) / span);
+    // The stale sample is pulled back to the left edge.
+    expect(ratios[0]).toBe(0);
+    // The two recent ones spread over the axis instead of piling on the far
+    // edge: roughly two thirds and the end of a compressed day.
+    expect(ratios[1]).toBeGreaterThan(0.5);
+    expect(ratios[1]).toBeLessThan(0.85);
+    expect(ratios[2]).toBeGreaterThan(0.9);
+    expect(ratios[2]).toBeLessThanOrEqual(1);
+  });
+
+  it("leaves the anchor on the window start when nothing was read", async () => {
+    // An empty read must not move the anchor onto Infinity.
+    const el = makeChart({ window: "today", demo_seconds: 30, refresh: 0 });
+    const callWS = vi.fn().mockResolvedValue(makeAnswer({}));
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+    expect(Number.isFinite(el._demo_start)).toBe(true);
+    expect(el._demo_start).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("pins the curve to the right edge once the day is over", () => {
+    // Older data scrolls off the left rather than the chart freezing: the
+    // reads keep running so the newest value stays current.
+    const el = demoChart(30);
+    el._demo_start = Date.now() - 60000;
+    expect(el.present()).toBe(el.display_window().end);
+  });
+
+  it("holds the curve out to the compressed present", () => {
+    const el = demoChart(30);
+    el._demo_start = Date.now() - 15000;
+    const axis = el.display_window();
+    // Halfway through the demo, so halfway across the day, not at "now".
+    expect(el.present()).toBeGreaterThan(axis.start + DAY * 0.4);
+    expect(el.present()).toBeLessThan(axis.start + DAY * 0.6);
+  });
+
+  it("compresses the samples on the way in", async () => {
+    const el = makeChart({ window: "today", demo_seconds: 30, refresh: 0 });
+    const start = Date.now();
+    const callWS = vi
+      .fn()
+      .mockResolvedValue(
+        makeAnswer({ "sensor.usage": [[Math.round(start / 1000), 5]] }),
+      );
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+    // Landed on the axis, near its start, not on the wall clock.
+    const axis = el.display_window();
+    expect(el.series[0].points[0].t).toBeGreaterThanOrEqual(axis.start - 1000);
+    expect(el.series[0].points[0].t).toBeLessThan(axis.start + 6 * 3600 * 1000);
+  });
+
+  it("refreshes every second by default in demo mode", async () => {
+    // A demo redrawing once a minute does not move.
+    const el = makeChart({ demo_seconds: 30 });
+    const callWS = vi.fn().mockResolvedValue(makeAnswer({}));
+    el._hass = { states: {}, callWS };
+    await el.fetch_history();
+    await el.fetch_history();
+    // Two calls inside a second would mean no throttle at all; one means the
+    // default is still 60s. Neither: the second is throttled by the 1s window.
+    expect(callWS).toHaveBeenCalledTimes(1);
+    el._last_fetch = Date.now() - 1500;
+    await el.fetch_history();
+    expect(callWS).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("HistoryChart.nice_step", () => {
   // Round numbers on the axis rather than whatever the range divides into.
   it("picks a round step", () => {

@@ -189,6 +189,74 @@ describe("WaterLevel — discrete probe mode", () => {
   });
 });
 
+describe("WaterLevel — fixed mode", () => {
+  /**
+   * A puddle: the probe is a threshold, not a gauge, so only the presence of
+   * the water carries information. `disabled_if` decides whether the element
+   * exists; the height is a constant.
+   */
+  function makeFixed(overrides: Record<string, any> = {}, state = "off"): any {
+    const el = new StubWaterLevel() as any;
+    el.conf = { name: "status", level: 100, ...overrides };
+    el.stateObj = makeState(state, "binary_sensor.status");
+    el.stateObjTarget = null;
+    el.device = makeDevice(true);
+    el.color = "51,151,232";
+    el.c = "51,151,232";
+    el.alpha = 1;
+    el.label = "";
+    el.evaluate = (v: any) => v || "";
+    return el;
+  }
+
+  it("returns the configured level whatever the state", () => {
+    // The bug this replaces: a `levels` map keyed on the binary_sensor fell
+    // through to the no-reading mark whenever that sensor read `off` while
+    // the raw status said otherwise.
+    expect(makeFixed().resolveLevel()).toBe(100);
+    expect(makeFixed({}, "on").resolveLevel()).toBe(100);
+    expect(makeFixed({}, "unknown").resolveLevel()).toBe(100);
+  });
+
+  it("takes any height, not only a full box", () => {
+    expect(makeFixed({ level: 40 }).resolveLevel()).toBe(40);
+    expect(makeFixed({ level: 0 }).resolveLevel()).toBe(0);
+  });
+
+  it("needs neither a target nor a readable state", () => {
+    const el = makeFixed();
+    el.stateObj = undefined;
+    expect(el.hasTargetState()).toBe(true);
+    expect(el.resolveLevel()).toBe(100);
+  });
+
+  it("wins over a levels map declared alongside it", () => {
+    // Ambiguous configuration, but a fixed height is the more specific
+    // intent and must not be overridden by a state lookup that can fail.
+    const el = makeFixed({ level: 70, levels: { on: 20 } }, "on");
+    expect(el.resolveLevel()).toBe(70);
+  });
+
+  it("labels the water with its state, not with a percentage", () => {
+    // A "100%" printed on a puddle whose depth means nothing would be worse
+    // than no label at all.
+    const el = makeFixed({}, "on");
+    el._hass = { formatEntityState: () => "Aquarium water leak" };
+    expect(el.resolveValueText(100)).toBe("Aquarium water leak");
+  });
+
+  it("falls back to the raw state without a formatter", () => {
+    const el = makeFixed({}, "aquarium_water_leak");
+    el._hass = {};
+    expect(el.resolveValueText(100)).toBe("aquarium_water_leak");
+  });
+
+  it("leaves discrete mode alone when no level is set", () => {
+    const el = makeFixed({ level: undefined, levels: { on: 20 } }, "on");
+    expect(el.resolveLevel()).toBe(20);
+  });
+});
+
 describe("WaterLevel — colours and options", () => {
   it("uses colors.fill when set", () => {
     const el = makeRatio({ colors: { fill: "rgb(1,2,3)" } });
