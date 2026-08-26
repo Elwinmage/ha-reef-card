@@ -891,6 +891,27 @@ limites vêm da própria entidade, por isso o cartão nunca pode escrever um val
 fora do intervalo. Apenas um editor fica aberto de cada vez. Use
 `show_interval: false` para esconder os botões.
 
+### Filtrar por aparelho
+
+Por omissão a vista lista as tarefas de todos os aparelhos. O bloco **Filtrar
+por dispositivo** do editor do cartão restringe-a: assinala um ou vários
+aparelhos e apenas as suas tarefas são mantidas, contadores incluídos.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+A lista contém uma entrada por controlador, com o número de tarefas que lhe
+pertencem. Os subaparelhos (cabeças ReefDose, bombas ReefRun) são agrupados sob
+o seu controlador graças à ligação `via_device` do registo do Home Assistant:
+assinalar **RSDose4** conserva assim as tarefas das quatro cabeças. Nenhuma
+caixa assinalada significa «sem filtro»: são apresentados todos os aparelhos, o
+que o atalho **Mostrar todos os dispositivos** também repõe.
+
+A seleção é guardada como nomes de aparelho (ver `devices` abaixo), para que o
+YAML se mantenha legível. Um nome escrito à mão corresponde também aos seus
+subaparelhos por prefixo, o que cobre as instalações onde `via_device` não está
+declarado. Os aparelhos sem nome são identificados pelo seu id de dispositivo do
+Home Assistant.
+
 ### Bombas ReefRun
 
 Os subaparelhos ReefRun chamam-se «… bomba 1» / «… bomba 2», o que nada diz
@@ -912,7 +933,8 @@ O tipo é traduzido e apenas o número final do modelo é mantido (`return-12000
 
 ## Editor
 
-O estado por omissão dos filtros e a visibilidade dos três botões definem-se no editor do cartão.
+O estado por omissão dos filtros, o filtro por aparelho e a visibilidade dos três
+botões definem-se no editor do cartão.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -923,6 +945,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (por omissão) ou "due"
+  devices: # mostrar apenas as tarefas destes aparelhos (vazio: todos)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # esconder as tarefas nem em atraso nem a vencer
   hide_muted: false # esconder as tarefas com as notificações desligadas
   warning_ratio: 0.2 # parte do intervalo apresentada a laranja
@@ -933,6 +958,8 @@ maintenance:
 
 Todas as chaves de `maintenance` são opcionais. `sort` e `hide_ok` apenas fixam
 o estado inicial: o utilizador pode alterá-los a partir da própria vista.
+`devices` aceita tanto nomes de aparelho como ids de dispositivo do Home
+Assistant; uma lista vazia (a predefinição) desativa o filtro.
 
 # FAQ
 

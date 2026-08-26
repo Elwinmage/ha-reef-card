@@ -59,6 +59,7 @@ export type {
   MaintenanceUnit,
   MaintenanceItem,
   MaintenanceGroup,
+  MaintenanceDeviceRef,
   MaintenanceCollectOptions,
 } from "./maintenance";
 

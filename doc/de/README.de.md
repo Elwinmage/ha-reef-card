@@ -1049,6 +1049,27 @@ wieder in Tage um. Die Grenzen stammen aus der Entität selbst, sodass die Karte
 nie einen Wert außerhalb des Bereichs schreiben kann. Es bleibt immer nur ein
 Editor geöffnet. Mit `show_interval: false` blendest du die Schaltflächen aus.
 
+### Nach Gerät filtern
+
+Standardmäßig listet die Ansicht die Aufgaben aller Geräte auf. Der Block
+**Nach Gerät filtern** im Karteneditor schränkt sie ein: Haken Sie ein oder
+mehrere Geräte an, und nur deren Aufgaben bleiben übrig, Zähler inbegriffen.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+Die Liste enthält einen Eintrag je Steuergerät samt der Anzahl seiner Aufgaben.
+Untergeräte (ReefDose-Köpfe, ReefRun-Pumpen) werden über die `via_device`-
+Verknüpfung der Home-Assistant-Registry ihrem Steuergerät zugeordnet: **RSDose4**
+anzuhaken behält also die Aufgaben aller vier Köpfe. Kein Haken bedeutet „kein
+Filter": alle Geräte werden angezeigt, was auch die Verknüpfung **Alle Geräte
+anzeigen** wiederherstellt.
+
+Die Auswahl wird als Gerätename gespeichert (siehe `devices` unten), damit das
+YAML lesbar bleibt. Ein von Hand geschriebener Name passt zusätzlich per Präfix
+auf seine Untergeräte, was Installationen ohne deklariertes `via_device`
+abdeckt. Geräte ohne Namen werden über ihre Home-Assistant-Geräte-ID
+identifiziert.
+
 ### ReefRun-Pumpen
 
 ReefRun-Untergeräte heißen „… Pumpe 1“ / „… Pumpe 2“, was nichts darüber aussagt,
@@ -1071,7 +1092,8 @@ schlichten Namen.
 
 ## Editor
 
-Der Standardzustand der Filter und die Sichtbarkeit der drei Schaltflächen werden im Karteneditor festgelegt.
+Der Standardzustand der Filter, der Gerätefilter und die Sichtbarkeit der drei
+Schaltflächen werden im Karteneditor festgelegt.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -1082,6 +1104,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (Standard) oder "due"
+  devices: # nur die Aufgaben dieser Geräte anzeigen (leer: alle)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # Aufgaben ausblenden, die weder überfällig noch bald fällig sind
   hide_muted: false # Aufgaben mit ausgeschalteten Benachrichtigungen ausblenden
   warning_ratio: 0.2 # Anteil des Intervalls, der orange dargestellt wird
@@ -1091,7 +1116,9 @@ maintenance:
 ```
 
 Alle `maintenance`-Schlüssel sind optional. `sort` und `hide_ok` legen nur den
-Anfangszustand fest: der Nutzer kann sie in der Ansicht selbst ändern.
+Anfangszustand fest: der Nutzer kann sie in der Ansicht selbst ändern. `devices`
+akzeptiert sowohl Gerätenamen als auch Home-Assistant-Geräte-IDs; eine leere
+Liste (der Standard) schaltet den Filter aus.
 
 # FAQ
 

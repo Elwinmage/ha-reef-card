@@ -23,6 +23,7 @@ import { state } from "lit/decorators.js";
 
 import type {
   HassConfig,
+  MaintenanceDeviceRef,
   MaintenanceItem,
   MaintenanceSort,
 } from "../../../types/index";
@@ -32,7 +33,9 @@ import { RSDevice } from "../../device";
 
 import {
   collect_maintenance_items,
+  filter_by_devices,
   group_by_device,
+  list_maintenance_devices,
   maintenance_counters,
   maintenance_signature,
   sort_maintenance_items,
@@ -106,6 +109,12 @@ export class RSMaintenance extends RSDevice {
     const ratio = Number(user.warning_ratio);
     return {
       sort,
+      devices: Array.isArray(user.devices)
+        ? user.devices.filter(
+            (name: unknown): name is string =>
+              typeof name === "string" && name.length > 0,
+          )
+        : default_options.devices,
       hide_ok:
         typeof user.hide_ok === "boolean"
           ? user.hide_ok
@@ -144,7 +153,13 @@ export class RSMaintenance extends RSDevice {
     this._hass = obj;
     const options = this._read_options();
     const signature = maintenance_signature(
-      collect_maintenance_items(obj, { warning_ratio: options.warning_ratio }),
+      // Filtered out devices must not trigger a repaint either.
+      filter_by_devices(
+        collect_maintenance_items(obj, {
+          warning_ratio: options.warning_ratio,
+        }),
+        options.devices,
+      ),
     );
     if (signature !== this._signature) {
       this._signature = signature;
@@ -652,9 +667,12 @@ export class RSMaintenance extends RSDevice {
       this._options_applied = true;
     }
 
-    const all = collect_maintenance_items(this._hass, {
-      warning_ratio: options.warning_ratio,
-    });
+    const all = filter_by_devices(
+      collect_maintenance_items(this._hass, {
+        warning_ratio: options.warning_ratio,
+      }),
+      options.devices,
+    );
     let visible = this._hide_ok ? all.filter((i) => i.status !== "ok") : all;
     if (this._hide_muted) {
       visible = visible.filter((i) => i.notify);
@@ -696,8 +714,100 @@ export class RSMaintenance extends RSDevice {
   }
 
   /**
+   * Tell whether a device is part of the configured filter.
+   * @param ref: the device offered by the selector
+   * @param selection: the configured device filter
+   * @return true when the device is selected
+   */
+  private _is_device_selected(
+    ref: MaintenanceDeviceRef,
+    selection: string[],
+  ): boolean {
+    return selection.some((name) => name === ref.id || name === ref.name);
+  }
+
+  /**
+   * Add/remove a device from the filter and persist the new list.
+   * The readable name is stored rather than the HA device id, so the YAML
+   * configuration stays understandable (the id is used as a fallback for
+   * unnamed devices).
+   * @param ref: the device toggled by the user
+   * @param checked: the new state of the checkbox
+   */
+  private _toggle_device_filter(
+    ref: MaintenanceDeviceRef,
+    checked: boolean,
+  ): void {
+    const selection = this._read_options().devices;
+    const next = selection.filter(
+      (name) => name !== ref.id && name !== ref.name,
+    );
+    if (checked) {
+      next.push(ref.name || ref.id);
+    }
+    this._update_option("devices", next);
+  }
+
+  /**
+   * Editor block letting the user restrict the overview to some devices.
+   * The list is built from the tasks currently exposed by the integration,
+   * one entry per controller (sub-device tasks are counted in their parent).
+   * @param options: the effective view options
+   */
+  private _render_device_filter(
+    options: MaintenanceViewOptions,
+  ): TemplateResult {
+    // Collect without the filter, otherwise unticking the last device would
+    // empty the selector itself.
+    const devices = list_maintenance_devices(
+      collect_maintenance_items(this._hass, {
+        warning_ratio: options.warning_ratio,
+      }),
+    );
+
+    if (devices.length === 0) {
+      return html`<div class="maint-empty">
+        ${i18n._("maintenance_no_task")}
+      </div>`;
+    }
+
+    return html`
+      <div class="maint-devices">
+        ${devices.map(
+          (ref) => html`
+            <label class="maint-device-option">
+              <input
+                type="checkbox"
+                .checked="${this._is_device_selected(ref, options.devices)}"
+                @change="${(e: Event) =>
+                  this._toggle_device_filter(
+                    ref,
+                    (e.currentTarget as HTMLInputElement).checked,
+                  )}"
+              />
+              <span class="maint-device-name">${ref.name}</span>
+              <span class="maint-device-count">${ref.count}</span>
+            </label>
+          `,
+        )}
+      </div>
+      <div class="maint-devices-hint">
+        ${options.devices.length === 0
+          ? i18n._("maintenance_filter_devices_hint")
+          : html`<button
+              class="maint-devices-clear"
+              @click="${() => this._update_option("devices", [])}"
+            >
+              ${i18n._("maintenance_filter_devices_all")}
+            </button>`}
+      </div>
+    `;
+  }
+
+  /**
    * Editor view: lets the user pick the default state of the
-   * "hide up to date tasks" and "hide muted tasks" filters.
+   * "hide up to date tasks" and "hide muted tasks" filters, and restrict
+   * the overview to a subset of the devices.
    */
   override renderEditor(): TemplateResult {
     const options = this._read_options();
@@ -741,6 +851,14 @@ export class RSMaintenance extends RSDevice {
                 <span class="slider round"></span>
               </label>
               <label>${i18n._("maintenance_hide_muted_default")}</label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label class="maint-devices-title">
+                ${i18n._("maintenance_filter_devices")}
+              </label>
+              ${this._render_device_filter(options)}
             </td>
           </tr>
         </table>

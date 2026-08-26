@@ -894,6 +894,27 @@ proviennent de l'entité elle-même, la carte ne peut donc jamais écrire une
 valeur hors plage. Un seul éditeur reste ouvert à la fois. Mettez
 `show_interval: false` pour masquer les boutons.
 
+### Filtrer par appareil
+
+Par défaut, la vue liste les tâches de tous les appareils. Le bloc **Filtrer par
+appareil** de l'éditeur de carte permet de la restreindre : cochez un ou
+plusieurs appareils et seules leurs tâches sont conservées, compteurs compris.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+La liste contient une entrée par contrôleur, avec le nombre de tâches qui lui
+sont rattachées. Les sous-appareils (têtes ReefDose, pompes ReefRun) sont
+regroupés sous leur contrôleur grâce au lien `via_device` du registre Home
+Assistant : cocher **RSDose4** conserve donc les tâches des quatre têtes. Aucune
+case cochée signifie « pas de filtre » : tous les appareils sont affichés, ce que
+rétablit aussi le raccourci **Afficher tous les appareils**.
+
+La sélection est enregistrée sous forme de noms d'appareils (voir `devices`
+ci-dessous), pour garder un YAML lisible. Un nom saisi à la main correspond aussi
+à ses sous-appareils par préfixe, ce qui couvre les installations où
+`via_device` n'est pas déclaré. Les appareils sans nom sont identifiés par leur
+identifiant Home Assistant.
+
 ### Pompes ReefRun
 
 Les sous-appareils ReefRun s'appellent « … pump 1 » / « … pump 2 », ce qui ne
@@ -916,7 +937,8 @@ nom tel quel.
 
 ## Éditeur
 
-L'état par défaut des filtres et la visibilité des trois boutons se règlent depuis l'éditeur de carte.
+L'état par défaut des filtres, le filtre par appareil et la visibilité des trois
+boutons se règlent depuis l'éditeur de carte.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -927,6 +949,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (défaut) ou "due"
+  devices: # n'afficher que les tâches de ces appareils (vide : tous)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # masquer les tâches ni dépassées ni proches
   hide_muted: false # masquer les tâches dont les notifications sont coupées
   warning_ratio: 0.2 # part de l'intervalle affichée en orange
@@ -937,7 +962,9 @@ maintenance:
 
 Toutes les clés de `maintenance` sont optionnelles. `sort` et `hide_ok` ne
 définissent que l'état initial : l'utilisateur peut toujours les modifier
-depuis la vue elle-même.
+depuis la vue elle-même. `devices` accepte aussi bien des noms d'appareils que
+des identifiants Home Assistant ; une liste vide (le défaut) désactive le
+filtre.
 
 # FAQ
 

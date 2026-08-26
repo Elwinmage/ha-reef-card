@@ -8,6 +8,9 @@
  *   device: __maintenance__
  *   maintenance:
  *     sort: due          # "device" (default) or "due"
+ *     devices:           # only show tasks of these devices (empty: all)
+ *       - SIMU-RSDOSE4
+ *       - SIMU-RSATO
  *     hide_ok: false     # hide tasks that are neither overdue nor due soon
  *     hide_muted: false  # hide tasks whose notifications are turned off
  *     warning_ratio: 0.2 # last 20% of the interval switches to orange
@@ -20,6 +23,11 @@ import type { MaintenanceSort } from "../../../types/index";
 
 export interface MaintenanceViewOptions {
   sort: MaintenanceSort;
+  /**
+   * Device filter: names (or ids) of the devices whose tasks are displayed.
+   * An empty list means "no filter", i.e. every device is shown.
+   */
+  devices: string[];
   hide_ok: boolean;
   hide_muted: boolean;
   warning_ratio: number;
@@ -38,6 +46,8 @@ export const config = {
 
 export const default_options: MaintenanceViewOptions = {
   sort: "device",
+  // No device filter: the overview shows every maintenance task.
+  devices: [],
   hide_ok: false,
   // Muted tasks stay visible by default: silencing an alert should not
   // make the deadline disappear from the overview.

@@ -889,6 +889,26 @@ przelicza z powrotem na dni przed zapisem. Granice pochodzą z samej encji, wię
 karta nigdy nie zapisze wartości spoza zakresu. Naraz otwarty pozostaje tylko
 jeden edytor. Ustaw `show_interval: false`, aby ukryć przyciski.
 
+### Filtrowanie według urządzenia
+
+Domyślnie widok wyświetla zadania wszystkich urządzeń. Blok **Filtruj według
+urządzenia** w edytorze karty go zawęża: zaznacz jedno lub kilka urządzeń, a
+pozostaną tylko ich zadania, wraz z licznikami.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+Lista zawiera jedną pozycję na sterownik, wraz z liczbą przypisanych do niego
+zadań. Podurządzenia (głowice ReefDose, pompy ReefRun) są grupowane pod swoim
+sterownikiem dzięki powiązaniu `via_device` z rejestru Home Assistant:
+zaznaczenie **RSDose4** zachowuje więc zadania wszystkich czterech głowic. Brak
+zaznaczeń oznacza „brak filtra": wyświetlane są wszystkie urządzenia, co
+przywraca też skrót **Pokaż wszystkie urządzenia**.
+
+Wybór jest zapisywany jako nazwy urządzeń (patrz `devices` poniżej), aby YAML
+pozostał czytelny. Nazwa wpisana ręcznie pasuje również do jej podurządzeń przez
+przedrostek, co obejmuje instalacje bez zadeklarowanego `via_device`. Urządzenia
+bez nazwy są identyfikowane przez swój identyfikator urządzenia Home Assistant.
+
 ### Pompy ReefRun
 
 Podurządzenia ReefRun noszą nazwy „… pompa 1” / „… pompa 2”, co nic nie mówi o
@@ -910,7 +930,8 @@ zwykłą nazwę.
 
 ## Edytor
 
-Domyślny stan filtrów i widoczność trzech przycisków ustawia się w edytorze karty.
+Domyślny stan filtrów, filtr według urządzenia oraz widoczność trzech przycisków
+ustawia się w edytorze karty.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -921,6 +942,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (domyślnie) lub "due"
+  devices: # pokaż tylko zadania tych urządzeń (pusto: wszystkie)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # ukryj zadania ani po terminie, ani zbliżające się
   hide_muted: false # ukryj zadania z wyłączonymi powiadomieniami
   warning_ratio: 0.2 # część interwału pokazywana na pomarańczowo
@@ -930,7 +954,9 @@ maintenance:
 ```
 
 Wszystkie klucze `maintenance` są opcjonalne. `sort` i `hide_ok` ustalają tylko
-stan początkowy: użytkownik może je zmienić z poziomu samego widoku.
+stan początkowy: użytkownik może je zmienić z poziomu samego widoku. `devices`
+przyjmuje zarówno nazwy urządzeń, jak i identyfikatory urządzeń Home Assistant;
+pusta lista (wartość domyślna) wyłącza filtr.
 
 # FAQ
 

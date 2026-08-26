@@ -887,6 +887,26 @@ and the integration converts back to days before storing. Bounds come from the
 entity itself, so the card can never write an out-of-range value. Only one
 editor stays open at a time. Set `show_interval: false` to hide the buttons.
 
+### Filtering by device
+
+By default the view lists the tasks of every device. The **Filter by device**
+block of the card editor restricts it to a subset: tick one or more devices and
+only their tasks are kept, counters included.
+
+<img src="doc/img/maintenance/editor_devices.png"/>
+
+The list holds one entry per controller, with the number of tasks it owns.
+Sub-devices (ReefDose heads, ReefRun pumps) are folded into their controller
+through the `via_device` link of the Home Assistant registry, so ticking
+**RSDose4** keeps the tasks of all four heads. Nothing ticked means "no filter":
+every device is shown, which is also what the **Show every device** shortcut
+restores.
+
+The selection is stored as device names (see `devices` below), so the YAML stays
+readable. A name written by hand also matches its sub-devices by prefix, which
+covers the setups where `via_device` is not declared. Devices without a name fall
+back to their Home Assistant device id.
+
 ### ReefRun pumps
 
 ReefRun sub-devices are named "… pump 1" / "… pump 2", which says nothing about
@@ -909,7 +929,8 @@ name.
 
 ## Editor
 
-The default state of the filters and the visibility of the three buttons are set from the card editor.
+The default state of the filters, the device filter and the visibility of the
+three buttons are set from the card editor.
 
 <img src="doc/img/maintenance/editor.png"/>
 
@@ -920,6 +941,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (default) or "due"
+  devices: # only show the tasks of these devices (empty: all of them)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # hide tasks that are neither overdue nor due soon
   hide_muted: false # hide tasks whose notifications are turned off
   warning_ratio: 0.2 # share of the interval displayed in orange
@@ -929,7 +953,9 @@ maintenance:
 ```
 
 All `maintenance` keys are optional. `sort` and `hide_ok` only set the initial
-state: the user can still change them from the view itself.
+state: the user can still change them from the view itself. `devices` accepts
+device names as well as Home Assistant device ids; an empty list (the default)
+disables the filter.
 
 # FAQ
 

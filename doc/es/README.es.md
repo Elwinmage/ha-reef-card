@@ -892,6 +892,28 @@ de guardar. Los límites vienen de la propia entidad, así que la tarjeta nunca
 puede escribir un valor fuera de rango. Solo permanece abierto un editor a la
 vez. Usa `show_interval: false` para ocultar los botones.
 
+### Filtrar por dispositivo
+
+Por defecto la vista lista las tareas de todos los dispositivos. El bloque
+**Filtrar por dispositivo** del editor de la tarjeta la restringe: marca uno o
+varios dispositivos y solo se conservan sus tareas, contadores incluidos.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+La lista contiene una entrada por controlador, con el número de tareas que le
+corresponden. Los subdispositivos (cabezales ReefDose, bombas ReefRun) se
+agrupan bajo su controlador gracias al enlace `via_device` del registro de Home
+Assistant: marcar **RSDose4** conserva por tanto las tareas de los cuatro
+cabezales. Ninguna casilla marcada significa «sin filtro»: se muestran todos los
+dispositivos, que es también lo que restaura el atajo **Mostrar todos los
+dispositivos**.
+
+La selección se guarda como nombres de dispositivo (ver `devices` más abajo),
+para que el YAML siga siendo legible. Un nombre escrito a mano también coincide
+con sus subdispositivos por prefijo, lo que cubre las instalaciones donde
+`via_device` no está declarado. Los dispositivos sin nombre se identifican por
+su id de dispositivo de Home Assistant.
+
 ### Bombas ReefRun
 
 Los subdispositivos ReefRun se llaman «… bomba 1» / «… bomba 2», lo que no dice
@@ -913,7 +935,8 @@ es críptico. Los dispositivos que no son bombas conservan un nombre simple.
 
 ## Editor
 
-El estado por defecto de los filtros y la visibilidad de los tres botones se ajustan desde el editor de la tarjeta.
+El estado por defecto de los filtros, el filtro por dispositivo y la visibilidad
+de los tres botones se ajustan desde el editor de la tarjeta.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -924,6 +947,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (por defecto) o "due"
+  devices: # mostrar solo las tareas de estos dispositivos (vacío: todos)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # ocultar las tareas ni vencidas ni próximas a vencer
   hide_muted: false # ocultar las tareas con las notificaciones apagadas
   warning_ratio: 0.2 # parte del intervalo mostrada en naranja
@@ -933,7 +959,9 @@ maintenance:
 ```
 
 Todas las claves de `maintenance` son opcionales. `sort` y `hide_ok` solo fijan
-el estado inicial: el usuario puede cambiarlos desde la propia vista.
+el estado inicial: el usuario puede cambiarlos desde la propia vista. `devices`
+acepta tanto nombres de dispositivo como ids de dispositivo de Home Assistant;
+una lista vacía (el valor por defecto) desactiva el filtro.
 
 # FAQ
 

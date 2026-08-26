@@ -23,6 +23,7 @@ import type {
   HassConfig,
   MaintenanceItem,
   MaintenanceGroup,
+  MaintenanceDeviceRef,
   MaintenanceSort,
   MaintenanceStatus,
   MaintenanceCollectOptions,
@@ -335,6 +336,41 @@ function index_interval_numbers(hass: HassConfig): Record<string, IntervalRef> {
 }
 
 /**
+ * Walk up the `via_device` chain of a device to find its root.
+ *
+ * ha-reefbeat-component registers sub-devices (RSDose heads, RSRun pumps)
+ * attached to their controller through `via_device`. The maintenance filter
+ * works on the root device so that ticking "RSDose4" keeps the tasks of all
+ * its heads.
+ * @param devices: the hass.devices registry
+ * @param device_id: the id of the device owning the task
+ * @param fallback_name: name used when the registry entry is missing
+ * @return the id and name of the root device
+ */
+export function resolve_root_device(
+  devices: Record<string, any>,
+  device_id: string,
+  fallback_name: string,
+): { id: string; name: string } {
+  let id = device_id;
+  const seen = new Set<string>();
+
+  // `seen` guards against a corrupted registry declaring a device cycle.
+  while (id && devices[id] && !seen.has(id)) {
+    seen.add(id);
+    const via = devices[id].via_device_id;
+    if (typeof via !== "string" || via === "" || !devices[via]) {
+      break;
+    }
+    id = via;
+  }
+
+  const device = id ? devices[id] : undefined;
+  const name = device?.name_by_user || device?.name || "";
+  return { id: id || "", name: name || fallback_name };
+}
+
+/**
  * Scan hass.states and build the list of maintenance items.
  * Entities belonging to a device disabled in Home Assistant are skipped.
  * @param hass: the hass states object
@@ -377,6 +413,8 @@ export function collect_maintenance_items(
     const device_name: string =
       device?.name_by_user || device?.name || attrs.device_name || "";
 
+    const root = resolve_root_device(devices, device_id, device_name);
+
     const interval_days = Math.max(0, to_number(attrs.interval_days, 0));
     const days_left = to_number_or_null(attrs.days_left);
     const overdue = days_left !== null && days_left < 0;
@@ -411,6 +449,8 @@ export function collect_maintenance_items(
       icon: typeof attrs.icon === "string" ? attrs.icon : null,
       device_id,
       device_name,
+      root_device_id: root.id,
+      root_device_name: root.name,
       model: device?.model || "",
       interval_days,
       days_left,
@@ -504,6 +544,75 @@ export function group_by_device(items: MaintenanceItem[]): MaintenanceGroup[] {
   }
 
   return groups;
+}
+
+/**
+ * List the devices owning at least one maintenance task, one entry per root
+ * device (sub-devices are folded into their controller). Used by the editor
+ * to build the "filter by device" selector.
+ * @param items: the collected maintenance items
+ * @return the devices, sorted by name
+ */
+export function list_maintenance_devices(
+  items: MaintenanceItem[],
+): MaintenanceDeviceRef[] {
+  const index: Record<string, MaintenanceDeviceRef> = {};
+  const list: MaintenanceDeviceRef[] = [];
+
+  for (const item of items) {
+    const key = item.root_device_id || item.root_device_name;
+    let ref = index[key];
+    if (!ref) {
+      ref = {
+        id: item.root_device_id,
+        name: item.root_device_name,
+        count: 0,
+      };
+      index[key] = ref;
+      list.push(ref);
+    }
+    ref.count += 1;
+  }
+
+  list.sort((a, b) => a.name.localeCompare(b.name));
+  return list;
+}
+
+/**
+ * Keep only the tasks belonging to the selected devices.
+ *
+ * A selection entry matches a device id or a device name, at the root level
+ * (the controller) as well as at the sub-device level. A root name also
+ * matches its sub-devices by prefix, so a hand written "RSDose4" keeps
+ * "RSDose4 Head 1" even on setups where `via_device` is not declared.
+ * @param items: the collected maintenance items
+ * @param selection: the configured device filter, empty means "all devices"
+ * @return the filtered list, or the untouched one when no filter is set
+ */
+export function filter_by_devices(
+  items: MaintenanceItem[],
+  selection: string[] | null | undefined,
+): MaintenanceItem[] {
+  if (!Array.isArray(selection)) {
+    return items;
+  }
+
+  const wanted = selection.filter(
+    (name): name is string => typeof name === "string" && name.length > 0,
+  );
+  if (wanted.length === 0) {
+    return items;
+  }
+
+  const exact = new Set(wanted);
+  return items.filter(
+    (item) =>
+      exact.has(item.root_device_id) ||
+      exact.has(item.root_device_name) ||
+      exact.has(item.device_id) ||
+      exact.has(item.device_name) ||
+      wanted.some((name) => item.device_name.startsWith(name + " ")),
+  );
 }
 
 /**

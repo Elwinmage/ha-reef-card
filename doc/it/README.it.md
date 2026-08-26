@@ -893,6 +893,29 @@ I limiti provengono dall'entità stessa, quindi la card non può mai scrivere un
 valore fuori intervallo. Resta aperto un solo editor per volta. Usa
 `show_interval: false` per nascondere i pulsanti.
 
+### Filtra per dispositivo
+
+Per impostazione predefinita la vista elenca le attività di tutti i dispositivi.
+Il blocco **Filtra per dispositivo** dell'editor della card la restringe: spunta
+uno o più dispositivi e vengono mantenute solo le loro attività, contatori
+compresi.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+L'elenco contiene una voce per ogni controller, con il numero di attività che gli
+appartengono. I sottodispositivi (teste ReefDose, pompe ReefRun) vengono
+raggruppati sotto il loro controller grazie al collegamento `via_device` del
+registro di Home Assistant: spuntare **RSDose4** conserva quindi le attività di
+tutte e quattro le teste. Nessuna casella spuntata significa «nessun filtro»:
+vengono mostrati tutti i dispositivi, che è anche ciò che ripristina la
+scorciatoia **Mostra tutti i dispositivi**.
+
+La selezione è salvata come nomi di dispositivo (vedi `devices` più sotto), così
+lo YAML resta leggibile. Un nome scritto a mano corrisponde anche ai suoi
+sottodispositivi per prefisso, il che copre le installazioni in cui `via_device`
+non è dichiarato. I dispositivi senza nome sono identificati dal loro id di
+dispositivo di Home Assistant.
+
 ### Pompe ReefRun
 
 I sottodispositivi ReefRun si chiamano «… pompa 1» / «… pompa 2», il che non
@@ -915,7 +938,8 @@ mantengono un nome semplice.
 
 ## Editor
 
-Lo stato predefinito dei filtri e la visibilità dei tre pulsanti si impostano dall'editor della card.
+Lo stato predefinito dei filtri, il filtro per dispositivo e la visibilità dei
+tre pulsanti si impostano dall'editor della card.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -926,6 +950,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (predefinito) o "due"
+  devices: # mostra solo le attività di questi dispositivi (vuoto: tutti)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # nascondi le attività né scadute né in scadenza
   hide_muted: false # nascondi le attività con le notifiche spente
   warning_ratio: 0.2 # quota dell'intervallo mostrata in arancione
@@ -935,7 +962,9 @@ maintenance:
 ```
 
 Tutte le chiavi di `maintenance` sono opzionali. `sort` e `hide_ok` impostano
-solo lo stato iniziale: l'utente può cambiarli dalla vista stessa.
+solo lo stato iniziale: l'utente può cambiarli dalla vista stessa. `devices`
+accetta sia nomi di dispositivo sia id di dispositivo di Home Assistant; una
+lista vuota (il valore predefinito) disattiva il filtro.
 
 # FAQ
 
