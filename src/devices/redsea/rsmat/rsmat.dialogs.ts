@@ -10,6 +10,10 @@ export const dialogs_rsmat = {
           type: "entities",
           entities: [
             { entity: "fetch_config", name: { type: "entity" } },
+            // Companion to the above: fetch_config only refreshes the sources
+            // typed "config", fetch_data forces an early read of the polled
+            // ones instead of waiting for the scan interval.
+            { entity: "fetch_data", name: { type: "entity" } },
             { entity: "reset", name: { type: "entity" } },
             { entity: "model", name: { type: "entity" } },
             { entity: "position", name: { type: "entity" } },

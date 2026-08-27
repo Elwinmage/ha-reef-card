@@ -792,3 +792,33 @@ describe("RSAto usage dialog", () => {
     expect(entities).toContain("days_till_empty");
   });
 });
+
+//----------------------------------------------------------------------------//
+//   Config dialogs
+//----------------------------------------------------------------------------//
+
+import { dialogs_rsdose } from "../src/devices/redsea/rsdose/rsdose.dialogs";
+import { dialogs_rsmat } from "../src/devices/redsea/rsmat/rsmat.dialogs";
+import { dialogs_rsrun } from "../src/devices/redsea/rsrun/rsrun.dialogs";
+
+describe("config dialogs", () => {
+  const all: Record<string, any> = {
+    rsato: dialogs_rsato,
+    rsdose: dialogs_rsdose,
+    rsmat: dialogs_rsmat,
+    rsrun: dialogs_rsrun,
+  };
+
+  it("offers fetch_data right after fetch_config on every device", () => {
+    // The two buttons cover the two halves of the source list, so they only
+    // make sense read together.
+    for (const [device, dialogs] of Object.entries(all)) {
+      const entities = dialogs.config.content[0].conf.entities
+        .filter((e: any) => e.type !== "divider")
+        .map((e: any) => e.entity);
+      const at = entities.indexOf("fetch_config");
+      expect(at, device).toBeGreaterThanOrEqual(0);
+      expect(entities[at + 1], device).toBe("fetch_data");
+    }
+  });
+});
