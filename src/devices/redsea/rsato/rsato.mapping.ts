@@ -406,13 +406,25 @@ export const config = {
       ],
       disabled_if: "!device.has_pump()",
       no_br_if_disabled: true,
+      // The chart already shows two of the six consumption figures; tapping
+      // it opens the other four rather than crowding the picture with them.
+      //
+      // pointer-events stays enabled here, unlike the overlays above: the
+      // only element underneath is the sump water-level, which carries no
+      // tap_action of its own, so nothing is swallowed.
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "usage",
+        },
+      },
       css: {
         position: "absolute",
         top: "61%",
         left: "61%",
         width: "39%",
         height: "30%",
-        "pointer-events": "none",
       },
     },
     // Puddle on the floor when the leak probe is wet.
@@ -484,6 +496,122 @@ export const config = {
         "pointer-events": "none",
       },
     },
+    // One cog per accessory socket on the controller, in the same column
+    // grid as the header icons above (75/81/87%). Each opens the sensors
+    // attached to that accessory, which the picture can only hint at.
+    //
+    // Left to right: pump, leak probe, water-level probe — the order of the
+    // three sockets on the front panel.
+    //
+    // Bound to a plain name rather than an entity: the icon is fixed, so no
+    // stateObj is needed, exactly like the `configuration` cog above.
+    pump_settings: {
+      name: "pump_settings",
+      type: "click-image",
+      // Nothing to show about a pump that is not paired.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
+      icon: "mdi:cog",
+      icon_color: COLOR_ERROR_HEX,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "pump",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "16%",
+        left: "75%",
+      },
+    },
+    leak_settings: {
+      name: "leak_settings",
+      type: "click-image",
+      // The probe is optional: no socket used, no cog.
+      disabled_if: "!device.has_leak_sensor()",
+      no_br_if_disabled: true,
+      icon: "mdi:cog",
+      icon_color: COLOR_ERROR_HEX,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "leak",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "16%",
+        left: "81%",
+      },
+    },
+    ato_sensor_settings: {
+      name: "ato_sensor_settings",
+      type: "click-image",
+      disabled_if: "!device.has_ato_sensor()",
+      no_br_if_disabled: true,
+      icon: "mdi:cog",
+      icon_color: COLOR_ERROR_HEX,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "ato_sensor",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "16%",
+        left: "87%",
+      },
+    },
+    // Leak-alarm buzzer, placed between the RO reservoir and the sump, next
+    // to the leak probe it belongs to rather than up with the header icons.
+    //
+    // Tap opens the buzzer dialog, hold toggles it: the switch is a safety
+    // setting, so turning it off is deliberately the gesture you cannot make
+    // by mistake while reaching for the details.
+    buzzer: {
+      // Domain-prefixed on purpose: integration versions before the switch
+      // exposed a read-only binary_sensor of the same name, and a bare key
+      // resolves to whichever the registry walk stored last.
+      name: "switch.buzzer_enabled",
+      type: "click-image",
+      // Hidden rather than broken on an integration that predates the switch.
+      disabled_if: "!device.has_buzzer()",
+      no_br_if_disabled: true,
+      // `state` follows the entity icon, which the integration flips between
+      // mdi:bell-ring and mdi:bell-off, and greys it out when off. There is
+      // no off variant of mdi:alarm-bell, hence the bell-ring/bell-off pair.
+      icon: "state",
+      icon_color: COLOR_ERROR_HEX,
+      master: true,
+      // Enabled but unable to fire: no probe plugged in, or probe disarmed.
+      class: "${device.buzzer_armed() ? '' : 'muted'}",
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "buzzer",
+        },
+      },
+      hold_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "77%",
+        left: "32%",
+      },
+    },
     current_read: {
       name: "current_read",
       type: "common-sensor",
@@ -510,8 +638,11 @@ export const config = {
       css: {
         position: "absolute",
         top: "80%",
-        left: "4%",
-        width: "40%",
+        left: "3%",
+        // Kept narrow: the label sits over the RO reservoir and a wider box
+        // spills past it. 15% is the ceiling that still fits the longest
+        // translations of the "days" unit.
+        width: "15%",
       },
       tap_action: {
         domain: "redsea_ui",

@@ -413,3 +413,382 @@ describe("RSAto._render", () => {
     expect(device._render(null, "")).toBeDefined();
   });
 });
+
+//----------------------------------------------------------------------------//
+//   Leak buzzer
+//----------------------------------------------------------------------------//
+
+import { dialogs_rsato } from "../src/devices/redsea/rsato/rsato.dialogs";
+
+describe("RSAto buzzer presence", () => {
+  it("hides the buzzer when the integration does not expose the switch", () => {
+    // The writable switch only exists from the version that added it; the
+    // read-only binary_sensor of the same name is not a substitute.
+    expect(makeAto().has_buzzer()).toBe(false);
+    expect(makeAto({ buzzer_enabled: "on" }).has_buzzer()).toBe(false);
+  });
+
+  it("shows the buzzer once the switch is there", () => {
+    expect(makeAto({ "switch.buzzer_enabled": "off" }).has_buzzer()).toBe(true);
+  });
+});
+
+describe("RSAto buzzer arming", () => {
+  it("is armed when it is on and the probe can trigger it", () => {
+    const device = makeAto({
+      "switch.buzzer_enabled": "on",
+      connected: "on",
+      enabled: "on",
+    });
+    expect(device.buzzer_armed()).toBe(true);
+  });
+
+  it("is not armed while switched off", () => {
+    const device = makeAto({
+      "switch.buzzer_enabled": "off",
+      connected: "on",
+      enabled: "on",
+    });
+    expect(device.buzzer_armed()).toBe(false);
+  });
+
+  it("is not armed without a probe to trigger it", () => {
+    // Enabled but deaf: the buzzer is the leak alarm, so with no probe
+    // plugged in nothing can ever make it sound.
+    const device = makeAto({
+      "switch.buzzer_enabled": "on",
+      connected: "off",
+      enabled: "on",
+    });
+    expect(device.buzzer_armed()).toBe(false);
+  });
+
+  it("is not armed while the probe is disarmed", () => {
+    const device = makeAto({
+      "switch.buzzer_enabled": "on",
+      connected: "on",
+      enabled: "off",
+    });
+    expect(device.buzzer_armed()).toBe(false);
+  });
+
+  it("is not armed when the switch is missing altogether", () => {
+    expect(makeAto({ connected: "on", enabled: "on" }).buzzer_armed()).toBe(
+      false,
+    );
+  });
+});
+
+describe("RSAto buzzer re-render", () => {
+  it("re-renders when the probe stops backing the buzzer", () => {
+    // The dimming depends on the leak probe, not on the buzzer entity, so
+    // the element cannot refresh itself: the device has to watch it.
+    const device = makeAto({
+      "switch.buzzer_enabled": "on",
+      connected: "on",
+      enabled: "on",
+    });
+    device._setting_hass(device._hass);
+    device.requestUpdate = vi.fn();
+    device._elements = {};
+
+    device._hass.states["sensor.connected"].state = "off";
+    device._setting_hass(device._hass);
+    expect(device.requestUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-render while the buzzer state is unchanged", () => {
+    const device = makeAto({
+      "switch.buzzer_enabled": "on",
+      connected: "on",
+      enabled: "on",
+    });
+    device._setting_hass(device._hass);
+    device.requestUpdate = vi.fn();
+    device._elements = {};
+
+    device._setting_hass(device._hass);
+    device._setting_hass(device._hass);
+    expect(device.requestUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe("RSAto buzzer element", () => {
+  const buzzer: any = (config.elements as any).buzzer;
+
+  it("targets the writable switch, not the read-only sensor", () => {
+    // Both entities are called `buzzer_enabled`: a bare key resolves to
+    // whichever the registry walk happened to store last.
+    expect(buzzer.name).toBe("switch.buzzer_enabled");
+  });
+
+  it("disappears instead of rendering an entity-less icon", () => {
+    expect(buzzer.disabled_if).toBe("!device.has_buzzer()");
+    expect(buzzer.no_br_if_disabled).toBe(true);
+  });
+
+  it("follows the entity icon so bell-ring/bell-off track the state", () => {
+    expect(buzzer.icon).toBe("state");
+  });
+
+  it("dims when nothing can trigger it", () => {
+    expect(buzzer.class).toContain("device.buzzer_armed()");
+    expect(buzzer.class).toContain("muted");
+  });
+
+  it("opens the dialog on tap and toggles on hold", () => {
+    expect(buzzer.tap_action).toEqual({
+      domain: "redsea_ui",
+      action: "dialog",
+      data: { type: "buzzer" },
+    });
+    expect(buzzer.hold_action).toEqual({
+      domain: "switch",
+      action: "toggle",
+      data: "default",
+    });
+  });
+
+  it("sits between the reservoir and the sump", () => {
+    expect(buzzer.css.position).toBe("absolute");
+    expect(buzzer.css.top).toBe("77%");
+    expect(buzzer.css.left).toBe("32%");
+  });
+});
+
+describe("RSAto buzzer dialog", () => {
+  const dialog: any = (dialogs_rsato as any).buzzer;
+
+  it("is registered under the type the element opens", () => {
+    expect(dialog.name).toBe("buzzer");
+    expect(dialog.close_cross).toBe(true);
+  });
+
+  it("shows the setting and the live state, nothing else", () => {
+    const entities = dialog.content[0].conf.entities
+      .filter((e: any) => e.type !== "divider")
+      .map((e: any) => e.entity);
+
+    // The switch is the single entity for the setting: the integration no
+    // longer duplicates it as a read-only binary_sensor.
+    expect(entities).toContain("switch.buzzer_enabled");
+    expect(entities).not.toContain("binary_sensor.buzzer_enabled");
+    expect(entities).toContain("buzzer_on");
+    // Only the two flags that explain a silent buzzer are repeated from the
+    // leak dialog; the probe itself belongs there.
+    expect(entities).toContain("connected");
+    expect(entities).toContain("enabled");
+    expect(entities).not.toContain("leak_sensor_current_read");
+    // Device-wide config re-read belongs to the config dialog, not here.
+    expect(entities).not.toContain("fetch_config");
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   Accessory settings cogs
+//----------------------------------------------------------------------------//
+
+describe("RSAto level-probe presence", () => {
+  it("assumes the probe is there until told otherwise", () => {
+    // The probe is what the whole device is built around: an entity that has
+    // not reported yet must not hide its settings.
+    expect(makeAto().has_ato_sensor()).toBe(true);
+    expect(makeAto({ ato_sensor_connected: "unknown" }).has_ato_sensor()).toBe(
+      true,
+    );
+    expect(makeAto({ ato_sensor_connected: "on" }).has_ato_sensor()).toBe(true);
+  });
+
+  it("hides it on an explicit disconnection", () => {
+    expect(makeAto({ ato_sensor_connected: "off" }).has_ato_sensor()).toBe(
+      false,
+    );
+  });
+});
+
+describe("RSAto accessory cogs", () => {
+  const elements: any = config.elements;
+
+  it("puts one cog per socket, in the header column grid", () => {
+    // Left to right, matching the three sockets on the front panel.
+    expect(elements.pump_settings.css.left).toBe("75%");
+    expect(elements.leak_settings.css.left).toBe("81%");
+    expect(elements.ato_sensor_settings.css.left).toBe("87%");
+    for (const key of [
+      "pump_settings",
+      "leak_settings",
+      "ato_sensor_settings",
+    ]) {
+      expect(elements[key].css.top).toBe("16%");
+      expect(elements[key].css.position).toBe("absolute");
+      expect(elements[key].icon).toBe("mdi:cog");
+    }
+  });
+
+  it("hides each cog when its accessory is absent", () => {
+    expect(elements.pump_settings.disabled_if).toBe("!device.has_pump()");
+    expect(elements.leak_settings.disabled_if).toBe(
+      "!device.has_leak_sensor()",
+    );
+    expect(elements.ato_sensor_settings.disabled_if).toBe(
+      "!device.has_ato_sensor()",
+    );
+    for (const key of [
+      "pump_settings",
+      "leak_settings",
+      "ato_sensor_settings",
+    ]) {
+      expect(elements[key].no_br_if_disabled).toBe(true);
+    }
+  });
+
+  it("opens the matching dialog on tap", () => {
+    const opened: Record<string, string> = {
+      pump_settings: "pump",
+      leak_settings: "leak",
+      ato_sensor_settings: "ato_sensor",
+    };
+    for (const [key, type] of Object.entries(opened)) {
+      expect(elements[key].tap_action).toEqual({
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type },
+      });
+      // A settings cog must not double as a toggle.
+      expect(elements[key].hold_action).toBeUndefined();
+    }
+  });
+});
+
+describe("RSAto accessory dialogs", () => {
+  /** Entity names of a dialog, dividers dropped. */
+  function entities_of(name: string): string[] {
+    return (dialogs_rsato as any)[name].content[0].conf.entities
+      .filter((e: any) => e.type !== "divider")
+      .map((e: any) => e.entity);
+  }
+
+  it("registers one dialog per cog", () => {
+    for (const name of ["pump", "leak", "ato_sensor"]) {
+      expect((dialogs_rsato as any)[name].name).toBe(name);
+      expect((dialogs_rsato as any)[name].close_cross).toBe(true);
+    }
+  });
+
+  it("gathers the pump sensors", () => {
+    const entities = entities_of("pump");
+    for (const key of [
+      "is_pump_on",
+      "pump_state",
+      "prev_pump_state",
+      "pump_speed",
+      "pump_consumption",
+      "flow_rate",
+      "pump_empty_threshold",
+      "pump_soft_blockage_threshold",
+      "pump_blockage_threshold",
+      "last_pump_on_cause",
+      "last_fill_date",
+    ]) {
+      expect(entities).toContain(key);
+    }
+  });
+
+  it("gathers the leak probe sensors and the alarm it drives", () => {
+    const entities = entities_of("leak");
+    for (const key of [
+      "connected",
+      "enabled",
+      "status",
+      "leak_sensor_status",
+      "leak_sensor_current_read",
+      "switch.buzzer_enabled",
+      "buzzer_on",
+    ]) {
+      expect(entities).toContain(key);
+    }
+  });
+
+  it("gathers the level probe sensors, health first", () => {
+    const entities = entities_of("ato_sensor");
+    for (const key of [
+      "ato_sensor_connected",
+      "is_calibrated",
+      "check_sensor",
+      "is_sensor_error",
+      "current_level",
+      "s1_average",
+      "s2_average",
+      "is_temp_enabled",
+      "current_read",
+      "temperature_probe_status",
+      "ato_sensor_code",
+    ]) {
+      expect(entities).toContain(key);
+    }
+  });
+
+  it("disambiguates water_level, which exists in two domains", () => {
+    // A bare `water_level` resolves to either the sensor or the
+    // binary_sensor, depending on the registry walk order.
+    const entities = entities_of("ato_sensor");
+    expect(entities).toContain("sensor.water_level");
+    expect(entities).toContain("binary_sensor.water_level");
+    expect(entities).not.toContain("water_level");
+  });
+
+  it("reports whether the buzzer is sounding, not just enabled", () => {
+    expect(entities_of("buzzer")).toContain("buzzer_on");
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   Consumption
+//----------------------------------------------------------------------------//
+
+describe("RSAto usage chart", () => {
+  const chart: any = (config.elements as any).today_usage_sparkline;
+
+  it("opens the consumption dialog on tap", () => {
+    expect(chart.tap_action).toEqual({
+      domain: "redsea_ui",
+      action: "dialog",
+      data: { type: "usage" },
+    });
+  });
+
+  it("accepts pointer events, unlike the full-canvas overlays", () => {
+    // The overlays disable them so they do not swallow clicks over their
+    // transparent areas; the chart is a real target and the only element
+    // underneath carries no tap_action.
+    expect(chart.css["pointer-events"]).toBeUndefined();
+  });
+});
+
+describe("RSAto usage dialog", () => {
+  const entities: string[] = (
+    dialogs_rsato as any
+  ).usage.content[0].conf.entities
+    .filter((e: any) => e.type !== "divider")
+    .map((e: any) => e.entity);
+
+  it("spells out the six consumption figures", () => {
+    // Fills and volume, each read today, on average and since day one.
+    // The chart plots two of them; the other four exist nowhere else.
+    for (const key of [
+      "today_fills",
+      "today_volume_usage",
+      "daily_fills_average",
+      "daily_volume_average",
+      "total_fills",
+      "total_volume_usage",
+    ]) {
+      expect(entities).toContain(key);
+    }
+  });
+
+  it("closes with what is left to consume", () => {
+    expect(entities).toContain("volume_left");
+    expect(entities).toContain("days_till_empty");
+  });
+});

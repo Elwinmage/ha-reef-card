@@ -151,6 +151,49 @@ export class RSAto extends RSDevice {
   }
 
   /**
+   * Whether the water-level probe is plugged in.
+   *
+   * Defaults to true, like `has_pump()`: the probe is what the whole device
+   * is built around, so only an explicit "off" hides its settings — an
+   * entity that has not reported yet must not.
+   * @return false only when the device reports the probe as disconnected
+   */
+  has_ato_sensor(): boolean {
+    return this.get_entity("ato_sensor_connected")?.state !== "off";
+  }
+
+  /**
+   * Whether the leak-alarm buzzer setting is exposed by the integration.
+   *
+   * Domain-prefixed: integration versions before the switch exposed a
+   * read-only binary_sensor of the same name, and a bare key would resolve to
+   * whichever the registry walk stored last.
+   *
+   * The switch only exists from the integration version that added it, so the
+   * element hides itself rather than rendering an entity-less icon.
+   * @return true when the writable buzzer switch is available
+   */
+  has_buzzer(): boolean {
+    return this.get_entity("switch.buzzer_enabled") !== null;
+  }
+
+  /**
+   * Whether the buzzer would actually sound on a leak.
+   *
+   * Being enabled is not enough: the buzzer is the leak alarm, so with no
+   * probe plugged in, or with the probe disarmed, nothing can ever trigger
+   * it. The icon is dimmed in that case, the same way the leak overlay marks
+   * a probe that is present but switched off.
+   * @return true when the buzzer is on and the leak probe is armed
+   */
+  buzzer_armed(): boolean {
+    return (
+      this.get_entity("switch.buzzer_enabled")?.state === "on" &&
+      this.leak_sensor_armed()
+    );
+  }
+
+  /**
    * Whether the water-level probe needs attention.
    *
    * `check_sensor` is the firmware asking the user to inspect the probe
@@ -165,6 +208,9 @@ export class RSAto extends RSDevice {
   /** Last known level-probe fault, to re-render only when it flips. */
   private _level_alert = false;
 
+  /** Last known buzzer-armed state, same purpose. */
+  private _buzzer_armed = false;
+
   /**
    * Watch the level-probe fault so the background picture follows it.
    *
@@ -172,12 +218,21 @@ export class RSAto extends RSDevice {
    * `master` element changed or a device was enabled — a plain sensor moving
    * leaves the picture with a stale class. Elements carrying a `disabled_if`
    * refresh themselves, the background has no such hook.
+   *
+   * The buzzer icon is watched here for a related reason: its dimming depends
+   * on the leak probe, not on its own entity, and an element's `class`
+   * expression is only re-evaluated when its own stateObj changes.
    */
   override _setting_hass(obj: any): void {
     super._setting_hass(obj);
     const alert = this.level_sensor_alert();
     if (alert !== this._level_alert) {
       this._level_alert = alert;
+      this.requestUpdate();
+    }
+    const armed = this.buzzer_armed();
+    if (armed !== this._buzzer_armed) {
+      this._buzzer_armed = armed;
       this.requestUpdate();
     }
   }
