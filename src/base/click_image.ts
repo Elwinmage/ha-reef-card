@@ -64,9 +64,13 @@ export class ClickImage extends MyElement {
     }
 
     // Mode 2 : Standard image
+    //
+    // `off` mirrors what RSDevice does to its own background picture: its
+    // <style> block cannot cross into this shadow root, so an overlay would
+    // otherwise stay in colour over a greyed-out device.
     return html`
       <img
-        class="click-image"
+        class="click-image ${this.stateOn ? "" : "off"}"
         src="${imageSrc}"
         style="${_style}"
         alt="${this.conf?.name || "clickable image"}"

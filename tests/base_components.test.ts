@@ -1377,3 +1377,38 @@ describe("Sensor resolve_text_color", () => {
     expect(s.resolve_text_color()).toBe("$DEVICE-COLOR$");
   });
 });
+
+describe("ClickImage image greyscale when the device is off", () => {
+  /** Render an image element and return the class list of its <img>. */
+  function img_class(stateOn: boolean): string {
+    const ci = new StubClickImage() as any;
+    ci.conf = { image: "/img/test.png", name: "overlay" };
+    ci.stateOn = stateOn;
+    // The template holds the class as a static/dynamic pair; join them the
+    // way lit does before comparing.
+    const result = ci._render("");
+    const strings = result.strings.join("\u0000");
+    const idx = strings.indexOf('class="click-image ');
+    expect(idx).toBeGreaterThanOrEqual(0);
+    return String(result.values[0]);
+  }
+
+  it("marks the image off so it greys with the background", () => {
+    // RSDevice greys its own background with a <style> block that cannot
+    // reach into this element's shadow root, so the image has to do it.
+    expect(img_class(false)).toBe("off");
+  });
+
+  it("leaves the image untouched while the device is on", () => {
+    expect(img_class(true)).toBe("");
+  });
+
+  it("does not put the marker on an icon", () => {
+    // Icons are already handled upstream, by MyElement swapping the colour.
+    const ci = new StubClickImage() as any;
+    ci.conf = { icon: "mdi:water-pump" };
+    ci.stateOn = false;
+    const result = ci._render("");
+    expect(result.strings.join("")).not.toContain("click-image");
+  });
+});
