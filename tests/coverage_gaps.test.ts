@@ -603,3 +603,162 @@ describe("add_pump rows guards", () => {
     expect(root.querySelector("#add-pump-rows")).not.toBeNull();
   });
 });
+
+describe("FlowImage running gate", () => {
+  /** FlowImage bound to a top-level device, as the RSATO is. */
+  function makeAtoFlow(): any {
+    const flow = make("gap-flowimage");
+    flow.device = {
+      entities: {
+        device_state: { entity_id: "switch.ato" },
+        is_pump_on: { entity_id: "binary_sensor.is_pump_on" },
+      },
+    };
+    flow.conf = { running_if: "is_pump_on" };
+    flow.stateObj = makeState("sensor.pump_speed", "80");
+    flow._hass = {
+      states: {
+        "switch.ato": makeState("switch.ato", "on"),
+        "binary_sensor.is_pump_on": makeState("binary_sensor.is_pump_on", "on"),
+      },
+      entities: {},
+    };
+    return flow;
+  }
+
+  it("runs while the device is on and the pump is pushing", () => {
+    expect(makeAtoFlow()._is_running(makeAtoFlow()._hass)).toBe(true);
+  });
+
+  it("stops on the device's own master switch", () => {
+    // On a sub-device the master lives on the parent; on a top-level device
+    // it sits on the device itself, and only the first case used to be read.
+    const flow = makeAtoFlow();
+    flow._hass.states["switch.ato"] = makeState("switch.ato", "off");
+    expect(flow._is_running(flow._hass)).toBe(false);
+  });
+
+  it("stops when the gate entity is off", () => {
+    // The RSATO reports a configured pump speed at all times, so speed alone
+    // would leave the water pouring between two fills.
+    const flow = makeAtoFlow();
+    flow._hass.states["binary_sensor.is_pump_on"] = makeState(
+      "binary_sensor.is_pump_on",
+      "off",
+    );
+    expect(flow._is_running(flow._hass)).toBe(false);
+  });
+
+  it("stops when the gate entity does not exist", () => {
+    // A mapping naming a key the integration does not expose must fail
+    // closed: showing water that is not flowing is worse than showing none.
+    const flow = makeAtoFlow();
+    flow.conf = { running_if: "no_such_entity" };
+    expect(flow._is_running(flow._hass)).toBe(false);
+  });
+
+  it("ignores the gate when the mapping declares none", () => {
+    const flow = makeAtoFlow();
+    flow.conf = {};
+    flow._hass.states["binary_sensor.is_pump_on"] = makeState(
+      "binary_sensor.is_pump_on",
+      "off",
+    );
+    expect(flow._is_running(flow._hass)).toBe(true);
+  });
+});
+
+describe("FlowImage hide_when_stopped", () => {
+  /** A flow element with a div to inspect, gated on a pump flag. */
+  function makeOutlet(conf: any): { flow: any; div: HTMLDivElement } {
+    const flow = make("gap-flowimage") as any;
+    const div = document.createElement("div");
+    vi.spyOn(flow, "shadowRoot", "get").mockReturnValue({
+      querySelector: () => div,
+    } as any);
+    flow.device = {
+      entities: { is_pump_on: { entity_id: "binary_sensor.pump" } },
+    };
+    flow.conf = conf;
+    flow.stateObj = makeState("sensor.pump_speed", "80");
+    flow._hass = {
+      states: { "binary_sensor.pump": makeState("binary_sensor.pump", "on") },
+      entities: {},
+    };
+    return { flow, div };
+  }
+
+  it("shows the water while the pump pushes", () => {
+    const { flow, div } = makeOutlet({
+      running_if: "is_pump_on",
+      hide_when_stopped: true,
+    });
+    flow._syncAnimation();
+    expect(div.style.opacity).toBe("1");
+    expect(div.style.animationPlayState).toBe("running");
+  });
+
+  it("hides it entirely once the pump stops", () => {
+    // Pausing alone would leave a frozen stream hanging at the outlet.
+    const { flow, div } = makeOutlet({
+      running_if: "is_pump_on",
+      hide_when_stopped: true,
+    });
+    flow._hass.states["binary_sensor.pump"] = makeState(
+      "binary_sensor.pump",
+      "off",
+    );
+    flow._syncAnimation();
+    expect(div.style.opacity).toBe("0");
+    expect(div.style.animationPlayState).toBe("paused");
+  });
+
+  it("leaves a tube full when the mapping does not opt in", () => {
+    // The RSRUN tube keeps its water when its pump stops.
+    const { flow, div } = makeOutlet({ running_if: "is_pump_on" });
+    flow._hass.states["binary_sensor.pump"] = makeState(
+      "binary_sensor.pump",
+      "off",
+    );
+    flow._syncAnimation();
+    expect(div.style.opacity).toBe("");
+    expect(div.style.animationPlayState).toBe("paused");
+  });
+});
+
+describe("FlowImage duration bounds", () => {
+  /** Sync the animation for one speed and return the duration in seconds. */
+  function durationFor(conf: any, speed: string): number {
+    const flow = make("gap-flowimage") as any;
+    const div = document.createElement("div");
+    vi.spyOn(flow, "shadowRoot", "get").mockReturnValue({
+      querySelector: () => div,
+    } as any);
+    flow.device = { entities: {} };
+    flow.conf = conf;
+    flow.stateObj = makeState("sensor.speed", speed);
+    flow._hass = { states: {}, entities: {} };
+    flow._syncAnimation();
+    return parseFloat(div.style.animationDuration);
+  }
+
+  it("keeps the return-pump defaults when the mapping says nothing", () => {
+    expect(durationFor({}, "100")).toBe(0.5);
+    expect(durationFor({}, "40")).toBe(10);
+  });
+
+  it("honours the bounds a mapping declares", () => {
+    // A trickle out of an outlet reads better far slower than water pushed
+    // up a tube.
+    expect(durationFor({ min_duration: 2, max_duration: 6 }, "100")).toBe(2);
+    expect(durationFor({ min_duration: 2, max_duration: 6 }, "40")).toBe(6);
+  });
+
+  it("interpolates between them", () => {
+    expect(durationFor({ min_duration: 2, max_duration: 6 }, "70")).toBe(4);
+  });
+
+  it("uses the slow bound when the pump is stopped", () => {
+    expect(durationFor({ min_duration: 2, max_duration: 6 }, "0")).toBe(6);
+  });
+});

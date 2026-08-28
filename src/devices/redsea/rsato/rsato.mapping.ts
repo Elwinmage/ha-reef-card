@@ -79,6 +79,56 @@ export const config = {
         width: "100%",
       },
     },
+    // Water leaving the outlet during a fill.
+    //
+    // Declared right after the two full-canvas overlays: it must paint over
+    // them, and under the controls that follow.
+    //
+    // Position: the nozzle clipped to the tank rim, down to the sump surface.
+    // Measured off the background picture; nudge the four values if the
+    // stream misses the outlet.
+    pump_flow: {
+      // The speed drives the animation rate. On the RSATO it is a setting,
+      // not a measurement -- it never falls to zero -- so `running_if` adds
+      // the flag that says water is actually moving.
+      name: "pump_speed",
+      running_if: "is_pump_on",
+      // No fill in progress means no water at the outlet, not water standing
+      // still: without this the stream would sit there frozen between fills.
+      hide_when_stopped: true,
+      type: "flow-image",
+      image: new URL(
+        "../../../img/redsea/RSRUN/water_seamless.png",
+        import.meta.url,
+      ),
+      // Nothing to pour without a pump.
+      disabled_if: "!device.has_pump()",
+      no_br_if_disabled: true,
+      // Slower than the defaults, which are tuned for a return pump pushing
+      // hard through a tube. This is a trickle into a sump.
+      min_duration: 2,
+      max_duration: 6,
+      elt_css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "41%",
+        left: "52.5%",
+        width: "4%",
+        height: "30%",
+        // The shared texture is nearly grey, which reads as a shadow rather
+        // than as water. `saturate` alone cannot colour it -- it multiplies a
+        // saturation that is close to zero -- so `sepia` puts a hue on it
+        // first, then `hue-rotate` swings that hue round to blue.
+        //
+        // To tune: hue-rotate picks the shade, saturate its intensity.
+        filter: "sepia(1) saturate(4) hue-rotate(175deg) brightness(1.05)",
+        // The shared keyframe scrolls the texture upward, for a return pump
+        // pushing water up a tube. Here the water falls out of an outlet, so
+        // the same keyframe is played backwards rather than duplicated.
+        "animation-direction": "reverse",
+        "pointer-events": "none",
+      },
+    },
 
     last_message: {
       name: "last_message",

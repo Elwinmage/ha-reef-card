@@ -108,6 +108,25 @@ export interface BaseElementConfig {
   target?: string | number;
   stateObj?: boolean;
   disabled_if?: DisabledCondition;
+  /**
+   * flow-image only: translation key of a binary entity that must be "on"
+   * for the flow to animate, on top of the speed. For a pump whose speed is
+   * a setting rather than a measurement, speed alone never reaches zero.
+   */
+  running_if?: string;
+  /**
+   * flow-image only: hide the water entirely while it is not flowing, rather
+   * than freezing it in place. A tube stays full when its pump stops; an
+   * outlet does not.
+   */
+  hide_when_stopped?: boolean;
+  /**
+   * flow-image only: seconds for one tile to scroll past, at the top of the
+   * speed range and at the bottom. Defaults to 0.5 and 10, tuned for a return
+   * pump; a trickle needs both much higher.
+   */
+  min_duration?: number;
+  max_duration?: number;
   timer?: number;
   image?: string | URL;
   css?: Record<string, string>;

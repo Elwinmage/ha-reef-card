@@ -822,3 +822,65 @@ describe("config dialogs", () => {
     }
   });
 });
+
+//----------------------------------------------------------------------------//
+//   Pump water flow
+//----------------------------------------------------------------------------//
+
+describe("RSAto pump flow", () => {
+  const flow: any = (config.elements as any).pump_flow;
+
+  it("is driven by the speed and gated on the pump actually running", () => {
+    // The RSATO reports a configured pump speed at all times, so the speed
+    // alone would keep the water pouring between two fills.
+    expect(flow.name).toBe("pump_speed");
+    expect(flow.running_if).toBe("is_pump_on");
+    expect(flow.type).toBe("flow-image");
+  });
+
+  it("shows no water at all between two fills", () => {
+    // Not merely paused: a frozen stream hanging at the outlet would read as
+    // a bug, unlike a tube that legitimately stays full.
+    expect(flow.hide_when_stopped).toBe(true);
+  });
+
+  it("disappears with the pump", () => {
+    expect(flow.disabled_if).toBe("!device.has_pump()");
+    expect(flow.no_br_if_disabled).toBe(true);
+  });
+
+  it("is placed at the outlet and swallows no click", () => {
+    expect(flow.elt_css.position).toBe("absolute");
+    expect(flow.elt_css.top).toBe("41%");
+    expect(flow.elt_css.left).toBe("52.5%");
+    expect(flow.elt_css.height).toBe("30%");
+    expect(flow.elt_css["pointer-events"]).toBe("none");
+  });
+
+  it("pours downward, not upward", () => {
+    // The shared keyframe is written for a return pump pushing water up a
+    // tube; playing it backwards costs nothing and adds no second keyframe.
+    expect(flow.elt_css["animation-direction"]).toBe("reverse");
+  });
+
+  it("runs slower than a return pump", () => {
+    expect(flow.min_duration).toBe(2);
+    expect(flow.max_duration).toBe(6);
+    expect(flow.min_duration).toBeLessThan(flow.max_duration);
+  });
+
+  it("tints the shared texture blue", () => {
+    // water_seamless.png is nearly grey: saturate alone cannot colour it,
+    // sepia has to put a hue on it first.
+    expect(flow.elt_css.filter).toContain("sepia(");
+    expect(flow.elt_css.filter).toContain("hue-rotate(");
+  });
+
+  it("paints over the overlays and under the controls", () => {
+    // Elements paint in declaration order: after the two full-canvas
+    // overlays, before everything the user can click.
+    const keys = Object.keys(config.elements);
+    expect(keys.indexOf("pump_flow")).toBeGreaterThan(keys.indexOf("leak"));
+    expect(keys.indexOf("pump_flow")).toBeLessThan(keys.indexOf("fill"));
+  });
+});
