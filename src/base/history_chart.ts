@@ -164,7 +164,18 @@ export class HistoryChart extends MyElement {
   override set hass(obj: HassConfig) {
     const previous = this._states_signature();
     super.hass = obj;
-    if (this._states_signature() !== previous) {
+
+    // `_last_fetch` stays 0 until a read succeeds, so this keeps retrying
+    // until the chart has something to draw.
+    //
+    // The signature alone is not enough on a cold start. The first hass
+    // arrives before the device has resolved its entity registry, so
+    // entity_ids() is empty and the signature is "" on both sides of the
+    // assignment -- no fetch. Once the registry lands, the signature is
+    // computed from resolved entities before *and* after, so it only differs
+    // when a state actually moved. On a quiet device nothing moves, and the
+    // chart stayed blank until the page was reloaded.
+    if (this._last_fetch === 0 || this._states_signature() !== previous) {
       void this.fetch_history();
     }
   }
@@ -592,24 +603,51 @@ export class HistoryChart extends MyElement {
     return nice * mag || 1;
   }
 
-  /**
-   * Grab the canvas and start following the box it is given.
-   *
-   * A percentage-sized box changes with the card width, and the canvas has to
-   * be re-measured and redrawn each time or the drawing is stretched.
-   */
   override firstUpdated(): void {
-    this._canvas =
-      this.shadowRoot?.querySelector(".history-chart-container canvas") ?? null;
-    if (this._canvas && typeof ResizeObserver !== "undefined") {
-      this._ro = new ResizeObserver(() => this.draw());
-      this._ro.observe(this._canvas);
-    }
+    this._attach_canvas();
     this.draw();
   }
 
   override updated(): void {
+    this._attach_canvas();
     this.draw();
+  }
+
+  /**
+   * Bind to the canvas currently in the shadow root, if it changed.
+   *
+   * Acquiring it once in `firstUpdated()` is not enough. An element carrying
+   * a `disabled_if` renders nothing while the condition holds, so on a cold
+   * start -- before the device has resolved the entity the condition reads --
+   * the first render has no canvas at all. The cached node stayed null
+   * afterwards and `draw()` had nowhere to paint: the chart only appeared
+   * after a page reload, which runs `firstUpdated()` again at a point where
+   * the canvas exists.
+   *
+   * Re-querying on every update also covers lit replacing the node rather
+   * than patching it, which would leave the observer watching a detached
+   * element.
+   */
+  private _attach_canvas(): void {
+    const canvas =
+      this.shadowRoot?.querySelector<HTMLCanvasElement>(
+        ".history-chart-container canvas",
+      ) ?? null;
+    if (canvas === this._canvas) {
+      return;
+    }
+
+    this._ro?.disconnect();
+    this._ro = null;
+    this._canvas = canvas;
+
+    if (this._canvas && typeof ResizeObserver !== "undefined") {
+      // A percentage-sized box changes with the card width, and the canvas
+      // has to be re-measured and redrawn each time or the drawing is
+      // stretched.
+      this._ro = new ResizeObserver(() => this.draw());
+      this._ro.observe(this._canvas);
+    }
   }
 
   override disconnectedCallback(): void {

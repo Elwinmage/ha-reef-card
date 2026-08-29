@@ -114,7 +114,7 @@ export const config = {
         top: "41%",
         left: "52.5%",
         width: "4%",
-        height: "30%",
+        height: "32%",
         // The shared texture is nearly grey, which reads as a shadow rather
         // than as water. `saturate` alone cannot colour it -- it multiplies a
         // saturation that is close to zero -- so `sepia` puts a hue on it
@@ -298,7 +298,7 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "38%",
+        top: "43%",
         left: "17%",
       },
     },
@@ -321,7 +321,7 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "38%",
+        top: "43%",
         left: "26%",
       },
     },
@@ -620,8 +620,11 @@ export const config = {
         left: "87%",
       },
     },
-    // Leak-alarm buzzer, placed between the RO reservoir and the sump, next
-    // to the leak probe it belongs to rather than up with the header icons.
+    // Device buzzer, placed between the RO reservoir and the sump.
+    //
+    // Not the leak alarm alone: the setting lives at the top level of
+    // /configuration, not under its `leak` object, so a probe-less device can
+    // still sound it. The icon therefore follows the switch and nothing else.
     //
     // Tap opens the buzzer dialog, hold toggles it: the switch is a safety
     // setting, so turning it off is deliberately the gesture you cannot make
@@ -641,8 +644,6 @@ export const config = {
       icon: "state",
       icon_color: COLOR_ERROR_HEX,
       master: true,
-      // Enabled but unable to fire: no probe plugged in, or probe disarmed.
-      class: "${device.buzzer_armed() ? '' : 'muted'}",
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",

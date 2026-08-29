@@ -433,83 +433,23 @@ describe("RSAto buzzer presence", () => {
   });
 });
 
-describe("RSAto buzzer arming", () => {
-  it("is armed when it is on and the probe can trigger it", () => {
-    const device = makeAto({
-      "switch.buzzer_enabled": "on",
-      connected: "on",
-      enabled: "on",
-    });
-    expect(device.buzzer_armed()).toBe(true);
-  });
-
-  it("is not armed while switched off", () => {
-    const device = makeAto({
-      "switch.buzzer_enabled": "off",
-      connected: "on",
-      enabled: "on",
-    });
-    expect(device.buzzer_armed()).toBe(false);
-  });
-
-  it("is not armed without a probe to trigger it", () => {
-    // Enabled but deaf: the buzzer is the leak alarm, so with no probe
-    // plugged in nothing can ever make it sound.
+describe("RSAto buzzer independence from the leak probe", () => {
+  it("stays available on a device with no leak probe", () => {
+    // The buzzer is not the leak alarm alone: its setting sits at the top
+    // level of /configuration, not inside the `leak` object, and the firmware
+    // also sounds it on pump faults. A probe-less device still has one.
     const device = makeAto({
       "switch.buzzer_enabled": "on",
       connected: "off",
-      enabled: "on",
     });
-    expect(device.buzzer_armed()).toBe(false);
+    expect(device.has_buzzer()).toBe(true);
   });
 
-  it("is not armed while the probe is disarmed", () => {
-    const device = makeAto({
-      "switch.buzzer_enabled": "on",
-      connected: "on",
-      enabled: "off",
-    });
-    expect(device.buzzer_armed()).toBe(false);
-  });
-
-  it("is not armed when the switch is missing altogether", () => {
-    expect(makeAto({ connected: "on", enabled: "on" }).buzzer_armed()).toBe(
-      false,
-    );
-  });
-});
-
-describe("RSAto buzzer re-render", () => {
-  it("re-renders when the probe stops backing the buzzer", () => {
-    // The dimming depends on the leak probe, not on the buzzer entity, so
-    // the element cannot refresh itself: the device has to watch it.
-    const device = makeAto({
-      "switch.buzzer_enabled": "on",
-      connected: "on",
-      enabled: "on",
-    });
-    device._setting_hass(device._hass);
-    device.requestUpdate = vi.fn();
-    device._elements = {};
-
-    device._hass.states["sensor.connected"].state = "off";
-    device._setting_hass(device._hass);
-    expect(device.requestUpdate).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not re-render while the buzzer state is unchanged", () => {
-    const device = makeAto({
-      "switch.buzzer_enabled": "on",
-      connected: "on",
-      enabled: "on",
-    });
-    device._setting_hass(device._hass);
-    device.requestUpdate = vi.fn();
-    device._elements = {};
-
-    device._setting_hass(device._hass);
-    device._setting_hass(device._hass);
-    expect(device.requestUpdate).not.toHaveBeenCalled();
+  it("does not expose an arming state derived from the probe", () => {
+    // Dimming the icon because no probe is plugged in would tell the user
+    // the buzzer cannot fire, which is wrong.
+    const device = makeAto({ "switch.buzzer_enabled": "on" }) as any;
+    expect(device.buzzer_armed).toBeUndefined();
   });
 });
 
@@ -531,9 +471,10 @@ describe("RSAto buzzer element", () => {
     expect(buzzer.icon).toBe("state");
   });
 
-  it("dims when nothing can trigger it", () => {
-    expect(buzzer.class).toContain("device.buzzer_armed()");
-    expect(buzzer.class).toContain("muted");
+  it("follows its own switch and nothing else", () => {
+    // No class expression: `icon: "state"` already greys the icon when the
+    // switch is off, and the leak probe has no say over this buzzer.
+    expect(buzzer.class).toBeUndefined();
   });
 
   it("opens the dialog on tap and toggles on hold", () => {
@@ -853,7 +794,7 @@ describe("RSAto pump flow", () => {
     expect(flow.elt_css.position).toBe("absolute");
     expect(flow.elt_css.top).toBe("41%");
     expect(flow.elt_css.left).toBe("52.5%");
-    expect(flow.elt_css.height).toBe("30%");
+    expect(flow.elt_css.height).toBe("32%");
     expect(flow.elt_css["pointer-events"]).toBe("none");
   });
 

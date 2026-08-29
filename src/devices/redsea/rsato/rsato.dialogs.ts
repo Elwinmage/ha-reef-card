@@ -39,11 +39,13 @@ export const dialogs_rsato = {
       },
     ],
   },
-  // Everything the RSATO+ exposes about its leak-alarm buzzer: the setting
-  // and whether it is sounding right now.
+  // Everything the RSATO+ exposes about its buzzer: the setting and whether
+  // it is sounding right now.
   //
-  // The probe itself lives in the `leak` dialog; only the two flags that
-  // explain a silent buzzer are repeated here.
+  // The leak probe is one trigger among others -- the firmware also sounds
+  // the buzzer on pump faults -- so it is shown here as context rather than
+  // as the explanation for a silent buzzer. The probe itself lives in the
+  // `leak` dialog.
   buzzer: {
     name: "buzzer",
     title_key: "${i18n._('buzzer')}",
@@ -58,8 +60,7 @@ export const dialogs_rsato = {
             // Sounding right now, as opposed to merely enabled.
             { entity: "buzzer_on", name: { type: "entity" } },
             { type: "divider" },
-            // Why an enabled buzzer may still never sound: it is the leak
-            // alarm, so an unplugged or disarmed probe silences it.
+            // The leak probe: one of the conditions that can set it off.
             { entity: "connected", name: { type: "entity" } },
             { entity: "enabled", name: { type: "entity" } },
           ],

@@ -781,12 +781,19 @@ function stubShadowRoot(el: any, canvas: any): void {
 /** Give the element a measurable canvas without a real DOM one. */
 function attachCanvas(el: any, width = 300, height = 120): any {
   const ctx = makeCtx();
-  el._canvas = {
+  const canvas = {
     width: 0,
     height: 0,
     getBoundingClientRect: () => ({ width, height }),
     getContext: () => ctx,
   };
+  el._canvas = canvas;
+  // The element re-queries its shadow root on every update and unbinds when
+  // the canvas is gone, so a fake injected on the side has to be reachable
+  // there too.
+  vi.spyOn(el, "shadowRoot", "get").mockReturnValue({
+    querySelector: () => canvas,
+  } as any);
   return ctx;
 }
 
@@ -1342,5 +1349,170 @@ describe("HistoryChart render", () => {
     expect(text).toContain("history-chart-container");
     expect(text).toContain("canvas");
     expect(text).toContain("width:100%");
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   Cold start
+//----------------------------------------------------------------------------//
+
+describe("HistoryChart cold start", () => {
+  /** A chart whose websocket answers with one point per configured entity. */
+  function chartWithSocket(entities?: any): { el: any; calls: any[] } {
+    const el = makeChart({}, entities);
+    const calls: any[] = [];
+    const hass: any = {
+      states: { "sensor.usage": { state: "120" } },
+      callWS: (msg: any) => {
+        calls.push(msg);
+        return Promise.resolve(
+          makeAnswer({ "sensor.usage": [[Date.now(), 120]] }),
+        );
+      },
+    };
+    el._hass = null;
+    return { el, calls: Object.assign(calls, { hass }) as any };
+  }
+
+  it("reads the recorder even when no state changed", async () => {
+    // The first hass lands before the device has resolved its registry, so
+    // the state signature is "" on both sides and used to skip the fetch.
+    // On a quiet device nothing then moved, and the chart stayed blank until
+    // the page was reloaded.
+    const { el, calls } = chartWithSocket();
+    el.hass = (calls as any).hass;
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(calls.length).toBe(1);
+  });
+
+  it("stops retrying once a read succeeded", async () => {
+    const { el, calls } = chartWithSocket();
+    el.hass = (calls as any).hass;
+    await new Promise((r) => setTimeout(r, 0));
+    const after_first = calls.length;
+
+    // Same states: the signature has not moved, and a fetch already worked.
+    el.hass = (calls as any).hass;
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls.length).toBe(after_first);
+  });
+
+  it("keeps retrying while nothing resolves yet", async () => {
+    // Nothing in the registry and no stateObj to fall back on: this is the
+    // state the element is in on a cold start, before the device has
+    // resolved anything. `_last_fetch` stays 0, so every hass update tries
+    // again -- which is what lets the chart start once the registry lands.
+    const { el, calls } = chartWithSocket({});
+    el.stateObj = null;
+
+    el.hass = (calls as any).hass;
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls.length).toBe(0);
+    expect(el._last_fetch).toBe(0);
+
+    // The registry lands: the very next update reads, without waiting for a
+    // state to move.
+    el.device = {
+      config: { color: "0,0,0", alpha: 1 },
+      is_on: () => true,
+      get_entity: (key: string) =>
+        key === "usage" ? { entity_id: "sensor.usage" } : null,
+    };
+    el.hass = (calls as any).hass;
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls.length).toBe(1);
+  });
+});
+
+describe("HistoryChart state signature", () => {
+  it("treats an entity with no state as empty rather than undefined", () => {
+    // A resolved entity that the recorder knows but hass does not yet hold a
+    // state for: the signature must stay a stable string, or every update
+    // would look like a change and refetch.
+    const el = makeChart({ entities: ["usage", "average"] });
+    el._hass = { states: {} };
+    expect(el._states_signature()).toBe("|");
+
+    el._hass = { states: { "sensor.usage": { state: "120" } } };
+    expect(el._states_signature()).toBe("120|");
+  });
+
+  it("is empty before hass arrives", () => {
+    const el = makeChart();
+    el._hass = null;
+    expect(el._states_signature()).toBe("");
+  });
+});
+
+describe("HistoryChart canvas acquisition", () => {
+  /** A chart whose shadow root can be swapped between renders. */
+  function chartWithShadow(): { el: any; setCanvas: (c: any) => void } {
+    const el = makeChart();
+    let canvas: any = null;
+    vi.spyOn(el, "shadowRoot", "get").mockReturnValue({
+      querySelector: () => canvas,
+    } as any);
+    return { el, setCanvas: (c: any) => (canvas = c) };
+  }
+
+  function fakeCanvas(): any {
+    const c = document.createElement("canvas");
+    c.getContext = (() => null) as any;
+    return c;
+  }
+
+  it("binds to a canvas that only appears after the first render", () => {
+    // An element with a `disabled_if` renders nothing while the condition
+    // holds, so on a cold start the first render has no canvas at all. The
+    // cached node used to stay null for good, and the chart only showed up
+    // after a page reload.
+    const { el, setCanvas } = chartWithShadow();
+    el.firstUpdated();
+    expect(el._canvas).toBeNull();
+
+    const canvas = fakeCanvas();
+    setCanvas(canvas);
+    el.updated();
+    expect(el._canvas).toBe(canvas);
+  });
+
+  it("follows the canvas when lit replaces the node", () => {
+    const { el, setCanvas } = chartWithShadow();
+    const first = fakeCanvas();
+    setCanvas(first);
+    el.firstUpdated();
+    expect(el._canvas).toBe(first);
+
+    const second = fakeCanvas();
+    setCanvas(second);
+    el.updated();
+    // Keeping the old node would leave the observer watching a detached
+    // element and paint into nothing.
+    expect(el._canvas).toBe(second);
+  });
+
+  it("does not rebind while the canvas is unchanged", () => {
+    const { el, setCanvas } = chartWithShadow();
+    setCanvas(fakeCanvas());
+    el.firstUpdated();
+    const observer = el._ro;
+    el.updated();
+    el.updated();
+    expect(el._ro).toBe(observer);
+  });
+
+  it("drops the observer when the canvas goes away", () => {
+    // The condition of a `disabled_if` can flip back: the element then
+    // renders nothing again and the old observer must not survive.
+    const { el, setCanvas } = chartWithShadow();
+    setCanvas(fakeCanvas());
+    el.firstUpdated();
+    expect(el._ro).not.toBeNull();
+
+    setCanvas(null);
+    el.updated();
+    expect(el._canvas).toBeNull();
+    expect(el._ro).toBeNull();
   });
 });

@@ -163,7 +163,7 @@ export class RSAto extends RSDevice {
   }
 
   /**
-   * Whether the leak-alarm buzzer setting is exposed by the integration.
+   * Whether the buzzer setting is exposed by the integration.
    *
    * Domain-prefixed: integration versions before the switch exposed a
    * read-only binary_sensor of the same name, and a bare key would resolve to
@@ -175,22 +175,6 @@ export class RSAto extends RSDevice {
    */
   has_buzzer(): boolean {
     return this.get_entity("switch.buzzer_enabled") !== null;
-  }
-
-  /**
-   * Whether the buzzer would actually sound on a leak.
-   *
-   * Being enabled is not enough: the buzzer is the leak alarm, so with no
-   * probe plugged in, or with the probe disarmed, nothing can ever trigger
-   * it. The icon is dimmed in that case, the same way the leak overlay marks
-   * a probe that is present but switched off.
-   * @return true when the buzzer is on and the leak probe is armed
-   */
-  buzzer_armed(): boolean {
-    return (
-      this.get_entity("switch.buzzer_enabled")?.state === "on" &&
-      this.leak_sensor_armed()
-    );
   }
 
   /**
@@ -208,9 +192,6 @@ export class RSAto extends RSDevice {
   /** Last known level-probe fault, to re-render only when it flips. */
   private _level_alert = false;
 
-  /** Last known buzzer-armed state, same purpose. */
-  private _buzzer_armed = false;
-
   /**
    * Watch the level-probe fault so the background picture follows it.
    *
@@ -218,21 +199,12 @@ export class RSAto extends RSDevice {
    * `master` element changed or a device was enabled — a plain sensor moving
    * leaves the picture with a stale class. Elements carrying a `disabled_if`
    * refresh themselves, the background has no such hook.
-   *
-   * The buzzer icon is watched here for a related reason: its dimming depends
-   * on the leak probe, not on its own entity, and an element's `class`
-   * expression is only re-evaluated when its own stateObj changes.
    */
   override _setting_hass(obj: any): void {
     super._setting_hass(obj);
     const alert = this.level_sensor_alert();
     if (alert !== this._level_alert) {
       this._level_alert = alert;
-      this.requestUpdate();
-    }
-    const armed = this.buzzer_armed();
-    if (armed !== this._buzzer_armed) {
-      this._buzzer_armed = armed;
       this.requestUpdate();
     }
   }

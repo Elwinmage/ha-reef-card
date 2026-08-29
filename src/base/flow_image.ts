@@ -119,6 +119,26 @@ export class FlowImage extends MyElement {
     }
   }
 
+  /**
+   * Re-apply the animation after every render.
+   *
+   * `_render()` writes the whole `style` attribute through a lit binding, so
+   * each time lit commits that binding it discards what `_syncAnimation()`
+   * had set imperatively -- duration, play state and opacity. The element
+   * then shows a still image until the next speed change.
+   *
+   * It bites hardest on an element carrying a `disabled_if`, which re-renders
+   * on every hass update; that is the ATO outlet, frozen the moment anything
+   * else on the device moved.
+   *
+   * Setting inline styles here starts no new update cycle: they are DOM
+   * properties, not reactive ones.
+   */
+  override updated(changed: Map<string, unknown>) {
+    super.updated(changed);
+    this._syncAnimation();
+  }
+
   override firstUpdated() {
     if (this.shadowRoot) {
       const sheet = getFlowKeyframeSheet();

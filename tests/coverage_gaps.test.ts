@@ -762,3 +762,35 @@ describe("FlowImage duration bounds", () => {
     expect(durationFor({ min_duration: 2, max_duration: 6 }, "0")).toBe(6);
   });
 });
+
+describe("FlowImage survives a re-render", () => {
+  it("re-applies the animation after every update", () => {
+    // `_render()` rewrites the whole style attribute through a lit binding,
+    // wiping what _syncAnimation set imperatively. Without updated() the
+    // element shows a still image until the next speed change -- which is
+    // exactly what an element carrying a disabled_if does, since it
+    // re-renders on every hass update.
+    const flow = make("gap-flowimage") as any;
+    const div = document.createElement("div");
+    vi.spyOn(flow, "shadowRoot", "get").mockReturnValue({
+      querySelector: () => div,
+    } as any);
+    flow.device = { entities: {} };
+    flow.conf = {};
+    flow.stateObj = makeState("sensor.speed", "100");
+    flow._hass = { states: {}, entities: {} };
+
+    // Compared as a number: the DOM normalises "0.50s" to "0.5s" in some
+    // environments and keeps it verbatim in others, so the literal string is
+    // not a stable expectation.
+    flow.updated(new Map());
+    expect(parseFloat(div.style.animationDuration)).toBe(0.5);
+    expect(div.style.animationPlayState).toBe("running");
+
+    // A re-render clears the inline styles; the next update must restore them.
+    div.removeAttribute("style");
+    expect(div.style.animationDuration).toBe("");
+    flow.updated(new Map());
+    expect(parseFloat(div.style.animationDuration)).toBe(0.5);
+  });
+});

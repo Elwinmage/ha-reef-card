@@ -6352,6 +6352,24 @@ const IA = class IA extends B {
     const I = A.states[this.stateObj.entity_id], g = !!I && I.state !== this.stateObj.state, i = this._is_running(A) !== this._is_running(this._hass);
     g || i ? (I && (this.stateObj = I), this._hass = A, this._syncAnimation()) : super.hass = A;
   }
+  /**
+   * Re-apply the animation after every render.
+   *
+   * `_render()` writes the whole `style` attribute through a lit binding, so
+   * each time lit commits that binding it discards what `_syncAnimation()`
+   * had set imperatively -- duration, play state and opacity. The element
+   * then shows a still image until the next speed change.
+   *
+   * It bites hardest on an element carrying a `disabled_if`, which re-renders
+   * on every hass update; that is the ATO outlet, frozen the moment anything
+   * else on the device moved.
+   *
+   * Setting inline styles here starts no new update cycle: they are DOM
+   * properties, not reactive ones.
+   */
+  updated(A) {
+    super.updated(A), this._syncAnimation();
+  }
   firstUpdated() {
     if (this.shadowRoot) {
       const A = sg();
@@ -6462,7 +6480,7 @@ const Zg = (N = class extends B {
    */
   set hass(A) {
     const I = this._states_signature();
-    super.hass = A, this._states_signature() !== I && this.fetch_history();
+    super.hass = A, (this._last_fetch === 0 || this._states_signature() !== I) && this.fetch_history();
   }
   get hass() {
     return this._hass;
@@ -6749,17 +6767,32 @@ const Zg = (N = class extends B {
     let c;
     return C <= 1.5 ? c = 1 : C <= 3 ? c = 2 : C <= 7 ? c = 5 : c = 10, c * i || 1;
   }
-  /**
-   * Grab the canvas and start following the box it is given.
-   *
-   * A percentage-sized box changes with the card width, and the canvas has to
-   * be re-measured and redrawn each time or the drawing is stretched.
-   */
   firstUpdated() {
-    this._canvas = this.shadowRoot?.querySelector(".history-chart-container canvas") ?? null, this._canvas && typeof ResizeObserver < "u" && (this._ro = new ResizeObserver(() => this.draw()), this._ro.observe(this._canvas)), this.draw();
+    this._attach_canvas(), this.draw();
   }
   updated() {
-    this.draw();
+    this._attach_canvas(), this.draw();
+  }
+  /**
+   * Bind to the canvas currently in the shadow root, if it changed.
+   *
+   * Acquiring it once in `firstUpdated()` is not enough. An element carrying
+   * a `disabled_if` renders nothing while the condition holds, so on a cold
+   * start -- before the device has resolved the entity the condition reads --
+   * the first render has no canvas at all. The cached node stayed null
+   * afterwards and `draw()` had nowhere to paint: the chart only appeared
+   * after a page reload, which runs `firstUpdated()` again at a point where
+   * the canvas exists.
+   *
+   * Re-querying on every update also covers lit replacing the node rather
+   * than patching it, which would leave the observer watching a detached
+   * element.
+   */
+  _attach_canvas() {
+    const A = this.shadowRoot?.querySelector(
+      ".history-chart-container canvas"
+    ) ?? null;
+    A !== this._canvas && (this._ro?.disconnect(), this._ro = null, this._canvas = A, this._canvas && typeof ResizeObserver < "u" && (this._ro = new ResizeObserver(() => this.draw()), this._ro.observe(this._canvas)));
   }
   disconnectedCallback() {
     super.disconnectedCallback(), this._ro?.disconnect(), this._ro = null;
@@ -13741,7 +13774,7 @@ const _W = {
         top: "41%",
         left: "52.5%",
         width: "4%",
-        height: "30%",
+        height: "32%",
         // The shared texture is nearly grey, which reads as a shadow rather
         // than as water. `saturate` alone cannot colour it -- it multiplies a
         // saturation that is close to zero -- so `sepia` puts a hue on it
@@ -13923,7 +13956,7 @@ const _W = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "38%",
+        top: "43%",
         left: "17%"
       }
     },
@@ -13946,7 +13979,7 @@ const _W = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "38%",
+        top: "43%",
         left: "26%"
       }
     },
@@ -14244,8 +14277,11 @@ const _W = {
         left: "87%"
       }
     },
-    // Leak-alarm buzzer, placed between the RO reservoir and the sump, next
-    // to the leak probe it belongs to rather than up with the header icons.
+    // Device buzzer, placed between the RO reservoir and the sump.
+    //
+    // Not the leak alarm alone: the setting lives at the top level of
+    // /configuration, not under its `leak` object, so a probe-less device can
+    // still sound it. The icon therefore follows the switch and nothing else.
     //
     // Tap opens the buzzer dialog, hold toggles it: the switch is a safety
     // setting, so turning it off is deliberately the gesture you cannot make
@@ -14265,8 +14301,6 @@ const _W = {
       icon: "state",
       icon_color: L,
       master: !0,
-      // Enabled but unable to fire: no probe plugged in, or probe disarmed.
-      class: "${device.buzzer_armed() ? '' : 'muted'}",
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
@@ -14366,11 +14400,13 @@ const _W = {
       }
     ]
   },
-  // Everything the RSATO+ exposes about its leak-alarm buzzer: the setting
-  // and whether it is sounding right now.
+  // Everything the RSATO+ exposes about its buzzer: the setting and whether
+  // it is sounding right now.
   //
-  // The probe itself lives in the `leak` dialog; only the two flags that
-  // explain a silent buzzer are repeated here.
+  // The leak probe is one trigger among others -- the firmware also sounds
+  // the buzzer on pump faults -- so it is shown here as context rather than
+  // as the explanation for a silent buzzer. The probe itself lives in the
+  // `leak` dialog.
   buzzer: {
     name: "buzzer",
     title_key: "${i18n._('buzzer')}",
@@ -14385,8 +14421,7 @@ const _W = {
             // Sounding right now, as opposed to merely enabled.
             { entity: "buzzer_on", name: { type: "entity" } },
             { type: "divider" },
-            // Why an enabled buzzer may still never sound: it is the leak
-            // alarm, so an unplugged or disarmed probe silences it.
+            // The leak probe: one of the conditions that can set it off.
             { entity: "connected", name: { type: "entity" } },
             { entity: "enabled", name: { type: "entity" } }
           ]
@@ -14555,7 +14590,7 @@ const _W = {
       model: "RSATO",
       name: "",
       elements: null
-    }, this._level_alert = !1, this._buzzer_armed = !1, this.initial_config = _W, this.load_dialogs([lA, $W]);
+    }, this._level_alert = !1, this.initial_config = _W, this.load_dialogs([lA, $W]);
   }
   /**
    * Current device mode, as reported by the `/mode` endpoint.
@@ -14652,7 +14687,7 @@ const _W = {
     return this.get_entity("ato_sensor_connected")?.state !== "off";
   }
   /**
-   * Whether the leak-alarm buzzer setting is exposed by the integration.
+   * Whether the buzzer setting is exposed by the integration.
    *
    * Domain-prefixed: integration versions before the switch exposed a
    * read-only binary_sensor of the same name, and a bare key would resolve to
@@ -14664,18 +14699,6 @@ const _W = {
    */
   has_buzzer() {
     return this.get_entity("switch.buzzer_enabled") !== null;
-  }
-  /**
-   * Whether the buzzer would actually sound on a leak.
-   *
-   * Being enabled is not enough: the buzzer is the leak alarm, so with no
-   * probe plugged in, or with the probe disarmed, nothing can ever trigger
-   * it. The icon is dimmed in that case, the same way the leak overlay marks
-   * a probe that is present but switched off.
-   * @return true when the buzzer is on and the leak probe is armed
-   */
-  buzzer_armed() {
-    return this.get_entity("switch.buzzer_enabled")?.state === "on" && this.leak_sensor_armed();
   }
   /**
    * Whether the water-level probe needs attention.
@@ -14695,17 +14718,11 @@ const _W = {
    * `master` element changed or a device was enabled — a plain sensor moving
    * leaves the picture with a stale class. Elements carrying a `disabled_if`
    * refresh themselves, the background has no such hook.
-   *
-   * The buzzer icon is watched here for a related reason: its dimming depends
-   * on the leak probe, not on its own entity, and an element's `class`
-   * expression is only re-evaluated when its own stateObj changes.
    */
   _setting_hass(A) {
     super._setting_hass(A);
     const I = this.level_sensor_alert();
     I !== this._level_alert && (this._level_alert = I, this.requestUpdate());
-    const g = this.buzzer_armed();
-    g !== this._buzzer_armed && (this._buzzer_armed = g, this.requestUpdate());
   }
   _render(A, I) {
     const g = this.config.background_img ?? "", i = this.level_sensor_alert() ? " blink-alert" : "";
