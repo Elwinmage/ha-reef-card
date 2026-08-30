@@ -299,7 +299,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "43%",
-        left: "17%",
+        left: "12%",
       },
     },
     stop_fill: {
@@ -322,7 +322,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "43%",
-        left: "26%",
+        left: "20%",
       },
     },
     resume: {
@@ -561,7 +561,7 @@ export const config = {
       // Nothing to show about a pump that is not paired.
       disabled_if: "!device.has_pump()",
       no_br_if_disabled: true,
-      icon: "mdi:cog",
+      icon: "mdi:pump",
       icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",
@@ -583,7 +583,7 @@ export const config = {
       // The probe is optional: no socket used, no cog.
       disabled_if: "!device.has_leak_sensor()",
       no_br_if_disabled: true,
-      icon: "mdi:cog",
+      icon: "mdi:pipe-leak",
       icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",
@@ -604,7 +604,7 @@ export const config = {
       type: "click-image",
       disabled_if: "!device.has_ato_sensor()",
       no_br_if_disabled: true,
-      icon: "mdi:cog",
+      icon: "mdi:hydraulic-oil-level",
       icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",

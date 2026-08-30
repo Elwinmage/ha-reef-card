@@ -526,7 +526,7 @@ describe("RSAto buzzer dialog", () => {
 });
 
 //----------------------------------------------------------------------------//
-//   Accessory settings cogs
+//   Accessory settings icons
 //----------------------------------------------------------------------------//
 
 describe("RSAto level-probe presence", () => {
@@ -547,10 +547,10 @@ describe("RSAto level-probe presence", () => {
   });
 });
 
-describe("RSAto accessory cogs", () => {
+describe("RSAto accessory settings icons", () => {
   const elements: any = config.elements;
 
-  it("puts one cog per socket, in the header column grid", () => {
+  it("puts one settings icon per socket, in the header column grid", () => {
     // Left to right, matching the three sockets on the front panel.
     expect(elements.pump_settings.css.left).toBe("75%");
     expect(elements.leak_settings.css.left).toBe("81%");
@@ -562,11 +562,24 @@ describe("RSAto accessory cogs", () => {
     ]) {
       expect(elements[key].css.top).toBe("16%");
       expect(elements[key].css.position).toBe("absolute");
-      expect(elements[key].icon).toBe("mdi:cog");
     }
   });
 
-  it("hides each cog when its accessory is absent", () => {
+  it("gives each socket its own icon", () => {
+    // Three identical cogs told the user nothing: the icon has to say which
+    // accessory it opens, since only its position distinguished them before.
+    const icons: Record<string, string> = {
+      pump_settings: "mdi:pump",
+      leak_settings: "mdi:pipe-leak",
+      ato_sensor_settings: "mdi:hydraulic-oil-level",
+    };
+    for (const [key, icon] of Object.entries(icons)) {
+      expect(elements[key].icon).toBe(icon);
+    }
+    expect(new Set(Object.values(icons)).size).toBe(3);
+  });
+
+  it("hides each icon when its accessory is absent", () => {
     expect(elements.pump_settings.disabled_if).toBe("!device.has_pump()");
     expect(elements.leak_settings.disabled_if).toBe(
       "!device.has_leak_sensor()",
@@ -595,7 +608,7 @@ describe("RSAto accessory cogs", () => {
         action: "dialog",
         data: { type },
       });
-      // A settings cog must not double as a toggle.
+      // A settings icon must not double as a toggle.
       expect(elements[key].hold_action).toBeUndefined();
     }
   });
@@ -609,7 +622,7 @@ describe("RSAto accessory dialogs", () => {
       .map((e: any) => e.entity);
   }
 
-  it("registers one dialog per cog", () => {
+  it("registers one dialog per settings icon", () => {
     for (const name of ["pump", "leak", "ato_sensor"]) {
       expect((dialogs_rsato as any)[name].name).toBe(name);
       expect((dialogs_rsato as any)[name].close_cross).toBe(true);

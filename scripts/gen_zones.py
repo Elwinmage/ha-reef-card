@@ -54,8 +54,8 @@ ZONE_SETS = {
         (598, 162, 866, 208),  # 2 pump, sensor and leak detector calibrations
         (3, 442, 236, 1005),  # 3 reservoir: pump, autonomy, level, leak state
         (260, 801, 338, 850),  # 4 buzzer
-        (253, 859, 420, 1005),  # 5 optical level sensor
-        (449, 550, 875, 1004),  # 6 aquarium: level history and temperature
+        (253, 859, 420, 1005),  # 5 leak probe
+        (449, 550, 875, 1004),  # 6 aquarium: level probe, temperature, usage
         (0, 341, 872, 434),  # 7 last message / last alert message
     ],
 }

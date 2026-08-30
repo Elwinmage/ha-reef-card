@@ -270,9 +270,259 @@ To remove device selection and force a specific one, set the `device` parameter 
 
 # ReefATO
 
-Planned.
+ReefATO+ with ha-reef-card in action:
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+
+[![Watch the video](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+
+The ReefATO+ card draws the whole top-off loop as it is plumbed: the controller
+with its three sockets, the RO/DI reservoir and its pump, the water level probe
+clipped to the tank, and the leak probe on the floor.
+
+The water level probe is the ReefATO+ itself and is always drawn. The **pump**
+and the **leak probe** are optional, and each of them is a transparent overlay
+stacked on the background picture rather than a part of it. One the device does
+not report is not drawn at all, and the controls that depend on it are hidden
+with it: a ReefATO+ without a leak probe shows a card without a leak probe, not
+a greyed-out one.
+
+<img src="doc/img/rsato/rsato_zones.png"/>
+
+The card is divided into 7 zones:
+
+1. Controller: operating mode, power, maintenance mode, configuration, Wifi and automatic top-off
+2. Accessory settings: ATO pump, leak probe, water level probe
+3. RO/DI reservoir: fill controls, remaining volume and autonomy
+4. Buzzer
+5. Leak probe
+6. Aquarium: water level, temperature and daily consumption
+7. Last message and last alert
+
+## Controller
+
+<img src="doc/img/rsato/zone_1.png"/>
+
+---
+
+The text on the controller face is the **operating mode** reported by the device
+(Auto, Manual, Leak…), translated into the language of Home Assistant.
+
+<span>The on/off switch <img src="doc/img/mdi/mdi_power-plug.png" width="20"/> switches the ReefATO+ between on and off states.</span>
+
+<img src="doc/img/rsato/off_mode.png" width="50%"/>
+
+<span>The maintenance switch <img src="doc/img/mdi/mdi_account-wrench.png" width="20"/> switches to maintenance mode.</span>
+
+<img src="doc/img/rsato/maintenance.png" width="50%"/>
+
+<span>Click the icon <img src="doc/img/rsdose/cog_icon.png" width="30"/> to manage the general configuration of the ReefATO+: refresh the settings or the polled data, reset the device, update its firmware.</span>
+
+<img src="doc/img/rsato/zone_1_dialog_config.png" width="50%"/>
+
+<span>Click the icon <img src="doc/img/mdi/wifi_icon.png" width="30"/> to manage the network settings.</span>
+
+<img src="doc/img/rsato/zone_1_dialog_wifi.png" width="50%"/>
+
+<span>The switch <img src="doc/img/mdi/mdi_waves-arrow-up.png" width="20"/> on the second row enables or disables the **automatic top-off**. Turned off, the device never fills on its own and only the buttons of zone 3 still act on the pump. It is hidden when no pump is paired.</span>
+
+## Accessory settings
+
+<img src="doc/img/rsato/zone_2.png"/>
+
+---
+
+The three icons follow the three sockets of the front panel, in the same order:
+from left to right the **ATO pump**, the **leak probe** and the **water level
+probe**. Each one opens what the device reports about that accessory, which the
+picture can only hint at. The pump and the leak probe icons disappear with the
+accessory when its socket is unused.
+
+<span>The pump icon <img src="doc/img/mdi/mdi_pump.png" width="30"/> shows the running state, the measured consumption and flow rate, the three current thresholds the firmware compares against to call a dry run or a blockage, and what triggered the last fill.</span>
+
+<img src="doc/img/rsato/zone_2_dialog_pump.png" width="50%"/>
+
+<span>The leak probe icon <img src="doc/img/mdi/mdi_pipe-leak.png" width="30"/> shows whether the probe is plugged in, whether it is armed, the wet/dry verdict and the raw reading behind it, plus the buzzer this probe drives.</span>
+
+<img src="doc/img/rsato/zone_2_dialog_leak.png" width="50%"/>
+
+<span>The level probe icon <img src="doc/img/mdi/mdi_hydraulic-oil-level.png" width="30"/> shows the health of the probe first — connected, calibrated, to be checked, in error — since an uncalibrated or fouled probe makes every reading below meaningless. Then the level itself, the two electrodes behind it, the temperature sensor that shares the same body, and the identity and service dates of the cartridge.</span>
+
+<img src="doc/img/rsato/zone_2_dialog_ato_sensor.png" width="50%"/>
+
+## RO/DI reservoir
+
+<img src="doc/img/rsato/zone_3.png"/>
+
+---
+
+This zone is the reservoir the ATO draws from, and the three buttons that drive
+its pump by hand:
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/img/mdi/mdi_water-pump.png" width="40"/><br/><b>Fill</b><br/>Starts a manual fill</td>
+    <td align="center"><img src="doc/img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Stop</b><br/>Stops the fill in progress</td>
+    <td align="center"><img src="doc/img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Resume</b><br/>Hands the pump back to the device</td>
+  </tr>
+</table>
+
+The water in the reservoir is a real volume ratio: the remaining volume against
+the reservoir capacity declared in the integration. The bottom of the scale is
+the residue the pump cannot siphon, so an empty reservoir still shows a water
+line, and the top of the scale is the rim of the container in the picture. Below
+10% the water blinks.
+
+Clicking the water opens the reservoir dialog, where the capacity can be
+corrected:
+
+<img src="doc/img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
+
+The figure at the bottom left of the reservoir is the **autonomy**: the number of
+days left before it runs dry, computed by the integration from the average daily
+consumption. Clicking it opens its more-info dialog.
+
+While a fill is running, water flows out of the outlet above the sump — the
+animation follows the pump speed and stops with the pump, so a still picture
+means a still pump.
+
+<img src="doc/img/rsato/zone_3_filling.png"/>
+
+## Buzzer
+
+<img src="doc/img/mdi/mdi_bell-ring_red.png" width="40"/>
+
+---
+
+<span>The bell <img src="doc/img/mdi/mdi_bell-ring_red.png" width="20"/> <img src="doc/img/mdi/mdi_bell-off_red.png" width="20"/> follows the buzzer setting of the device, and greys out when it is off.</span>
+
+A click opens the buzzer dialog: the setting itself, whether it is sounding right
+now, and the state of the leak probe as context.
+
+<img src="doc/img/rsato/zone_4_dialog_buzzer.png" width="50%"/>
+
+A **long press** toggles the buzzer directly. The two gestures are deliberately
+split: silencing the alarm is a safety setting, not something to do by accident
+while reaching for the details.
+
+> [!NOTE]
+> The buzzer is not the leak alarm alone: the device also sounds it on pump
+> faults, so it stays available on a ReefATO+ with no leak probe. The icon is
+> hidden only on integration versions that do not expose the setting yet.
+
+## Leak probe
+
+<img src="doc/img/rsato/zone_5.png"/>
+
+---
+
+The probe is drawn only when it is physically plugged in. Plugged in but turned
+off in the app, it is greyed out: it is there, it detects nothing.
+
+When water is detected the probe blinks, and a puddle spreads at the foot of the
+picture. The device says which side the water came from, and that is the half of
+the information worth showing — fresh water from the RO/DI line is not the same
+problem as salt water from the tank — so the puddle is drawn on the matching
+side: on the left under the reservoir, on the right under the aquarium. A leak
+reported without a readable side spreads over the whole width rather than
+guessing one.
+
+<table>
+  <tr>
+    <th align="center">Leak in the aquarium</th>
+    <th align="center">Leak in the RO/DI reservoir</th>
+    <th align="center">Leak from an unknown source</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rsato/zone_5_leak_aquarium.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_5_leak_rodi.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_5_leak_unknown.png"/></td>
+  </tr>
+</table>
+
+## Aquarium
+
+<img src="doc/img/rsato/zone_6.png"/>
+
+---
+
+The water level is not a percentage here: the probe reports which of its marks
+the surface has reached, and each state is drawn at the height of that mark on
+the glass.
+
+| State           | Meaning                                                   |
+| --------------- | --------------------------------------------------------- |
+| Below           | The surface is under the probe: the ATO is not keeping up |
+| Desired level 1 | First top-off mark                                        |
+| Desired level 2 | Second top-off mark                                       |
+| Above           | The surface is over the probe: the tank is overfilled     |
+
+Both ends are abnormal, so **Below** and **Above** make the water blink. A probe
+in error, or an entity that has not reported yet, has no height at all: the card
+draws its no-reading mark rather than an empty tank.
+
+<table>
+  <tr>
+    <th align="center">Below</th>
+    <th align="center">Desired level 1</th>
+    <th align="center">Desired level 2</th>
+    <th align="center">Above</th>
+    <th align="center">No reading</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rsato/zone_6_water_level_below.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_6_water_level_1.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_6_water_level_2.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_6_water_level_above.png"/></td>
+    <td align="center"><img src="doc/img/rsato/zone_6_water_level_error.png"/></td>
+  </tr>
+</table>
+
+The temperature at the bottom of the tank comes from the sensor built into the
+level probe, and is only reported when it is enabled on the device.
+
+The chart in the corner is the **consumption of the day**: the volume topped off
+since midnight, filled in orange, against the running daily average in red. The
+window is pinned to the calendar day rather than to a rolling 24 hours, since the
+counter resets at midnight.
+
+Clicking the chart opens the consumption dialog, the same story with the figures
+spelled out: fills and volume, each read today, as a daily average and as a
+lifetime total, plus what the reservoir has left to feed them.
+
+<img src="doc/img/rsato/zone_6_dialog_usage.png" width="50%"/>
+
+## Faults
+
+The card has no separate warning light: whatever is at fault is what blinks,
+under a light red tint.
+
+| Blinking element  | What the device is reporting                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| The pump          | Malfunction, stalled pump, fill timeout, empty reservoir, or a missing level probe             |
+| The leak probe    | Water detected, on the RO/DI side or on the aquarium side                                      |
+| The water level   | The surface is below or above the probe                                                        |
+| The whole picture | The level probe asks to be checked, or fails to read — every level shown becomes untrustworthy |
+
+A pump reported as missing is not a fault: the pump, the fill buttons, the
+reservoir and the consumption chart are simply not drawn.
+
+## Messages
+
+<img src="doc/img/rsato/zone_7.png"/>
+
+---
+
+This zone displays the latest system messages from the ReefATO+. It has two lines:
+
+- The grey line shows the **last message** received.
+- The pink line shows the **last alert**, preceded by the ⚠ symbol.
+
+Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
+
+> [!NOTE]
+> The ReefATO+ has no device-specific option in the card editor yet: unlike the
+> ReefMat and the ReefRun, its two message lines cannot be hidden.
 
 # ReefControl
 
