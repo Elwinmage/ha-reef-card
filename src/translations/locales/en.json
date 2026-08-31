@@ -149,5 +149,11 @@
   "weekly": "Weekly",
   "whisper": "Whisper",
   "wifi": "Wifi",
-  "yes": "Yes"
+  "yes": "Yes",
+  "infinite_tank": "Infinite RO/DI reservoir",
+  "external_usage": "Read the dispensed volume from another entity",
+  "external_usage_entity": "Dispensed volume entity",
+  "fill_entity": "Fill entity",
+  "stop_fill_entity": "Stop fill entity",
+  "rsato_entity_none": "None"
 }

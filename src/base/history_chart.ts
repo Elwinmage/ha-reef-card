@@ -392,6 +392,12 @@ export class HistoryChart extends MyElement {
     if (key === this.conf?.name && this.stateObj?.entity_id) {
       return this.stateObj.entity_id;
     }
+    // A series can name an entity of another integration, picked by the user
+    // in the card editor: it has no translation key, so the entity_id itself
+    // is the key. Checked after the registry so a translation key always wins.
+    if (this._hass?.states?.[key]) {
+      return key;
+    }
     return null;
   }
 

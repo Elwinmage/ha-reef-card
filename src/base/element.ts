@@ -174,6 +174,12 @@ export class MyElement extends LitElement {
         elt.device.parent_entities?.[config.name];
       if (entityData) {
         elt.stateObj = hass.states[entityData.entity_id] || null;
+      } else if (config.name && hass.states[config.name]) {
+        // The name is already an entity_id. Registry keys are translation
+        // keys, so an entity picked by the user in the card editor — which
+        // belongs to another integration entirely — can only be named this
+        // way. Tried last: a translation key always wins over a state lookup.
+        elt.stateObj = hass.states[config.name];
       }
     }
 

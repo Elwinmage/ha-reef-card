@@ -78,6 +78,21 @@ export class RSDevice extends LitElement {
   private _helpers: any;
 
   /**
+   * Custom element tag of a device model.
+   *
+   * The model Home Assistant reports can carry a "+" (RSATO+), which is not a
+   * valid custom element name, so the tag drops it. The card and its editor
+   * used to build this string separately: the editor kept the "+" and looked
+   * for redsea-rsato+, which nothing registers, so the ReefATO+ editor stayed
+   * empty.
+   * @param model: the model as reported by the integration
+   * @return the registered tag name
+   */
+  static tag_for_model(model: string): string {
+    return "redsea-" + model.toLowerCase().replaceAll("+", "");
+  }
+
+  /**
    * Create a device from a configuration (ex: rsdose4.mapping.ts)
    * @param tag_name: the name of the element (ex: redsea-rsdose4)
    * @param hass: the hass states
@@ -316,13 +331,29 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Model the user configuration of this device is stored under.
+   *
+   * The model Home Assistant reports and the model the mapping declares are
+   * not always the same string: the ReefATO+ reports RSATO+ for a mapping
+   * that calls itself RSATO, and every RSLED* reports its size for a mapping
+   * that calls itself RSLED. The reported model wins, because that is what
+   * the merge in update_config() has always read — an editor writing under
+   * the mapping name stored options that were then never read back, which
+   * looked like a switch that would not stay on.
+   * @return the key of this device in `conf`
+   */
+  config_model(): string {
+    return this.device?.elements?.[0]?.model ?? this.config?.model;
+  }
+
+  /**
    * Merge basic device onfiguraiton with user configuration for final configuration
    */
   update_config(): void {
     this.config = JSON.parse(JSON.stringify(this.initial_config));
 
     if (this.user_config && "conf" in this.user_config && this.device) {
-      const model = this.device.elements[0].model;
+      const model = this.config_model();
 
       if (model && model in this.user_config.conf) {
         const device_conf = this.user_config.conf[model];
@@ -772,12 +803,29 @@ export class RSDevice extends LitElement {
   }
 
   /**
-   * Persist a device-level flag toggled from the editor.
+   * Read a device-level value stored in the user config.
+   * The string counterpart of get_config_flag(), for options that name an
+   * entity rather than switch a behaviour on and off.
+   * @param key: the option name
+   * @return the stored value trimmed, or "" when never set
    */
-  handleChangedConfigFlagEvent(changedEvent) {
-    const value = changedEvent.currentTarget.checked;
-    const key = changedEvent.target.id;
-    const model = this.config.model;
+  get_config_value(key: string): string {
+    const value = this.config?.[key];
+    return typeof value === "string" ? value.trim() : "";
+  }
+
+  /**
+   * Persist a device-level option and tell the editor about it.
+   *
+   * Every device-level option goes through here, whatever its type: the
+   * config shape (conf > model > devices > name > key) is the same for a
+   * boolean toggled from a switch and for an entity id picked from a
+   * selector.
+   * @param key: the option name
+   * @param value: the value to store
+   */
+  set_config_value(key: string, value: unknown): void {
+    const model = this.config_model();
     const newVal = {
       conf: {
         [model]: {
@@ -799,6 +847,16 @@ export class RSDevice extends LitElement {
         bubbles: true,
         composed: true,
       }),
+    );
+  }
+
+  /**
+   * Persist a device-level flag toggled from the editor.
+   */
+  handleChangedConfigFlagEvent(changedEvent) {
+    this.set_config_value(
+      changedEvent.target.id,
+      changedEvent.currentTarget.checked,
     );
   }
 
@@ -877,9 +935,10 @@ export class RSDevice extends LitElement {
 
   handleChangedDeviceEvent(changedEvent) {
     const value = changedEvent.currentTarget.checked;
+    const model = this.config_model();
     const newVal = {
       conf: {
-        [this.config.model]: {
+        [model]: {
           devices: {
             [this.device.name]: {
               elements: { [changedEvent.target.id]: { disabled_if: value } },
@@ -890,7 +949,7 @@ export class RSDevice extends LitElement {
     };
     let newConfig = JSON.parse(JSON.stringify(this.user_config));
     try {
-      newConfig.conf[this.config.model].devices[this.device.name].elements[
+      newConfig.conf[model].devices[this.device.name].elements[
         changedEvent.target.id
       ].disabled_if = value;
     } catch {

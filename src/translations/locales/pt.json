@@ -149,5 +149,11 @@
   "weekly": "Semanal",
   "whisper": "Sussurro",
   "wifi": "WiFi",
-  "yes": "Sim"
+  "yes": "Sim",
+  "infinite_tank": "Reservatório de água osmotizada infinito",
+  "external_usage": "Ler o volume doseado a partir de outra entidade",
+  "external_usage_entity": "Entidade do volume doseado",
+  "fill_entity": "Entidade de enchimento",
+  "stop_fill_entity": "Entidade de paragem do enchimento",
+  "rsato_entity_none": "Nenhuma"
 }

@@ -149,5 +149,11 @@
   "weekly": "Tygodniowy",
   "whisper": "Szept",
   "wifi": "WiFi",
-  "yes": "Tak"
+  "yes": "Tak",
+  "infinite_tank": "Nieograniczony zbiornik wody osmotycznej",
+  "external_usage": "Odczytuj podaną objętość z innej encji",
+  "external_usage_entity": "Encja podanej objętości",
+  "fill_entity": "Encja uzupełniania",
+  "stop_fill_entity": "Encja zatrzymania uzupełniania",
+  "rsato_entity_none": "Brak"
 }

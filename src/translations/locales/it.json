@@ -149,5 +149,11 @@
   "weekly": "Settimanale",
   "whisper": "Sussurro",
   "wifi": "WiFi",
-  "yes": "Sì"
+  "yes": "Sì",
+  "infinite_tank": "Serbatoio di acqua osmotica infinito",
+  "external_usage": "Leggi il volume erogato da un'altra entità",
+  "external_usage_entity": "Entità del volume erogato",
+  "fill_entity": "Entità di riempimento",
+  "stop_fill_entity": "Entità di arresto del riempimento",
+  "rsato_entity_none": "Nessuna"
 }

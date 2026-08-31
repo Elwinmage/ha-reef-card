@@ -149,5 +149,11 @@
   "weekly": "Hebdomadaire",
   "whisper": "Silencieux",
   "wifi": "Wifi",
-  "yes": "Oui"
+  "yes": "Oui",
+  "infinite_tank": "Réservoir d'eau osmosée infini",
+  "external_usage": "Lire le volume distribué depuis une autre entité",
+  "external_usage_entity": "Entité du volume distribué",
+  "fill_entity": "Entité de remplissage",
+  "stop_fill_entity": "Entité d'arrêt du remplissage",
+  "rsato_entity_none": "Aucune"
 }

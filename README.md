@@ -520,9 +520,75 @@ This zone displays the latest system messages from the ReefATO+. It has two line
 
 Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
 
-> [!NOTE]
-> The ReefATO+ has no device-specific option in the card editor yet: unlike the
-> ReefMat and the ReefRun, its two message lines cannot be hidden.
+These lines can be hidden via the card editor interface.
+
+## Card editor
+
+<img src="doc/img/rsato/editor.png" width="50%"/>
+
+---
+
+Besides the two message lines, the ReefATO+ has three options. They exist for a
+top-off loop the device was not designed for: an RO unit plumbed straight to the
+sump, with a valve driven by Home Assistant rather than by the Red Sea pump.
+
+### Infinite RO/DI reservoir
+
+Off by default. An RO unit that tops off on the fly has no container, so nothing
+can run out — and everything the card says about a reservoir is about a tank
+that does not exist.
+
+Turned on, the percentage on the reservoir and the dialog behind it are dropped,
+the autonomy becomes ∞, and the pump settings icon and the resume button are
+hidden: a continuous feed has no fill cycle to hand back to the device. The
+water, the fill controls and the consumption chart stay.
+
+### Dispensed volume entity
+
+A switch and an entity picker. Turned on, the orange curve of the daily chart is
+read from an entity of your own — a flow meter on the RO line — instead of the
+device counter. The red running average stays the device's: only the source of
+the volume moves, not the comparison it is drawn against.
+
+The switch is what enables it, so an entity left over from an earlier
+configuration is ignored rather than silently taking over again.
+
+### Fill and Stop fill entities
+
+Either button can be bound to an entity of another integration, to drive your
+own valve. The service is derived from the domain of the entity, since picking
+one already says which it is:
+
+| Domain of the entity      | Fill         | Stop          |
+| ------------------------- | ------------ | ------------- |
+| `button`, `input_button`  | `press`      | `press`       |
+| `switch`, `input_boolean` | `turn_on`    | `turn_off`    |
+| `valve`                   | `open_valve` | `close_valve` |
+| `script`                  | `turn_on`    | `turn_on`     |
+
+A single switch is a complete control: on fills, off stops. Leave the other
+picker empty and the second button reuses the same entity with the opposite
+service — the same goes for an `input_boolean` or a `valve`. Two press-once
+buttons have to be picked separately, since a press carries no direction.
+
+A bound control no longer follows the Red Sea pump either: it stays visible on a
+ReefATO+ that reports no pump at all, which is the point of binding it.
+
+The options are stored under the model as Home Assistant reports it:
+
+```yaml
+type: custom:reef-card
+device: MY-RSATO
+conf:
+  RSATO+:
+    devices:
+      MY-RSATO:
+        infinite_tank: true
+        external_usage: true
+        external_usage_entity: sensor.rodi_flow_meter
+        fill_entity: switch.rodi_valve
+        stop_fill_entity: "" # left empty: the switch above stops it too
+```
 
 # ReefControl
 

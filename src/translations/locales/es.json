@@ -149,5 +149,11 @@
   "weekly": "Semanal",
   "whisper": "Susurro",
   "wifi": "WiFi",
-  "yes": "Sí"
+  "yes": "Sí",
+  "infinite_tank": "Depósito de agua osmotizada infinito",
+  "external_usage": "Leer el volumen dosificado desde otra entidad",
+  "external_usage_entity": "Entidad del volumen dosificado",
+  "fill_entity": "Entidad de llenado",
+  "stop_fill_entity": "Entidad de parada del llenado",
+  "rsato_entity_none": "Ninguna"
 }

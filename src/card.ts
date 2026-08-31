@@ -290,7 +290,7 @@ export class ReefCard extends LitElement {
     }
     //Create the new "lit device"
     this.current_device = RSDevice.create_device(
-      "redsea-" + model.toLowerCase().replace("+", ""),
+      RSDevice.tag_for_model(model),
       this._hass,
       this.user_config,
       device,

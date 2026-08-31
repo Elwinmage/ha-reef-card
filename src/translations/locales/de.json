@@ -149,5 +149,11 @@
   "weekly": "Wöchentlich",
   "whisper": "Flüstern",
   "wifi": "WLAN",
-  "yes": "Ja"
+  "yes": "Ja",
+  "infinite_tank": "Unbegrenzter Osmosewasser-Vorratsbehälter",
+  "external_usage": "Abgegebene Menge aus einer anderen Entität lesen",
+  "external_usage_entity": "Entität der abgegebenen Menge",
+  "fill_entity": "Entität zum Nachfüllen",
+  "stop_fill_entity": "Entität zum Stoppen des Nachfüllens",
+  "rsato_entity_none": "Keine"
 }
