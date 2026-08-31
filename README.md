@@ -28,7 +28,11 @@ Your language is not yet supported and you want to help with the translation? Fo
 The **Reef card** for Home Assistant helps you manage your reef aquarium.
 
 Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), it automatically supports your
-Redsea (ReefBeat) devices.
+Redsea (ReefBeat) devices, and [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+adds the equipment Home Assistant cannot talk to to the maintenance view.
+
+Support for the Aqua Medic devices of [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) is on
+its way; their maintenance tasks already show up in that same view.
 
 <!-- ecosystem:start -->
 
@@ -276,16 +280,14 @@ ReefATO+ with ha-reef-card in action:
 
 [![Watch the video](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-The ReefATO+ card draws the whole top-off loop as it is plumbed: the controller
-with its three sockets, the RO/DI reservoir and its pump, the water level probe
-clipped to the tank, and the leak probe on the floor.
+The ReefATO+ card is a visual way to drive the RSATO+ controller, the RO/DI
+reservoir and its pump, the water level probe clipped to the tank, and the leak
+probe on the floor.
 
-The water level probe is the ReefATO+ itself and is always drawn. The **pump**
-and the **leak probe** are optional, and each of them is a transparent overlay
-stacked on the background picture rather than a part of it. One the device does
-not report is not drawn at all, and the controls that depend on it are hidden
-with it: a ReefATO+ without a leak probe shows a card without a leak probe, not
-a greyed-out one.
+The water level probe of the ReefATO+ is always drawn. The **pump** and the
+**leak probe** are optional. The one the device does not report is not drawn at
+all, and the controls that depend on it are hidden with it: a ReefATO+ without a
+leak probe shows a card without a leak probe, not a greyed-out one.
 
 <img src="doc/img/rsato/rsato_zones.png"/>
 
@@ -334,9 +336,8 @@ The text on the controller face is the **operating mode** reported by the device
 
 The three icons follow the three sockets of the front panel, in the same order:
 from left to right the **ATO pump**, the **leak probe** and the **water level
-probe**. Each one opens what the device reports about that accessory, which the
-picture can only hint at. The pump and the leak probe icons disappear with the
-accessory when its socket is unused.
+probe**. Each one opens a dialog dedicated to that accessory. The pump and the
+leak probe icons disappear with the accessory when its socket is unused.
 
 <span>The pump icon <img src="doc/img/mdi/mdi_pump.png" width="30"/> shows the running state, the measured consumption and flow rate, the three current thresholds the firmware compares against to call a dry run or a blockage, and what triggered the last fill.</span>
 
@@ -363,18 +364,17 @@ its pump by hand:
   <tr>
     <td align="center"><img src="doc/img/mdi/mdi_water-pump.png" width="40"/><br/><b>Fill</b><br/>Starts a manual fill</td>
     <td align="center"><img src="doc/img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Stop</b><br/>Stops the fill in progress</td>
-    <td align="center"><img src="doc/img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Resume</b><br/>Hands the pump back to the device</td>
+    <td align="center"><img src="doc/img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Resume</b><br/>Re-enables the pump</td>
   </tr>
 </table>
 
-The water in the reservoir is a real volume ratio: the remaining volume against
-the reservoir capacity declared in the integration. The bottom of the scale is
-the residue the pump cannot siphon, so an empty reservoir still shows a water
-line, and the top of the scale is the rim of the container in the picture. Below
-10% the water blinks.
+This part shows the level of the water reserve, computed from the declared
+reservoir capacity and the actual value. An empty reservoir still shows a water
+line — the one the pump cannot draw up. Below 10% the water blinks, to say that
+the reservoir will soon be empty.
 
 Clicking the water opens the reservoir dialog, where the capacity can be
-corrected:
+edited:
 
 <img src="doc/img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
 
@@ -382,9 +382,7 @@ The figure at the bottom left of the reservoir is the **autonomy**: the number o
 days left before it runs dry, computed by the integration from the average daily
 consumption. Clicking it opens its more-info dialog.
 
-While a fill is running, water flows out of the outlet above the sump — the
-animation follows the pump speed and stops with the pump, so a still picture
-means a still pump.
+While a fill is running, water flows out of the outlet above the sump.
 
 <img src="doc/img/rsato/zone_3_filling.png"/>
 
@@ -420,12 +418,7 @@ The probe is drawn only when it is physically plugged in. Plugged in but turned
 off in the app, it is greyed out: it is there, it detects nothing.
 
 When water is detected the probe blinks, and a puddle spreads at the foot of the
-picture. The device says which side the water came from, and that is the half of
-the information worth showing — fresh water from the RO/DI line is not the same
-problem as salt water from the tank — so the puddle is drawn on the matching
-side: on the left under the reservoir, on the right under the aquarium. A leak
-reported without a readable side spreads over the whole width rather than
-guessing one.
+picture.
 
 <table>
   <tr>
@@ -446,9 +439,7 @@ guessing one.
 
 ---
 
-The water level is not a percentage here: the probe reports which of its marks
-the surface has reached, and each state is drawn at the height of that mark on
-the glass.
+The water level in this part shows the detection state of the ATO probe.
 
 | State           | Meaning                                                   |
 | --------------- | --------------------------------------------------------- |
@@ -1230,8 +1221,10 @@ The maintenance view of ha-reef-card in action:
 <img src="doc/img/maintenance/overview.png"/>
 
 Beyond the per-device views, the card offers a **Maintenance** view that gathers
-every maintenance task exposed by `ha-reefbeat-component` as if the whole
-maintenance subsystem were a single device.
+every maintenance task exposed by `ha-reefbeat-component`,
+`ha-reef-maintenance-component` and `ha-aquamedic-component` as if the whole
+maintenance subsystem were a single device. The view looks for the marker any of
+them puts on its entities, not for a particular integration.
 
 Each task is displayed as a progress bar showing how much of its interval has
 elapsed, with a color driven by the remaining time:

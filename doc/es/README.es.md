@@ -28,7 +28,11 @@
 La **Reef card** para Home Assistant le ayuda a gestionar su acuario de arrecife.
 
 Combinada con [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), soporta automáticamente sus
-dispositivos Redsea (ReefBeat).
+dispositivos Redsea (ReefBeat), y [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+añade a la vista de mantenimiento el equipo con el que Home Assistant no puede comunicarse.
+
+La compatibilidad con los dispositivos Aqua Medic de [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component)
+está en camino; sus tareas de mantenimiento ya aparecen en esa misma vista.
 
 <!-- ecosystem:start -->
 
@@ -230,16 +234,15 @@ ReefATO+ con ha-reef-card en acción:
 
 [![Ver el vídeo](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-La tarjeta ReefATO+ dibuja todo el circuito de reposición tal y como está
-instalado: el controlador y sus tres tomas, el depósito de agua osmotizada con su
-bomba, la sonda de nivel sujeta al cristal y la sonda de fugas en el suelo.
+La tarjeta ReefATO+ permite gobernar visualmente el controlador RSATO+, el
+depósito de agua osmotizada con su bomba, la sonda de nivel sujeta al cristal y
+la sonda de fugas en el suelo.
 
-La sonda de nivel es el propio ReefATO+ y siempre se dibuja. La **bomba** y la
-**sonda de fugas** son opcionales, y cada una es una capa transparente colocada
-sobre la imagen de fondo, no una parte de ella. La que el dispositivo no reporta
-no se dibuja en absoluto, y los controles que dependen de ella se ocultan con
-ella: un ReefATO+ sin sonda de fugas muestra una tarjeta sin sonda de fugas, no
-una sonda atenuada.
+La sonda de nivel del ReefATO+ siempre se dibuja. La **bomba** y la **sonda de
+fugas** son opcionales. La que el dispositivo no reporta no se dibuja en
+absoluto, y los controles que dependen de ella se ocultan con ella: un ReefATO+
+sin sonda de fugas muestra una tarjeta sin sonda de fugas, no una sonda
+atenuada.
 
 <img src="../img/rsato/rsato_zones.png"/>
 
@@ -288,9 +291,9 @@ el dispositivo (Auto, Manual, Fuga…), traducido al idioma de Home Assistant.
 
 Los tres iconos siguen las tres tomas del panel frontal, en el mismo orden: de
 izquierda a derecha la **bomba de reposición**, la **sonda de fugas** y la **sonda
-de nivel**. Cada uno abre lo que el dispositivo reporta sobre ese accesorio, algo
-que la imagen solo puede insinuar. Los iconos de la bomba y de la sonda de fugas
-desaparecen junto con el accesorio cuando su toma no se usa.
+de nivel**. Cada uno abre un diálogo dedicado a ese accesorio. Los iconos de la
+bomba y de la sonda de fugas desaparecen junto con el accesorio cuando su toma no
+se usa.
 
 <span>El icono de la bomba <img src="../img/mdi/mdi_pump.png" width="30"/> muestra el estado de funcionamiento, el consumo y el caudal medidos, los tres umbrales de corriente con los que el firmware decide si hay marcha en seco o bloqueo, y qué provocó el último llenado.</span>
 
@@ -317,17 +320,16 @@ gobiernan su bomba a mano:
   <tr>
     <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Llenar</b><br/>Inicia un llenado manual</td>
     <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Parar</b><br/>Detiene el llenado en curso</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Reanudar</b><br/>Devuelve la bomba al dispositivo</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Reanudar</b><br/>Reactiva la bomba</td>
   </tr>
 </table>
 
-El agua del depósito es una proporción real de volúmenes: el volumen restante
-sobre la capacidad del depósito declarada en la integración. La parte baja de la
-escala es el residuo que la bomba no puede aspirar, así que un depósito vacío
-sigue mostrando una línea de agua, y la parte alta es el borde del recipiente de
-la imagen. Por debajo del 10 % el agua parpadea.
+Esta parte muestra el nivel de la reserva de agua, calculado a partir de la
+capacidad declarada del depósito y del valor real. Un depósito vacío sigue
+mostrando una línea de agua: la que la bomba no puede aspirar. Por debajo del
+10 % el agua parpadea, para indicar que el depósito pronto estará vacío.
 
-Pulsar sobre el agua abre el diálogo del depósito, donde se puede corregir la
+Pulsar sobre el agua abre el diálogo del depósito, donde se puede editar la
 capacidad:
 
 <img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
@@ -336,9 +338,7 @@ La cifra abajo a la izquierda del depósito es la **autonomía**: los días que
 quedan antes de que se seque, calculados por la integración a partir del consumo
 diario medio. Al pulsarla se abre su ficha de información.
 
-Mientras hay un llenado en curso, el agua sale por la salida sobre el sump — la
-animación sigue la velocidad de la bomba y se detiene con ella, así que una
-imagen quieta significa una bomba parada.
+Mientras hay un llenado en curso, el agua sale por la salida sobre el sump.
 
 <img src="../img/rsato/zone_3_filling.png"/>
 
@@ -375,12 +375,7 @@ La sonda solo se dibuja cuando está físicamente conectada. Conectada pero
 desactivada en la aplicación, aparece atenuada: está ahí, no detecta nada.
 
 Cuando se detecta agua, la sonda parpadea y un charco se extiende al pie de la
-imagen. El dispositivo indica de qué lado viene el agua, y esa es la mitad de la
-información que merece mostrarse — agua dulce de la línea osmotizada no es el
-mismo problema que agua salada del acuario — así que el charco se dibuja en el
-lado correspondiente: a la izquierda bajo el depósito, a la derecha bajo el
-acuario. Una fuga reportada sin un lado legible se extiende por todo el ancho en
-lugar de suponer uno.
+imagen.
 
 <table>
   <tr>
@@ -401,9 +396,7 @@ lugar de suponer uno.
 
 ---
 
-Aquí el nivel de agua no es un porcentaje: la sonda indica cuál de sus marcas ha
-alcanzado la superficie, y cada estado se dibuja a la altura de esa marca sobre
-el cristal.
+El nivel de agua de esta parte indica el estado de detección de la sonda ATO.
 
 | Estado          | Significado                                                        |
 | --------------- | ------------------------------------------------------------------ |
@@ -1194,8 +1187,10 @@ La vista de mantenimiento de ha-reef-card en acción:
 
 Más allá de las vistas por dispositivo, la tarjeta ofrece una vista
 **Mantenimiento** que reúne todas las tareas de mantenimiento expuestas por
-`ha-reefbeat-component`, como si todo el subsistema de mantenimiento fuera un
-único dispositivo.
+`ha-reefbeat-component`, `ha-reef-maintenance-component` y
+`ha-aquamedic-component`, como si todo el subsistema de mantenimiento fuera un
+único dispositivo. La vista busca la marca que cada una de ellas pone en sus
+entidades, no una integración concreta.
 
 Cada tarea se muestra como una barra de progreso que indica qué parte de su
 intervalo ha transcurrido, con un color que depende del tiempo restante:

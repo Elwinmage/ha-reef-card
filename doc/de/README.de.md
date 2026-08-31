@@ -28,7 +28,11 @@ Ihre Sprache wird noch nicht unterstützt und Sie möchten bei der Übersetzung 
 Die **Reef card** für Home Assistant hilft Ihnen bei der Verwaltung Ihres Riffaquariums.
 
 In Kombination mit [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) werden Ihre Redsea-Geräte
-(ReefBeat) automatisch unterstützt.
+(ReefBeat) automatisch unterstützt, und [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+ergänzt die Wartungsansicht um Geräte, mit denen Home Assistant nicht sprechen kann.
+
+Die Unterstützung der Aqua-Medic-Geräte von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) ist
+in Arbeit; ihre Wartungsaufgaben erscheinen bereits in derselben Ansicht.
 
 <!-- ecosystem:start -->
 
@@ -230,17 +234,15 @@ ReefATO+ mit ha-reef-card in Aktion:
 
 [![Video ansehen](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-Die ReefATO+-Karte zeichnet den gesamten Nachfüllkreis so, wie er verrohrt ist:
-den Controller mit seinen drei Buchsen, den Osmosewasser-Vorratsbehälter mit
-seiner Pumpe, die am Beckenrand geklemmte Füllstandssonde und die Lecksonde am
-Boden.
+Die ReefATO+-Karte ist eine visuelle Bedienung für den RSATO+-Controller, den
+Osmosewasser-Vorratsbehälter mit seiner Pumpe, die am Beckenrand geklemmte
+Füllstandssonde und die Lecksonde am Boden.
 
-Die Füllstandssonde ist der ReefATO+ selbst und wird immer gezeichnet. Die
-**Pumpe** und die **Lecksonde** sind optional, und beide sind eine transparente
-Ebene über dem Hintergrundbild, kein Teil davon. Was das Gerät nicht meldet, wird
-gar nicht gezeichnet, und die davon abhängigen Bedienelemente verschwinden mit
-ihm: ein ReefATO+ ohne Lecksonde zeigt eine Karte ohne Lecksonde, keine
-ausgegraute Sonde.
+Die Füllstandssonde des ReefATO+ wird immer gezeichnet. Die **Pumpe** und die
+**Lecksonde** sind optional. Was das Gerät nicht meldet, wird gar nicht
+gezeichnet, und die davon abhängigen Bedienelemente verschwinden mit ihm: ein
+ReefATO+ ohne Lecksonde zeigt eine Karte ohne Lecksonde, keine ausgegraute
+Sonde.
 
 <img src="../img/rsato/rsato_zones.png"/>
 
@@ -289,9 +291,9 @@ Der Text auf der Controller-Front ist der vom Gerät gemeldete **Betriebsmodus**
 
 Die drei Symbole folgen den drei Buchsen der Frontplatte, in derselben
 Reihenfolge: von links nach rechts die **Nachfüllpumpe**, die **Lecksonde** und
-die **Füllstandssonde**. Jedes öffnet, was das Gerät über dieses Zubehör meldet
-und das Bild nur andeuten kann. Die Symbole der Pumpe und der Lecksonde
-verschwinden mit dem Zubehör, wenn dessen Buchse unbelegt ist.
+die **Füllstandssonde**. Jedes öffnet einen eigenen Dialog für dieses Zubehör.
+Die Symbole der Pumpe und der Lecksonde verschwinden mit dem Zubehör, wenn dessen
+Buchse unbelegt ist.
 
 <span>Das Pumpensymbol <img src="../img/mdi/mdi_pump.png" width="30"/> zeigt den Betriebszustand, den gemessenen Verbrauch und die Fördermenge, die drei Stromschwellen, anhand derer die Firmware Trockenlauf oder Blockade erkennt, und was die letzte Füllung ausgelöst hat.</span>
 
@@ -318,18 +320,17 @@ seine Pumpe von Hand steuern:
   <tr>
     <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Füllen</b><br/>Startet eine manuelle Füllung</td>
     <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Stoppen</b><br/>Bricht die laufende Füllung ab</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Fortsetzen</b><br/>Gibt die Pumpe an das Gerät zurück</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Fortsetzen</b><br/>Aktiviert die Pumpe wieder</td>
   </tr>
 </table>
 
-Das Wasser im Behälter ist ein echtes Mengenverhältnis: die Restmenge im
-Verhältnis zur in der Integration hinterlegten Behältergröße. Das untere Ende der
-Skala ist der Rest, den die Pumpe nicht ansaugen kann, deshalb zeigt auch ein
-leerer Behälter noch eine Wasserlinie; das obere Ende ist der Rand des Kanisters
-im Bild. Unter 10 % blinkt das Wasser.
+Dieser Teil zeigt den Stand des Wasservorrats, berechnet aus der hinterlegten
+Behältergröße und dem tatsächlichen Wert. Ein leerer Behälter zeigt weiterhin
+eine Wasserlinie — die, die die Pumpe nicht ansaugen kann. Unter 10 % blinkt das
+Wasser, um zu sagen, dass der Behälter bald leer ist.
 
 Ein Klick auf das Wasser öffnet den Behälterdialog, in dem sich die Größe
-korrigieren lässt:
+bearbeiten lässt:
 
 <img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
 
@@ -337,9 +338,7 @@ Die Zahl unten links am Behälter ist die **Reichweite**: die verbleibenden Tage
 bis er leer ist, von der Integration aus dem mittleren Tagesverbrauch berechnet.
 Ein Klick darauf öffnet die zugehörige Info-Ansicht.
 
-Während einer Füllung fließt Wasser aus dem Auslass über dem Technikbecken — die
-Animation folgt der Pumpendrehzahl und hört mit ihr auf, ein stehendes Bild heißt
-also stehende Pumpe.
+Während einer Füllung fließt Wasser aus dem Auslass über dem Technikbecken.
 
 <img src="../img/rsato/zone_3_filling.png"/>
 
@@ -377,12 +376,7 @@ aber in der App abgeschaltet, erscheint sie ausgegraut: sie ist da, sie erkennt
 nichts.
 
 Wird Wasser erkannt, blinkt die Sonde und eine Pfütze breitet sich am Fuß des
-Bildes aus. Das Gerät meldet, von welcher Seite das Wasser kam, und das ist die
-Hälfte der Information, die zu zeigen sich lohnt — Süßwasser aus der Osmoseleitung
-ist ein anderes Problem als Salzwasser aus dem Becken. Deshalb wird die Pfütze auf
-der passenden Seite gezeichnet: links unter dem Behälter, rechts unter dem
-Aquarium. Ein Leck ohne lesbare Seite breitet sich über die volle Breite aus,
-statt eine zu erraten.
+Bildes aus.
 
 <table>
   <tr>
@@ -403,9 +397,7 @@ statt eine zu erraten.
 
 ---
 
-Der Wasserstand ist hier kein Prozentwert: Die Sonde meldet, welche ihrer Marken
-die Oberfläche erreicht hat, und jeder Zustand wird auf der Höhe dieser Marke an
-der Scheibe gezeichnet.
+Der Wasserstand in diesem Teil zeigt den Erkennungszustand der ATO-Sonde.
 
 | Zustand     | Bedeutung                                                             |
 | ----------- | --------------------------------------------------------------------- |
@@ -1353,9 +1345,11 @@ Die Wartungsansicht von ha-reef-card in Aktion:
 <img src="../img/maintenance/overview.png"/>
 
 Über die gerätebezogenen Ansichten hinaus bietet die Karte eine
-**Wartungsansicht**, die alle von `ha-reefbeat-component` bereitgestellten
+**Wartungsansicht**, die alle von `ha-reefbeat-component`,
+`ha-reef-maintenance-component` und `ha-aquamedic-component` bereitgestellten
 Wartungsaufgaben zusammenfasst, als wäre das gesamte Wartungssystem ein einziges
-Gerät.
+Gerät. Die Ansicht sucht nach der Markierung, die jede von ihnen auf ihren
+Entitäten setzt, nicht nach einer bestimmten Integration.
 
 Jede Aufgabe erscheint als Fortschrittsbalken, der zeigt, welcher Teil ihres
 Intervalls verstrichen ist, mit einer Farbe je nach Restzeit:

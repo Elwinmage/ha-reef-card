@@ -28,7 +28,11 @@ Twój język nie jest jeszcze obsługiwany i chcesz pomóc w tłumaczeniu? Post�
 **Reef card** dla Home Assistant pomaga zarządzać akwarium rafowym.
 
 W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) automatycznie obsługuje urządzenia
-Redsea (ReefBeat).
+Redsea (ReefBeat), a [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component) dodaje do
+widoku konserwacji sprzęt, z którym Home Assistant nie potrafi się porozumieć.
+
+Obsługa urządzeń Aqua Medic z [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) jest w drodze;
+ich zadania konserwacyjne pojawiają się już w tym samym widoku.
 
 <!-- ecosystem:start -->
 
@@ -230,15 +234,14 @@ ReefATO+ z ha-reef-card w akcji:
 
 [![Obejrzyj film](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-Karta ReefATO+ rysuje cały obieg uzupełniania wody tak, jak jest on
-zainstalowany: sterownik z trzema gniazdami, zbiornik wody osmotycznej z pompą,
-sondę poziomu przypiętą do szyby i sondę zalania leżącą na podłodze.
+Karta ReefATO+ pozwala wizualnie sterować sterownikiem RSATO+, zbiornikiem wody
+osmotycznej z pompą, sondą poziomu przypiętą do szyby i sondą zalania leżącą na
+podłodze.
 
-Sonda poziomu to sam ReefATO+ i jest rysowana zawsze. **Pompa** i **sonda
-zalania** są opcjonalne, a każda z nich to przezroczysta warstwa nałożona na
-zdjęcie tła, a nie jego część. To, czego urządzenie nie zgłasza, nie jest w ogóle
-rysowane, a zależne od tego przyciski znikają razem z nim: ReefATO+ bez sondy
-zalania pokazuje kartę bez sondy zalania, a nie sondę wyszarzoną.
+Sonda poziomu ReefATO+ jest rysowana zawsze. **Pompa** i **sonda zalania** są
+opcjonalne. To, czego urządzenie nie zgłasza, nie jest w ogóle rysowane, a
+zależne od tego przyciski znikają razem z nim: ReefATO+ bez sondy zalania
+pokazuje kartę bez sondy zalania, a nie sondę wyszarzoną.
 
 <img src="../img/rsato/rsato_zones.png"/>
 
@@ -287,9 +290,8 @@ Ręczny, Zalanie…), przetłumaczony na język Home Assistant.
 
 Trzy ikony odpowiadają trzem gniazdom na panelu przednim, w tej samej kolejności:
 od lewej do prawej **pompa uzupełniająca**, **sonda zalania** i **sonda
-poziomu**. Każda otwiera to, co urządzenie zgłasza o danym akcesorium, a czego
-zdjęcie może tylko się domyślać. Ikony pompy i sondy zalania znikają razem z
-akcesorium, gdy ich gniazdo nie jest używane.
+poziomu**. Każda otwiera okno dialogowe poświęcone temu akcesorium. Ikony pompy i
+sondy zalania znikają razem z akcesorium, gdy ich gniazdo nie jest używane.
 
 <span>Ikona pompy <img src="../img/mdi/mdi_pump.png" width="30"/> pokazuje stan pracy, zmierzone zużycie i wydajność, trzy progi prądowe, według których firmware rozpoznaje pracę na sucho lub zablokowanie, oraz to, co wywołało ostatnie napełnianie.</span>
 
@@ -316,16 +318,16 @@ sterujące jego pompą ręcznie:
   <tr>
     <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Napełnij</b><br/>Uruchamia ręczne napełnianie</td>
     <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Zatrzymaj</b><br/>Przerywa trwające napełnianie</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Wznów</b><br/>Oddaje pompę urządzeniu</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Wznów</b><br/>Ponownie włącza pompę</td>
   </tr>
 </table>
 
-Woda w zbiorniku to prawdziwy stosunek objętości: objętość pozostała do
-pojemności zbiornika zadeklarowanej w integracji. Dół skali to resztka, której
-pompa nie jest w stanie zassać, więc pusty zbiornik wciąż pokazuje linię wody, a
-góra skali to krawędź pojemnika na zdjęciu. Poniżej 10 % woda miga.
+Ta część pokazuje poziom zapasu wody, wyliczony z zadeklarowanej pojemności
+zbiornika i rzeczywistej wartości. Pusty zbiornik wciąż pokazuje linię wody — tę,
+której pompa nie jest w stanie zassać. Poniżej 10 % woda miga, sygnalizując, że
+zbiornik wkrótce się opróżni.
 
-Kliknięcie wody otwiera okno zbiornika, w którym można poprawić pojemność:
+Kliknięcie wody otwiera okno zbiornika, w którym można edytować pojemność:
 
 <img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
 
@@ -333,9 +335,7 @@ Liczba w lewym dolnym rogu zbiornika to **zapas**: liczba dni pozostałych do je
 opróżnienia, wyliczona przez integrację ze średniego zużycia dziennego.
 Kliknięcie jej otwiera kartę informacyjną.
 
-W trakcie napełniania woda wypływa z wylotu nad sumpem — animacja podąża za
-prędkością pompy i zatrzymuje się razem z nią, więc nieruchomy obraz oznacza
-zatrzymaną pompę.
+W trakcie napełniania woda wypływa z wylotu nad sumpem.
 
 <img src="../img/rsato/zone_3_filling.png"/>
 
@@ -372,11 +372,6 @@ Sonda jest rysowana tylko wtedy, gdy jest fizycznie podłączona. Podłączona, 
 wyłączona w aplikacji, jest wyszarzona: jest na miejscu, ale niczego nie wykrywa.
 
 Gdy woda zostanie wykryta, sonda miga, a u dołu obrazu rozlewa się kałuża.
-Urządzenie podaje, z której strony przyszła woda, i to jest ta połowa informacji,
-którą warto pokazać — słodka woda z linii osmotycznej to nie ten sam problem co
-słona woda z akwarium — więc kałuża jest rysowana po odpowiedniej stronie: po
-lewej pod zbiornikiem, po prawej pod akwarium. Zalanie zgłoszone bez czytelnej
-strony rozlewa się na całą szerokość, zamiast zgadywać.
 
 <table>
   <tr>
@@ -397,8 +392,7 @@ strony rozlewa się na całą szerokość, zamiast zgadywać.
 
 ---
 
-Poziom wody nie jest tu procentem: sonda podaje, którą ze swoich kresek osiągnęła
-powierzchnia, a każdy stan jest rysowany na wysokości tej kreski na szybie.
+Poziom wody w tej części pokazuje stan wykrywania sondy ATO.
 
 | Stan            | Znaczenie                                               |
 | --------------- | ------------------------------------------------------- |
@@ -1186,8 +1180,10 @@ Widok konserwacji w ha-reef-card w akcji:
 
 Poza widokami poszczególnych urządzeń karta oferuje widok **Konserwacja**, który
 zbiera wszystkie zadania konserwacyjne udostępniane przez
-`ha-reefbeat-component`, tak jakby cały podsystem konserwacji był jednym
-urządzeniem.
+`ha-reefbeat-component`, `ha-reef-maintenance-component` i
+`ha-aquamedic-component`, tak jakby cały podsystem konserwacji był jednym
+urządzeniem. Widok szuka znacznika, który każda z nich umieszcza na swoich
+encjach, a nie konkretnej integracji.
 
 Każde zadanie jest pokazane jako pasek postępu wskazujący, jaka część jego
 interwału już minęła, w kolorze zależnym od pozostałego czasu:

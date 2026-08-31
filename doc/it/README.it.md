@@ -28,7 +28,11 @@ La vostra lingua non è ancora supportata e volete contribuire alla traduzione? 
 La **Reef card** per Home Assistant vi aiuta a gestire il vostro acquario di barriera corallina.
 
 Abbinata a [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), supporta automaticamente i vostri
-dispositivi Redsea (ReefBeat).
+dispositivi Redsea (ReefBeat), e [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+aggiunge alla vista manutenzione le attrezzature con cui Home Assistant non può dialogare.
+
+Il supporto per i dispositivi Aqua Medic di [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) è
+in arrivo; le loro attività di manutenzione compaiono già nella stessa vista.
 
 <!-- ecosystem:start -->
 
@@ -230,17 +234,15 @@ ReefATO+ con ha-reef-card in azione:
 
 [![Guarda il video](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-La card ReefATO+ disegna l'intero circuito di rabbocco così com'è idraulicamente
-montato: il controller e le sue tre prese, il serbatoio di acqua osmotica con la
-sua pompa, la sonda di livello agganciata alla vasca e la sonda di perdita
-appoggiata a terra.
+La card ReefATO+ permette di gestire visivamente il controller RSATO+, il
+serbatoio di acqua osmotica con la sua pompa, la sonda di livello agganciata alla
+vasca e la sonda di perdita appoggiata a terra.
 
-La sonda di livello è il ReefATO+ stesso ed è sempre disegnata. La **pompa** e la
-**sonda di perdita** sono opzionali, e ognuna è un livello trasparente
-sovrapposto all'immagine di sfondo, non una sua parte. Quella che il dispositivo
-non segnala non viene disegnata affatto, e i comandi che ne dipendono spariscono
-con lei: un ReefATO+ senza sonda di perdita mostra una card senza sonda di
-perdita, non una sonda in grigio.
+La sonda di livello del ReefATO+ è sempre disegnata. La **pompa** e la **sonda di
+perdita** sono opzionali. Quella che il dispositivo non segnala non viene
+disegnata affatto, e i comandi che ne dipendono spariscono con lei: un ReefATO+
+senza sonda di perdita mostra una card senza sonda di perdita, non una sonda in
+grigio.
 
 <img src="../img/rsato/rsato_zones.png"/>
 
@@ -290,9 +292,9 @@ Assistant.
 
 Le tre icone seguono le tre prese del pannello frontale, nello stesso ordine: da
 sinistra a destra la **pompa di rabbocco**, la **sonda di perdita** e la **sonda
-di livello**. Ognuna apre ciò che il dispositivo riporta su quell'accessorio, che
-l'immagine può solo suggerire. Le icone della pompa e della sonda di perdita
-spariscono insieme all'accessorio quando la loro presa non è usata.
+di livello**. Ognuna apre una finestra dedicata a quell'accessorio. Le icone
+della pompa e della sonda di perdita spariscono insieme all'accessorio quando la
+loro presa non è usata.
 
 <span>L'icona della pompa <img src="../img/mdi/mdi_pump.png" width="30"/> mostra lo stato di funzionamento, il consumo e la portata misurati, le tre soglie di corrente con cui il firmware decide se c'è funzionamento a secco o blocco, e che cosa ha innescato l'ultimo riempimento.</span>
 
@@ -319,17 +321,16 @@ comandano la sua pompa a mano:
   <tr>
     <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Riempi</b><br/>Avvia un riempimento manuale</td>
     <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Ferma</b><br/>Ferma il riempimento in corso</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Riprendi</b><br/>Restituisce la pompa al dispositivo</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Riprendi</b><br/>Riattiva la pompa</td>
   </tr>
 </table>
 
-L'acqua nel serbatoio è un vero rapporto di volumi: il volume rimanente sulla
-capacità del serbatoio dichiarata nell'integrazione. Il fondo della scala è il
-residuo che la pompa non riesce ad aspirare, quindi un serbatoio vuoto mostra
-ancora una linea d'acqua, e la cima della scala è il bordo del contenitore
-nell'immagine. Sotto il 10 % l'acqua lampeggia.
+Questa parte mostra il livello della riserva d'acqua, calcolato dalla capacità
+dichiarata del serbatoio e dal valore reale. Un serbatoio vuoto mostra comunque
+una linea d'acqua: quella che la pompa non riesce ad aspirare. Sotto il 10 %
+l'acqua lampeggia, per dire che il serbatoio sarà presto vuoto.
 
-Cliccare sull'acqua apre la finestra del serbatoio, dove si può correggere la
+Cliccare sull'acqua apre la finestra del serbatoio, dove si può modificare la
 capacità:
 
 <img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
@@ -338,9 +339,7 @@ Il numero in basso a sinistra del serbatoio è l'**autonomia**: i giorni che
 mancano prima che si svuoti, calcolati dall'integrazione a partire dal consumo
 giornaliero medio. Cliccandolo si apre la sua scheda informativa.
 
-Durante un riempimento l'acqua esce dall'uscita sopra la sump — l'animazione
-segue la velocità della pompa e si ferma con lei, quindi un'immagine immobile
-significa pompa ferma.
+Durante un riempimento l'acqua esce dall'uscita sopra la sump.
 
 <img src="../img/rsato/zone_3_filling.png"/>
 
@@ -377,12 +376,7 @@ La sonda è disegnata solo quando è fisicamente collegata. Collegata ma disatti
 nell'app, appare in grigio: c'è, ma non rileva nulla.
 
 Quando viene rilevata acqua, la sonda lampeggia e una pozza si allarga ai piedi
-dell'immagine. Il dispositivo dice da quale lato è arrivata l'acqua, ed è la metà
-dell'informazione che vale la pena mostrare — acqua dolce dalla linea osmotica non
-è lo stesso problema dell'acqua salata dalla vasca — quindi la pozza è disegnata
-dal lato corrispondente: a sinistra sotto il serbatoio, a destra sotto
-l'acquario. Una perdita segnalata senza un lato leggibile si allarga su tutta la
-larghezza invece di indovinarne uno.
+dell'immagine.
 
 <table>
   <tr>
@@ -403,9 +397,8 @@ larghezza invece di indovinarne uno.
 
 ---
 
-Qui il livello dell'acqua non è una percentuale: la sonda indica quale delle sue
-tacche la superficie ha raggiunto, e ogni stato è disegnato all'altezza di quella
-tacca sul vetro.
+Il livello dell'acqua in questa parte indica lo stato di rilevamento della sonda
+ATO.
 
 | Stato            | Significato                                                  |
 | ---------------- | ------------------------------------------------------------ |
@@ -1199,7 +1192,10 @@ La vista manutenzione di ha-reef-card in azione:
 
 Oltre alle viste per apparecchio, la card offre una vista **Manutenzione** che
 raccoglie tutte le attività di manutenzione esposte da `ha-reefbeat-component`,
-come se l'intero sottosistema di manutenzione fosse un unico dispositivo.
+`ha-reef-maintenance-component` e `ha-aquamedic-component`, come se l'intero
+sottosistema di manutenzione fosse un unico dispositivo. La vista cerca il
+marcatore che ognuna di esse mette sulle proprie entità, non una particolare
+integrazione.
 
 Ogni attività è mostrata come una barra di avanzamento che indica quanta parte
 del suo intervallo è trascorsa, con un colore legato al tempo rimanente:

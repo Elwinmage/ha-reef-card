@@ -28,7 +28,11 @@ Votre langue n'est pas encore supportée et vous souhaitez aider à la traductio
 La **Reef card** pour Home Assistant vous aide à gérer votre aquarium récifal.
 
 Couplée à [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component), elle prend automatiquement en charge
-vos appareils Redsea (ReefBeat).
+vos appareils Redsea (ReefBeat), et [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+ajoute à la vue maintenance le matériel avec lequel Home Assistant ne peut pas dialoguer.
+
+La prise en charge des appareils Aqua Medic de [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component)
+arrive ; leurs tâches de maintenance apparaissent déjà dans cette même vue.
 
 <!-- ecosystem:start -->
 
@@ -230,16 +234,15 @@ ReefATO+ avec ha-reef-card en action :
 
 [![Regarder la vidéo](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
 
-La carte ReefATO+ dessine toute la boucle d'appoint telle qu'elle est plombée :
-le contrôleur et ses trois prises, le réservoir d'eau osmosée et sa pompe, la
-sonde de niveau clipsée sur la cuve, et la sonde de fuite posée au sol.
+La carte ReefATO+ permet de gérer visuellement le contrôleur RSATO+, le
+réservoir d'eau osmosée et sa pompe, la sonde de niveau clipsée sur la cuve, et
+la sonde de fuite posée au sol.
 
-La sonde de niveau est le ReefATO+ lui-même et est toujours dessinée. La
-**pompe** et la **sonde de fuite** sont optionnelles, et chacune est un calque
-transparent posé sur l'image de fond plutôt qu'une partie de celle-ci. Celle que
-l'appareil ne signale pas n'est pas dessinée du tout, et les commandes qui en
-dépendent sont masquées avec elle : un ReefATO+ sans sonde de fuite affiche une
-carte sans sonde de fuite, pas une sonde grisée.
+La sonde de niveau du ReefATO+ est toujours dessinée. La **pompe** et la **sonde
+de fuite** sont optionnelles. Celle que l'appareil ne signale pas n'est pas
+dessinée du tout, et les commandes qui en dépendent sont masquées avec elle : un
+ReefATO+ sans sonde de fuite affiche une carte sans sonde de fuite, pas une sonde
+grisée.
 
 <img src="../img/rsato/rsato_zones.png"/>
 
@@ -288,9 +291,9 @@ l'appareil (Auto, Manuel, Fuite…), traduit dans la langue de Home Assistant.
 
 Les trois icônes suivent les trois prises de la face avant, dans le même ordre :
 de gauche à droite la **pompe d'appoint**, la **sonde de fuite** et la **sonde de
-niveau**. Chacune ouvre ce que l'appareil remonte sur cet accessoire, ce que
-l'image ne peut que suggérer. Les icônes de la pompe et de la sonde de fuite
-disparaissent avec l'accessoire quand leur prise est inutilisée.
+niveau**. Chacune ouvre une boîte de dialogue dédiée à l'accessoire. Les icônes
+de la pompe et de la sonde de fuite disparaissent avec l'accessoire quand leur
+prise est inutilisée.
 
 <span>L'icône de la pompe <img src="../img/mdi/mdi_pump.png" width="30"/> montre l'état de marche, la consommation et le débit mesurés, les trois seuils de courant auxquels le firmware se réfère pour déclarer une marche à sec ou un blocage, et ce qui a déclenché le dernier remplissage.</span>
 
@@ -317,18 +320,17 @@ boutons qui pilotent sa pompe à la main :
   <tr>
     <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Remplir</b><br/>Démarre un remplissage manuel</td>
     <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Arrêter</b><br/>Arrête le remplissage en cours</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Reprendre</b><br/>Rend la pompe à l'appareil</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Reprendre</b><br/>Réactive la pompe</td>
   </tr>
 </table>
 
-L'eau du réservoir est un vrai rapport de volumes : le volume restant sur la
-capacité du réservoir déclarée dans l'intégration. Le bas de l'échelle est le
-résidu que la pompe ne peut pas siphonner, donc un réservoir vide montre encore
-une ligne d'eau, et le haut de l'échelle est le rebord du bidon sur l'image. En
-dessous de 10 %, l'eau clignote.
+Cette partie indique visuellement le niveau de la réserve d'eau, calculé depuis
+la capacité du réservoir et la valeur réelle. Un réservoir vide montre toujours
+une ligne d'eau, celle que la pompe ne peut pas remonter. En dessous de 10 %,
+l'eau clignote pour signifier que le réservoir sera bientôt vide.
 
 Cliquer sur l'eau ouvre la boîte de dialogue du réservoir, où la capacité peut
-être corrigée :
+être éditée :
 
 <img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
 
@@ -336,9 +338,7 @@ Le chiffre en bas à gauche du réservoir est l'**autonomie** : le nombre de jou
 restants avant qu'il ne soit à sec, calculé par l'intégration à partir de la
 consommation quotidienne moyenne. Cliquer dessus ouvre sa fiche détaillée.
 
-Pendant un remplissage, l'eau s'écoule à la sortie au-dessus de la décantation —
-l'animation suit la vitesse de la pompe et s'arrête avec elle, donc une image
-immobile signifie une pompe à l'arrêt.
+Pendant un remplissage, l'eau s'écoule à la sortie au-dessus de la décantation.
 
 <img src="../img/rsato/zone_3_filling.png"/>
 
@@ -376,12 +376,7 @@ désactivée dans l'application, elle est grisée : elle est là, elle ne détec
 rien.
 
 Quand de l'eau est détectée, la sonde clignote et une flaque s'étale au pied de
-l'image. L'appareil indique de quel côté vient l'eau, et c'est la moitié de
-l'information qui mérite d'être montrée — de l'eau douce venant de la ligne
-osmosée n'est pas le même problème que de l'eau salée venant de la cuve — donc la
-flaque est dessinée du côté correspondant : à gauche sous le réservoir, à droite
-sous l'aquarium. Une fuite signalée sans côté lisible s'étale sur toute la
-largeur plutôt que d'en supposer un.
+l'image.
 
 <table>
   <tr>
@@ -402,9 +397,8 @@ largeur plutôt que d'en supposer un.
 
 ---
 
-Le niveau d'eau n'est pas un pourcentage ici : la sonde indique laquelle de ses
-marques la surface a atteinte, et chaque état est dessiné à la hauteur de cette
-marque sur la vitre.
+Le niveau de l'eau dans cette partie indique l'état de détection du capteur
+ATO.
 
 | État            | Signification                                                   |
 | --------------- | --------------------------------------------------------------- |
@@ -1198,8 +1192,10 @@ La vue maintenance de ha-reef-card en action :
 
 En plus des vues par appareil, la carte propose une vue **Maintenance** qui
 regroupe toutes les échéances de maintenance exposées par
-`ha-reefbeat-component`, comme si l'ensemble du sous-système de maintenance
-était un appareil à part entière.
+`ha-reefbeat-component`, `ha-reef-maintenance-component` et
+`ha-aquamedic-component`, comme si l'ensemble du sous-système de maintenance
+était un appareil à part entière. La vue cherche le marqueur que chacune d'elles
+pose sur ses entités, pas une intégration en particulier.
 
 Chaque tâche est affichée sous forme de barre de progression indiquant la part
 de l'intervalle déjà écoulée, avec une couleur qui dépend du temps restant :
