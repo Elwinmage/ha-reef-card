@@ -1356,6 +1356,65 @@ describe("DoseHead", () => {
     expect(el.config.calibration.css).toEqual({ color: "red" });
     spy.mockRestore();
   });
+
+  it("sizes the calibration image to its wrapper, not to itself", async () => {
+    // Without elt_css the <img> renders at its intrinsic size and ignores the
+    // width the mapping gave the wrapper, so the overlay spills over the card.
+    const restore = mockXHR(200);
+    const dh = makeDH();
+    dh.config.calibration = { css: { width: "76%", left: "20%", top: "8%" } };
+    dh.entities = {
+      supplement: { entity_id: "sensor.sup" },
+      head_state: { entity_id: "sensor.hs" },
+    };
+    dh._hass = makeHass_B({
+      "sensor.sup": makeState_B("Ca", "sensor.sup", {
+        supplement: { uid: "elt-css-uid", short_name: "Ca" },
+      }),
+      "sensor.hs": makeState_B("not-setup", "sensor.hs"),
+    });
+
+    const spy = vi
+      .spyOn(MyElement, "create_element")
+      .mockReturnValue({} as any);
+    dh._render();
+    restore();
+
+    const conf = spy.mock.calls.at(-1)?.[1] as any;
+    expect(conf.elt_css).toEqual({ width: "100%" });
+    // The wrapper keeps the positioning the mapping gave it.
+    expect(conf.css).toEqual({ width: "76%", left: "20%", top: "8%" });
+    spy.mockRestore();
+  });
+
+  it("lets the mapping override the calibration image sizing", async () => {
+    const restore = mockXHR(200);
+    const dh = makeDH();
+    dh.config.calibration = {
+      css: {},
+      elt_css: { width: "60%", opacity: "0.5" },
+    };
+    dh.entities = {
+      supplement: { entity_id: "sensor.sup" },
+      head_state: { entity_id: "sensor.hs" },
+    };
+    dh._hass = makeHass_B({
+      "sensor.sup": makeState_B("Ca", "sensor.sup", {
+        supplement: { uid: "elt-css-uid-2", short_name: "Ca" },
+      }),
+      "sensor.hs": makeState_B("not-setup", "sensor.hs"),
+    });
+
+    const spy = vi
+      .spyOn(MyElement, "create_element")
+      .mockReturnValue({} as any);
+    dh._render();
+    restore();
+
+    const conf = spy.mock.calls.at(-1)?.[1] as any;
+    expect(conf.elt_css).toEqual({ width: "60%", opacity: "0.5" });
+    spy.mockRestore();
+  });
 });
 describe("DoseHead.container_warning() — L216 and L217 reached", () => {
   async function makeDoseHead() {

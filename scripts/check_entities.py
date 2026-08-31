@@ -437,17 +437,26 @@ def extract_component_entities(component_dir: Path) -> dict[str, dict[str, list[
 # Patterns to find entity references in card TypeScript files
 # ---------------------------------------------------------------------------
 
+# A card reference may carry an explicit HA domain prefix ("sensor.water_level")
+# when two entities of the same device share one translation key and the mapping
+# has to pick one of them. Only the translation key is captured: the component
+# side is indexed by key, not by entity_id.
+_DOMAIN = r"(?:[a-z_]+\.)?"
+
 CARD_ENTITY_PATTERNS: list[re.Pattern[str]] = [
     # {"entity": "key"} or {entity: "key"} (with or without quotes around the key)
-    re.compile(r'["\']?entity["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
+    re.compile(r'["\']?entity["\']?\s*:\s*["\']' + _DOMAIN + r'([a-z_][a-z0-9_]*)["\']'),
     # entities['key'] or entities["key"]
-    re.compile(r"entities\[['\"]([ a-z_][a-z0-9_]*)['\"]"),
+    re.compile(r"entities\[['\"]" + _DOMAIN + r"([ a-z_][a-z0-9_]*)['\"]"),
     # "name": "snake_case_key"  — element key names in mapping objects
-    re.compile(r'["\']?name["\']?\s*:\s*["\']([a-z_][a-z0-9_]+)["\']'),
+    re.compile(r'["\']?name["\']?\s*:\s*["\']' + _DOMAIN + r'([a-z_][a-z0-9_]+)["\']'),
     # "entity_id": "key"
-    re.compile(r'["\']?entity_id["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
+    re.compile(r'["\']?entity_id["\']?\s*:\s*["\']' + _DOMAIN + r'([a-z_][a-z0-9_]*)["\']'),
     # "target": "key"  — progress-bar / progress-circle / *-target elements
-    re.compile(r'["\']?target["\']?\s*:\s*["\']([a-z_][a-z0-9_]*)["\']'),
+    re.compile(r'["\']?target["\']?\s*:\s*["\']' + _DOMAIN + r'([a-z_][a-z0-9_]*)["\']'),
+    # "value_entity": "key"  — overlay entity of a water-level element, which
+    # displays one entity and reads its level from another
+    re.compile(r'["\']?value_entity["\']?\s*:\s*["\']' + _DOMAIN + r'([a-z_][a-z0-9_]*)["\']'),
     # ${entity.key.state} — inline template expressions
     re.compile(r'\$\{entity\.([a-z_][a-z0-9_]*)'),
     # _pressButton("key") — indirect callService via entity translation_key

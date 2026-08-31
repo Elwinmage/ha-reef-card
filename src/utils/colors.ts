@@ -13,6 +13,12 @@ export const COLOR_NEUTRAL_0 = "rgb(150,150,150,0)";
 
 // Semi-transparent white card background
 export const COLOR_WHITE_60 = "rgba(255,255,255,0.6)";
+/** Opaque white. Charts want a hex colour, they do not accept rgba(). */
+export const COLOR_WHITE_HEX = "#ffffff";
+
+// Graph
+export const COLOR_ORANGE_HEX = "#dd772d";
+export const COLOR_BLUE_HEX = "#282dc9";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Button color

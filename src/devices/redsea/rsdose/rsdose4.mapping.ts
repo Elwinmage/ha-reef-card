@@ -224,6 +224,10 @@ export const config4 = {
         },
       },
       calibration: {
+        // Fills the positioned box below instead of rendering at its own size
+        elt_css: {
+          width: "100%",
+        },
         css: {
           //"flex": "0 0 auto",
           position: "absolute",
@@ -456,6 +460,10 @@ export const config4 = {
         },
       },
       calibration: {
+        // Fills the positioned box below instead of rendering at its own size
+        elt_css: {
+          width: "100%",
+        },
         css: {
           left: "17%",
         },
@@ -473,6 +481,10 @@ export const config4 = {
         },
       },
       calibration: {
+        // Fills the positioned box below instead of rendering at its own size
+        elt_css: {
+          width: "100%",
+        },
         css: {
           left: "20%",
         },

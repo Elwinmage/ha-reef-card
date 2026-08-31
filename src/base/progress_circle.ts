@@ -73,7 +73,7 @@ export class ProgressCircle extends SensorTarget {
    * @param _style: No used here
    */
   protected override _render(_style?: string): TemplateResult {
-    if (!this.hasTargetState() && typeof this.conf.target !== "number") {
+    if (!this.hasTargetState()) {
       const why = !this.stateObj
         ? `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`
         : `stateObjTarget not resolved for target="${(this.conf as any)?.target}" — set target_attribute if the target lives in the entity's attributes`;
@@ -101,12 +101,8 @@ export class ProgressCircle extends SensorTarget {
     }
     // Use SensorTarget helpers so value_attribute / target_attribute are honoured.
     const value = this.getValue();
-    let target = 100;
-    if (typeof this.conf.target === "number") {
-      target = this.conf.target;
-    } else {
-      target = this.getTargetValue();
-    }
+    // Numeric targets are resolved by SensorTarget.getTargetValue()
+    let target = this.getTargetValue();
     if (this.conf?.target_is_remaining) {
       target += value;
     }

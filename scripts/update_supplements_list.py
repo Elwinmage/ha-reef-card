@@ -155,7 +155,7 @@ def python_to_ts(indent: int, output: Path) -> bool:
     body = "\n".join(reindent(line) for line in body.splitlines())
 
     ts_content = (
-        'import { Supplement } from "../../types/supplement";\n\n'
+        'import { Supplement } from "../../../types/supplement";\n\n'
         "export const SUPPLEMENTS: Supplement[] = [\n"
         + body.rstrip()
         + ";\n"

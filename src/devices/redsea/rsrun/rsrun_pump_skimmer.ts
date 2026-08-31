@@ -26,9 +26,12 @@ export class RSSkimmer extends RSPump {
     this.load_dialogs([dialogs_rsrun_pump, dialogs_rsrun_pump_skimmer]);
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
+  override async connectedCallback() {
+    // Started before awaiting the base: RSDevice.connectedCallback() waits on
+    // loadCardHelpers(), and the foam animation must not be held hostage to a
+    // module load.
     this._bubbleInterval = setInterval(() => this._spawnBubbles(), 5000);
+    await super.connectedCallback();
   }
 
   override disconnectedCallback() {
@@ -139,7 +142,7 @@ export class RSSkimmer extends RSPump {
 
     return html`
       <div>
-        ${this._render_elements(pumpOn, "cables_" + this.id.toString())}
+        ${this._render_elements(pumpOn, "cables_" + this.pump_id.toString())}
         ${this._render_elements(pumpOn, "sensor")}
         <div class="skimmer-body">
           ${off_style}
@@ -159,7 +162,9 @@ export class RSSkimmer extends RSPump {
         </div>
         ${this._render_elements(pumpOn, "sensor_in")}
       </div>
-      <div>${this._render_elements(pumpOn, "ctrl_" + this.id.toString())}</div>
+      <div>
+        ${this._render_elements(pumpOn, "ctrl_" + this.pump_id.toString())}
+      </div>
       <div>${this._render_elements(pumpOn, "ctrl")}</div>
     `;
   }

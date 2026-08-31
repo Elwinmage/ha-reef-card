@@ -41,6 +41,7 @@ export type {
   ElementConfig,
   SensorConfig,
   ProgressConfig,
+  WaterLevelConfig,
   ButtonConfig,
   DialogContentConfig,
   DialogConfig,
@@ -58,6 +59,7 @@ export type {
   MaintenanceUnit,
   MaintenanceItem,
   MaintenanceGroup,
+  MaintenanceDeviceRef,
   MaintenanceCollectOptions,
 } from "./maintenance";
 

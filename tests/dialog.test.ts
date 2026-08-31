@@ -71,7 +71,7 @@ function makeElt_B(device?: any): any {
 function makeSR() {
   const host = document.createElement("div");
   const sr = host.attachShadow({ mode: "open" });
-  sr.innerHTML = `<div id="dialog-box"> <div id="bt_left"></div> <div id="bt_center"></div> <div id="bt_right"></div> <div id="dialog-close"></div> </div>`;
+  sr.innerHTML = `<div id="dialog-box"> <div id="dialog-content"></div> <div id="bt_left"></div> <div id="bt_center"></div> <div id="bt_right"></div> <div id="dialog-close"></div> </div>`;
   return sr;
 }
 function makeDlg(): any {
@@ -937,5 +937,101 @@ describe("Dialog hass setter — extends_to_re_render branch", () => {
     expect(() => {
       dlg.hass = makeHass_E();
     }).not.toThrow();
+  });
+});
+
+describe("Dialog._render_content() — unresolvable entities", () => {
+  /**
+   * `get_entity()` returns null for an entity the device does not expose, so
+   * reading `.entity_id` off it throws. The dialog drops that entry instead of
+   * letting the whole card blow up — and the warning has to survive a thrown
+   * value that is not an Error, which is what `catch (e)` actually binds.
+   */
+  function makeContentDlg(entities_conf: any) {
+    if (!customElements.get("fake-entities-card")) {
+      class FakeCard extends HTMLElement {
+        setConfig(_c: any) {}
+        hass: any = null;
+      }
+      customElements.define("fake-entities-card", FakeCard);
+    }
+    const dlg = makeDlg();
+    dlg._shadowRoot = makeSR();
+    return {
+      dlg,
+      conf: {
+        view: "fake-entities-card",
+        conf: { entities: entities_conf },
+      },
+    };
+  }
+
+  it("drops a string entity that cannot be resolved", () => {
+    const { dlg, conf } = makeContentDlg(["known", "missing"]);
+    dlg.elt = {
+      device: makeDevice(),
+      get_entity: (k: string) =>
+        k === "known" ? { entity_id: "sensor.known" } : null,
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() => dlg._render_content(conf)).not.toThrow();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("drops an object entity that cannot be resolved", () => {
+    const { dlg, conf } = makeContentDlg([{ entity: "missing" }]);
+    dlg.elt = { device: makeDevice(), get_entity: () => null };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() => dlg._render_content(conf)).not.toThrow();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("logs a thrown non-Error without crashing on its missing message", () => {
+    // A `catch` binds unknown: reading `.message` blind on a thrown string
+    // would replace the warning with a TypeError.
+    const { dlg, conf } = makeContentDlg(["missing"]);
+    dlg.elt = {
+      device: makeDevice(),
+      get_entity: () => {
+        throw "plain string, not an Error";
+      },
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() => dlg._render_content(conf)).not.toThrow();
+    expect(warn.mock.calls[0]![2]).toBe("plain string, not an Error");
+    warn.mockRestore();
+  });
+
+  it("drops a single unresolvable entity", () => {
+    if (!customElements.get("fake-single-card")) {
+      class FakeCard extends HTMLElement {
+        setConfig(_c: any) {}
+        hass: any = null;
+      }
+      customElements.define("fake-single-card", FakeCard);
+    }
+    const dlg = makeDlg();
+    dlg._shadowRoot = makeSR();
+    dlg.elt = {
+      device: makeDevice(),
+      get_entity: () => {
+        throw 42;
+      },
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() =>
+      dlg._render_content({
+        view: "fake-single-card",
+        conf: { entity: "missing" },
+      }),
+    ).not.toThrow();
+    expect(warn.mock.calls[0]![2]).toBe(42);
+    warn.mockRestore();
   });
 });

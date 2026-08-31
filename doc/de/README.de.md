@@ -28,25 +28,66 @@ Ihre Sprache wird noch nicht unterstützt und Sie möchten bei der Übersetzung 
 Die **Reef card** für Home Assistant hilft Ihnen bei der Verwaltung Ihres Riffaquariums.
 
 In Kombination mit [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component) werden Ihre Redsea-Geräte
-(ReefBeat) automatisch unterstützt.
+(ReefBeat) automatisch unterstützt, und [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
+ergänzt die Wartungsansicht um Geräte, mit denen Home Assistant nicht sprechen kann.
+
+Die Unterstützung der Aqua-Medic-Geräte von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) ist
+in Arbeit; ihre Wartungsaufgaben erscheinen bereits in derselben Ansicht.
+
+<!-- ecosystem:start -->
 
 ## Verwandte Projekte
 
-Diese Karte gehört zu einer Reihe von Projekten für ein aus Home Assistant
-gesteuertes Riffaquarium:
+Die ReefTech-Projekte greifen ineinander: die Integrationen bringen Ihre Geräte in Home Assistant, die Karte zeigt und steuert sie, und das Backup hält sie bei einem Stromausfall am Laufen. Jedes funktioniert auch für sich allein.
 
-| Projekt                                                                           | Aufgabe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**ha-reef-card**](https://github.com/Elwinmage/ha-reef-card)                     | Diese Karte. Eine interaktive grafische Ansicht jedes Geräts auf Ihrem Dashboard und der einzige Weg, erweiterte Zeitpläne zu bearbeiten.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| [**ha-reefbeat-component**](https://github.com/Elwinmage/ha-reefbeat-component)   | Integration der Red-Sea-ReefBeat-Geräte, lokal und ohne Cloud gesteuert: ReefATO+, ReefControl, ReefControl-Power, ReefDose, ReefLed, ReefMat, ReefRun und ReefWave. Sie versorgt die Karte mit Daten.<br />[**ReefBeat watch**](https://github.com/Elwinmage/ha-reefbeat-component/tree/main/blueprints/automation) — das mit dieser Integration gelieferte Alarm-Blueprint. Benachrichtigt Sie über überfällige Wartungen und Kalibrierungen, abnormale Modi, schwache Batterien und nicht erreichbare Geräte, auf den von Ihnen gewählten Mobilgeräten. [![Öffnen Sie Ihre Home-Assistant-Instanz und zeigen Sie den Blueprint-Importdialog an.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/refs/heads/main/blueprints/automation/redsea_alerts.en.yaml) |
-| [**ha-aquamedic-component**](https://github.com/Elwinmage/ha-aquamedic-component) | Integration der Aqua-Medic-Pumpen über die Gizwits-Cloud-API: Strömungspumpen EcoDrift und SmartDrift, Rückförderpumpen DC Runner.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| [**reefbeatEnergyBackup**](https://github.com/Elwinmage/reefbeatEnergyBackup)     | Batteriepuffer bei Stromausfall. 24V-LiFePO₄-Pack, gesteuert von einem Raspberry Pi, mit stufenweiser Drosselung der Pumpen je nach Ladezustand.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+<table>
+  <tr>
+    <th width="100px"></th>
+    <th>Projekt</th>
+    <th>Funktion</th>
+    <th>Arbeitet mit</th>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/icon.png" width="64" alt="ha-reefbeat-component" /></td>
+    <td><a href="https://github.com/Elwinmage/ha-reefbeat-component"><b>ha-reefbeat-component</b></a></td>
+    <td>Red Sea ReefBeat-Geräte, lokal gesteuert ohne Cloud: ReefATO+, ReefControl, ReefControl-Power, ReefDose, ReefLed, ReefMat, ReefRun und ReefWave.<br />Alarm-Blueprint für abweichende Modi, Kalibrierungen und niedrigen Akkustand. <a href="https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/refs/heads/main/blueprints/automation/redsea_alerts.en.yaml"><img src="https://my.home-assistant.io/badges/blueprint_import.svg" alt="Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled." /></a></td>
+    <td>ha-reef-card</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/icon.png" width="64" alt="ha-aquamedic-component" /></td>
+    <td><a href="https://github.com/Elwinmage/ha-aquamedic-component"><b>ha-aquamedic-component</b></a></td>
+    <td>Aqua Medic-Pumpen über die Gizwits-Cloud-API: EcoDrift- und SmartDrift-Strömungspumpen, DC Runner Rückförder- und Abschäumerpumpen.</td>
+    <td>ha-reef-card</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-maintenance-component/main/icon.png" width="64" alt="ha-reef-maintenance-component" /></td>
+    <td><a href="https://github.com/Elwinmage/ha-reef-maintenance-component"><b>ha-reef-maintenance-component</b></a></td>
+    <td>Reinigungs- und Verschleißverfolgung für Geräte, die Home Assistant nicht erreicht: Strömungspumpen, Rückförderpumpen, Abschäumer, Reaktoren, alles was von Hand gewartet wird.</td>
+    <td>ha-reef-card</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/icon.png" width="64" alt="ha-reef-card" /></td>
+    <td><b>ha-reef-card</b><br /><i>(dieses Repository)</i></td>
+    <td>Interaktive grafische Ansicht jedes Geräts auf Ihrem Dashboard und der einzige Weg, erweiterte Zeitpläne zu bearbeiten. Liest die drei Integrationen über den gemeinsamen <code>reef_role</code>-Vertrag, ohne Konfiguration auf Kartenseite.</td>
+    <td>alle drei Integrationen</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-blueprints/main/icon.png" width="64" alt="ha-reef-blueprints" /></td>
+    <td><a href="https://github.com/Elwinmage/ha-reef-blueprints"><b>ha-reef-blueprints</b></a></td>
+    <td>Benachrichtigungs-Blueprints für das gesamte Ökosystem: überfällige Wartungen, über den <code>reef_role</code>-Vertrag gefunden, und nicht mehr erreichbare Geräte. Acht Sprachen.</td>
+    <td>alle drei Integrationen</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64" alt="reefbeatEnergyBackup" /></td>
+    <td><a href="https://github.com/Elwinmage/reefbeatEnergyBackup"><b>reefbeatEnergyBackup</b></a></td>
+    <td>Batterie-Backup bei Stromausfall. Ein 24V LiFePO₄-Pack, gesteuert von einem Raspberry Pi, mit schrittweiser Reduzierung der Pumpendrehzahl je nach Ladezustand.</td>
+    <td>eigenständig oder zusammen mit ha-reefbeat-component</td>
+  </tr>
+</table>
 
-Alle, sowie weitere Riff-Projekte, sind gemeinsam auf der [Projektseite](https://elwinmage.github.io/reeftank/) dokumentiert.
+Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/reeftank/) dokumentiert.
 
-> [!TIP]
-> Die Liste der zukünftigen Funktionen ist [hier](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement) verfügbar<br />
-> Die Liste der Fehler ist [hier](https://github.com/Elwinmage/ha-reef-card/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) verfügbar
+<!-- ecosystem:end -->
 
 # Kompatibilität
 
@@ -187,9 +228,322 @@ Um die Geräteauswahl zu entfernen und ein bestimmtes Gerät zu erzwingen, setze
 
 # ReefATO
 
-Geplant.
+ReefATO+ mit ha-reef-card in Aktion:
 
-Möchten Sie, dass es schneller unterstützt wird? Stimmen Sie [hier](https://github.com/Elwinmage/ha-reef-card/discussions/22) ab.
+<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+
+[![Video ansehen](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+
+Die ReefATO+-Karte ist eine visuelle Bedienung für den RSATO+-Controller, den
+Osmosewasser-Vorratsbehälter mit seiner Pumpe, die am Beckenrand geklemmte
+Füllstandssonde und die Lecksonde am Boden.
+
+Die Füllstandssonde des ReefATO+ wird immer gezeichnet. Die **Pumpe** und die
+**Lecksonde** sind optional. Was das Gerät nicht meldet, wird gar nicht
+gezeichnet, und die davon abhängigen Bedienelemente verschwinden mit ihm: ein
+ReefATO+ ohne Lecksonde zeigt eine Karte ohne Lecksonde, keine ausgegraute
+Sonde.
+
+<img src="../img/rsato/rsato_zones.png"/>
+
+Die Karte ist in 7 Zonen aufgeteilt:
+
+1. Controller: Betriebsmodus, Ein/Aus, Wartungsmodus, Konfiguration, WLAN und automatisches Nachfüllen
+2. Zubehör-Einstellungen: Nachfüllpumpe, Lecksonde, Füllstandssonde
+3. Osmosewasser-Vorratsbehälter: Nachfüll-Bedienelemente, Restmenge und Reichweite
+4. Summer
+5. Lecksonde
+6. Aquarium: Wasserstand, Temperatur und Tagesverbrauch
+7. Letzte Meldung und letzter Alarm
+
+## Controller
+
+<img src="../img/rsato/zone_1.png"/>
+
+---
+
+Der Text auf der Controller-Front ist der vom Gerät gemeldete **Betriebsmodus**
+(Auto, Manuell, Leck…), übersetzt in die Sprache von Home Assistant.
+
+<span>Der Schalter <img src="../img/mdi/mdi_power-plug.png" width="20"/> schaltet den ReefATO+ ein oder aus.</span>
+
+<img src="../img/rsato/off_mode.png" width="50%"/>
+
+<span>Der Schalter <img src="../img/mdi/mdi_account-wrench.png" width="20"/> wechselt in den Wartungsmodus.</span>
+
+<img src="../img/rsato/maintenance.png" width="50%"/>
+
+<span>Ein Klick auf das Symbol <img src="../img/rsdose/cog_icon.png" width="30"/> öffnet die allgemeine Konfiguration des ReefATO+: Einstellungen oder abgefragte Daten neu laden, Gerät zurücksetzen, Firmware aktualisieren.</span>
+
+<img src="../img/rsato/zone_1_dialog_config.png" width="50%"/>
+
+<span>Ein Klick auf das Symbol <img src="../img/mdi/wifi_icon.png" width="30"/> öffnet die Netzwerkeinstellungen.</span>
+
+<img src="../img/rsato/zone_1_dialog_wifi.png" width="50%"/>
+
+<span>Der Schalter <img src="../img/mdi/mdi_waves-arrow-up.png" width="20"/> in der zweiten Reihe aktiviert oder deaktiviert das **automatische Nachfüllen**. Ausgeschaltet füllt das Gerät nie von selbst nach, und nur die Tasten aus Zone 3 wirken noch auf die Pumpe. Er ist ausgeblendet, wenn keine Pumpe gekoppelt ist.</span>
+
+## Zubehör-Einstellungen
+
+<img src="../img/rsato/zone_2.png"/>
+
+---
+
+Die drei Symbole folgen den drei Buchsen der Frontplatte, in derselben
+Reihenfolge: von links nach rechts die **Nachfüllpumpe**, die **Lecksonde** und
+die **Füllstandssonde**. Jedes öffnet einen eigenen Dialog für dieses Zubehör.
+Die Symbole der Pumpe und der Lecksonde verschwinden mit dem Zubehör, wenn dessen
+Buchse unbelegt ist.
+
+<span>Das Pumpensymbol <img src="../img/mdi/mdi_pump.png" width="30"/> zeigt den Betriebszustand, den gemessenen Verbrauch und die Fördermenge, die drei Stromschwellen, anhand derer die Firmware Trockenlauf oder Blockade erkennt, und was die letzte Füllung ausgelöst hat.</span>
+
+<img src="../img/rsato/zone_2_dialog_pump.png" width="50%"/>
+
+<span>Das Symbol der Lecksonde <img src="../img/mdi/mdi_pipe-leak.png" width="30"/> zeigt, ob die Sonde eingesteckt und scharfgeschaltet ist, das Urteil trocken/nass samt dem Rohwert dahinter, sowie den Summer, den diese Sonde auslöst.</span>
+
+<img src="../img/rsato/zone_2_dialog_leak.png" width="50%"/>
+
+<span>Das Symbol der Füllstandssonde <img src="../img/mdi/mdi_hydraulic-oil-level.png" width="30"/> zeigt zuerst den Zustand der Sonde — angeschlossen, kalibriert, zu prüfen, Fehler — denn eine unkalibrierte oder verschmutzte Sonde entwertet jede folgende Messung. Danach den Füllstand selbst, die beiden Elektroden dahinter, den Temperatursensor im selben Gehäuse sowie Kennung und Wartungsdaten der Kartusche.</span>
+
+<img src="../img/rsato/zone_2_dialog_ato_sensor.png" width="50%"/>
+
+## Osmosewasser-Vorratsbehälter
+
+<img src="../img/rsato/zone_3.png"/>
+
+---
+
+Diese Zone ist der Behälter, aus dem nachgefüllt wird, samt den drei Tasten, die
+seine Pumpe von Hand steuern:
+
+<table>
+  <tr>
+    <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Füllen</b><br/>Startet eine manuelle Füllung</td>
+    <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Stoppen</b><br/>Bricht die laufende Füllung ab</td>
+    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Fortsetzen</b><br/>Aktiviert die Pumpe wieder</td>
+  </tr>
+</table>
+
+Dieser Teil zeigt den Stand des Wasservorrats, berechnet aus der hinterlegten
+Behältergröße und dem tatsächlichen Wert. Ein leerer Behälter zeigt weiterhin
+eine Wasserlinie — die, die die Pumpe nicht ansaugen kann. Unter 10 % blinkt das
+Wasser, um zu sagen, dass der Behälter bald leer ist.
+
+Ein Klick auf das Wasser öffnet den Behälterdialog, in dem sich die Größe
+bearbeiten lässt:
+
+<img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
+
+Die Zahl unten links am Behälter ist die **Reichweite**: die verbleibenden Tage,
+bis er leer ist, von der Integration aus dem mittleren Tagesverbrauch berechnet.
+Ein Klick darauf öffnet die zugehörige Info-Ansicht.
+
+Während einer Füllung fließt Wasser aus dem Auslass über dem Technikbecken.
+
+<img src="../img/rsato/zone_3_filling.png"/>
+
+## Summer
+
+<img src="../img/mdi/mdi_bell-ring_red.png" width="40"/>
+
+---
+
+<span>Die Glocke <img src="../img/mdi/mdi_bell-ring_red.png" width="20"/> <img src="../img/mdi/mdi_bell-off_red.png" width="20"/> folgt der Summer-Einstellung des Geräts und wird ausgegraut, wenn er aus ist.</span>
+
+Ein Klick öffnet den Summer-Dialog: die Einstellung selbst, ob er gerade ertönt,
+und als Zusammenhang der Zustand der Lecksonde.
+
+<img src="../img/rsato/zone_4_dialog_buzzer.png" width="50%"/>
+
+Ein **langer Druck** schaltet den Summer direkt um. Die beiden Gesten sind bewusst
+getrennt: den Alarm stummzuschalten ist eine Sicherheitseinstellung und nichts,
+was einem beim Nachsehen der Details versehentlich passieren sollte.
+
+> [!NOTE]
+> Der Summer ist nicht nur der Leckalarm: Das Gerät lässt ihn auch bei
+> Pumpenfehlern ertönen, er bleibt also auf einem ReefATO+ ohne Lecksonde
+> verfügbar. Das Symbol wird nur bei Versionen der Integration ausgeblendet, die
+> die Einstellung noch nicht bereitstellen.
+
+## Lecksonde
+
+<img src="../img/rsato/zone_5.png"/>
+
+---
+
+Die Sonde wird nur gezeichnet, wenn sie tatsächlich eingesteckt ist. Eingesteckt,
+aber in der App abgeschaltet, erscheint sie ausgegraut: sie ist da, sie erkennt
+nichts.
+
+Wird Wasser erkannt, blinkt die Sonde und eine Pfütze breitet sich am Fuß des
+Bildes aus.
+
+<table>
+  <tr>
+    <th align="center">Leck am Aquarium</th>
+    <th align="center">Leck am Osmosewasserbehälter</th>
+    <th align="center">Leck unbekannter Herkunft</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="../img/rsato/zone_5_leak_aquarium.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_5_leak_rodi.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_5_leak_unknown.png"/></td>
+  </tr>
+</table>
+
+## Aquarium
+
+<img src="../img/rsato/zone_6.png"/>
+
+---
+
+Der Wasserstand in diesem Teil zeigt den Erkennungszustand der ATO-Sonde.
+
+| Zustand     | Bedeutung                                                             |
+| ----------- | --------------------------------------------------------------------- |
+| Darunter    | Die Oberfläche liegt unter der Sonde: das Nachfüllen kommt nicht nach |
+| Sollstand 1 | Erste Nachfüllmarke                                                   |
+| Sollstand 2 | Zweite Nachfüllmarke                                                  |
+| Darüber     | Die Oberfläche liegt über der Sonde: das Becken ist überfüllt         |
+
+Beide Enden sind anormal, deshalb lassen **Darunter** und **Darüber** das Wasser
+blinken. Eine Sonde im Fehlerzustand oder eine Entität, die noch nichts gemeldet
+hat, hat gar keine Höhe: Die Karte zeichnet ihre Markierung für „keine Messung“
+statt eines leeren Beckens.
+
+<table>
+  <tr>
+    <th align="center">Darunter</th>
+    <th align="center">Sollstand 1</th>
+    <th align="center">Sollstand 2</th>
+    <th align="center">Darüber</th>
+    <th align="center">Keine Messung</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="../img/rsato/zone_6_water_level_below.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_6_water_level_1.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_6_water_level_2.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_6_water_level_above.png"/></td>
+    <td align="center"><img src="../img/rsato/zone_6_water_level_error.png"/></td>
+  </tr>
+</table>
+
+Die Temperatur am Beckenboden stammt vom Sensor in der Füllstandssonde und wird
+nur gemeldet, wenn er am Gerät aktiviert ist.
+
+Das Diagramm in der Ecke ist der **Tagesverbrauch**: die seit Mitternacht
+nachgefüllte Menge, orange gefüllt, gegen den gleitenden Tagesmittelwert in Rot.
+Das Fenster ist am Kalendertag verankert und nicht an gleitenden 24 Stunden, da
+der Zähler um Mitternacht zurückgesetzt wird.
+
+Ein Klick auf das Diagramm öffnet den Verbrauchsdialog, dieselbe Geschichte mit
+ausgeschriebenen Zahlen: Füllungen und Menge, heute gemessen, als Tagesmittel und
+als Gesamtsumme, dazu das, was der Behälter noch dafür hergibt.
+
+<img src="../img/rsato/zone_6_dialog_usage.png" width="50%"/>
+
+## Störungen
+
+Die Karte hat keine eigene Warnleuchte: Was gestört ist, ist das, was blinkt —
+unter einem hellroten Schleier.
+
+| Blinkendes Element | Was das Gerät meldet                                                                                      |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Die Pumpe          | Störung, blockierte Pumpe, zu lange Füllung, leerer Behälter oder fehlende Füllstandssonde                |
+| Die Lecksonde      | Wasser erkannt, auf der Osmose- oder auf der Aquarienseite                                                |
+| Der Wasserstand    | Die Oberfläche liegt unter oder über der Sonde                                                            |
+| Das ganze Bild     | Die Füllstandssonde will geprüft werden oder misst nicht mehr — jeder angezeigte Stand wird unglaubwürdig |
+
+Eine als fehlend gemeldete Pumpe ist keine Störung: Pumpe, Nachfülltasten,
+Behälter und Verbrauchsdiagramm werden dann schlicht nicht gezeichnet.
+
+## Meldungen
+
+<img src="../img/rsato/zone_7.png"/>
+
+---
+
+Diese Zone zeigt die letzten Systemmeldungen des ReefATO+. Sie hat zwei Zeilen:
+
+- Die graue Zeile zeigt die **letzte Meldung**.
+- Die rosa Zeile zeigt den **letzten Alarm**, dem das Symbol ⚠ vorangeht.
+
+Ein Klick auf das Symbol <img src="../img/mdi/mdi_delete-empty.png" width="20"/> löscht die zugehörige Meldung.
+
+Diese Zeilen lassen sich über den Karteneditor ausblenden.
+
+## Karteneditor
+
+<img src="../img/rsato/editor.png" width="50%"/>
+
+---
+
+Neben den beiden Meldungszeilen hat der ReefATO+ drei Optionen. Sie sind für
+einen Nachfüllkreis gedacht, für den das Gerät nicht ausgelegt wurde: eine
+Osmoseanlage, die direkt ins Technikbecken speist, mit einem Ventil, das Home
+Assistant statt der Red-Sea-Pumpe steuert.
+
+### Unbegrenzter Osmosewasser-Vorratsbehälter
+
+Standardmäßig aus. Eine Osmoseanlage, die laufend nachspeist, hat keinen
+Behälter, also kann nichts leer werden — und alles, was die Karte über den
+Vorrat sagt, handelt von einem Kanister, den es nicht gibt.
+
+Eingeschaltet entfallen der Prozentwert am Behälter und der Dialog dahinter, die
+Reichweite wird zu ∞, und das Symbol der Pumpeneinstellungen sowie die Taste
+„Fortsetzen“ werden ausgeblendet: eine kontinuierliche Speisung hat keinen
+Füllzyklus, den man dem Gerät zurückgeben könnte. Wasser, Nachfülltasten und
+Verbrauchsdiagramm bleiben.
+
+### Entität der abgegebenen Menge
+
+Ein Schalter und eine Entitätsauswahl. Eingeschaltet wird die orange Kurve des
+Tagesdiagramms aus einer eigenen Entität gelesen — einem Durchflussmesser in der
+Osmoseleitung — statt aus dem Zähler des Geräts. Der rote gleitende Mittelwert
+bleibt der des Geräts: nur die Quelle der Menge wandert, nicht der Vergleich, vor
+dem sie gezeichnet wird.
+
+Der Schalter ist es, der die Option aktiviert, damit eine aus einer früheren
+Konfiguration übrig gebliebene Entität ignoriert wird, statt stillschweigend
+wieder zu übernehmen.
+
+### Entitäten zum Nachfüllen und Stoppen
+
+Jede der beiden Tasten kann an eine Entität einer anderen Integration gebunden
+werden, um das eigene Ventil zu steuern. Der Dienst wird aus der Domäne der
+Entität abgeleitet, denn deren Auswahl sagt bereits, worum es sich handelt:
+
+| Domäne der Entität        | Füllen       | Stoppen       |
+| ------------------------- | ------------ | ------------- |
+| `button`, `input_button`  | `press`      | `press`       |
+| `switch`, `input_boolean` | `turn_on`    | `turn_off`    |
+| `valve`                   | `open_valve` | `close_valve` |
+| `script`                  | `turn_on`    | `turn_on`     |
+
+Ein einzelner Schalter ist eine vollständige Bedienung: ein füllt, aus stoppt.
+Lassen Sie die andere Auswahl leer, und die zweite Taste verwendet dieselbe
+Entität mit dem gegenteiligen Dienst — dasselbe gilt für ein `input_boolean` oder
+ein `valve`. Zwei Taster müssen getrennt gewählt werden, denn ein Tastendruck
+trägt keine Richtung.
+
+Eine gebundene Bedienung folgt auch der Red-Sea-Pumpe nicht mehr: Sie bleibt auf
+einem ReefATO+ sichtbar, der gar keine Pumpe meldet — genau dafür bindet man sie.
+
+Die Optionen werden unter dem Modell gespeichert, wie Home Assistant es meldet:
+
+```yaml
+type: custom:reef-card
+device: MY-RSATO
+conf:
+  RSATO+:
+    devices:
+      MY-RSATO:
+        infinite_tank: true
+        external_usage: true
+        external_usage_entity: sensor.rodi_flow_meter
+        fill_entity: switch.rodi_valve
+        stop_fill_entity: "" # leer gelassen: der Schalter oben stoppt ihn auch
+```
 
 # ReefControl
 
@@ -991,9 +1345,11 @@ Die Wartungsansicht von ha-reef-card in Aktion:
 <img src="../img/maintenance/overview.png"/>
 
 Über die gerätebezogenen Ansichten hinaus bietet die Karte eine
-**Wartungsansicht**, die alle von `ha-reefbeat-component` bereitgestellten
+**Wartungsansicht**, die alle von `ha-reefbeat-component`,
+`ha-reef-maintenance-component` und `ha-aquamedic-component` bereitgestellten
 Wartungsaufgaben zusammenfasst, als wäre das gesamte Wartungssystem ein einziges
-Gerät.
+Gerät. Die Ansicht sucht nach der Markierung, die jede von ihnen auf ihren
+Entitäten setzt, nicht nach einer bestimmten Integration.
 
 Jede Aufgabe erscheint als Fortschrittsbalken, der zeigt, welcher Teil ihres
 Intervalls verstrichen ist, mit einer Farbe je nach Restzeit:
@@ -1049,6 +1405,27 @@ wieder in Tage um. Die Grenzen stammen aus der Entität selbst, sodass die Karte
 nie einen Wert außerhalb des Bereichs schreiben kann. Es bleibt immer nur ein
 Editor geöffnet. Mit `show_interval: false` blendest du die Schaltflächen aus.
 
+### Nach Gerät filtern
+
+Standardmäßig listet die Ansicht die Aufgaben aller Geräte auf. Der Block
+**Nach Gerät filtern** im Karteneditor schränkt sie ein: Haken Sie ein oder
+mehrere Geräte an, und nur deren Aufgaben bleiben übrig, Zähler inbegriffen.
+
+<img src="../img/maintenance/editor_devices.png"/>
+
+Die Liste enthält einen Eintrag je Steuergerät samt der Anzahl seiner Aufgaben.
+Untergeräte (ReefDose-Köpfe, ReefRun-Pumpen) werden über die `via_device`-
+Verknüpfung der Home-Assistant-Registry ihrem Steuergerät zugeordnet: **RSDose4**
+anzuhaken behält also die Aufgaben aller vier Köpfe. Kein Haken bedeutet „kein
+Filter": alle Geräte werden angezeigt, was auch die Verknüpfung **Alle Geräte
+anzeigen** wiederherstellt.
+
+Die Auswahl wird als Gerätename gespeichert (siehe `devices` unten), damit das
+YAML lesbar bleibt. Ein von Hand geschriebener Name passt zusätzlich per Präfix
+auf seine Untergeräte, was Installationen ohne deklariertes `via_device`
+abdeckt. Geräte ohne Namen werden über ihre Home-Assistant-Geräte-ID
+identifiziert.
+
 ### ReefRun-Pumpen
 
 ReefRun-Untergeräte heißen „… Pumpe 1“ / „… Pumpe 2“, was nichts darüber aussagt,
@@ -1071,7 +1448,8 @@ schlichten Namen.
 
 ## Editor
 
-Der Standardzustand der Filter und die Sichtbarkeit der drei Schaltflächen werden im Karteneditor festgelegt.
+Der Standardzustand der Filter, der Gerätefilter und die Sichtbarkeit der drei
+Schaltflächen werden im Karteneditor festgelegt.
 
 <img src="../img/maintenance/editor.png"/>
 
@@ -1082,6 +1460,9 @@ type: custom:reef-card
 device: __maintenance__
 maintenance:
   sort: due # "device" (Standard) oder "due"
+  devices: # nur die Aufgaben dieser Geräte anzeigen (leer: alle)
+    - SIMU-RSDOSE4
+    - SIMU-RSATO
   hide_ok: false # Aufgaben ausblenden, die weder überfällig noch bald fällig sind
   hide_muted: false # Aufgaben mit ausgeschalteten Benachrichtigungen ausblenden
   warning_ratio: 0.2 # Anteil des Intervalls, der orange dargestellt wird
@@ -1091,7 +1472,9 @@ maintenance:
 ```
 
 Alle `maintenance`-Schlüssel sind optional. `sort` und `hide_ok` legen nur den
-Anfangszustand fest: der Nutzer kann sie in der Ansicht selbst ändern.
+Anfangszustand fest: der Nutzer kann sie in der Ansicht selbst ändern. `devices`
+akzeptiert sowohl Gerätenamen als auch Home-Assistant-Geräte-IDs; eine leere
+Liste (der Standard) schaltet den Filter aus.
 
 # FAQ
 

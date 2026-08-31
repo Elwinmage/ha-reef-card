@@ -681,6 +681,253 @@ describe("RSDevice._render_element() L481 — existing hui-entities-card gets ha
     expect(fakeCard.hass).toBe(dev._hass);
   });
 });
+describe("RSDevice._render_element() — disabled_if on a hui-* element", () => {
+  /**
+   * A hui-* element never builds a MyElement, so the disabled_if that
+   * MyElement.render() would have evaluated has to be handled by the device.
+   * Without it a native card cannot be conditionally hidden at all.
+   */
+  function makeHuiDev() {
+    const dev = makeDev_B();
+    dev._hass = makeHass_B();
+    dev.entities = {};
+    // Already cached, so the test never reaches loadCardHelpers().
+    dev._elements["hui-statistics-graph-card.usage"] = {
+      setConfig: vi.fn(),
+      hass: null as any,
+    };
+    return dev;
+  }
+
+  const conf = (extra: any = {}) => ({
+    type: "hui-statistics-graph-card",
+    name: "usage",
+    conf: { entities: [] },
+    ...extra,
+  });
+
+  it("renders the card when the condition is false", () => {
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => true;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(result).not.toBeNull();
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBe(
+      dev._hass,
+    );
+  });
+
+  it("hides the card when the condition is true", () => {
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => false;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()", no_br_if_disabled: true }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    // The cached card was left untouched: the branch returned before it.
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBeNull();
+    expect(JSON.stringify(result.strings)).not.toContain("br");
+  });
+
+  it("emits a <br> when no_br_if_disabled is not set", () => {
+    // Same rule as MyElement: an absolutely positioned element needs the flag,
+    // an inline one wants the line break.
+    const dev = makeHuiDev();
+    (dev as any).has_pump = () => false;
+    const result = dev._render_element(
+      conf({ disabled_if: "!device.has_pump()" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(JSON.stringify(result.strings)).toContain("br");
+  });
+
+  it("reads entity states in the condition", () => {
+    const dev = makeHuiDev();
+    dev.entities = { mode: { entity_id: "sensor.mode" } };
+    dev._hass = {
+      states: { "sensor.mode": { entity_id: "sensor.mode", state: "empty" } },
+    } as any;
+    dev._elements["hui-statistics-graph-card.usage"] = {
+      setConfig: vi.fn(),
+      hass: null as any,
+    };
+    const result = dev._render_element(
+      conf({
+        disabled_if: "entity.mode?.state === 'empty'",
+        no_br_if_disabled: true,
+      }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBeNull();
+    expect(JSON.stringify(result.strings)).not.toContain("br");
+  });
+
+  it("shows the card when the condition throws", () => {
+    // SafeEval answers false on a throwing expression, so a broken condition
+    // fails open: the card stays visible and the mistake stays findable,
+    // rather than an element silently disappearing.
+    const dev = makeHuiDev();
+    const result = dev._render_element(
+      conf({ disabled_if: "device.nope().boom" }),
+      true,
+      null,
+      "hui-statistics-graph-card.usage",
+    );
+    expect(result).not.toBeNull();
+    expect(dev._elements["hui-statistics-graph-card.usage"].hass).toBe(
+      dev._hass,
+    );
+  });
+});
+
+describe("RSDevice._render_element() — templates in a hui-* configuration", () => {
+  /**
+   * A hui-* block goes straight to createCardElement(), so it never passes
+   * through the SafeEval that MyElement applies elsewhere. Without resolution
+   * here a mapping shared across seven locales could only carry hard-coded
+   * strings.
+   */
+  function makeTemplateDev() {
+    const dev = makeDev_B();
+    dev._hass = {
+      states: {
+        "sensor.usage": { entity_id: "sensor.usage", state: "120" },
+      },
+    } as any;
+    dev.entities = { today_volume_usage: { entity_id: "sensor.usage" } };
+    dev._helpers = {
+      createCardElement: vi.fn((cfg: any) => {
+        const card: any = document.createElement("div");
+        card.__config = cfg;
+        return card;
+      }),
+    };
+    return dev;
+  }
+
+  function build(dev: any, conf: any) {
+    dev._render_element(conf, true, null, "hui-statistics-graph-card.usage");
+    return dev._helpers.createCardElement.mock.calls.at(-1)![0];
+  }
+
+  it("resolves a template in a nested entity name", () => {
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        entities: [
+          { entity: "today_volume_usage", name: "${i18n._('volume')}" },
+        ],
+      },
+    });
+    expect(cfg.entities[0].name).not.toContain("${");
+    expect(cfg.entities[0].name.length).toBeGreaterThan(0);
+    // The entity id substitution still happened alongside it.
+    expect(cfg.entities[0].entity).toBe("sensor.usage");
+  });
+
+  it("resolves a template at the top level of the card config", () => {
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: { title: "${i18n._('volume')}", entities: ["today_volume_usage"] },
+    });
+    expect(cfg.title).not.toContain("${");
+  });
+
+  it("reads device state through the template context", () => {
+    // A bare expression keeps its native type rather than being stringified,
+    // so a numeric card option can be templated too.
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        title: "${entity.today_volume_usage.state}",
+        entities: ["today_volume_usage"],
+      },
+    });
+    expect(cfg.title).toBe(120);
+  });
+
+  it("leaves plain strings untouched", () => {
+    // Entity ids and colours must never be round-tripped through the
+    // expression parser.
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        chart_type: "line",
+        entities: [{ entity: "today_volume_usage", color: "#ffffff" }],
+      },
+    });
+    expect(cfg.chart_type).toBe("line");
+    expect(cfg.entities[0].color).toBe("#ffffff");
+  });
+
+  it("leaves non-string values untouched", () => {
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        days_to_show: 14,
+        hide_legend: true,
+        min_y_axis: null,
+        entities: ["today_volume_usage"],
+      },
+    });
+    expect(cfg.days_to_show).toBe(14);
+    expect(cfg.hide_legend).toBe(true);
+    expect(cfg.min_y_axis).toBeNull();
+  });
+
+  it("walks arrays of arrays", () => {
+    const dev = makeTemplateDev();
+    const cfg = build(dev, {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        entities: ["today_volume_usage"],
+        nested: [["${i18n._('volume')}", "plain"]],
+      },
+    });
+    expect(cfg.nested[0][0]).not.toContain("${");
+    expect(cfg.nested[0][1]).toBe("plain");
+  });
+
+  it("does not touch the mapping itself", () => {
+    // The clone is what gets mutated: a resolved template written back into
+    // the mapping would freeze the first language loaded.
+    const dev = makeTemplateDev();
+    const conf = {
+      type: "hui-statistics-graph-card",
+      name: "today_volume_usage",
+      conf: {
+        entities: [
+          { entity: "today_volume_usage", name: "${i18n._('volume')}" },
+        ],
+      },
+    };
+    build(dev, conf);
+    expect(conf.conf.entities[0].name).toBe("${i18n._('volume')}");
+    expect(conf.conf.entities[0].entity).toBe("today_volume_usage");
+  });
+});
+
 describe("RSDevice._render_element() L488-490 — existing element stateOn updated", () => {
   it("updates stateOn on an existing element when conf.name is in _elements", () => {
     const dev = makeDev_B();
@@ -1956,12 +2203,16 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
       "common-switch.relay": { css: { opacity: "0.5" } },
     };
 
-    // Create a real-like element with conf.css so Object.assign can run
+    // The device goes through MyElement.merge_css(), a public seam, rather
+    // than assigning into the protected `conf` from outside the class.
     const fakeElem: any = {
       conf: { css: {} },
       hass: null,
       stateOn: false,
       requestUpdate: vi.fn(),
+      merge_css(css: Record<string, string>) {
+        this.conf.css = { ...this.conf.css, ...css };
+      },
     };
     vi.spyOn(MyElement, "create_element").mockReturnValue(fakeElem);
 
@@ -1970,6 +2221,41 @@ describe("RSDevice._render_element L563 — _conf_overrides CSS re-apply", () =>
 
     expect(fakeElem.conf.css.opacity).toBe("0.5");
     vi.restoreAllMocks();
+  });
+
+  /** MyElement extends LitElement: jsdom refuses to construct one unregistered. */
+  let merge_css_seq = 0;
+  function makeElement(): any {
+    const tag = `merge-css-test-${merge_css_seq++}`;
+    class T extends MyElement {}
+    customElements.define(tag, T);
+    return new T();
+  }
+
+  it("merges the override without dropping the element's own css", () => {
+    // Regression guard for the seam: merge_css must add to the existing css,
+    // not replace it, or a positioned element loses its coordinates.
+    const el: any = makeElement();
+    el.conf = { css: { top: "10%", left: "20%" } };
+    el.merge_css({ opacity: "0.5", top: "30%" });
+    expect(el.conf.css).toEqual({
+      top: "30%",
+      left: "20%",
+      opacity: "0.5",
+    });
+  });
+
+  it("ignores a css merge on an element with no conf", () => {
+    const el: any = makeElement();
+    el.conf = undefined;
+    expect(() => el.merge_css({ opacity: "0.5" })).not.toThrow();
+  });
+
+  it("creates the css object when the conf has none", () => {
+    const el: any = makeElement();
+    el.conf = {};
+    el.merge_css({ opacity: "0.5" });
+    expect(el.conf.css).toEqual({ opacity: "0.5" });
   });
 
   it("L571 fallback branch: elementKey uses type.name when declarationKey is undefined", () => {

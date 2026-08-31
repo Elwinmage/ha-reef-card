@@ -69,10 +69,30 @@ export class FlowImage extends MyElement {
     if (schedule && hass.states[schedule.entity_id]?.state === "off") {
       return false;
     }
-    // device_state is only exposed by the parent, hence parent_entities
-    const master = device?.parent_entities?.["device_state"];
-    if (master && hass.states[master.entity_id]?.state === "off") {
-      return false;
+    // device_state sits on the parent for a sub-device such as an RSRUN pump,
+    // and on the device itself for a top-level one such as the RSATO. Both
+    // are read: whichever exists must be on.
+    const masters = [
+      device?.parent_entities?.["device_state"],
+      device?.entities?.["device_state"],
+    ];
+    for (const master of masters) {
+      if (master && hass.states[master.entity_id]?.state === "off") {
+        return false;
+      }
+    }
+    // Optional extra gate, named in the mapping as `running_if`.
+    //
+    // Speed alone is enough for a pump that reports 0 when idle, but not for
+    // one whose speed is a setting rather than a measurement: the RSATO
+    // reports a configured pump speed at all times and says whether water is
+    // actually moving through a separate `is_pump_on` flag.
+    const gate_key = this.conf?.running_if;
+    if (gate_key) {
+      const gate = device?.entities?.[gate_key];
+      if (!gate || hass.states[gate.entity_id]?.state !== "on") {
+        return false;
+      }
     }
     return true;
   }
@@ -97,6 +117,26 @@ export class FlowImage extends MyElement {
     } else {
       super.hass = obj;
     }
+  }
+
+  /**
+   * Re-apply the animation after every render.
+   *
+   * `_render()` writes the whole `style` attribute through a lit binding, so
+   * each time lit commits that binding it discards what `_syncAnimation()`
+   * had set imperatively -- duration, play state and opacity. The element
+   * then shows a still image until the next speed change.
+   *
+   * It bites hardest on an element carrying a `disabled_if`, which re-renders
+   * on every hass update; that is the ATO outlet, frozen the moment anything
+   * else on the device moved.
+   *
+   * Setting inline styles here starts no new update cycle: they are DOM
+   * properties, not reactive ones.
+   */
+  override updated(changed: Map<string, unknown>) {
+    super.updated(changed);
+    this._syncAnimation();
   }
 
   override firstUpdated() {
@@ -154,8 +194,12 @@ export class FlowImage extends MyElement {
     // speed 40–100 → duration 10s–0.5s (below 40 treated as minimum)
 
     const maxSpeed = 100;
-    const minDuration = 0.5; // speed=100 → fastest
-    const maxDuration = 10; // speed=40  → slowest
+    // How long one tile takes to scroll past, at full speed and at the
+    // slowest. The defaults suit a return pump pushing hard through a tube;
+    // a trickle from an ATO outlet reads better much slower, hence the
+    // mapping overrides.
+    const minDuration = this.conf?.min_duration ?? 0.5; // speed=100 → fastest
+    const maxDuration = this.conf?.max_duration ?? 10; // speed=40  → slowest
 
     let duration: number;
     if (speed === 0) {
@@ -168,9 +212,16 @@ export class FlowImage extends MyElement {
           (maxDuration - minDuration);
     }
 
+    const stopped = speed === 0 || !running;
     div.style.animationDuration = `${duration.toFixed(2)}s`;
-    div.style.animationPlayState =
-      speed === 0 || !running ? "paused" : "running";
+    div.style.animationPlayState = stopped ? "paused" : "running";
+
+    // Pausing alone leaves the water texture on screen, frozen. That is right
+    // for a tube, which stays full when the pump stops, and wrong for an
+    // outlet, where a stopped pump means no water at all -- hence the opt-in.
+    if (this.conf?.hide_when_stopped) {
+      div.style.opacity = stopped ? "0" : "1";
+    }
   }
 
   protected override _render(_style: string = ""): any {

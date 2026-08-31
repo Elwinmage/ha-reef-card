@@ -174,7 +174,7 @@ describe("RSRun._render_pumps", () => {
     run._populate_entities();
     run._render_pumps(true);
     const pump = run._pumps[1].litElement;
-    expect(pump.id).toBe(1);
+    expect(pump.pump_id).toBe(1);
     expect(pump.entities).toBe(run._pumps[1].entities);
     expect(pump.parent_entities).toBe(run.entities);
     expect(pump.parent_device).toBe(run.device);

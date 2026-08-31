@@ -7,6 +7,7 @@
 //   IMPORT
 //----------------------------------------------------------------------------//
 import { html, LitElement } from "lit";
+import type { CSSResultGroup } from "lit";
 import { property, state } from "lit/decorators.js";
 
 import type {
@@ -35,7 +36,10 @@ import style_animations from "../utils/animations.styles";
  */
 export class MyElement extends LitElement {
   // Inject animation keyframes into every element's shadow DOM
-  static override styles = [style_animations];
+  // Typed as Lit does (ReactiveElement.styles), not inferred as CSSResult[]:
+  // subclasses legitimately assign a single CSSResult or a nested group, and
+  // the narrower inferred type made every one of them a TS2417.
+  static override styles: CSSResultGroup = [style_animations];
   // Public reactive properties
   @property({ type: Object, attribute: false })
   stateObj: StateObject | null = null;
@@ -87,10 +91,7 @@ export class MyElement extends LitElement {
    * @param hass: the hass states
    * @return a context to help evaluate dynamic strings
    */
-  private static createEntitiesContext(
-    device: any,
-    hass: any,
-  ): Record<string, any> {
+  static createEntitiesContext(device: any, hass: any): Record<string, any> {
     const entitiesObj: Record<string, any> = {};
 
     if (device?.entities && hass?.states) {
@@ -173,6 +174,12 @@ export class MyElement extends LitElement {
         elt.device.parent_entities?.[config.name];
       if (entityData) {
         elt.stateObj = hass.states[entityData.entity_id] || null;
+      } else if (config.name && hass.states[config.name]) {
+        // The name is already an entity_id. Registry keys are translation
+        // keys, so an entity picked by the user in the card editor — which
+        // belongs to another integration entirely — can only be named this
+        // way. Tried last: a translation key always wins over a state lookup.
+        elt.stateObj = hass.states[config.name];
       }
     }
 
@@ -227,6 +234,22 @@ export class MyElement extends LitElement {
         this._longclick();
       },
     });
+  }
+
+  /**
+   * Merge extra CSS into this element's own configuration.
+   *
+   * The device re-applies persistent overrides after a config rebuild, which
+   * used to poke at the protected `conf` from outside the class. This is the
+   * same operation with a public seam, and it tolerates an element whose conf
+   * carries no `css` yet.
+   * @param css: the properties to merge in
+   */
+  merge_css(css: Record<string, string>): void {
+    if (!this.conf) {
+      return;
+    }
+    this.conf.css = { ...(this.conf.css ?? {}), ...css };
   }
 
   /**
@@ -357,11 +380,15 @@ export class MyElement extends LitElement {
         if (!this.device.is_on()) {
           device_color = OFF_COLOR;
         }
-        if (o_style["background-color"] === "$DEVICE-COLOR$") {
-          o_style["background-color"] = "rgb(" + device_color + ")";
-        } else if (o_style["background-color"] === "$DEVICE-COLOR-ALPHA$") {
-          o_style["background-color"] =
-            "rgba(" + device_color + "," + this.device.config.alpha + ")";
+        // The device-colour tokens apply to any property, not just
+        // background-color: `color`, `border-color` and friends need them too.
+        for (const [key, val] of Object.entries(o_style)) {
+          if (val === "$DEVICE-COLOR$") {
+            o_style[key] = "rgb(" + device_color + ")";
+          } else if (val === "$DEVICE-COLOR-ALPHA$") {
+            o_style[key] =
+              "rgba(" + device_color + "," + this.device.config.alpha + ")";
+          }
         }
       }
       style = Object.entries(o_style)

@@ -13,6 +13,8 @@
  *      class: "blink-fast"     # 0.4 s urgent blink
  *      class: "pulse"          # 1.5 s opacity fade (min 25 %)
  *      class: "blink-color"    # 1 s hue-shift
+ *      class: "blink-alert"    # 1.2 s red tint (faulty accessory)
+ *      class: "muted"          # static dim + greyscale (present but off)
  *      class: "blink-scale"    # 1 s scale grow/shrink
  *
  * These styles are injected into MyElement (base class) so every
@@ -56,6 +58,19 @@ export default css`
     }
     50% {
       filter: hue-rotate(180deg) saturate(3);
+    }
+  }
+
+  /* Fault tint: pulls the image toward warning red without hiding it.
+     A filter is used rather than a coloured overlay so the tint follows the
+     PNG alpha channel instead of painting its whole bounding box. */
+  @keyframes blink-alert {
+    0%,
+    100% {
+      filter: none;
+    }
+    50% {
+      filter: sepia(1) saturate(5) hue-rotate(-40deg) brightness(0.95);
     }
   }
 
@@ -107,6 +122,23 @@ export default css`
     animation: blink-color 1s ease-in-out infinite;
   }
 
+  /** Fault pulse — 1.2 s red tint, for an accessory that is present but in
+      error (ATO pump, leak probe…). Softer than blink so the picture stays
+      readable while the alert is on. */
+  .blink-alert,
+  .blink-alert > * {
+    animation: blink-alert 1.2s ease-in-out infinite;
+  }
+
+  /** Dimmed — for an accessory that is plugged in but switched off. Not an
+      animation: a static cue that it is present and currently doing nothing,
+      so it reads differently from both "absent" and "faulty". */
+  .muted,
+  .muted > * {
+    opacity: 0.35;
+    filter: grayscale(1);
+  }
+
   /** Scale pulse — 1 s */
   .blink-scale,
   .blink-scale > * {
@@ -117,7 +149,6 @@ export default css`
   .blink-icon > * {
     animation: blink 1s linear infinite;
   }
-
   /** Icon-only scale: only the inner icon scales, the wrapper (background) stays still */
   .blink-icon-scale > * {
     animation: blink-scale 1s ease-in-out infinite;

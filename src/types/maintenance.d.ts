@@ -49,6 +49,13 @@ export interface MaintenanceItem {
   device_id: string;
   /** Human readable device name (sub-devices included, e.g. "RSDose4 Head 1"). */
   device_name: string;
+  /**
+   * HA device id of the root device, i.e. the top of the `via_device` chain.
+   * Equal to `device_id` for devices without a parent.
+   */
+  root_device_id: string;
+  /** Human readable name of the root device, e.g. "RSDose4". */
+  root_device_name: string;
   /** Device model as declared in the HA device registry. */
   model: string;
   /** Configured interval in days (0 when unknown). */
@@ -76,6 +83,16 @@ export interface MaintenanceGroup {
   /** RSRUN pump model of the device, null when not a pump. */
   pump_model: string | null;
   items: MaintenanceItem[];
+}
+
+/** A device offered by the "filter by device" selector of the editor. */
+export interface MaintenanceDeviceRef {
+  /** HA device id of the root device ("" when the registry entry is missing). */
+  id: string;
+  /** Human readable name of the root device. */
+  name: string;
+  /** Number of maintenance tasks owned by this device and its sub-devices. */
+  count: number;
 }
 
 /** Options accepted by `collect_maintenance_items`. */

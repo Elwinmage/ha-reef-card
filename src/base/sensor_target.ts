@@ -102,15 +102,41 @@ export class SensorTarget extends Sensor {
 
   /**
    * Get numeric target value.
-   * If conf.target_attribute is set, read from stateObj.attributes[target_attribute]
-   * (same entity as value — no external target entity needed).
-   * Otherwise, fall back to stateObjTarget.state.
+   *
+   * Resolution order, most specific first:
+   *   1. conf.target_attribute -> stateObj.attributes[target_attribute]
+   *   2. conf.target as a number -> that literal value (no entity involved)
+   *   3. stateObjTarget.state -> the sibling entity named by conf.target
+   *
+   * Case 2 covers targets that are a property of the installation rather than
+   * of the device: a container size, a tank volume, a maintenance interval the
+   * device does not expose. Writing it inline avoids creating a template
+   * sensor in Home Assistant whose only job is to hold a constant.
    */
   protected getTargetValue(): number {
+    return this.getRawTargetValue() * this.getTargetFactor();
+  }
+
+  /**
+   * Multiplier applied to the resolved target so value and target can live in
+   * different units without a template sensor in Home Assistant. The RO
+   * reservoir reports volume_left in mL while ato_tank_volume is in L, hence
+   * target_factor: 1000.
+   */
+  protected getTargetFactor(): number {
+    const factor = (this.conf as any)?.target_factor;
+    return typeof factor === "number" && factor !== 0 ? factor : 1;
+  }
+
+  /** Target before any unit conversion. */
+  protected getRawTargetValue(): number {
     const attrKey = (this.conf as any)?.target_attribute;
     if (attrKey && this.stateObj) {
       const raw = this.stateObj.attributes?.[attrKey];
       return parseFloat(String(raw ?? "0")) || 0;
+    }
+    if (typeof this.conf?.target === "number") {
+      return this.conf.target;
     }
     return parseFloat(this.stateObjTarget?.state || "0") || 0;
   }
@@ -132,6 +158,8 @@ export class SensorTarget extends Sensor {
   protected hasTargetState(): boolean {
     if (!this.stateObj) return false;
     if ((this.conf as any)?.target_attribute) return true;
+    // A literal numeric target needs no entity to resolve
+    if (typeof this.conf?.target === "number") return true;
     return !!this.stateObjTarget;
   }
 
@@ -150,6 +178,8 @@ export class SensorTarget extends Sensor {
       value = Math.floor(value);
       target = Math.floor(target);
     }
+    const rounded_value = this.apply_round(value);
+    const rounded_target = this.apply_round(target);
 
     //eval de unit
     const unit = this.evaluate(
@@ -160,16 +190,22 @@ export class SensorTarget extends Sensor {
 
     const style = this.get_style("css");
     const _bgColor = `rgba(${this.c},${this.alpha})`;
+    const text_color = this.resolve_text_color();
 
     return html`
-      <div class="${sclass}" id="${this.conf.name}" style="${style}">
-        ${value}/${target}<span class="unit">${unit}</span>
+      <div
+        class="${sclass}"
+        id="${this.conf.name}"
+        style="${style}${text_color ? `;color:${text_color}` : ""}"
+      >
+        ${rounded_value}/${rounded_target}<span class="unit">${unit}</span>
       </div>
     `;
   }
 
   protected override _load_subelements() {
-    if (this.conf?.target && this.device) {
+    // Only a string target names an entity; a number is the value itself
+    if (typeof this.conf?.target === "string" && this.device) {
       const targetEntity = this.device.entities[this.conf.target];
       if (targetEntity) {
         this.stateObjTarget = this._hass.states[targetEntity.entity_id] || null;

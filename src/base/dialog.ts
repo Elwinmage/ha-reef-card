@@ -250,10 +250,13 @@ export class Dialog extends LitElement {
               ).entity_id;
             }
           } catch (e) {
+            // `catch` binds unknown: a thrown non-Error has no `.message`,
+            // and reading it blind would replace a useful warning with a
+            // TypeError.
             console.warn(
               "Dialog: skipping unresolved entity",
               content_conf.conf.entities[pos],
-              e.message,
+              e instanceof Error ? e.message : e,
             );
             // Remove unresolvable entity from the clone so the card doesn't crash
             delete clone.entities[pos];
@@ -272,7 +275,7 @@ export class Dialog extends LitElement {
           console.warn(
             "Dialog: skipping unresolved entity",
             content_conf.conf.entity,
-            e.message,
+            e instanceof Error ? e.message : e,
           );
           return;
         }

@@ -26,6 +26,16 @@
  *     },
  *     label: "${entity.replace_activated_carbon.attributes.days_left} d left",
  *   }
+ *
+ * 3) Fixed target, no target entity (e.g. a 5 L container the device does not
+ *    report):
+ *   {
+ *     name: "container_volume",
+ *     target: 5000,
+ *     type: "progress-bar",
+ *     unit: "ml",
+ *     label: "${entity.container_volume.state} / 5000 ml",
+ *   }
  */
 
 //----------------------------------------------------------------------------//
@@ -71,6 +81,55 @@ export class ProgressBar extends SensorTarget {
   }
 
   /**
+   * Name used in console diagnostics. Subclasses override it so a warning
+   * points at the element the mapping actually declared.
+   */
+  protected logName = "ProgressBar";
+
+  /**
+   * Set this.c from the DEVICE state (not stateObj state): progress entities
+   * hold numbers, not on/off states, so the greying must follow the device.
+   * Extracted so subclasses (water-level) share the exact same rule.
+   */
+  protected applyStateColor(): void {
+    if (!this.device.is_on()) {
+      this.c = OFF_COLOR;
+    } else {
+      this.c = this.color;
+    }
+  }
+
+  /**
+   * Percentage to render, clamped to [0, 100], with `inverted` applied.
+   * Out-of-range raw ratios are logged before clamping so a mis-configured
+   * target stays visible in the console.
+   * Extracted so subclasses share the value_attribute / target_attribute /
+   * literal-target resolution without duplicating the clamping rules.
+   */
+  protected resolveDisplayPercent(): number {
+    const value = this.getValue();
+    const target = this.getTargetValue() || 1;
+    let percent = this.getPercentage();
+    if (this.conf?.inverted) {
+      percent = 100 - percent;
+    }
+    if (percent > 100 || percent < 0) {
+      console.error(
+        `[${this.logName} - ${this.conf?.name}] out-of-range percent : ${percent}=${value}*100/${target} (inverted=${!!this.conf?.inverted})`,
+      );
+    }
+    return Math.min(100, Math.max(0, percent));
+  }
+
+  /**
+   * Progression colour. colors.fill wins over device/OFF colours when set
+   * (explicit user intent).
+   */
+  protected resolveFillColor(): string {
+    return this.conf?.colors?.fill ?? `rgb(${this.c})`;
+  }
+
+  /**
    * Render
    * @param _style: No used here
    */
@@ -81,35 +140,16 @@ export class ProgressBar extends SensorTarget {
       // stateObjTarget is null (target_attribute always resolves given stateObj).
       const why = !this.stateObj
         ? `stateObj not resolved for name="${this.conf?.name}" — check the entity's translation_key matches (device.entities keys)`
-        : `stateObjTarget not resolved for target="${(this.conf as any)?.target}" — set target_attribute if the target lives in the entity's attributes`;
+        : `stateObjTarget not resolved for target="${(this.conf as any)?.target}" — use a number for a fixed target, or target_attribute if it lives in the entity's attributes`;
       console.warn(`[ProgressBar - ${this.conf?.name}] Missing state: ${why}`);
       return html`<div class="error">Missing state</div>`;
     }
 
-    // Set this.c based on DEVICE state (not stateObj state).
-    // ProgressBar entities are numbers, not on/off states,
-    // so we check whether the DEVICE is on, not the progress value.
-    if (!this.device.is_on()) {
-      this.c = OFF_COLOR;
-    } else {
-      this.c = this.color;
-    }
+    this.applyStateColor();
 
     // Compute value/target via SensorTarget helpers so value_attribute /
     // target_attribute are honoured transparently.
-    const value = this.getValue();
-    const target = this.getTargetValue() || 1;
-    let percent = this.getPercentage();
-    if (this.conf?.inverted) {
-      percent = 100 - percent;
-    }
-    // Clamp to [0, 100] for rendering (still log the raw ratio if abnormal).
-    if (percent > 100 || percent < 0) {
-      console.error(
-        `[ProgressBar - ${this.conf.name}] out-of-range percent : ${percent}=${value}*100/${target} (inverted=${!!this.conf?.inverted})`,
-      );
-    }
-    const displayPercent = Math.min(100, Math.max(0, percent));
+    const displayPercent = this.resolveDisplayPercent();
 
     const bar_class = this.conf?.class || "progress-bar";
     let label = this.label || "";
@@ -124,8 +164,7 @@ export class ProgressBar extends SensorTarget {
     const fill = Math.max(0, displayPercent - 1);
 
     // Color overrides — device color remains the default fill.
-    // colors.fill wins over device/OFF colors when set (explicit user intent).
-    const fillColor = this.conf?.colors?.fill ?? `rgb(${this.c})`;
+    const fillColor = this.resolveFillColor();
     const bgColor = this.conf?.colors?.background;
     const containerStyle = bgColor ? `--progress-bg-color: ${bgColor};` : "";
 

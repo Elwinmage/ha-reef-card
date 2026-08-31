@@ -441,6 +441,66 @@ export default css`
     border-radius: 50%;
   }
 
+  /* ── Editor device filter ───────────────────────────────────────────── */
+
+  .maint-devices-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .maint-devices {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background-color: rgba(127, 127, 127, 0.12);
+  }
+
+  .maint-device-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .maint-device-option input {
+    accent-color: var(--primary-color, #03a9f4);
+    cursor: pointer;
+  }
+
+  .maint-device-name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .maint-device-count {
+    color: var(--maint-text-soft);
+    font-size: 0.8em;
+  }
+
+  .maint-devices-hint {
+    color: var(--maint-text-soft);
+    font-size: 0.8em;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .maint-devices-clear {
+    background: none;
+    border: none;
+    color: var(--primary-color, #03a9f4);
+    cursor: pointer;
+    font: inherit;
+    font-style: normal;
+    padding: 0;
+  }
+
   /* ── Empty state ────────────────────────────────────────────────────── */
 
   .maint-empty {

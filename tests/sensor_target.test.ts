@@ -1251,3 +1251,136 @@ describe("ProgressBar/Circle — missing-state diagnostics", () => {
     spy.mockRestore();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Fixed numeric target: the target is a constant of the installation, not a
+// value any entity reports (container size, tank volume, maintenance interval).
+// ---------------------------------------------------------------------------
+describe("numeric target", () => {
+  function makeStub(conf: any, value = "50"): StubSensorTarget {
+    const elt = new StubSensorTarget();
+    elt.conf = conf;
+    elt.stateObj = makeState(value);
+    return elt;
+  }
+
+  it("resolves a literal number without any target entity", () => {
+    const elt = makeStub({ name: "x", target: 5000 });
+    expect((elt as any).getTargetValue()).toBe(5000);
+    expect((elt as any).hasTargetState()).toBe(true);
+  });
+
+  it("computes the percentage against the literal target", () => {
+    const elt = makeStub({ name: "x", target: 200 }, "50");
+    expect((elt as any).getPercentage()).toBe(25);
+  });
+
+  it("does not require stateObjTarget to be set", () => {
+    const elt = makeStub({ name: "x", target: 400 });
+    expect(elt.stateObjTarget).toBeNull();
+    expect((elt as any).hasTargetState()).toBe(true);
+  });
+
+  it("still needs a stateObj", () => {
+    const elt = new StubSensorTarget();
+    elt.conf = { name: "x", target: 400 } as any;
+    elt.stateObj = null as any;
+    expect((elt as any).hasTargetState()).toBe(false);
+  });
+
+  it("gives target_attribute precedence over the literal", () => {
+    const elt = new StubSensorTarget();
+    elt.conf = {
+      name: "x",
+      target: 999,
+      target_attribute: "interval_days",
+    } as any;
+    elt.stateObj = makeState("3", "button.maint", { interval_days: 30 });
+    expect((elt as any).getTargetValue()).toBe(30);
+  });
+
+  it("never looks up an entity for a numeric target", () => {
+    const elt = makeStub({ name: "x", target: 5000 });
+    elt.device = makeDevice();
+    (elt as any)._hass = makeHass();
+    (elt as any)._load_subelements();
+    expect(elt.stateObjTarget).toBeNull();
+  });
+
+  it("still resolves a string target as an entity", () => {
+    const elt = makeStub({ name: "x", target: "my_target" });
+    elt.device = makeDevice();
+    (elt as any)._hass = makeHass();
+    (elt as any)._load_subelements();
+    expect(elt.stateObjTarget?.state).toBe("100");
+  });
+
+  it("works on a progress bar, which previously showed 'Missing state'", () => {
+    const bar = new StubProgressBar();
+    bar.conf = { name: "x", target: 5000 } as any;
+    bar.stateObj = makeState("1250");
+    expect((bar as any).hasTargetState()).toBe(true);
+    expect((bar as any).getPercentage()).toBe(25);
+  });
+
+  it("works on a progress circle", () => {
+    const circle = new StubProgressCircle();
+    circle.conf = { name: "x", target: 80 } as any;
+    circle.stateObj = makeState("20");
+    expect((circle as any).getTargetValue()).toBe(80);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// round / text_color on common-sensor-target
+// ---------------------------------------------------------------------------
+describe("SensorTarget round and text_color", () => {
+  function makeElt(conf: any, value = "12.3456", target = "100"): any {
+    const elt: any = new StubSensorTarget();
+    elt.conf = conf;
+    elt.stateObj = makeState(value);
+    elt.stateObjTarget = makeState(target, "sensor.target");
+    elt.device = makeDevice();
+    (elt as any)._hass = makeHass();
+    return elt;
+  }
+
+  it("round(2) applies to value and target", () => {
+    const elt = makeElt({ name: "x", target: "my_target", round: 2 });
+    expect(elt.apply_round(elt.getValue())).toBe("12.35");
+    expect(elt.apply_round(elt.getTargetValue())).toBe("100.00");
+  });
+
+  // The stubs override _render, so reach the real implementation explicitly
+  const realRender = (elt: any) =>
+    (SensorTarget.prototype as any)._render.call(elt, "");
+
+  it("renders with text_color set", () => {
+    const elt = makeElt({ name: "x", target: "my_target", text_color: "blue" });
+    expect(() => realRender(elt)).not.toThrow();
+  });
+
+  it("renders without text_color", () => {
+    const elt = makeElt({ name: "x", target: "my_target" });
+    expect(() => realRender(elt)).not.toThrow();
+  });
+
+  it("renders with force_integer and no round", () => {
+    const elt = makeElt({
+      name: "x",
+      target: "my_target",
+      force_integer: true,
+    });
+    expect(() => realRender(elt)).not.toThrow();
+  });
+
+  it("renders with a unit override and round", () => {
+    const elt = makeElt({
+      name: "x",
+      target: "my_target",
+      unit: "mL",
+      round: 1,
+    });
+    expect(() => realRender(elt)).not.toThrow();
+  });
+});

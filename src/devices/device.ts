@@ -15,10 +15,12 @@ import { merge } from "../utils/merge";
 import i18n from "../translations/myi18n";
 
 import { MyElement } from "../base/element";
+import { SafeEval } from "../utils/SafeEval";
 
 import { dialogs_device } from "./device.dialogs";
 
 import style_common from "../utils/common.styles";
+import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
 @customElement("rs-device")
@@ -68,9 +70,27 @@ export class RSDevice extends LitElement {
 
   protected state: boolean = false;
 
-  static styles = [style_common];
+  // Animations too: a device can put a class such as `blink-alert` on its own
+  // background picture, and those keyframes live in MyElement's stylesheet,
+  // which does not reach the device's shadow root.
+  static styles = [style_common, style_animations];
 
   private _helpers: any;
+
+  /**
+   * Custom element tag of a device model.
+   *
+   * The model Home Assistant reports can carry a "+" (RSATO+), which is not a
+   * valid custom element name, so the tag drops it. The card and its editor
+   * used to build this string separately: the editor kept the "+" and looked
+   * for redsea-rsato+, which nothing registers, so the ReefATO+ editor stayed
+   * empty.
+   * @param model: the model as reported by the integration
+   * @return the registered tag name
+   */
+  static tag_for_model(model: string): string {
+    return "redsea-" + model.toLowerCase().replaceAll("+", "");
+  }
 
   /**
    * Create a device from a configuration (ex: rsdose4.mapping.ts)
@@ -168,7 +188,7 @@ export class RSDevice extends LitElement {
     return this._render(style, substyle);
   }
 
-  _render(style?: any, substyle?: any) {
+  _render(style?: any, substyle?: any): TemplateResult {
     return html` <div class="device_bg">
       ${style}
       <img
@@ -311,13 +331,29 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Model the user configuration of this device is stored under.
+   *
+   * The model Home Assistant reports and the model the mapping declares are
+   * not always the same string: the ReefATO+ reports RSATO+ for a mapping
+   * that calls itself RSATO, and every RSLED* reports its size for a mapping
+   * that calls itself RSLED. The reported model wins, because that is what
+   * the merge in update_config() has always read — an editor writing under
+   * the mapping name stored options that were then never read back, which
+   * looked like a switch that would not stay on.
+   * @return the key of this device in `conf`
+   */
+  config_model(): string {
+    return this.device?.elements?.[0]?.model ?? this.config?.model;
+  }
+
+  /**
    * Merge basic device onfiguraiton with user configuration for final configuration
    */
   update_config(): void {
     this.config = JSON.parse(JSON.stringify(this.initial_config));
 
     if (this.user_config && "conf" in this.user_config && this.device) {
-      const model = this.device.elements[0].model;
+      const model = this.config_model();
 
       if (model && model in this.user_config.conf) {
         const device_conf = this.user_config.conf[model];
@@ -479,6 +515,77 @@ export class RSDevice extends LitElement {
    * @state: the state of the device on or off to adapt the render
    * @put_in: a grouping div to put element on
    */
+  /**
+   * Evaluate every `${...}` template found in a native card configuration.
+   *
+   * A `hui-*` block goes straight to `createCardElement()`, so it never passes
+   * through the SafeEval that MyElement applies to labels and classes. Without
+   * this, a mapping shared across seven locales can only carry hard-coded
+   * strings — `name: "${i18n._('<key>')}"` would reach the legend verbatim.
+   *
+   * Walks the whole structure in place: templates turn up in `name`, `title`,
+   * axis labels, and any option a card may add later, so the key names are not
+   * hardcoded. Strings without `${` are left untouched, which keeps entity ids
+   * and colours safe from the evaluator.
+   *
+   * @param node: the value to walk, mutated in place for objects and arrays
+   * @param evaluator: the SafeEval bound to this device
+   * @return the value with its templates resolved
+   */
+  private _resolve_templates(node: any, evaluator: SafeEval): any {
+    if (typeof node === "string") {
+      // The evaluator is only worth its cost on an actual template, and this
+      // also guarantees a plain string is returned unchanged rather than
+      // round-tripped through the expression parser.
+      return node.includes("${") ? evaluator.evaluate(node) : node;
+    }
+    if (Array.isArray(node)) {
+      for (let pos = 0; pos < node.length; pos++) {
+        node[pos] = this._resolve_templates(node[pos], evaluator);
+      }
+      return node;
+    }
+    if (node && typeof node === "object") {
+      for (const key of Object.keys(node)) {
+        node[key] = this._resolve_templates(node[key], evaluator);
+      }
+      return node;
+    }
+    return node;
+  }
+
+  /**
+   * Build the SafeEval used for both `disabled_if` and card templates.
+   * @param conf: the element configuration, exposed as `config`
+   * @return an evaluator bound to this device
+   */
+  private _evaluator(conf: any): SafeEval {
+    return new SafeEval({
+      entity: MyElement.createEntitiesContext(this, this._hass),
+      device: this,
+      config: conf,
+      i18n: i18n,
+    });
+  }
+
+  /**
+   * Evaluate a `disabled_if` expression against this device.
+   *
+   * Same context as MyElement: `device`, `entity`, `config` and `i18n`, minus
+   * `stateObj`, which only an element bound to an entity has.
+   *
+   * SafeEval.evaluateCondition() already swallows a throwing expression and
+   * answers false, so a broken condition leaves the element visible rather
+   * than blanking it out — which is the right way round: a mistake stays
+   * findable instead of making a card silently disappear.
+   * @param expression: the condition to evaluate
+   * @param conf: the element configuration, exposed as `config`
+   * @return true when the element should be hidden
+   */
+  evaluate_condition(expression: string, conf: any): boolean {
+    return this._evaluator(conf).evaluateCondition(expression) === true;
+  }
+
   _render_element(
     conf: any,
     state: boolean,
@@ -499,6 +606,15 @@ export class RSDevice extends LitElement {
       return html``;
     }
 
+    // hui-* elements never build a MyElement, so the disabled_if that
+    // MyElement.render() would have evaluated has to be handled here or it is
+    // silently ignored — a native card cannot be conditionally hidden.
+    if (conf.type?.startsWith("hui-") && conf.disabled_if) {
+      if (this.evaluate_condition(conf.disabled_if, conf)) {
+        return conf.no_br_if_disabled ? html`` : html`<br />`;
+      }
+    }
+
     // Handle hui-*-card natively — same logic as dialog.ts _render_content()
     // Requires _helpers (loaded async), skip until available
     if (conf.type?.startsWith("hui-")) {
@@ -513,7 +629,10 @@ export class RSDevice extends LitElement {
       if (!(key in this._elements)) {
         if (this._hass && conf.conf) {
           // Resolve translation_key -> real entity_id, exactly like dialog.ts
-          const clone = structuredClone(conf.conf);
+          const clone = this._resolve_templates(
+            structuredClone(conf.conf),
+            this._evaluator(conf),
+          );
           if (clone?.entity) {
             const e = clone.entity;
             if (typeof e === "string") {
@@ -596,7 +715,7 @@ export class RSDevice extends LitElement {
     }
     // Re-apply persistent CSS overrides (survive swapLeftRight config recreation)
     if (element && this._conf_overrides[elementKey]?.css) {
-      Object.assign(element.conf.css, this._conf_overrides[elementKey].css);
+      element.merge_css(this._conf_overrides[elementKey].css);
     }
     return html`${element}`;
   }
@@ -684,12 +803,29 @@ export class RSDevice extends LitElement {
   }
 
   /**
-   * Persist a device-level flag toggled from the editor.
+   * Read a device-level value stored in the user config.
+   * The string counterpart of get_config_flag(), for options that name an
+   * entity rather than switch a behaviour on and off.
+   * @param key: the option name
+   * @return the stored value trimmed, or "" when never set
    */
-  handleChangedConfigFlagEvent(changedEvent) {
-    const value = changedEvent.currentTarget.checked;
-    const key = changedEvent.target.id;
-    const model = this.config.model;
+  get_config_value(key: string): string {
+    const value = this.config?.[key];
+    return typeof value === "string" ? value.trim() : "";
+  }
+
+  /**
+   * Persist a device-level option and tell the editor about it.
+   *
+   * Every device-level option goes through here, whatever its type: the
+   * config shape (conf > model > devices > name > key) is the same for a
+   * boolean toggled from a switch and for an entity id picked from a
+   * selector.
+   * @param key: the option name
+   * @param value: the value to store
+   */
+  set_config_value(key: string, value: unknown): void {
+    const model = this.config_model();
     const newVal = {
       conf: {
         [model]: {
@@ -711,6 +847,16 @@ export class RSDevice extends LitElement {
         bubbles: true,
         composed: true,
       }),
+    );
+  }
+
+  /**
+   * Persist a device-level flag toggled from the editor.
+   */
+  handleChangedConfigFlagEvent(changedEvent) {
+    this.set_config_value(
+      changedEvent.target.id,
+      changedEvent.currentTarget.checked,
     );
   }
 
@@ -789,9 +935,10 @@ export class RSDevice extends LitElement {
 
   handleChangedDeviceEvent(changedEvent) {
     const value = changedEvent.currentTarget.checked;
+    const model = this.config_model();
     const newVal = {
       conf: {
-        [this.config.model]: {
+        [model]: {
           devices: {
             [this.device.name]: {
               elements: { [changedEvent.target.id]: { disabled_if: value } },
@@ -802,7 +949,7 @@ export class RSDevice extends LitElement {
     };
     let newConfig = JSON.parse(JSON.stringify(this.user_config));
     try {
-      newConfig.conf[this.config.model].devices[this.device.name].elements[
+      newConfig.conf[model].devices[this.device.name].elements[
         changedEvent.target.id
       ].disabled_if = value;
     } catch {

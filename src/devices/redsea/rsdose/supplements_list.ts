@@ -1,4 +1,4 @@
-import { Supplement } from "../../types/supplement";
+import { Supplement } from "../../../types/supplement";
 
 export const SUPPLEMENTS: Supplement[] = [
   {
