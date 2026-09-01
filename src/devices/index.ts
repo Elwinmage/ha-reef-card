@@ -21,10 +21,16 @@ import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
+import { RSPower6, RSPower8 } from "./redsea/rspower";
+import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
   customElements.define("redsea-nodevice", NoDevice);
+if (!customElements.get("redsea-rscontrollite"))
+  customElements.define("redsea-rscontrollite", RSControlLite);
+if (!customElements.get("redsea-rscontrolpro"))
+  customElements.define("redsea-rscontrolpro", RSControlPro);
 if (!customElements.get("redsea-rsdose4"))
   customElements.define("redsea-rsdose4", RSDose4);
 if (!customElements.get("redsea-rsdose2"))
@@ -63,6 +69,10 @@ if (!customElements.get("redsea-rswave45"))
   customElements.define("redsea-rswave45", RSWave25);
 if (!customElements.get("redsea-maintenance"))
   customElements.define("redsea-maintenance", RSMaintenance);
+if (!customElements.get("redsea-rspower6"))
+  customElements.define("redsea-rspower6", RSPower6);
+if (!customElements.get("redsea-rspower8"))
+  customElements.define("redsea-rspower8", RSPower8);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -80,3 +90,5 @@ export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";
 export { RSWave25, RSWave45 } from "./redsea/rswave";
 export { RSMaintenance } from "./redsea/maintenance";
+export { RSPower6, RSPower8 } from "./redsea/rspower";
+export { RSControlLite, RSControlPro } from "./redsea/rscontrol";

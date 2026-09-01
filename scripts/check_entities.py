@@ -47,13 +47,15 @@ COORDINATOR_TO_DEVICE: dict[str, list[str]] = {
     "ReefMatCoordinator":        ["rsmat"],
     "ReefDoseCoordinator":       ["rsdose"],
     "ReefATOCoordinator":        ["rsato"],
+    "ReefPowerCoordinator":      ["rspower"],
+    "ReefControlCoordinator":    ["rscontrol"],
     "ReefRunCoordinator":        ["rsrun"],
     "ReefWaveCoordinator":       ["rswave"],
     # Cloud coordinator — no card device
     "ReefBeatCloudCoordinator":  ["_cloud"],
     # Base / protocol guards used in isinstance() conditions
-    "_CloudLinkedCoordinator":   ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat", "rsdose", "rsato", "rsrun", "rswave"],
-    "ReefBeatCloudLinkedCoordinator": ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat", "rsdose", "rsato", "rsrun", "rswave"],
+    "_CloudLinkedCoordinator":   ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat","rspower", "rcontrol", "rsdose", "rsato", "rsrun", "rswave"],
+    "ReefBeatCloudLinkedCoordinator": ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat", "rspower","rscontrol","rsdose", "rsato", "rsrun", "rswave"],
 }
 
 # Platforms we parse
@@ -137,7 +139,7 @@ class EntityExtractor(ast.NodeVisitor):
     """
 
     # All real device names we care about
-    ALL_DEVICES: list[str] = ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat", "rsdose", "rsato", "rsrun", "rswave"]
+    ALL_DEVICES: list[str] = ["rsled_g1", "rsled_g2", "rsled_virtual", "rsmat", "rsdose", "rsato", "rsrun", "rswave","rspower","rscontrol"]
 
     def __init__(self, platform: str) -> None:
         self.platform = platform
@@ -495,6 +497,8 @@ CARD_DEVICE_FOLDERS: dict[str, str] = {
     "rsrun":        "redsea/rsrun",
     "rswave":       "redsea/rswave",
     "rsmat":        "redsea/rsmat",
+    "rspower":        "redsea/rspower",
+    "rscontrol":        "redsea/rscontrol",
 }
 
 # Restrict TS file scanning per device variant.
@@ -625,7 +629,7 @@ def _extract_keys_from_ts_file(path: Path) -> set[str]:
 # Step 3 – Cross-check and report
 # ---------------------------------------------------------------------------
 
-DEVICES = ["rsdose", "rsled_g1", "rsled_g2", "rsled_virtual", "rsato", "rsrun", "rswave", "rsmat"]
+DEVICES = ["rsdose", "rsled_g1", "rsled_g2", "rsled_virtual", "rsato", "rsrun", "rswave", "rsmat","rspower","rscontrol"]
 
 # Some translation_keys are template-based (per head/pump) and the card uses
 # the base key without the suffix. We strip known suffixes for comparison.
