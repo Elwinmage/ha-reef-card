@@ -16450,6 +16450,19 @@ class Ng extends l {
   constructor() {
     super(), this.initial_config = f4;
   }
+  // override _render(style?: any, substyle?: any) {
+  //   return html` <div class="device_bg">
+  //     ${style}
+  //     <img
+  //       class="device_img"
+  //       id="rspower6_img"
+  //       alt=""
+  //       src="${this.config.background_img}"
+  //       style="${substyle}"
+  //     />
+  //     <div>${this._render_elements(this.is_on())}</div>
+  //   </div>`;
+  // } // end of function render
   renderEditor() {
     return n``;
   }
@@ -16461,6 +16474,19 @@ class $4 extends Ng {
     super(), this.initial_config = X4;
   }
   // end of constructor
+  // override _render(style?: any, substyle?: any) {
+  //   return html` <div class="device_bg">
+  //     ${style}
+  //     <img
+  //       class="device_img"
+  //       id="rspower6_img"
+  //       alt=""
+  //       src="${this.config.background_img}"
+  //       style="${substyle}"
+  //     />
+  //     <div>${this._render_elements(this.is_on())}</div>
+  //   </div>`;
+  // } // end of function render
 }
 class Ap extends $4 {
 }
