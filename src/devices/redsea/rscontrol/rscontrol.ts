@@ -4,6 +4,7 @@ import { config } from "./rscontrollite.mapping";
 import { config2 } from "./rscontrolpro.mapping";
 
 // TODO : Implement RSCONTROL support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/96
 // labels: enhancement, rscontrol
 export class RSControl extends RSDevice {
   constructor() {

@@ -4,6 +4,7 @@ import { config } from "./rspower6.mapping";
 import { config2 } from "./rspower8.mapping";
 
 // TODO : Implement RSPOWER support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/97
 // labels: enhancement, rspower
 export class RSPower extends RSDevice {
   constructor() {
