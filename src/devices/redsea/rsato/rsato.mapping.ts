@@ -574,7 +574,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "16%",
-        left: "75%",
+        left: "87%",
       },
     },
     leak_settings: {
@@ -596,7 +596,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "16%",
-        left: "81%",
+        left: "75%",
       },
     },
     ato_sensor_settings: {
@@ -617,7 +617,7 @@ export const config = {
         flex: "0 0 auto",
         position: "absolute",
         top: "16%",
-        left: "87%",
+        left: "81%",
       },
     },
     // Device buzzer, placed between the RO reservoir and the sump.
