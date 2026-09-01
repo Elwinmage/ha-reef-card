@@ -552,9 +552,9 @@ describe("RSAto accessory settings icons", () => {
 
   it("puts one settings icon per socket, in the header column grid", () => {
     // Left to right, matching the three sockets on the front panel.
-    expect(elements.pump_settings.css.left).toBe("75%");
-    expect(elements.leak_settings.css.left).toBe("81%");
-    expect(elements.ato_sensor_settings.css.left).toBe("87%");
+    expect(elements.pump_settings.css.left).toBe("87%");
+    expect(elements.leak_settings.css.left).toBe("75%");
+    expect(elements.ato_sensor_settings.css.left).toBe("81%");
     for (const key of [
       "pump_settings",
       "leak_settings",
