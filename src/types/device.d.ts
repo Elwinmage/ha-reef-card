@@ -55,6 +55,12 @@ export interface HeadEntity {
   dose_head?: any;
 }
 
+export interface SocketEntity {
+  entities: Record<string, any>;
+  /** Cached PowerSocket LitElement rendering this socket */
+  power_socket?: any;
+}
+
 export interface PumpEntity {
   entities: Record<string, any>;
   parent_entities?: Record<string, any>;

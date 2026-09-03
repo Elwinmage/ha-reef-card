@@ -1,3 +1,5 @@
+import { COLOR_ERROR_HEX, COLOR_WHITE_60 } from "../../../utils/colors";
+
 export const config = {
   name: null,
   model: "RSPOWER6",
@@ -8,11 +10,11 @@ export const config = {
   css: {
     width: "100%",
   },
+  sockets_nb: 6,
   elements: {
     last_message: {
       name: "last_message",
       type: "redsea-messages",
-      // Absolutely positioned: never emit a <br> that shifts the flow
       no_br_if_disabled: true,
       css: {
         flex: "0 0 auto",
@@ -26,11 +28,9 @@ export const config = {
         "background-color": "rgba(220,220,220,0.7)",
       },
     },
-
     last_alert_message: {
       name: "last_alert_message",
       type: "redsea-messages",
-      // Absolutely positioned: never emit a <br> that shifts the flow
       no_br_if_disabled: true,
       label: "'⚠'",
       css: {
@@ -46,14 +46,59 @@ export const config = {
         "background-color": "rgba(240,200,200,0.7)",
       },
     },
-    device_states: {
-      type: "hui-entities-card",
-      conf: {
-        type: "entities",
-        entities: [
-          { entity: "device_state", name: { type: "entity" } },
-          { entity: "maintenance", name: { type: "entity" } },
-        ],
+    device_state: {
+      name: "device_state",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "0%",
+        left: "60%",
+      },
+    },
+    maintenance: {
+      name: "maintenance",
+      type: "click-image",
+      icon: "state",
+      icon_color: "red",
+      master: true,
+      tap_action: {
+        domain: "switch",
+        action: "toggle",
+        data: "default",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "0%",
+        left: "66%",
+      },
+    },
+    configuration: {
+      name: "configuration",
+      type: "click-image",
+      icon: "mdi:cog",
+      icon_color: COLOR_ERROR_HEX,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: "config",
+        },
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "0%",
+        left: "72%",
       },
     },
     wifi_quality: {
@@ -62,7 +107,7 @@ export const config = {
       master: true,
       label: false,
       icon: true,
-      icon_color: "#ec2330",
+      icon_color: COLOR_ERROR_HEX,
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
@@ -74,8 +119,92 @@ export const config = {
         width: "5.5%",
         height: "2%",
         top: "0%",
-        right: "0%",
+        left: "78%",
       },
+    },
+    battery_level: {
+      name: "battery_level",
+      type: "common-sensor",
+      master: true,
+      label: false,
+      icon: true,
+      icon_color: "red",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "0%",
+        left: "84%",
+      },
+    },
+    mode: {
+      name: "mode",
+      type: "common-sensor",
+      translate_values: true,
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        color: COLOR_WHITE_60,
+        width: "5.3%",
+        top: "0%",
+        left: "35%",
+      },
+    },
+  },
+  sockets: {
+    common: {
+      css: {
+        top: "3%",
+        position: "absolute",
+        flex: "0 0 auto",
+        width: "13.5%",
+        height: "13.5%",
+      },
+      elements: {
+        socket_on_off: {
+          name: "socket_on_off",
+          type: "click-image",
+          icon: "state",
+          class: "on_off",
+          style: "button",
+          tap_action: {
+            domain: "switch",
+            action: "toggle",
+            data: "default",
+          },
+          css: {
+            position: "absolute",
+            width: "70%",
+            "aspect-ratio": "1/1",
+            top: "25%",
+            left: "15%",
+            "border-radius": "10%",
+          },
+        },
+      },
+    },
+    socket_1: {
+      id: 1,
+      css: { left: "10%", "background-color": "rgba(255,0,0,0.2)" },
+    },
+    socket_2: {
+      id: 2,
+      css: { left: "24%", "background-color": "rgba(0,255,0,0.2)" },
+    },
+    socket_3: {
+      id: 3,
+      css: { left: "38%", "background-color": "rgba(0,0,255,0.2)" },
+    },
+    socket_4: {
+      id: 4,
+      css: { left: "52%", "background-color": "rgba(255,255,0,0.2)" },
+    },
+    socket_5: {
+      id: 5,
+      css: { left: "66%", "background-color": "rgba(255,0,255,0.2)" },
+    },
+    socket_6: {
+      id: 6,
+      css: { left: "80%", "background-color": "rgba(0,255,255,0.2)" },
     },
   },
 };
