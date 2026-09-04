@@ -230,8 +230,6 @@ Aby usunąć wybór urządzenia i wymusić konkretne, ustaw parametr `device` na
 
 ReefATO+ z ha-reef-card w akcji:
 
-<!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
-
 [![Obejrzyj film](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 Karta ReefATO+ pozwala wizualnie sterować sterownikiem RSATO+, zbiornikiem wody

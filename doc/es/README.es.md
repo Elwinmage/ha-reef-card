@@ -230,8 +230,6 @@ Para eliminar la selección de dispositivo y forzar uno específico, defina el p
 
 ReefATO+ con ha-reef-card en acción:
 
-<!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
-
 [![Ver el vídeo](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 La tarjeta ReefATO+ permite gobernar visualmente el controlador RSATO+, el

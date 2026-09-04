@@ -230,8 +230,6 @@ Per rimuovere la selezione del dispositivo e forzarne uno specifico, impostate i
 
 ReefATO+ con ha-reef-card in azione:
 
-<!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
-
 [![Guarda il video](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 La card ReefATO+ permette di gestire visivamente il controller RSATO+, il
