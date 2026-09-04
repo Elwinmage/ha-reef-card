@@ -277,6 +277,7 @@ To remove device selection and force a specific one, set the `device` parameter 
 ReefATO+ with ha-reef-card in action:
 
 <!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
+<!-- Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/99 -->
 <!-- Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/93 -->
 
 [![Watch the video](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
