@@ -230,9 +230,9 @@ Aby usunąć wybór urządzenia i wymusić konkretne, ustaw parametr `device` na
 
 ReefATO+ z ha-reef-card w akcji:
 
-<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+<!-- TODO: replace BOEswDYcNO8 by the youtube id of the ReefATO+ video -->
 
-[![Obejrzyj film](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+[![Obejrzyj film](https://img.youtube.com/vi/BOEswDYcNO8/0.jpg)](https://www.youtube.com/watch?v=BOEswDYcNO8)
 
 Karta ReefATO+ pozwala wizualnie sterować sterownikiem RSATO+, zbiornikiem wody
 osmotycznej z pompą, sondą poziomu przypiętą do szyby i sondą zalania leżącą na

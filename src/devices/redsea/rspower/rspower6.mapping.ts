@@ -1,4 +1,8 @@
-import { COLOR_ERROR_HEX, COLOR_WHITE_60 } from "../../../utils/colors";
+import {
+  COLOR_ERROR_HEX,
+  COLOR_RS_RGBSTR,
+  COLOR_WHITE_60,
+} from "../../../utils/colors";
 
 export const config = {
   name: null,
@@ -60,8 +64,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "0%",
-        left: "60%",
+        top: "2%",
+        left: "10%",
       },
     },
     maintenance: {
@@ -78,8 +82,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "0%",
-        left: "66%",
+        top: "2%",
+        left: "16%",
       },
     },
     configuration: {
@@ -97,8 +101,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "0%",
-        left: "72%",
+        top: "2%",
+        right: "22%",
       },
     },
     wifi_quality: {
@@ -116,10 +120,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        width: "5.5%",
-        height: "2%",
-        top: "0%",
-        left: "78%",
+        top: "2%",
+        right: "16%",
       },
     },
     battery_level: {
@@ -132,8 +134,8 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "0%",
-        left: "84%",
+        top: "2%",
+        right: "10%",
       },
     },
     mode: {
@@ -145,15 +147,16 @@ export const config = {
         position: "absolute",
         color: COLOR_WHITE_60,
         width: "5.3%",
-        top: "0%",
-        left: "35%",
+        top: "6.5%",
+        left: "54%",
       },
     },
   },
   sockets: {
     common: {
+      alpha: "0.2",
       css: {
-        top: "3%",
+        top: "9.5%",
         position: "absolute",
         flex: "0 0 auto",
         width: "13.5%",
@@ -166,6 +169,7 @@ export const config = {
           icon: "state",
           class: "on_off",
           style: "button",
+          icon_color: COLOR_RS_RGBSTR,
           tap_action: {
             domain: "switch",
             action: "toggle",
@@ -175,36 +179,47 @@ export const config = {
             position: "absolute",
             width: "70%",
             "aspect-ratio": "1/1",
-            top: "25%",
+            top: "23%",
             left: "15%",
-            "border-radius": "10%",
+            "border-radius": "100%",
+            "--mdc-icon-size": "100%",
+            "border-width": "2px",
+            "border-style": "solid",
+            "border-color": "$DEVICE-COLOR-ALPHA$",
+            "background-color": "$DEVICE-COLOR-ALPHA$",
           },
         },
       },
     },
     socket_1: {
       id: 1,
-      css: { left: "10%", "background-color": "rgba(255,0,0,0.2)" },
+      color: "255,0,0",
+      css: { left: "10%" },
     },
     socket_2: {
+      color: "0,255,0",
       id: 2,
-      css: { left: "24%", "background-color": "rgba(0,255,0,0.2)" },
+      css: { left: "24%" },
     },
     socket_3: {
       id: 3,
-      css: { left: "38%", "background-color": "rgba(0,0,255,0.2)" },
+      color: "0,0,255",
+      css: { left: "38%" },
     },
     socket_4: {
       id: 4,
-      css: { left: "52%", "background-color": "rgba(255,255,0,0.2)" },
+      color: "255,255,0",
+      css: { left: "52%" },
     },
     socket_5: {
       id: 5,
-      css: { left: "66%", "background-color": "rgba(255,0,255,0.2)" },
+      color: "255,0,255",
+      css: { left: "66%" },
     },
     socket_6: {
       id: 6,
-      css: { left: "80%", "background-color": "rgba(0,255,255,0.2)" },
+      color: "0,255,255",
+      css: { left: "80%" },
     },
   },
 };

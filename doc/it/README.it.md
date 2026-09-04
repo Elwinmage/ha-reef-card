@@ -230,9 +230,9 @@ Per rimuovere la selezione del dispositivo e forzarne uno specifico, impostate i
 
 ReefATO+ con ha-reef-card in azione:
 
-<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+<!-- TODO: replace BOEswDYcNO8 by the youtube id of the ReefATO+ video -->
 
-[![Guarda il video](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+[![Guarda il video](https://img.youtube.com/vi/BOEswDYcNO8/0.jpg)](https://www.youtube.com/watch?v=BOEswDYcNO8)
 
 La card ReefATO+ permette di gestire visivamente il controller RSATO+, il
 serbatoio di acqua osmotica con la sua pompa, la sonda di livello agganciata alla

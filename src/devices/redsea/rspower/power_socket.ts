@@ -49,10 +49,11 @@ export class PowerSocket extends RSDevice {
 
     this.state_on = this.is_on();
 
-    const name = this._get_socket_sensor_state("name") ?? `S${this.socket_id}`;
-    const mode = this._get_socket_sensor_state("mode") ?? "setup";
-    const state = this._get_socket_sensor_state("state") ?? "unknown";
-    const consumption = this._get_socket_sensor_state("consumption");
+    const name =
+      this._get_socket_sensor_state("socket_name") ?? `S${this.socket_id}`;
+    const mode = this._get_socket_sensor_state("socket_mode") ?? "setup";
+    const state = this._get_socket_sensor_state("socket_state") ?? "unknown";
+    const consumption = this._get_socket_sensor_state("socket_consumption");
 
     // Determine visual state class
     let stateClass = "off";
@@ -76,9 +77,7 @@ export class PowerSocket extends RSDevice {
     return html`
       <div class="socket_container">
         <div class="socket_label">${name}</div>
-        ${consumptionHtml}
-        <div class="socket_indicator ${stateClass}">${i18n._(stateClass)}</div>
-        ${this._render_elements(this.state_on)}
+        ${consumptionHtml} ${this._render_elements(this.state_on)}
       </div>
     `;
   }
@@ -87,11 +86,11 @@ export class PowerSocket extends RSDevice {
    * Read the current HA state for a per-socket sensor.
    *
    * Per-socket entities are stored in `this.entities` by the parent's
-   * `_populate_entities_with_sockets()` under their field suffix
-   * (e.g. "name", "state", "mode", "consumption").
+   * `_populate_entities_with_sockets()` under their translation_key
+   * (e.g. "socket_name", "socket_state", "socket_mode", "socket_consumption").
    */
-  _get_socket_sensor_state(field: string): string | null {
-    const entity = this.entities?.[field];
+  _get_socket_sensor_state(translation_key: string): string | null {
+    const entity = this.entities?.[translation_key];
     if (!entity) return null;
     const stateObj = this._hass?.states?.[entity.entity_id];
     return stateObj?.state ?? null;
@@ -102,7 +101,7 @@ export class PowerSocket extends RSDevice {
     this._setting_hass(obj);
 
     // Detect state changes
-    const newState = this._get_socket_sensor_state("state");
+    const newState = this._get_socket_sensor_state("socket_state");
     if (newState !== this.socket_state) {
       this.socket_state = newState;
       to_update = true;
@@ -114,8 +113,8 @@ export class PowerSocket extends RSDevice {
   }
 
   is_on(): boolean {
-    const mode = this._get_socket_sensor_state("mode");
-    const state = this._get_socket_sensor_state("state");
+    const mode = this._get_socket_sensor_state("socket_mode");
+    const state = this._get_socket_sensor_state("socket_state");
     if (mode === "off" || mode === "setup") return false;
     if (state === "on") return true;
     if (mode === "on") return true;

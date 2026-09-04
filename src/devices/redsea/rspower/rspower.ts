@@ -65,11 +65,6 @@ export class RSPower extends RSDevice {
     }
     if (!this._hass) return;
 
-    // Regex matching per-socket entity keys in the entity_id:
-    //   sensor.redsea_mypower_socket_0_name  →  idx=0, field=name
-    //   switch.redsea_mypower_socket_3_on_off → idx=3, field=on_off
-    const socketPattern = /socket_(\d+)_(\w+)$/;
-
     for (const entity_id in this._hass.entities) {
       const entity = this._hass.entities[entity_id];
       if (!this.device) continue;
@@ -84,13 +79,16 @@ export class RSPower extends RSDevice {
       }
       if (!is_ours) continue;
 
-      const match = entity_id.match(socketPattern);
-      if (match) {
-        const socket_idx = parseInt(match[1]); // 0-based from HA
-        const field = match[2]; // name, state, mode, consumption, on_off, delete …
-        const slot = socket_idx + 1; // 1-based in _sockets array
-        if (slot < this._sockets.length) {
-          this._sockets[slot].entities[field] = entity;
+      if (entity.translation_key?.startsWith("socket_")) {
+        // Per-socket entity — extract 0-based index from unique_id
+        // (format: serial_socket_N_field, stable — built from the
+        // integration's key, not from translations).
+        const idxMatch = (entity.unique_id ?? entity_id).match(/socket_(\d+)/);
+        if (idxMatch) {
+          const slot = parseInt(idxMatch[1]);
+          if (slot < this._sockets.length) {
+            this._sockets[slot].entities[entity.translation_key] = entity;
+          }
         }
       } else {
         // Global entity (device_state, maintenance, wifi_quality, mode, …)

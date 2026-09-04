@@ -100,6 +100,8 @@
   "new_roll_info": "For a new roll, set the following value to the minimum; otherwise, enter the diameter of your current roll.",
   "next": "Next",
   "no": "No",
+  "off": "Off",
+  "on": "On",
   "overskimming_calibration": "Overskimming calibration",
   "priming": "Priming",
   "pump": "ATO pump",

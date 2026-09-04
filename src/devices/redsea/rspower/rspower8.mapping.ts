@@ -60,8 +60,8 @@ export const config2 = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "1%",
-        left: "60%",
+        top: "2%",
+        left: "10%",
       },
     },
     maintenance: {
@@ -78,8 +78,8 @@ export const config2 = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "1%",
-        left: "66%",
+        top: "2%",
+        left: "16%",
       },
     },
     configuration: {
@@ -97,8 +97,8 @@ export const config2 = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "1%",
-        left: "72%",
+        top: "2%",
+        right: "22%",
       },
     },
     wifi_quality: {
@@ -116,10 +116,8 @@ export const config2 = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        width: "5.5%",
-        height: "2%",
-        top: "1%",
-        left: "78%",
+        top: "2%",
+        right: "16%",
       },
     },
     battery_level: {
@@ -132,8 +130,8 @@ export const config2 = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "1%",
-        left: "84%",
+        top: "2%",
+        right: "10%",
       },
     },
     mode: {
@@ -145,26 +143,25 @@ export const config2 = {
         position: "absolute",
         color: COLOR_WHITE_60,
         width: "5.3%",
-        top: "1%",
-        left: "35%",
+        top: "6.5%",
+        left: "54%",
       },
     },
   },
   sockets: {
     common: {
       css: {
-        top: "0%",
+        top: "9.5%",
         position: "absolute",
         flex: "0 0 auto",
-        width: "11%",
-        height: "100%",
+        width: "10.8%",
+        height: "13.5%",
       },
       elements: {
-        on_off: {
-          name: "on_off",
-          type: "common-switch",
-          master: true,
-          label: false,
+        socket_on_off: {
+          name: "socket_on_off",
+          type: "click-image",
+          icon: "state",
           class: "on_off",
           style: "button",
           tap_action: {
@@ -183,13 +180,37 @@ export const config2 = {
         },
       },
     },
-    socket_1: { id: 1, css: { left: "3%" } },
-    socket_2: { id: 2, css: { left: "14.5%" } },
-    socket_3: { id: 3, css: { left: "26%" } },
-    socket_4: { id: 4, css: { left: "37.5%" } },
-    socket_5: { id: 5, css: { left: "49%" } },
-    socket_6: { id: 6, css: { left: "60.5%" } },
-    socket_7: { id: 7, css: { left: "72%" } },
-    socket_8: { id: 8, css: { left: "83.5%" } },
+    socket_1: {
+      id: 1,
+      css: { left: "9%", "background-color": "rgba(255,0,0,0.2)" },
+    },
+    socket_2: {
+      id: 2,
+      css: { left: "19.8%", "background-color": "rgba(0,255,0,0.2)" },
+    },
+    socket_3: {
+      id: 3,
+      css: { left: "30.6%", "background-color": "rgba(0,0,255,0.2)" },
+    },
+    socket_4: {
+      id: 4,
+      css: { left: "41.4%", "background-color": "rgba(255,255,0,0.2)" },
+    },
+    socket_5: {
+      id: 5,
+      css: { left: "52.2%", "background-color": "rgba(255,0,255,0.2)" },
+    },
+    socket_6: {
+      id: 6,
+      css: { left: "63%", "background-color": "rgba(0,255,255,0.2)" },
+    },
+    socket_7: {
+      id: 7,
+      css: { left: "73.8%", "background-color": "rgba(125,125,255,0.2)" },
+    },
+    socket_8: {
+      id: 8,
+      css: { left: "84.6%", "background-color": "rgba(255,100,20,0.2)" },
+    },
   },
 };

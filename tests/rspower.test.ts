@@ -98,18 +98,18 @@ describe("RSPower", () => {
     dev._hass = makeHass(
       {},
       {
-        "sensor.mypower_socket_0_name": {
-          entity_id: "sensor.mypower_socket_0_name",
+        "sensor.mypower_socket_1_name": {
+          entity_id: "sensor.mypower_socket_1_name",
           device_id: "dev1",
           translation_key: "socket_name",
         },
-        "sensor.mypower_socket_0_consumption": {
-          entity_id: "sensor.mypower_socket_0_consumption",
+        "sensor.mypower_socket_1_consumption": {
+          entity_id: "sensor.mypower_socket_1_consumption",
           device_id: "dev1",
           translation_key: "socket_consumption",
         },
-        "sensor.mypower_socket_2_mode": {
-          entity_id: "sensor.mypower_socket_2_mode",
+        "sensor.mypower_socket_3_mode": {
+          entity_id: "sensor.mypower_socket_3_mode",
           device_id: "dev1",
           translation_key: "socket_mode",
         },
@@ -122,11 +122,11 @@ describe("RSPower", () => {
     );
     dev._populate_entities_with_sockets();
 
-    // socket 0 → slot 1
-    expect(dev._sockets[1].entities.name).toBeDefined();
-    expect(dev._sockets[1].entities.consumption).toBeDefined();
+    // socket 0 → slot 1 (stored by translation_key)
+    expect(dev._sockets[1].entities.socket_name).toBeDefined();
+    expect(dev._sockets[1].entities.socket_consumption).toBeDefined();
     // socket 2 → slot 3
-    expect(dev._sockets[3].entities.mode).toBeDefined();
+    expect(dev._sockets[3].entities.socket_mode).toBeDefined();
     // global entity
     expect(dev.entities.battery_level).toBeDefined();
   });
@@ -183,8 +183,8 @@ describe("PowerSocket", () => {
   it("is_on() returns false when mode is setup", () => {
     const ps = new StubPowerSocket() as any;
     ps.entities = {
-      mode: { entity_id: "sensor.mode" },
-      state: { entity_id: "sensor.state" },
+      socket_mode: { entity_id: "sensor.mode" },
+      socket_state: { entity_id: "sensor.state" },
     };
     ps._hass = makeHass({
       "sensor.mode": { state: "setup" },
@@ -196,8 +196,8 @@ describe("PowerSocket", () => {
   it("is_on() returns true when mode is on", () => {
     const ps = new StubPowerSocket() as any;
     ps.entities = {
-      mode: { entity_id: "sensor.mode" },
-      state: { entity_id: "sensor.state" },
+      socket_mode: { entity_id: "sensor.mode" },
+      socket_state: { entity_id: "sensor.state" },
     };
     ps._hass = makeHass({
       "sensor.mode": { state: "on" },
@@ -210,13 +210,13 @@ describe("PowerSocket", () => {
     const ps = new StubPowerSocket() as any;
     ps.entities = {};
     ps._hass = makeHass();
-    expect(ps._get_socket_sensor_state("name")).toBeNull();
+    expect(ps._get_socket_sensor_state("socket_name")).toBeNull();
   });
 
   it("_get_socket_sensor_state() returns state value", () => {
     const ps = new StubPowerSocket() as any;
-    ps.entities = { consumption: { entity_id: "sensor.cons" } };
+    ps.entities = { socket_consumption: { entity_id: "sensor.cons" } };
     ps._hass = makeHass({ "sensor.cons": { state: "12.5" } });
-    expect(ps._get_socket_sensor_state("consumption")).toBe("12.5");
+    expect(ps._get_socket_sensor_state("socket_consumption")).toBe("12.5");
   });
 });
