@@ -276,10 +276,10 @@ To remove device selection and force a specific one, set the `device` parameter 
 
 ReefATO+ with ha-reef-card in action:
 
-<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+<!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
 <!-- Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/93 -->
 
-[![Watch the video](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+[![Watch the video](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 The ReefATO+ card is a visual way to drive the RSATO+ controller, the RO/DI
 reservoir and its pump, the water level probe clipped to the tank, and the leak

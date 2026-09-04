@@ -230,9 +230,9 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 
 ReefATO+ avec ha-reef-card en action :
 
-<!-- TODO: replace RSATO_VIDEO_ID by the youtube id of the ReefATO+ video -->
+<!-- TODO: replace 2R0DHp2eqT4 by the youtube id of the ReefATO+ video -->
 
-[![Regarder la vidéo](https://img.youtube.com/vi/RSATO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=RSATO_VIDEO_ID)
+[![Regarder la vidéo](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 La carte ReefATO+ permet de gérer visuellement le contrôleur RSATO+, le
 réservoir d'eau osmosée et sa pompe, la sonde de niveau clipsée sur la cuve, et
