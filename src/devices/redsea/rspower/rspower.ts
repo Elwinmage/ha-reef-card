@@ -88,6 +88,12 @@ export class RSPower extends RSDevice {
           const slot = parseInt(idxMatch[1]);
           if (slot < this._sockets.length) {
             this._sockets[slot].entities[entity.translation_key] = entity;
+            // Also store with domain prefix (e.g. "select.socket_mode")
+            // so dialogs can reference the right entity type.
+            const domain = entity_id.split(".")[0];
+            this._sockets[slot].entities[
+              domain + "." + entity.translation_key
+            ] = entity;
           }
         }
       } else {
