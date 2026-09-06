@@ -230,10 +230,7 @@ Um die Geräteauswahl zu entfernen und ein bestimmtes Gerät zu erzwingen, setze
 
 ReefATO+ mit ha-reef-card in Aktion:
 
-<!-- TODO: replace BOEswDYcNO8 by the youtube id of the ReefATO+ video -->
-<!-- Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/94 -->
-
-[![Video ansehen](https://img.youtube.com/vi/BOEswDYcNO8/0.jpg)](https://www.youtube.com/watch?v=BOEswDYcNO8)
+[![Video ansehen](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 Die ReefATO+-Karte ist eine visuelle Bedienung für den RSATO+-Controller, den
 Osmosewasser-Vorratsbehälter mit seiner Pumpe, die am Beckenrand geklemmte

@@ -230,9 +230,7 @@ Para eliminar la selección de dispositivo y forzar uno específico, defina el p
 
 ReefATO+ con ha-reef-card en acción:
 
-<!-- TODO: replace BOEswDYcNO8 by the youtube id of the ReefATO+ video -->
-
-[![Ver el vídeo](https://img.youtube.com/vi/BOEswDYcNO8/0.jpg)](https://www.youtube.com/watch?v=BOEswDYcNO8)
+[![Ver el vídeo](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 La tarjeta ReefATO+ permite gobernar visualmente el controlador RSATO+, el
 depósito de agua osmotizada con su bomba, la sonda de nivel sujeta al cristal y

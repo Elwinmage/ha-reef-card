@@ -230,9 +230,7 @@ Para remover a seleção de dispositivo e forçar um específico, defina o parâ
 
 ReefATO+ com o ha-reef-card em ação:
 
-<!-- TODO: replace BOEswDYcNO8 by the youtube id of the ReefATO+ video -->
-
-[![Ver o vídeo](https://img.youtube.com/vi/BOEswDYcNO8/0.jpg)](https://www.youtube.com/watch?v=BOEswDYcNO8)
+[![Ver o vídeo](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
 
 O cartão ReefATO+ permite gerir visualmente o controlador RSATO+, o reservatório
 de água osmotizada com a sua bomba, a sonda de nível presa ao vidro e a sonda de
