@@ -4,9 +4,6 @@ import { RSDevice } from "../../device";
 import styles from "./power_socket.styles";
 import style_common from "../../../utils/common.styles";
 
-import i18n from "../../../translations/myi18n";
-import { OFF_COLOR } from "../../../utils/constants";
-
 /**
  * LitElement rendering a single RSPower AC socket.
  *
@@ -49,35 +46,9 @@ export class PowerSocket extends RSDevice {
 
     this.state_on = this.is_on();
 
-    const name =
-      this._get_socket_sensor_state("socket_name") ?? `S${this.socket_id}`;
-    const mode = this._get_socket_sensor_state("socket_mode") ?? "setup";
-    const state = this._get_socket_sensor_state("socket_state") ?? "unknown";
-    const consumption = this._get_socket_sensor_state("socket_consumption");
-
-    // Determine visual state class
-    let stateClass = "off";
-    if (state === "on" || mode === "on") {
-      stateClass = "on";
-    } else if (state === "standby") {
-      stateClass = "standby";
-    }
-
-    // Consumption display (only when socket is active)
-    let consumptionHtml = html``;
-    if (consumption !== null && stateClass === "on") {
-      const val = parseFloat(consumption);
-      if (!isNaN(val)) {
-        consumptionHtml = html`<div class="socket_consumption">
-          ${val.toFixed(1)}W
-        </div>`;
-      }
-    }
-
     return html`
       <div class="socket_container">
-        <div class="socket_label">${name}</div>
-        ${consumptionHtml} ${this._render_elements(this.state_on)}
+        ${this._render_elements(this.state_on)}
       </div>
     `;
   }
@@ -121,10 +92,8 @@ export class PowerSocket extends RSDevice {
     return false;
   }
 
-  update_state(value: boolean): void {
-    if (this.state_on !== value) {
-      this.state_on = value;
-    }
+  update_state(_value: boolean): void {
+    this.state_on = _value;
     this.requestUpdate();
   }
 }

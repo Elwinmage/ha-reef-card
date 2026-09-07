@@ -240,15 +240,40 @@ describe("collect_maintenance_items with sub devices", () => {
 // ── Device list ──────────────────────────────────────────────────────────────
 
 describe("list_maintenance_devices", () => {
-  it("folds sub devices into their controller and counts the tasks", () => {
+  it("lists each sub-device individually with its task count", () => {
     const devices = list_maintenance_devices(
       collect_maintenance_items(makeHass()),
     );
     expect(devices).toEqual([
-      { id: "", name: "Ghost", count: 1 },
-      { id: "dev_ato", name: "SIMU-RSATO", count: 1 },
-      { id: "dev_dose", name: "SIMU-RSDOSE4", count: 2 },
-      { id: "dev_led", name: "SIMU-RSLED", count: 1 },
+      { id: "", name: "Ghost", count: 1, pump_type: null, pump_model: null },
+      {
+        id: "dev_ato",
+        name: "SIMU-RSATO",
+        count: 1,
+        pump_type: null,
+        pump_model: null,
+      },
+      {
+        id: "dev_head1",
+        name: "SIMU-RSDOSE4 Head 1",
+        count: 1,
+        pump_type: null,
+        pump_model: null,
+      },
+      {
+        id: "dev_head2",
+        name: "SIMU-RSDOSE4 Head 2",
+        count: 1,
+        pump_type: null,
+        pump_model: null,
+      },
+      {
+        id: "dev_led",
+        name: "SIMU-RSLED",
+        count: 1,
+        pump_type: null,
+        pump_model: null,
+      },
     ]);
   });
 
@@ -403,27 +428,28 @@ describe("RSMaintenance device filter", () => {
     expect(names).toEqual([
       "Ghost",
       "SIMU-RSATO",
-      "SIMU-RSDOSE4",
+      "SIMU-RSDOSE4 Head 1",
+      "SIMU-RSDOSE4 Head 2",
       "SIMU-RSLED",
     ]);
     const counts = Array.from(
       elt.shadowRoot.querySelectorAll(".maint-device-count"),
     ).map((n: any) => n.textContent.trim());
-    expect(counts).toEqual(["1", "1", "2", "1"]);
+    expect(counts).toEqual(["1", "1", "1", "1", "1"]);
     // No selection yet: the hint is displayed instead of the reset button
     expect(elt.shadowRoot.querySelector(".maint-devices-clear")).toBeNull();
     document.body.removeChild(elt);
   });
 
   it("ticks the boxes of the configured devices", async () => {
-    elt.setConfig({ maintenance: { devices: ["SIMU-RSDOSE4"] } });
+    elt.setConfig({ maintenance: { devices: ["SIMU-RSDOSE4 Head 1"] } });
     elt.isEditorMode = true;
     document.body.appendChild(elt);
     await elt.updateComplete;
     const boxes = Array.from(
       elt.shadowRoot.querySelectorAll(".maint-device-option input"),
     ).map((n: any) => n.checked);
-    expect(boxes).toEqual([false, false, true, false]);
+    expect(boxes).toEqual([false, false, true, false, false]);
     document.body.removeChild(elt);
   });
 
@@ -438,7 +464,7 @@ describe("RSMaintenance device filter", () => {
       config = e.detail.config;
     });
 
-    // Third box: SIMU-RSDOSE4
+    // Third box: SIMU-RSDOSE4 Head 1
     const box = elt.shadowRoot.querySelectorAll(
       ".maint-device-option input",
     )[2];
@@ -447,14 +473,14 @@ describe("RSMaintenance device filter", () => {
 
     expect(config).toEqual({
       device: "__maintenance__",
-      maintenance: { devices: ["SIMU-RSDOSE4"] },
+      maintenance: { devices: ["SIMU-RSDOSE4 Head 1"] },
     });
     document.body.removeChild(elt);
   });
 
   it("removes a device from the filter when it is unticked", async () => {
     elt.setConfig({
-      maintenance: { devices: ["SIMU-RSDOSE4", "SIMU-RSATO"] },
+      maintenance: { devices: ["SIMU-RSDOSE4 Head 1", "SIMU-RSATO"] },
     });
     elt.isEditorMode = true;
     document.body.appendChild(elt);
@@ -471,7 +497,7 @@ describe("RSMaintenance device filter", () => {
     box.checked = false;
     box.dispatchEvent(new Event("change"));
 
-    expect(config.maintenance.devices).toEqual(["SIMU-RSDOSE4"]);
+    expect(config.maintenance.devices).toEqual(["SIMU-RSDOSE4 Head 1"]);
     document.body.removeChild(elt);
   });
 

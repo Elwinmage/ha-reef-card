@@ -45,11 +45,12 @@ export class ClickImage extends MyElement {
           iconColor = "#666666";
         }
         return html`
-          <ha-icon
+          <ha-state-icon
             class="click-icon"
-            .icon="${obj.attributes.icon}"
+            .hass="${this._hass}"
+            .stateObj="${obj}"
             style="color: ${iconColor}; ${_style}"
-          ></ha-icon>
+          ></ha-state-icon>
         `;
       }
       if (icon.startsWith("mdi:") || icon.startsWith("redsea:")) {

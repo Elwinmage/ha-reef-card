@@ -151,13 +151,15 @@ export class Sensor extends MyElement {
       if (this.conf?.icon_color) {
         color = this.conf.icon_color;
       }
-      //      this._hass.entities?.[this.stateObj.entity_id]?.icon
-      //icon="${this.stateObj.attributes.icon || "mdi:help"}"
-      /*      return html` <ha-icon
-        icon="${this._hass.entities?.[this.stateObj.entity_id]?.icon || "mdi:help"}"
-        style="color:${color}"
-      >
-      </ha-icon>`;*/
+      // String icon: evaluate expression and render directly (static or dynamic)
+      if (typeof this.conf.icon === "string") {
+        const iconName = this.evaluate(this.conf.icon);
+        return html`<ha-icon
+          .icon="${iconName}"
+          style="color:${color}"
+        ></ha-icon>`;
+      }
+      // Boolean true: use entity state icon
       return html`<ha-state-icon
         .hass=${this._hass}
         .stateObj=${this.stateObj}

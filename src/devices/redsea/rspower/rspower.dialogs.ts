@@ -23,7 +23,7 @@ export const dialogs_rspower = {
   },
   socket_config: {
     name: "socket_config",
-    title_key: "${i18n._('socket_config')}",
+    title_key: "${i18n._('socket_config')} n°${config.id}",
     close_cross: false,
     content: [
       {
@@ -40,6 +40,61 @@ export const dialogs_rspower = {
           ],
         },
       },
+      {
+        view: "click-image",
+        conf: {
+          icon: "mdi:delete",
+          icon_color: "rgb(51,151,232)",
+          type: "click-image",
+          stateObj: null,
+          tap_action: [
+            {
+              domain: "redsea_ui",
+              action: "dialog",
+              data: { type: "socket_delete" },
+            },
+          ],
+          css: {
+            position: "absolute",
+            top: "7%",
+            right: "5%",
+          },
+        },
+      },
     ],
+  },
+  socket_delete: {
+    name: "socket_delete",
+    title_key: "${i18n._('dialog_socket_delete_title')} n°${config.id}",
+    close_cross: false,
+    content: [
+      {
+        view: "text",
+        value: "${entity.socket_name?.state || ''}",
+      },
+    ],
+    validate: {
+      label: "${i18n._('delete')}",
+      class: "dialog_button",
+      type: "common-button",
+      stateObj: null,
+      tap_action: [
+        {
+          domain: "button",
+          action: "press",
+          data: { entity_id: "socket_delete" },
+        },
+        {
+          domain: "redsea_ui",
+          action: "message_box",
+          data: "${i18n._('delete_wait')}",
+        },
+        {
+          domain: "redsea_ui",
+          action: "exit-dialog",
+        },
+      ],
+    },
+    cancel: true,
   },
 };

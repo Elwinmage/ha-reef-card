@@ -1,4 +1,8 @@
-import { COLOR_ERROR_HEX, COLOR_WHITE_60 } from "../../../utils/colors";
+import {
+  COLOR_ERROR_HEX,
+  COLOR_RS_RGBSTR,
+  COLOR_WHITE_60,
+} from "../../../utils/colors";
 
 export const config2 = {
   name: null,
@@ -150,6 +154,7 @@ export const config2 = {
   },
   sockets: {
     common: {
+      alpha: "0.2",
       css: {
         top: "9.5%",
         position: "absolute",
@@ -158,15 +163,96 @@ export const config2 = {
         height: "13.5%",
       },
       elements: {
+        socket_name_label: {
+          name: "socket_name",
+          type: "common-sensor",
+          disabled_if: "entity.socket_mode?.state === 'setup'",
+          no_br_if_disabled: true,
+          css: {
+            position: "absolute",
+            top: "7%",
+            left: "0%",
+            width: "100%",
+            "text-align": "center",
+            "font-size": "0.7em",
+            "font-weight": "bold",
+            color: "white",
+            "text-shadow": "0 0 3px rgba(0,0,0,0.7)",
+            overflow: "hidden",
+            "text-overflow": "ellipsis",
+            "white-space": "nowrap",
+          },
+        },
+        socket_consumption_label: {
+          name: "socket_consumption",
+          type: "common-sensor",
+          round: 1,
+          unit: "'W'",
+          disabled_if: "entity.socket_mode?.state === 'setup'",
+          no_br_if_disabled: true,
+          tap_action: {
+            domain: "redsea_ui",
+            action: "more-info",
+            data: "socket_consumption",
+          },
+          css: {
+            position: "absolute",
+            bottom: "0%",
+            left: "0%",
+            width: "100%",
+            "text-align": "center",
+            "font-size": "0.55em",
+            color: "rgba(255,255,255,0.8)",
+          },
+        },
+        socket_mode_icon: {
+          name: "socket_mode",
+          type: "common-sensor",
+          icon: "${entity.socket_mode?.state === 'schedule' || entity.socket_prev_mode?.state === 'schedule' ? 'mdi:clock-time-nine-outline' : entity.socket_mode?.state === 'sensor' || entity.socket_prev_mode?.state === 'sensor' ? 'mdi:flask-outline' : 'mdi:power'}",
+          icon_color: "rgba(255,255,255,0.5)",
+          disabled_if: "entity.socket_mode?.state === 'setup'",
+          no_br_if_disabled: true,
+          css: {
+            position: "absolute",
+            width: "70%",
+            "aspect-ratio": "1/1",
+            top: "60%",
+            left: "15%",
+            "--mdc-icon-size": "40%",
+            "pointer-events": "none",
+          },
+        },
+        socket_manual_override: {
+          name: "socket_prev_mode",
+          type: "common-sensor",
+          icon: "'mdi:hand-back-left-outline'",
+          icon_color: "rgba(255,255,255,0.5)",
+          disabled_if:
+            "entity.socket_mode?.state === 'setup' || entity.socket_mode?.state === 'schedule' || entity.socket_mode?.state === 'sensor' || (entity.socket_prev_mode?.state !== 'schedule' && entity.socket_prev_mode?.state !== 'sensor')",
+          no_br_if_disabled: true,
+          css: {
+            position: "absolute",
+            top: "60%",
+            left: "70%",
+            "--mdc-icon-size": "30%",
+            "pointer-events": "none",
+          },
+        },
         socket_on_off: {
           name: "socket_on_off",
           type: "click-image",
           icon: "state",
           class: "on_off",
           style: "button",
+          icon_color: COLOR_RS_RGBSTR,
           disabled_if: "entity.socket_mode?.state === 'setup'",
           no_br_if_disabled: true,
           tap_action: {
+            domain: "redsea_ui",
+            action: "dialog",
+            data: { type: "socket_config" },
+          },
+          hold_action: {
             domain: "switch",
             action: "toggle",
             data: "default",
@@ -178,6 +264,11 @@ export const config2 = {
             top: "25%",
             left: "15%",
             "border-radius": "10%",
+            "--mdc-icon-size": "100%",
+            "border-width": "2px",
+            "border-style": "solid",
+            "border-color": "$DEVICE-COLOR-ALPHA$",
+            "background-color": "$DEVICE-COLOR-ALPHA$",
           },
         },
         socket_setup: {
@@ -206,35 +297,43 @@ export const config2 = {
     },
     socket_1: {
       id: 1,
-      css: { left: "9%", "background-color": "rgba(255,0,0,0.2)" },
+      color: "255,0,0",
+      css: { left: "9%" },
     },
     socket_2: {
       id: 2,
-      css: { left: "19.8%", "background-color": "rgba(0,255,0,0.2)" },
+      color: "0,255,0",
+      css: { left: "19.8%" },
     },
     socket_3: {
       id: 3,
-      css: { left: "30.6%", "background-color": "rgba(0,0,255,0.2)" },
+      color: "0,0,255",
+      css: { left: "30.6%" },
     },
     socket_4: {
       id: 4,
-      css: { left: "41.4%", "background-color": "rgba(255,255,0,0.2)" },
+      color: "255,255,0",
+      css: { left: "41.4%" },
     },
     socket_5: {
       id: 5,
-      css: { left: "52.2%", "background-color": "rgba(255,0,255,0.2)" },
+      color: "255,0,255",
+      css: { left: "52.2%" },
     },
     socket_6: {
       id: 6,
-      css: { left: "63%", "background-color": "rgba(0,255,255,0.2)" },
+      color: "0,255,255",
+      css: { left: "63%" },
     },
     socket_7: {
       id: 7,
-      css: { left: "73.8%", "background-color": "rgba(125,125,255,0.2)" },
+      color: "125,125,255",
+      css: { left: "73.8%" },
     },
     socket_8: {
       id: 8,
-      css: { left: "84.6%", "background-color": "rgba(255,100,20,0.2)" },
+      color: "255,100,20",
+      css: { left: "84.6%" },
     },
   },
 };

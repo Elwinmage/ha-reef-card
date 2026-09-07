@@ -67,9 +67,14 @@ export class Dialog extends LitElement {
 
   createContext() {
     if (!this.evalCtx) {
+      const entitiesObj = MyElement.createEntitiesContext(
+        this.elt?.device,
+        this._hass,
+      );
       const context = {
         config: this.elt.device.config,
         i18n: i18n,
+        entity: entitiesObj,
       };
       this.evalCtx = new SafeEval(context);
     }

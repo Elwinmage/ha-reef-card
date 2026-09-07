@@ -547,9 +547,10 @@ export function group_by_device(items: MaintenanceItem[]): MaintenanceGroup[] {
 }
 
 /**
- * List the devices owning at least one maintenance task, one entry per root
- * device (sub-devices are folded into their controller). Used by the editor
- * to build the "filter by device" selector.
+ * List the devices owning at least one maintenance task, one entry per
+ * sub-device so the user can filter on individual equipment (e.g. a
+ * specific pump or dosing head). Used by the editor and the toolbar
+ * quick-filter.
  * @param items: the collected maintenance items
  * @return the devices, sorted by name
  */
@@ -560,13 +561,15 @@ export function list_maintenance_devices(
   const list: MaintenanceDeviceRef[] = [];
 
   for (const item of items) {
-    const key = item.root_device_id || item.root_device_name;
+    const key = item.device_id || item.device_name;
     let ref = index[key];
     if (!ref) {
       ref = {
-        id: item.root_device_id,
-        name: item.root_device_name,
+        id: item.device_id,
+        name: item.device_name,
         count: 0,
+        pump_type: item.pump_type,
+        pump_model: item.pump_model,
       };
       index[key] = ref;
       list.push(ref);

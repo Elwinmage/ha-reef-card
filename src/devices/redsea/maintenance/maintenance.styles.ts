@@ -109,6 +109,30 @@ export default css`
     font-weight: 600;
   }
 
+  .maint-toolbar-left {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .maint-equip-select {
+    appearance: auto;
+    background: transparent;
+    border: 1px solid var(--maint-divider);
+    border-radius: 16px;
+    color: var(--maint-text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    padding: 4px 10px;
+  }
+
+  .maint-equip-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #03a9f4);
+  }
+
   .maint-filter {
     display: inline-flex;
     align-items: center;

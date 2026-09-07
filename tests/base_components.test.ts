@@ -459,6 +459,16 @@ describe("Sensor._render()", () => {
     expect(result).toBeDefined();
   });
 
+  it("renders ha-icon with string icon expression", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { icon: "'mdi:power'" };
+    s.stateObj = makeState_B("on", "sensor.x");
+    s.evaluate = vi.fn(() => "mdi:power");
+    const result = s._render("");
+    expect(result).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'mdi:power'");
+  });
+
   it("L87: falls back to mdi:help when stateObj.attributes.icon is absent", () => {
     const s = new StubSensor2() as any;
     s.conf = { icon: true };
