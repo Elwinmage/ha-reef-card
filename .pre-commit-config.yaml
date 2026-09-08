@@ -8,6 +8,11 @@ repos:
         exclude: ^dist/
         language: system
 
+  - repo: https://github.com/Elwinmage/create_ha_project
+    rev: v1.0.1
+    hooks:
+      - id: check-mdi
+
   - repo: local
     hooks:
       - id: eslint

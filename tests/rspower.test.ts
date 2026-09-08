@@ -158,7 +158,7 @@ describe("RSPower", () => {
         // Entity with no device_id
         "sensor.orphan": {
           entity_id: "sensor.orphan",
-          translation_key: "socket_name",
+          translation_key: "socket_0_name",
         },
       },
     );
@@ -184,7 +184,6 @@ describe("RSPower", () => {
           entity_id: "sensor.mypower_bad_unique",
           device_id: "dev1",
           translation_key: "socket_name",
-          unique_id: "no_match_here",
         },
       },
     );
@@ -210,8 +209,7 @@ describe("RSPower", () => {
         "sensor.mypower_socket_99_name": {
           entity_id: "sensor.mypower_socket_99_name",
           device_id: "dev1",
-          translation_key: "socket_name",
-          unique_id: "serial_socket_99_name",
+          translation_key: "socket_99_name",
         },
       },
     );
@@ -232,20 +230,20 @@ describe("RSPower", () => {
     dev._hass = makeHass(
       {},
       {
-        "sensor.mypower_socket_1_name": {
-          entity_id: "sensor.mypower_socket_1_name",
+        "sensor.mypower_socket_0_name": {
+          entity_id: "sensor.mypower_socket_0_name",
           device_id: "dev1",
-          translation_key: "socket_name",
+          translation_key: "socket_0_name",
         },
-        "sensor.mypower_socket_1_consumption": {
-          entity_id: "sensor.mypower_socket_1_consumption",
+        "sensor.mypower_socket_0_consumption": {
+          entity_id: "sensor.mypower_socket_0_consumption",
           device_id: "dev1",
-          translation_key: "socket_consumption",
+          translation_key: "socket_0_consumption",
         },
-        "sensor.mypower_socket_3_mode": {
-          entity_id: "sensor.mypower_socket_3_mode",
+        "sensor.mypower_socket_2_mode": {
+          entity_id: "sensor.mypower_socket_2_mode",
           device_id: "dev1",
-          translation_key: "socket_mode",
+          translation_key: "socket_2_mode",
         },
         "sensor.mypower_battery_level": {
           entity_id: "sensor.mypower_battery_level",
@@ -256,10 +254,10 @@ describe("RSPower", () => {
     );
     dev._populate_entities_with_sockets();
 
-    // socket 0 → slot 1 (stored by translation_key)
+    // socket_0 → slot 1 (0-based index + 1), stored by base key
     expect(dev._sockets[1].entities.socket_name).toBeDefined();
     expect(dev._sockets[1].entities.socket_consumption).toBeDefined();
-    // socket 2 → slot 3
+    // socket_2 → slot 3
     expect(dev._sockets[3].entities.socket_mode).toBeDefined();
     // global entity
     expect(dev.entities.battery_level).toBeDefined();
@@ -559,7 +557,7 @@ describe("PowerSocket", () => {
     expect(ps.is_on()).toBe(true);
   });
 
-  it("is_on() returns false when mode is schedule and state is unknown", () => {
+  it("is_on() returns false when mode is schedule and state is standby", () => {
     const ps = new StubPowerSocket() as any;
     ps.entities = {
       socket_mode: { entity_id: "sensor.mode" },
@@ -567,7 +565,7 @@ describe("PowerSocket", () => {
     };
     ps._hass = makeHass({
       "sensor.mode": { state: "schedule" },
-      "sensor.state": { state: "unknown" },
+      "sensor.state": { state: "standby" },
     });
     expect(ps.is_on()).toBe(false);
   });

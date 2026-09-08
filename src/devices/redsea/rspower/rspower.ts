@@ -80,20 +80,22 @@ export class RSPower extends RSDevice {
       if (!is_ours) continue;
 
       if (entity.translation_key?.startsWith("socket_")) {
-        // Per-socket entity — extract 0-based index from unique_id
-        // (format: serial_socket_N_field, stable — built from the
-        // integration's key, not from translations).
-        const idxMatch = (entity.unique_id ?? entity_id).match(/socket_(\d+)/);
+        // Per-socket entity — extract 0-based index from translation_key
+        // (format: "socket_{idx}_{field}", set by the integration).
+        // Then store under the base key (without index) so mappings
+        // can reference "socket_mode", "socket_prev_mode" etc.
+        const idxMatch = entity.translation_key.match(/^socket_(\d+)_(.+)$/);
         if (idxMatch) {
-          const slot = parseInt(idxMatch[1]);
+          // Integration uses 0-based indices, card slots are 1-based
+          // (index 0 is unused padding).
+          const slot = parseInt(idxMatch[1]) + 1;
+          const baseKey = "socket_" + idxMatch[2];
           if (slot < this._sockets.length) {
-            this._sockets[slot].entities[entity.translation_key] = entity;
+            this._sockets[slot].entities[baseKey] = entity;
             // Also store with domain prefix (e.g. "select.socket_mode")
             // so dialogs can reference the right entity type.
             const domain = entity_id.split(".")[0];
-            this._sockets[slot].entities[
-              domain + "." + entity.translation_key
-            ] = entity;
+            this._sockets[slot].entities[domain + "." + baseKey] = entity;
           }
         }
       } else {

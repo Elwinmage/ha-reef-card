@@ -85,11 +85,11 @@ export class PowerSocket extends RSDevice {
 
   is_on(): boolean {
     const mode = this._get_socket_sensor_state("socket_mode");
-    const state = this._get_socket_sensor_state("socket_state");
-    if (mode === "off" || mode === "setup") return false;
-    if (state === "on") return true;
     if (mode === "on") return true;
-    return false;
+    if (mode === "off" || mode === "setup") return false;
+    // schedule or sensor: rely on hardware state
+    const state = this._get_socket_sensor_state("socket_state");
+    return state === "on";
   }
 
   update_state(_value: boolean): void {
