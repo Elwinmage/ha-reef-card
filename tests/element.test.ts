@@ -513,6 +513,115 @@ describe("MyElement.run_actions()", () => {
     expect(events[0].detail.message).toContain("key");
     document.body.removeChild(elt);
   });
+
+  // show_device navigates the card to another device it manages. The target
+  // is named by hardware id: the one identifier that survives a rename both
+  // in Home Assistant and in the device's own payload.
+  it("dispatches show-device with an evaluated hardware id", async () => {
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+    elt.evaluate = vi.fn(() => "737225465317");
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: { hwid: "${device.linked_control_hwid()}" },
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].detail.hwid).toBe("737225465317");
+    expect(events[0].bubbles).toBe(true);
+    expect(events[0].composed).toBe(true);
+    document.body.removeChild(elt);
+  });
+
+  it("accepts a bare string as the show-device target", async () => {
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+    elt.evaluate = vi.fn((e: string) => e);
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: "111",
+    });
+
+    expect(events[0].detail.hwid).toBe("111");
+    document.body.removeChild(elt);
+  });
+
+  it("accepts the target under a device key", async () => {
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+    elt.evaluate = vi.fn((e: string) => e);
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: { device: "222" },
+    });
+
+    expect(events[0].detail.hwid).toBe("222");
+    document.body.removeChild(elt);
+  });
+
+  it("stays silent when the target expression resolves to nothing", async () => {
+    // An unpaired strip has no peer to navigate to.
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+    elt.evaluate = vi.fn(() => "");
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: { hwid: "${device.linked_control_hwid()}" },
+    });
+
+    expect(events).toHaveLength(0);
+    document.body.removeChild(elt);
+  });
+
+  it("stays silent when no target is given at all", async () => {
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: {},
+    });
+
+    expect(events).toHaveLength(0);
+    document.body.removeChild(elt);
+  });
+
+  it("passes a non-string target through without evaluating it", async () => {
+    const elt = makeElt() as any;
+    document.body.appendChild(elt);
+    const events: CustomEvent[] = [];
+    elt.addEventListener("show-device", (e: CustomEvent) => events.push(e));
+    elt.evaluate = vi.fn();
+
+    await elt.run_actions({
+      domain: "redsea_ui",
+      action: "show_device",
+      data: { hwid: 12345 },
+    });
+
+    expect(events[0].detail.hwid).toBe("12345");
+    expect(elt.evaluate).not.toHaveBeenCalled();
+    document.body.removeChild(elt);
+  });
 });
 describe("MyElement._click() / _longclick() / _dblclick()", () => {
   function makeElt(

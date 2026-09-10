@@ -77,6 +77,41 @@ export default class DeviceList {
   }
 
   /**
+   * Find the config entry of the device carrying a given hardware id.
+   *
+   * Devices name each other by hardware id on the wire, and the integration
+   * stores that id as `model_id` (and as the second half of its `redsea`
+   * identifier). Resolving through it keeps device-to-device links tied to
+   * the hardware rather than to a display name a user may change.
+   * @param hwid: the hardware id reported by the peer device
+   * @return the primary config entry id, or undefined when not found
+   */
+  get_config_entry_by_hwid(hwid: string): string | undefined {
+    if (!hwid) {
+      return undefined;
+    }
+    for (const entry in this.devices) {
+      const elements = this.devices[entry]?.elements ?? [];
+      for (const element of elements) {
+        const el: any = element;
+        if (el?.model_id === hwid) {
+          return entry;
+        }
+        const ident = el?.identifiers?.[0];
+        // Entries created before model_id existed still carry the id here.
+        if (
+          Array.isArray(ident) &&
+          ident[0] === "redsea" &&
+          ident[1] === hwid
+        ) {
+          return entry;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Initialise devices and main_devices lists with reefbeat devices configured in ha-reefbeat-component
    */
   private init_devices(): void {

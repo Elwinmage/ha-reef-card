@@ -628,3 +628,70 @@ describe("DeviceList init_devices — L120 false: device is undefined after L118
     expect(realEntry.name).toBe("Original");
   });
 });
+
+// ─── Resolving a device by hardware id ──────────────────────────────────────
+
+describe("DeviceList.get_config_entry_by_hwid", () => {
+  /** A list holding one device per config entry, keyed by hardware id. */
+  function makeList(entries: Record<string, any>): any {
+    const list = Object.create(DeviceList.prototype);
+    list.devices = entries;
+    list.main_devices = [];
+    return list;
+  }
+
+  it("finds the config entry carrying the hardware id", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ model_id: "111" }] },
+      "cfg-b": { elements: [{ model_id: "222" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("222")).toBe("cfg-b");
+  });
+
+  it("searches every element of an entry, not just the first", () => {
+    // Sub-devices share their parent's config entry.
+    const list = makeList({
+      "cfg-a": { elements: [{ model_id: "111" }, { model_id: "999" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("999")).toBe("cfg-a");
+  });
+
+  it("falls back to the redsea identifier when model_id is absent", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ identifiers: [["redsea", "333"]] }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("333")).toBe("cfg-a");
+  });
+
+  it("ignores an identifier belonging to another integration", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ identifiers: [["other", "333"]] }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("333")).toBeUndefined();
+  });
+
+  it("returns undefined for an unknown hardware id", () => {
+    const list = makeList({ "cfg-a": { elements: [{ model_id: "111" }] } });
+
+    expect(list.get_config_entry_by_hwid("nope")).toBeUndefined();
+  });
+
+  it("returns undefined for an empty hardware id", () => {
+    const list = makeList({ "cfg-a": { elements: [{ model_id: "111" }] } });
+
+    expect(list.get_config_entry_by_hwid("")).toBeUndefined();
+  });
+
+  it("tolerates an entry with no elements", () => {
+    const list = makeList({
+      "cfg-a": {},
+      "cfg-b": { elements: [{ model_id: "1" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("1")).toBe("cfg-b");
+  });
+});

@@ -611,6 +611,27 @@ export class MyElement extends LitElement {
           }),
         );
         break;
+      case "show_device": {
+        // Navigate the card to another device it already manages. The target
+        // is named by hardware id — the one identifier that survives a rename
+        // in Home Assistant and in the device's own payload. The card resolves
+        // it; the element only says where it wants to go.
+        const raw =
+          typeof action.data === "string"
+            ? action.data
+            : ((action.data as any)?.hwid ?? (action.data as any)?.device);
+        const hwid = typeof raw === "string" ? this.evaluate(raw) : raw;
+        if (hwid) {
+          this.dispatchEvent(
+            new CustomEvent("show-device", {
+              bubbles: true,
+              composed: true,
+              detail: { hwid: String(hwid) },
+            }),
+          );
+        }
+        break;
+      }
       case "exit-dialog":
         this.dispatchEvent(
           new CustomEvent("quit-dialog", {

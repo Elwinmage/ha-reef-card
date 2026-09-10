@@ -124,6 +124,21 @@ describe("ReefCard — constructor", () => {
     ).not.toThrow();
   });
 
+  it("show-device: delegates to _handle_show_device()", () => {
+    const card = makeCard();
+    const spy = vi
+      .spyOn(card, "_handle_show_device")
+      .mockImplementation(() => {});
+
+    card.dispatchEvent(
+      new CustomEvent("show-device", { detail: { hwid: "222" } }),
+    );
+
+    expect(spy).toHaveBeenCalled();
+    expect(spy.mock.calls[0][0].detail.hwid).toBe("222");
+    spy.mockRestore();
+  });
+
   it("config-dialog: delegates to _dialog_box.merge_conf()", () => {
     const card = makeCard();
     const mockSetConf = vi.fn();
@@ -670,7 +685,11 @@ describe("ReefCard L139-140 — dialog.init called when shadowRoot is present", 
   it("calls dialog.init with hass and shadowRoot on first render", async () => {
     const { ReefCard } = await import("../src/card");
     const RSDeviceMod = await import("../src/devices/device");
-    vi.spyOn(RSDeviceMod.default, "create_device").mockReturnValue({} as any);
+    // Restored below: left in place it makes create_device return a bare
+    // object for every later test in this file.
+    const create_stub = vi
+      .spyOn(RSDeviceMod.default, "create_device")
+      .mockReturnValue({} as any);
 
     const tag = uid("reef-card-l140");
     class T extends ReefCard {}
@@ -690,6 +709,7 @@ describe("ReefCard L139-140 — dialog.init called when shadowRoot is present", 
     card.render();
 
     expect(initMock).toHaveBeenCalledWith(card._hass, card.shadowRoot);
+    create_stub.mockRestore();
   });
 });
 describe("ReefCard", () => {
@@ -723,5 +743,239 @@ describe("ReefCard", () => {
       card.hass = hass;
     }).not.toThrow();
     expect(card.current_device.hass).toBe(hass);
+  });
+});
+
+// ─── Device-to-device navigation ────────────────────────────────────────────
+
+/** A card with a resolvable device registry and a device on screen. */
+function makeNavCard(): any {
+  const card = makeReadyCard();
+  card.devices_list = {
+    devices: {
+      "cfg-power": {
+        name: "Power",
+        elements: [
+          {
+            primary_config_entry: "cfg-power",
+            model: "RSPOWER6",
+            model_id: "111",
+            identifiers: [["redsea", "111"]],
+          },
+        ],
+      },
+      "cfg-hub": {
+        name: "Hub",
+        elements: [
+          {
+            primary_config_entry: "cfg-hub",
+            model: "RSCONTROLPRO",
+            model_id: "222",
+            identifiers: [["redsea", "222"]],
+          },
+        ],
+      },
+    },
+    main_devices: [],
+    get_config_entry_by_hwid(hwid: string) {
+      for (const entry in this.devices) {
+        for (const el of this.devices[entry].elements) {
+          if (el.model_id === hwid) return entry;
+        }
+      }
+      return undefined;
+    },
+  };
+  card.current_device = {
+    hass: null,
+    device: { elements: [{ primary_config_entry: "cfg-power" }] },
+  };
+  return card;
+}
+
+function showDevice(card: any, hwid: any): void {
+  card._handle_show_device({ detail: { hwid } } as CustomEvent);
+}
+
+describe("ReefCard — device navigation", () => {
+  it("navigates to the device carrying the requested hardware id", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+
+    showDevice(card, "222");
+
+    expect(card.current_device).not.toBe(origin);
+    expect(card._nav_stack).toEqual([origin]);
+  });
+
+  it("goes back to the device it came from", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+
+    showDevice(card, "222");
+    card._navigate_back();
+
+    expect(card.current_device).toBe(origin);
+    expect(card._nav_stack).toHaveLength(0);
+  });
+
+  it("restores the very same instance, not a rebuilt one", () => {
+    // Going back must not lose transient state such as an open editor.
+    const card = makeNavCard();
+    const origin = card.current_device;
+    origin.marker = "untouched";
+
+    showDevice(card, "222");
+    card._navigate_back();
+
+    expect(card.current_device.marker).toBe("untouched");
+  });
+
+  it("stacks successive hops and unwinds them one at a time", () => {
+    const card = makeNavCard();
+    const first = card.current_device;
+
+    showDevice(card, "222");
+    const second = card.current_device;
+    showDevice(card, "111");
+
+    expect(card._nav_stack).toEqual([first, second]);
+
+    card._navigate_back();
+    expect(card.current_device).toBe(second);
+    card._navigate_back();
+    expect(card.current_device).toBe(first);
+  });
+
+  it("ignores a request for a device Home Assistant does not know", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    showDevice(card, "does-not-exist");
+
+    expect(card.current_device).toBe(origin);
+    expect(card._nav_stack).toHaveLength(0);
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("ignores a request without a hardware id", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+
+    card._handle_show_device({ detail: {} } as CustomEvent);
+
+    expect(card.current_device).toBe(origin);
+  });
+
+  it("ignores a request before the device list is built", () => {
+    const card = makeNavCard();
+    card.devices_list = null;
+
+    expect(() => showDevice(card, "222")).not.toThrow();
+    expect(card._nav_stack).toHaveLength(0);
+  });
+
+  it("does not stack a hop to the device already on screen", () => {
+    // Otherwise the back button would undo a navigation that never happened.
+    const card = makeNavCard();
+
+    showDevice(card, "111");
+
+    expect(card._nav_stack).toHaveLength(0);
+  });
+
+  it("back does nothing on an empty stack", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+
+    card._navigate_back();
+
+    expect(card.current_device).toBe(origin);
+  });
+
+  it("shows no back control until a navigation happens", () => {
+    const card = makeNavCard();
+    expect(card._back_button().values ?? []).toHaveLength(0);
+  });
+
+  it("shows the back control once a navigation happened", () => {
+    const card = makeNavCard();
+    showDevice(card, "222");
+    expect(card._back_button().strings.join("")).toContain("nav_back");
+  });
+
+  it("clears the stack when a device is picked from the selector", () => {
+    const card = makeNavCard();
+    showDevice(card, "222");
+    patchShadowRoot(card, {
+      querySelector: () => ({ value: "unselected" }),
+    } as any);
+
+    vi.useFakeTimers();
+    card.onChanges();
+    vi.runAllTimers();
+    vi.useRealTimers();
+
+    expect(card._nav_stack).toHaveLength(0);
+  });
+
+  it("keeps the navigated device even though a device is pinned", () => {
+    // user_config.device is re-applied on every render and would otherwise
+    // snap the card back on the next state update.
+    const card = makeNavCard();
+    card.user_config = { device: "Power" };
+    card.first_init = false;
+    card.re_render = true;
+    showDevice(card, "222");
+    const navigated = card.current_device;
+
+    card.render();
+
+    expect(card.current_device).toBe(navigated);
+  });
+});
+
+describe("ReefCard — navigation robustness", () => {
+  it("stays put when the target model has no card mapping", () => {
+    const card = makeNavCard();
+    const origin = card.current_device;
+    const stub = vi.spyOn(RSDevice, "create_device").mockReturnValue(null);
+
+    showDevice(card, "222");
+
+    expect(card.current_device).toBe(origin);
+    expect(card._nav_stack).toHaveLength(0);
+    stub.mockRestore();
+  });
+});
+
+describe("ReefCard — navigation edge cases", () => {
+  it("does not stack when the target resolves but cannot be built", () => {
+    // The hwid maps to a config entry the device list no longer holds:
+    // _set_current_device bails out and leaves the card where it was.
+    const card = makeNavCard();
+    const origin = card.current_device;
+    card.devices_list.get_config_entry_by_hwid = () => "cfg-vanished";
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    showDevice(card, "222");
+
+    expect(card.current_device).toBe(origin);
+    expect(card._nav_stack).toHaveLength(0);
+    spy.mockRestore();
+  });
+
+  it("navigates from a card showing no device at all", () => {
+    // The logo placeholder has no .device, so the identity check must not
+    // assume one is there.
+    const card = makeNavCard();
+    card.current_device = { hass: null };
+
+    showDevice(card, "222");
+
+    expect(card._nav_stack).toHaveLength(1);
+    expect(card.current_device.tagName).toBe("REDSEA-RSCONTROLPRO");
   });
 });

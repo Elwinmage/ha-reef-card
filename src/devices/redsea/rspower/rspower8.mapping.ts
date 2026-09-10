@@ -36,6 +36,10 @@ export const config2 = {
         width: "100%",
         top: "0%",
         left: "0%",
+        // A full-canvas image would otherwise swallow clicks aimed at the
+        // controls underneath, including over its transparent areas — the
+        // hub name sits inside this picture's box.
+        "pointer-events": "none",
       },
     },
     rscontrol_name: {
@@ -45,12 +49,21 @@ export const config2 = {
       name: "control_paired",
       type: "common-sensor",
       value: "${device.linked_control_name()}",
-      disabled_if: "!device.has_control_link()",
+      // Hidden unless the hub resolves to a device Home Assistant knows:
+      // a name that cannot be resolved has nothing to navigate to, and a
+      // clickable label leading nowhere is worse than no label.
+      disabled_if: "!device.linked_control_name()",
       no_br_if_disabled: true,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "show_device",
+        data: { hwid: "${device.linked_control_hwid()}" },
+      },
       css: {
         position: "absolute",
         top: "31.5%",
         left: "2.5%",
+        cursor: "pointer",
         "writing-mode": "vertical-rl",
         "text-orientation": "mixed",
         transform: "rotate(180deg)",
@@ -61,7 +74,6 @@ export const config2 = {
         "white-space": "nowrap",
         overflow: "hidden",
         "max-height": "26%",
-        "pointer-events": "none",
       },
     },
     last_message: {
@@ -73,7 +85,7 @@ export const config2 = {
         position: "absolute",
         width: "100%",
         height: "15px",
-        top: "33%",
+        top: "51%",
         left: "0px",
       },
       "elt.css": {
@@ -91,7 +103,7 @@ export const config2 = {
         position: "absolute",
         width: "100%",
         height: "20px",
-        top: "37%",
+        top: "55%",
         left: "0px",
       },
       "elt.css": {

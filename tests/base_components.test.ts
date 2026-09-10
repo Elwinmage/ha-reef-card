@@ -738,6 +738,52 @@ describe("RSMessages._render()", () => {
     expect(result).toBeDefined();
   });
 
+  // The message band spans the full card width and is drawn on top of the
+  // other elements. With nothing to show it must render no content at all,
+  // or it silently eats clicks aimed at whatever sits underneath it.
+  function messageMarkup(result: any): string {
+    if (!result || typeof result !== "object" || !("strings" in result)) {
+      return "";
+    }
+    return (
+      (result.strings as string[]).join("") +
+      (result.values as any[]).map((v) => messageMarkup(v)).join("")
+    );
+  }
+
+  it("renders no content when there is no message to show", () => {
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("");
+    m._hass = null;
+
+    expect(messageMarkup(m._render("")).trim()).toBe("");
+  });
+
+  it("renders no content for an unavailable message sensor", () => {
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("unavailable");
+    m._hass = null;
+
+    expect(messageMarkup(m._render("")).trim()).toBe("");
+  });
+
+  it("marks the content interactive when a message is shown", () => {
+    // The host opts out of pointer events; the content opts back in so the
+    // text and its trash button stay clickable.
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("Hello World");
+    m._hass = null;
+    m.device = null;
+
+    const markup = messageMarkup(m._render(""));
+
+    expect(markup).toContain("messages_content");
+    expect(markup).toContain("marquee");
+  });
+
   it("creates trash element when _hass and device are set", () => {
     const m = new StubMessages_B() as any;
     m.conf = { name: "msg" };
