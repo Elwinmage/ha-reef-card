@@ -40,6 +40,46 @@ export const dialogs_rspower = {
           ],
         },
       },
+      // Compact on/off timeline — rendered only when the socket runs on a
+      // schedule; clicking it opens the full editor.
+      {
+        view: "power-schedule",
+        conf: {
+          type: "power-schedule",
+          name: "socket_schedule_preview",
+          readonly: true,
+        },
+      },
+      // Advanced configuration button — only for schedule mode.
+      // The dialog type must be a literal: it is looked up as-is in the
+      // dialog table, so a template expression would resolve to nothing.
+      {
+        view: "common-button",
+        conf: {
+          type: "common-button",
+          stateObj: null,
+          icon: "mdi:clock-time-nine-outline",
+          disabled_if: "entity.socket_mode?.state !== 'schedule'",
+          no_br_if_disabled: true,
+          tap_action: {
+            domain: "redsea_ui",
+            action: "dialog",
+            data: {
+              type: "socket_schedule",
+              overload_quit: "socket_config",
+            },
+          },
+          label: "${i18n._('socket_advanced_config')}",
+          class: "dialog_button",
+          css: {
+            "margin-bottom": "5px",
+            "text-align": "center",
+          },
+          "elt.css": {
+            "background-color": "rgba(0,0,0,0)",
+          },
+        },
+      },
       {
         view: "click-image",
         conf: {
@@ -96,5 +136,19 @@ export const dialogs_rspower = {
       ],
     },
     cancel: true,
+  },
+  socket_schedule: {
+    name: "socket_schedule",
+    title_key: "${i18n._('socket_schedule')} n°${config.id}",
+    close_cross: false,
+    content: [
+      {
+        view: "power-schedule",
+        conf: {
+          type: "power-schedule",
+          name: "socket_schedule",
+        },
+      },
+    ],
   },
 };

@@ -22,6 +22,7 @@ import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
 import { RSPower6, RSPower8, PowerSocket } from "./redsea/rspower";
+import { PowerSchedule } from "./redsea/rspower/power_schedule";
 import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
 
 // register devices
@@ -71,6 +72,8 @@ if (!customElements.get("redsea-maintenance"))
   customElements.define("redsea-maintenance", RSMaintenance);
 if (!customElements.get("redsea-power-socket"))
   customElements.define("redsea-power-socket", PowerSocket);
+if (!customElements.get("power-schedule"))
+  customElements.define("power-schedule", PowerSchedule);
 if (!customElements.get("redsea-rspower6"))
   customElements.define("redsea-rspower6", RSPower6);
 if (!customElements.get("redsea-rspower8"))
