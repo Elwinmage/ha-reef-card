@@ -19,7 +19,11 @@ export const config = {
     rssense_temperature: {
       name: "rssense_temperature",
       type: "click-image",
-      disabled_if: "entity.power_temperature?.state === 'unknown'",
+      // A paired hub takes the probe's slot: the two pictures occupy the
+      // same corner, so the probe steps aside rather than overlapping.
+      disabled_if:
+        "device.has_control_link() || entity.power_temperature?.state === 'unknown'",
+      no_br_if_disabled: true,
       image: new URL(
         "../../../img/redsea/RSPOWER/rssense-temperature-power.png",
         import.meta.url,
@@ -32,10 +36,58 @@ export const config = {
         left: "0%",
       },
     },
+    rscontrol_link: {
+      // Bound to the pairing flag so the element re-renders when a hub is
+      // paired or dropped; `disabled_if` forces a refresh on every update,
+      // which also catches the link going up and down underneath.
+      name: "control_paired",
+      type: "click-image",
+      disabled_if: "!device.has_control_link()",
+      no_br_if_disabled: true,
+      // Paired but unreachable: blink under a light red tint.
+      class: "${device.control_link_alert() ? 'blink-alert' : ''}",
+      image: new URL(
+        "../../../img/redsea/RSPOWER/rscontrol_rspower_link.png",
+        import.meta.url,
+      ),
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "100%",
+        top: "0%",
+        left: "0%",
+      },
+    },
+    rscontrol_name: {
+      // Bound to the pairing flag like the picture above: its `disabled_if`
+      // forces a re-render on every update, which is what keeps the `value`
+      // expression fresh when the hub is renamed or swapped.
+      name: "control_paired",
+      type: "common-sensor",
+      value: "${device.linked_control_name()}",
+      disabled_if: "!device.has_control_link()",
+      no_br_if_disabled: true,
+      css: {
+        position: "absolute",
+        top: "31.5%",
+        left: "2.5%",
+        "writing-mode": "vertical-rl",
+        "text-orientation": "mixed",
+        transform: "rotate(180deg)",
+        color: COLOR_WHITE_60,
+        // Scales with the card width — a fixed rem overflows on mobile and
+        // reads too small in a browser.
+        "font-size": "var(--rs-label-font)",
+        "white-space": "nowrap",
+        overflow: "hidden",
+        "max-height": "26%",
+        "pointer-events": "none",
+      },
+    },
     power_temperature: {
       name: "power_temperature",
       type: "common-sensor",
-      disabled_if: "${state} === 'unknown'",
+      disabled_if: "device.has_control_link() || ${state} === 'unknown'",
       css: {
         flex: "0 0 auto",
         position: "absolute",

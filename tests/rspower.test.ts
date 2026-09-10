@@ -570,3 +570,228 @@ describe("PowerSocket", () => {
     expect(ps.is_on()).toBe(false);
   });
 });
+
+// ─── ReefControl link ───────────────────────────────────────────────────────
+
+/** An RSPower whose paired/link entities report the given states. */
+function makeLinkedPower(paired: string | null, linkUp: string | null): any {
+  const dev = new StubRSPower() as any;
+  dev.entities = {};
+  const states: Record<string, any> = {};
+  if (paired !== null) {
+    dev.entities.control_paired = { entity_id: "binary_sensor.paired" };
+    states["binary_sensor.paired"] = { state: paired };
+  }
+  if (linkUp !== null) {
+    dev.entities.control_link_up = { entity_id: "binary_sensor.link" };
+    states["binary_sensor.link"] = { state: linkUp };
+  }
+  dev._hass = makeHass(states);
+  return dev;
+}
+
+describe("RSPower ReefControl link", () => {
+  it("has_control_link() is true when a hub is paired", () => {
+    expect(makeLinkedPower("on", "on").has_control_link()).toBe(true);
+  });
+
+  it("has_control_link() is false when no hub is paired", () => {
+    expect(makeLinkedPower("off", "off").has_control_link()).toBe(false);
+  });
+
+  it("has_control_link() is false without the pairing entity", () => {
+    expect(makeLinkedPower(null, null).has_control_link()).toBe(false);
+  });
+
+  it("control_link_alert() is false for a reachable hub", () => {
+    expect(makeLinkedPower("on", "on").control_link_alert()).toBe(false);
+  });
+
+  it("control_link_alert() is true for a paired but unreachable hub", () => {
+    // Pairing survives the hub going offline: this is the blinking state.
+    expect(makeLinkedPower("on", "off").control_link_alert()).toBe(true);
+  });
+
+  it("control_link_alert() is true when the link state is unknown", () => {
+    expect(makeLinkedPower("on", "unknown").control_link_alert()).toBe(true);
+  });
+
+  it("control_link_alert() is true without the link entity", () => {
+    expect(makeLinkedPower("on", null).control_link_alert()).toBe(true);
+  });
+
+  it("control_link_alert() stays quiet when no hub is paired", () => {
+    // Nothing paired is not a fault — the picture is simply absent.
+    expect(makeLinkedPower("off", "off").control_link_alert()).toBe(false);
+  });
+});
+
+// ─── Resolving the paired hub ───────────────────────────────────────────────
+
+/** An RSPower reporting `hwid` as its peer, against a device registry. */
+function makePowerWithRegistry(
+  hwid: string | null,
+  devices: Record<string, any>,
+): any {
+  const dev = new StubRSPower() as any;
+  dev.entities = { connected_control: { entity_id: "sensor.hub" } };
+  dev._hass = makeHass({
+    "sensor.hub": { state: hwid ?? "unknown" },
+  });
+  dev._hass.devices = devices;
+  return dev;
+}
+
+const HUB_HWID = "737225465317";
+
+describe("RSPower.linked_control_hwid", () => {
+  it("returns the hardware id the strip reports", () => {
+    expect(makePowerWithRegistry(HUB_HWID, {}).linked_control_hwid()).toBe(
+      HUB_HWID,
+    );
+  });
+
+  it("returns null when nothing is paired", () => {
+    expect(makePowerWithRegistry(null, {}).linked_control_hwid()).toBeNull();
+  });
+
+  it("returns null when the sensor is unavailable", () => {
+    const dev = makePowerWithRegistry(null, {});
+    dev._hass.states["sensor.hub"] = { state: "unavailable" };
+    expect(dev.linked_control_hwid()).toBeNull();
+  });
+
+  it("returns null without the sensor at all", () => {
+    const dev = new StubRSPower() as any;
+    dev.entities = {};
+    dev._hass = makeHass({});
+    expect(dev.linked_control_hwid()).toBeNull();
+  });
+});
+
+describe("RSPower.linked_control_device", () => {
+  it("finds the hub by model_id", () => {
+    const hub = { id: "d1", model_id: HUB_HWID, identifiers: [] };
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d0: { id: "d0", model_id: "999", identifiers: [] },
+      d1: hub,
+    });
+
+    expect(dev.linked_control_device()).toBe(hub);
+  });
+
+  it("falls back to the redsea identifier when model_id is absent", () => {
+    // Entries created before model_id existed still carry the id here.
+    const hub = { id: "d1", identifiers: [["redsea", HUB_HWID]] };
+    const dev = makePowerWithRegistry(HUB_HWID, { d1: hub });
+
+    expect(dev.linked_control_device()).toBe(hub);
+  });
+
+  it("ignores an identifier from another integration", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d1: { id: "d1", identifiers: [["other", HUB_HWID]] },
+    });
+
+    expect(dev.linked_control_device()).toBeNull();
+  });
+
+  it("returns null when the hub is not in the registry", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d0: { id: "d0", model_id: "999", identifiers: [] },
+    });
+
+    expect(dev.linked_control_device()).toBeNull();
+  });
+
+  it("returns null when nothing is paired", () => {
+    const dev = makePowerWithRegistry(null, {
+      d1: { id: "d1", model_id: HUB_HWID, identifiers: [] },
+    });
+
+    expect(dev.linked_control_device()).toBeNull();
+  });
+
+  it("skips empty registry slots", () => {
+    const hub = { id: "d1", model_id: HUB_HWID, identifiers: [] };
+    const dev = makePowerWithRegistry(HUB_HWID, { d0: null, d1: hub });
+
+    expect(dev.linked_control_device()).toBe(hub);
+  });
+
+  it("returns null without a device registry", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {});
+    dev._hass.devices = undefined;
+
+    expect(dev.linked_control_device()).toBeNull();
+  });
+});
+
+describe("RSPower.linked_control_name", () => {
+  it("returns the hub name from the registry", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d1: {
+        id: "d1",
+        model_id: HUB_HWID,
+        name: "ReefControl Pro",
+        identifiers: [],
+      },
+    });
+
+    expect(dev.linked_control_name()).toBe("ReefControl Pro");
+  });
+
+  it("prefers the name the user set over the generated one", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d1: {
+        id: "d1",
+        model_id: HUB_HWID,
+        name: "SIMU-RSCONTROLPRO",
+        name_by_user: "Bac principal",
+        identifiers: [],
+      },
+    });
+
+    expect(dev.linked_control_name()).toBe("Bac principal");
+  });
+
+  it("ignores an empty user name and keeps the generated one", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d1: {
+        id: "d1",
+        model_id: HUB_HWID,
+        name: "ReefControl Pro",
+        name_by_user: null,
+        identifiers: [],
+      },
+    });
+
+    expect(dev.linked_control_name()).toBe("ReefControl Pro");
+  });
+
+  it("returns an empty string when the hub is not in the registry", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {});
+    expect(dev.linked_control_name()).toBe("");
+  });
+
+  it("returns an empty string when nothing is paired", () => {
+    const dev = makePowerWithRegistry(null, {
+      d1: {
+        id: "d1",
+        model_id: HUB_HWID,
+        name: "ReefControl Pro",
+        identifiers: [],
+      },
+    });
+
+    expect(dev.linked_control_name()).toBe("");
+  });
+
+  it("returns an empty string for a nameless registry entry", () => {
+    const dev = makePowerWithRegistry(HUB_HWID, {
+      d1: { id: "d1", model_id: HUB_HWID, identifiers: [] },
+    });
+
+    expect(dev.linked_control_name()).toBe("");
+  });
+});

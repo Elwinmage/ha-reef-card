@@ -34,6 +34,82 @@ export class RSPower extends RSDevice {
     this.load_dialogs([dialogs_device, dialogs_rspower]);
   }
 
+  // ── ReefControl link ──────────────────────────────────────────────────
+
+  /**
+   * Whether a ReefControl hub is paired with this power strip.
+   *
+   * Pairing survives the hub going offline, so this is read from the paired
+   * flag rather than from reachability: an unplugged hub must still show its
+   * link picture, blinking, instead of silently disappearing from the card.
+   * @return true when a hub is paired
+   */
+  has_control_link(): boolean {
+    return this.get_entity("control_paired")?.state === "on";
+  }
+
+  /**
+   * Whether the paired hub is currently unreachable.
+   * @return true when a hub is paired but its link is down
+   */
+  control_link_alert(): boolean {
+    return (
+      this.has_control_link() &&
+      this.get_entity("control_link_up")?.state !== "on"
+    );
+  }
+
+  /**
+   * Hardware id of the paired hub, as the strip reports it.
+   * @return the hub's hwid, or null when nothing is paired
+   */
+  linked_control_hwid(): string | null {
+    const hwid = this.get_entity("connected_control")?.state;
+    if (!hwid || hwid === "unknown" || hwid === "unavailable") return null;
+    return hwid;
+  }
+
+  /**
+   * Find the Home Assistant device entry of the paired hub.
+   *
+   * The strip reports its peer by hardware id, and the integration stores
+   * that same id as the device's `model_id` (and as the second half of its
+   * `redsea` identifier). Matching on it keeps the link tied to the hardware:
+   * a device renamed in Home Assistant, or a fixture renamed in the
+   * simulator, still resolves to the same entry.
+   * @return the hub's device registry entry, or null when it is not found
+   */
+  linked_control_device(): any | null {
+    const hwid = this.linked_control_hwid();
+    if (!hwid || !this._hass?.devices) return null;
+
+    for (const id in this._hass.devices) {
+      const dev: any = this._hass.devices[id];
+      if (!dev) continue;
+      if (dev.model_id === hwid) return dev;
+
+      // Older entries may predate model_id; the identifier carries the
+      // same id, so fall back to it rather than giving up on the link.
+      const ident = dev.identifiers?.[0];
+      if (Array.isArray(ident) && ident[0] === "redsea" && ident[1] === hwid) {
+        return dev;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Friendly name of the paired hub, as shown in Home Assistant.
+   *
+   * A name set by the user wins over the one the integration created, which
+   * is what "friendly name" means in Home Assistant.
+   * @return the hub's name, or an empty string when it cannot be resolved
+   */
+  linked_control_name(): string {
+    const dev = this.linked_control_device();
+    return dev?.name_by_user || dev?.name || "";
+  }
+
   // ── Entity population ─────────────────────────────────────────────────
 
   _populate_entities(): void {

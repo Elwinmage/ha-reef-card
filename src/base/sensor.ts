@@ -8,6 +8,8 @@
  *      icon: true,
  *      icon_color: "#ec2330",
  *      round: 2,               // 12.3456 -> "12.35"
+ *      value: "${device.some_method()}",  // replaces the entity state,
+ *                                         // re-evaluated on every render
  *      text_color: "$DEVICE-COLOR$",   // value + unit share the colour
  *      tap_action: {
  *        domain: "redsea_ui",
@@ -170,7 +172,16 @@ export class Sensor extends MyElement {
     let value: string | number = "";
     let unit = "";
 
-    if (this.stateObj) {
+    // `value` overrides the entity state and is re-evaluated on every render.
+    // Elements are built once and cached, so anything derived from the device
+    // rather than from a single entity — a linked device's name, say — would
+    // freeze at its creation-time text if it were passed as `label`.
+    if (this.conf?.value) {
+      value = this.evaluate(this.conf.value);
+      if (this.conf.unit) {
+        unit = this.evaluate(this.conf.unit);
+      }
+    } else if (this.stateObj) {
       if (this.conf?.translate_values) {
         value = this.label || this._hass.formatEntityState(this.stateObj);
       } else {

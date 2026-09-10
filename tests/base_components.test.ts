@@ -573,6 +573,61 @@ describe("Sensor._render()", () => {
     s._render("");
     expect(s._hass.formatEntityState).not.toHaveBeenCalled();
   });
+
+  // `value` exists for text that comes from the device rather than from one
+  // entity — a linked device's name, say. Elements are built once and cached,
+  // so such text has to be re-evaluated at render time or it freezes.
+  it("renders conf.value in place of the entity state", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "${device.linked_control_name()}" };
+    s.stateObj = makeState_B("on", "sensor.x");
+    s.evaluate = vi.fn(() => "ReefControl Pro");
+
+    const result = s._render("");
+
+    expect(result).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("${device.linked_control_name()}");
+  });
+
+  it("renders conf.value without any entity behind it", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'text'" };
+    s.stateObj = null;
+    s.evaluate = vi.fn(() => "text");
+
+    expect(s._render("")).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'text'");
+  });
+
+  it("appends the unit to conf.value when one is configured", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'21'", unit: "'°C'" };
+    s.stateObj = null;
+    s.evaluate = vi.fn((e: string) => (e === "'21'" ? "21" : "°C"));
+
+    expect(s._render("")).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'°C'");
+  });
+
+  it("leaves the unit out when conf.value carries none", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'text'" };
+    s.stateObj = makeState_B("on", "sensor.x", { unit_of_measurement: "W" });
+    s.evaluate = vi.fn(() => "text");
+
+    s._render("");
+
+    // The entity's own unit must not leak onto device-derived text
+    expect(s.evaluate).not.toHaveBeenCalledWith("W");
+  });
+
+  it("keeps reading the entity state when conf.value is absent", () => {
+    const s = new StubSensor2() as any;
+    s.conf = {};
+    s.stateObj = makeState_B("42", "sensor.x");
+
+    expect(s._render("")).toBeDefined();
+  });
 });
 describe("RSSwitch._render()", () => {
   it("renders switch style when conf.style='switch'", () => {

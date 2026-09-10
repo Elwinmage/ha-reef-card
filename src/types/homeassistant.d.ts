@@ -28,6 +28,10 @@ export interface HassDevice {
   primary_config_entry: string;
   name: string;
   model?: string;
+  /** Hardware id reported by the device; stable across renames. */
+  model_id?: string;
+  /** Name the user set in Home Assistant; overrides `name` when present. */
+  name_by_user?: string | null;
   manufacturer?: string;
   sw_version?: string;
   disabled_by: string | null;

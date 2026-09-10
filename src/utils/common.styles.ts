@@ -7,6 +7,24 @@ export default css`
     left: 0;
     width: 100%;
     aspect-ratio: 1/1.2;
+    /* Anchor for the label font below: everything drawn on the picture is
+       positioned in percentages of this box, so text has to scale with it
+       too. Viewport units would not do — a narrow card on a wide screen
+       still needs small text. */
+    container-type: inline-size;
+    /* Fixed fallback for engines without container query units. */
+    --rs-label-font: 0.5rem;
+  }
+
+  /* Text sized from the card width, bounded so it stays legible when the
+     card is tiny and does not balloon when it is stretched wide. Tuned for
+     vertical labels, where the run length is capped by the picture height
+     and rotated glyphs eat more room than a horizontal line of the same
+     size — hence a smaller ratio than a horizontal label would take. */
+  @supports (font-size: 1cqw) {
+    .device_bg {
+      --rs-label-font: clamp(7px, 2.1cqw, 14px);
+    }
   }
 
   .device_img {
