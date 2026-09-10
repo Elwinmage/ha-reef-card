@@ -352,6 +352,32 @@ export const config = {
             "background-color": "$DEVICE-COLOR-ALPHA$",
           },
         },
+        linked_thumbnail: {
+          // The strip holds the link, the socket only draws it. Bound to the
+          // socket mode so it refreshes with the rest, and disabled when no
+          // appliance is linked or its model has no picture to borrow.
+          name: "socket_mode",
+          type: "click-image",
+          image: "${device.linked_image()}",
+          disabled_if: "!device.linked_image()",
+          no_br_if_disabled: true,
+          class: "${device.linked_class()}",
+          tap_action: {
+            domain: "redsea_ui",
+            action: "show_device",
+            data: { hwid: "${device.linked_hwid()}" },
+          },
+          css: {
+            position: "absolute",
+            width: "90%",
+            left: "5%",
+            cursor: "pointer",
+            // Thumbnails hang below the strip in two staggered rows so
+            // neighbours do not overlap. Odd sockets take the near row; the
+            // even ones override this to the far row.
+            top: "110%",
+          },
+        },
         socket_mode_icon: {
           name: "socket_mode",
           type: "common-sensor",
@@ -439,6 +465,9 @@ export const config = {
       css: { left: "10%" },
     },
     socket_2: {
+      elements: {
+        linked_thumbnail: { css: { top: "225%" } },
+      },
       color: "0,255,0",
       id: 2,
       css: { left: "24%" },
@@ -449,6 +478,9 @@ export const config = {
       css: { left: "38%" },
     },
     socket_4: {
+      elements: {
+        linked_thumbnail: { css: { top: "225%" } },
+      },
       id: 4,
       color: "255,255,0",
       css: { left: "52%" },
@@ -459,6 +491,9 @@ export const config = {
       css: { left: "66%" },
     },
     socket_6: {
+      elements: {
+        linked_thumbnail: { css: { top: "225%" } },
+      },
       id: 6,
       color: "0,255,255",
       css: { left: "80%" },

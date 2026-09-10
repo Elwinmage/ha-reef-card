@@ -33,6 +33,9 @@ interface Interval {
 const TOTAL_MINUTES = 24 * 60; // 1440
 const MAX_INTERVALS = 10;
 
+/** Seconds the strip needs before it serves a freshly written schedule. */
+const SCHEDULE_REFRESH_WAIT = 3;
+
 // Colours for the timeline: ON blocks vs the OFF background
 const ON_COLOR = "51,151,232"; // primary-ish blue
 const OFF_COLOR = "220,60,60"; // red
@@ -77,6 +80,21 @@ export class PowerSchedule extends LitElement {
     super.disconnectedCallback();
   }
 
+  /**
+   * The preview is built once and then only receives state updates, so it
+   * has to notice the schedule changing under it — after a save, or when the
+   * device reports one of its own. Done before rendering rather than after,
+   * so the new data reaches the same frame instead of the one after it.
+   *
+   * The editor is left alone: re-reading there would discard whatever the
+   * user is in the middle of changing.
+   */
+  override willUpdate(changed: Map<string, unknown>): void {
+    if (changed.has("hass") && this.conf?.readonly === true && this._loaded) {
+      this._fetchSchedule();
+    }
+  }
+
   override updated(): void {
     this._drawTimeline();
   }
@@ -118,6 +136,30 @@ export class PowerSchedule extends LitElement {
     return null;
   }
 
+  /**
+   * The strip this socket belongs to, which owns the pending schedules.
+   * @return the parent device, or null when it cannot be reached
+   */
+  private _strip(): any | null {
+    return (this.device as any)?.device ?? null;
+  }
+
+  /**
+   * The socket's schedule attribute as the device reports it right now.
+   *
+   * Compared as text: the value is a small plain object, so comparing the
+   * serialisation avoids pulling in a deep-equality helper for no gain.
+   * @return the serialised attribute, or "null" when there is none
+   */
+  private _scheduleSnapshot(): string {
+    const entities: any = (this.device as any)?.entities;
+    const entity_id = entities?.socket_mode?.entity_id;
+    const attributes = entity_id
+      ? this.hass?.states?.[entity_id]?.attributes
+      : null;
+    return JSON.stringify(attributes?.schedule ?? null);
+  }
+
   /** Get the 0-based socket number expected by the device API.
    *
    * Card-side sockets are numbered 1..N (config.id / socket_id), the REST API
@@ -130,63 +172,59 @@ export class PowerSchedule extends LitElement {
     return Number.isFinite(num) && num > 0 ? num - 1 : 0;
   }
 
-  private async _fetchSchedule(): Promise<void> {
-    this._loading = true;
+  /**
+   * Read the socket's programme from the state machine.
+   *
+   * The integration carries it as a `schedule` attribute of the socket's
+   * mode sensor, the same way a dosing head carries its own. Reading it from
+   * there means the editor opens on data already in hand, instead of holding
+   * an empty dialog open while a request goes out to the device.
+   */
+  private _fetchSchedule(): void {
+    // Only the first read shows a spinner. A later one refreshes what is
+    // already on screen, and blanking it for a frame would make the preview
+    // flicker every time the device reports anything.
+    this._loading = !this._loaded;
     this._error = null;
 
-    const deviceId = this._getDeviceId();
-    const socketNum = this._getSocketNumber();
+    const entities: any = (this.device as any)?.entities;
+    const entity_id = entities?.socket_mode?.entity_id;
+    const state = entity_id ? this.hass?.states?.[entity_id] : null;
 
-    if (!deviceId || !this.hass) {
-      console.error("PowerSchedule: missing device context", {
-        deviceId,
-        socketNum,
-        device: this.device,
-        hasHass: !!this.hass,
-      });
+    if (!state) {
       this._error = "Missing device context";
       this._loading = false;
       return;
     }
 
-    try {
-      // Use the WebSocket call_service message which returns the service
-      // response directly (unlike the REST-based callService which is
-      // fire-and-forget in the HA frontend).
-      const resp = await this.hass.callWS({
-        type: "call_service",
-        domain: "redsea",
-        service: "request",
-        service_data: {
-          device_id: deviceId,
-          access_path: `/socket/${socketNum}/config/schedule`,
-          method: "get",
-        },
-        return_response: true,
-      });
+    // A sensor carrying no schedule attribute is a socket with no programme,
+    // not a failure to reach it.
+    const attributes = state.attributes ?? {};
 
-      // Response shape: {response: {ok: true, json: {intervals: [...]}}}
-      const json = resp?.response?.json ?? {};
-      const intervals: Interval[] = [];
+    // A schedule just written is shown straight away rather than waiting for
+    // the device to serve it back; the strip drops the note as soon as the
+    // device reports anything else, so a rejected write corrects itself.
+    const snapshot = JSON.stringify(attributes.schedule ?? null);
+    const pending = this._strip()?.pending_schedule?.(
+      this._getSocketNumber(),
+      snapshot,
+    );
 
-      if (json?.intervals && Array.isArray(json.intervals)) {
-        for (const iv of json.intervals) {
-          const t = Number(iv.time);
-          const d = Number(iv.duration);
-          if (!isNaN(t) && !isNaN(d) && d > 0) {
-            intervals.push({ time: t, duration: d });
-          }
+    const intervals: Interval[] = [];
+    const raw = pending ?? attributes.schedule?.intervals;
+    if (Array.isArray(raw)) {
+      for (const iv of raw) {
+        const t = Number(iv?.time);
+        const d = Number(iv?.duration);
+        if (!isNaN(t) && !isNaN(d) && d > 0) {
+          intervals.push({ time: t, duration: d });
         }
       }
-
-      this._intervals = intervals.sort((a, b) => a.time - b.time);
-      this._loaded = true;
-    } catch (err: any) {
-      console.error("PowerSchedule: fetch failed", err);
-      this._error = String(err?.message || err);
-    } finally {
-      this._loading = false;
     }
+
+    this._intervals = intervals.sort((a, b) => a.time - b.time);
+    this._loaded = true;
+    this._loading = false;
   }
 
   private async _saveSchedule(): Promise<void> {
@@ -194,6 +232,10 @@ export class PowerSchedule extends LitElement {
     const socketNum = this._getSocketNumber();
 
     if (!deviceId || !this.hass) return;
+
+    // Taken before the write: it is what a later read compares against to
+    // tell whether the device has caught up yet.
+    const snapshot = this._scheduleSnapshot();
 
     // Clean & sort intervals before sending
     const intervals = this._intervals
@@ -204,19 +246,31 @@ export class PowerSchedule extends LitElement {
         duration: Math.max(1, iv.duration),
       }));
 
+    // Noted and closed before the write is awaited, on purpose. The service
+    // holds its reply until it has re-read the device, several seconds
+    // later; waiting for that would freeze the dialog and leave the note
+    // useless, since by then the device has already caught up. Assume the
+    // write lands — the re-read corrects the display if it did not.
+    this._strip()?.set_pending_schedule?.(socketNum, intervals, snapshot);
+    this.dispatchEvent(
+      new CustomEvent("quit-dialog", { bubbles: true, composed: true }),
+    );
+
     try {
       await this.hass.callService("redsea", "request", {
         device_id: deviceId,
         access_path: `/socket/${socketNum}/config/schedule`,
         method: "put",
         data: { intervals },
+        // The schedule is served as configuration, and the strip acknowledges
+        // the write before it hands back the new programme — so ask for a
+        // config re-read, after a pause long enough to get the new one.
+        refresh: "config",
+        wait: SCHEDULE_REFRESH_WAIT,
       });
-
-      // Close the dialog after successful save
-      this.dispatchEvent(
-        new CustomEvent("quit-dialog", { bubbles: true, composed: true }),
-      );
     } catch (err) {
+      // No write means no re-read, so nothing would ever clear the note.
+      this._strip()?.clear_pending_schedule?.(socketNum);
       console.error("PowerSchedule: save failed", err);
     }
   }

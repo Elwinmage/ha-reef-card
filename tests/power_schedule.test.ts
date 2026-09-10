@@ -300,69 +300,32 @@ describe("PowerSchedule._getSocketNumber", () => {
 // ─── Fetch ──────────────────────────────────────────────────────────────────
 
 describe("PowerSchedule._fetchSchedule", () => {
-  it("reports a missing device chain instead of requesting", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
+  /** An element whose socket mode sensor carries the given attributes. */
+  function makeWithAttributes(attributes: any): any {
     const el = makeElement();
-    el.device = null;
-    el.hass = makeHass();
-
-    await el._fetchSchedule();
-
-    expect(el._error).toBe("Missing device context");
-    expect(el._loading).toBe(false);
-    expect(el.hass.callWS).not.toHaveBeenCalled();
-  });
-
-  it("reports a missing hass instead of requesting", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    const el = makeElement();
-    el.device = makeDevice();
-    el.hass = null;
-
-    await el._fetchSchedule();
-
-    expect(el._error).toBe("Missing device context");
-  });
-
-  it("requests the schedule of the right socket", async () => {
-    const el = makeElement();
-    el.device = makeDevice("entry-9", 3);
-    el.hass = makeHass();
-
-    await el._fetchSchedule();
-
-    expect(el.hass.callWS).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "call_service",
-        domain: "redsea",
-        service: "request",
-        return_response: true,
-        service_data: expect.objectContaining({
-          device_id: "entry-9",
-          access_path: "/socket/2/config/schedule",
-          method: "get",
-        }),
-      }),
-    );
-  });
-
-  it("loads and sorts the returned intervals", async () => {
-    const el = makeElement();
-    el.device = makeDevice();
+    el.device = {
+      ...makeDevice(),
+      entities: { socket_mode: { entity_id: "sensor.socket_mode" } },
+    };
     el.hass = makeHass({
-      callWS: vi.fn().mockResolvedValue({
-        response: {
-          json: {
-            intervals: [
-              { time: 600, duration: 120 },
-              { time: 0, duration: 60 },
-            ],
-          },
-        },
-      }),
+      states: { "sensor.socket_mode": { state: "schedule", attributes } },
+    });
+    return el;
+  }
+
+  it("reads the programme carried by the socket mode sensor", () => {
+    // No request goes out: the integration already holds the schedule, so
+    // the editor opens on data in hand rather than on an empty dialog.
+    const el = makeWithAttributes({
+      schedule: {
+        intervals: [
+          { time: 600, duration: 120 },
+          { time: 0, duration: 60 },
+        ],
+      },
     });
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
     expect(el._intervals).toEqual([
       { time: 0, duration: 60 },
@@ -370,91 +333,79 @@ describe("PowerSchedule._fetchSchedule", () => {
     ]);
     expect(el._loaded).toBe(true);
     expect(el._loading).toBe(false);
+    expect(el.hass.callWS).not.toHaveBeenCalled();
   });
 
-  it("drops malformed and zero-length intervals", async () => {
-    const el = makeElement();
-    el.device = makeDevice();
-    el.hass = makeHass({
-      callWS: vi.fn().mockResolvedValue({
-        response: {
-          json: {
-            intervals: [
-              { time: 0, duration: 60 },
-              { time: "x", duration: 30 },
-              { time: 120, duration: "y" },
-              { time: 240, duration: 0 },
-            ],
-          },
-        },
-      }),
+  it("drops malformed and zero-length intervals", () => {
+    const el = makeWithAttributes({
+      schedule: {
+        intervals: [
+          { time: 0, duration: 60 },
+          { time: "x", duration: 30 },
+          { time: 120, duration: "y" },
+          { time: 240, duration: 0 },
+          null,
+        ],
+      },
     });
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
     expect(el._intervals).toEqual([{ time: 0, duration: 60 }]);
   });
 
-  it("treats a response without intervals as an empty schedule", async () => {
-    const el = makeElement();
-    el.device = makeDevice();
-    el.hass = makeHass({
-      callWS: vi.fn().mockResolvedValue({ response: { json: {} } }),
-    });
+  it("treats a sensor with no schedule attribute as an empty programme", () => {
+    const el = makeWithAttributes({});
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
     expect(el._intervals).toEqual([]);
     expect(el._error).toBeNull();
   });
 
-  it("treats a non-array intervals field as an empty schedule", async () => {
-    const el = makeElement();
-    el.device = makeDevice();
-    el.hass = makeHass({
-      callWS: vi.fn().mockResolvedValue({
-        response: { json: { intervals: "nope" } },
-      }),
-    });
+  it("treats a non-array intervals field as an empty programme", () => {
+    const el = makeWithAttributes({ schedule: { intervals: "nope" } });
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
     expect(el._intervals).toEqual([]);
   });
 
-  it("treats an empty response as an empty schedule", async () => {
+  it("reports a missing socket mode sensor", () => {
     const el = makeElement();
     el.device = makeDevice();
-    el.hass = makeHass({ callWS: vi.fn().mockResolvedValue(undefined) });
+    el.hass = makeHass();
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
-    expect(el._intervals).toEqual([]);
-  });
-
-  it("surfaces a rejected request as an error message", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    const el = makeElement();
-    el.device = makeDevice();
-    el.hass = makeHass({
-      callWS: vi.fn().mockRejectedValue(new Error("boom")),
-    });
-
-    await el._fetchSchedule();
-
-    expect(el._error).toBe("boom");
+    expect(el._error).toBe("Missing device context");
     expect(el._loading).toBe(false);
   });
 
-  it("surfaces a thrown non-Error as an error message", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
+  it("reports a sensor that has no state yet", () => {
     const el = makeElement();
-    el.device = makeDevice();
-    el.hass = makeHass({ callWS: vi.fn().mockRejectedValue("plain string") });
+    el.device = {
+      ...makeDevice(),
+      entities: { socket_mode: { entity_id: "sensor.socket_mode" } },
+    };
+    el.hass = makeHass({ states: {} });
 
-    await el._fetchSchedule();
+    el._fetchSchedule();
 
-    expect(el._error).toBe("plain string");
+    expect(el._error).toBe("Missing device context");
+  });
+
+  it("reports a missing hass", () => {
+    const el = makeElement();
+    el.device = {
+      ...makeDevice(),
+      entities: { socket_mode: { entity_id: "sensor.socket_mode" } },
+    };
+    el.hass = null;
+
+    el._fetchSchedule();
+
+    expect(el._error).toBe("Missing device context");
   });
 });
 
@@ -502,6 +453,10 @@ describe("PowerSchedule._saveSchedule", () => {
           { time: 600, duration: 60 },
         ],
       },
+      // The strip acknowledges the write before it serves the new programme
+      // back, so the re-read has to wait for it.
+      refresh: "config",
+      wait: 3,
     });
     expect(quit).toHaveBeenCalled();
   });
@@ -525,7 +480,9 @@ describe("PowerSchedule._saveSchedule", () => {
     ]);
   });
 
-  it("keeps the dialog open when the request fails", async () => {
+  it("closes without waiting for the device to confirm", async () => {
+    // The service holds its reply until it has re-read the device, seconds
+    // later. Waiting would freeze the dialog for no gain.
     vi.spyOn(console, "error").mockImplementation(() => {});
     const el = makeElement();
     el.device = makeDevice();
@@ -537,7 +494,7 @@ describe("PowerSchedule._saveSchedule", () => {
 
     await el._saveSchedule();
 
-    expect(quit).not.toHaveBeenCalled();
+    expect(quit).toHaveBeenCalled();
   });
 });
 
@@ -1093,5 +1050,115 @@ describe("PowerSchedule mounted interactions", () => {
 
     expect(seen).toHaveLength(1);
     expect(seen[0].type).toBe("socket_schedule");
+  });
+});
+
+// ─── Optimistic display ─────────────────────────────────────────────────────
+
+describe("PowerSchedule optimistic display", () => {
+  /** An element wired to a strip that records pending schedules. */
+  function makeWired(attributeSchedule: any, strip: any = {}): any {
+    const el = makeElement();
+    el.device = {
+      socket_id: 1,
+      entities: { socket_mode: { entity_id: "sensor.socket_mode" } },
+      // The strip is both the pending-schedule holder and the next link in
+      // the chain _getDeviceId walks to reach the config entry.
+      device: strip
+        ? { ...strip, elements: [{ primary_config_entry: "entry-1" }] }
+        : null,
+    };
+    el.hass = makeHass({
+      states: {
+        "sensor.socket_mode": {
+          state: "schedule",
+          attributes: { schedule: attributeSchedule },
+        },
+      },
+    });
+    return el;
+  }
+
+  const stored = { intervals: [{ time: 0, duration: 30 }] };
+  const justSaved = [{ time: 600, duration: 60 }];
+
+  it("shows a schedule just written rather than the stored one", () => {
+    const el = makeWired(stored, {
+      pending_schedule: vi.fn(() => justSaved),
+    });
+
+    el._fetchSchedule();
+
+    expect(el._intervals).toEqual(justSaved);
+  });
+
+  it("asks the strip about its own socket, with what the device reports", () => {
+    const pending_schedule = vi.fn(() => null);
+    const el = makeWired(stored, { pending_schedule });
+
+    el._fetchSchedule();
+
+    expect(pending_schedule).toHaveBeenCalledWith(0, JSON.stringify(stored));
+  });
+
+  it("falls back to the stored schedule once the device caught up", () => {
+    const el = makeWired(stored, { pending_schedule: vi.fn(() => null) });
+
+    el._fetchSchedule();
+
+    expect(el._intervals).toEqual([{ time: 0, duration: 30 }]);
+  });
+
+  it("reads the stored schedule when the strip cannot be reached", () => {
+    const el = makeWired(stored, null);
+
+    el._fetchSchedule();
+
+    expect(el._intervals).toEqual([{ time: 0, duration: 30 }]);
+  });
+
+  it("notes the sent schedule on the strip after a successful save", () => {
+    const set_pending_schedule = vi.fn();
+    const el = makeWired(stored, { set_pending_schedule });
+    el._intervals = [{ time: 600, duration: 60 }];
+
+    return el._saveSchedule().then(() => {
+      expect(set_pending_schedule).toHaveBeenCalledWith(
+        0,
+        [{ time: 600, duration: 60 }],
+        JSON.stringify(stored),
+      );
+    });
+  });
+
+  it("takes back the note when the save failed", async () => {
+    // A failed write triggers no re-read, so nothing else would ever clear
+    // it: the socket would keep showing a programme it never received.
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const clear_pending_schedule = vi.fn();
+    const el = makeWired(stored, {
+      set_pending_schedule: vi.fn(),
+      clear_pending_schedule,
+    });
+    el.hass.callService = vi.fn().mockRejectedValue(new Error("nope"));
+
+    await el._saveSchedule();
+
+    expect(clear_pending_schedule).toHaveBeenCalledWith(0);
+  });
+
+  it("saves without a strip to note it on", async () => {
+    const el = makeWired(stored, null);
+
+    await expect(el._saveSchedule()).resolves.toBeUndefined();
+  });
+
+  it("treats a sensor with no schedule attribute as an empty snapshot", () => {
+    const pending_schedule = vi.fn(() => null);
+    const el = makeWired(undefined, { pending_schedule });
+
+    el._fetchSchedule();
+
+    expect(pending_schedule).toHaveBeenCalledWith(0, "null");
   });
 });

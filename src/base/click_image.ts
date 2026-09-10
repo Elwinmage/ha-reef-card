@@ -29,7 +29,13 @@ export class ClickImage extends MyElement {
    * @param _style: set the style of <ha-icon> or <img>
    */
   protected override _render(_style: string = ""): any {
-    const imageSrc = this.conf?.image || "";
+    // An image may be an expression when it depends on device state — a
+    // linked device's picture, say. Static images stay untouched: mapping
+    // entries pass a URL object built at module load, not a string.
+    let imageSrc: any = this.conf?.image || "";
+    if (typeof imageSrc === "string" && imageSrc.includes("${")) {
+      imageSrc = this.evaluate(imageSrc);
+    }
     const icon = this.conf?.icon || "";
     let iconColor = this.conf?.icon_color || "currentColor";
 

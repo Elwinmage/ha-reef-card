@@ -19,4 +19,13 @@ export default css`
   #nav_back:hover {
     background: var(--input-fill-color, rgba(127, 127, 127, 0.22));
   }
+
+  /* Shown while the card is displaying a device reached through a link,
+     rather than the one it is configured for. */
+  :host(.following-link) {
+    display: block;
+    border: 2px solid var(--primary-color, #3397e8);
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
 `;

@@ -816,6 +816,29 @@ describe("RSMessages._render()", () => {
   });
 });
 describe("ClickImage._render()", () => {
+  // An image may depend on device state — a linked appliance's picture.
+  // Static entries pass a URL object built at module load, so only strings
+  // carrying an interpolation are evaluated.
+  it("evaluates an image expression at render time", () => {
+    const ci = new StubClickImage() as any;
+    ci.conf = { image: "${device.linked_image()}", name: "linked" };
+    ci.evaluate = vi.fn(() => "/img/led.png");
+
+    ci._render("");
+
+    expect(ci.evaluate).toHaveBeenCalledWith("${device.linked_image()}");
+  });
+
+  it("leaves a plain image source untouched", () => {
+    const ci = new StubClickImage() as any;
+    ci.conf = { image: "/img/test.png", name: "test_img" };
+    ci.evaluate = vi.fn();
+
+    ci._render("");
+
+    expect(ci.evaluate).not.toHaveBeenCalled();
+  });
+
   it("renders img element for standard image source", () => {
     const ci = new StubClickImage() as any;
     ci.conf = { image: "/img/test.png", name: "test_img" };

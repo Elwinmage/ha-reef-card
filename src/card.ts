@@ -127,6 +127,17 @@ export class ReefCard extends LitElement {
    *                 - overload_quit: the dialog box to display when closing this, if null close close this box
    *                 - elt: the lit element caller
    */
+  /**
+   * Mark the card while it is showing a device reached through a link.
+   *
+   * The border is the only cue that what is on screen is not the card's own
+   * device: the picture changes completely, so without it a user who has
+   * forgotten they followed a link has no way to tell.
+   */
+  override updated(): void {
+    this.classList.toggle("following-link", this._nav_stack.length > 0);
+  }
+
   private _handle_display_dialog(event: CustomEvent): void {
     if (this._dialog_box) {
       this._dialog_box.display(event.detail);

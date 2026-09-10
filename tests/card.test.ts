@@ -951,6 +951,32 @@ describe("ReefCard — navigation robustness", () => {
   });
 });
 
+describe("ReefCard — link border", () => {
+  it("marks the card while it shows a device reached through a link", () => {
+    // The picture changes completely, so without the border a user who has
+    // forgotten they followed a link has no way to tell.
+    const card = makeNavCard();
+
+    card.updated();
+    expect(card.classList.contains("following-link")).toBe(false);
+
+    showDevice(card, "222");
+    card.updated();
+    expect(card.classList.contains("following-link")).toBe(true);
+  });
+
+  it("clears the mark on the way back", () => {
+    const card = makeNavCard();
+    showDevice(card, "222");
+    card.updated();
+
+    card._navigate_back();
+    card.updated();
+
+    expect(card.classList.contains("following-link")).toBe(false);
+  });
+});
+
 describe("ReefCard — navigation edge cases", () => {
   it("does not stack when the target resolves but cannot be built", () => {
     // The hwid maps to a config entry the device list no longer holds:

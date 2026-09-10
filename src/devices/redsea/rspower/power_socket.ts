@@ -96,4 +96,35 @@ export class PowerSocket extends RSDevice {
     this.state_on = _value;
     this.requestUpdate();
   }
+
+  // ── Linked appliance ──────────────────────────────────────────────────
+
+  /**
+   * Thumbnail of the appliance linked to this socket.
+   *
+   * The link is configured on the strip, so the lookup is delegated to it.
+   * @return the image URL, or an empty string when nothing is linked
+   */
+  linked_image(): string {
+    const parent: any = this.device;
+    return parent?.linked_device_image?.(this.socket_id) ?? "";
+  }
+
+  /**
+   * Hardware id of the appliance linked to this socket, for navigation.
+   * @return the hardware id, or an empty string when nothing is linked
+   */
+  linked_hwid(): string {
+    const parent: any = this.device;
+    return parent?.linked_device_hwid?.(this.socket_id) ?? "";
+  }
+
+  /**
+   * CSS class conveying the linked appliance's state.
+   * @return the class to apply, empty for the normal state
+   */
+  linked_class(): string {
+    const parent: any = this.device;
+    return parent?.linked_device_class?.(this.socket_id) ?? "";
+  }
 }

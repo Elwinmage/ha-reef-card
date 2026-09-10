@@ -77,8 +77,7 @@ export default class DeviceList {
   }
 
   /**
-   * Find the config entry of the device carrying a given hardware id.
-   *
+   * Find the config entry of the device carrying a given hardware id.   *
    * Devices name each other by hardware id on the wire, and the integration
    * stores that id as `model_id` (and as the second half of its `redsea`
    * identifier). Resolving through it keeps device-to-device links tied to
@@ -334,4 +333,175 @@ export function create_hour(
   div.appendChild(node);
 
   return div;
+}
+
+//----------------------------------------------------------------------------//
+//   LINKABLE DEVICES
+//----------------------------------------------------------------------------//
+
+/**
+ * Integrations whose devices may be linked to a ReefPower socket.
+ *
+ * A socket drives whatever is plugged into it, and that appliance is often
+ * already known to Home Assistant through one of these. Filtering keeps the
+ * picker to a handful of plausible choices instead of every device in the
+ * installation.
+ *
+ * `mqtt` is deliberately narrowed: the reefbeat Backup service publishes a
+ * stable `model_id` for exactly this purpose, and without that check the
+ * picker would list every MQTT device the user owns.
+ */
+export const LINKABLE_INTEGRATIONS: Record<string, string | null> = {
+  redsea: null,
+  aquamedic: null,
+  mqtt: "reefbeat-energy-backup",
+};
+
+/**
+ * Identifier fragments marking a sub-device with no plug of its own.
+ *
+ * A ReefDose has a single power lead whatever its head count, so its heads
+ * are not separate appliances and offering them would let a socket claim to
+ * drive something it does not.
+ *
+ * ReefRun pumps are deliberately absent from this list: the controller is a
+ * dual driver whose two pumps are powered independently, so each is its own
+ * appliance and may sit on its own socket.
+ */
+const SUB_DEVICE_MARKERS = ["_head_"];
+
+/**
+ * Models drawing their power through a sub-device rather than directly.
+ *
+ * The ReefRun controller is fed by its return or skimmer pump: it has no
+ * mains lead of its own, so only its pumps can be tied to a socket. Its
+ * pumps stay listed — this excludes the parent, not the family.
+ */
+const POWERED_THROUGH_SUB_DEVICE_MODELS = ["RSRUN"];
+
+/** Model carried by the cloud account and its per-aquarium entries. */
+const CLOUD_MODEL = "ReefBeat";
+
+/** Value standing for an appliance the card does not know about. */
+export const OTHER_DEVICE_VALUE = "other";
+
+/**
+ * Whether a registry entry is the one the caller asked to leave out.
+ *
+ * A socket cannot power the strip it belongs to, and the caller may know
+ * that strip by any of the handles the registry exposes. Matching all three
+ * means the exclusion holds whichever one it was given — and matching the
+ * config entry also covers a device's own sub-entries.
+ */
+function is_excluded(
+  dev: any,
+  device_id: string,
+  exclude: string | null,
+): boolean {
+  if (!exclude) {
+    return false;
+  }
+  return (
+    dev.id === exclude ||
+    device_id === exclude ||
+    dev.primary_config_entry === exclude
+  );
+}
+
+/**
+ * Append a channel number to labels that would otherwise be identical.
+ *
+ * The two pumps of a dual controller are registered under the controller's
+ * title, so renaming it leaves both entries reading the same with no way to
+ * tell which socket drives which pump. Names that already differ are left
+ * alone: numbering everything would add noise to the common case.
+ */
+function disambiguate(entries: { entry: MainDevice; key: string }[]): void {
+  const seen = new Map<string, number>();
+  for (const { entry } of entries) {
+    seen.set(entry.text, (seen.get(entry.text) ?? 0) + 1);
+  }
+
+  for (const { entry, key } of entries) {
+    // Every label was counted in the pass above, so the lookup always hits.
+    if (seen.get(entry.text)! < 2) {
+      continue;
+    }
+    const channel = /_(?:pump|head)_(\d+)/.exec(key);
+    if (channel) {
+      entry.text = `${entry.text} — ${channel[1]}`;
+    }
+  }
+}
+
+/**
+ * List the devices that may be linked to a socket, filtered by integration.
+ *
+ * @param hass: the hass object holding the device registry
+ * @param exclude_device_id: a device to leave out, normally the strip itself
+ * @return devices as {value: hass device id, text: display name}, sorted
+ */
+export function list_linkable_devices(
+  hass: HassConfig | null,
+  exclude_device_id: string | null = null,
+): MainDevice[] {
+  const found: MainDevice[] = [];
+  const labelled: { entry: MainDevice; key: string }[] = [];
+  if (!hass?.devices) {
+    return found;
+  }
+
+  for (const device_id in hass.devices) {
+    const dev: any = hass.devices[device_id];
+    if (!dev || is_excluded(dev, device_id, exclude_device_id)) {
+      continue;
+    }
+
+    const ident = dev.identifiers?.[0];
+    if (!Array.isArray(ident)) {
+      continue;
+    }
+    const domain = ident[0];
+    if (!(domain in LINKABLE_INTEGRATIONS)) {
+      continue;
+    }
+
+    // Some integrations expose one device per sub-unit; a socket powers the
+    // appliance as a whole, so those are not offered.
+    const key = String(ident[1] ?? "");
+    if (SUB_DEVICE_MARKERS.some((marker) => key.includes(marker))) {
+      continue;
+    }
+
+    const required_model = LINKABLE_INTEGRATIONS[domain];
+    if (required_model && dev.model_id !== required_model) {
+      continue;
+    }
+
+    // The cloud account and the per-aquarium groupings are registry entries
+    // with nothing to plug in: they all carry the ReefBeat model.
+    if (dev.model === CLOUD_MODEL) {
+      continue;
+    }
+
+    // The parent is skipped, not its sub-devices: a marker in the identifier
+    // is what tells the two apart.
+    if (
+      POWERED_THROUGH_SUB_DEVICE_MODELS.includes(String(dev.model ?? "")) &&
+      !key.includes("_")
+    ) {
+      continue;
+    }
+
+    const entry: MainDevice = {
+      value: dev.id ?? device_id,
+      text: dev.name_by_user || dev.name || String(device_id),
+    };
+    found.push(entry);
+    labelled.push({ entry, key });
+  }
+
+  disambiguate(labelled);
+  found.sort((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0));
+  return found;
 }
