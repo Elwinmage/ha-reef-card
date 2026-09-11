@@ -285,12 +285,47 @@ export class Dialog extends LitElement {
           return;
         }
       }
+      // Row options may depend on the device — an icon reflecting what is
+      // plugged into a socket, say. Only `entity` was ever rewritten, so
+      // anything else had to be a constant.
+      Dialog.evaluate_conf(clone, this.elt);
+
       content.setConfig(clone);
       content.hass = this._hass;
       content.device = this.elt.device;
     }
     this.elts.push(content);
     this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+  }
+
+  /**
+   * Resolve `${…}` expressions anywhere in a card configuration.
+   *
+   * Walks the cloned configuration in place, so nested row options are
+   * covered too. `entity` is skipped: it was already turned into an
+   * entity_id above, and re-evaluating it would only risk undoing that.
+   *
+   * @param node: the configuration fragment to walk
+   * @param elt: the element providing the evaluation context
+   */
+  static evaluate_conf(node: any, elt: any): void {
+    if (
+      !node ||
+      typeof node !== "object" ||
+      typeof elt?.evaluate !== "function"
+    ) {
+      return;
+    }
+    for (const key of Object.keys(node)) {
+      const value = node[key];
+      if (typeof value === "string") {
+        if (key !== "entity" && value.includes("${")) {
+          node[key] = elt.evaluate(value);
+        }
+      } else if (typeof value === "object") {
+        Dialog.evaluate_conf(value, elt);
+      }
+    }
   }
 
   /**

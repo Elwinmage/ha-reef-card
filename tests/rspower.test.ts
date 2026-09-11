@@ -1680,3 +1680,98 @@ describe("RSPower socket link — recording the role", () => {
     expect(sockets.socket_1).not.toHaveProperty("linked_role");
   });
 });
+
+// ─── Socket switch icon ─────────────────────────────────────────────────────
+
+describe("RSPower.linked_device_icon", () => {
+  it("shows a generic plug when no device is linked", () => {
+    const dev = makeLinkedPowerStrip();
+
+    expect(dev.linked_device_icon(1, true)).toBe("mdi:power-plug");
+    expect(dev.linked_device_icon(1, false)).toBe("mdi:power-plug-off");
+  });
+
+  it("shows the linked appliance's own drawing", () => {
+    const dev = makeLinkedPowerStrip({ id: "d-led", model: "RSDOSE4" });
+
+    expect(dev.linked_device_icon(1, true)).toBe("redsea:rsdose4-on");
+    expect(dev.linked_device_icon(1, false)).toBe("redsea:rsdose4-off");
+  });
+
+  it("tells the two dosers apart", () => {
+    const two = makeLinkedPowerStrip({ id: "d-led", model: "RSDOSE2" });
+
+    expect(two.linked_device_icon(1, true)).toBe("redsea:rsdose2-on");
+  });
+
+  it("draws a pump by its job, not by its controller", () => {
+    const pump = (role: string) =>
+      makeLinkedPowerStrip(
+        { id: "d-led", model: "RSRUN" },
+        {
+          "sensor.type": {
+            device_id: "d-led",
+            translation_key: "type",
+            entity_id: "sensor.type",
+          },
+        },
+        { "sensor.type": { state: role } },
+      );
+
+    expect(pump("return").linked_device_icon(1, true)).toBe("redsea:pump-on");
+    expect(pump("skimmer").linked_device_icon(1, true)).toBe(
+      "redsea:skimmer-on",
+    );
+  });
+
+  it("uses the gyre family for both wave models", () => {
+    const w25 = makeLinkedPowerStrip({ id: "d-led", model: "RSWAVE25" });
+    const w45 = makeLinkedPowerStrip({ id: "d-led", model: "RSWAVE45" });
+
+    expect(w25.linked_device_icon(1, true)).toBe("redsea:gyre-on");
+    expect(w45.linked_device_icon(1, false)).toBe("redsea:gyre-off");
+  });
+
+  it("builds both states from one fully qualified name", () => {
+    // The table holds the set as part of the name, so a model can point at
+    // the integration's own drawings or at any other set.
+    const dev = makeLinkedPowerStrip({ id: "d-led", model: "RSMAT" });
+
+    expect(dev.linked_device_icon(1, true)).toBe("redsea:rsmat-on");
+    expect(dev.linked_device_icon(1, false)).toBe("redsea:rsmat-off");
+  });
+
+  it("falls back to a plug for a model with no drawing", () => {
+    // No lights, ATO, strips or hubs in the icon set yet.
+    const dev = makeLinkedPowerStrip({ id: "d-led", model: "RSLED90" });
+
+    expect(dev.linked_device_icon(1, true)).toBe("mdi:power-plug");
+  });
+
+  it("falls back to a plug when the linked device left the registry", () => {
+    const dev = makeLinkedPowerStrip({ id: "d-led", model: "RSDOSE4" });
+    dev._hass.devices = {};
+
+    expect(dev.linked_device_icon(1, false)).toBe("mdi:power-plug-off");
+  });
+});
+
+describe("PowerSocket.linked_icon", () => {
+  it("asks the strip about its own socket and current state", () => {
+    const socket = new StubPowerSocket() as any;
+    socket.socket_id = 2;
+    socket.device = { linked_device_icon: vi.fn(() => "redsea:rsmat-on") };
+    socket.is_on = () => true;
+
+    expect(socket.linked_icon()).toBe("redsea:rsmat-on");
+    expect(socket.device.linked_device_icon).toHaveBeenCalledWith(2, true);
+  });
+
+  it("falls back to a plug without a parent strip", () => {
+    const socket = new StubPowerSocket() as any;
+    socket.device = null;
+    socket.is_on = () => false;
+
+    expect(socket.linked_icon()).toBe("mdi:power-plug-off");
+  });
+});

@@ -33,7 +33,14 @@ export const dialogs_rspower = {
           entities: [
             { entity: "socket_name", name: { type: "entity" } },
             { type: "divider" },
-            { entity: "socket_on_off", name: { type: "entity" } },
+            {
+              entity: "socket_on_off",
+              name: { type: "entity" },
+              // Shows what is plugged in rather than a generic plug. Fixed
+              // when the dialog opens: the row is built once, so a socket
+              // switched while it is open keeps the icon it opened with.
+              icon: "${device.linked_icon()}",
+            },
             { entity: "select.socket_mode", name: { type: "entity" } },
             { entity: "socket_state", name: { type: "entity" } },
             { entity: "socket_consumption", name: { type: "entity" } },

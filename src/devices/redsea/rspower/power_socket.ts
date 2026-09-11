@@ -120,6 +120,18 @@ export class PowerSocket extends RSDevice {
   }
 
   /**
+   * Icon for this socket's switch, reflecting what is plugged into it.
+   * @return the icon name, generic when nothing recognisable is linked
+   */
+  linked_icon(): string {
+    const parent: any = this.device;
+    return (
+      parent?.linked_device_icon?.(this.socket_id, this.is_on()) ??
+      "mdi:power-plug-off"
+    );
+  }
+
+  /**
    * CSS class conveying the linked appliance's state.
    * @return the class to apply, empty for the normal state
    */

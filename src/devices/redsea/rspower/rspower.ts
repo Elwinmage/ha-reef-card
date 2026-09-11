@@ -16,6 +16,35 @@ import {
 import type { SocketEntity } from "../../../types/index";
 
 /**
+ * Socket switch icons, keyed by hardware model or by pump role.
+ *
+ * Values are the icon name without its state suffix; `-on` and `-off` are
+ * appended. The set is part of the name, so a model can be pointed at any
+ * of them — the integration's own drawings, plain Material icons, or a set
+ * shipped by another integration.
+ *
+ * Adding a model is one line, once both variants exist: a name missing one
+ * of them shows a blank icon, which reads worse than the plug it replaced.
+ *
+ * Models absent here keep the generic plug icon.
+ */
+const SUB_DEVICE_ICONS: Record<string, string> = {
+  RSDOSE2: "redsea:rsdose2",
+  RSDOSE4: "redsea:rsdose4",
+  RSMAT: "redsea:rsmat",
+  RSWAVE25: "redsea:gyre",
+  RSWAVE45: "redsea:gyre",
+  return: "redsea:pump",
+  skimmer: "redsea:skimmer",
+};
+
+/** Plug icons shown for anything with no drawing of its own. */
+const DEFAULT_SOCKET_ICONS = {
+  on: "mdi:power-plug",
+  off: "mdi:power-plug-off",
+};
+
+/**
  * Socket thumbnails, keyed by hardware model.
  *
  * Each URL is written out in full rather than built from the model name: the
@@ -568,6 +597,32 @@ export class RSPower extends RSDevice {
     return Array.isArray(ident) && ident[0] === "redsea"
       ? String(ident[1])
       : "";
+  }
+
+  /**
+   * Icon for a socket's switch, reflecting what is plugged into it.
+   *
+   * A socket showing a generic plug tells the user nothing they did not
+   * already know. Once a device is linked, its own drawing says at a glance
+   * which appliance the switch controls.
+   * @param socket: the 1-based socket number
+   * @param on: whether the socket is currently powered
+   * @return the full icon name, generic when the device has no drawing
+   */
+  linked_device_icon(socket: number, on: boolean): string {
+    const fallback = on ? DEFAULT_SOCKET_ICONS.on : DEFAULT_SOCKET_ICONS.off;
+    const device_id = this.linked_device_id(socket);
+    if (!device_id) {
+      return fallback;
+    }
+    const model = String(
+      (this._hass?.devices?.[device_id] as any)?.model ?? "",
+    );
+    // As for the thumbnail, a pump is described by its job rather than by
+    // the controller's model, which both its channels share.
+    const icon =
+      SUB_DEVICE_ICONS[this._pump_role(socket)] ?? SUB_DEVICE_ICONS[model];
+    return icon ? `${icon}-${on ? "on" : "off"}` : fallback;
   }
 
   /**

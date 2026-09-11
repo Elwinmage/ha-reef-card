@@ -1035,3 +1035,77 @@ describe("Dialog._render_content() — unresolvable entities", () => {
     warn.mockRestore();
   });
 });
+
+// ─── Dynamic card options ───────────────────────────────────────────────────
+
+describe("Dialog.evaluate_conf()", () => {
+  /** An element resolving any expression to a fixed marker. */
+  function elt(resolved = "redsea:rsdose4-on"): any {
+    return { evaluate: vi.fn(() => resolved) };
+  }
+
+  it("resolves an expression in a row option", () => {
+    // Row options may depend on the device — an icon showing what is
+    // plugged into a socket, say.
+    const conf: any = { entities: [{ icon: "${device.linked_icon()}" }] };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].icon).toBe("redsea:rsdose4-on");
+    expect(e.evaluate).toHaveBeenCalledWith("${device.linked_icon()}");
+  });
+
+  it("leaves constants alone", () => {
+    const conf: any = {
+      entities: [{ icon: "mdi:power-plug", name: "Socket" }],
+    };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].icon).toBe("mdi:power-plug");
+    expect(e.evaluate).not.toHaveBeenCalled();
+  });
+
+  it("never touches entity, which was already resolved", () => {
+    // Re-evaluating it would undo the entity_id resolved just before.
+    const conf: any = { entities: [{ entity: "${something}" }] };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].entity).toBe("${something}");
+  });
+
+  it("reaches options nested several levels down", () => {
+    const conf: any = { a: { b: { c: { icon: "${x}" } } } };
+
+    Dialog.evaluate_conf(conf, elt("done"));
+
+    expect(conf.a.b.c.icon).toBe("done");
+  });
+
+  it("leaves non-string values as they are", () => {
+    const conf: any = { entities: [{ icon: "${x}", show: true, count: 3 }] };
+
+    Dialog.evaluate_conf(conf, elt("done"));
+
+    expect(conf.entities[0].show).toBe(true);
+    expect(conf.entities[0].count).toBe(3);
+  });
+
+  it("does nothing without a configuration to walk", () => {
+    expect(() => Dialog.evaluate_conf(null, elt())).not.toThrow();
+    expect(() => Dialog.evaluate_conf("text" as any, elt())).not.toThrow();
+  });
+
+  it("does nothing without an element to evaluate with", () => {
+    const conf: any = { icon: "${x}" };
+
+    Dialog.evaluate_conf(conf, null);
+    Dialog.evaluate_conf(conf, {});
+
+    expect(conf.icon).toBe("${x}");
+  });
+});
