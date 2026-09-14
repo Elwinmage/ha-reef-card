@@ -1775,3 +1775,209 @@ describe("PowerSocket.linked_icon", () => {
     expect(socket.linked_icon()).toBe("mdi:power-plug-off");
   });
 });
+
+// ─── PowerSocket._pipe_path ─────────────────────────────────────────────────
+describe("PowerSocket._pipe_path", () => {
+  function tmplText(result: any): string {
+    if (result && result.strings) return result.strings.join("|");
+    return String(result);
+  }
+
+  it("renders nothing when no appliance is linked", () => {
+    const ps = new StubPowerSocket() as any;
+    ps.config = { color: "1,2,3" };
+    ps.device = { linked_device_image: () => "" };
+    expect(tmplText(ps._pipe_path())).not.toContain("svg");
+  });
+
+  it("draws the pipe (on, 6 sockets, even id) in the socket colour", () => {
+    const ps = new StubPowerSocket() as any;
+    ps.config = { color: "10,20,30" };
+    ps.state_on = true;
+    ps.socket_id = 2; // even → long pipe
+    ps.device = {
+      linked_device_image: () => "http://img",
+      config: { sockets_nb: 6 },
+    };
+    const out = ps._pipe_path();
+    expect(tmplText(out)).toContain("svg");
+    // the on colour is the configured one
+    expect(JSON.stringify(out.values)).toContain("10,20,30");
+  });
+
+  it("draws the pipe off (8 sockets, odd id) in the OFF colour", () => {
+    const ps = new StubPowerSocket() as any;
+    ps.config = { color: "10,20,30" };
+    ps.state_on = false;
+    ps.socket_id = 1; // odd → short pipe
+    ps.device = {
+      linked_device_image: () => "http://img",
+      config: { sockets_nb: 8 },
+    };
+    const out = ps._pipe_path();
+    expect(tmplText(out)).toContain("svg");
+    // off colour differs from the configured one
+    expect(JSON.stringify(out.values)).not.toContain("10,20,30");
+  });
+});
+
+// ─── RSPower socket colour editor ───────────────────────────────────────────
+describe("RSPower socket colour editor", () => {
+  function markup(result: any): string {
+    if (result === null || result === undefined || result === false) return "";
+    if (Array.isArray(result)) return result.map(markup).join("");
+    if (typeof result === "object" && "strings" in result) {
+      const strings = result.strings as string[];
+      const values = result.values as any[];
+      return strings
+        .map((chunk, i) => chunk + (i < values.length ? markup(values[i]) : ""))
+        .join("");
+    }
+    return String(result);
+  }
+
+  it("renders one colour picker per socket", () => {
+    const dev = makeEditorPower(3);
+    dev.config.sockets = { common: { color: "0,0,0" } };
+    const out = markup(dev._editor_socket_colors());
+    expect(out).toContain("socket_1-color");
+    expect(out).toContain("socket_2-color");
+    expect(out).toContain("socket_3-color");
+    expect(out).not.toContain("socket_4-color");
+  });
+
+  it("labels a socket with its own name when it has one", () => {
+    const dev = makeEditorPower(1);
+    dev.config.sockets = { common: { color: "0,0,0" } };
+    dev._sockets = [null, { entities: { name: { entity_id: "sensor.s1" } } }];
+    dev._hass.states["sensor.s1"] = { state: "Heater" };
+    expect(markup(dev._editor_socket_color(1))).toContain("Heater");
+  });
+
+  it("uses the per-socket colour over the common one", () => {
+    const dev = makeEditorPower(1);
+    dev.config.sockets = {
+      common: { color: "0,0,0" },
+      socket_1: { color: "255,255,255" },
+    };
+    // rgbToHex('255,255,255') → #ffffff (case-insensitive)
+    expect(markup(dev._editor_socket_color(1)).toLowerCase()).toContain(
+      "#ffffff",
+    );
+  });
+});
+
+describe("RSPower socket colour persistence", () => {
+  function changeColor(dev: any, socket: number, value: string): any {
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+    dev._handle_socket_color_change(socket, { target: { value } } as any);
+    return seen[0]?.config;
+  }
+
+  it("stores the chosen colour as rgb under its socket", () => {
+    const dev = makeEditorPower();
+    dev.config.sockets = { common: { color: "0,0,0" } };
+    const config = changeColor(dev, 2, "#ff0000");
+    expect(
+      config.conf.RSPOWER6.devices["Power strip"].sockets.socket_2.color,
+    ).toBe("255,0,0");
+  });
+
+  it("merges into an existing socket config", () => {
+    const dev = makeEditorPower(
+      2,
+      {},
+      {
+        conf: {
+          RSPOWER6: {
+            devices: {
+              "Power strip": { sockets: { socket_1: { linked_device: "x" } } },
+            },
+          },
+        },
+      },
+    );
+    const config = changeColor(dev, 1, "#00ff00");
+    const s1 = config.conf.RSPOWER6.devices["Power strip"].sockets.socket_1;
+    expect(s1.color).toBe("0,255,0");
+    expect(s1.linked_device).toBe("x");
+  });
+
+  it("ignores an invalid colour (no event)", () => {
+    const dev = makeEditorPower();
+    expect(changeColor(dev, 1, "not-a-color")).toBeUndefined();
+  });
+
+  it("does nothing without a device name", () => {
+    const dev = makeEditorPower();
+    dev.device = { name: undefined, elements: [] };
+    expect(changeColor(dev, 1, "#ffffff")).toBeUndefined();
+  });
+});
+
+describe("RSPower socket colour picker wiring", () => {
+  /** Collect every function embedded in a lit template tree. */
+  function handlers(result: any, found: any[] = []): any[] {
+    if (typeof result === "function") found.push(result);
+    else if (Array.isArray(result)) result.forEach((r) => handlers(r, found));
+    else if (result && typeof result === "object" && "values" in result) {
+      (result.values as any[]).forEach((v) => handlers(v, found));
+    }
+    return found;
+  }
+
+  it("the rendered picker persists the colour when it changes", () => {
+    // Exercises the inline @change/@input handlers as the DOM would.
+    const dev = makeEditorPower(1);
+    dev.config.sockets = { common: { color: "0,0,0" } };
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+
+    for (const h of handlers(dev._editor_socket_color(1))) {
+      h({ target: { value: "#0081c5" } });
+    }
+
+    expect(
+      seen[0].config.conf.RSPOWER6.devices["Power strip"].sockets.socket_1
+        .color,
+    ).toBe("0,129,197");
+  });
+});
+
+describe("RSPower socket colour — defensive paths", () => {
+  function changeColor(dev: any, socket: number, value: string): any {
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+    dev._handle_socket_color_change(socket, { target: { value } } as any);
+    return seen[0]?.config;
+  }
+
+  it("renders no colour picker when the socket count is missing", () => {
+    const dev = makeEditorPower(1);
+    delete dev.config.sockets_nb;
+    const out = JSON.stringify(dev._editor_socket_colors());
+    expect(out).not.toContain("socket_1-color");
+  });
+
+  it("does nothing when there is no device at all", () => {
+    const dev = makeEditorPower();
+    dev.device = null;
+    expect(changeColor(dev, 1, "#ffffff")).toBeUndefined();
+  });
+});
+
+describe("RSPower socket colour — no prior user_config", () => {
+  it("still persists the colour when user_config is undefined", () => {
+    const dev = makeEditorPower();
+    dev.config.sockets = { common: { color: "0,0,0" } };
+    dev.user_config = undefined;
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+    dev._handle_socket_color_change(1, { target: { value: "#ffffff" } } as any);
+    expect(
+      seen[0].config.conf.RSPOWER6.devices["Power strip"].sockets.socket_1
+        .color,
+    ).toBe("255,255,255");
+  });
+});

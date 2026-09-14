@@ -3,6 +3,7 @@ import { RSDevice } from "../../device";
 
 import styles from "./power_socket.styles";
 import style_common from "../../../utils/common.styles";
+import { OFF_COLOR } from "../../../utils/constants";
 
 /**
  * LitElement rendering a single RSPower AC socket.
@@ -36,6 +37,31 @@ export class PowerSocket extends RSDevice {
     return this._render();
   }
 
+  _pipe_path() {
+    if (!this.linked_image()) {
+      return html``;
+    }
+    let color = this.config.color;
+    if (!this.state_on) {
+      color = OFF_COLOR;
+    }
+    const parent: any = this.device;
+    const start_pos = parent?.config?.sockets_nb === 6 ? 105 : 129;
+    const length_scale = parent?.config?.sockets_nb === 6 ? 1 : 1.28;
+    const length =
+      this.socket_id % 2 !== 0 ? 10 * length_scale : 127 * length_scale;
+    return html`
+      <svg viewBox="0 0 86 350">
+        <path
+          d="M 46 ${start_pos} v ${length}"
+          stroke="rgba(${color},0.5)"
+          stroke-width="8"
+          fill="none"
+        ></path>
+      </svg>
+    `;
+  }
+
   _render(_style = null, _substyle = null) {
     this.to_render = false;
 
@@ -49,6 +75,9 @@ export class PowerSocket extends RSDevice {
     return html`
       <div class="socket_container">
         ${this._render_elements(this.state_on)}
+        <div class="pipe" style="${this.get_style(this.config.pipe)}">
+          ${this._pipe_path()}
+        </div>
       </div>
     `;
   }

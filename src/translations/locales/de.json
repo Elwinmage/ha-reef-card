@@ -64,6 +64,7 @@
   "head": "Kopf",
   "head_configuration": "Kopfkonfiguration",
   "heads_colors": "Kopffarben",
+  "sockets_colors": "Steckdosenfarben",
   "heads_shortcuts": "Manuelle Schnelldosen",
   "hide_add_pump": "Platzhalter zum Hinzufügen ausblenden",
   "hour": "Stunde",

@@ -376,6 +376,10 @@ export const config = {
             // neighbours do not overlap. Odd sockets take the near row; the
             // even ones override this to the far row.
             top: "110%",
+            "border-style": "solid",
+            "border-radius": "30%",
+            "border-color": "$DEVICE-COLOR-ALPHA$",
+            "background-color": "$DEVICE-COLOR-ALPHA$",
           },
         },
         socket_mode_icon: {

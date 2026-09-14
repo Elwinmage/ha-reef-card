@@ -11,6 +11,8 @@ import { merge } from "../../../utils/merge";
 import {
   list_linkable_devices,
   OTHER_DEVICE_VALUE,
+  rgbToHex,
+  hexToRgb,
 } from "../../../utils/common";
 
 import type { SocketEntity } from "../../../types/index";
@@ -386,8 +388,110 @@ export class RSPower extends RSDevice {
     this._populate_entities_with_sockets();
     this.update_config();
     return html` <form>
-      ${this._editor_common()}${this._editor_socket_links()}
+      ${this._editor_common()}${this._editor_socket_colors()}${this._editor_socket_links()}
     </form>`;
+  }
+
+  // ── Socket colours ────────────────────────────────────────────────────
+
+  /**
+   * Per-socket colour pickers, mirroring RSDose's per-head tube colours.
+   * The chosen colour drives the socket's pipe (see PowerSocket._pipe_path).
+   */
+  private _editor_socket_colors(): TemplateResult {
+    const count = Number(this.config?.sockets_nb ?? 0);
+    const rows: TemplateResult[] = [];
+    for (let socket = 1; socket <= count; socket++) {
+      rows.push(this._editor_socket_color(socket));
+    }
+    return html`<table>
+      <tr>
+        <th colspan="1">${i18n._("sockets_colors")}</th>
+      </tr>
+      ${rows}
+      <datalist id="RedSeaColors">
+        <option>#8c4394</option>
+        <option>#0081c5</option>
+        <option>#008264</option>
+        <option>#64a04b</option>
+        <option>#582900</option>
+        <option>#f04e99</option>
+        <option>#f14b4c</option>
+        <option>#f08f37</option>
+        <option>#d9d326</option>
+        <option>#FFFFFF</option>
+      </datalist>
+    </table>`;
+  }
+
+  /**
+   * One colour picker row for a socket.
+   * @param socket_id: the 1-based socket number
+   */
+  private _editor_socket_color(socket_id: number): TemplateResult {
+    const socket_conf = merge(
+      this.config.sockets.common,
+      this.config.sockets["socket_" + socket_id] ?? {},
+    );
+    const color = rgbToHex("rgb(" + socket_conf.color + ");");
+    const name_entity = this._sockets[socket_id]?.entities?.name;
+    const socket_name =
+      name_entity && this._hass?.states[name_entity.entity_id]?.state;
+    return html`<tr>
+      <td class="config_color">
+        <input
+          type="color"
+          id="socket_${socket_id}-color"
+          value="${color}"
+          @change="${(e: Event) =>
+            this._handle_socket_color_change(socket_id, e)}"
+          @input="${(e: Event) =>
+            this._handle_socket_color_change(socket_id, e)}"
+          list="RedSeaColors"
+        />
+        <label class="tab-label"
+          >${socket_id}${socket_name ? " — " + socket_name : ""}</label
+        >
+      </td>
+    </tr>`;
+  }
+
+  /**
+   * Persist a socket's colour under conf[model].devices[name].sockets.socket_N.
+   * @param socket: the 1-based socket number
+   * @param event: the colour input change event
+   */
+  private _handle_socket_color_change(socket: number, event: Event): void {
+    const hex = (event.target as HTMLInputElement).value;
+    const rgb = hexToRgb(hex);
+    if (rgb === null) {
+      return;
+    }
+    const model = this.config_model();
+    const device_name = this.device?.name;
+    if (!model || !device_name) {
+      return;
+    }
+    let new_config = JSON.parse(JSON.stringify(this.user_config ?? {}));
+    new_config = merge(new_config, {
+      conf: {
+        [model]: {
+          devices: {
+            [device_name]: { sockets: { ["socket_" + socket]: {} } },
+          },
+        },
+      },
+    });
+    new_config.conf[model].devices[device_name].sockets[
+      "socket_" + socket
+    ].color = rgb;
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: new_config },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   // ── Pending schedules ─────────────────────────────────────────────────

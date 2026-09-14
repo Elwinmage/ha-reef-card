@@ -64,6 +64,7 @@
   "head": "Cabezal",
   "head_configuration": "Configuración del cabezal",
   "heads_colors": "Colores de cabezales",
+  "sockets_colors": "Colores de las tomas",
   "heads_shortcuts": "Dosis manuales rápidas",
   "hide_add_pump": "Ocultar el espacio para añadir una bomba",
   "hour": "Hora",
