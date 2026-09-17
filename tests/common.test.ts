@@ -9,8 +9,10 @@ import {
   create_hour,
   create_select,
   default as DeviceList,
+  domain_of,
   hexToRgb,
   list_linkable_devices,
+  resolve_device_model,
   rgbToHex,
   stringToTime,
   toTime,
@@ -528,6 +530,72 @@ describe("DeviceList (init_devices, get_by_name, device_compare)", () => {
 
     expect(list.devices["entry_1"].elements).toHaveLength(2);
   });
+
+  function makeAquamedic(
+    id: string,
+    hass_device_id: string,
+    name: string,
+    entry: string,
+    model = "DC Runner",
+  ): any {
+    return {
+      id: hass_device_id,
+      identifiers: [["aquamedic", id]],
+      name,
+      model,
+      primary_config_entry: entry,
+    };
+  }
+
+  it("keeps independent Aqua Medic pumps separate even under one config entry", async () => {
+    // ha-aquamedic-component can register several devices (one per pump)
+    // under a single config entry, unlike Red Sea's per-appliance entries:
+    // they must not be merged into a single selectable device.
+    const hass = makeHass({
+      d1: makeAquamedic(
+        "p1",
+        "dev-p1",
+        "SmartDrift",
+        "shared_entry",
+        "SmartDrift",
+      ),
+      d2: makeAquamedic("p2", "dev-p2", "Skimmer #1", "shared_entry"),
+    });
+    const list = await getDeviceList(hass);
+
+    expect(list.main_devices).toHaveLength(2);
+    expect(list.main_devices.map((d: any) => d.text)).toEqual(
+      expect.arrayContaining(["SmartDrift", "Skimmer #1"]),
+    );
+    // Each pump keeps its own single-element entry — no merging — and is
+    // keyed by its own hass device id rather than the shared config entry.
+    expect(list.devices["dev-p1"].elements).toHaveLength(1);
+    expect(list.devices["dev-p1"].elements[0].name).toBe("SmartDrift");
+    expect(list.devices["dev-p2"].elements).toHaveLength(1);
+    expect(list.devices["dev-p2"].elements[0].name).toBe("Skimmer #1");
+  });
+
+  it("sets DeviceInfo.key to the primary config entry for a grouped domain", async () => {
+    const hass = makeHass({ d1: makeRedsea("ABC", "Skimmer", "entry_1") });
+    const list = await getDeviceList(hass);
+    expect(list.devices["entry_1"].key).toBe("entry_1");
+    expect(list.main_devices[0].value).toBe("entry_1");
+  });
+
+  it("sets DeviceInfo.key to the device id for a non-grouped domain", async () => {
+    const hass = makeHass({
+      d1: makeAquamedic(
+        "p1",
+        "dev-p1",
+        "SmartDrift",
+        "shared_entry",
+        "SmartDrift",
+      ),
+    });
+    const list = await getDeviceList(hass);
+    expect(list.devices["dev-p1"].key).toBe("dev-p1");
+    expect(list.main_devices[0].value).toBe("dev-p1");
+  });
 });
 describe("toTime() edge cases", () => {
   it("handles exactly midnight (0)", () => {
@@ -1007,5 +1075,119 @@ describe("list_linkable_devices — excluding the strip itself", () => {
   it("keeps every device when nothing is excluded", () => {
     expect(list_linkable_devices(reg([strip, other]))).toHaveLength(2);
     expect(list_linkable_devices(reg([strip, other]), null)).toHaveLength(2);
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   domain_of
+//----------------------------------------------------------------------------//
+
+describe("domain_of", () => {
+  it("reads the domain of the first identifier tuple", () => {
+    expect(domain_of([["redsea", "abc"]])).toBe("redsea");
+    expect(domain_of([["aquamedic", "def"]])).toBe("aquamedic");
+  });
+
+  it("returns undefined when there is no identifier tuple", () => {
+    expect(domain_of([])).toBeUndefined();
+    expect(domain_of(undefined)).toBeUndefined();
+  });
+
+  it("returns undefined when the first identifier is not a tuple", () => {
+    expect(domain_of(["not-a-tuple"])).toBeUndefined();
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   resolve_device_model — pump_role driven DC Runner / DC Skimmer switch
+//----------------------------------------------------------------------------//
+
+describe("resolve_device_model", () => {
+  function hassWithRole(role: string | undefined): any {
+    if (role === undefined) {
+      return { states: {}, devices: {}, callService: vi.fn() };
+    }
+    return {
+      states: { "select.pump_pump_role": { state: role } },
+      entities: {
+        "select.pump_pump_role": {
+          device_id: "dev1",
+          translation_key: "pump_role",
+        },
+      },
+      devices: {},
+      callService: vi.fn(),
+    };
+  }
+
+  function device(): any {
+    return { name: "Pump", elements: [{ id: "dev1" }] };
+  }
+
+  it("resolves to DC Skimmer when the role entity says skimmer", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("skimmer"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Skimmer");
+  });
+
+  it("resolves to DC Runner when the role entity says return", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("return"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when the role is not (yet) mapped", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("unknown"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when the domain declares no override", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("skimmer"),
+        device(),
+        "redsea",
+        "RSDoser",
+      ),
+    ).toBe("RSDoser");
+  });
+
+  it("keeps the raw model when hass carries no entities", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole(undefined),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when no entity matches the device", () => {
+    const hass = hassWithRole("skimmer");
+    expect(
+      resolve_device_model(
+        hass,
+        { name: "Pump", elements: [{ id: "other-device" }] },
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
   });
 });

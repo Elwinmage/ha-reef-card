@@ -144,6 +144,7 @@
   "schedule_advance": "Avanzamento programmato",
   "schedule_saved": "Programmazione salvata",
   "select_device": "Seleziona un dispositivo",
+  "select_pump_role": "Seleziona il ruolo della pompa",
   "set_calibration": "Imposta valore di calibrazione",
   "set_container_volume": "Volume del contenitore",
   "set_manual_head_volume": "Volume manuale",

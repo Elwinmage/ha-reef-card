@@ -16,6 +16,8 @@ import i18n from "../translations/myi18n";
 
 import { MyElement } from "../base/element";
 import { SafeEval } from "../utils/SafeEval";
+import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "../utils/constants";
+import { ambiguous_model_of, domain_of, AmbiguousModel } from "../utils/common";
 
 import { dialogs_device } from "./device.dialogs";
 
@@ -70,6 +72,19 @@ export class RSDevice extends LitElement {
 
   protected state: boolean = false;
 
+  // Cache for _render_delegate(): the concrete device this instance defers
+  // to once an ambiguous model's role resolves to something other than its
+  // own (ex: an AMDCRunner instance whose pump_role turns out to be
+  // "skimmer" delegates to an AMDCSkimmer). Rebuilt only when the resolved
+  // model changes, so the delegate's own state survives re-renders.
+  private _delegate: RSDevice | null = null;
+  private _delegate_model?: string;
+
+  // Last role state seen for an ambiguous model, so _setting_hass() can
+  // tell a role change apart from any other hass update and schedule a
+  // re-render — nothing else watches that entity's state.
+  private _last_ambiguous_role?: string;
+
   // Animations too: a device can put a class such as `blink-alert` on its own
   // background picture, and those keyframes live in MyElement's stylesheet,
   // which does not reach the device's shadow root.
@@ -80,16 +95,41 @@ export class RSDevice extends LitElement {
   /**
    * Custom element tag of a device model.
    *
-   * The model Home Assistant reports can carry a "+" (RSATO+), which is not a
-   * valid custom element name, so the tag drops it. The card and its editor
-   * used to build this string separately: the editor kept the "+" and looked
-   * for redsea-rsato+, which nothing registers, so the ReefATO+ editor stayed
-   * empty.
+   * The model Home Assistant reports can carry a "+" (RSATO+) or spaces
+   * ("DC Runner"), neither of which is valid in a custom element name, so
+   * the tag drops them. The card and its editor used to build this string
+   * separately: the editor kept the "+" and looked for redsea-rsato+, which
+   * nothing registers, so the ReefATO+ editor stayed empty.
+   *
+   * The prefix comes from the device's integration domain via
+   * KNOWN_DEVICE_DOMAINS rather than being hardcoded to "redsea", so every
+   * registered manufacturer (Aqua Medic, ...) resolves to its own tag
+   * without this method knowing their names. An unregistered domain falls
+   * back to using the domain itself as the prefix.
+   *
+   * `model` became a required second parameter when the domain prefix did
+   * (a caller still on the single-argument signature passes its model as
+   * `domain` and leaves `model` undefined, which used to throw deep inside
+   * this method): guard against that here, once, rather than at every call
+   * site, and fail into a tag nothing registers — the same safe "device not
+   * found" path create_device() already takes for a genuinely unknown model
+   * — instead of crashing the card.
+   * @param domain: the integration domain reported by hass (ex: "redsea", "aquamedic")
    * @param model: the model as reported by the integration
    * @return the registered tag name
    */
-  static tag_for_model(model: string): string {
-    return "redsea-" + model.toLowerCase().replaceAll("+", "");
+  static tag_for_model(domain: string, model: string): string {
+    if (!domain || !model) {
+      console.error(
+        "RSDevice.tag_for_model() called without a domain and/or a model:",
+        { domain, model },
+      );
+      return `${domain ?? "unknown"}-unknown`;
+    }
+    const prefix = KNOWN_DEVICE_DOMAINS[domain]?.tag_prefix ?? domain;
+    return (
+      prefix + "-" + model.toLowerCase().replaceAll("+", "").replaceAll(" ", "")
+    );
   }
 
   /**
@@ -150,6 +190,38 @@ export class RSDevice extends LitElement {
     }
     this.update_config();
     this.to_render = false;
+
+    // Some models are ambiguous for their domain (see KNOWN_DEVICE_DOMAINS
+    // model_overrides): until the user has set the role entity, show a
+    // picker instead of this device's own (possibly unimplemented) view;
+    // once it resolves to a different concrete device than this very
+    // instance, delegate rendering to that device instead.
+    const ambiguous = this._ambiguous_model();
+    if (ambiguous) {
+      const resolved_model = ambiguous.role
+        ? (ambiguous.override.role_to_model[ambiguous.role] ??
+          ambiguous.raw_model)
+        : ambiguous.raw_model;
+
+      if (resolved_model !== this.config?.model) {
+        const delegated = this._render_delegate(
+          ambiguous.domain,
+          resolved_model,
+        );
+        if (delegated !== null) {
+          return delegated;
+        }
+      } else if (
+        !ambiguous.role ||
+        !ambiguous.override.role_to_model[ambiguous.role]
+      ) {
+        return this._render_role_picker(
+          ambiguous.override,
+          ambiguous.entity_id,
+        );
+      }
+    }
+
     console.debug("Render ", this.config.model, this.device?.name);
 
     // get style and substyle
@@ -224,6 +296,116 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Looks up whether this device's own model is ambiguous for its domain.
+   * Thin wrapper around utils/common's ambiguous_model_of(), reading the
+   * domain/model off this instance's own device and hass.
+   * @return undefined when the model is not ambiguous for its domain
+   */
+  private _ambiguous_model(): AmbiguousModel | undefined {
+    const el = this.device?.elements?.[0];
+    if (!el?.model) return undefined;
+    return ambiguous_model_of(
+      this._hass ?? undefined,
+      this.device as DeviceInfo,
+      domain_of(el.identifiers),
+      el.model,
+    );
+  }
+
+  /**
+   * Render the concrete device an ambiguous model resolved to, when it is
+   * not this very instance. The delegate is cached and only rebuilt when
+   * the resolved model changes, so its own internal state (and its own
+   * ambiguous-model handling, should the role change again) survives
+   * re-renders of this instance.
+   * @param domain: the integration domain (ex: "aquamedic")
+   * @param model: the resolved, concrete model to delegate to
+   * @return the delegate's template, or null when no custom element is
+   *         registered for that model (falls back to this device's own view)
+   */
+  private _render_delegate(
+    domain: string,
+    model: string,
+  ): TemplateResult | null {
+    if (!this._delegate || this._delegate_model !== model) {
+      this._delegate = RSDevice.create_device(
+        RSDevice.tag_for_model(domain, model),
+        this._hass as HassConfig,
+        this.user_config,
+        this.device as DeviceInfo,
+      );
+      this._delegate_model = model;
+    }
+    if (!this._delegate) {
+      return null;
+    }
+    this._delegate.hass = this._hass as HassConfig;
+    return html`${this._delegate}`;
+  }
+
+  /**
+   * Render a picker for an ambiguous model's role, in place of this
+   * device's own view, when the user has not set it (yet). Selecting an
+   * option calls the role entity's select service directly; the resulting
+   * hass update is picked up by _setting_hass(), which schedules the
+   * re-render that switches to the resolved device.
+   * @param override: the domain's ModelOverride for this raw model
+   * @param entity_id: the role entity to write to, when one was found
+   * @return the picker's template
+   */
+  private _render_role_picker(
+    override: ModelOverride,
+    entity_id?: string,
+  ): TemplateResult {
+    const roles = Object.keys(override.role_to_model);
+    return html`
+      <div class="device_bg">
+        <div
+          id="banner"
+          style="background-color:rgba(135,135,135,0.7);position:absolute;top:0%;width:100%;height:100%;text-align:center;"
+        >
+          <div
+            style="background-color:rgba(255,255,255,0.7);border-radius:30px;padding:10px 0"
+          >
+            <h2>${i18n._("select_pump_role")}</h2>
+            <select
+              id="pump_role_select"
+              @change="${(e: Event) =>
+                this._select_pump_role(
+                  entity_id,
+                  (e.target as HTMLSelectElement).value,
+                )}"
+            >
+              <option value="" selected disabled></option>
+              ${roles.map(
+                (role) =>
+                  html`<option value="${role}">
+                    ${i18n._("pump_type_" + role)}
+                  </option>`,
+              )}
+            </select>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Persist the role picked from _render_role_picker() by calling the role
+   * entity's select service directly — this device has no other way to
+   * reach it, since it carries no `set_config_value()`-style user config.
+   * @param entity_id: the role entity to write to
+   * @param role: the option picked
+   */
+  private _select_pump_role(entity_id: string | undefined, role: string): void {
+    if (!entity_id || !role || !this._hass) return;
+    this._hass.callService("select", "select_option", {
+      entity_id,
+      option: role,
+    });
+  }
+
+  /**
    * Check if new hass states imply a re-render and propagate for sub elements.
    * @param obj: the new hass states
    */
@@ -240,6 +422,16 @@ export class RSDevice extends LitElement {
           re_render = true;
         }
       }
+    }
+
+    // An ambiguous model's role entity (see _ambiguous_model()) is not
+    // bound to any rendered element, so nothing else would notice it
+    // changing — watch it directly, whether the change came from our own
+    // role picker or was set some other way.
+    const ambiguous = this._ambiguous_model();
+    if (ambiguous && ambiguous.role !== this._last_ambiguous_role) {
+      this._last_ambiguous_role = ambiguous.role;
+      re_render = true;
     }
 
     for (const element in this._elements) {
@@ -421,14 +613,25 @@ export class RSDevice extends LitElement {
   }
 
   /*
+   * translation_key of the entity carrying this device's on/off state.
+   * Defaults to Red Sea's "device_state"; a domain declaring its own (Aqua
+   * Medic's switch is "power") overrides it — see KNOWN_DEVICE_DOMAINS.
+   */
+  private _power_translation_key(): string {
+    const domain = domain_of(this.device?.elements?.[0]?.identifiers);
+    return (
+      (domain && KNOWN_DEVICE_DOMAINS[domain]?.power_translation_key) ||
+      "device_state"
+    );
+  }
+
+  /*
    * Get the state of the device on or off.
    */
   is_on(): boolean {
-    if (!this._hass || !this.entities["device_state"]) return false;
-    return (
-      this._hass.states[this.entities["device_state"].entity_id]?.state !==
-      "off"
-    );
+    const key = this._power_translation_key();
+    if (!this._hass || !this.entities[key]) return false;
+    return this._hass.states[this.entities[key].entity_id]?.state !== "off";
   }
 
   /*

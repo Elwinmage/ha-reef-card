@@ -144,6 +144,7 @@
   "schedule_advance": "Geplanter Vorlauf",
   "schedule_saved": "Zeitplan gespeichert",
   "select_device": "Gerät auswählen",
+  "select_pump_role": "Pumpenrolle auswählen",
   "set_calibration": "Kalibrierungswert setzen",
   "set_container_volume": "Behältervolumen",
   "set_manual_head_volume": "Manuelles Volumen",

@@ -20,6 +20,7 @@
 
 import i18n from "../translations/myi18n";
 import { HassConfig, MainDevice, DeviceInfo } from "../types/index";
+import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "./constants";
 
 //----------------------------------------------------------------------------//
 
@@ -111,7 +112,9 @@ export default class DeviceList {
   }
 
   /**
-   * Initialise devices and main_devices lists with reefbeat devices configured in ha-reefbeat-component
+   * Initialise devices and main_devices lists with devices configured by any
+   * integration listed in KNOWN_DEVICE_DOMAINS (ha-reefbeat-component,
+   * ha-aquamedic-component...).
    */
   private init_devices(): void {
     for (const device_id in this._hass?.devices) {
@@ -119,45 +122,168 @@ export default class DeviceList {
       if (!dev) continue;
 
       const dev_id = dev.identifiers[0];
-      if (!dev_id) continue;
+      if (!dev_id || !Array.isArray(dev_id)) continue;
 
-      if (Array.isArray(dev_id) && dev_id[0] === "redsea") {
-        // Get only main device, not sub or cloud
-        if (
-          !dev_id[1].includes("_head_") &&
-          !dev_id[1].includes("_pump") &&
-          dev.model !== "ReefBeat"
-        ) {
-          this.main_devices.push({
-            value: dev.primary_config_entry,
-            text: dev.name,
-          });
-        }
+      const domain = KNOWN_DEVICE_DOMAINS[dev_id[0]];
+      if (!domain) continue;
 
-        if (
-          !Object.prototype.hasOwnProperty.call(
-            this.devices,
-            dev.primary_config_entry,
-          )
-        ) {
-          this.devices[dev.primary_config_entry] = {
-            name: dev.name,
-            elements: [dev],
-          };
-        } else {
-          this.devices[dev.primary_config_entry]?.elements.push(dev);
-          // Changes main device name with main device
-          if (dev_id.length === 2 && this.devices[dev.primary_config_entry]) {
-            const device = this.devices[dev.primary_config_entry];
-            if (device) {
-              device.name = dev.name;
-            }
+      // Get only main device, not sub or cloud
+      const is_sub_device = (domain.sub_device_markers ?? []).some((marker) =>
+        dev_id[1].includes(marker),
+      );
+      const is_excluded_model = (domain.excluded_models ?? []).includes(
+        dev.model ?? "",
+      );
+
+      // Red Sea groups a main device with its dose heads/pumps, which share
+      // one config entry: key on that so they get reassembled below. Other
+      // domains are not grouped — a config entry can cover a whole account
+      // (Aqua Medic) — so each hass device row is its own selectable
+      // device, keyed by its own id.
+      const key = domain.group_by_config_entry
+        ? dev.primary_config_entry
+        : dev.id;
+
+      if (!is_sub_device && !is_excluded_model) {
+        this.main_devices.push({
+          value: key,
+          text: dev.name,
+        });
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(this.devices, key)) {
+        this.devices[key] = {
+          name: dev.name,
+          key,
+          elements: [dev],
+        };
+      } else {
+        this.devices[key]?.elements.push(dev);
+        // Changes main device name with main device
+        if (dev_id.length === 2 && this.devices[key]) {
+          const device = this.devices[key];
+          if (device) {
+            device.name = dev.name;
           }
         }
       }
     }
     this.main_devices.sort(this.device_compare);
   }
+}
+
+/**
+ * Integration domain of a hass device, read from its first identifier tuple.
+ * @param identifiers: the `identifiers` array of a hass device
+ * @return the domain (ex: "redsea", "aquamedic"), or undefined when the
+ *         device carries no recognizable identifier tuple
+ */
+export function domain_of(
+  identifiers?: Array<string | [string, string]>,
+): string | undefined {
+  const ident = identifiers?.[0];
+  return Array.isArray(ident) ? ident[0] : undefined;
+}
+
+/**
+ * Result of looking up whether a device's model is ambiguous, and, when it
+ * is, what the role entity currently says.
+ */
+export interface AmbiguousModel {
+  domain: string;
+  raw_model: string;
+  override: ModelOverride;
+  /** entity_id of the role entity, when one is found on this device */
+  entity_id?: string;
+  /** current state of the role entity, when found */
+  role?: string;
+}
+
+/**
+ * Looks up whether a device's model is ambiguous for its domain (see
+ * KNOWN_DEVICE_DOMAINS model_overrides) and, when it is, finds the role
+ * entity and its current state. Shared by resolve_device_model() — which
+ * only needs the resolved model — and RSDevice's own render(), which also
+ * needs the entity_id to build a role picker and delegate rendering.
+ * @param hass: the hass config object, to read entities/states from
+ * @param device: the DeviceInfo of the selected device
+ * @param domain: the integration domain (ex: "aquamedic")
+ * @param model: the raw model as reported by the integration
+ * @return undefined when the domain declares no override for this model;
+ *         otherwise the override plus whatever role entity/state was found
+ */
+export function ambiguous_model_of(
+  hass: HassConfig | undefined,
+  device: DeviceInfo,
+  domain: string | undefined,
+  model: string,
+): AmbiguousModel | undefined {
+  const override = domain
+    ? KNOWN_DEVICE_DOMAINS[domain]?.model_overrides?.[model]
+    : undefined;
+  if (!override || !domain) return undefined;
+
+  let entity_id: string | undefined;
+  if (hass?.entities) {
+    entity_id = find_role_entity_id(
+      hass,
+      device.elements ?? [],
+      override.role_translation_key,
+    );
+  }
+  const role = entity_id ? hass?.states?.[entity_id]?.state : undefined;
+  return { domain, raw_model: model, override, entity_id, role };
+}
+
+/**
+ * Finds the entity_id, among a device's elements, whose translation_key
+ * matches the one carrying an ambiguous model's role.
+ * @param hass: the hass config object, to read entities from
+ * @param elements: the device's underlying hass devices
+ * @param translation_key: the role entity's translation_key to look for
+ * @return the matching entity_id, or undefined when none is found
+ */
+function find_role_entity_id(
+  hass: HassConfig,
+  elements: DeviceInfo["elements"],
+  translation_key: string,
+): string | undefined {
+  for (const element of elements) {
+    for (const eid in hass.entities) {
+      const entity = hass.entities[eid];
+      if (
+        entity?.device_id === element.id &&
+        entity?.translation_key === translation_key
+      ) {
+        return eid;
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Resolves an ambiguous model to the concrete one, using a role entity when
+ * the domain declares one (see KNOWN_DEVICE_DOMAINS model_overrides). Aqua
+ * Medic's "DC Runner" model, for instance, covers both the return pump and
+ * the skimmer: the user declares which one through the `pump_role` select
+ * entity, since the API exposes byte-identical data for both.
+ * @param hass: the hass config object, to read entities/states from
+ * @param device: the DeviceInfo of the selected device
+ * @param domain: the integration domain (ex: "aquamedic")
+ * @param model: the raw model as reported by the integration
+ * @return the concrete model to build a tag for; the raw model when the
+ *         domain declares no override for it, or the role is not (yet) set
+ */
+export function resolve_device_model(
+  hass: HassConfig | undefined,
+  device: DeviceInfo,
+  domain: string | undefined,
+  model: string,
+): string {
+  const found = ambiguous_model_of(hass, device, domain, model);
+  if (!found?.role) return model;
+  return found.override.role_to_model[found.role] ?? model;
 }
 
 /**

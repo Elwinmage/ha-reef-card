@@ -11,7 +11,7 @@ import { property, state } from "lit/decorators.js";
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n.js";
-import DeviceList from "./utils/common";
+import DeviceList, { domain_of, resolve_device_model } from "./utils/common";
 import { has_maintenance_entities } from "./utils/maintenance";
 import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
@@ -199,13 +199,11 @@ export class ReefCard extends LitElement {
   };
 
   /**
-   * Config entry currently on screen, when there is one.
-   * @return the primary config entry id, or null
+   * Selector key of the device currently on screen, when there is one.
+   * @return the device's key (see DeviceInfo.key), or null
    */
   private _current_config_entry(): string | null {
-    return (
-      this.current_device?.device?.elements?.[0]?.primary_config_entry ?? null
-    );
+    return this.current_device?.device?.key ?? null;
   }
 
   /**
@@ -296,8 +294,7 @@ export class ReefCard extends LitElement {
             value="${option.value}"
             ?selected=${option.value === MAINTENANCE_DEVICE_ID
               ? this.current_device?.is_maintenance === true
-              : this.current_device?.device?.elements?.[0]
-                  ?.primary_config_entry === option.value}
+              : this.current_device?.device?.key === option.value}
           >
             ${option.text}
           </option>
@@ -383,10 +380,7 @@ export class ReefCard extends LitElement {
     // The current device has not change, so no update
     // The placeholder shown before any selection carries no `device` at all,
     // so this reads through rather than assuming one is there.
-    if (
-      this.current_device?.device?.elements?.[0]?.primary_config_entry ===
-      device_id
-    ) {
+    if (this.current_device?.device?.key === device_id) {
       console.debug(
         "current device not updated",
         this.current_device.device.name,
@@ -401,14 +395,25 @@ export class ReefCard extends LitElement {
       return;
     }
     //Get device model
-    const model = device.elements[0]?.model;
+    const el = device.elements[0];
+    const model = el?.model;
     if (!model) {
       console.error("Device model not found");
       return;
     }
+    // The integration domain (redsea, aquamedic...) picks the tag prefix.
+    const domain = domain_of(el?.identifiers) ?? "redsea";
+    // Some models are ambiguous (ex: Aqua Medic's "DC Runner" covers both
+    // the return pump and the skimmer) and get resolved via a role entity.
+    const resolved_model = resolve_device_model(
+      this._hass,
+      device,
+      domain,
+      model,
+    );
     //Create the new "lit device"
     this.current_device = RSDevice.create_device(
-      RSDevice.tag_for_model(model),
+      RSDevice.tag_for_model(domain, resolved_model),
       this._hass,
       this.user_config,
       device,

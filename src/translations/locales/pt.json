@@ -144,6 +144,7 @@
   "schedule_advance": "Avanço agendado",
   "schedule_saved": "Agendamento guardado",
   "select_device": "Selecionar um dispositivo",
+  "select_pump_role": "Selecione a função da bomba",
   "set_calibration": "Definir valor de calibração",
   "set_container_volume": "Volume do recipiente",
   "set_manual_head_volume": "Volume manual",

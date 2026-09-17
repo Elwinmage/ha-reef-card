@@ -24,6 +24,9 @@ import { RSMaintenance } from "./redsea/maintenance";
 import { RSPower6, RSPower8, PowerSocket } from "./redsea/rspower";
 import { PowerSchedule } from "./redsea/rspower/power_schedule";
 import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+import { AMSmartDrift } from "./aquamedic/smartdrift";
+import { AMDCRunner } from "./aquamedic/dcrunner";
+import { AMDCSkimmer } from "./aquamedic/dcskimmer";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -78,6 +81,12 @@ if (!customElements.get("redsea-rspower6"))
   customElements.define("redsea-rspower6", RSPower6);
 if (!customElements.get("redsea-rspower8"))
   customElements.define("redsea-rspower8", RSPower8);
+if (!customElements.get("aquamedic-smartdrift"))
+  customElements.define("aquamedic-smartdrift", AMSmartDrift);
+if (!customElements.get("aquamedic-dcrunner"))
+  customElements.define("aquamedic-dcrunner", AMDCRunner);
+if (!customElements.get("aquamedic-dcskimmer"))
+  customElements.define("aquamedic-dcskimmer", AMDCSkimmer);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -97,3 +106,6 @@ export { RSWave25, RSWave45 } from "./redsea/rswave";
 export { RSMaintenance } from "./redsea/maintenance";
 export { RSPower6, RSPower8, PowerSocket } from "./redsea/rspower";
 export { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+export { AMSmartDrift } from "./aquamedic/smartdrift";
+export { AMDCRunner } from "./aquamedic/dcrunner";
+export { AMDCSkimmer } from "./aquamedic/dcskimmer";

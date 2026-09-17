@@ -13,6 +13,14 @@ export interface MainDevice {
 
 export interface DeviceInfo {
   name: string;
+  /**
+   * The identity this device is selected/looked up by (a MainDevice's
+   * `value`, and the key of DeviceList.devices). Usually a config entry id
+   * (several devices grouped under one physical appliance), but a plain
+   * hass device id for an integration whose devices are not grouped — see
+   * KNOWN_DEVICE_DOMAINS.group_by_config_entry.
+   */
+  key?: string;
   elements: import("./homeassistant").HassDevice[];
 }
 

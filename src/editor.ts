@@ -11,7 +11,7 @@ import { property } from "lit/decorators.js";
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n";
-import DeviceList from "./utils/common";
+import DeviceList, { domain_of, resolve_device_model } from "./utils/common";
 import { has_maintenance_entities } from "./utils/maintenance";
 import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
@@ -171,13 +171,24 @@ export class ReefCardEditor extends LitElement {
       if (!device) {
         return html``;
       }
-      const model = device.elements[0]?.model;
+      const el = device.elements[0];
+      const model = el?.model;
       if (!model) {
         return html``;
       }
+      // The integration domain (redsea, aquamedic...) picks the tag prefix.
+      const domain = domain_of(el?.identifiers) ?? "redsea";
+      // Some models are ambiguous (ex: Aqua Medic's "DC Runner" covers both
+      // the return pump and the skimmer) and get resolved via a role entity.
+      const resolved_model = resolve_device_model(
+        this._hass,
+        device,
+        domain,
+        model,
+      );
 
       const lit_device = RSDevice.create_device(
-        RSDevice.tag_for_model(model),
+        RSDevice.tag_for_model(domain, resolved_model),
         this._hass,
         this._config,
         device as any,

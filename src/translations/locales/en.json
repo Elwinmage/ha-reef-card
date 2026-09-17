@@ -144,6 +144,7 @@
   "schedule_advance": "Scheduled advance",
   "schedule_saved": "Schedule saved",
   "select_device": "Select a device",
+  "select_pump_role": "Select the pump role",
   "set_calibration": "Set calibration value",
   "set_container_volume": "Container Volume",
   "set_manual_head_volume": "Manual volume",

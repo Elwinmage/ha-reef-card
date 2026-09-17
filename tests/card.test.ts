@@ -272,13 +272,17 @@ describe("ReefCard — _set_current_device()", () => {
     const card = makeReadyCard();
     const fakeDevice: any = {
       hass: null,
-      device: { elements: [{ primary_config_entry: "cfg-001" }] },
+      device: {
+        key: "cfg-001",
+        elements: [{ primary_config_entry: "cfg-001" }],
+      },
     };
     card.current_device = fakeDevice;
     card.devices_list = {
       devices: {
         "cfg-001": {
           name: "Pump",
+          key: "cfg-001",
           elements: [{ primary_config_entry: "cfg-001", model: "RSDOSE4" }],
         },
       },
@@ -348,6 +352,38 @@ describe("ReefCard — _set_current_device()", () => {
       expect.anything(),
     );
     stub.mockRestore();
+  });
+
+  it("falls back to the redsea domain when identifiers carry no domain tuple", () => {
+    // domain_of() returns undefined when a device's identifiers don't
+    // carry a [domain, id] tuple (a malformed/legacy registry entry) —
+    // the tag must still resolve rather than becoming "undefined-...".
+    const card = makeCard() as any;
+    const hassDevice = {
+      id: "dev-cfg-001",
+      name: "Pump",
+      model: "RSDOSE4",
+      identifiers: [],
+      primary_config_entry: "cfg-001",
+      disabled_by: null,
+    };
+    card._hass = makeHass({ "dev-cfg-001": hassDevice });
+    card.render();
+
+    (card as any).devices_list.devices["cfg-001"] = {
+      name: "Pump",
+      key: "cfg-001",
+      elements: [hassDevice],
+    };
+    const stub2 = vi.spyOn(RSDevice, "create_device").mockReturnValue(null);
+    (card as any)._set_current_device("cfg-001");
+    expect(stub2).toHaveBeenCalledWith(
+      "redsea-rsdose4",
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
+    stub2.mockRestore();
   });
 });
 describe("ReefCard — onChanges()", () => {
@@ -495,6 +531,41 @@ describe("ReefCardEditor — render()", () => {
     editor._config = {};
     editor.requestUpdate = vi.fn();
     expect(() => editor.render()).not.toThrow();
+  });
+
+  it("falls back to the redsea domain when identifiers carry no domain tuple", () => {
+    // domain_of() returns undefined when a device's identifiers don't
+    // carry a [domain, id] tuple (a malformed/legacy registry entry) —
+    // the tag must still resolve rather than becoming "undefined-...".
+    const hassDevice = {
+      id: "dev-cfg-001",
+      name: "Pump",
+      model: "RSDOSE4",
+      identifiers: [],
+      primary_config_entry: "cfg-001",
+      disabled_by: null,
+    };
+    const editor = makeEditor();
+    editor._hass = makeHass();
+    editor._config = { device: "Pump" };
+    editor.first_init = false;
+    editor.select_devices = [{ value: "cfg-001", text: "Pump" }];
+    editor.devices_list = {
+      main_devices: [{ value: "cfg-001", text: "Pump" }],
+      devices: { "cfg-001": { name: "Pump", elements: [hassDevice] } },
+      get_by_name: (name: string) =>
+        name === "Pump" ? { name: "Pump", elements: [hassDevice] } : undefined,
+    };
+    editor.requestUpdate = vi.fn();
+    const stub = vi.spyOn(RSDevice, "create_device").mockReturnValue(null);
+    editor.render();
+    expect(stub).toHaveBeenCalledWith(
+      "redsea-rsdose4",
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
+    stub.mockRestore();
   });
 });
 describe("ReefCardEditor — device_conf()", () => {
@@ -755,6 +826,7 @@ function makeNavCard(): any {
     devices: {
       "cfg-power": {
         name: "Power",
+        key: "cfg-power",
         elements: [
           {
             primary_config_entry: "cfg-power",
@@ -766,6 +838,7 @@ function makeNavCard(): any {
       },
       "cfg-hub": {
         name: "Hub",
+        key: "cfg-hub",
         elements: [
           {
             primary_config_entry: "cfg-hub",
@@ -788,7 +861,10 @@ function makeNavCard(): any {
   };
   card.current_device = {
     hass: null,
-    device: { elements: [{ primary_config_entry: "cfg-power" }] },
+    device: {
+      key: "cfg-power",
+      elements: [{ primary_config_entry: "cfg-power" }],
+    },
   };
   return card;
 }
