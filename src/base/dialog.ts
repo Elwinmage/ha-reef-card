@@ -367,7 +367,6 @@ export class Dialog extends LitElement {
         "background-color": "rgba(0,0,0,0)",
       },
     };
-
     if (this.to_render !== null) {
       let submit_conf = close_conf;
       let cancel_conf = null;

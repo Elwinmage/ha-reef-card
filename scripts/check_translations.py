@@ -155,9 +155,22 @@ class TranslationVerifier:
         # Pattern to match i18n._('key') or i18n._("key")
         pattern_i18n = r"i18n\._\(['\"]([^'\"]+)['\"]\)"
 
-        # Pattern to match is_checked('id') / is_config_checked('key').
-        # Both render a <label>${i18n._(id)}</label>, so the id is a key.
-        pattern_is_checked = r"\bis_(?:config_)?checked\(['\"]([^'\"]+)['\"]\)"
+        # Pattern to match the helpers whose first argument is rendered as a
+        # label through i18n._(key), so the literal id is a translation key:
+        #   - is_checked('id') / is_config_checked('key')      (device.ts)
+        #   - _render_option_switch('key')                      (rsato.ts)
+        #   - _render_entity_picker('key', DOMAINS)             (rsato.ts)
+        # Matched on the whole file with \s*: prettier moves the literal to the
+        # next line as soon as the call carries a second argument.
+        pattern_label_helper = (
+            r"\b(?:is_(?:config_)?checked|_render_option_switch|_render_entity_picker)"
+            r"\(\s*['\"]([^'\"]+)['\"]"
+        )
+
+        # Pattern to match `labelKey: "key"` entries of the lookup tables that
+        # are translated later through i18n._(entry.labelKey) (power_sensor.ts:
+        # MODE_DEFS and the sensor candidates).
+        pattern_label_key = r"\blabelKey\s*:\s*['\"]([^'\"]+)['\"]"
 
         # Pattern to match the opening of a create_select( / create_hour( call.
         # The arguments are then split by _split_call_args() instead of a regex:
@@ -234,11 +247,15 @@ class TranslationVerifier:
                     for opt_key in re.findall(r"['\"]([^'\"]+)['\"]", options):
                         add_key(opt_key, ctx)
 
-                # --- Line-by-line scan: i18n._() and is_checked() ---
+                # --- Scan: label helpers and labelKey tables ---
+                for pattern in (pattern_label_helper, pattern_label_key):
+                    for match in re.finditer(pattern, file_content):
+                        add_key(match.group(1), make_context(offset_to_line(match.start(1))))
+
+                # --- Line-by-line scan: i18n._() ---
                 for line_num, line in enumerate(lines, 1):
-                    for pattern in (pattern_i18n, pattern_is_checked):
-                        for match in re.finditer(pattern, line):
-                            add_key(match.group(1), make_context(line_num))
+                    for match in re.finditer(pattern_i18n, line):
+                        add_key(match.group(1), make_context(line_num))
 
                 if file_has_keys:
                     files_scanned += 1

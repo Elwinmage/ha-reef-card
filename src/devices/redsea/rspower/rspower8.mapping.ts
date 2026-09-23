@@ -16,6 +16,26 @@ export const config2 = {
   },
   sockets_nb: 8,
   elements: {
+    rssense_temperature: {
+      name: "rssense_temperature",
+      type: "click-image",
+      // A paired hub takes the probe's slot: the two pictures occupy the
+      // same corner, so the probe steps aside rather than overlapping.
+      disabled_if: "!device.has_temperature_link()",
+      no_br_if_disabled: true,
+      class: "${device.temperature_link_alert() ? 'blink-alert' : ''}",
+      image: new URL(
+        "../../../img/redsea/RSPOWER/rssense-temperature-power.png",
+        import.meta.url,
+      ),
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "100%",
+        top: "0%",
+        left: "0%",
+      },
+    },
     rscontrol_link: {
       // Bound to the pairing flag so the element re-renders when a hub is
       // paired or dropped; `disabled_if` forces a refresh on every update,
@@ -76,6 +96,45 @@ export const config2 = {
         "max-height": "26%",
       },
     },
+    power_temperature: {
+      name: "power_temperature",
+      type: "common-sensor",
+      round: 1,
+      disabled_if: "device.has_control_link() || ${state} === 'unknown'",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "33%",
+        color: COLOR_WHITE_60,
+        left: "0.5%",
+        "font-size": "0.65rem",
+      },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "power_temperature",
+      },
+    },
+    power_temperature_conf: {
+      name: "power_temperature_conf",
+      type: "click-image",
+      icon: "mdi:cog",
+      icon_color: COLOR_RS_RGBSTR,
+      disabled_if:
+        "device.has_control_link() || device.temperature_link_alert()",
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "46.5%",
+        left: "1%",
+        "font-size": "0.65rem",
+      },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "power_temperature_conf" },
+      },
+    },
     last_message: {
       name: "last_message",
       type: "redsea-messages",
@@ -85,7 +144,7 @@ export const config2 = {
         position: "absolute",
         width: "100%",
         height: "15px",
-        top: "51%",
+        top: "70%",
         left: "0px",
       },
       "elt.css": {
@@ -103,7 +162,7 @@ export const config2 = {
         position: "absolute",
         width: "100%",
         height: "20px",
-        top: "55%",
+        top: "74%",
         left: "0px",
       },
       "elt.css": {
@@ -375,7 +434,7 @@ export const config2 = {
         socket_mode_icon_static: {
           name: "socket_mode",
           type: "common-sensor",
-          icon: "${entity.socket_mode?.state === 'sensor' || entity.socket_prev_mode?.state === 'sensor' ? 'mdi:flask-outline' : 'mdi:power'}",
+          icon: "(entity?.socket_mode?.state === 'sensor' || entity?.socket_prev_mode?.state === 'sensor') ? ({'temperature': 'mdi:thermometer','ph': 'mdi:ph','ec': 'mdi:water-percent','orp': 'mdi:flash-triangle','leak': 'mdi:water-alert','ato': 'mdi:cup-water'}[entity?.socket_mode?.attributes?.sensor_config?.sensor?.app_cache] || 'mdi:power'): 'mdi:power'",
           icon_color: "rgba(255,255,255,0.5)",
           disabled_if:
             "entity.socket_mode?.state === 'setup' || entity.socket_mode?.state === 'schedule' || entity.socket_prev_mode?.state === 'schedule'",
@@ -406,6 +465,38 @@ export const config2 = {
             "pointer-events": "none",
           },
         },
+        // ── Sensor-mode overlays ────────────────────────────────────────
+        // Top-left: main measurement icon (ORP / pH / EC / ATO).
+        // Shown only when the socket is in sensor or prev-sensor mode AND the
+        // probe type is not a pure temperature one (those show nothing here).
+        socket_sensor_main_icon: {
+          name: "socket_mode",
+          type: "common-sensor",
+          // device is the PowerSocket: sensor_main_icon() returns the mdi
+          // icon of this socket's probe type, or "" when it should not
+          // appear — the element is then disabled, so no invisible click
+          // area is left under the socket.
+          icon: "${device.sensor_main_icon()}",
+          icon_color: "rgba(255,255,255,0.75)",
+          disabled_if: "!device.sensor_main_icon()",
+          no_br_if_disabled: true,
+          tap_action: {
+            domain: "redsea_ui",
+            action: "dialog",
+            //data: { type: "socket_sensor", overload_quit: "socket_config" },
+            data: { type: "socket_config" },
+          },
+          css: {
+            flex: "0 0 auto",
+            position: "absolute",
+            top: "85%",
+            left: "14%",
+            width: "30%",
+            "--mdc-icon-size": "100%",
+            cursor: "pointer",
+          },
+        },
+
         socket_setup: {
           name: "socket_mode",
           type: "click-image",

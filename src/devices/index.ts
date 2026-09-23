@@ -21,7 +21,7 @@ import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
-import { RSPower6, RSPower8, PowerSocket } from "./redsea/rspower";
+import { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
 import { PowerSchedule } from "./redsea/rspower/power_schedule";
 import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
 import { AMSmartDrift } from "./aquamedic/smartdrift";
@@ -77,6 +77,8 @@ if (!customElements.get("redsea-power-socket"))
   customElements.define("redsea-power-socket", PowerSocket);
 if (!customElements.get("power-schedule"))
   customElements.define("power-schedule", PowerSchedule);
+if (!customElements.get("power-sensor"))
+  customElements.define("power-sensor", PowerSensor);
 if (!customElements.get("redsea-rspower6"))
   customElements.define("redsea-rspower6", RSPower6);
 if (!customElements.get("redsea-rspower8"))
@@ -104,7 +106,7 @@ export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";
 export { RSWave25, RSWave45 } from "./redsea/rswave";
 export { RSMaintenance } from "./redsea/maintenance";
-export { RSPower6, RSPower8, PowerSocket } from "./redsea/rspower";
+export { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
 export { RSControlLite, RSControlPro } from "./redsea/rscontrol";
 export { AMSmartDrift } from "./aquamedic/smartdrift";
 export { AMDCRunner } from "./aquamedic/dcrunner";

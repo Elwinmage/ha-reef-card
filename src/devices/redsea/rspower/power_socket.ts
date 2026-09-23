@@ -6,6 +6,19 @@ import style_common from "../../../utils/common.styles";
 import { OFF_COLOR } from "../../../utils/constants";
 
 /**
+ * Icon of the measurement driving a socket in sensor mode, by probe type
+ * (the `app_cache` id, DEX: DeviceSubscriberType). A temperature probe has
+ * none: the socket's static mode icon already shows a thermometer.
+ */
+const SENSOR_MAIN_ICONS: Record<string, string> = {
+  ph: "mdi:ph",
+  orp: "mdi:lightning-bolt-circle",
+  ec: "mdi:water-percent",
+  ato: "mdi:waves-arrow-up",
+  leak: "mdi:water-alert",
+};
+
+/**
  * LitElement rendering a single RSPower AC socket.
  *
  * Mirrors the DoseHead pattern used by RSDose: the parent RSPower creates
@@ -124,6 +137,29 @@ export class PowerSocket extends RSDevice {
   update_state(_value: boolean): void {
     this.state_on = _value;
     this.requestUpdate();
+  }
+
+  // ── Sensor mode ───────────────────────────────────────────────────────
+
+  /**
+   * MDI icon of the probe type controlling this socket.
+   *
+   * Read from this socket's own `socket_mode` entity, whose `sensor_config`
+   * attribute mirrors the device config: `{ sensor: { app_cache,
+   * default_state }, value, is_above, turn_on }`. A socket temporarily
+   * forced on or off keeps its probe icon while `socket_prev_mode` still
+   * says sensor, as the other mode overlays do.
+   * @return the icon name, or "" when the socket is not driven by a probe
+   *         or its probe type has no icon of its own
+   */
+  sensor_main_icon(): string {
+    const mode = this.get_entity("socket_mode");
+    const prev = this.get_entity("socket_prev_mode");
+    if (mode?.state !== "sensor" && prev?.state !== "sensor") {
+      return "";
+    }
+    const type = mode?.attributes?.sensor_config?.sensor?.app_cache ?? "";
+    return SENSOR_MAIN_ICONS[type] ?? "";
   }
 
   // ── Linked appliance ──────────────────────────────────────────────────

@@ -233,6 +233,27 @@ export class RSPower extends RSDevice {
     return dev?.name_by_user || dev?.name || "";
   }
 
+  // ── Temeprature link ──────────────────────────────────────────────────
+
+  /**
+   * Whether a temperature probe is connected with this power strip.
+   * @return true when a temperature is configured
+   */
+  has_temperature_link(): boolean {
+    return this.get_entity("remove_temperature")?.state !== "unavailable";
+  }
+
+  /**
+   * Whether the localt temperature is currently unreachable.
+   * @return true when a temperature is paired but its link is down
+   */
+  temperature_link_alert(): boolean {
+    return (
+      this.get_entity("status_temperature")?.state === "disconnected" ||
+      this.get_entity("power_temperature")?.state === "unknown"
+    );
+  }
+
   // ── Entity population ─────────────────────────────────────────────────
 
   _populate_entities(): void {
@@ -340,7 +361,10 @@ export class RSPower extends RSDevice {
       );
       if (ps) {
         (ps as any).socket_id = socket_id;
-        ps.entities = this._sockets[socket_id].entities;
+        ps.entities = {
+          ...this._sockets[socket_id].entities,
+          ...this.entities,
+        };
         ps.config = socket_conf;
         (ps as any).update_state(this.is_on());
         this._sockets[socket_id].power_socket = ps;
@@ -370,12 +394,12 @@ export class RSPower extends RSDevice {
         src="${this.config.background_img}"
         style="${substyle}"
       />
+      <div>${this._render_elements(this.is_on())}</div>
       <div class="sockets">
         ${Array.from({ length: this.config.sockets_nb }, (_, i) => i + 1).map(
           (id) => this._render_socket(id),
         )}
       </div>
-      <div>${this._render_elements(this.is_on())}</div>
     </div>`;
   }
 

@@ -1,3 +1,11 @@
+/**
+ * Dialog definitions for the RSPower device.
+ *
+ * socket_config renders the socket's entities then the PowerSensor
+ * component, which owns the mode selector (On/Off/Schedule/Sensor),
+ * the schedule editor and the sensor configurator as a single unified
+ * inline panel — no sub-dialogs.
+ */
 export const dialogs_rspower = {
   config: {
     name: "config",
@@ -19,13 +27,81 @@ export const dialogs_rspower = {
           ],
         },
       },
+
+      // ── Temperature probe & RSControl hub management ───────────────────
+      // Mutually exclusive (integration available_fn):
+      //   no probe + no hub  → install_temperature available
+      //   local probe        → remove_temperature available
+      //   paired hub         → unpair_control available
+      // The integration sets the entity to state "unavailable" when it does
+      // not apply; we grey the button out rather than hiding it so the user
+      // can see what actions exist.
+      {
+        view: "common-button",
+        conf: {
+          type: "common-button",
+          stateObj: null,
+          icon: "mdi:thermometer-plus",
+          disabled_if: "entity.install_temperature?.state === 'unavailable'",
+          no_br_if_disabled: false,
+          tap_action: {
+            domain: "button",
+            action: "press",
+            data: { entity_id: "install_temperature" },
+          },
+          label: "${i18n._('install_temperature')}",
+          class: "dialog_button",
+          css: { "margin-bottom": "4px", "text-align": "center" },
+          "elt.css": { "background-color": "rgba(0,0,0,0)" },
+        },
+      },
+      {
+        view: "common-button",
+        conf: {
+          type: "common-button",
+          stateObj: null,
+          icon: "mdi:thermometer-minus",
+          disabled_if: "entity.remove_temperature?.state === 'unavailable'",
+          no_br_if_disabled: false,
+          tap_action: {
+            domain: "button",
+            action: "press",
+            data: { entity_id: "remove_temperature" },
+          },
+          label: "${i18n._('remove_temperature')}",
+          class: "dialog_button",
+          css: { "margin-bottom": "4px", "text-align": "center" },
+          "elt.css": { "background-color": "rgba(0,0,0,0)" },
+        },
+      },
+      {
+        view: "common-button",
+        conf: {
+          type: "common-button",
+          stateObj: null,
+          icon: "mdi:link-off",
+          disabled_if: "entity.unpair_control?.state === 'unavailable'",
+          no_br_if_disabled: false,
+          tap_action: {
+            domain: "button",
+            action: "press",
+            data: { entity_id: "unpair_control" },
+          },
+          label: "${i18n._('unpair_control')}",
+          class: "dialog_button",
+          css: { "margin-bottom": "4px", "text-align": "center" },
+          "elt.css": { "background-color": "rgba(0,0,0,0)" },
+        },
+      },
     ],
   },
+
   socket_config: {
     name: "socket_config",
     title_key: "${i18n._('socket_config')} n°${config.id}",
     close_cross: false,
     content: [
+      // Socket info: name, switch, state, consumption
       {
         view: "hui-entities-card",
         conf: {
@@ -36,57 +112,24 @@ export const dialogs_rspower = {
             {
               entity: "socket_on_off",
               name: { type: "entity" },
-              // Shows what is plugged in rather than a generic plug. Fixed
-              // when the dialog opens: the row is built once, so a socket
-              // switched while it is open keeps the icon it opened with.
               icon: "${device.linked_icon()}",
             },
-            { entity: "select.socket_mode", name: { type: "entity" } },
             { entity: "socket_state", name: { type: "entity" } },
             { entity: "socket_consumption", name: { type: "entity" } },
           ],
         },
       },
-      // Compact on/off timeline — rendered only when the socket runs on a
-      // schedule; clicking it opens the full editor.
+
+      // Unified mode editor: On/Off/Schedule/Sensor + conditional content + Save
       {
-        view: "power-schedule",
+        view: "power-sensor",
         conf: {
-          type: "power-schedule",
-          name: "socket_schedule_preview",
-          readonly: true,
+          type: "power-sensor",
+          name: "socket_mode_editor",
         },
       },
-      // Advanced configuration button — only for schedule mode.
-      // The dialog type must be a literal: it is looked up as-is in the
-      // dialog table, so a template expression would resolve to nothing.
-      {
-        view: "common-button",
-        conf: {
-          type: "common-button",
-          stateObj: null,
-          icon: "mdi:clock-time-nine-outline",
-          disabled_if: "entity.socket_mode?.state !== 'schedule'",
-          no_br_if_disabled: true,
-          tap_action: {
-            domain: "redsea_ui",
-            action: "dialog",
-            data: {
-              type: "socket_schedule",
-              overload_quit: "socket_config",
-            },
-          },
-          label: "${i18n._('socket_advanced_config')}",
-          class: "dialog_button",
-          css: {
-            "margin-bottom": "5px",
-            "text-align": "center",
-          },
-          "elt.css": {
-            "background-color": "rgba(0,0,0,0)",
-          },
-        },
-      },
+
+      // Delete socket button (top-right of dialog, always present)
       {
         view: "click-image",
         conf: {
@@ -110,6 +153,51 @@ export const dialogs_rspower = {
       },
     ],
   },
+  power_temperature_conf: {
+    name: "power_temperature_conf",
+    title_key: "${i18n._('dialog_socket_temperature_conf')}",
+    close_cross: false,
+    content: [
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "temperature_probe_name", name: { type: "entity" } },
+            { entity: "get_temperature", name: { type: "entity" } },
+            { entity: "power_temperature", name: { type: "entity" } },
+            { type: "divider" },
+            {
+              entity: "temperature_desired_range_low",
+              name: { type: "entity" },
+            },
+            {
+              entity: "temperature_desired_range_high",
+              name: { type: "entity" },
+            },
+            { type: "divider" },
+            {
+              entity: "temperature_acceptable_range_low",
+              name: { type: "entity" },
+            },
+            {
+              entity: "temperature_acceptable_range_high",
+              name: { type: "entity" },
+            },
+            { type: "divider" },
+            { entity: "temperature_offset", name: { type: "entity" } },
+            { type: "divider" },
+            { entity: "temperature_log_enabled", name: { type: "entity" } },
+            {
+              entity: "temperature_notifications_enabled",
+              name: { type: "entity" },
+            },
+          ],
+        },
+      },
+    ],
+  },
+
   socket_delete: {
     name: "socket_delete",
     title_key: "${i18n._('dialog_socket_delete_title')} n°${config.id}",
@@ -143,19 +231,5 @@ export const dialogs_rspower = {
       ],
     },
     cancel: true,
-  },
-  socket_schedule: {
-    name: "socket_schedule",
-    title_key: "${i18n._('socket_schedule')} n°${config.id}",
-    close_cross: false,
-    content: [
-      {
-        view: "power-schedule",
-        conf: {
-          type: "power-schedule",
-          name: "socket_schedule",
-        },
-      },
-    ],
   },
 };
