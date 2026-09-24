@@ -22,6 +22,15 @@
  *                                  value, hysteresis, sensor}] }
  *   PUT /subscribe              { sockets: [{number, default_state,
  *                                  app_cache}] }
+ *
+ * The probes of a paired RSControl come from the integration's
+ * `redsea.get_control_probes` service (called with `return_response`), which
+ * reports every probe the hub knows, whatever entities it exposes.
+ *
+ * A socket driven by a schedule or a probe can be forced on/off by hand: its
+ * mode then reads on/off while `socket_prev_mode` keeps the automatic one.
+ * The editor opens on that automatic mode, says it is suspended, and offers
+ * to resume it without rewriting its configuration.
  */
 
 import { html, LitElement, TemplateResult, nothing } from "lit";
@@ -149,6 +158,28 @@ const MODE_DEFS: Array<{ id: SocketMode; labelKey: string; icon: string }> = [
   { id: "sensor", labelKey: "sensor_mode_sensor", icon: "mdi:flask-outline" },
 ];
 
+/**
+ * RSControl probe types offered to a socket, in display order, with the
+ * label used when the hub reports no name. `hasTemp` types also carry a
+ * temperature reading a socket can follow on its own (sub-sensor
+ * "temperature").
+ */
+const CONTROL_PROBE_TYPES: Array<{
+  type: ProbeTypeId;
+  labelKey: string;
+  hasTemp: boolean;
+}> = [
+  { type: "ph", labelKey: "sensor_ph", hasTemp: true },
+  { type: "orp", labelKey: "sensor_orp", hasTemp: false },
+  { type: "ec", labelKey: "sensor_ec", hasTemp: true },
+  { type: "temperature", labelKey: "sensor_temp", hasTemp: false },
+  { type: "ato", labelKey: "sensor_ato", hasTemp: false },
+  { type: "leak", labelKey: "sensor_leak", hasTemp: false },
+];
+
+/** Automatic modes a manual on/off can suspend. */
+type AutoMode = "schedule" | "sensor";
+
 const TOTAL_MINUTES = 24 * 60;
 const MAX_INTERVALS = 10;
 
@@ -165,6 +196,12 @@ export class PowerSensor extends LitElement {
   @state() private _mode: SocketMode = "on";
   @state() private _saving = false;
   @state() private _saveError: string | null = null;
+  /**
+   * Automatic mode suspended by a manual on/off, with the forced state;
+   * null when the socket runs its mode normally.
+   */
+  @state() private _override: { mode: AutoMode; state: "on" | "off" } | null =
+    null;
 
   // ── Schedule state ──────────────────────────────────────────────────────
   @state() private _intervals: Interval[] = [];
@@ -179,6 +216,14 @@ export class PowerSensor extends LitElement {
   @state() private _hysteresis = 0.5;
   @state() private _turnOn = true;
   @state() private _fallbackOn = false;
+  @state() private _probesLoading = false;
+
+  /** Probes reported by the paired RSControl; null until fetched. */
+  private _controlProbes: any[] | null = null;
+  /** Hub the probes above were fetched for, so they are fetched once. */
+  private _controlProbesHwid: string | null = null;
+  /** Set once the user picks a probe: a late fetch must not override it. */
+  private _probeTouched = false;
 
   private _loaded = false;
 
@@ -194,7 +239,10 @@ export class PowerSensor extends LitElement {
       this._mode = this._readCurrentMode();
       this._buildProbeList();
       if (this._mode === "schedule") this._loadSchedule();
-      if (this._mode === "sensor") this._loadSensorConfig();
+      if (this._mode === "sensor") {
+        this._loadSensorConfig();
+        void this._fetchControlProbes();
+      }
       this._loaded = true;
     }
   }
@@ -270,8 +318,17 @@ export class PowerSensor extends LitElement {
 
   private _readCurrentMode(): SocketMode {
     const m = this._entityState("socket_mode");
-    if (m === "on" || m === "off" || m === "schedule" || m === "sensor")
+    this._override = null;
+    if (m === "on" || m === "off") {
+      // Forced by hand out of an automatic mode: open on that mode
+      const prev = this._entityState("socket_prev_mode");
+      if (prev === "schedule" || prev === "sensor") {
+        this._override = { mode: prev, state: m };
+        return prev;
+      }
       return m;
+    }
+    if (m === "schedule" || m === "sensor") return m;
     return "on";
   }
 
@@ -280,7 +337,46 @@ export class PowerSensor extends LitElement {
     this._mode = mode;
     this._saveError = null;
     if (mode === "schedule" && !this._scheduleLoaded) this._loadSchedule();
-    if (mode === "sensor") this._buildProbeList();
+    if (mode === "sensor") {
+      this._buildProbeList();
+      void this._fetchControlProbes();
+    }
+  }
+
+  /**
+   * Resume the automatic mode a manual on/off suspended.
+   *
+   * Only the mode is written back: the schedule or the probe subscription
+   * are still stored on the device, so they are left untouched.
+   */
+  private async _resume(): Promise<void> {
+    const deviceId = this._configEntry();
+    if (!deviceId || !this.hass || !this._override) return;
+    this._saving = true;
+    this._saveError = null;
+    try {
+      const body: Record<string, unknown> = {
+        number: this._socketNum(),
+        mode: this._override.mode,
+      };
+      const name = this._socketName();
+      if (name) body["name"] = name;
+      await this.hass.callService("redsea", "request", {
+        device_id: deviceId,
+        access_path: "/sockets/config",
+        method: "put",
+        data: { sockets: [body] },
+        refresh: "config",
+        wait: 2,
+      });
+      this.dispatchEvent(
+        new CustomEvent("quit-dialog", { bubbles: true, composed: true }),
+      );
+    } catch (err: any) {
+      this._saveError = String(err?.message ?? err ?? "Save failed");
+    } finally {
+      this._saving = false;
+    }
   }
 
   // ── Schedule helpers ────────────────────────────────────────────────────
@@ -432,11 +528,52 @@ export class PowerSensor extends LitElement {
     const inner = cfg.sensor ?? {};
     if (inner.default_state !== undefined)
       this._fallbackOn = Boolean(inner.default_state);
-    const appCache: string = inner.app_cache ?? "";
-    if (appCache) {
-      const idx = this._probeOptions.findIndex((p) => p.type === appCache);
-      if (idx >= 0) this._probeIdx = idx;
+    this._selectConfiguredProbe();
+  }
+
+  /** Select the probe type the socket is currently subscribed to. */
+  private _selectConfiguredProbe(): void {
+    const cfg = this._entityAttr("socket_mode", "sensor_config");
+    const appCache: string = cfg?.sensor?.app_cache ?? "";
+    if (!appCache) return;
+    const idx = this._probeOptions.findIndex((p) => p.type === appCache);
+    if (idx >= 0) this._probeIdx = idx;
+  }
+
+  /**
+   * Fetch the probes of the paired RSControl, once per hub.
+   *
+   * The list comes from `redsea.get_control_probes`: it covers every probe
+   * the hub reports, including those without a matching entity. A failed
+   * call leaves the hub probes out rather than blocking the editor.
+   */
+  private async _fetchControlProbes(): Promise<void> {
+    const strip = this._strip();
+    if (!strip?.has_control_link?.()) return;
+    const hwid: string | null = strip.linked_control_hwid?.() ?? null;
+    if (!hwid || hwid === this._controlProbesHwid) return;
+    if (typeof this.hass?.callWS !== "function") return;
+
+    this._controlProbesHwid = hwid;
+    this._probesLoading = true;
+    try {
+      const answer = await this.hass.callWS({
+        type: "call_service",
+        domain: "redsea",
+        service: "get_control_probes",
+        service_data: { hwid },
+        return_response: true,
+      });
+      const probes = answer?.response?.probes;
+      this._controlProbes = Array.isArray(probes) ? probes : [];
+    } catch (err) {
+      console.warn("RSPower: cannot read the RSControl probes", err);
+      this._controlProbes = [];
+    } finally {
+      this._probesLoading = false;
     }
+    this._buildProbeList();
+    if (!this._probeTouched) this._selectConfiguredProbe();
   }
 
   private _buildProbeList(): void {
@@ -459,111 +596,43 @@ export class PowerSensor extends LitElement {
     }
     // ── RSControl probes ──────────────────────────────────────────────────
     const strip = this._strip();
-    if (strip?.has_control_link?.()) {
-      const controlDev = strip.linked_control_device?.();
-      if (controlDev && this.hass?.entities) {
-        // Probe types and their sub-sensors to offer
-        // Types come from DEX DeviceSubscriberType / ControlProbeType
-        const candidates: Array<{
-          type: ProbeTypeId;
-          sensor: SubSensor;
-          tkMatch: string;
-          labelKey: string;
-        }> = [
-          {
-            type: "ph",
+    if (strip?.has_control_link?.() && this._controlProbes) {
+      const hub = strip.linked_control_name?.() || "RSControl";
+      const control: ProbeOption[] = [];
+      for (const t of CONTROL_PROBE_TYPES) {
+        for (const p of this._controlProbes) {
+          if (p?.type !== t.type) continue;
+          const name = p.name || i18n._(t.labelKey);
+          const state =
+            p.status === "disconnected"
+              ? ` (${i18n._("sensor_probe_disconnected")})`
+              : "";
+          const uid = String(p.uid ?? "");
+          control.push({
+            label: `${hub} — ${name}${state}`,
+            uid,
+            type: t.type,
             sensor: "primary",
-            tkMatch: "ph",
-            labelKey: "sensor_ph",
-          },
-          {
-            type: "ph",
-            sensor: "temperature",
-            tkMatch: "ph",
-            labelKey: "sensor_ph_temp",
-          },
-          {
-            type: "orp",
-            sensor: "primary",
-            tkMatch: "orp",
-            labelKey: "sensor_orp",
-          },
-          {
-            type: "ec",
-            sensor: "primary",
-            tkMatch: "ec",
-            labelKey: "sensor_ec",
-          },
-          {
-            type: "ec",
-            sensor: "temperature",
-            tkMatch: "ec",
-            labelKey: "sensor_ec_temp",
-          },
-          {
-            type: "temperature",
-            sensor: "primary",
-            tkMatch: "temperature",
-            labelKey: "sensor_temp",
-          },
-          {
-            type: "ato",
-            sensor: "primary",
-            tkMatch: "ato",
-            labelKey: "sensor_ato",
-          },
-          {
-            type: "leak",
-            sensor: "primary",
-            tkMatch: "leak",
-            labelKey: "sensor_leak",
-          },
-        ];
-
-        // Build a map of probe type → [entities] for this RSControl device
-        const probeEntities = new Map<string, any[]>();
-        for (const eid in this.hass.entities) {
-          const e = this.hass.entities[eid];
-          if (e?.device_id !== controlDev.id) continue;
-          const tk: string = e?.translation_key ?? "";
-          if (!tk) continue;
-          // Match by prefix (e.g. "ph_value" → type "ph")
-          for (const c of candidates) {
-            if (tk === c.tkMatch || tk.startsWith(c.tkMatch + "_")) {
-              if (!probeEntities.has(c.tkMatch))
-                probeEntities.set(c.tkMatch, []);
-              probeEntities.get(c.tkMatch)!.push(e);
-              break;
-            }
-          }
-        }
-
-        const devName =
-          controlDev.name_by_user || controlDev.name || "RSControl";
-
-        for (const c of candidates) {
-          const ents = probeEntities.get(c.tkMatch);
-          if (!ents?.length) continue;
-
-          // For temperature sub-sensor, only add if a dedicated temp entity exists
-          if (c.sensor === "temperature" && !probeEntities.has("temperature"))
-            continue;
-
-          // Get uid from the first entity's state attributes
-          const stateObj = this.hass.states?.[ents[0].entity_id];
-          const uid = stateObj?.attributes?.uid ?? ents[0].entity_id;
-
-          // One entry per candidate: every (type, sensor) pair of the table
-          // above is unique, so no de-duplication is needed here.
-          options.push({
-            label: `${devName} — ${i18n._(c.labelKey)}`,
-            uid: String(uid),
-            type: c.type,
-            sensor: c.sensor,
             from_control: true,
           });
+          if (t.hasTemp && p.temp_value !== undefined && p.temp_value !== null)
+            control.push({
+              label: `${hub} — ${name} · ${i18n._("sensor_temp")}${state}`,
+              uid,
+              type: t.type,
+              sensor: "temperature",
+              from_control: true,
+            });
         }
       }
+      // Two probes of the same type and name (e.g. two ATO sensors) would
+      // read the same: tell them apart by their hardware uid.
+      const seen = new Map<string, number>();
+      for (const o of control) seen.set(o.label, (seen.get(o.label) ?? 0) + 1);
+      for (const o of control) {
+        if (seen.get(o.label)! > 1 && o.uid) o.label += ` [${o.uid}]`;
+      }
+      options.push(...control);
     }
 
     this._probeOptions = options;
@@ -574,6 +643,7 @@ export class PowerSensor extends LitElement {
     const idx = Number((e.target as HTMLSelectElement).value);
     if (idx === this._probeIdx) return;
     this._probeIdx = idx;
+    this._probeTouched = true;
     const probe = this._probeOptions[idx];
     if (!probe) return;
     const def = PROBE_TYPES[probe.type];
@@ -717,7 +787,7 @@ export class PowerSensor extends LitElement {
 
   override render(): TemplateResult {
     return html`
-      ${this._renderModeSelector()}
+      ${this._renderModeSelector()} ${this._renderOverride()}
       ${this._mode === "schedule"
         ? html`<div class="sce-divider"></div>
             ${this._renderSchedule()}`
@@ -759,10 +829,44 @@ export class PowerSensor extends LitElement {
                   style="--mdc-icon-size:18px"
                 ></ha-icon>
                 ${i18n._(m.labelKey)}
+                ${this._override?.mode === m.id
+                  ? html`<ha-icon
+                      class="sce-mode-paused"
+                      icon="mdi:hand-back-left-outline"
+                    ></ha-icon>`
+                  : nothing}
               </button>
             `,
           )}
         </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Notice shown while the selected mode is the automatic one a manual
+   * on/off suspended, with a button to resume it as configured.
+   */
+  private _renderOverride(): TemplateResult | typeof nothing {
+    const o = this._override;
+    if (!o || this._mode !== o.mode) return nothing;
+    const mode = i18n._(MODE_DEFS.find((m) => m.id === o.mode)!.labelKey);
+    return html`
+      <div class="sce-override">
+        <div>
+          ${i18n._("sensor_override_notice", {
+            mode,
+            state: i18n._(o.state === "on" ? "sched_on" : "sched_off"),
+          })}
+        </div>
+        <button
+          class="sce-resume-btn"
+          ?disabled="${this._saving}"
+          @click="${this._resume}"
+        >
+          <ha-icon icon="mdi:play-circle-outline"></ha-icon>
+          ${i18n._("sensor_override_resume", { mode })}
+        </button>
       </div>
     `;
   }
@@ -840,7 +944,11 @@ export class PowerSensor extends LitElement {
 
   private _renderSensor(): TemplateResult {
     if (this._probeOptions.length === 0) {
-      return html`<div class="sce-error">${i18n._("sensor_no_probe")}</div>`;
+      return this._probesLoading
+        ? html`<div class="sce-ato-info">
+            ${i18n._("sensor_probes_loading")}
+          </div>`
+        : html`<div class="sce-error">${i18n._("sensor_no_probe")}</div>`;
     }
 
     const probe = this._probeOptions[this._probeIdx];

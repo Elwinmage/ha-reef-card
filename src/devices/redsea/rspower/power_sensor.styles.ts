@@ -54,6 +54,12 @@ export default css`
     font-weight: 600;
   }
 
+  /* Marks the automatic mode a manual on/off suspended */
+  .sce-mode-paused {
+    --mdc-icon-size: 14px;
+    color: var(--warning-color, #e6a23c);
+  }
+
   .sce-mode-btn:disabled {
     opacity: 0.35;
     cursor: default;
@@ -229,6 +235,39 @@ export default css`
   }
 
   /* ── ATO info ───────────────────────────────────────────────────────── */
+  /* ── Manual override notice ──────────────────────────────────────── */
+  .sce-override {
+    margin-top: 8px;
+    padding: 8px 11px;
+    border-radius: 6px;
+    background: rgba(230, 162, 60, 0.12);
+    border-left: 3px solid var(--warning-color, #e6a23c);
+    font-size: 0.82em;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sce-resume-btn {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid var(--warning-color, #e6a23c);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--primary-text-color, #000);
+    font-size: 1em;
+    cursor: pointer;
+    --mdc-icon-size: 16px;
+  }
+
+  .sce-resume-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
   .sce-ato-info {
     padding: 8px 11px;
     border-radius: 6px;

@@ -153,7 +153,8 @@ class TranslationVerifier:
         self.key_locations: Dict[str, List[Dict]] = defaultdict(list)
         
         # Pattern to match i18n._('key') or i18n._("key")
-        pattern_i18n = r"i18n\._\(['\"]([^'\"]+)['\"]\)"
+        # The key may be followed by a params object: i18n._('key', {...}).
+        pattern_i18n = r"i18n\._\(\s*['\"]([^'\"]+)['\"]\s*[,)]"
 
         # Pattern to match the helpers whose first argument is rendered as a
         # label through i18n._(key), so the literal id is a translation key:
@@ -254,6 +255,9 @@ class TranslationVerifier:
 
                 # --- Line-by-line scan: i18n._() ---
                 for line_num, line in enumerate(lines, 1):
+                    # Usage examples in doc comments are not real calls
+                    if line.lstrip().startswith(("*", "/*", "//")):
+                        continue
                     for match in re.finditer(pattern_i18n, line):
                         add_key(match.group(1), make_context(line_num))
 

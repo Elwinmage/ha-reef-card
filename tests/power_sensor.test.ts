@@ -8,7 +8,11 @@
  * versus a ReefControl probe), and that a failed request is reported in the
  * dialog instead of closing it.
  *
- * The rest covers the probe list built from the Home Assistant registries,
+ * The RSControl probes come from the `redsea.get_control_probes` service; a
+ * socket forced on/off by hand out of an automatic mode opens on that mode
+ * with a notice and a resume button.
+ *
+ * The rest covers the probe list built from the hub's answer,
  * the schedule interval editing, the canvas drawing guards and the template
  * wiring, which is exercised through a mounted element so every event handler
  * is really fired.
@@ -89,16 +93,61 @@ function attachCanvas(el: any, width = 400, height = 64, ctx: any = makeCtx()) {
   return { ctx, canvas };
 }
 
+/**
+ * Probes as `redsea.get_control_probes` reports them for a real hub
+ * (trimmed to the fields the editor reads).
+ */
+const HUB_PROBES = [
+  {
+    type: "ec",
+    uid: "0x007BF",
+    name: "Salinity temp",
+    status: "auto",
+    temp_value: 29.2,
+  },
+  {
+    type: "temperature",
+    uid: "0x000F7",
+    name: "Temperature",
+    status: "disconnected",
+  },
+  {
+    type: "ato",
+    uid: "0x0024E",
+    name: "ATO",
+    status: "auto",
+    temp_value: 28.6,
+  },
+  { type: "leak", uid: "0x0032B", name: "Leak", status: "setup" },
+  {
+    type: "ato",
+    uid: "0x0097E",
+    name: "ATO",
+    status: "auto",
+    temp_value: 25.2,
+  },
+  {
+    type: "ph",
+    uid: "0x00B39",
+    name: "pH",
+    status: "disconnected",
+    temp_value: 28,
+  },
+  { type: "orp", uid: "0x0071F", name: "ORP", status: "disconnected" },
+];
+
 interface SetupOptions {
   mode?: string | null;
+  prevMode?: string | null;
   name?: string | null;
   temperature?: string | null;
   schedule?: any;
   sensorConfig?: any;
   control?: boolean;
-  controlDevice?: any;
-  controlEntities?: Record<string, any>;
-  controlStates?: Record<string, any>;
+  hubName?: string;
+  /** Answer of get_control_probes; preloaded unless `fetched` is false. */
+  probes?: any[];
+  fetched?: boolean;
   entry?: string | null;
 }
 
@@ -111,25 +160,29 @@ interface SetupOptions {
 function makeSetup(opts: SetupOptions = {}) {
   const {
     mode = "on",
+    prevMode = null,
     name = "Heater",
     temperature = "25.1",
     schedule,
     sensorConfig,
     control = false,
-    controlDevice = { id: "ctl", name: "Hub" },
-    controlEntities = {},
-    controlStates = {},
+    hubName = "Hub",
+    probes = [],
     entry = "entry-1",
   } = opts;
 
   const entities: Record<string, any> = {};
-  const states: Record<string, any> = { ...controlStates };
+  const states: Record<string, any> = {};
   if (mode !== null) {
     entities.socket_mode = { entity_id: "sensor.mode" };
     states["sensor.mode"] = {
       state: mode,
       attributes: { schedule, sensor_config: sensorConfig },
     };
+  }
+  if (prevMode !== null) {
+    entities.socket_prev_mode = { entity_id: "sensor.prev" };
+    states["sensor.prev"] = { state: prevMode };
   }
   if (name !== null) {
     entities.socket_name = { entity_id: "sensor.name" };
@@ -143,23 +196,31 @@ function makeSetup(opts: SetupOptions = {}) {
   const strip = {
     elements: entry ? [{ primary_config_entry: entry }] : [],
     has_control_link: () => control,
-    linked_control_device: () => controlDevice,
+    linked_control_hwid: () => (control ? "d4e9f4e89208" : null),
+    linked_control_name: () => hubName,
   };
   const socket = { socket_id: 2, entities, device: strip };
   const hass = {
     states,
-    entities: controlEntities,
     callService: vi.fn().mockResolvedValue(undefined),
+    callWS: vi.fn().mockResolvedValue({ response: { probes } }),
   };
   return { socket, strip, hass };
 }
 
-/** An element wired to a setup, built without being connected. */
+/**
+ * An element wired to a setup, built without being connected. The hub
+ * probes are preloaded, as after a completed fetch, unless `fetched` is false.
+ */
 function makeElement(opts: SetupOptions = {}): any {
   const { socket, hass } = makeSetup(opts);
   const el = new StubPowerSensor() as any;
   el.device = socket;
   el.hass = hass;
+  if (opts.control && opts.fetched !== false) {
+    el._controlProbes = opts.probes ?? [];
+    el._controlProbesHwid = "d4e9f4e89208";
+  }
   return el;
 }
 
@@ -171,20 +232,10 @@ async function mount(opts: SetupOptions = {}): Promise<any> {
   return el;
 }
 
-/** ReefControl registry entries for the given translation keys. */
-function controlRegistry(
-  keys: string[],
-  device_id = "ctl",
-): Record<string, any> {
-  const out: Record<string, any> = {};
-  keys.forEach((tk, i) => {
-    out[`sensor.ctl_${i}`] = {
-      entity_id: `sensor.ctl_${i}`,
-      device_id,
-      translation_key: tk,
-    };
-  });
-  return out;
+/** Let pending promises (the probe fetch) settle, then re-render. */
+async function settle(el: any): Promise<void> {
+  for (let i = 0; i < 3; i++) await Promise.resolve();
+  await el.updateComplete;
 }
 
 /** Buttons of the rendered element, matched on their text. */
@@ -699,7 +750,7 @@ describe("PowerSensor sensor configuration", () => {
   it("reads every threshold field", () => {
     const el = makeElement({
       control: true,
-      controlEntities: controlRegistry(["ph_value"]),
+      probes: [{ type: "ph", uid: "0x1", name: "pH" }],
       sensorConfig: {
         is_above: 0,
         value: "7.9",
@@ -768,10 +819,8 @@ describe("PowerSensor probe list", () => {
 
   it("copes with a strip that knows nothing of ReefControl", () => {
     const el = makeElement({ temperature: null });
+    el._controlProbes = HUB_PROBES;
     el.device = { entities: {}, device: {} };
-    el._buildProbeList();
-    expect(el._probeOptions).toEqual([]);
-    el.device = { entities: {}, device: { has_control_link: () => true } };
     el._buildProbeList();
     expect(el._probeOptions).toEqual([]);
     el.device = null;
@@ -779,119 +828,119 @@ describe("PowerSensor probe list", () => {
     expect(el._probeOptions).toEqual([]);
   });
 
-  it("needs the ReefControl device and the entity registry", () => {
-    const noDevice = makeElement({
-      temperature: null,
-      control: true,
-      controlDevice: null,
-      controlEntities: controlRegistry(["ph"]),
-    });
-    noDevice._buildProbeList();
-    expect(noDevice._probeOptions).toEqual([]);
-
-    const noRegistry = makeElement({ temperature: null, control: true });
-    noRegistry.hass.entities = undefined;
-    noRegistry._buildProbeList();
-    expect(noRegistry._probeOptions).toEqual([]);
-  });
-
-  it("lists the ReefControl probes in a fixed order", () => {
+  it("offers nothing from the hub before its probes are known", () => {
     const el = makeElement({
       temperature: null,
       control: true,
-      controlEntities: controlRegistry([
-        "leak",
-        "ato_level",
-        "temperature",
-        "ec_value",
-        "orp",
-        "ph_value",
-        "ph_temperature",
-      ]),
-    });
-    el._buildProbeList();
-    expect(el._probeOptions.map((p: any) => `${p.type}:${p.sensor}`)).toEqual([
-      "ph:primary",
-      "ph:temperature",
-      "orp:primary",
-      "ec:primary",
-      "ec:temperature",
-      "temperature:primary",
-      "ato:primary",
-      "leak:primary",
-    ]);
-    expect(el._probeOptions[0].label).toBe("Hub — pH");
-    expect(el._probeOptions.every((p: any) => p.from_control)).toBe(true);
-  });
-
-  it("offers the temperature half of a dual probe only with a temperature entity", () => {
-    const el = makeElement({
-      temperature: null,
-      control: true,
-      controlEntities: controlRegistry(["ph_value", "ec"]),
-    });
-    el._buildProbeList();
-    expect(el._probeOptions.map((p: any) => p.sensor)).toEqual([
-      "primary",
-      "primary",
-    ]);
-  });
-
-  it("skips entities of other devices, without key or unknown", () => {
-    const el = makeElement({
-      temperature: null,
-      control: true,
-      controlEntities: {
-        ...controlRegistry(["ph"], "other"),
-        "sensor.nokey": { entity_id: "sensor.nokey", device_id: "ctl" },
-        "sensor.empty": {
-          entity_id: "sensor.empty",
-          device_id: "ctl",
-          translation_key: "",
-        },
-        "sensor.phosphate": {
-          entity_id: "sensor.phosphate",
-          device_id: "ctl",
-          translation_key: "phosphate",
-        },
-        "sensor.null": null,
-      },
+      fetched: false,
     });
     el._buildProbeList();
     expect(el._probeOptions).toEqual([]);
   });
 
-  it("takes the probe uid from its state, else from its entity id", () => {
+  it("lists every probe the hub reports, grouped by type", () => {
+    // The hub of the bug report: only temperature and leak were offered
     const el = makeElement({
       temperature: null,
       control: true,
-      controlEntities: controlRegistry(["ph", "ph_temp_x", "orp"]),
-      controlStates: { "sensor.ctl_0": { attributes: { uid: 42 } } },
+      probes: HUB_PROBES,
     });
     el._buildProbeList();
-    expect(el._probeOptions[0].uid).toBe("42");
-    expect(el._probeOptions[1].uid).toBe("sensor.ctl_2");
-
-    el.hass.states = undefined;
-    el._buildProbeList();
-    expect(el._probeOptions[0].uid).toBe("sensor.ctl_0");
+    expect(
+      el._probeOptions.map((p: any) => `${p.type}:${p.sensor}:${p.uid}`),
+    ).toEqual([
+      "ph:primary:0x00B39",
+      "ph:temperature:0x00B39",
+      "orp:primary:0x0071F",
+      "ec:primary:0x007BF",
+      "ec:temperature:0x007BF",
+      "temperature:primary:0x000F7",
+      "ato:primary:0x0024E",
+      "ato:primary:0x0097E",
+      "leak:primary:0x0032B",
+    ]);
+    expect(el._probeOptions.every((p: any) => p.from_control)).toBe(true);
   });
 
-  it("names the probes after the ReefControl device", () => {
-    const named = (device: any) => {
-      const el = makeElement({
-        temperature: null,
-        control: true,
-        controlDevice: device,
-        controlEntities: controlRegistry(["orp"]),
-      });
-      el._buildProbeList();
-      return el._probeOptions[0].label;
-    };
-    expect(named({ id: "ctl", name: "Hub", name_by_user: "Mine" })).toBe(
-      "Mine — ORP",
-    );
-    expect(named({ id: "ctl" })).toBe("RSControl — ORP");
+  it("labels the probes with the hub and probe names", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      probes: HUB_PROBES,
+    });
+    el._buildProbeList();
+    const labels = el._probeOptions.map((p: any) => p.label);
+    expect(labels).toContain("Hub — pH (disconnected)");
+    expect(labels).toContain("Hub — pH · Temperature (disconnected)");
+    expect(labels).toContain("Hub — Salinity temp");
+    expect(labels).toContain("Hub — Salinity temp · Temperature");
+    expect(labels).toContain("Hub — Leak");
+  });
+
+  it("tells two probes with the same name apart by their uid", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      probes: HUB_PROBES,
+    });
+    el._buildProbeList();
+    const ato = el._probeOptions
+      .filter((p: any) => p.type === "ato")
+      .map((p: any) => p.label);
+    expect(ato).toEqual(["Hub — ATO [0x0024E]", "Hub — ATO [0x0097E]"]);
+  });
+
+  it("does not add a uid to duplicates that have none", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      probes: [{ type: "leak" }, { type: "leak" }],
+    });
+    el._buildProbeList();
+    expect(el._probeOptions.map((p: any) => p.label)).toEqual([
+      "Hub — Leak detector",
+      "Hub — Leak detector",
+    ]);
+    expect(el._probeOptions[0].uid).toBe("");
+  });
+
+  it("falls back to the type label and the default hub name", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      hubName: "",
+      probes: [{ type: "orp", uid: "0x1" }],
+    });
+    el._buildProbeList();
+    expect(el._probeOptions[0].label).toBe("RSControl — ORP");
+  });
+
+  it("offers a temperature half only for dual probes with a reading", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      probes: [
+        { type: "ph", uid: "a", name: "pH" },
+        { type: "ec", uid: "b", name: "EC", temp_value: null },
+        { type: "ato", uid: "c", name: "ATO", temp_value: 25 },
+      ],
+    });
+    el._buildProbeList();
+    expect(el._probeOptions.map((p: any) => p.sensor)).toEqual([
+      "primary",
+      "primary",
+      "primary",
+    ]);
+  });
+
+  it("ignores unknown probe types and empty entries", () => {
+    const el = makeElement({
+      temperature: null,
+      control: true,
+      probes: [null, { type: "par", uid: "x" }, { uid: "y" }],
+    });
+    el._buildProbeList();
+    expect(el._probeOptions).toEqual([]);
   });
 
   it("resets the selection when it no longer exists", () => {
@@ -904,7 +953,7 @@ describe("PowerSensor probe list", () => {
   it("changing probe restores that type's defaults", () => {
     const el = makeElement({
       control: true,
-      controlEntities: controlRegistry(["orp"]),
+      probes: [{ type: "orp", uid: "0x1", name: "ORP" }],
     });
     el._buildProbeList();
     el._isAbove = false;
@@ -917,6 +966,7 @@ describe("PowerSensor probe list", () => {
     expect(el._isAbove).toBe(true);
     expect(el._turnOn).toBe(true);
     expect(el._fallbackOn).toBe(false);
+    expect(el._probeTouched).toBe(true);
   });
 
   it("selecting the current probe or a missing one changes nothing", () => {
@@ -928,6 +978,276 @@ describe("PowerSensor probe list", () => {
     el._onProbeChange({ target: { value: "5" } });
     expect(el._probeIdx).toBe(5);
     expect(el._value).toBe(30);
+  });
+});
+
+// ─── RSControl probe fetch ──────────────────────────────────────────────────
+
+describe("PowerSensor RSControl probes", () => {
+  it("asks the integration for the hub's probes when opened in sensor mode", async () => {
+    const el = await mount({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      fetched: false,
+      probes: HUB_PROBES,
+    });
+    expect(el.hass.callWS).toHaveBeenCalledWith({
+      type: "call_service",
+      domain: "redsea",
+      service: "get_control_probes",
+      service_data: { hwid: "d4e9f4e89208" },
+      return_response: true,
+    });
+    await settle(el);
+    expect(el._probeOptions.length).toBe(9);
+    expect(el.shadowRoot.querySelectorAll("option").length).toBe(9);
+  });
+
+  it("shows a loading notice until the probes arrive", async () => {
+    let answer: (v: any) => void = () => {};
+    const el = makeElement({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      fetched: false,
+    });
+    el.hass.callWS.mockReturnValue(new Promise((r) => (answer = r)));
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.shadowRoot.textContent).toContain("Loading the RSControl probes");
+    answer({ response: { probes: [{ type: "orp", uid: "0x1" }] } });
+    await settle(el);
+    expect(el._probesLoading).toBe(false);
+    expect(el.shadowRoot.querySelector("select")).not.toBeNull();
+  });
+
+  it("selects the configured probe once the list arrives", async () => {
+    let answer: (v: any) => void = () => {};
+    const el = makeElement({
+      mode: "sensor",
+      temperature: "25",
+      control: true,
+      fetched: false,
+      sensorConfig: { sensor: { app_cache: "leak" } },
+    });
+    el.hass.callWS.mockReturnValue(new Promise((r) => (answer = r)));
+    document.body.appendChild(el);
+    await el.updateComplete;
+    // Only the local probe is known until the hub answers
+    expect(el._probeIdx).toBe(0);
+    answer({ response: { probes: [{ type: "leak", uid: "0x1" }] } });
+    await settle(el);
+    expect(el._probeIdx).toBe(1);
+  });
+
+  it("keeps a probe the user picked while the list was loading", async () => {
+    let answer: (v: any) => void = () => {};
+    const el = makeElement({
+      mode: "sensor",
+      control: true,
+      fetched: false,
+      sensorConfig: { sensor: { app_cache: "leak" } },
+    });
+    el.hass.callWS.mockReturnValue(new Promise((r) => (answer = r)));
+    document.body.appendChild(el);
+    await el.updateComplete;
+    el._probeTouched = true;
+    el._probeIdx = 0;
+    answer({ response: { probes: [{ type: "leak", uid: "0x1" }] } });
+    await settle(el);
+    expect(el._probeIdx).toBe(0);
+  });
+
+  it("fetches the probes once per hub", async () => {
+    const el = await mount({
+      mode: "on",
+      control: true,
+      fetched: false,
+      probes: HUB_PROBES,
+    });
+    expect(el.hass.callWS).not.toHaveBeenCalled();
+    el._onModeClick("sensor");
+    await settle(el);
+    el._onModeClick("on");
+    el._onModeClick("sensor");
+    await settle(el);
+    expect(el.hass.callWS).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not ask without a paired hub, its hwid or callWS", async () => {
+    const unpaired = makeElement({ control: false });
+    await unpaired._fetchControlProbes();
+    expect(unpaired.hass.callWS).not.toHaveBeenCalled();
+
+    const noHwid = makeElement({ control: true, fetched: false });
+    noHwid.device.device.linked_control_hwid = () => null;
+    await noHwid._fetchControlProbes();
+    expect(noHwid.hass.callWS).not.toHaveBeenCalled();
+
+    const oldStrip = makeElement({ control: true, fetched: false });
+    delete oldStrip.device.device.linked_control_hwid;
+    await oldStrip._fetchControlProbes();
+    expect(oldStrip.hass.callWS).not.toHaveBeenCalled();
+
+    const noWs = makeElement({ control: true, fetched: false });
+    noWs.hass.callWS = undefined;
+    await noWs._fetchControlProbes();
+    expect(noWs._controlProbes).toBeNull();
+
+    const noHass = makeElement({ control: true, fetched: false });
+    noHass.hass = null;
+    await expect(noHass._fetchControlProbes()).resolves.toBeUndefined();
+  });
+
+  it("reads an unexpected answer as no probe", async () => {
+    for (const answer of [null, {}, { response: { probes: "x" } }]) {
+      const el = makeElement({ control: true, fetched: false });
+      el.hass.callWS.mockResolvedValue(answer);
+      await el._fetchControlProbes();
+      expect(el._controlProbes).toEqual([]);
+    }
+  });
+
+  it("keeps the local probe when the service fails", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const el = makeElement({ control: true, fetched: false });
+    el.hass.callWS.mockRejectedValue(new Error("Service not found"));
+    await el._fetchControlProbes();
+    expect(warn).toHaveBeenCalled();
+    expect(el._probesLoading).toBe(false);
+    expect(el._probeOptions.map((p: any) => p.uid)).toEqual(["local"]);
+  });
+});
+
+// ─── Manual override ────────────────────────────────────────────────────────
+
+describe("PowerSensor manual override", () => {
+  it.each([
+    [
+      "sensor",
+      "on",
+      "Sensor mode suspended: the socket was switched ON manually.",
+    ],
+    [
+      "schedule",
+      "off",
+      "Schedule mode suspended: the socket was switched OFF manually.",
+    ],
+  ])(
+    "opens on the suspended %s mode of a socket forced %s",
+    async (prev, forced, notice) => {
+      const el = await mount({
+        mode: forced,
+        prevMode: prev,
+        schedule: { intervals: [] },
+      });
+      expect(el._mode).toBe(prev);
+      expect(el._override).toEqual({ mode: prev, state: forced });
+      const box = el.shadowRoot.querySelector(".sce-override");
+      expect(box.textContent.replace(/\s+/g, " ")).toContain(notice);
+      // The suspended mode is marked in the selector
+      const active = el.shadowRoot.querySelector(".sce-mode-btn.active");
+      expect(active.querySelector(".sce-mode-paused")).not.toBeNull();
+    },
+  );
+
+  it("loads the configuration of the suspended mode", async () => {
+    const el = await mount({
+      mode: "on",
+      prevMode: "sensor",
+      sensorConfig: { value: 27 },
+    });
+    expect(el._value).toBe(27);
+  });
+
+  it("is not an override when the previous mode was manual", async () => {
+    const el = await mount({ mode: "off", prevMode: "on" });
+    expect(el._mode).toBe("off");
+    expect(el._override).toBeNull();
+    expect(el.shadowRoot.querySelector(".sce-override")).toBeNull();
+  });
+
+  it("hides the notice while another mode is selected", async () => {
+    const el = await mount({ mode: "on", prevMode: "sensor" });
+    button(el, "Off").click();
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector(".sce-override")).toBeNull();
+  });
+
+  it("resumes the suspended mode without touching its configuration", async () => {
+    const el = await mount({ mode: "off", prevMode: "sensor" });
+    const quit = vi.fn();
+    el.addEventListener("quit-dialog", quit);
+    button(el, "Resume Sensor mode").click();
+    await settle(el);
+    expect(el.hass.callService).toHaveBeenCalledTimes(1);
+    expect(lastRequest(el)).toEqual({
+      device_id: "entry-1",
+      access_path: "/sockets/config",
+      method: "put",
+      data: { sockets: [{ number: 1, mode: "sensor", name: "Heater" }] },
+      refresh: "config",
+      wait: 2,
+    });
+    expect(quit).toHaveBeenCalled();
+    expect(el._saving).toBe(false);
+  });
+
+  it("resumes without a name when the socket has none", async () => {
+    const el = makeElement({ mode: "on", prevMode: "schedule", name: null });
+    el._readCurrentMode();
+    await el._resume();
+    expect(lastRequest(el).data.sockets[0]).toEqual({
+      number: 1,
+      mode: "schedule",
+    });
+  });
+
+  it("reports a failed resume and stays open", async () => {
+    const el = makeElement({ mode: "on", prevMode: "sensor" });
+    el._readCurrentMode();
+    el.hass.callService.mockRejectedValue(new Error("device offline"));
+    const quit = vi.fn();
+    el.addEventListener("quit-dialog", quit);
+    await el._resume();
+    expect(el._saveError).toBe("device offline");
+    expect(quit).not.toHaveBeenCalled();
+    for (const err of ["timeout", null]) {
+      el.hass.callService.mockRejectedValue(err);
+      await el._resume();
+      expect(el._saveError).toBe(err ?? "Save failed");
+    }
+  });
+
+  it("resumes nothing without override, config entry or hass", async () => {
+    const plain = makeElement({ mode: "on" });
+    plain._readCurrentMode();
+    await plain._resume();
+    expect(plain.hass.callService).not.toHaveBeenCalled();
+
+    const noEntry = makeElement({
+      mode: "on",
+      prevMode: "sensor",
+      entry: null,
+    });
+    noEntry._readCurrentMode();
+    await noEntry._resume();
+    expect(noEntry.hass.callService).not.toHaveBeenCalled();
+
+    const noHass = makeElement({ mode: "on", prevMode: "sensor" });
+    noHass._readCurrentMode();
+    const hass = noHass.hass;
+    noHass.hass = null;
+    await noHass._resume();
+    expect(hass.callService).not.toHaveBeenCalled();
+  });
+
+  it("disables the resume button while saving", async () => {
+    const el = await mount({ mode: "on", prevMode: "sensor" });
+    el._saving = true;
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector(".sce-resume-btn").disabled).toBe(true);
   });
 });
 
@@ -981,7 +1301,7 @@ describe("PowerSensor sensor rendering", () => {
     const el = await mount({
       mode: "sensor",
       control: true,
-      controlEntities: controlRegistry(["leak"]),
+      probes: [{ type: "leak", uid: "0x1", name: "Leak" }],
     });
     const select = el.shadowRoot.querySelector("select") as HTMLSelectElement;
     select.value = "1";
@@ -998,7 +1318,7 @@ describe("PowerSensor sensor rendering", () => {
       mode: "sensor",
       temperature: null,
       control: true,
-      controlEntities: controlRegistry(["ato"]),
+      probes: [{ type: "ato", uid: "0x1", name: "ATO" }],
     });
     expect(el.shadowRoot.querySelector(".sce-ato-info")).not.toBeNull();
     expect(el.shadowRoot.querySelector(".sce-params")).toBeNull();
@@ -1157,7 +1477,7 @@ describe("PowerSensor save", () => {
     const el = makeElement({
       temperature: null,
       control: true,
-      controlEntities: controlRegistry(["orp"]),
+      probes: [{ type: "orp", uid: "0x1", name: "ORP" }],
     });
     el._mode = "sensor";
     el._buildProbeList();
