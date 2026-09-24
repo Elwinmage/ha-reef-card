@@ -1,6 +1,13 @@
 repos:
   - repo: local
     hooks:
+      - id: display_banner
+        name: Header Banner
+        language: system
+        verbose: true
+        pass_filenames: false
+        entry: bash -c 'echo -e "\033[1;36m========================================================================\n                   🚀 EXÉCUTION DES VÉRIFICATIONS PRE-COMMIT\n                   $(date)\n========================================================================\033[0m"'
+
       - id: prettier
         name: Prettier
         entry: npx prettier --write
