@@ -8,7 +8,10 @@
  * versus a ReefControl probe), and that a failed request is reported in the
  * dialog instead of closing it.
  *
- * The RSControl probes come from the `redsea.get_control_probes` service; a
+ * The RSControl probes come from the `redsea.get_control_probes` service;
+ * the socket's rule is read from the `sensor_config` attribute, in its local
+ * or RSControl shape; the requests sent on save replay captures of the Red
+ * Sea app. A
  * socket forced on/off by hand out of an automatic mode opens on that mode
  * with a notice and a resume button.
  *
@@ -136,6 +139,76 @@ const HUB_PROBES = [
   { type: "orp", uid: "0x0071F", name: "ORP", status: "disconnected" },
 ];
 
+/**
+ * The hub's GET /subscription-info after the app configured all six
+ * sockets: the integration copies each socket's rule into the
+ * `sensor_config` attribute of its socket_mode entity.
+ */
+const HUB_RULES = [
+  {
+    number: 0,
+    type: "ph",
+    uid: "0x00B39",
+    trigger_op: false,
+    last_sock_op: "on",
+    sensor: "primary",
+    value: 8.199999809265137,
+    is_above: true,
+    hysteresis: 0.5,
+  },
+  {
+    number: 1,
+    type: "orp",
+    uid: "0x0071F",
+    trigger_op: false,
+    last_sock_op: "on",
+    sensor: "primary",
+    value: 420,
+    is_above: true,
+    hysteresis: 25,
+  },
+  {
+    number: 2,
+    type: "ec",
+    uid: "0x007BF",
+    trigger_op: false,
+    last_sock_op: "on",
+    sensor: "primary",
+    value: 53.0999984741211,
+    is_above: true,
+    hysteresis: 0.9800000190734863,
+  },
+  {
+    number: 3,
+    type: "temperature",
+    uid: "0x000F7",
+    trigger_op: false,
+    last_sock_op: "off",
+    sensor: "primary",
+    value: 25,
+    is_above: true,
+    hysteresis: 0.5,
+  },
+  {
+    number: 4,
+    type: "ato",
+    uid: "0x0097E",
+    trigger_op: false,
+    last_sock_op: "off",
+    sensor: "temperature",
+    value: 25,
+    is_above: true,
+    hysteresis: 0.5,
+  },
+  {
+    number: 5,
+    type: "ato",
+    uid: "0x0024E",
+    last_sock_op: "on",
+    sensor: "primary",
+  },
+];
+
 interface SetupOptions {
   mode?: string | null;
   prevMode?: string | null;
@@ -145,8 +218,12 @@ interface SetupOptions {
   sensorConfig?: any;
   control?: boolean;
   hubName?: string;
+  /** Config entry of the paired RSControl; null leaves it unknown. */
+  controlEntry?: string | null;
   /** Answer of get_control_probes; preloaded unless `fetched` is false. */
   probes?: any[];
+  /** `sensor_source` attribute of socket_mode ("local" / "control"). */
+  sensorSource?: string;
   fetched?: boolean;
   entry?: string | null;
 }
@@ -167,7 +244,9 @@ function makeSetup(opts: SetupOptions = {}) {
     sensorConfig,
     control = false,
     hubName = "Hub",
+    controlEntry = "ctl-entry",
     probes = [],
+    sensorSource,
     entry = "entry-1",
   } = opts;
 
@@ -177,7 +256,11 @@ function makeSetup(opts: SetupOptions = {}) {
     entities.socket_mode = { entity_id: "sensor.mode" };
     states["sensor.mode"] = {
       state: mode,
-      attributes: { schedule, sensor_config: sensorConfig },
+      attributes: {
+        schedule,
+        sensor_config: sensorConfig,
+        sensor_source: sensorSource,
+      },
     };
   }
   if (prevMode !== null) {
@@ -198,6 +281,8 @@ function makeSetup(opts: SetupOptions = {}) {
     has_control_link: () => control,
     linked_control_hwid: () => (control ? "d4e9f4e89208" : null),
     linked_control_name: () => hubName,
+    linked_control_device: () =>
+      control ? { primary_config_entry: controlEntry } : null,
   };
   const socket = { socket_id: 2, entities, device: strip };
   const hass = {
@@ -856,7 +941,9 @@ describe("PowerSensor probe list", () => {
       "ec:temperature:0x007BF",
       "temperature:primary:0x000F7",
       "ato:primary:0x0024E",
+      "ato:temperature:0x0024E",
       "ato:primary:0x0097E",
+      "ato:temperature:0x0097E",
       "leak:primary:0x0032B",
     ]);
     expect(el._probeOptions.every((p: any) => p.from_control)).toBe(true);
@@ -887,7 +974,12 @@ describe("PowerSensor probe list", () => {
     const ato = el._probeOptions
       .filter((p: any) => p.type === "ato")
       .map((p: any) => p.label);
-    expect(ato).toEqual(["Hub — ATO [0x0024E]", "Hub — ATO [0x0097E]"]);
+    expect(ato).toEqual([
+      "Hub — ATO [0x0024E]",
+      "Hub — ATO · Temperature [0x0024E]",
+      "Hub — ATO [0x0097E]",
+      "Hub — ATO · Temperature [0x0097E]",
+    ]);
   });
 
   it("does not add a uid to duplicates that have none", () => {
@@ -915,7 +1007,7 @@ describe("PowerSensor probe list", () => {
     expect(el._probeOptions[0].label).toBe("RSControl — ORP");
   });
 
-  it("offers a temperature half only for dual probes with a reading", () => {
+  it("offers a temperature half only for probes reporting one", () => {
     const el = makeElement({
       temperature: null,
       control: true,
@@ -923,14 +1015,35 @@ describe("PowerSensor probe list", () => {
         { type: "ph", uid: "a", name: "pH" },
         { type: "ec", uid: "b", name: "EC", temp_value: null },
         { type: "ato", uid: "c", name: "ATO", temp_value: 25 },
+        // A temperature probe is already a temperature reading
+        { type: "temperature", uid: "d", name: "T", temp_value: 25 },
       ],
     });
     el._buildProbeList();
-    expect(el._probeOptions.map((p: any) => p.sensor)).toEqual([
-      "primary",
-      "primary",
-      "primary",
+    expect(el._probeOptions.map((p: any) => `${p.type}:${p.sensor}`)).toEqual([
+      "ph:primary",
+      "ec:primary",
+      "temperature:primary",
+      "ato:primary",
+      "ato:temperature",
     ]);
+  });
+
+  it("gives the temperature half the temperature parameters", async () => {
+    const el = await mount({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      probes: [{ type: "ato", uid: "0x0097E", name: "ATO", temp_value: 25 }],
+    });
+    const select = el.shadowRoot.querySelector("select") as HTMLSelectElement;
+    select.value = "1";
+    select.dispatchEvent(new Event("change"));
+    await el.updateComplete;
+    // Not the ATO notice: a threshold, its direction and hysteresis
+    expect(el.shadowRoot.querySelector(".sce-ato-info")).toBeNull();
+    expect(el.shadowRoot.querySelectorAll(".sce-number-input").length).toBe(2);
+    expect(el._value).toBe(25);
   });
 
   it("ignores unknown probe types and empty entries", () => {
@@ -1000,8 +1113,8 @@ describe("PowerSensor RSControl probes", () => {
       return_response: true,
     });
     await settle(el);
-    expect(el._probeOptions.length).toBe(9);
-    expect(el.shadowRoot.querySelectorAll("option").length).toBe(9);
+    expect(el._probeOptions.length).toBe(11);
+    expect(el.shadowRoot.querySelectorAll("option").length).toBe(11);
   });
 
   it("shows a loading notice until the probes arrive", async () => {
@@ -1117,6 +1230,150 @@ describe("PowerSensor RSControl probes", () => {
     expect(warn).toHaveBeenCalled();
     expect(el._probesLoading).toBe(false);
     expect(el._probeOptions.map((p: any) => p.uid)).toEqual(["local"]);
+  });
+});
+
+// ─── Reading the socket rule back ───────────────────────────────────────────
+
+describe("PowerSensor rule read back", () => {
+  /**
+   * Socket `n` (0-based) of the capture, opened in sensor mode once the hub
+   * probes are known, with its rule in `sensor_config` as the integration
+   * exposes it for an RSControl probe.
+   */
+  async function openSocket(n: number, opts: SetupOptions = {}): Promise<any> {
+    const el = makeElement({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      fetched: false,
+      probes: HUB_PROBES,
+      sensorSource: "control",
+      sensorConfig: HUB_RULES.find((r) => r.number === n),
+      ...opts,
+    });
+    el.device.socket_id = n + 1;
+    document.body.appendChild(el);
+    await settle(el);
+    return el;
+  }
+
+  function selected(el: any): string {
+    const p = el._probeOptions[el._probeIdx];
+    return `${p.type}:${p.sensor}:${p.uid}`;
+  }
+
+  it("selects the exact probe among two of the same type", async () => {
+    // Sockets 4 and 5 both follow an ATO, but not the same one
+    expect(selected(await openSocket(4))).toBe("ato:temperature:0x0097E");
+    expect(selected(await openSocket(5))).toBe("ato:primary:0x0024E");
+  });
+
+  it("loads the thresholds kept on the hub, without float noise", async () => {
+    const ph = await openSocket(0);
+    expect(selected(ph)).toBe("ph:primary:0x00B39");
+    expect(ph._value).toBe(8.2);
+    expect(ph._hysteresis).toBe(0.5);
+    expect(ph._isAbove).toBe(true);
+    // trigger_op false: "turn the socket OFF when…"
+    expect(ph._turnOn).toBe(false);
+
+    const ec = await openSocket(2);
+    expect(ec._value).toBe(53.1);
+    expect(ec._hysteresis).toBe(0.98);
+  });
+
+  it("shows the loaded values in the form", async () => {
+    const el = await openSocket(1);
+    const [value, hysteresis] = Array.from(
+      el.shadowRoot.querySelectorAll(".sce-number-input"),
+    ) as HTMLInputElement[];
+    expect(value.value).toBe("420");
+    expect(hysteresis.value).toBe("25");
+  });
+
+  it("keeps the defaults of the fields a rule does not carry", async () => {
+    const el = await openSocket(5);
+    // Water-level rule: no threshold, trigger_op or direction
+    expect(el._value).toBe(25);
+    expect(el._turnOn).toBe(true);
+    expect(el._fallbackOn).toBe(false);
+  });
+
+  it("reads a rule without sub-sensor as the primary one", async () => {
+    const el = await openSocket(1, {
+      sensorConfig: { number: 1, type: "orp", uid: "0x0071F", value: 400 },
+    });
+    expect(selected(el)).toBe("orp:primary:0x0071F");
+    expect(el._value).toBe(400);
+  });
+
+  it("falls back to the probe type when the exact probe is gone", async () => {
+    const el = await openSocket(4, {
+      sensorConfig: { ...HUB_RULES[4], uid: "0xDEAD" },
+    });
+    expect(selected(el)).toBe("ato:primary:0x0024E");
+  });
+
+  it("matches by type only for a rule not tagged as a control one", async () => {
+    // Same rule without sensor_source: the uid is not trusted
+    const el = await openSocket(4, { sensorSource: undefined });
+    expect(selected(el)).toBe("ato:primary:0x0024E");
+  });
+
+  it("still reads the local probe shape", async () => {
+    const el = await openSocket(0, {
+      temperature: "25",
+      sensorSource: "local",
+      sensorConfig: {
+        sensor: { app_cache: "temperature", default_state: true },
+        value: 26.5,
+        is_above: false,
+        turn_on: false,
+        hysteresis: 0.3,
+      },
+    });
+    expect(selected(el)).toBe("temperature:primary:local");
+    expect(el._value).toBe(26.5);
+    expect(el._isAbove).toBe(false);
+    expect(el._turnOn).toBe(false);
+    expect(el._hysteresis).toBe(0.3);
+    expect(el._fallbackOn).toBe(true);
+  });
+
+  it("does not override a probe picked while loading", async () => {
+    let answer: (v: any) => void = () => {};
+    const el = makeElement({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      fetched: false,
+      sensorSource: "control",
+      sensorConfig: HUB_RULES[4],
+    });
+    el.hass.callWS.mockReturnValue(new Promise((r) => (answer = r)));
+    document.body.appendChild(el);
+    await el.updateComplete;
+    el._probeTouched = true;
+    el._probeIdx = 0;
+    answer({ response: { probes: HUB_PROBES } });
+    await settle(el);
+    expect(el._probeIdx).toBe(0);
+  });
+
+  it("round-trips the capture: what is read back saves unchanged", async () => {
+    const el = await openSocket(4, { name: null });
+    await el._save();
+    const [, , hub] = el.hass.callService.mock.calls.map((c: any) => c[2]);
+    expect(hub.data).toEqual({
+      uid: "0x0097E",
+      is_above: true,
+      sensor: "temperature",
+      type: "ato",
+      value: 25,
+      trigger_op: false,
+      hysteresis: 0.5,
+    });
   });
 });
 
@@ -1473,22 +1730,142 @@ describe("PowerSensor save", () => {
     });
   });
 
-  it("binds the socket to a ReefControl probe", async () => {
+  /** A socket in sensor mode on the given hub probe, ready to save. */
+  function onHubProbe(probes: any[], opts: SetupOptions = {}): any {
     const el = makeElement({
       temperature: null,
       control: true,
-      probes: [{ type: "orp", uid: "0x1", name: "ORP" }],
+      probes,
+      ...opts,
     });
     el._mode = "sensor";
     el._buildProbeList();
+    return el;
+  }
+
+  /** Requests sent, as [device_id, access_path, data]. */
+  function requests(el: any): any[] {
+    return el.hass.callService.mock.calls.map((c: any) => [
+      c[2].device_id,
+      c[2].access_path,
+      c[2].data,
+    ]);
+  }
+
+  it("configures a hub probe on the RSPower then on the RSControl", async () => {
+    // Replays the Red Sea app capture: ATO temperature on socket 4 (0-based)
+    const el = onHubProbe(
+      [{ type: "ato", uid: "0x0097E", name: "ATO", temp_value: 25.3 }],
+      { name: null },
+    );
+    el.device.socket_id = 5;
+    el._probeIdx = 1;
+    el._value = 25;
+    el._isAbove = true;
+    el._hysteresis = 0.5;
+    el._turnOn = false;
+    el._fallbackOn = false;
+    const quit = vi.fn();
+    el.addEventListener("quit-dialog", quit);
     await el._save();
-    const req = lastRequest(el);
-    expect(req.access_path).toBe("/subscribe");
-    expect(req.data.sockets[0]).toEqual({
-      number: 1,
-      default_state: false,
-      app_cache: "orp",
+    expect(requests(el)).toEqual([
+      [
+        "entry-1",
+        "/subscribe",
+        { sockets: [{ number: 4, default_state: false, app_cache: "ato" }] },
+      ],
+      [
+        "entry-1",
+        "/sockets/config",
+        { sockets: [{ number: 4, mode: "sensor" }] },
+      ],
+      [
+        "ctl-entry",
+        "/socket/4/subscribe",
+        {
+          uid: "0x0097E",
+          is_above: true,
+          sensor: "temperature",
+          type: "ato",
+          value: 25,
+          trigger_op: false,
+          hysteresis: 0.5,
+        },
+      ],
+    ]);
+    expect(quit).toHaveBeenCalled();
+  });
+
+  it("sends the hub only the parameters of the probe type", async () => {
+    // Water level: no threshold, the fallback is repeated (capture: log2)
+    const ato = onHubProbe([{ type: "ato", uid: "0x0024E", name: "ATO" }]);
+    ato.device.socket_id = 6;
+    await ato._save();
+    expect(requests(ato)).toEqual([
+      [
+        "entry-1",
+        "/subscribe",
+        { sockets: [{ number: 5, default_state: false, app_cache: "ato" }] },
+      ],
+      [
+        "entry-1",
+        "/sockets/config",
+        { sockets: [{ number: 5, mode: "sensor", name: "Heater" }] },
+      ],
+      [
+        "ctl-entry",
+        "/socket/5/subscribe",
+        {
+          uid: "0x0024E",
+          default_state: false,
+          sensor: "primary",
+          type: "ato",
+        },
+      ],
+    ]);
+
+    const leak = onHubProbe([{ type: "leak", uid: "0x2", name: "Leak" }]);
+    leak._turnOn = true;
+    await leak._save();
+    expect(lastRequest(leak).data).toEqual({
+      uid: "0x2",
+      type: "leak",
+      sensor: "primary",
+      trigger_op: true,
     });
+  });
+
+  it("keeps the socket name when switching to sensor mode", async () => {
+    const el = onHubProbe([{ type: "orp", uid: "0x1", name: "ORP" }]);
+    await el._save();
+    expect(requests(el)[1][2].sockets[0]).toEqual({
+      number: 1,
+      mode: "sensor",
+      name: "Heater",
+    });
+  });
+
+  it("writes nothing when the RSControl cannot be addressed", async () => {
+    const probes = [{ type: "orp", uid: "0x1", name: "ORP" }];
+    const unknown = (el: any) => el;
+    const noDevice = (el: any) => {
+      el.device.device.linked_control_device = () => null;
+      return el;
+    };
+    const oldStrip = (el: any) => {
+      delete el.device.device.linked_control_device;
+      return el;
+    };
+    for (const [opts, tweak] of [
+      [{ controlEntry: null }, unknown],
+      [{}, noDevice],
+      [{}, oldStrip],
+    ] as Array<[SetupOptions, (el: any) => any]>) {
+      const el = tweak(onHubProbe(probes, opts));
+      await el._save();
+      expect(el.hass.callService).not.toHaveBeenCalled();
+      expect(el._saveError).toBe("RSControl not found");
+    }
   });
 
   it("reports a missing probe instead of closing", async () => {

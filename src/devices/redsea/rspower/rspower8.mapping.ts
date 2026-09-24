@@ -413,8 +413,7 @@ export const config2 = {
           type: "common-sensor",
           icon: "'mdi:clock-time-nine-outline'",
           icon_color: "rgba(255,255,255,0.5)",
-          disabled_if:
-            "entity.socket_mode?.state !== 'schedule' && entity.socket_prev_mode?.state !== 'schedule'",
+          disabled_if: "device.auto_mode() !== 'schedule'",
           no_br_if_disabled: true,
           tap_action: {
             domain: "redsea_ui",
@@ -434,10 +433,10 @@ export const config2 = {
         socket_mode_icon_static: {
           name: "socket_mode",
           type: "common-sensor",
-          icon: "(entity?.socket_mode?.state === 'sensor' || entity?.socket_prev_mode?.state === 'sensor') ? ({'temperature': 'mdi:thermometer','ph': 'mdi:ph','ec': 'mdi:water-percent','orp': 'mdi:flash-triangle','leak': 'mdi:water-alert','ato': 'mdi:cup-water'}[entity?.socket_mode?.attributes?.sensor_config?.sensor?.app_cache] || 'mdi:power'): 'mdi:power'",
+          icon: "device.auto_mode() === 'sensor' ? ({'temperature': 'mdi:thermometer','ph': 'mdi:ph','ec': 'mdi:water-percent','orp': 'mdi:flash-triangle','leak': 'mdi:water-alert','ato': 'mdi:cup-water'}[device.sensor_type()] || 'mdi:power'): 'mdi:power'",
           icon_color: "rgba(255,255,255,0.5)",
           disabled_if:
-            "entity.socket_mode?.state === 'setup' || entity.socket_mode?.state === 'schedule' || entity.socket_prev_mode?.state === 'schedule'",
+            "entity.socket_mode?.state === 'setup' || device.auto_mode() === 'schedule'",
           no_br_if_disabled: true,
           css: {
             position: "absolute",
@@ -465,38 +464,6 @@ export const config2 = {
             "pointer-events": "none",
           },
         },
-        // ── Sensor-mode overlays ────────────────────────────────────────
-        // Top-left: main measurement icon (ORP / pH / EC / ATO).
-        // Shown only when the socket is in sensor or prev-sensor mode AND the
-        // probe type is not a pure temperature one (those show nothing here).
-        socket_sensor_main_icon: {
-          name: "socket_mode",
-          type: "common-sensor",
-          // device is the PowerSocket: sensor_main_icon() returns the mdi
-          // icon of this socket's probe type, or "" when it should not
-          // appear — the element is then disabled, so no invisible click
-          // area is left under the socket.
-          icon: "${device.sensor_main_icon()}",
-          icon_color: "rgba(255,255,255,0.75)",
-          disabled_if: "!device.sensor_main_icon()",
-          no_br_if_disabled: true,
-          tap_action: {
-            domain: "redsea_ui",
-            action: "dialog",
-            //data: { type: "socket_sensor", overload_quit: "socket_config" },
-            data: { type: "socket_config" },
-          },
-          css: {
-            flex: "0 0 auto",
-            position: "absolute",
-            top: "85%",
-            left: "14%",
-            width: "30%",
-            "--mdc-icon-size": "100%",
-            cursor: "pointer",
-          },
-        },
-
         socket_setup: {
           name: "socket_mode",
           type: "click-image",

@@ -6,17 +6,21 @@ import style_common from "../../../utils/common.styles";
 import { OFF_COLOR } from "../../../utils/constants";
 
 /**
- * Icon of the measurement driving a socket in sensor mode, by probe type
- * (the `app_cache` id, DEX: DeviceSubscriberType). A temperature probe has
- * none: the socket's static mode icon already shows a thermometer.
+ * Probe type a socket follows, from the `sensor_config` attribute of its
+ * `socket_mode` entity. The integration fills it in one of two shapes,
+ * tagged by the `sensor_source` attribute:
+ *   - local probe:   { sensor: { app_cache, default_state }, … }
+ *   - RSControl:     the hub's rule, { type, uid, sensor, … } — there
+ *                    `sensor` is the sub-sensor name, not an object.
+ * @return the type id (ph, orp, ec, temperature, ato, leak), or "" when the
+ *         configuration names none
  */
-const SENSOR_MAIN_ICONS: Record<string, string> = {
-  ph: "mdi:ph",
-  orp: "mdi:lightning-bolt-circle",
-  ec: "mdi:water-percent",
-  ato: "mdi:waves-arrow-up",
-  leak: "mdi:water-alert",
-};
+export function socketSensorType(cfg: any): string {
+  if (!cfg || typeof cfg !== "object") return "";
+  if (typeof cfg.type === "string") return cfg.type;
+  const appCache = cfg.sensor?.app_cache;
+  return typeof appCache === "string" ? appCache : "";
+}
 
 /**
  * LitElement rendering a single RSPower AC socket.
@@ -142,24 +146,36 @@ export class PowerSocket extends RSDevice {
   // ── Sensor mode ───────────────────────────────────────────────────────
 
   /**
-   * MDI icon of the probe type controlling this socket.
+   * Automatic mode this socket runs, or would run without a manual override.
    *
-   * Read from this socket's own `socket_mode` entity, whose `sensor_config`
-   * attribute mirrors the device config: `{ sensor: { app_cache,
-   * default_state }, value, is_above, turn_on }`. A socket temporarily
-   * forced on or off keeps its probe icon while `socket_prev_mode` still
-   * says sensor, as the other mode overlays do.
-   * @return the icon name, or "" when the socket is not driven by a probe
-   *         or its probe type has no icon of its own
+   * `socket_prev_mode` is the mode the socket was in before its current
+   * one, so it only means "suspended" while the current mode is a manual
+   * on/off: a socket moved from schedule to sensor keeps `prev_mode =
+   * schedule` but runs its probe. The schedule it had stays stored on the
+   * device, ready to be switched back to, which is why the configuration
+   * attributes cannot tell the mode either.
+   * @return "schedule" or "sensor", or "" for a manual or unset socket
    */
-  sensor_main_icon(): string {
-    const mode = this.get_entity("socket_mode");
-    const prev = this.get_entity("socket_prev_mode");
-    if (mode?.state !== "sensor" && prev?.state !== "sensor") {
-      return "";
+  auto_mode(): string {
+    const mode = this.get_entity("socket_mode")?.state;
+    if (mode === "schedule" || mode === "sensor") return mode;
+    if (mode === "on" || mode === "off") {
+      const prev = this.get_entity("socket_prev_mode")?.state;
+      if (prev === "schedule" || prev === "sensor") return prev;
     }
-    const type = mode?.attributes?.sensor_config?.sensor?.app_cache ?? "";
-    return SENSOR_MAIN_ICONS[type] ?? "";
+    return "";
+  }
+
+  /**
+   * Probe type this socket follows, whether the probe is local or on the
+   * paired RSControl (see `socketSensorType`). Meant for the mapping, e.g.
+   * an icon picked by probe type.
+   * @return the type id, or "" when the socket has no sensor configuration
+   */
+  sensor_type(): string {
+    return socketSensorType(
+      this.get_entity("socket_mode")?.attributes?.sensor_config,
+    );
   }
 
   // ── Linked appliance ──────────────────────────────────────────────────

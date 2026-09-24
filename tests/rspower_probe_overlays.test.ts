@@ -24,6 +24,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { RSPower } from "../src/devices/redsea/rspower/rspower";
 import { PowerSocket } from "../src/devices/redsea/rspower/power_socket";
+import { SafeEval } from "../src/utils/SafeEval";
 import { config as config6 } from "../src/devices/redsea/rspower/rspower6.mapping";
 import { config2 as config8 } from "../src/devices/redsea/rspower/rspower8.mapping";
 
@@ -141,54 +142,142 @@ describe("RSPower.temperature_link_alert", () => {
 
 // ─── Sensor-mode overlay ────────────────────────────────────────────────────
 
-describe("PowerSocket.sensor_main_icon", () => {
-  it.each([
-    ["ph", "mdi:ph"],
-    ["orp", "mdi:lightning-bolt-circle"],
-    ["ec", "mdi:water-percent"],
-    ["ato", "mdi:waves-arrow-up"],
-    ["leak", "mdi:water-alert"],
-  ])("shows the %s probe icon", (type, icon) => {
-    expect(makeSocket("sensor", probe(type)).sensor_main_icon()).toBe(icon);
+describe("PowerSocket.auto_mode", () => {
+  it.each(["schedule", "sensor"])("is the running %s mode", (mode) => {
+    expect(makeSocket(mode).auto_mode()).toBe(mode);
   });
 
-  it("has no main icon for a temperature probe", () => {
-    // The static mode icon already shows a thermometer for it
-    expect(makeSocket("sensor", probe("temperature")).sensor_main_icon()).toBe(
-      "",
+  it.each(["schedule", "sensor"])(
+    "is the %s mode a manual on/off suspended",
+    (prev) => {
+      expect(makeSocket("on", undefined, prev).auto_mode()).toBe(prev);
+      expect(makeSocket("off", undefined, prev).auto_mode()).toBe(prev);
+    },
+  );
+
+  it("ignores the previous mode while an automatic mode runs", () => {
+    // Moved from schedule to sensor: the schedule is kept on the device,
+    // prev_mode says schedule, but the socket follows its probe
+    expect(makeSocket("sensor", undefined, "schedule").auto_mode()).toBe(
+      "sensor",
+    );
+    expect(makeSocket("schedule", undefined, "sensor").auto_mode()).toBe(
+      "schedule",
     );
   });
 
-  it("keeps the icon while a sensor socket is forced on or off", () => {
-    expect(makeSocket("on", probe("orp"), "sensor").sensor_main_icon()).toBe(
-      "mdi:lightning-bolt-circle",
+  it("is empty for a manual, unset or unknown socket", () => {
+    expect(makeSocket("on").auto_mode()).toBe("");
+    expect(makeSocket("off", undefined, "on").auto_mode()).toBe("");
+    expect(makeSocket("setup", undefined, "sensor").auto_mode()).toBe("");
+    expect(makeSocket(null).auto_mode()).toBe("");
+  });
+});
+
+describe("PowerSocket.sensor_type", () => {
+  it("reads the local probe shape", () => {
+    expect(makeSocket("sensor", probe("temperature")).sensor_type()).toBe(
+      "temperature",
     );
   });
 
-  it("follows this socket only, not the first one in sensor mode", () => {
-    const ph = makeSocket("sensor", probe("ph"));
-    const plain = makeSocket("on", probe("ph"), "schedule");
-    expect(ph.sensor_main_icon()).toBe("mdi:ph");
-    expect(plain.sensor_main_icon()).toBe("");
+  it("reads the RSControl rule shape", () => {
+    // Here `sensor` is the sub-sensor name, the type sits at the top level
+    const rule = {
+      number: 4,
+      type: "ato",
+      uid: "0x0097E",
+      sensor: "temperature",
+    };
+    expect(makeSocket("sensor", rule).sensor_type()).toBe("ato");
   });
 
-  it("has no icon without a usable sensor configuration", () => {
-    for (const cfg of [undefined, null, {}, { app_cache: "ph" }, probe("")]) {
-      expect(makeSocket("sensor", cfg).sensor_main_icon()).toBe("");
+  it("is empty without a usable configuration", () => {
+    for (const cfg of [
+      undefined,
+      null,
+      "ph",
+      {},
+      { type: 3 },
+      { sensor: {} },
+    ]) {
+      expect(makeSocket("sensor", cfg).sensor_type()).toBe("");
     }
+    expect(makeSocket(null).sensor_type()).toBe("");
+  });
+});
+
+describe.each([
+  ["RSPOWER6", config6],
+  ["RSPOWER8", config8],
+])("%s socket mode icon", (_model, config: any) => {
+  /** An element of the socket templates, by key. */
+  function elementOf(node: any, key: string): any {
+    if (node && typeof node === "object") {
+      if (node[key]) return node[key];
+      for (const v of Object.values(node)) {
+        const found = elementOf(v, key);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  function evalCtx(mode: string, cfg: any, prev: string | null): SafeEval {
+    const socket = makeSocket(mode, cfg, prev);
+    const entity: Record<string, any> = {};
+    for (const [key, ent] of Object.entries<any>(socket.entities)) {
+      entity[key] = socket._hass.states[ent.entity_id];
+    }
+    return new SafeEval({ entity, device: socket } as any);
+  }
+
+  function render(mode: string, cfg: any, prev: string | null = null): string {
+    return evalCtx(mode, cfg, prev).evaluate(
+      elementOf(config.sockets, "socket_mode_icon_static").icon,
+    );
+  }
+
+  /** Whether the clock (schedule) and probe icons are hidden. */
+  function hidden(mode: string, prev: string | null): [boolean, boolean] {
+    const ctx = evalCtx(mode, probe("ph"), prev);
+    return [
+      ctx.evaluateCondition(
+        elementOf(config.sockets, "socket_mode_icon").disabled_if,
+      ),
+      ctx.evaluateCondition(
+        elementOf(config.sockets, "socket_mode_icon_static").disabled_if,
+      ),
+    ];
+  }
+
+  it("shows the probe, not the clock, of a socket moved from schedule", () => {
+    expect(render("sensor", probe("ph"), "schedule")).toBe("mdi:ph");
+    expect(hidden("sensor", "schedule")).toEqual([true, false]);
   });
 
-  it("has no icon when only the previous mode is known", () => {
-    // Previous mode says sensor, but no socket_mode entity to read the
-    // probe type from
-    expect(makeSocket(null, undefined, "sensor").sensor_main_icon()).toBe("");
+  it("shows the clock of a schedule, running or suspended", () => {
+    expect(hidden("schedule", "sensor")).toEqual([false, true]);
+    expect(hidden("off", "schedule")).toEqual([false, true]);
   });
 
-  it("has no icon before hass or the entities are known", () => {
-    const socket = makeSocket("sensor", probe("ph"));
-    socket._hass = null;
-    expect(socket.sensor_main_icon()).toBe("");
-    expect(makeSocket(null).sensor_main_icon()).toBe("");
+  it("has no second icon row under the sockets", () => {
+    expect(elementOf(config.sockets, "socket_sensor_main_icon")).toBeNull();
+  });
+
+  it("shows the probe type of a local or a hub probe", () => {
+    expect(render("sensor", probe("temperature"))).toBe("mdi:thermometer");
+    expect(
+      render("sensor", { type: "ph", uid: "0x00B39", sensor: "primary" }),
+    ).toBe("mdi:ph");
+    expect(render("on", { type: "orp", uid: "0x1" }, "sensor")).toBe(
+      "mdi:flash-triangle",
+    );
+  });
+
+  it("shows the power icon outside sensor mode or for an unknown type", () => {
+    expect(render("on", probe("ph"))).toBe("mdi:power");
+    expect(render("sensor", {})).toBe("mdi:power");
   });
 });
 

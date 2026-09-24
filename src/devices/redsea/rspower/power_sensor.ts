@@ -23,6 +23,26 @@
  *   PUT /subscribe              { sockets: [{number, default_state,
  *                                  app_cache}] }
  *
+ * A socket driven by an RSControl probe is configured on both devices, in
+ * the order the Red Sea app uses (captured on the wire):
+ *   1. RSPower   PUT /subscribe             { sockets: [{number,
+ *                                             default_state, app_cache}] }
+ *   2. RSPower   PUT /sockets/config        { sockets: [{number, mode}] }
+ *   3. RSControl PUT /socket/<n>/subscribe  { uid, type, sensor, is_above,
+ *                                             value, hysteresis, trigger_op }
+ * The RSPower only learns which probe type to follow; the probe itself
+ * (uid, as two probes may share a type) and the thresholds live on the hub,
+ * under the RSPower socket number. A water-level (ATO) rule carries no
+ * threshold but repeats the fallback: { uid, type, sensor, default_state }.
+ *
+ * Reading back, the integration merges both sides into the `sensor_config`
+ * attribute of the socket's `socket_mode` entity, tagged by `sensor_source`:
+ *   local   { sensor: { app_cache, default_state }, value, is_above,
+ *             turn_on, … }
+ *   control the hub's rule for this socket, from its GET /subscription-info:
+ *           { number, type, uid, sensor, is_above, value, hysteresis,
+ *             trigger_op, last_sock_op }
+ *
  * The probes of a paired RSControl come from the integration's
  * `redsea.get_control_probes` service (called with `return_response`), which
  * reports every probe the hub knows, whatever entities it exposes.
@@ -37,6 +57,7 @@ import { html, LitElement, TemplateResult, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import styles from "./power_sensor.styles";
 import i18n from "../../../translations/myi18n";
+import { socketSensorType } from "./power_socket";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -160,22 +181,37 @@ const MODE_DEFS: Array<{ id: SocketMode; labelKey: string; icon: string }> = [
 
 /**
  * RSControl probe types offered to a socket, in display order, with the
- * label used when the hub reports no name. `hasTemp` types also carry a
- * temperature reading a socket can follow on its own (sub-sensor
- * "temperature").
+ * label used when the hub reports no name. A probe that also reports a
+ * `temp_value` (pH, EC, ATO…) is offered a second time for its temperature
+ * reading (sub-sensor "temperature").
  */
-const CONTROL_PROBE_TYPES: Array<{
-  type: ProbeTypeId;
-  labelKey: string;
-  hasTemp: boolean;
-}> = [
-  { type: "ph", labelKey: "sensor_ph", hasTemp: true },
-  { type: "orp", labelKey: "sensor_orp", hasTemp: false },
-  { type: "ec", labelKey: "sensor_ec", hasTemp: true },
-  { type: "temperature", labelKey: "sensor_temp", hasTemp: false },
-  { type: "ato", labelKey: "sensor_ato", hasTemp: false },
-  { type: "leak", labelKey: "sensor_leak", hasTemp: false },
+const CONTROL_PROBE_TYPES: Array<{ type: ProbeTypeId; labelKey: string }> = [
+  { type: "ph", labelKey: "sensor_ph" },
+  { type: "orp", labelKey: "sensor_orp" },
+  { type: "ec", labelKey: "sensor_ec" },
+  { type: "temperature", labelKey: "sensor_temp" },
+  { type: "ato", labelKey: "sensor_ato" },
+  { type: "leak", labelKey: "sensor_leak" },
 ];
+
+/**
+ * Parameters of a probe: the temperature reading of any probe behaves like a
+ * temperature probe, whatever the probe type.
+ */
+function probeDef(probe: ProbeOption): ProbeTypeDef {
+  return probe.sensor === "temperature"
+    ? PROBE_TYPES.temperature
+    : PROBE_TYPES[probe.type];
+}
+
+/**
+ * Thresholds come back from the hub as float32 (8.2 → 8.199999809…) and the
+ * app sends float64 noise (0.4999999999999991): keep two decimals, the
+ * finest step any probe type uses.
+ */
+function round2(v: unknown): number {
+  return Math.round(Number(v) * 100) / 100;
+}
 
 /** Automatic modes a manual on/off can suspend. */
 type AutoMode = "schedule" | "sensor";
@@ -295,6 +331,13 @@ export class PowerSensor extends LitElement {
       node = node.device ?? node.parent_device;
     }
     return null;
+  }
+
+  /** Config entry of the paired RSControl, target of its requests. */
+  private _controlConfigEntry(): string | null {
+    return (
+      this._strip()?.linked_control_device?.()?.primary_config_entry ?? null
+    );
   }
 
   private _entityState(key: string): string | null {
@@ -521,31 +564,68 @@ export class PowerSensor extends LitElement {
   private _loadSensorConfig(): void {
     const cfg = this._entityAttr("socket_mode", "sensor_config");
     if (!cfg) return;
-    // Structure: {sensor:{app_cache, default_state}, value, is_above, turn_on}
+    // Both shapes share is_above / value / hysteresis; the action is
+    // `turn_on` locally and `trigger_op` on the hub (see the file header).
     if (cfg.is_above !== undefined) this._isAbove = Boolean(cfg.is_above);
-    if (cfg.value !== undefined) this._value = Number(cfg.value);
-    if (cfg.turn_on !== undefined) this._turnOn = Boolean(cfg.turn_on);
-    const inner = cfg.sensor ?? {};
-    if (inner.default_state !== undefined)
+    if (cfg.value !== undefined) this._value = round2(cfg.value);
+    if (cfg.hysteresis !== undefined) this._hysteresis = round2(cfg.hysteresis);
+    const action = cfg.trigger_op ?? cfg.turn_on;
+    if (action !== undefined) this._turnOn = Boolean(action);
+    const inner = cfg.sensor;
+    if (inner?.default_state !== undefined)
       this._fallbackOn = Boolean(inner.default_state);
     this._selectConfiguredProbe();
   }
 
-  /** Select the probe type the socket is currently subscribed to. */
+  /**
+   * Select the probe the socket currently follows: the exact hub probe (uid
+   * and sub-sensor) for a control rule, else the first probe of its type.
+   */
   private _selectConfiguredProbe(): void {
     const cfg = this._entityAttr("socket_mode", "sensor_config");
-    const appCache: string = cfg?.sensor?.app_cache ?? "";
-    if (!appCache) return;
-    const idx = this._probeOptions.findIndex((p) => p.type === appCache);
+    const type = socketSensorType(cfg);
+    if (!type) return;
+    let idx = -1;
+    if (this._entityAttr("socket_mode", "sensor_source") === "control") {
+      const sensor = cfg.sensor ?? "primary";
+      idx = this._probeOptions.findIndex(
+        (p) =>
+          p.from_control &&
+          p.type === type &&
+          p.uid === cfg.uid &&
+          p.sensor === sensor,
+      );
+    }
+    if (idx < 0) idx = this._probeOptions.findIndex((p) => p.type === type);
     if (idx >= 0) this._probeIdx = idx;
   }
 
   /**
-   * Fetch the probes of the paired RSControl, once per hub.
-   *
-   * The list comes from `redsea.get_control_probes`: it covers every probe
-   * the hub reports, including those without a matching entity. A failed
-   * call leaves the hub probes out rather than blocking the editor.
+   * Call a `redsea` service addressed to the paired hub and return its
+   * response. A failed call is reported in the console and read as no
+   * answer, so a missing service never blocks the editor.
+   */
+  private async _callHub(service: string, hwid: string): Promise<any> {
+    try {
+      const answer = await this.hass.callWS({
+        type: "call_service",
+        domain: "redsea",
+        service,
+        service_data: { hwid },
+        return_response: true,
+      });
+      return answer?.response ?? null;
+    } catch (err) {
+      console.warn(`RSPower: redsea.${service} failed`, err);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch the probes of the paired RSControl, once per hub, from
+   * `redsea.get_control_probes`: it covers every probe the hub reports,
+   * including those without a matching entity. A failed call leaves the hub
+   * probes out rather than blocking the editor.
    */
   private async _fetchControlProbes(): Promise<void> {
     const strip = this._strip();
@@ -556,22 +636,10 @@ export class PowerSensor extends LitElement {
 
     this._controlProbesHwid = hwid;
     this._probesLoading = true;
-    try {
-      const answer = await this.hass.callWS({
-        type: "call_service",
-        domain: "redsea",
-        service: "get_control_probes",
-        service_data: { hwid },
-        return_response: true,
-      });
-      const probes = answer?.response?.probes;
-      this._controlProbes = Array.isArray(probes) ? probes : [];
-    } catch (err) {
-      console.warn("RSPower: cannot read the RSControl probes", err);
-      this._controlProbes = [];
-    } finally {
-      this._probesLoading = false;
-    }
+    const answer = await this._callHub("get_control_probes", hwid);
+    this._controlProbes = Array.isArray(answer?.probes) ? answer.probes : [];
+    this._probesLoading = false;
+
     this._buildProbeList();
     if (!this._probeTouched) this._selectConfiguredProbe();
   }
@@ -615,7 +683,11 @@ export class PowerSensor extends LitElement {
             sensor: "primary",
             from_control: true,
           });
-          if (t.hasTemp && p.temp_value !== undefined && p.temp_value !== null)
+          if (
+            t.type !== "temperature" &&
+            p.temp_value !== undefined &&
+            p.temp_value !== null
+          )
             control.push({
               label: `${hub} — ${name} · ${i18n._("sensor_temp")}${state}`,
               uid,
@@ -646,7 +718,7 @@ export class PowerSensor extends LitElement {
     this._probeTouched = true;
     const probe = this._probeOptions[idx];
     if (!probe) return;
-    const def = PROBE_TYPES[probe.type];
+    const def = probeDef(probe);
     this._value = def.defaultValue;
     this._hysteresis = def.defaultDelta;
     this._isAbove = true;
@@ -717,34 +789,32 @@ export class PowerSensor extends LitElement {
         // Sensor mode: the only one left once on/off/schedule are handled
         const probe = this._probeOptions[this._probeIdx];
         if (!probe) throw new Error("No probe selected");
+        const def = probeDef(probe);
 
-        // Step 1 — set mode to sensor
-        const body: Record<string, unknown> = {
+        const modeBody: Record<string, unknown> = {
           number: socketNum,
           mode: "sensor",
         };
-        if (name) body["name"] = name;
-        await this.hass.callService("redsea", "request", {
-          device_id: deviceId,
-          access_path: "/sockets/config",
-          method: "put",
-          data: { sockets: [body] },
-          refresh: "config",
-          wait: 2,
-        });
-
-        // Step 2 — write the subscription
-        // Local probe → PUT /temperature/subscribe  (DEX: S7.b6)
-        // RSControl probe → PUT /subscribe          (DEX: S7.d6)
-        const def = PROBE_TYPES[probe.type];
-        const subscriber: Record<string, unknown> = {
-          number: socketNum,
-          default_state: this._fallbackOn,
-          app_cache: probe.type,
-        };
+        if (name) modeBody["name"] = name;
+        const setMode = () =>
+          this.hass.callService("redsea", "request", {
+            device_id: deviceId,
+            access_path: "/sockets/config",
+            method: "put",
+            data: { sockets: [modeBody] },
+            refresh: "config",
+            wait: 2,
+          });
 
         if (!probe.from_control) {
-          // Local temperature probe: full threshold params
+          // Local temperature probe (DEX: S7.b6): the RSPower holds
+          // everything, thresholds included.
+          await setMode();
+          const subscriber: Record<string, unknown> = {
+            number: socketNum,
+            default_state: this._fallbackOn,
+            app_cache: probe.type,
+          };
           if (def.hasTurnOn) subscriber["turn_on"] = this._turnOn;
           if (def.hasDirection) subscriber["is_above"] = this._isAbove;
           if (def.hasValue) subscriber["value"] = this._value;
@@ -760,12 +830,49 @@ export class PowerSensor extends LitElement {
             wait: 2,
           });
         } else {
-          // RSControl probe: simple binding (threshold params live on hub)
+          // RSControl probe: split between the strip and the hub, see the
+          // file header. Checked first so nothing is half written.
+          const controlId = this._controlConfigEntry();
+          if (!controlId) throw new Error("RSControl not found");
+
+          // 1 — RSPower follows this probe type (DEX: S7.d6)
           await this.hass.callService("redsea", "request", {
             device_id: deviceId,
             access_path: "/subscribe",
             method: "put",
-            data: { sockets: [subscriber] },
+            data: {
+              sockets: [
+                {
+                  number: socketNum,
+                  default_state: this._fallbackOn,
+                  app_cache: probe.type,
+                },
+              ],
+            },
+            refresh: "data",
+            wait: 2,
+          });
+
+          // 2 — socket switched to sensor mode
+          await setMode();
+
+          // 3 — the hub watches this probe for this socket
+          const rule: Record<string, unknown> = {
+            uid: probe.uid,
+            type: probe.type,
+            sensor: probe.sensor,
+          };
+          if (def.hasDirection) rule["is_above"] = this._isAbove;
+          if (def.hasValue) rule["value"] = this._value;
+          if (def.hasHysteresis) rule["hysteresis"] = this._hysteresis;
+          if (def.hasTurnOn) rule["trigger_op"] = this._turnOn;
+          // A water-level rule repeats the fallback state on the hub
+          if (def.isAto) rule["default_state"] = this._fallbackOn;
+          await this.hass.callService("redsea", "request", {
+            device_id: controlId,
+            access_path: `/socket/${socketNum}/subscribe`,
+            method: "put",
+            data: rule,
             refresh: "data",
             wait: 2,
           });
@@ -952,7 +1059,7 @@ export class PowerSensor extends LitElement {
     }
 
     const probe = this._probeOptions[this._probeIdx];
-    const def = probe ? PROBE_TYPES[probe.type] : null;
+    const def = probe ? probeDef(probe) : null;
 
     return html`
       <div class="sce-sensor-container">
