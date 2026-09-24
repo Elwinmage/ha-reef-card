@@ -207,6 +207,28 @@ describe("PowerSocket.sensor_type", () => {
   });
 });
 
+describe("PowerSocket.sensor_reading", () => {
+  it("is the temperature for a probe's temperature sub-sensor", () => {
+    // subscription-info, socket 4: the ATO probe's temperature
+    const rule = { type: "ato", uid: "0x0097E", sensor: "temperature" };
+    expect(makeSocket("sensor", rule).sensor_reading()).toBe("temperature");
+    // The probe itself is still an ATO one
+    expect(makeSocket("sensor", rule).sensor_type()).toBe("ato");
+  });
+
+  it("is the probe type for its primary measurement", () => {
+    // subscription-info, socket 5: the ATO water level
+    const rule = { type: "ato", uid: "0x0024E", sensor: "primary" };
+    expect(makeSocket("sensor", rule).sensor_reading()).toBe("ato");
+    expect(makeSocket("sensor", probe("ph")).sensor_reading()).toBe("ph");
+  });
+
+  it("is empty without sensor configuration", () => {
+    expect(makeSocket("sensor", undefined).sensor_reading()).toBe("");
+    expect(makeSocket(null).sensor_reading()).toBe("");
+  });
+});
+
 describe.each([
   ["RSPOWER6", config6],
   ["RSPOWER8", config8],
@@ -250,6 +272,17 @@ describe.each([
       ),
     ];
   }
+
+  it("shows a thermometer for the temperature of a pH, EC or ATO probe", () => {
+    for (const type of ["ph", "ec", "ato"]) {
+      expect(
+        render("sensor", { type, uid: "0x1", sensor: "temperature" }),
+      ).toBe("mdi:thermometer");
+    }
+    expect(
+      render("sensor", { type: "ato", uid: "0x1", sensor: "primary" }),
+    ).toBe("mdi:cup-water");
+  });
 
   it("shows the probe, not the clock, of a socket moved from schedule", () => {
     expect(render("sensor", probe("ph"), "schedule")).toBe("mdi:ph");

@@ -433,7 +433,7 @@ export const config = {
         socket_mode_icon_static: {
           name: "socket_mode",
           type: "common-sensor",
-          icon: "device.auto_mode() === 'sensor' ? ({'temperature': 'mdi:thermometer','ph': 'mdi:ph','ec': 'mdi:water-percent','orp': 'mdi:flash-triangle','leak': 'mdi:water-alert','ato': 'mdi:cup-water'}[device.sensor_type()] || 'mdi:power'): 'mdi:power'",
+          icon: "device.auto_mode() === 'sensor' ? ({'temperature': 'mdi:thermometer','ph': 'mdi:ph','ec': 'mdi:water-percent','orp': 'mdi:flash-triangle','leak': 'mdi:water-alert','ato': 'mdi:cup-water'}[device.sensor_reading()] || 'mdi:power'): 'mdi:power'",
           icon_color: "rgba(255,255,255,0.5)",
           disabled_if:
             "entity.socket_mode?.state === 'setup' || device.auto_mode() === 'schedule'",

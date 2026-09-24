@@ -178,6 +178,21 @@ export class PowerSocket extends RSDevice {
     );
   }
 
+  /**
+   * Measurement this socket reacts to, which is not always its probe type:
+   * a hub rule on the "temperature" sub-sensor of a pH, EC or ATO probe
+   * follows that probe's temperature reading. Meant for the mapping, to
+   * show what is measured rather than which probe measures it.
+   * @return "temperature" for a temperature sub-sensor, else the probe type
+   *         (see `sensor_type()`), or "" without sensor configuration
+   */
+  sensor_reading(): string {
+    const cfg = this.get_entity("socket_mode")?.attributes?.sensor_config;
+    // Only the hub rule shape names its sub-sensor as a string
+    if (cfg?.sensor === "temperature") return "temperature";
+    return socketSensorType(cfg);
+  }
+
   // ── Linked appliance ──────────────────────────────────────────────────
 
   /**
