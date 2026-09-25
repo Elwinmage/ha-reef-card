@@ -69,6 +69,21 @@ export interface SocketEntity {
   power_socket?: any;
 }
 
+export interface ProbeEntity {
+  /** Probe uid, unique within its type */
+  uid: string;
+  /** Probe type: ph, orp, ec, temperature, ato, leak */
+  type: string;
+  /** Position in the hub's probe list, null when not reported */
+  index: number | null;
+  /** 1-based slot the probe is drawn in, set when it is placed */
+  slot?: number;
+  /** Probe entities keyed by translation key */
+  entities: Record<string, any>;
+  /** Cached ControlProbe LitElement rendering this probe */
+  control_probe?: any;
+}
+
 export interface PumpEntity {
   entities: Record<string, any>;
   parent_entities?: Record<string, any>;

@@ -45,6 +45,7 @@
   "dialog_edit_container": "Modifica contenitore",
   "dialog_socket_delete_title": "Elimina presa",
   "dialog_socket_temperature_conf": "Impostazioni sonda temperatura",
+  "dialog_probe_conf": "Impostazioni sonda",
   "disabledInHa": "Dispositivo disabilitato in HomeAssistant!",
   "display_name": "Nome visualizzato",
   "doses": "Dosi",
@@ -214,5 +215,10 @@
   "weekly": "Settimanale",
   "whisper": "Sussurro",
   "wifi": "WiFi",
-  "yes": "Sì"
+  "yes": "Sì",
+  "port_config": "Impostazioni porta 12V",
+  "port_power": "Potenza in funzione",
+  "temperature": "Temperatura",
+  "probe_slots": "Posizione delle sonde",
+  "probe_slot_auto": "Auto"
 }

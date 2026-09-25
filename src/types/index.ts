@@ -27,6 +27,7 @@ export type {
   Device,
   HeadEntity,
   SocketEntity,
+  ProbeEntity,
   PumpEntity,
   RGB,
 } from "./device";

@@ -45,6 +45,7 @@
   "dialog_edit_container": "Edit Container",
   "dialog_socket_delete_title": "Delete socket",
   "dialog_socket_temperature_conf": "Temperature probe settings",
+  "dialog_probe_conf": "Probe settings",
   "disabledInHa": "Device disabled in HomeAssistant!",
   "display_name": "Display Name",
   "doses": "Doses",
@@ -214,5 +215,10 @@
   "weekly": "Weekly",
   "whisper": "Whisper",
   "wifi": "Wifi",
-  "yes": "Yes"
+  "yes": "Yes",
+  "port_config": "12V port settings",
+  "port_power": "Power when on",
+  "temperature": "Temperature",
+  "probe_slots": "Probe slots",
+  "probe_slot_auto": "Auto"
 }

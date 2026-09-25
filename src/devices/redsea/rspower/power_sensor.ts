@@ -65,7 +65,7 @@ type SocketMode = "on" | "off" | "schedule" | "sensor";
 type ProbeTypeId = "temperature" | "ec" | "ph" | "orp" | "leak" | "ato";
 type SubSensor = "primary" | "temperature";
 
-interface ProbeOption {
+export interface ProbeOption {
   label: string;
   uid: string;
   type: ProbeTypeId;
@@ -85,7 +85,7 @@ interface Interval {
 // ATO (isMainLevelSensor=true): hides condition/fallback/hysteresis entirely
 // Leak: shows turn_on only, hides value/is_above/hysteresis
 
-interface ProbeTypeDef {
+export interface ProbeTypeDef {
   unit: string;
   defaultValue: number;
   defaultDelta: number;
@@ -198,7 +198,7 @@ const CONTROL_PROBE_TYPES: Array<{ type: ProbeTypeId; labelKey: string }> = [
  * Parameters of a probe: the temperature reading of any probe behaves like a
  * temperature probe, whatever the probe type.
  */
-function probeDef(probe: ProbeOption): ProbeTypeDef {
+export function probeDef(probe: ProbeOption): ProbeTypeDef {
   return probe.sensor === "temperature"
     ? PROBE_TYPES.temperature
     : PROBE_TYPES[probe.type];
@@ -216,7 +216,7 @@ function round2(v: unknown): number {
 /** Automatic modes a manual on/off can suspend. */
 type AutoMode = "schedule" | "sensor";
 
-const TOTAL_MINUTES = 24 * 60;
+export const TOTAL_MINUTES = 24 * 60;
 const MAX_INTERVALS = 10;
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -229,29 +229,29 @@ export class PowerSensor extends LitElement {
   @property({ attribute: false }) conf: any = null;
 
   // ── Mode state ──────────────────────────────────────────────────────────
-  @state() private _mode: SocketMode = "on";
-  @state() private _saving = false;
-  @state() private _saveError: string | null = null;
+  @state() protected _mode: SocketMode = "on";
+  @state() protected _saving = false;
+  @state() protected _saveError: string | null = null;
   /**
    * Automatic mode suspended by a manual on/off, with the forced state;
    * null when the socket runs its mode normally.
    */
-  @state() private _override: { mode: AutoMode; state: "on" | "off" } | null =
+  @state() protected _override: { mode: AutoMode; state: "on" | "off" } | null =
     null;
 
   // ── Schedule state ──────────────────────────────────────────────────────
-  @state() private _intervals: Interval[] = [];
+  @state() protected _intervals: Interval[] = [];
   private _scheduleLoaded = false;
   private _resizeObserver: ResizeObserver | null = null;
 
   // ── Sensor state ────────────────────────────────────────────────────────
-  @state() private _probeOptions: ProbeOption[] = [];
-  @state() private _probeIdx = 0;
-  @state() private _isAbove = true;
-  @state() private _value = 25.0;
-  @state() private _hysteresis = 0.5;
-  @state() private _turnOn = true;
-  @state() private _fallbackOn = false;
+  @state() protected _probeOptions: ProbeOption[] = [];
+  @state() protected _probeIdx = 0;
+  @state() protected _isAbove = true;
+  @state() protected _value = 25.0;
+  @state() protected _hysteresis = 0.5;
+  @state() protected _turnOn = true;
+  @state() protected _fallbackOn = false;
   @state() private _probesLoading = false;
 
   /** Probes reported by the paired RSControl; null until fetched. */
@@ -260,6 +260,8 @@ export class PowerSensor extends LitElement {
   private _controlProbesHwid: string | null = null;
   /** Set once the user picks a probe: a late fetch must not override it. */
   private _probeTouched = false;
+  /** Set once the thresholds on screen come from the socket's own rule. */
+  private _paramsFromConfig = false;
 
   private _loaded = false;
 
@@ -277,6 +279,7 @@ export class PowerSensor extends LitElement {
       if (this._mode === "schedule") this._loadSchedule();
       if (this._mode === "sensor") {
         this._loadSensorConfig();
+        this._applyProbeDefaults();
         void this._fetchControlProbes();
       }
       this._loaded = true;
@@ -312,18 +315,18 @@ export class PowerSensor extends LitElement {
   private _socket(): any {
     return this.device;
   }
-  private _strip(): any {
+  protected _strip(): any {
     return (this.device as any)?.device ?? null;
   }
 
-  private _socketNum(): number {
+  protected _socketNum(): number {
     const dev: any = this._socket();
     const raw = dev?.socket_id ?? dev?.config?.id;
     const n = Number(raw);
     return Number.isFinite(n) && n > 0 ? n - 1 : 0;
   }
 
-  private _configEntry(): string | null {
+  protected _configEntry(): string | null {
     let node: any = this.device;
     for (let i = 0; node && i < 5; i++) {
       const e = node?.elements?.[0]?.primary_config_entry;
@@ -346,13 +349,13 @@ export class PowerSensor extends LitElement {
     return this.hass?.states?.[e.entity_id]?.state ?? null;
   }
 
-  private _entityAttr(key: string, attr: string): any {
+  protected _entityAttr(key: string, attr: string): any {
     const e = this._socket()?.entities?.[key];
     if (!e) return null;
     return this.hass?.states?.[e.entity_id]?.attributes?.[attr] ?? null;
   }
 
-  private _socketName(): string | null {
+  protected _socketName(): string | null {
     const state = this._entityState("socket_name");
     return state && state !== "unknown" ? state : null;
   }
@@ -382,6 +385,10 @@ export class PowerSensor extends LitElement {
     if (mode === "schedule" && !this._scheduleLoaded) this._loadSchedule();
     if (mode === "sensor") {
       this._buildProbeList();
+      // Opened on another mode: the rule the socket keeps on the device, if
+      // any, is only read now
+      if (!this._paramsFromConfig) this._loadSensorConfig();
+      this._applyProbeDefaults();
       void this._fetchControlProbes();
     }
   }
@@ -392,7 +399,7 @@ export class PowerSensor extends LitElement {
    * Only the mode is written back: the schedule or the probe subscription
    * are still stored on the device, so they are left untouched.
    */
-  private async _resume(): Promise<void> {
+  protected async _resume(): Promise<void> {
     const deviceId = this._configEntry();
     if (!deviceId || !this.hass || !this._override) return;
     this._saving = true;
@@ -566,6 +573,7 @@ export class PowerSensor extends LitElement {
     if (!cfg) return;
     // Both shapes share is_above / value / hysteresis; the action is
     // `turn_on` locally and `trigger_op` on the hub (see the file header).
+    this._paramsFromConfig = true;
     if (cfg.is_above !== undefined) this._isAbove = Boolean(cfg.is_above);
     if (cfg.value !== undefined) this._value = round2(cfg.value);
     if (cfg.hysteresis !== undefined) this._hysteresis = round2(cfg.hysteresis);
@@ -642,6 +650,24 @@ export class PowerSensor extends LitElement {
 
     this._buildProbeList();
     if (!this._probeTouched) this._selectConfiguredProbe();
+    this._applyProbeDefaults();
+  }
+
+  /**
+   * Give the selected probe its own default threshold and hysteresis.
+   *
+   * The editor starts with a temperature's (25 °C): kept as is, a pH or ORP
+   * probe picked by default would offer a threshold of 25 pH or 25 mV.
+   * Left alone when the values come from the socket's rule, or once the
+   * user has picked a probe (which applies the defaults itself).
+   */
+  private _applyProbeDefaults(): void {
+    if (this._paramsFromConfig || this._probeTouched) return;
+    const probe = this._probeOptions[this._probeIdx];
+    if (!probe) return;
+    const def = probeDef(probe);
+    this._value = def.defaultValue;
+    this._hysteresis = def.defaultDelta;
   }
 
   private _buildProbeList(): void {
@@ -728,7 +754,7 @@ export class PowerSensor extends LitElement {
 
   // ── Save ────────────────────────────────────────────────────────────────
 
-  private async _save(): Promise<void> {
+  protected async _save(): Promise<void> {
     const deviceId = this._configEntry();
     const socketNum = this._socketNum();
     if (!deviceId || !this.hass) return;
@@ -903,6 +929,7 @@ export class PowerSensor extends LitElement {
         ? html`<div class="sce-divider"></div>
             ${this._renderSensor()}`
         : nothing}
+      ${this._renderExtra()}
       ${this._saveError
         ? html`<div class="sce-error" style="margin-top:6px">
             ${this._saveError}
@@ -918,6 +945,14 @@ export class PowerSensor extends LitElement {
         </button>
       </div>
     `;
+  }
+
+  /**
+   * Room for settings a subclass adds above the Save button (a 12V port's
+   * power, say). Nothing for a power-center socket.
+   */
+  protected _renderExtra(): TemplateResult | typeof nothing {
+    return nothing;
   }
 
   private _renderModeSelector(): TemplateResult {

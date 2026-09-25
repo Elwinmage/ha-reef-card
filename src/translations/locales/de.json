@@ -45,6 +45,7 @@
   "dialog_edit_container": "Behälter bearbeiten",
   "dialog_socket_delete_title": "Steckdose löschen",
   "dialog_socket_temperature_conf": "Einstellungen der Temperatursonde",
+  "dialog_probe_conf": "Sondeneinstellungen",
   "disabledInHa": "Gerät in HomeAssistant deaktiviert!",
   "display_name": "Anzeigename",
   "doses": "Dosen",
@@ -214,5 +215,10 @@
   "weekly": "Wöchentlich",
   "whisper": "Flüstern",
   "wifi": "WLAN",
-  "yes": "Ja"
+  "yes": "Ja",
+  "port_config": "Einstellungen des 12V-Anschlusses",
+  "port_power": "Leistung im Betrieb",
+  "temperature": "Temperatur",
+  "probe_slots": "Sondenplätze",
+  "probe_slot_auto": "Auto"
 }

@@ -1916,3 +1916,78 @@ describe("PowerSensor save", () => {
     );
   });
 });
+
+// ─── Default threshold of the selected probe ────────────────────────────────
+
+describe("PowerSensor probe defaults", () => {
+  const PH = [{ type: "ph", uid: "0x1", name: "pH" }];
+
+  it("gives a probe picked by default its own threshold", async () => {
+    // No local probe: the hub's pH comes first, not a 25 °C threshold
+    const el = await mount({
+      mode: "on",
+      temperature: null,
+      control: true,
+      probes: PH,
+    });
+    el._onModeClick("sensor");
+    expect(el._value).toBe(8.2);
+    expect(el._hysteresis).toBe(0.1);
+  });
+
+  it("applies it once the hub's probes arrive", async () => {
+    const el = makeElement({
+      mode: "sensor",
+      temperature: null,
+      control: true,
+      probes: [{ type: "orp", uid: "0x2", name: "ORP" }],
+      fetched: false,
+    });
+    document.body.appendChild(el);
+    await settle(el);
+    expect(el._probeOptions[el._probeIdx].type).toBe("orp");
+    expect(el._value).toBe(420);
+    expect(el._hysteresis).toBe(25);
+  });
+
+  it("keeps the socket's own rule", async () => {
+    const el = await mount({
+      mode: "schedule",
+      temperature: null,
+      control: true,
+      probes: PH,
+      sensorSource: "control",
+      sensorConfig: { type: "ph", uid: "0x1", value: 7.9, hysteresis: 0.2 },
+    });
+    // Opened on the schedule: the rule is only read when switching
+    el._onModeClick("sensor");
+    expect(el._value).toBe(7.9);
+    expect(el._hysteresis).toBe(0.2);
+    // Switching away and back keeps it
+    el._onModeClick("on");
+    el._value = 7.5;
+    el._onModeClick("sensor");
+    expect(el._value).toBe(7.5);
+  });
+
+  it("keeps what the user picked", async () => {
+    const el = makeElement({
+      mode: "sensor",
+      control: true,
+      probes: PH,
+      fetched: false,
+    });
+    el._buildProbeList();
+    el._probeTouched = true;
+    el._value = 12;
+    await el._fetchControlProbes();
+    expect(el._value).toBe(12);
+  });
+
+  it("does nothing without any probe", () => {
+    const el = makeElement({ mode: "on", temperature: null });
+    el._onModeClick("sensor");
+    expect(el._probeOptions).toEqual([]);
+    expect(el._value).toBe(25);
+  });
+});

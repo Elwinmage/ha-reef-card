@@ -45,6 +45,7 @@
   "dialog_edit_container": "Editar recipiente",
   "dialog_socket_delete_title": "Eliminar enchufe",
   "dialog_socket_temperature_conf": "Ajustes de la sonda de temperatura",
+  "dialog_probe_conf": "Ajustes de la sonda",
   "disabledInHa": "¡Dispositivo desactivado en HomeAssistant!",
   "display_name": "Nombre visible",
   "doses": "Dosis",
@@ -214,5 +215,10 @@
   "weekly": "Semanal",
   "whisper": "Susurro",
   "wifi": "WiFi",
-  "yes": "Sí"
+  "yes": "Sí",
+  "port_config": "Ajustes del puerto 12V",
+  "port_power": "Potencia en marcha",
+  "temperature": "Temperatura",
+  "probe_slots": "Posición de las sondas",
+  "probe_slot_auto": "Auto"
 }

@@ -23,7 +23,13 @@ import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
 import { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
 import { PowerSchedule } from "./redsea/rspower/power_schedule";
-import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+import {
+  RSControlLite,
+  RSControlPro,
+  ControlProbe,
+  ControlPort,
+  PortSensor,
+} from "./redsea/rscontrol";
 import { AMSmartDrift } from "./aquamedic/smartdrift";
 import { AMDCRunner } from "./aquamedic/dcrunner";
 import { AMDCSkimmer } from "./aquamedic/dcskimmer";
@@ -35,6 +41,12 @@ if (!customElements.get("redsea-rscontrollite"))
   customElements.define("redsea-rscontrollite", RSControlLite);
 if (!customElements.get("redsea-rscontrolpro"))
   customElements.define("redsea-rscontrolpro", RSControlPro);
+if (!customElements.get("redsea-control-probe"))
+  customElements.define("redsea-control-probe", ControlProbe);
+if (!customElements.get("redsea-control-port"))
+  customElements.define("redsea-control-port", ControlPort);
+if (!customElements.get("port-sensor"))
+  customElements.define("port-sensor", PortSensor);
 if (!customElements.get("redsea-rsdose4"))
   customElements.define("redsea-rsdose4", RSDose4);
 if (!customElements.get("redsea-rsdose2"))
@@ -107,7 +119,13 @@ export { RSAto } from "./redsea/rsato";
 export { RSWave25, RSWave45 } from "./redsea/rswave";
 export { RSMaintenance } from "./redsea/maintenance";
 export { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
-export { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+export {
+  RSControlLite,
+  RSControlPro,
+  ControlProbe,
+  ControlPort,
+  PortSensor,
+} from "./redsea/rscontrol";
 export { AMSmartDrift } from "./aquamedic/smartdrift";
 export { AMDCRunner } from "./aquamedic/dcrunner";
 export { AMDCSkimmer } from "./aquamedic/dcskimmer";
