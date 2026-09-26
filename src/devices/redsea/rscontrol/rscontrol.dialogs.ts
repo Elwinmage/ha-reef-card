@@ -12,6 +12,109 @@
  */
 import { history_dialog } from "../../../utils/history_dialog";
 
+/** Pictures of the probe calibrations, one per probe type. */
+export const CALIBRATION_IMAGES: Record<string, string> = {
+  ph: new URL("../../../img/redsea/RSSENSE/ph_calibration.png", import.meta.url)
+    .href,
+  ec: new URL("../../../img/redsea/RSSENSE/ec_calibration.png", import.meta.url)
+    .href,
+  orp: new URL(
+    "../../../img/redsea/RSSENSE/orp_calibration.png",
+    import.meta.url,
+  ).href,
+};
+
+/** Hidden unless the probe is of this type, and while it is unplugged. */
+const UNPLUGGED =
+  "!entity.probe_get_value || entity.probe_get_value.state === 'unavailable'";
+
+/**
+ * Button of the probe settings opening one of its calibration dialogs.
+ * @param dialog: the dialog to open (probe_calibration_<name>)
+ * @param key: an entity only the probes this calibration applies to have
+ * @param label: the button's text (an i18n expression)
+ * @return the dialog content entry
+ */
+function calibration_button(dialog: string, key: string, label: string): any {
+  return {
+    view: "common-button",
+    conf: {
+      type: "common-button",
+      stateObj: null,
+      icon: "mdi:water-check",
+      label,
+      class: "dialog_button",
+      disabled_if: `!entity.${key} || ${UNPLUGGED}`,
+      no_br_if_disabled: true,
+      css: {},
+      "elt.css": { "background-color": "rgba(0,0,0,0)" },
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: {
+          type: `probe_calibration_${dialog}`,
+          overload_quit: "probe_conf",
+        },
+      },
+    },
+  };
+}
+
+/**
+ * Calibration dialog: a picture when there is one, what to do, then the
+ * controls (an entity, or a workflow built by rscontrol_dialog_func_ext).
+ * @param name: the dialog name after probe_calibration_ (ph, ec, orp,
+ *   temperature, temp)
+ * @param text: what to do (an i18n expression)
+ * @param controls: the dialog content following the picture and the text
+ * @return the dialog definition
+ */
+function calibration_dialog(name: string, text: string, controls: any[]): any {
+  const picture = CALIBRATION_IMAGES[name];
+  return {
+    name: `probe_calibration_${name}`,
+    title_key:
+      "${i18n._('probe_calibration')} ${entity.probe_name?.state || ''}",
+    close_cross: false,
+    content: [
+      ...(picture
+        ? [
+            {
+              view: "click-image",
+              conf: {
+                image: picture,
+                type: "click-image",
+                stateObj: null,
+                tap_action: [],
+                css: { width: "60%", "margin-left": "20%" },
+              },
+            },
+          ]
+        : []),
+      { view: "text", value: text },
+      ...controls,
+    ],
+  };
+}
+
+/**
+ * Controls of a calibration against a reference: the integration's number,
+ * which reads the probe and moves its offset when set to the reference.
+ * @param entity: the key of the number
+ * @return the dialog content entries
+ */
+function reference_controls(entity: string): any[] {
+  return [
+    {
+      view: "hui-entities-card",
+      conf: {
+        type: "entities",
+        entities: [{ entity, name: { type: "entity" } }],
+      },
+    },
+  ];
+}
+
 export const dialogs_rscontrol = {
   /**
    * Hub-wide buzzer, opened from the bell on the hub's status LED: what it
@@ -266,15 +369,6 @@ export const dialogs_rscontrol = {
               entity: "probe_temp_acceptable_range_high",
               name: { type: "entity" },
             },
-            // Calibration against a reference: set it to the value of the
-            // solution (ORP) or of the real temperature the probe is in
-            { entity: "probe_orp_calibration", name: { type: "entity" } },
-            {
-              entity: "probe_temperature_calibration",
-              name: { type: "entity" },
-            },
-            // pH, EC, ATO: their embedded temperature
-            { entity: "probe_temp_calibration", name: { type: "entity" } },
             { type: "divider" },
             { entity: "probe_enabled", name: { type: "entity" } },
             { entity: "probe_buzzer", name: { type: "entity" } },
@@ -283,6 +377,34 @@ export const dialogs_rscontrol = {
           ],
         },
       },
+      // Calibrations of the probe, each in its own dialog: only those of
+      // the probe's type show (and none while it is unplugged)
+      calibration_button(
+        "ph",
+        "probe_ph_value",
+        "${i18n._('probe_calibrate')}",
+      ),
+      calibration_button(
+        "ec",
+        "probe_ec_value",
+        "${i18n._('probe_calibrate')}",
+      ),
+      calibration_button(
+        "orp",
+        "probe_orp_value",
+        "${i18n._('probe_calibrate')}",
+      ),
+      calibration_button(
+        "temperature",
+        "probe_temperature_calibration",
+        "${i18n._('probe_calibrate')}",
+      ),
+      // pH, EC, ATO: their embedded temperature
+      calibration_button(
+        "temp",
+        "probe_temp_calibration",
+        "${i18n._('probe_calibrate_temperature')}",
+      ),
     ],
     // Center button: read the probe now rather than waiting for the next
     // poll. The dialog stays open, so the readings above refresh in place.
@@ -311,4 +433,38 @@ export const dialogs_rscontrol = {
       },
     },
   },
+
+  /**
+   * ORP: the reference is set through the integration's calibration
+   * number, which reads the probe and moves its offset.
+   */
+  probe_calibration_orp: calibration_dialog(
+    "orp",
+    "${i18n._('calibration_dip_probe')}",
+    reference_controls("probe_orp_calibration"),
+  ),
+  /** EC: one point, the value of the solution entered by hand (mS/cm). */
+  probe_calibration_ec: calibration_dialog(
+    "ec",
+    "${i18n._('calibration_dip_probe')}",
+    [{ view: "extend", extend: "rscontrol_dialog_func_ext", re_render: true }],
+  ),
+  /** pH: pH 7, then pH 10 (salt water) or pH 4 (fresh water). */
+  probe_calibration_ph: calibration_dialog(
+    "ph",
+    "${i18n._('calibration_dip_probe')}",
+    [{ view: "extend", extend: "rscontrol_dialog_func_ext", re_render: true }],
+  ),
+  /** Temperature probe: set to the real temperature of its water. */
+  probe_calibration_temperature: calibration_dialog(
+    "temperature",
+    "${i18n._('calibration_dip_temperature')}",
+    reference_controls("probe_temperature_calibration"),
+  ),
+  /** Embedded temperature of a pH, EC or ATO probe, the same way. */
+  probe_calibration_temp: calibration_dialog(
+    "temp",
+    "${i18n._('calibration_dip_temperature')}",
+    reference_controls("probe_temp_calibration"),
+  ),
 };

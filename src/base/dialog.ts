@@ -293,6 +293,12 @@ export class Dialog extends LitElement {
       content.setConfig(clone);
       content.hass = this._hass;
       content.device = this.elt.device;
+      // A picture of a dialog illustrates what to do: always in colour. Built
+      // here rather than by MyElement.create_element, it would otherwise
+      // keep the default "off" state and be greyed out.
+      if (content_conf.view === "click-image") {
+        content.stateOn = true;
+      }
     }
     this.elts.push(content);
     this._shadowRoot.querySelector("#dialog-content").appendChild(content);

@@ -1109,3 +1109,40 @@ describe("Dialog.evaluate_conf()", () => {
     expect(conf.icon).toBe("${x}");
   });
 });
+describe("Dialog._render_content — pictures stay in colour", () => {
+  it("turns a click-image on, and leaves other views alone", async () => {
+    const { dlg } = await makeDialog();
+    dlg._hass = makeHass_C();
+    dlg.elts = [];
+    dlg.elt = { get_entity: vi.fn(), device: { name: "dev" } };
+    if (!customElements.get("click-image")) {
+      class FakeClickImage extends HTMLElement {
+        conf: any;
+        hass: any;
+      }
+      customElements.define("click-image", FakeClickImage);
+    }
+    const ClickImage = customElements.get("click-image") as any;
+    if (!ClickImage.prototype.setConfig)
+      ClickImage.prototype.setConfig = () => {};
+    const shadow = document.createElement("div");
+    shadow.innerHTML = `<div id="dialog-content"></div>`;
+    dlg._shadowRoot = shadow;
+
+    dlg._render_content({
+      view: "click-image",
+      conf: { type: "click-image", image: "/img/x.png", tap_action: [] },
+    });
+    expect(dlg.elts.at(-1).stateOn).toBe(true);
+
+    const viewTag = uid("dlg-view");
+    class ViewEl extends HTMLElement {
+      setConfig(_c: any) {}
+      hass: any = null;
+      device: any = null;
+    }
+    customElements.define(viewTag, ViewEl);
+    dlg._render_content({ view: viewTag, conf: { name: "x" } });
+    expect(dlg.elts.at(-1).stateOn).toBeUndefined();
+  });
+});

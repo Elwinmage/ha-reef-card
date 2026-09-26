@@ -703,16 +703,21 @@ describe("RSControl models", () => {
     for (const key of [
       "probe_desired_range_low",
       "probe_temp_acceptable_range_high",
-      "probe_orp_calibration",
-      "probe_temperature_calibration",
-      "probe_temp_calibration",
       "probe_ec_unit",
       "probe_buzzer",
     ]) {
       expect(keys).toContain(key);
     }
-    // The offsets gave way to the calibration against a reference
-    expect(keys).not.toContain("probe_offset");
+    // The offsets gave way to the calibration against a reference, in the
+    // calibration dialogs
+    for (const key of [
+      "probe_offset",
+      "probe_orp_calibration",
+      "probe_temperature_calibration",
+      "probe_temp_calibration",
+    ]) {
+      expect(keys).not.toContain(key);
+    }
     // Reading now is a button of the dialog, not a row
     expect(keys).not.toContain("probe_get_value");
     expect(hub.dialogs.probe_conf.other.conf.tap_action[0].data.entity_id).toBe(
