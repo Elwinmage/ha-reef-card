@@ -36,6 +36,9 @@ export const dialogs_rscontrol = {
             { entity: "danger_buzzer_duty_cycle", name: { type: "entity" } },
             { entity: "danger_debounce_seconds", name: { type: "entity" } },
             { type: "divider" },
+            // Leak detection itself, then its alarm sound
+            { entity: "leak_detector_enabled", name: { type: "entity" } },
+            { entity: "leak_detector", name: { type: "entity" } },
             { entity: "leak_buzzer_enabled", name: { type: "entity" } },
             { entity: "leak_buzzer_frequency", name: { type: "entity" } },
             { entity: "leak_buzzer_duty_cycle", name: { type: "entity" } },
@@ -81,6 +84,8 @@ export const dialogs_rscontrol = {
             { type: "divider" },
             { entity: "port_on_off", name: { type: "entity" } },
             { entity: "port_state", name: { type: "entity" } },
+            // other, ato, or unknown for a port not installed yet
+            { entity: "port_type", name: { type: "entity" } },
             { entity: "port_consumption", name: { type: "entity" } },
           ],
         },
@@ -196,6 +201,14 @@ export const dialogs_rscontrol = {
             { entity: "temperature_anomaly_source", name: { type: "entity" } },
 
             { type: "divider" },
+            // How the hub reaches the outside (its wifi is in the wifi
+            // dialog), then the power center it drives
+            { entity: "is_internet_connected", name: { type: "entity" } },
+            { entity: "cable_connected", name: { type: "entity" } },
+            { type: "divider" },
+            { entity: "connected_power", name: { type: "entity" } },
+            { entity: "connected_power_state", name: { type: "entity" } },
+            { entity: "power_link_up", name: { type: "entity" } },
             { entity: "unpair_power", name: { type: "entity" } },
             { entity: "pair_power", name: { type: "entity" } },
           ],
@@ -216,7 +229,15 @@ export const dialogs_rscontrol = {
           entities: [
             { entity: "probe_primary", name: { type: "entity" } },
             { entity: "probe_secondary", name: { type: "entity" } },
+            // Leak probes: wet or dry, where the water comes from, and the
+            // conductivity the probe measured to tell it
+            { entity: "probe_leak_detected", name: { type: "entity" } },
+            { entity: "probe_leak_status", name: { type: "entity" } },
+            { entity: "probe_leak_conductivity", name: { type: "entity" } },
             { entity: "probe_status", name: { type: "entity" } },
+            // The hub's mode: a probe reads nothing while the hub is off,
+            // in setup, feeding or maintenance
+            { entity: "control_mode", name: { type: "entity" } },
             { type: "divider" },
             { entity: "probe_ec_unit", name: { type: "entity" } },
             { entity: "probe_desired_range_low", name: { type: "entity" } },

@@ -28,12 +28,6 @@ const EMPTY_STATES: readonly string[] = ["", "unknown", "unavailable"];
 /** Port states meaning the 12V output is powered. */
 const PORT_ON_STATES: readonly string[] = ["on", "fallback_on"];
 
-/** Leak statuses of an ATO port, to the side the water came from. */
-const LEAK_SOURCES: Record<string, string> = {
-  aquarium_water_leak: "aquarium",
-  rodi_water_leak: "rodi",
-};
-
 /** Model drawn when the paired power strip cannot be resolved. */
 const DEFAULT_POWER_MODEL = "RSPOWER6";
 
@@ -358,6 +352,7 @@ export class RSControl extends RSDevice {
    * Whether the paired power strip is unreachable.
    * @return true when paired but not connected
    */
+  // check-entities: uses power_link_up
   power_link_alert(): boolean {
     return (
       this.has_power_link() && this.get_entity("power_link_up")?.state !== "on"
@@ -441,6 +436,7 @@ export class RSControl extends RSDevice {
    * @param port: the 1-based port number
    * @return true when the port is of type "ato" or follows an ATO probe
    */
+  // check-entities: uses port_type
   is_ato_port(port: number): boolean {
     if (this.get_entity("port_type_" + port)?.state === "ato") return true;
     const mode = this.get_entity("sensor.port_mode_" + port);
@@ -476,20 +472,6 @@ export class RSControl extends RSDevice {
     return [1, 2].some(
       (port) => this.is_ato_port(port) && this.is_port_on(port),
     );
-  }
-
-  /**
-   * Where the water of a leak comes from, as an ATO port's leak sensor
-   * tells it: the tank or the ATO reservoir (RO/DI water).
-   * @return "aquarium", "rodi", or null when no port reports a leak
-   */
-  leak_source(): string | null {
-    for (const port of [1, 2]) {
-      const source =
-        LEAK_SOURCES[this.get_entity("port_leak_status_" + port)?.state];
-      if (source) return source;
-    }
-    return null;
   }
 
   // ── Probe rendering ───────────────────────────────────────────────────

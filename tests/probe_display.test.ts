@@ -396,29 +396,20 @@ describe("RSControl water", () => {
     expect(els.ato_reservoir.disabled_if).toBe("!device.ato_pump_on()");
   });
 
-  it("tells where a leak comes from", () => {
-    expect(
-      hub({ port_leak_status_2: "aquarium_water_leak" }).leak_source(),
-    ).toBe("aquarium");
-    expect(hub({ port_leak_status_1: "rodi_water_leak" }).leak_source()).toBe(
-      "rodi",
-    );
-    expect(hub({ port_leak_status_1: "dry" }).leak_source()).toBeNull();
-  });
-
   it("marks a wet leak probe with the side of the leak", () => {
-    const wet = makeProbe("leak", { probe_primary: { state: "on" } });
-    wet.device = { leak_source: () => "aquarium" };
-    expect(wet.leak_detected()).toBe(true);
-    expect(wet.leak_icon()).toBe("mdi:fish");
-    wet.device = { leak_source: () => "rodi" };
-    expect(wet.leak_icon()).toBe("mdi:cup-water");
-    wet.device = { leak_source: () => null };
-    expect(wet.leak_icon()).toBe("");
-    wet.device = undefined;
-    expect(wet.leak_icon()).toBe("");
-    const dry = makeProbe("leak", { probe_primary: { state: "off" } });
-    dry.device = { leak_source: () => "aquarium" };
+    const probe = (state: string, origin?: string): any =>
+      makeProbe("leak", {
+        probe_primary: { state },
+        ...(origin ? { probe_leak_status: { state: origin } } : {}),
+      });
+    const aquarium = probe("on", "aquarium_water_leak");
+    expect(aquarium.leak_detected()).toBe(true);
+    expect(aquarium.leak_icon()).toBe("mdi:fish");
+    expect(probe("on", "rodi_water_leak").leak_icon()).toBe("mdi:cup-water");
+    // Wet but not read yet, or no origin sensor: no icon
+    expect(probe("on", "unknown").leak_icon()).toBe("");
+    expect(probe("on").leak_icon()).toBe("");
+    const dry = probe("off", "aquarium_water_leak");
     expect(dry.leak_detected()).toBe(false);
     expect(dry.leak_icon()).toBe("");
   });
@@ -638,5 +629,66 @@ describe("Probe settings dialog", () => {
     expect(hidden({})).toBe(true);
     expect(hidden({ probe_get_value: { state: "unavailable" } })).toBe(true);
     expect(hidden({ probe_get_value: { state: "unknown" } })).toBe(false);
+  });
+});
+
+describe("RSControl connectivity and leak detection", () => {
+  it("dims a leak probe the hub does not watch", () => {
+    const leak = (entities: Record<string, string>): any =>
+      makeProbe(
+        "leak",
+        Object.fromEntries(
+          Object.entries(entities).map(([k, v]) => [k, { state: v }]),
+        ),
+      );
+    expect(leak({ leak_detector_enabled: "off" }).leak_muted()).toBe(true);
+    expect(leak({ leak_detector_enabled: "on" }).leak_muted()).toBe(false);
+    // Without the setting, the state the hub reports
+    expect(leak({ leak_detector: "off" }).leak_muted()).toBe(true);
+    expect(leak({}).leak_muted()).toBe(false);
+    // Only leak probes
+    const ph = makeProbe("ph", { leak_detector_enabled: { state: "off" } });
+    expect(ph.leak_muted()).toBe(false);
+  });
+
+  it("draws the dimmed probe", () => {
+    const probe = makeProbe(
+      "leak",
+      { leak_detector_enabled: { state: "off" } },
+      { image: "leak.png" },
+    );
+    probe._render_elements = vi.fn(() => "");
+    const dom = toDom(probe._render());
+    expect(dom.querySelector(".probe")!.classList.contains("muted")).toBe(true);
+  });
+
+  it("shows the hub connectivity in its settings", () => {
+    expect((proConfig.elements as any).connectivity).toBeUndefined();
+    const keys = (dialogs_rscontrol as any).config.content[0].conf.entities.map(
+      (e: any) => e.entity,
+    );
+    for (const key of [
+      "is_internet_connected",
+      "cable_connected",
+      "connected_power",
+      "connected_power_state",
+      "power_link_up",
+    ]) {
+      expect(keys).toContain(key);
+    }
+    // The wifi keeps its own dialog
+    expect(keys).not.toContain("wifi_quality");
+  });
+
+  it("lists the detection, the port type and the hub mode", () => {
+    const rows = (name: string): string[] =>
+      (dialogs_rscontrol as any)[name].content[0].conf.entities.map(
+        (e: any) => e.entity,
+      );
+    expect(rows("buzzer_conf")).toContain("leak_detector_enabled");
+    expect(rows("buzzer_conf")).toContain("leak_detector");
+    expect(rows("port_conf")).toContain("port_type");
+    expect(rows("probe_conf")).toContain("probe_leak_detected");
+    expect(rows("probe_conf")).toContain("control_mode");
   });
 });

@@ -55,6 +55,8 @@ export type { ProbeLevel };
 // ─── Probe model ─────────────────────────────────────────────────────────────
 
 /** Translation key of each probe type's main reading. */
+// check-entities: uses probe_ph_value, probe_orp_value, probe_ec_value
+// check-entities: uses probe_temperature, probe_water_level, probe_leak_detected
 export const PRIMARY_KEYS: Record<string, string> = {
   ph: "probe_ph_value",
   orp: "probe_orp_value",
@@ -137,6 +139,12 @@ const HISTORY_DIALOGS: Record<string, string> = {
   probe_secondary: "probe_temp_history",
 };
 
+/** Origins a leak probe reports, to the side the water came from. */
+const LEAK_SOURCES: Record<string, string> = {
+  aquarium_water_leak: "aquarium",
+  rodi_water_leak: "rodi",
+};
+
 /** Icon of each side a leak may come from. */
 const LEAK_ICONS: Record<string, string> = {
   aquarium: "mdi:fish",
@@ -213,6 +221,8 @@ export class ControlProbe extends RSDevice {
       "probe_level",
       "probe_temp_level",
       "probe_status",
+      "leak_detector_enabled",
+      "leak_detector",
     ]
       .map((key) => {
         const st = this.get_entity(key);
@@ -319,6 +329,19 @@ export class ControlProbe extends RSDevice {
   }
 
   /**
+   * Whether a leak probe is switched off: the hub's leak detection is
+   * disabled (its setting, or the state the hub reports without it). The
+   * probe is then drawn dimmed, as the RSATO+ does with its leak sensor.
+   * @return true for a leak probe the hub does not watch
+   */
+  leak_muted(): boolean {
+    if (this.probe_type !== "leak") return false;
+    const setting = this.get_entity("leak_detector_enabled");
+    const state = setting ?? this.get_entity("leak_detector");
+    return state?.state === "off";
+  }
+
+  /**
    * Whether a leak probe is wet.
    * @return true when it detects water
    */
@@ -328,13 +351,15 @@ export class ControlProbe extends RSDevice {
 
   /**
    * Icon telling where the water of a detected leak comes from: a fish for
-   * the tank, a cup of water for the ATO reservoir. The hub knows it from
-   * the leak sensor of its ATO port.
+   * the tank, a cup of water for the ATO reservoir. The probe tells it
+   * itself (`probe_leak_status`, read by the integration as soon as the
+   * probe turns wet).
    * @return the icon, or "" when there is no leak or its side is unknown
    */
   leak_icon(): string {
     if (!this.leak_detected()) return "";
-    return LEAK_ICONS[(this.device as any)?.leak_source?.()] ?? "";
+    const source = LEAK_SOURCES[this.get_entity("probe_leak_status")?.state];
+    return LEAK_ICONS[source] ?? "";
   }
 
   /**
@@ -400,7 +425,11 @@ export class ControlProbe extends RSDevice {
     }
     const view = this.view();
     const box_style = this.get_style({ css: view.img_css });
-    const alert = this.is_disconnected() ? "blink-alert" : "";
+    const alert = this.is_disconnected()
+      ? "blink-alert"
+      : this.leak_muted()
+        ? "muted"
+        : "";
     // Everything is drawn inside the picture box, in % of the picture
     return html`
       <div class="probe ${alert}">
