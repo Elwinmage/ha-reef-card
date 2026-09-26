@@ -266,7 +266,15 @@ export const dialogs_rscontrol = {
               entity: "probe_temp_acceptable_range_high",
               name: { type: "entity" },
             },
-            { entity: "probe_offset", name: { type: "entity" } },
+            // Calibration against a reference: set it to the value of the
+            // solution (ORP) or of the real temperature the probe is in
+            { entity: "probe_orp_calibration", name: { type: "entity" } },
+            {
+              entity: "probe_temperature_calibration",
+              name: { type: "entity" },
+            },
+            // pH, EC, ATO: their embedded temperature
+            { entity: "probe_temp_calibration", name: { type: "entity" } },
             { type: "divider" },
             { entity: "probe_enabled", name: { type: "entity" } },
             { entity: "probe_buzzer", name: { type: "entity" } },

@@ -194,7 +194,8 @@ export const dialogs_rspower = {
               name: { type: "entity" },
             },
             { type: "divider" },
-            { entity: "temperature_offset", name: { type: "entity" } },
+            // Set it to the real temperature the probe is in
+            { entity: "temperature_calibration", name: { type: "entity" } },
             { type: "divider" },
             { entity: "temperature_log_enabled", name: { type: "entity" } },
             {
