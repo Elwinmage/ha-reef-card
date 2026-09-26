@@ -36,8 +36,16 @@ export class ClickImage extends MyElement {
     if (typeof imageSrc === "string" && imageSrc.includes("${")) {
       imageSrc = this.evaluate(imageSrc);
     }
-    const icon = this.conf?.icon || "";
+    let icon = this.conf?.icon || "";
+    // An icon may follow the device state too
+    if (typeof icon === "string" && icon.includes("${")) {
+      icon = String(this.evaluate(icon) ?? "");
+    }
     let iconColor = this.conf?.icon_color || "currentColor";
+    // Like the image, a colour may follow the device state
+    if (typeof iconColor === "string" && iconColor.includes("${")) {
+      iconColor = this.evaluate(iconColor);
+    }
 
     /*    if (!_style) {
       _style = this.get_style("css");

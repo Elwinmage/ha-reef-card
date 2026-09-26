@@ -28,6 +28,12 @@ const EMPTY_STATES: readonly string[] = ["", "unknown", "unavailable"];
 /** Port states meaning the 12V output is powered. */
 const PORT_ON_STATES: readonly string[] = ["on", "fallback_on"];
 
+/** Leak statuses of an ATO port, to the side the water came from. */
+const LEAK_SOURCES: Record<string, string> = {
+  aquarium_water_leak: "aquarium",
+  rodi_water_leak: "rodi",
+};
+
 /** Model drawn when the paired power strip cannot be resolved. */
 const DEFAULT_POWER_MODEL = "RSPOWER6";
 
@@ -462,6 +468,30 @@ export class RSControl extends RSDevice {
     );
   }
 
+  /**
+   * Whether the ATO pump is running: a port driving it is powered.
+   * @return true while it pumps
+   */
+  ato_pump_on(): boolean {
+    return [1, 2].some(
+      (port) => this.is_ato_port(port) && this.is_port_on(port),
+    );
+  }
+
+  /**
+   * Where the water of a leak comes from, as an ATO port's leak sensor
+   * tells it: the tank or the ATO reservoir (RO/DI water).
+   * @return "aquarium", "rodi", or null when no port reports a leak
+   */
+  leak_source(): string | null {
+    for (const port of [1, 2]) {
+      const source =
+        LEAK_SOURCES[this.get_entity("port_leak_status_" + port)?.state];
+      if (source) return source;
+    }
+    return null;
+  }
+
   // ── Probe rendering ───────────────────────────────────────────────────
 
   /**
@@ -473,24 +503,32 @@ export class RSControl extends RSDevice {
   _probe_config(probe: ProbeEntity, slot: number): any {
     const probes = this.config.probes;
     const typed = merge(probes.common, probes.common.types?.[probe.type] ?? {});
-    return merge(typed, probes["probe_" + slot] ?? {});
+    return {
+      ...merge(typed, probes["probe_" + slot] ?? {}),
+      // Dots instead of bars, switched on in the card editor
+      compact: this.config?.compact_probes === true,
+    };
   }
 
   /**
-   * Hub entities a probe may read, without any probe-scoped one.
+   * Hub entities a probe or a port may read, without any probe- or
+   * port-scoped one.
    *
-   * A probe entity the integration could not tag stays among the hub's own:
-   * an entity that is unavailable carries no attributes, which is always the
-   * case of the range bounds an EC probe keeps for its other units. Handed
-   * to every probe, it would stand in for a setting that probe does not
-   * have — the salinity bounds showing up in an ATO probe's settings.
+   * An entity the integration could not tag stays among the hub's own:
+   * an entity that is unavailable carries no attributes. That is always the
+   * case of the range bounds an EC probe keeps for its other units, and of
+   * the uninstall button of a port not installed. Handed to every probe or
+   * port, it would stand in for one it does not have — the salinity bounds
+   * in an ATO probe's settings, the other port's uninstall button.
    * @return the hub entities, keyed as in `entities`
    */
   _hub_entities(): Record<string, any> {
     const result: Record<string, any> = {};
     for (const [key, entity] of Object.entries(this.entities)) {
       const bare = key.includes(".") ? key.split(".")[1] : key;
-      if (!bare.startsWith("probe_")) result[key] = entity;
+      if (!bare.startsWith("probe_") && !bare.startsWith("port_")) {
+        result[key] = entity;
+      }
     }
     return result;
   }
@@ -873,7 +911,9 @@ export class RSControl extends RSDevice {
     }
     this._populate_entities();
     return html`<form>
-      ${this._editor_common()}${this._editor_probe_slots()}
+      ${this._editor_common()}
+      <div>${this.is_config_checked("compact_probes")}</div>
+      ${this._editor_probe_slots()}
     </form>`;
   }
 

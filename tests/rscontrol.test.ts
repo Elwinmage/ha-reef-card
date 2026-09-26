@@ -706,10 +706,14 @@ describe("RSControl models", () => {
       "probe_offset",
       "probe_ec_unit",
       "probe_buzzer",
-      "probe_get_value",
     ]) {
       expect(keys).toContain(key);
     }
+    // Reading now is a button of the dialog, not a row
+    expect(keys).not.toContain("probe_get_value");
+    expect(hub.dialogs.probe_conf.other.conf.tap_action[0].data.entity_id).toBe(
+      "probe_get_value",
+    );
     // The device-wide dialogs are still there
     expect(hub.dialogs.wifi).toBeDefined();
   });

@@ -44,6 +44,7 @@
   "dialog_delete_supplement_title": "Elimina integratore dalla testina",
   "dialog_edit_container": "Modifica contenitore",
   "dialog_socket_delete_title": "Elimina presa",
+  "dialog_port_delete_title": "Disinstalla la porta 12V",
   "dialog_socket_temperature_conf": "Impostazioni sonda temperatura",
   "dialog_probe_conf": "Impostazioni sonda",
   "disabledInHa": "Dispositivo disabilitato in HomeAssistant!",
@@ -220,5 +221,10 @@
   "port_power": "Potenza in funzione",
   "temperature": "Temperatura",
   "probe_slots": "Posizione delle sonde",
-  "probe_slot_auto": "Auto"
+  "probe_slot_auto": "Auto",
+  "history_24h": "Ultime 24 h",
+  "dialog_buzzer_conf": "Cicalino generale",
+  "compact_probes": "Sonde compatte (punti invece di barre)",
+  "probe_read_value": "Leggi valore",
+  "rscontrol_connectivity": "Connettività del RSControl"
 }

@@ -186,7 +186,10 @@ export class FlowImage extends MyElement {
     const minSpeed = 40;
     let speedRaw = parseFloat(this.stateObj?.state ?? "0");
     const running = this._is_running(this._hass);
-    if (running && speedRaw === 0) {
+    // A running pump at speed zero, or bound to an on/off state rather than
+    // a speed (the hub's own switch, for its ATO pump), flows at the slowest
+    // speed. An unreadable speed still pauses it.
+    if (running && (speedRaw === 0 || this.stateObj?.state === "on")) {
       speedRaw = minSpeed;
     }
     const speed = isNaN(speedRaw) ? 0 : Math.max(0, Math.min(100, speedRaw));

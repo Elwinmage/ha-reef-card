@@ -44,6 +44,7 @@
   "dialog_delete_supplement_title": "Supprimer le Supplément de la tête",
   "dialog_edit_container": "Edition du Conteneur",
   "dialog_socket_delete_title": "Supprimer la prise",
+  "dialog_port_delete_title": "Désinstaller le port 12V",
   "dialog_socket_temperature_conf": "Réglages de la sonde de température",
   "dialog_probe_conf": "Réglages de la sonde",
   "disabledInHa": "Périphérique désactivé dans HomeAssistant!",
@@ -220,5 +221,10 @@
   "port_power": "Puissance en marche",
   "temperature": "Température",
   "probe_slots": "Emplacement des sondes",
-  "probe_slot_auto": "Auto"
+  "probe_slot_auto": "Auto",
+  "history_24h": "Dernières 24 h",
+  "dialog_buzzer_conf": "Buzzer général",
+  "compact_probes": "Sondes compactes (ronds au lieu des barres)",
+  "probe_read_value": "Lire la valeur",
+  "rscontrol_connectivity": "Connectivité du RSControl"
 }

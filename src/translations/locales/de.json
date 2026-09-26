@@ -44,6 +44,7 @@
   "dialog_delete_supplement_title": "Nahrungsergänzungsmittel für Kopf löschen",
   "dialog_edit_container": "Behälter bearbeiten",
   "dialog_socket_delete_title": "Steckdose löschen",
+  "dialog_port_delete_title": "12V-Anschluss deinstallieren",
   "dialog_socket_temperature_conf": "Einstellungen der Temperatursonde",
   "dialog_probe_conf": "Sondeneinstellungen",
   "disabledInHa": "Gerät in HomeAssistant deaktiviert!",
@@ -220,5 +221,10 @@
   "port_power": "Leistung im Betrieb",
   "temperature": "Temperatur",
   "probe_slots": "Sondenplätze",
-  "probe_slot_auto": "Auto"
+  "probe_slot_auto": "Auto",
+  "history_24h": "Letzte 24 Std.",
+  "dialog_buzzer_conf": "Allgemeiner Summer",
+  "compact_probes": "Kompakte Sonden (Punkte statt Balken)",
+  "probe_read_value": "Wert lesen",
+  "rscontrol_connectivity": "RSControl-Konnektivität"
 }

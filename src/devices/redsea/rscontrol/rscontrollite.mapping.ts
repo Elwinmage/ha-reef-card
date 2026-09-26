@@ -43,6 +43,12 @@ export const config = {
     ...lite_extends,
     ...lite_links,
     ...widgets,
+    // The Lite's LED sits further left, its box being narrower: x 1727,
+    // y 210 of 1952 x 2196
+    buzzer: {
+      ...widgets.buzzer,
+      css: { ...widgets.buzzer.css, top: "9.6%", left: "88.5%" },
+    },
   },
   probes: { ...probes, max: 2 },
   ports: lite_ports,

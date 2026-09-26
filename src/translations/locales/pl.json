@@ -44,6 +44,7 @@
   "dialog_delete_supplement_title": "Usuń suplement z głowicy",
   "dialog_edit_container": "Edytuj pojemnik",
   "dialog_socket_delete_title": "Usuń gniazdko",
+  "dialog_port_delete_title": "Odinstaluj port 12V",
   "dialog_socket_temperature_conf": "Ustawienia sondy temperatury",
   "dialog_probe_conf": "Ustawienia sondy",
   "disabledInHa": "Urządzenie wyłączone w HomeAssistant!",
@@ -220,5 +221,10 @@
   "port_power": "Moc po włączeniu",
   "temperature": "Temperatura",
   "probe_slots": "Położenie sond",
-  "probe_slot_auto": "Auto"
+  "probe_slot_auto": "Auto",
+  "history_24h": "Ostatnie 24 h",
+  "dialog_buzzer_conf": "Brzęczyk ogólny",
+  "compact_probes": "Kompaktowe sondy (kropki zamiast pasków)",
+  "probe_read_value": "Odczytaj wartość",
+  "rscontrol_connectivity": "Łączność RSControl"
 }

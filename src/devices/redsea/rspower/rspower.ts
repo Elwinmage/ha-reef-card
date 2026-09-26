@@ -15,6 +15,14 @@ import {
   hexToRgb,
 } from "../../../utils/common";
 
+import {
+  HUB_LEVELS,
+  level_color,
+  level_from_ranges,
+  parse_ranges,
+} from "../../../utils/levels";
+import type { ProbeLevel } from "../../../utils/levels";
+
 import type { SocketEntity } from "../../../types/index";
 
 /**
@@ -254,6 +262,24 @@ export class RSPower extends RSDevice {
     );
   }
 
+  /**
+   * Colour of the local temperature for its level: the power center's own
+   * verdict when it gives one, else computed from its bounds — the same
+   * colours as the ReefControl probes.
+   * @return a CSS colour
+   */
+  temperature_color(): string {
+    const st = this.get_entity("power_temperature");
+    const value = parseFloat(st?.state);
+    let level: ProbeLevel = "error";
+    if (Number.isFinite(value)) {
+      level =
+        HUB_LEVELS[st.attributes?.level] ??
+        level_from_ranges(value, parse_ranges(st.attributes?.ranges));
+    }
+    return level_color(level);
+  }
+
   // ── Entity population ─────────────────────────────────────────────────
 
   _populate_entities(): void {
@@ -412,7 +438,9 @@ export class RSPower extends RSDevice {
     this._populate_entities_with_sockets();
     this.update_config();
     return html` <form>
-      ${this._editor_common()}${this._editor_socket_colors()}${this._editor_socket_links()}
+      ${this._editor_common()}
+      <div>${this.is_config_checked("compact_probes")}</div>
+      ${this._editor_socket_colors()}${this._editor_socket_links()}
     </form>`;
   }
 

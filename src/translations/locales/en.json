@@ -44,6 +44,7 @@
   "dialog_delete_supplement_title": "Delete supplement for head",
   "dialog_edit_container": "Edit Container",
   "dialog_socket_delete_title": "Delete socket",
+  "dialog_port_delete_title": "Uninstall 12V port",
   "dialog_socket_temperature_conf": "Temperature probe settings",
   "dialog_probe_conf": "Probe settings",
   "disabledInHa": "Device disabled in HomeAssistant!",
@@ -220,5 +221,10 @@
   "port_power": "Power when on",
   "temperature": "Temperature",
   "probe_slots": "Probe slots",
-  "probe_slot_auto": "Auto"
+  "probe_slot_auto": "Auto",
+  "history_24h": "Last 24 h",
+  "dialog_buzzer_conf": "General buzzer",
+  "compact_probes": "Compact probes (dots instead of bars)",
+  "probe_read_value": "Read value",
+  "rscontrol_connectivity": "RSControl connectivity"
 }

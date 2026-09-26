@@ -713,6 +713,20 @@ describe("FlowImage hide_when_stopped", () => {
     expect(div.style.animationPlayState).toBe("paused");
   });
 
+  it("runs an on/off pump at the slowest speed", () => {
+    // A 12V port reports "on", not a speed: the stream still flows
+    const { flow, div } = makeOutlet({
+      running_if: "is_pump_on",
+      hide_when_stopped: true,
+      min_duration: 2,
+      max_duration: 6,
+    });
+    flow.stateObj = makeState("switch.hub", "on");
+    flow._syncAnimation();
+    expect(div.style.animationPlayState).toBe("running");
+    expect(div.style.animationDuration).toBe("6.00s");
+  });
+
   it("leaves a tube full when the mapping does not opt in", () => {
     // The RSRUN tube keeps its water when its pump stops.
     const { flow, div } = makeOutlet({ running_if: "is_pump_on" });

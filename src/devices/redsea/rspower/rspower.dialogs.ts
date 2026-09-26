@@ -6,7 +6,16 @@
  * the schedule editor and the sensor configurator as a single unified
  * inline panel — no sub-dialogs.
  */
+import { history_dialog } from "../../../utils/history_dialog";
+
 export const dialogs_rspower = {
+  // Last 24 hours of the local temperature over its level bands, opened
+  // from its value, its bar or its dot
+  power_temperature_history: history_dialog(
+    "power_temperature_history",
+    "power_temperature",
+    "${i18n._('history_24h')} ${i18n._('temperature')}",
+  ),
   config: {
     name: "config",
     title_key: "${i18n._('config')}",
@@ -197,7 +206,25 @@ export const dialogs_rspower = {
       },
     ],
   },
-
+  rscontrol_connectivity: {
+    title_key: "${i18n._('rscontrol_connectivity')}",
+    close_cross: false,
+    content: [
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "connected_control", name: { type: "entity" } },
+            { entity: "connected_control_type", name: { type: "entity" } },
+            { entity: "connected_control_status", name: { type: "entity" } },
+            { entity: "control_internet_connected", name: { type: "entity" } },
+            { entity: "control_link_up", name: { type: "entity" } },
+          ],
+        },
+      },
+    ],
+  },
   socket_delete: {
     name: "socket_delete",
     title_key: "${i18n._('dialog_socket_delete_title')} n°${config.id}",
