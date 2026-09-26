@@ -688,7 +688,9 @@ describe("RSControl connectivity and leak detection", () => {
     expect(rows("buzzer_conf")).toContain("leak_detector_enabled");
     expect(rows("buzzer_conf")).toContain("leak_detector");
     expect(rows("port_conf")).toContain("port_type");
-    expect(rows("probe_conf")).toContain("probe_leak_detected");
+    // A leak probe's detection is its reading, shown once as probe_primary
+    expect(rows("probe_conf")).toContain("probe_primary");
+    expect(rows("probe_conf")).not.toContain("probe_leak_detected");
     expect(rows("probe_conf")).toContain("control_mode");
   });
 });

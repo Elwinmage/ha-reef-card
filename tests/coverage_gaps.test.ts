@@ -724,7 +724,8 @@ describe("FlowImage hide_when_stopped", () => {
     flow.stateObj = makeState("switch.hub", "on");
     flow._syncAnimation();
     expect(div.style.animationPlayState).toBe("running");
-    expect(div.style.animationDuration).toBe("6.00s");
+    // "6.00s" or "6s": DOM implementations differ on normalising it
+    expect(parseFloat(div.style.animationDuration)).toBe(6);
   });
 
   it("leaves a tube full when the mapping does not opt in", () => {

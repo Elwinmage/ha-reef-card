@@ -227,11 +227,11 @@ export const dialogs_rscontrol = {
         conf: {
           type: "entities",
           entities: [
+            // The probe's reading (wet or dry for a leak probe)
             { entity: "probe_primary", name: { type: "entity" } },
             { entity: "probe_secondary", name: { type: "entity" } },
-            // Leak probes: wet or dry, where the water comes from, and the
-            // conductivity the probe measured to tell it
-            { entity: "probe_leak_detected", name: { type: "entity" } },
+            // Leak probes: where the water comes from, and the conductivity
+            // the probe measured to tell it
             { entity: "probe_leak_status", name: { type: "entity" } },
             { entity: "probe_leak_conductivity", name: { type: "entity" } },
             { entity: "probe_status", name: { type: "entity" } },
