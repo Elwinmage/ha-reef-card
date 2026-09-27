@@ -150,6 +150,8 @@ akceptowalny (oraz te dla wbudowanej temperatury), jednostkę wyświetlania sond
 zasolenia i jej przełączniki — włączona, brzęczyk, powiadomienia i konserwacja,
 która wyłącza sondę z fuzji temperatur na czas czyszczenia lub kalibracji.
 
+W sondzie zasolenia wyświetlane są granice wybranej jednostki wyświetlania: po zmianie jednostki okno od razu pokazuje jej granice.
+
 Przycisk **Odczytaj wartość** prosi hub o świeży odczyt zamiast czekać na
 następne odpytanie; wartości w oknie odświeżają się na miejscu.
 

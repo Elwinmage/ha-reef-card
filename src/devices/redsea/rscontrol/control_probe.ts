@@ -241,6 +241,8 @@ export class ControlProbe extends RSDevice {
   probe_type: string = "";
   probe_uid: string = "";
   slot_id: number = 0;
+  // Every entity of a key several entities share (EC range bounds per unit)
+  alternates: Record<string, any[]> = {};
 
   // Last states the picture depends on, to re-render only on a change
   private _signature: string = "";
@@ -256,6 +258,7 @@ export class ControlProbe extends RSDevice {
 
   set hass(obj: any) {
     this._setting_hass(obj);
+    this.pick_alternates();
     const signature = this._states_signature();
     if (signature !== this._signature) {
       this._signature = signature;
@@ -270,6 +273,49 @@ export class ControlProbe extends RSDevice {
   update_state(value: boolean): void {
     this.state_on = value;
     this.requestUpdate();
+  }
+
+  /**
+   * Re-read this probe's entities from Home Assistant, for an open dialog.
+   *
+   * Called by the dialog on every hass update, before it resolves its rows:
+   * the hub only re-sorts entities when it renders, later than that.
+   * @param hass: the Home Assistant object the dialog just received
+   */
+  refresh_entities(hass: any): void {
+    if (hass) this._hass = hass;
+    const fresh = (this.device as any)?.probe_entities_now?.(
+      this.probe_type,
+      this.probe_uid,
+    );
+    if (fresh) {
+      this.entities = fresh.entities;
+      this.alternates = fresh.alternates;
+    }
+    this.pick_alternates();
+  }
+
+  /**
+   * Bind each shared key to the entity that is usable now.
+   *
+   * An EC probe has one set of range bounds per display unit, sharing their
+   * translation keys, and only the set of the selected unit is available.
+   * The hub picks one when it scans; this follows a unit changed since,
+   * so a dialog open on the probe shows the bounds of the new unit.
+   */
+  pick_alternates(): void {
+    if (!this._hass || !this.entities) return;
+    for (const [key, candidates] of Object.entries(this.alternates ?? {})) {
+      if (!Array.isArray(candidates) || candidates.length < 2) continue;
+      const usable = candidates.find((entity: any) => {
+        const state = this._hass?.states?.[entity?.entity_id]?.state;
+        return state !== undefined && state !== "unavailable";
+      });
+      if (!usable || this.entities[key] === usable) continue;
+      const domain = String(usable.entity_id).split(".")[0];
+      this.entities[key] = usable;
+      this.entities[domain + "." + key] = usable;
+    }
   }
 
   /**

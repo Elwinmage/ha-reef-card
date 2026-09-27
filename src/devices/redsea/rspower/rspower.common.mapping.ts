@@ -540,13 +540,15 @@ export function socket_common(geometry: SocketGeometry): Record<string, any> {
           "pointer-events": "none",
         },
       },
+      // A socket is only ever suspended by being switched off by hand: a
+      // manual "on" out of an automatic mode is a mode change, not a pause.
       socket_manual_override: {
         name: "socket_prev_mode",
         type: "common-sensor",
         icon: "'mdi:hand-back-left-outline'",
         icon_color: "rgba(255,255,255,0.5)",
         disabled_if:
-          "entity.socket_mode?.state === 'setup' || entity.socket_mode?.state === 'schedule' || entity.socket_mode?.state === 'sensor' || (entity.socket_prev_mode?.state !== 'schedule' && entity.socket_prev_mode?.state !== 'sensor')",
+          "entity.socket_mode?.state !== 'off' || (entity.socket_prev_mode?.state !== 'schedule' && entity.socket_prev_mode?.state !== 'sensor')",
         no_br_if_disabled: true,
         css: {
           position: "absolute",

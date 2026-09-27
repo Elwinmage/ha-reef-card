@@ -154,6 +154,8 @@ l'unità di visualizzazione di una sonda di salinità, e i suoi interruttori —
 attivata, cicalino, notifiche e manutenzione, che tiene la sonda fuori dalla
 fusione delle temperature mentre viene pulita o calibrata.
 
+Su una sonda di salinità, i limiti mostrati sono quelli dell'unità di visualizzazione scelta: cambiate unità e la finestra passa subito ai suoi limiti.
+
 Il pulsante **Leggi valore** chiede all'hub una nuova lettura invece di
 attendere la lettura successiva; i valori della finestra si aggiornano sul posto.
 

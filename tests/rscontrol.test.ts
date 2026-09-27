@@ -842,6 +842,87 @@ describe("RSControl._scan_entities", () => {
     );
   });
 
+  it("keeps every entity of a shared key for the probe element", () => {
+    const ec = (id: string, state: string) =>
+      probeSpec(id, "probe_desired_range_low", state, "ec", "0xE", 0);
+    const hub = makeHub(
+      makeHass([ec("number.ec", "unavailable"), ec("number.ppt", "32")]),
+    );
+    expect(
+      hub._probes[0].alternates.probe_desired_range_low.map(
+        (e: any) => e.entity_id,
+      ),
+    ).toEqual(["number.ec", "number.ppt"]);
+  });
+
+  it("follows a unit changed while the probe element is shown", () => {
+    // The probe dialog reads its entities from the probe element: after a
+    // unit change, the bounds of the new unit must replace the old ones
+    // even before the hub scans again
+    const ec = (id: string, state: string) =>
+      probeSpec(id, "probe_desired_range_low", state, "ec", "0xE", 0);
+    const hass = makeHass([
+      ec("number.ec", "unavailable"),
+      ec("number.ppt", "32"),
+    ]);
+    const hub = makeHub(hass);
+    const probe = new StubControlProbe() as any;
+    probe.entities = { ...hub._probes[0].entities };
+    probe.alternates = hub._probes[0].alternates;
+    probe.hass = hass;
+    expect(probe.entities.probe_desired_range_low.entity_id).toBe("number.ppt");
+
+    hass.states["number.ppt"] = { state: "unavailable", attributes: {} };
+    hass.states["number.ec"] = { state: "53", attributes: {} };
+    probe.hass = { ...hass };
+    expect(probe.entities.probe_desired_range_low.entity_id).toBe("number.ec");
+    expect(probe.entities["number.probe_desired_range_low"].entity_id).toBe(
+      "number.ec",
+    );
+  });
+
+  it("re-reads a probe's entities now for an open dialog", () => {
+    // At opening only the EC bounds are known: the PPT ones are unavailable
+    // and carry no attributes yet, so the hub cannot tell their probe
+    const ec = (id: string, state: string) =>
+      probeSpec(id, "probe_desired_range_low", state, "ec", "0xE", 0);
+    const hass = makeHass([ec("number.ec", "53")]);
+    hass.entities["number.ppt"] = {
+      entity_id: "number.ppt",
+      device_id: "hub",
+      translation_key: "probe_desired_range_low",
+    };
+    hass.states["number.ppt"] = { state: "unavailable", attributes: {} };
+    const hub = makeHub(hass);
+    const probe = new StubControlProbe() as any;
+    probe.device = hub;
+    probe.probe_type = "ec";
+    probe.probe_uid = "0xE";
+    probe.refresh_entities(hass);
+    expect(probe.entities.probe_desired_range_low.entity_id).toBe("number.ec");
+
+    // The unit is switched to PPT from the dialog, before the hub renders
+    hass.states["number.ec"] = { state: "unavailable", attributes: {} };
+    hass.states["number.ppt"] = {
+      state: "32",
+      attributes: { probe_uid: "0xE", probe_type: "ec", probe_index: 0 },
+    };
+    probe.refresh_entities(hass);
+    expect(probe.entities.probe_desired_range_low.entity_id).toBe("number.ppt");
+  });
+
+  it("keeps its entities when the hub no longer lists the probe", () => {
+    const hub = makeHub(makeHass([]));
+    const probe = new StubControlProbe() as any;
+    probe.device = hub;
+    probe.probe_type = "ec";
+    probe.probe_uid = "0xGONE";
+    probe.entities = { kept: { entity_id: "sensor.kept" } };
+    probe.refresh_entities(null);
+    expect(probe.entities.kept.entity_id).toBe("sensor.kept");
+    expect(hub.probe_entities_now("ec", "0xGONE")).toBeNull();
+  });
+
   it("orders probes with the same index by key and caps the count", () => {
     const many: Spec[] = [];
     for (let i = 0; i < 9; i++) {

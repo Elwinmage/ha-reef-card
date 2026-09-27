@@ -1427,8 +1427,8 @@ describe("PowerSensor manual override", () => {
   it.each([
     [
       "sensor",
-      "on",
-      "Sensor mode suspended: the socket was switched ON manually.",
+      "off",
+      "Sensor mode suspended: the socket was switched OFF manually.",
     ],
     [
       "schedule",
@@ -1455,11 +1455,20 @@ describe("PowerSensor manual override", () => {
 
   it("loads the configuration of the suspended mode", async () => {
     const el = await mount({
-      mode: "on",
+      mode: "off",
       prevMode: "sensor",
       sensorConfig: { value: 27 },
     });
     expect(el._value).toBe(27);
+  });
+
+  it("is not an override when the socket was set on", async () => {
+    // Manual forcing is always off: "on" out of an automatic mode is a
+    // mode change, the automatic one is not suspended
+    const el = await mount({ mode: "on", prevMode: "sensor" });
+    expect(el._mode).toBe("on");
+    expect(el._override).toBeNull();
+    expect(el.shadowRoot.querySelector(".sce-override")).toBeNull();
   });
 
   it("is not an override when the previous mode was manual", async () => {
@@ -1470,8 +1479,8 @@ describe("PowerSensor manual override", () => {
   });
 
   it("hides the notice while another mode is selected", async () => {
-    const el = await mount({ mode: "on", prevMode: "sensor" });
-    button(el, "Off").click();
+    const el = await mount({ mode: "off", prevMode: "sensor" });
+    button(el, "On").click();
     await el.updateComplete;
     expect(el.shadowRoot.querySelector(".sce-override")).toBeNull();
   });
@@ -1496,7 +1505,7 @@ describe("PowerSensor manual override", () => {
   });
 
   it("resumes without a name when the socket has none", async () => {
-    const el = makeElement({ mode: "on", prevMode: "schedule", name: null });
+    const el = makeElement({ mode: "off", prevMode: "schedule", name: null });
     el._readCurrentMode();
     await el._resume();
     expect(lastRequest(el).data.sockets[0]).toEqual({
@@ -1506,7 +1515,7 @@ describe("PowerSensor manual override", () => {
   });
 
   it("reports a failed resume and stays open", async () => {
-    const el = makeElement({ mode: "on", prevMode: "sensor" });
+    const el = makeElement({ mode: "off", prevMode: "sensor" });
     el._readCurrentMode();
     el.hass.callService.mockRejectedValue(new Error("device offline"));
     const quit = vi.fn();
@@ -1528,7 +1537,7 @@ describe("PowerSensor manual override", () => {
     expect(plain.hass.callService).not.toHaveBeenCalled();
 
     const noEntry = makeElement({
-      mode: "on",
+      mode: "off",
       prevMode: "sensor",
       entry: null,
     });
@@ -1536,7 +1545,7 @@ describe("PowerSensor manual override", () => {
     await noEntry._resume();
     expect(noEntry.hass.callService).not.toHaveBeenCalled();
 
-    const noHass = makeElement({ mode: "on", prevMode: "sensor" });
+    const noHass = makeElement({ mode: "off", prevMode: "sensor" });
     noHass._readCurrentMode();
     const hass = noHass.hass;
     noHass.hass = null;
@@ -1545,7 +1554,7 @@ describe("PowerSensor manual override", () => {
   });
 
   it("disables the resume button while saving", async () => {
-    const el = await mount({ mode: "on", prevMode: "sensor" });
+    const el = await mount({ mode: "off", prevMode: "sensor" });
     el._saving = true;
     await el.updateComplete;
     expect(el.shadowRoot.querySelector(".sce-resume-btn").disabled).toBe(true);

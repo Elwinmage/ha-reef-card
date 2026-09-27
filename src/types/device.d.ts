@@ -80,6 +80,12 @@ export interface ProbeEntity {
   slot?: number;
   /** Probe entities keyed by translation key */
   entities: Record<string, any>;
+  /**
+   * Every entity of each translation key, when several share it: an EC
+   * probe has one set of range bounds per display unit, only the set of the
+   * selected unit being available at a time.
+   */
+  alternates?: Record<string, any[]>;
   /** Cached ControlProbe LitElement rendering this probe */
   control_probe?: any;
 }

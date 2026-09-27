@@ -205,6 +205,8 @@ Una bomba ReefRun se representa por su función, bomba de retorno o skimmer, en
 lugar de por su controlador. Cualquier otro dispositivo conocido por Home
 Assistant también puede vincularse, pero aún no tiene imagen.
 
+Para un aparato que Home Assistant no conoce (calentador, lámpara, ventilador…), elija **Otro**: el botón de la toma muestra entonces <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> en lugar del enchufe, sin imagen debajo.
+
 La imagen sigue el estado del dispositivo:
 
 | Aspecto     | Estado del dispositivo Red Sea                                                         |
@@ -245,7 +247,7 @@ Además de las dos líneas de mensajes, el ReefControl-Power tiene tres opciones
 - **Colores de las tomas**: el color de cada toma, usado por su botón y por el
   tubo hacia su dispositivo vinculado.
 - **Dispositivo vinculado**: por toma, el dispositivo enchufado en ella, o
-  **Ninguno**.
+  **Ninguno**. **Otro** designa un aparato que Home Assistant no conoce.
 
 Las opciones se guardan bajo el modelo tal como lo informa Home Assistant:
 

@@ -153,6 +153,8 @@ visualización de una sonda de salinidad, y sus interruptores — activada,
 zumbador, notificaciones y mantenimiento, que mantiene la sonda fuera de la
 fusión de temperaturas mientras se limpia o se calibra.
 
+En una sonda de salinidad, los límites mostrados son los de la unidad de visualización elegida: cambie la unidad y el diálogo pasa de inmediato a sus límites.
+
 El botón **Leer valor** pide al hub una lectura nueva en lugar de esperar a la
 siguiente consulta; los valores del diálogo se actualizan en su sitio.
 

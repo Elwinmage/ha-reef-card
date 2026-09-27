@@ -65,6 +65,13 @@ const DEFAULT_SOCKET_ICONS = {
 };
 
 /**
+ * Icon of a socket feeding an appliance Home Assistant does not know about
+ * (heater, lamp, fan...). The socket's colour already tells on from off, so
+ * one drawing serves both states.
+ */
+const OTHER_DEVICE_ICON = "mdi:dots-horizontal-circle-outline";
+
+/**
  * Socket thumbnails, keyed by hardware model.
  *
  * Each URL is written out in full rather than built from the model name: the
@@ -798,6 +805,9 @@ export class RSPower extends RSDevice {
     if (!device_id) {
       return fallback;
     }
+    if (device_id === OTHER_DEVICE_VALUE) {
+      return OTHER_DEVICE_ICON;
+    }
     const model = this._linked_model(socket);
     // As for the thumbnail, a pump is described by its job rather than by
     // the controller's model, which both its channels share.
@@ -919,6 +929,10 @@ export class RSPower extends RSDevice {
     // appliance from another integration (Aqua Medic...) names its entities
     // differently and would blink for no reason, so it is drawn plain.
     const device_id = this.linked_device_id(socket);
+    // An appliance unknown to Home Assistant has no state to read
+    if (device_id === OTHER_DEVICE_VALUE) {
+      return "";
+    }
     const identifiers = device_id
       ? this._hass?.devices?.[device_id]?.identifiers
       : undefined;

@@ -121,12 +121,17 @@ export class RSControl extends RSDevice {
             type: scope.type,
             index: null,
             entities: {},
+            alternates: {},
             // Rescans rebuild the probe list: keep the element rendering it
             control_probe: this._probe_elements[probe_key],
           };
         }
         const probe = found[probe_key];
         if (typeof scope.index === "number") probe.index = scope.index;
+        // Kept for the probe element, which re-picks the available one when
+        // the unit changes (see ControlProbe.pick_alternates)
+        const alternates = (probe.alternates ??= {});
+        (alternates[key] ??= []).push(entity);
         // An EC probe has one set of range bounds per unit, sharing their
         // keys, and only the set of the current unit is available: never
         // let an unavailable entity hide an available one.
@@ -516,6 +521,39 @@ export class RSControl extends RSDevice {
     return result;
   }
 
+  /**
+   * Entities of one probe, read afresh from Home Assistant.
+   *
+   * The hub sorts entities into probes when it renders, which happens after
+   * a hass update has reached an open dialog. A dialog that must follow an
+   * entity swapped by that update (the range bounds of the newly selected
+   * EC unit) asks for a scan now rather than waiting for the next render.
+   * @param type: the probe type
+   * @param uid: the probe uid
+   * @return the probe's entities (with the hub's) and their alternates, or
+   *         null when the probe is gone
+   */
+  probe_entities_now(
+    type: string,
+    uid: string,
+  ): {
+    entities: Record<string, any>;
+    alternates: Record<string, any[]>;
+  } | null {
+    this._scan_entities();
+    const probe = (this._all_probes ?? []).find(
+      (p: ProbeEntity) => p.type === type && p.uid === uid,
+    );
+    if (!probe) return null;
+    return {
+      entities: {
+        ...this._hub_entities(),
+        ...probe_aliases(probe.type, probe.entities),
+      },
+      alternates: probe.alternates ?? {},
+    };
+  }
+
   _render_probe(probe: ProbeEntity, slot: number): TemplateResult {
     const conf = this._probe_config(probe, slot);
     const key = probe.type + ":" + probe.uid;
@@ -546,6 +584,7 @@ export class RSControl extends RSDevice {
       elt.probe_uid = probe.uid;
       elt.slot_id = slot;
       elt.entities = entities;
+      elt.alternates = probe.alternates ?? {};
       elt.config = conf;
       elt.update_state(this.is_on());
       elt.hass = this._hass;

@@ -203,6 +203,8 @@ Uma bomba ReefRun é representada pela sua função, bomba de retorno ou
 escumador, em vez do seu controlador. Qualquer outro dispositivo conhecido pelo
 Home Assistant também pode ser associado, mas ainda não tem imagem.
 
+Para um aparelho que o Home Assistant não conhece (aquecedor, lâmpada, ventoinha…), escolha **Outro**: o botão da tomada mostra então <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> em vez da ficha, sem imagem por baixo.
+
 A imagem segue o estado do dispositivo:
 
 | Aspeto       | Estado do dispositivo Red Sea                                            |
@@ -243,7 +245,7 @@ Além das duas linhas de mensagens, o ReefControl-Power tem três opções:
 - **Cores das tomadas**: a cor de cada tomada, usada pelo seu botão e pelo tubo
   até ao seu dispositivo associado.
 - **Dispositivo associado**: por tomada, o dispositivo ligado a ela, ou
-  **Nenhum**.
+  **Nenhum**. **Outro** designa um aparelho que o Home Assistant não conhece.
 
 As opções são guardadas sob o modelo tal como o Home Assistant o reporta:
 

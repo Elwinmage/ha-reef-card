@@ -202,6 +202,8 @@ Pompa ReefRun jest przedstawiana przez swoją funkcję, pompę powrotną lub
 odpieniacz, a nie przez swój sterownik. Każde inne urządzenie znane Home
 Assistant również może zostać powiązane, ale nie ma jeszcze obrazu.
 
+Dla urządzenia, którego Home Assistant nie zna (grzałka, lampa, wentylator…), wybierz **Inne**: przycisk gniazda pokazuje wtedy <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> zamiast wtyczki, bez obrazu pod spodem.
+
 Obraz odzwierciedla stan urządzenia:
 
 | Wygląd     | Stan urządzenia Red Sea                                                 |
@@ -242,7 +244,7 @@ Oprócz dwóch linii komunikatów ReefControl-Power ma trzy opcje:
 - **Kolory gniazd**: kolor każdego gniazda, używany przez jego przycisk i przez
   rurkę do powiązanego urządzenia.
 - **Powiązane urządzenie**: dla każdego gniazda urządzenie do niego podłączone
-  lub **Brak**.
+  lub **Brak**. **Inne** oznacza urządzenie, którego Home Assistant nie zna.
 
 Opcje są zapisywane pod modelem zgłaszanym przez Home Assistant:
 

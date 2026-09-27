@@ -202,6 +202,8 @@ A ReefRun pump is pictured by its job, return pump or skimmer, rather than by it
 controller. Any other device known to Home Assistant can be linked too, but has
 no picture yet.
 
+For an appliance Home Assistant does not know about (a heater, a lamp, a fan…), pick **Other**: the socket button then shows <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> instead of the plug, with no picture below it.
+
 The picture follows the state of the device:
 
 | Look       | Red Sea device state                                                          |
@@ -241,7 +243,7 @@ Besides the two message lines, the ReefControl-Power has three options:
   instead of a situation bar.
 - **Sockets colors**: the colour of each socket, used by its button and by the
   pipe to its linked device.
-- **Linked device**: per socket, the device plugged into it, or **None**.
+- **Linked device**: per socket, the device plugged into it, or **None**. **Other** stands for an appliance Home Assistant does not know about.
 
 The options are stored under the model as Home Assistant reports it:
 

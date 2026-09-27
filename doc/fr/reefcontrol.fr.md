@@ -155,6 +155,8 @@ intégrée), l'unité d'affichage d'une sonde de salinité, et ses interrupteurs
 activée, buzzer, notifications, et maintenance, qui tient la sonde à l'écart de
 la fusion des températures pendant son nettoyage ou son étalonnage.
 
+Sur une sonde de salinité, les bornes affichées sont celles de l'unité d'affichage choisie : changez d'unité et la boîte de dialogue passe aussitôt à ses bornes.
+
 Le bouton **Lire la valeur** demande une mesure fraîche au hub au lieu
 d'attendre la prochaine interrogation ; les valeurs de la boîte de dialogue se
 mettent à jour sur place.

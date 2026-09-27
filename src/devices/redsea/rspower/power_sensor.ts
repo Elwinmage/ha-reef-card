@@ -47,8 +47,8 @@
  * `redsea.get_control_probes` service (called with `return_response`), which
  * reports every probe the hub knows, whatever entities it exposes.
  *
- * A socket driven by a schedule or a probe can be forced on/off by hand: its
- * mode then reads on/off while `socket_prev_mode` keeps the automatic one.
+ * A socket driven by a schedule or a probe can be switched off by hand: its
+ * mode then reads off while `socket_prev_mode` keeps the automatic one.
  * The editor opens on that automatic mode, says it is suspended, and offers
  * to resume it without rewriting its configuration.
  */
@@ -371,9 +371,10 @@ export class PowerSensor extends LitElement {
     const m = this._entityState("socket_mode");
     this._override = null;
     if (m === "on" || m === "off") {
-      // Forced by hand out of an automatic mode: open on that mode
+      // Switched off by hand out of an automatic mode: open on that mode.
+      // Manual forcing is always off; "on" is a mode of its own.
       const prev = this._entityState("socket_prev_mode");
-      if (prev === "schedule" || prev === "sensor") {
+      if (m === "off" && (prev === "schedule" || prev === "sensor")) {
         this._override = { mode: prev, state: m };
         return prev;
       }

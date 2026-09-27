@@ -211,6 +211,8 @@ Eine ReefRun-Pumpe wird nach ihrer Aufgabe dargestellt, Förderpumpe oder
 Abschäumer, statt nach ihrem Controller. Jedes andere in Home Assistant bekannte
 Gerät kann ebenfalls verknüpft werden, hat aber noch kein Bild.
 
+Für ein Gerät, das Home Assistant nicht kennt (Heizer, Lampe, Lüfter…), wählen Sie **Andere**: Die Steckdosentaste zeigt dann <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> statt des Steckers, ohne Bild darunter.
+
 Das Bild folgt dem Zustand des Geräts:
 
 | Aussehen   | Zustand des Red Sea-Geräts                                                         |
@@ -251,7 +253,7 @@ Neben den beiden Meldungszeilen hat das ReefControl-Power drei Optionen:
 - **Steckdosenfarben**: die Farbe jeder Steckdose, verwendet für ihre
   Schaltfläche und das Rohr zu ihrem verknüpften Gerät.
 - **Verknüpftes Gerät**: pro Steckdose das daran angeschlossene Gerät oder
-  **Keines**.
+  **Keines**. **Andere** steht für ein Gerät, das Home Assistant nicht kennt.
 
 Die Optionen werden unter dem Modell gespeichert, wie Home Assistant es meldet:
 

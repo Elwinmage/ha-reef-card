@@ -206,6 +206,8 @@ Une pompe ReefRun est représentée par son rôle, pompe de remontée ou écumeu
 plutôt que par son contrôleur. Tout autre appareil connu de Home Assistant peut
 aussi être lié, mais n'a pas encore d'image.
 
+Pour un appareil que Home Assistant ne connaît pas (chauffage, lampe, ventilateur…), choisissez **Autre** : le bouton de la prise affiche alors <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> au lieu de la fiche, sans image en dessous.
+
 L'image suit l'état de l'appareil :
 
 | Aspect     | État de l'appareil Red Sea                                                      |
@@ -245,7 +247,7 @@ En plus des deux lignes de messages, le ReefControl-Power a trois options :
   niveau au lieu d'une barre de situation.
 - **Couleur des prises** : la couleur de chaque prise, utilisée par son bouton
   et par le tuyau vers son appareil lié.
-- **Appareil lié** : pour chaque prise, l'appareil branché dessus, ou **Aucun**.
+- **Appareil lié** : pour chaque prise, l'appareil branché dessus, ou **Aucun**. **Autre** désigne un appareil que Home Assistant ne connaît pas.
 
 Les options sont enregistrées sous le modèle tel que Home Assistant le remonte :
 

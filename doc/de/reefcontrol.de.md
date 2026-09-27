@@ -154,6 +154,8 @@ Temperatur), die Anzeigeeinheit einer Salinitätssonde und ihre Schalter —
 aktiviert, Summer, Benachrichtigungen und Wartung, die die Sonde während der
 Reinigung oder Kalibrierung aus der Temperatur-Fusion heraushält.
 
+Bei einer Salinitätssonde sind die angezeigten Grenzen die der gewählten Anzeigeeinheit: Wechseln Sie die Einheit, zeigt der Dialog sofort deren Grenzen.
+
 Die Schaltfläche **Wert lesen** fordert einen frischen Messwert vom Hub an,
 statt auf die nächste Abfrage zu warten; die Werte des Dialogs aktualisieren
 sich an Ort und Stelle.

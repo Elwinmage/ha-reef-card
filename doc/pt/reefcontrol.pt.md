@@ -154,6 +154,8 @@ de apresentação de uma sonda de salinidade, e os seus interruptores — ativad
 besouro, notificações e manutenção, que mantém a sonda fora da fusão de
 temperaturas enquanto é limpa ou calibrada.
 
+Numa sonda de salinidade, os limites mostrados são os da unidade de apresentação escolhida: mude a unidade e a janela passa de imediato aos seus limites.
+
 O botão **Ler valor** pede ao hub uma leitura nova em vez de esperar pela
 consulta seguinte; os valores da janela atualizam-se no lugar.
 

@@ -206,6 +206,8 @@ Una pompa ReefRun è rappresentata dalla sua funzione, pompa di risalita o
 schiumatoio, invece che dal suo controller. Qualsiasi altro dispositivo noto a
 Home Assistant può essere collegato, ma non ha ancora un'immagine.
 
+Per un apparecchio che Home Assistant non conosce (riscaldatore, lampada, ventola…), scegliete **Altro**: il pulsante della presa mostra allora <img src="../img/mdi/mdi_dots-horizontal-circle-outline.png" width="20"/> al posto della spina, senza immagine sotto.
+
 L'immagine segue lo stato del dispositivo:
 
 | Aspetto      | Stato del dispositivo Red Sea                                                      |
@@ -246,7 +248,7 @@ Oltre alle due righe di messaggi, il ReefControl-Power ha tre opzioni:
 - **Colori delle prese**: il colore di ogni presa, usato dal suo pulsante e dal
   tubo verso il suo dispositivo collegato.
 - **Dispositivo collegato**: per presa, il dispositivo collegato ad essa, oppure
-  **Nessuno**.
+  **Nessuno**. **Altro** indica un apparecchio che Home Assistant non conosce.
 
 Le opzioni sono salvate sotto il modello come riportato da Home Assistant:
 

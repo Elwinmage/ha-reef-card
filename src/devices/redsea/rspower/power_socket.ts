@@ -154,9 +154,10 @@ export class PowerSocket extends RSDevice {
    * Automatic mode this socket runs, or would run without a manual override.
    *
    * `socket_prev_mode` is the mode the socket was in before its current
-   * one, so it only means "suspended" while the current mode is a manual
-   * on/off: a socket moved from schedule to sensor keeps `prev_mode =
-   * schedule` but runs its probe. The schedule it had stays stored on the
+   * one, so it only means "suspended" while the socket is switched off by
+   * hand: a socket moved from schedule to sensor keeps `prev_mode =
+   * schedule` but runs its probe, and one set to "on" out of a schedule
+   * has simply changed mode (manual forcing is always off). The schedule it had stays stored on the
    * device, ready to be switched back to, which is why the configuration
    * attributes cannot tell the mode either.
    * @return "schedule" or "sensor", or "" for a manual or unset socket
@@ -164,7 +165,7 @@ export class PowerSocket extends RSDevice {
   auto_mode(): string {
     const mode = this.get_entity("socket_mode")?.state;
     if (mode === "schedule" || mode === "sensor") return mode;
-    if (mode === "on" || mode === "off") {
+    if (mode === "off") {
       const prev = this.get_entity("socket_prev_mode")?.state;
       if (prev === "schedule" || prev === "sensor") return prev;
     }

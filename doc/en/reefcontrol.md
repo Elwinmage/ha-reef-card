@@ -152,6 +152,8 @@ display unit of a salinity probe, and its switches — enabled, buzzer,
 notifications, and maintenance, which keeps the probe out of the temperature
 fusion while it is cleaned or calibrated.
 
+On a salinity probe, the bounds shown are those of the selected display unit: change the unit and the dialog switches to its bounds straight away.
+
 The **Read now** button asks the hub for a fresh reading rather than waiting for
 the next poll; the values of the dialog refresh in place.
 

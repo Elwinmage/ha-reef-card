@@ -1722,6 +1722,35 @@ describe("RSPower socket link — recording the role", () => {
 
 // ─── Socket switch icon ─────────────────────────────────────────────────────
 
+describe("RSPower — socket linked to another appliance", () => {
+  // "Other" stands for an appliance Home Assistant does not know about.
+  const other = () => {
+    const dev = makeLinkedPowerStrip();
+    dev.config.sockets = { socket_1: { linked_device: "other" } };
+    return dev;
+  };
+
+  it("marks the socket with the generic appliance icon, on or off", () => {
+    expect(other().linked_device_icon(1, true)).toBe(
+      "mdi:dots-horizontal-circle-outline",
+    );
+    expect(other().linked_device_icon(1, false)).toBe(
+      "mdi:dots-horizontal-circle-outline",
+    );
+  });
+
+  it("has no thumbnail, no card to open and nothing to blink about", () => {
+    const dev = other();
+    expect(dev.linked_device_image(1)).toBeNull();
+    expect(dev.linked_device_hwid(1)).toBe("");
+    expect(dev.linked_device_class(1)).toBe("");
+  });
+
+  it("leaves the other sockets alone", () => {
+    expect(other().linked_device_icon(2, true)).toBe("mdi:power-plug");
+  });
+});
+
 describe("RSPower.linked_device_icon", () => {
   it("shows a generic plug when no device is linked", () => {
     const dev = makeLinkedPowerStrip();

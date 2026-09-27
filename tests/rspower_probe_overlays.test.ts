@@ -148,10 +148,11 @@ describe("PowerSocket.auto_mode", () => {
   });
 
   it.each(["schedule", "sensor"])(
-    "is the %s mode a manual on/off suspended",
+    "is the %s mode suspended by a manual off",
     (prev) => {
-      expect(makeSocket("on", undefined, prev).auto_mode()).toBe(prev);
       expect(makeSocket("off", undefined, prev).auto_mode()).toBe(prev);
+      // Forcing is always off: "on" is a mode change, nothing is suspended
+      expect(makeSocket("on", undefined, prev).auto_mode()).toBe("");
     },
   );
 
@@ -294,6 +295,21 @@ describe.each([
     expect(hidden("off", "schedule")).toEqual([false, true]);
   });
 
+  it("shows the hand only for a socket switched off out of an automatic mode", () => {
+    const hand = (mode: string, prev: string | null) =>
+      evalCtx(mode, probe("ph"), prev).evaluateCondition(
+        elementOf(config.sockets, "socket_manual_override").disabled_if,
+      );
+    // disabled_if true means hidden
+    expect(hand("off", "schedule")).toBe(false);
+    expect(hand("off", "sensor")).toBe(false);
+    expect(hand("on", "schedule")).toBe(true);
+    expect(hand("on", "sensor")).toBe(true);
+    expect(hand("off", "on")).toBe(true);
+    expect(hand("sensor", "schedule")).toBe(true);
+    expect(hand("setup", "sensor")).toBe(true);
+  });
+
   it("has no second icon row under the sockets", () => {
     expect(elementOf(config.sockets, "socket_sensor_main_icon")).toBeNull();
   });
@@ -303,7 +319,7 @@ describe.each([
     expect(
       render("sensor", { type: "ph", uid: "0x00B39", sensor: "primary" }),
     ).toBe("mdi:ph");
-    expect(render("on", { type: "orp", uid: "0x1" }, "sensor")).toBe(
+    expect(render("off", { type: "orp", uid: "0x1" }, "sensor")).toBe(
       "mdi:flash-triangle",
     );
   });
