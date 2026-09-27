@@ -131,6 +131,8 @@
   "sched_add_interval": "+ Añadir intervalo",
   "sched_cancel": "Cancelar",
   "sched_duration": "Duración",
+  "sched_err_end_before_start": "Intervalo {n}: el fin debe ser posterior al inicio",
+  "sched_err_overlap": "Intervalo {n}: el inicio debe ser posterior al fin del intervalo {prev}",
   "sched_from": "Desde",
   "sched_intensity": "Intensidad (%)",
   "sched_off": "OFF",

@@ -20,6 +20,12 @@ import { html, LitElement, TemplateResult, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import styles from "./power_schedule.styles";
 import i18n from "../../../translations/myi18n";
+import {
+  IntervalError,
+  intervalsValid,
+  scheduleSavable,
+  validateIntervals,
+} from "../../../utils/intervals";
 
 // ────────────────────────────────────────────────────────────────────────────
 //  Types
@@ -232,6 +238,8 @@ export class PowerSchedule extends LitElement {
     const socketNum = this._getSocketNumber();
 
     if (!deviceId || !this.hass) return;
+    // Never send a schedule with overlapping or empty rows
+    if (!scheduleSavable(this._intervals)) return;
 
     // Taken before the write: it is what a later read compares against to
     // tell whether the device has caught up yet.
@@ -312,6 +320,8 @@ export class PowerSchedule extends LitElement {
 
     const canAdd = this._intervals.length < MAX_INTERVALS;
     const canDelete = this._intervals.length > 0;
+    const errors = validateIntervals(this._intervals);
+    const valid = intervalsValid(errors);
 
     return html`
       <div class="ps-container">
@@ -336,11 +346,13 @@ export class PowerSchedule extends LitElement {
                 <span class="idx">${i + 1}</span>
                 <input
                   type="time"
+                  class=${errors[i].overlap ? "invalid" : ""}
                   .value=${this._minutesToTime(iv.time)}
                   @change=${(e: Event) => this._onStartChange(i, e)}
                 />
                 <input
                   type="time"
+                  class=${errors[i].endBeforeStart ? "invalid" : ""}
                   .value=${this._minutesToTime(
                     Math.min(iv.time + iv.duration, TOTAL_MINUTES - 1),
                   )}
@@ -358,6 +370,8 @@ export class PowerSchedule extends LitElement {
           )}
         </div>
 
+        ${this._renderErrors(errors)}
+
         <button class="ps-add" ?disabled=${!canAdd} @click=${this._addInterval}>
           ${i18n._("sched_add_interval")}
         </button>
@@ -365,6 +379,7 @@ export class PowerSchedule extends LitElement {
         <div class="ps-footer">
           <button
             class="ps-btn ps-btn-save"
+            ?disabled=${!valid}
             @click=${() => this._saveSchedule()}
           >
             ${i18n._("sched_save")}
@@ -372,6 +387,28 @@ export class PowerSchedule extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * One line per broken rule, under the rows, so the user knows why Save is
+   * disabled.
+   */
+  private _renderErrors(
+    errors: IntervalError[],
+  ): TemplateResult | typeof nothing {
+    const lines: string[] = [];
+    errors.forEach((err, i) => {
+      if (err.endBeforeStart) {
+        lines.push(i18n._("sched_err_end_before_start", { n: i + 1 }));
+      }
+      if (err.overlap) {
+        lines.push(i18n._("sched_err_overlap", { n: i + 1, prev: i }));
+      }
+    });
+    if (lines.length === 0) return nothing;
+    return html`<div class="ps-validation">
+      ${lines.map((l) => html`<div>${l}</div>`)}
+    </div>`;
   }
 
   // ── Event handlers ────────────────────────────────────────────────────
@@ -383,10 +420,11 @@ export class PowerSchedule extends LitElement {
 
     const newStart = h * 60 + m;
     const iv = this._intervals[index];
-    // Keep the end time the same: adjust duration
+    // Keep the end time the same: adjust duration. Left unclamped so an end
+    // before the start is reported instead of being silently rewritten.
     const oldEnd = iv.time + iv.duration;
     iv.time = newStart;
-    iv.duration = Math.max(1, oldEnd - newStart);
+    iv.duration = oldEnd - newStart;
 
     this._intervals = [...this._intervals].sort((a, b) => a.time - b.time);
     this.requestUpdate();
@@ -399,7 +437,8 @@ export class PowerSchedule extends LitElement {
 
     const newEnd = h * 60 + m;
     const iv = this._intervals[index];
-    iv.duration = Math.max(1, newEnd - iv.time);
+    // Unclamped on purpose: validation flags an end before the start
+    iv.duration = newEnd - iv.time;
 
     this._intervals = [...this._intervals];
     this.requestUpdate();

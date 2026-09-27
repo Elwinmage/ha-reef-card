@@ -503,7 +503,6 @@ describe("PortSensor", () => {
     el._mode = "schedule";
     el._intervals = [
       { time: 600, duration: 60 },
-      { time: -5, duration: 0 },
       { time: 2000, duration: 0.5 },
       { time: 60, duration: 30 },
     ];
@@ -518,6 +517,17 @@ describe("PortSensor", () => {
       ],
     });
     expect(mode.data[0].mode).toBe("schedule");
+  });
+
+  it("refuses overlapping schedule slots without any request", async () => {
+    const el = makeEditor();
+    el._mode = "schedule";
+    el._intervals = [
+      { time: 60, duration: 60 },
+      { time: 100, duration: 30 },
+    ];
+    await el._save();
+    expect(requests(el)).toEqual([]);
   });
 
   it("writes the probe rule before the probe mode", async () => {

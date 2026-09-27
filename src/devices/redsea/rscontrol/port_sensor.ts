@@ -166,6 +166,7 @@ export class PortSensor extends PowerSensor {
 
   protected override async _save(): Promise<void> {
     if (!this._configEntry() || !this.hass) return;
+    if (this._scheduleInvalid()) return;
     const number = this._socketNum();
     const installing = !this.is_installed();
     this._saving = true;

@@ -58,6 +58,11 @@ import { property, state } from "lit/decorators.js";
 import styles from "./power_sensor.styles";
 import i18n from "../../../translations/myi18n";
 import { socketSensorType } from "./power_socket";
+import {
+  IntervalError,
+  scheduleSavable,
+  validateIntervals,
+} from "../../../utils/intervals";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -456,9 +461,11 @@ export class PowerSensor extends LitElement {
     const [h, m] = (e.target as HTMLInputElement).value.split(":").map(Number);
     if (isNaN(h) || isNaN(m)) return;
     const iv = this._intervals[i];
+    // Keep the end, unclamped: an end before the start is reported by the
+    // validation instead of being silently rewritten.
     const oldEnd = iv.time + iv.duration;
     iv.time = h * 60 + m;
-    iv.duration = Math.max(1, oldEnd - iv.time);
+    iv.duration = oldEnd - iv.time;
     this._intervals = [...this._intervals].sort((a, b) => a.time - b.time);
     this.requestUpdate();
   }
@@ -466,10 +473,8 @@ export class PowerSensor extends LitElement {
   private _onEndChange(i: number, e: Event): void {
     const [h, m] = (e.target as HTMLInputElement).value.split(":").map(Number);
     if (isNaN(h) || isNaN(m)) return;
-    this._intervals[i].duration = Math.max(
-      1,
-      h * 60 + m - this._intervals[i].time,
-    );
+    // Unclamped on purpose: validation flags an end before the start
+    this._intervals[i].duration = h * 60 + m - this._intervals[i].time;
     this._intervals = [...this._intervals];
     this.requestUpdate();
   }
@@ -486,6 +491,14 @@ export class PowerSensor extends LitElement {
       { time: Math.max(0, start), duration: 60 },
     ].sort((a, b) => a.time - b.time);
     this.requestUpdate();
+  }
+
+  /**
+   * Whether the schedule being edited breaks a rule and must not be saved.
+   * Only relevant in schedule mode: the rows are ignored by the other modes.
+   */
+  protected _scheduleInvalid(): boolean {
+    return this._mode === "schedule" && !scheduleSavable(this._intervals);
   }
 
   private _removeInterval(i: number): void {
@@ -758,6 +771,7 @@ export class PowerSensor extends LitElement {
     const deviceId = this._configEntry();
     const socketNum = this._socketNum();
     if (!deviceId || !this.hass) return;
+    if (this._scheduleInvalid()) return;
 
     this._saving = true;
     this._saveError = null;
@@ -938,7 +952,7 @@ export class PowerSensor extends LitElement {
       <div class="sce-footer">
         <button
           class="sce-save-btn"
-          ?disabled="${this._saving}"
+          ?disabled="${this._saving || this._scheduleInvalid()}"
           @click="${this._save}"
         >
           ${this._saving ? "…" : i18n._("sched_save")}
@@ -1018,6 +1032,12 @@ export class PowerSensor extends LitElement {
   private _renderSchedule(): TemplateResult {
     const canAdd = this._intervals.length < MAX_INTERVALS;
     const canDel = this._intervals.length > 0;
+    const errors = validateIntervals(this._intervals);
+    const inputStyle = (bad: boolean): string =>
+      "padding:4px;border-radius:4px;font-size:0.86em;border:1px solid " +
+      (bad
+        ? "var(--error-color,#c0392b);background:rgba(220,60,60,0.1);"
+        : "var(--divider-color,rgba(0,0,0,0.18));");
 
     return html`
       <div class="sce-schedule-wrap">
@@ -1049,13 +1069,13 @@ export class PowerSensor extends LitElement {
               >
               <input
                 type="time"
-                style="padding:4px;border-radius:4px;border:1px solid var(--divider-color,rgba(0,0,0,0.18));font-size:0.86em;"
+                style="${inputStyle(errors[i].overlap)}"
                 .value="${this._minutesToTime(iv.time)}"
                 @change="${(e: Event) => this._onStartChange(i, e)}"
               />
               <input
                 type="time"
-                style="padding:4px;border-radius:4px;border:1px solid var(--divider-color,rgba(0,0,0,0.18));font-size:0.86em;"
+                style="${inputStyle(errors[i].endBeforeStart)}"
                 .value="${this._minutesToTime(
                   Math.min(iv.time + iv.duration, TOTAL_MINUTES - 1),
                 )}"
@@ -1071,6 +1091,7 @@ export class PowerSensor extends LitElement {
             </div>
           `,
         )}
+        ${this._renderScheduleErrors(errors)}
         <button
           ?disabled="${!canAdd}"
           style="margin-top:4px;padding:5px 12px;border-radius:5px;border:1px solid var(--divider-color,rgba(0,0,0,0.18));cursor:pointer;font-size:0.82em;width:100%;"
@@ -1080,6 +1101,28 @@ export class PowerSensor extends LitElement {
         </button>
       </div>
     `;
+  }
+
+  /**
+   * One line per broken rule, under the rows, so the user knows why Save is
+   * disabled.
+   */
+  private _renderScheduleErrors(
+    errors: IntervalError[],
+  ): TemplateResult | typeof nothing {
+    const lines: string[] = [];
+    errors.forEach((err, i) => {
+      if (err.endBeforeStart) {
+        lines.push(i18n._("sched_err_end_before_start", { n: i + 1 }));
+      }
+      if (err.overlap) {
+        lines.push(i18n._("sched_err_overlap", { n: i + 1, prev: i }));
+      }
+    });
+    if (lines.length === 0) return nothing;
+    return html`<div class="sce-error" style="margin-top:4px">
+      ${lines.map((l) => html`<div>${l}</div>`)}
+    </div>`;
   }
 
   // ── Sensor render ───────────────────────────────────────────────────────

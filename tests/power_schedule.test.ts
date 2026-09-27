@@ -461,14 +461,13 @@ describe("PowerSchedule._saveSchedule", () => {
     expect(quit).toHaveBeenCalled();
   });
 
-  it("drops zero-length intervals and clamps out-of-range values", async () => {
+  it("clamps out-of-range values", async () => {
     const el = makeElement();
     el.device = makeDevice();
     el.hass = makeHass();
     el._intervals = [
       { time: -50, duration: 10 },
       { time: 5000, duration: 20 },
-      { time: 100, duration: 0 },
     ];
 
     await el._saveSchedule();
@@ -478,6 +477,52 @@ describe("PowerSchedule._saveSchedule", () => {
       { time: 0, duration: 10 },
       { time: 1439, duration: 20 },
     ]);
+  });
+
+  it("refuses a slot whose end is not after its start", async () => {
+    const el = makeElement();
+    el.device = makeDevice();
+    el.hass = makeHass();
+    const quit = vi.fn();
+    el.addEventListener("quit-dialog", quit);
+    el._intervals = [
+      { time: 60, duration: 30 },
+      { time: 100, duration: 0 },
+    ];
+
+    await el._saveSchedule();
+
+    expect(el.hass.callService).not.toHaveBeenCalled();
+    expect(quit).not.toHaveBeenCalled();
+  });
+
+  it("refuses a slot starting before the previous one ends", async () => {
+    const el = makeElement();
+    el.device = makeDevice();
+    el.hass = makeHass();
+    // Given unsorted: checked in start order, as it would be sent
+    el._intervals = [
+      { time: 90, duration: 30 },
+      { time: 60, duration: 30 },
+    ];
+
+    await el._saveSchedule();
+
+    expect(el.hass.callService).not.toHaveBeenCalled();
+  });
+
+  it("refuses a slot starting exactly when the previous one ends", async () => {
+    const el = makeElement();
+    el.device = makeDevice();
+    el.hass = makeHass();
+    el._intervals = [
+      { time: 60, duration: 30 },
+      { time: 90, duration: 30 },
+    ];
+
+    await el._saveSchedule();
+
+    expect(el.hass.callService).not.toHaveBeenCalled();
   });
 
   it("closes without waiting for the device to confirm", async () => {
@@ -602,13 +647,13 @@ describe("PowerSchedule interval editing", () => {
     expect(el._intervals).toEqual([{ time: 60, duration: 60 }]);
   });
 
-  it("a start pushed past the end leaves a one-minute interval", () => {
+  it("a start pushed past the end is kept as is, for validation", () => {
     const el = makeElement();
     el._intervals = [{ time: 0, duration: 60 }];
 
     el._onStartChange(0, timeEvent("05:00"));
 
-    expect(el._intervals).toEqual([{ time: 300, duration: 1 }]);
+    expect(el._intervals).toEqual([{ time: 300, duration: -240 }]);
   });
 
   it("re-sorts intervals after a start moves", () => {
@@ -641,13 +686,13 @@ describe("PowerSchedule interval editing", () => {
     expect(el._intervals).toEqual([{ time: 60, duration: 180 }]);
   });
 
-  it("an end before the start leaves a one-minute interval", () => {
+  it("an end before the start is kept as is, for validation", () => {
     const el = makeElement();
     el._intervals = [{ time: 600, duration: 60 }];
 
     el._onEndChange(0, timeEvent("01:00"));
 
-    expect(el._intervals).toEqual([{ time: 600, duration: 1 }]);
+    expect(el._intervals).toEqual([{ time: 600, duration: -540 }]);
   });
 
   it("ignores an unparsable end time", () => {
@@ -980,6 +1025,42 @@ function qAll(el: any, selector: string): any[] {
 describe("PowerSchedule mounted interactions", () => {
   afterEach(() => {
     document.body.innerHTML = "";
+  });
+
+  it("valid slots show no message and leave Save enabled", async () => {
+    const el = await mount([
+      { time: 60, duration: 30 },
+      { time: 120, duration: 30 },
+    ]);
+    expect(q(el, ".ps-validation")).toBeNull();
+    expect(qAll(el, "input.invalid")).toHaveLength(0);
+    expect(q(el, ".ps-btn-save").disabled).toBe(false);
+  });
+
+  it("flags an end before the start and disables Save", async () => {
+    const el = await mount([{ time: 600, duration: -60 }]);
+    const inputs = qAll(el, ".ps-row input");
+    expect(inputs[0].classList.contains("invalid")).toBe(false);
+    expect(inputs[1].classList.contains("invalid")).toBe(true);
+    expect(q(el, ".ps-validation").textContent).toContain(
+      "Slot 1: end must be after start",
+    );
+    expect(q(el, ".ps-btn-save").disabled).toBe(true);
+  });
+
+  it("flags a start before the previous end and disables Save", async () => {
+    const el = await mount([
+      { time: 60, duration: 60 },
+      { time: 90, duration: 60 },
+    ]);
+    const inputs = qAll(el, ".ps-row input");
+    // Row 2 start is the faulty field
+    expect(inputs[2].classList.contains("invalid")).toBe(true);
+    expect(inputs[3].classList.contains("invalid")).toBe(false);
+    expect(q(el, ".ps-validation").textContent).toContain(
+      "Slot 2: start must be after the end of slot 1",
+    );
+    expect(q(el, ".ps-btn-save").disabled).toBe(true);
   });
 
   it("editing the start field updates the interval", async () => {

@@ -90,6 +90,11 @@ export default css`
     box-sizing: border-box;
   }
 
+  .ps-row input[type="time"].invalid {
+    border-color: var(--error-color, #cf6679);
+    background: rgba(207, 102, 121, 0.15);
+  }
+
   .ps-row .btn-del {
     background: none;
     border: none;
@@ -175,8 +180,26 @@ export default css`
     color: #fff;
   }
 
-  .ps-btn:hover {
+  .ps-btn:hover:not(:disabled) {
     filter: brightness(1.15);
+  }
+
+  .ps-btn:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  /* ── Validation messages ─────────────────────────────────────────── */
+
+  .ps-validation {
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background: rgba(207, 102, 121, 0.1);
+    border-left: 3px solid var(--error-color, #cf6679);
+    color: var(--error-color, #cf6679);
+    font-size: 0.8em;
+    line-height: 1.4;
   }
 
   /* ── Loading / error ─────────────────────────────────────────────── */

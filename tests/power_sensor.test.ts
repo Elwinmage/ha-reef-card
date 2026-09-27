@@ -591,11 +591,11 @@ describe("PowerSensor schedule", () => {
     expect(el._intervals).toEqual([{ time: 90, duration: 30 }]);
   });
 
-  it("a start moved past the end keeps a one-minute interval", () => {
+  it("a start moved past the end is kept as is, for validation", () => {
     const el = makeElement();
     el._intervals = [{ time: 60, duration: 60 }];
     el._onStartChange(0, { target: { value: "05:00" } });
-    expect(el._intervals[0]).toEqual({ time: 300, duration: 1 });
+    expect(el._intervals[0]).toEqual({ time: 300, duration: -180 });
   });
 
   it("a start change re-sorts the intervals", () => {
@@ -608,13 +608,13 @@ describe("PowerSensor schedule", () => {
     expect(el._intervals[0].time).toBe(30);
   });
 
-  it("an end change sets the duration, never below one minute", () => {
+  it("an end change sets the duration, even below zero", () => {
     const el = makeElement();
     el._intervals = [{ time: 60, duration: 60 }];
     el._onEndChange(0, { target: { value: "03:00" } });
     expect(el._intervals[0].duration).toBe(120);
     el._onEndChange(0, { target: { value: "00:10" } });
-    expect(el._intervals[0].duration).toBe(1);
+    expect(el._intervals[0].duration).toBe(-50);
   });
 
   it("an incomplete time is ignored", () => {
@@ -669,6 +669,50 @@ describe("PowerSensor schedule", () => {
 });
 
 describe("PowerSensor schedule rendering", () => {
+  it("flags invalid slots and disables Save", async () => {
+    const el = await mount({
+      mode: "schedule",
+      schedule: {
+        intervals: [
+          { time: 60, duration: 60 },
+          { time: 90, duration: 60 },
+        ],
+      },
+    });
+    const inputs = el.shadowRoot.querySelectorAll('input[type="time"]');
+    expect(inputs[2].getAttribute("style")).toContain("--error-color");
+    expect(inputs[3].getAttribute("style")).not.toContain("--error-color");
+    expect(el.shadowRoot.querySelector(".sce-error").textContent).toContain(
+      "Slot 2: start must be after the end of slot 1",
+    );
+    expect(
+      (el.shadowRoot.querySelector(".sce-save-btn") as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    // An end before the start is reported on the end field
+    el._intervals = [{ time: 600, duration: -10 }];
+    await el.updateComplete;
+    const [start, end] = el.shadowRoot.querySelectorAll('input[type="time"]');
+    expect(start.getAttribute("style")).not.toContain("--error-color");
+    expect(end.getAttribute("style")).toContain("--error-color");
+    expect(el.shadowRoot.querySelector(".sce-error").textContent).toContain(
+      "Slot 1: end must be after start",
+    );
+  });
+
+  it("leaves Save enabled on valid slots", async () => {
+    const el = await mount({
+      mode: "schedule",
+      schedule: { intervals: [{ time: 60, duration: 60 }] },
+    });
+    expect(el.shadowRoot.querySelector(".sce-error")).toBeNull();
+    expect(
+      (el.shadowRoot.querySelector(".sce-save-btn") as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+  });
+
   it("says the socket stays off when there is no interval", async () => {
     const el = await mount({ mode: "schedule", schedule: { intervals: [] } });
     expect(el.shadowRoot.textContent).toContain("00:00 → 23:59");
@@ -1662,7 +1706,6 @@ describe("PowerSensor save", () => {
       el._mode = "schedule";
       el._intervals = [
         { time: 1500, duration: 10 },
-        { time: 30, duration: 0 },
         { time: 10, duration: 20 },
       ];
       await el._save();
@@ -1677,6 +1720,37 @@ describe("PowerSensor save", () => {
         { time: 1439, duration: 10 },
       ]);
     }
+  });
+
+  it("refuses an invalid schedule without any request", async () => {
+    for (const intervals of [
+      // end not after start
+      [{ time: 60, duration: 0 }],
+      [{ time: 60, duration: -10 }],
+      // start not after the previous end
+      [
+        { time: 60, duration: 60 },
+        { time: 120, duration: 10 },
+      ],
+      [
+        { time: 60, duration: 60 },
+        { time: 90, duration: 10 },
+      ],
+    ]) {
+      const el = makeElement();
+      el._mode = "schedule";
+      el._intervals = intervals;
+      expect(el._scheduleInvalid()).toBe(true);
+      await el._save();
+      expect(el.hass.callService).not.toHaveBeenCalled();
+    }
+  });
+
+  it("an invalid schedule is ignored outside schedule mode", () => {
+    const el = makeElement();
+    el._mode = "on";
+    el._intervals = [{ time: 60, duration: 0 }];
+    expect(el._scheduleInvalid()).toBe(false);
   });
 
   it("subscribes the socket to the local probe with its thresholds", async () => {
