@@ -595,8 +595,32 @@ def _strip_comments(content: str) -> str:
     return content
 
 
+# Explicit declaration, in a comment, of entities the code uses in a way the
+# patterns cannot see: a key built at run time (`get_entity("port_type_" +
+# port)`), an alias (a probe's main reading exposed as `probe_primary`), or a
+# read in a logic file that drives the picture (a blinking overlay). Written
+# next to the code that uses them:
+#
+#   // check-entities: uses port_type
+#   // check-entities: uses power_link_up, probe_leak_detected
+#
+# Read before the comments are stripped, since it lives in one.
+USES_DIRECTIVE_RE = re.compile(
+    r"check-entities:\s*uses\s+([a-z0-9_]+(?:\s*,\s*[a-z0-9_]+)*)"
+)
+
+
+def _declared_keys(raw: str) -> set[str]:
+    """Keys named by `check-entities: uses …` comments."""
+    keys: set[str] = set()
+    for m in USES_DIRECTIVE_RE.finditer(raw):
+        keys.update(k.strip() for k in m.group(1).split(",") if k.strip())
+    return keys
+
+
 def _extract_keys_from_ts_file(path: Path) -> set[str]:
     raw = path.read_text(encoding="utf-8")
+    declared = _declared_keys(raw)
     # Strip comments so that commented-out entity references are not collected
     content = _strip_comments(raw)
 
@@ -622,7 +646,7 @@ def _extract_keys_from_ts_file(path: Path) -> set[str]:
                     and not k.startswith('rgb')
                     and not k.startswith('rgba')):
                 keys.add(k)
-    return keys
+    return keys | declared
 
 
 # ---------------------------------------------------------------------------

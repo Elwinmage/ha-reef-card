@@ -87,12 +87,16 @@ export interface MaintenanceGroup {
 
 /** A device offered by the "filter by device" selector of the editor. */
 export interface MaintenanceDeviceRef {
-  /** HA device id of the root device ("" when the registry entry is missing). */
+  /** HA device id of the device ("" when the registry entry is missing). */
   id: string;
-  /** Human readable name of the root device. */
+  /** Human readable device name (sub-device level, e.g. "RSDose4 Head 1"). */
   name: string;
-  /** Number of maintenance tasks owned by this device and its sub-devices. */
+  /** Number of maintenance tasks owned by this device. */
   count: number;
+  /** RSRUN pump type ("return" / "skimmer"), null for other devices. */
+  pump_type: string | null;
+  /** RSRUN pump model ("return-12000", "rsk-900"), null for other devices. */
+  pump_model: string | null;
 }
 
 /** Options accepted by `collect_maintenance_items`. */

@@ -26,6 +26,8 @@ export type {
   DeviceConfig,
   Device,
   HeadEntity,
+  SocketEntity,
+  ProbeEntity,
   PumpEntity,
   RGB,
 } from "./device";

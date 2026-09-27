@@ -23,3 +23,10 @@ export const COLOR_BLUE_HEX = "#282dc9";
 // ──────────────────────────────────────────────────────────────────────────────
 // Button color
 export const COLOR_BUTTON_RGB: string = "51,151,232";
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Probe reading levels (ReefControl situation bar and values)
+export const COLOR_LEVEL_DESIRED_HEX = "#2ecc40";
+export const COLOR_LEVEL_ACCEPTABLE_HEX = "#f08c1e";
+export const COLOR_LEVEL_DANGER_HEX = "#e8222a";
+export const COLOR_LEVEL_ERROR_HEX = "#ffffff";

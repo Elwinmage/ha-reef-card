@@ -59,6 +59,14 @@
  *                  seen a single fill would otherwise draw nothing at all.
  *   refresh        seconds between two reads at most (default 60, or 1 in
  *                  demo mode where the whole point is to move)
+ *   zones          true to draw the five level bands behind the curves, from
+ *                  the `ranges` attribute of the first series (`[acceptable
+ *                  low, desired low, desired high, acceptable high]`), or
+ *                  those four bounds given directly. Bottom to top: danger,
+ *                  acceptable, desired, acceptable, danger. The vertical
+ *                  scale then always shows the acceptable span, with a margin
+ *                  of danger on both sides.
+ *   zone_alpha     opacity of the bands (default 0.3)
  *   demo_seconds   demo aid, off by default. Compresses time: the last N real
  *                  seconds of recorded history are stretched across the whole
  *                  `window`, so a 24h axis fills in 30s. The recorder cannot
@@ -84,6 +92,7 @@ import type { HassConfig } from "../types/index";
 
 import style_history_chart from "./history_chart.styles";
 import style_animations from "../utils/animations.styles";
+import { BAR_ZONES, parse_ranges } from "../utils/levels";
 
 //----------------------------------------------------------------------------//
 
@@ -119,6 +128,10 @@ const PADDING_RIGHT = 4;
 const LABEL_GAP = 3;
 /** Below this width the chart is treated as an overlay: fewer, smaller marks. */
 const NARROW_WIDTH = 160;
+/** Level bands, bottom to top, when `zones` is on (symmetrical). */
+const ZONE_COLORS: readonly string[] = BAR_ZONES;
+/** Share of the acceptable span shown as danger above and below it. */
+const ZONE_MARGIN = 0.25;
 
 export class HistoryChart extends MyElement {
   static override styles: CSSResultGroup = [
@@ -551,6 +564,27 @@ export class HistoryChart extends MyElement {
   }
 
   /**
+   * Bounds of the level bands, when `zones` asks for them.
+   *
+   * @return [acceptable low, desired low, desired high, acceptable high], or
+   *   null when zones are off or no usable bounds are known
+   */
+  zone_ranges(): number[] | null {
+    const zones = this.conf?.zones;
+    if (!zones) {
+      return null;
+    }
+    let raw: any = zones;
+    if (!Array.isArray(zones)) {
+      const first = this.series[0]?.entity_id;
+      raw = first
+        ? (this._hass as any)?.states?.[first]?.attributes?.ranges
+        : null;
+    }
+    return parse_ranges(raw);
+  }
+
+  /**
    * Compute the scale shared by every drawable series.
    *
    * The time span and the vertical range are taken across all series at once:
@@ -569,11 +603,19 @@ export class HistoryChart extends MyElement {
     const first = window.start;
     // A window of zero length would divide by zero; draw it flat instead.
     const span = window.end - first || 1;
-    const high = Math.max(...values);
-    const low =
+    let high = Math.max(...values);
+    let low =
       this.conf?.baseline === "min"
         ? Math.min(...values)
         : Math.min(0, ...values);
+    const zones = this.zone_ranges();
+    if (zones) {
+      // The whole acceptable span stays in view, with some danger around it,
+      // so a reading is always seen against its bounds.
+      const margin = (zones[3]! - zones[0]!) * ZONE_MARGIN || 1;
+      low = Math.min(...values, zones[0]! - margin);
+      high = Math.max(...values, zones[3]! + margin);
+    }
     // Same guard vertically: a counter that never moved is a flat line, not a
     // division by zero.
     const range = high - low || 1;
@@ -722,6 +764,11 @@ export class HistoryChart extends MyElement {
     const y_of = (v: number): number =>
       chart_y + chart_h - ((v - scale.low) / scale.range) * chart_h;
 
+    const zones = this.zone_ranges();
+    if (zones) {
+      this.draw_zones(ctx, chart_x, chart_w, scale, zones, y_of);
+    }
+
     this.draw_grid(
       ctx,
       chart_x,
@@ -736,6 +783,52 @@ export class HistoryChart extends MyElement {
     for (const series of drawable) {
       this.draw_series(ctx, series, chart_y, chart_h, x_of, y_of);
     }
+  }
+
+  /**
+   * Draw the five level bands across the plot area.
+   *
+   * @param ctx: the context
+   * @param chart_x: left edge of the plot area
+   * @param chart_w: width of the plot area
+   * @param scale: the vertical scale
+   * @param zones: [acceptable low, desired low, desired high, acceptable high]
+   * @param y_of: value to y coordinate
+   */
+  draw_zones(
+    ctx: CanvasRenderingContext2D,
+    chart_x: number,
+    chart_w: number,
+    scale: ChartScale,
+    zones: number[],
+    y_of: (v: number) => number,
+  ): void {
+    const edges = [scale.low, ...zones, scale.low + scale.range];
+    const alpha = Number(this.conf?.zone_alpha ?? 0.3);
+    ctx.save();
+    ctx.globalAlpha = Number.isFinite(alpha) ? alpha : 0.3;
+    ZONE_COLORS.forEach((color, idx) => {
+      const top = y_of(edges[idx + 1]!);
+      const bottom = y_of(edges[idx]!);
+      ctx.fillStyle = color;
+      ctx.fillRect(chart_x, top, chart_w, bottom - top);
+    });
+    ctx.restore();
+  }
+
+  /**
+   * Label of a y tick, with as many decimals as the step needs.
+   *
+   * @param value: the tick value
+   * @param step: the distance between two ticks
+   * @return the label, without unit
+   */
+  static format_tick(value: number, step: number): string {
+    if (step >= 1) {
+      return String(Math.round(value));
+    }
+    const decimals = Math.min(3, Math.ceil(-Math.log10(step) - 1e-9));
+    return value.toFixed(decimals);
   }
 
   /**
@@ -760,7 +853,7 @@ export class HistoryChart extends MyElement {
     const high = scale.low + scale.range;
     let widest = 0;
     for (let v = Math.ceil(scale.low / step) * step; v <= high; v += step) {
-      const label = `${Math.round(v)}${unit}`;
+      const label = `${HistoryChart.format_tick(v, step)}${unit}`;
       // measureText is unavailable on a stub context; fall back to a rough
       // per-character estimate rather than collapsing the gutter to nothing.
       const width =
@@ -835,7 +928,11 @@ export class HistoryChart extends MyElement {
       ctx.lineTo(chart_x + chart_w, y);
       ctx.stroke();
       ctx.fillStyle = text_color;
-      ctx.fillText(`${Math.round(v)}${unit}`, chart_x - LABEL_GAP, y);
+      ctx.fillText(
+        `${HistoryChart.format_tick(v, y_step)}${unit}`,
+        chart_x - LABEL_GAP,
+        y,
+      );
     }
 
     ctx.strokeStyle = axis_color;

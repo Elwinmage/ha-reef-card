@@ -29,9 +29,23 @@ export class ClickImage extends MyElement {
    * @param _style: set the style of <ha-icon> or <img>
    */
   protected override _render(_style: string = ""): any {
-    const imageSrc = this.conf?.image || "";
-    const icon = this.conf?.icon || "";
+    // An image may be an expression when it depends on device state — a
+    // linked device's picture, say. Static images stay untouched: mapping
+    // entries pass a URL object built at module load, not a string.
+    let imageSrc: any = this.conf?.image || "";
+    if (typeof imageSrc === "string" && imageSrc.includes("${")) {
+      imageSrc = this.evaluate(imageSrc);
+    }
+    let icon = this.conf?.icon || "";
+    // An icon may follow the device state too
+    if (typeof icon === "string" && icon.includes("${")) {
+      icon = String(this.evaluate(icon) ?? "");
+    }
     let iconColor = this.conf?.icon_color || "currentColor";
+    // Like the image, a colour may follow the device state
+    if (typeof iconColor === "string" && iconColor.includes("${")) {
+      iconColor = this.evaluate(iconColor);
+    }
 
     /*    if (!_style) {
       _style = this.get_style("css");
@@ -45,11 +59,12 @@ export class ClickImage extends MyElement {
           iconColor = "#666666";
         }
         return html`
-          <ha-icon
+          <ha-state-icon
             class="click-icon"
-            .icon="${obj.attributes.icon}"
+            .hass="${this._hass}"
+            .stateObj="${obj}"
             style="color: ${iconColor}; ${_style}"
-          ></ha-icon>
+          ></ha-state-icon>
         `;
       }
       if (icon.startsWith("mdi:") || icon.startsWith("redsea:")) {

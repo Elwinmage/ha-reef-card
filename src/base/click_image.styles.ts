@@ -45,4 +45,11 @@ export default css`
   .click-image.off {
     filter: grayscale(90%);
   }
+
+  /* A linked appliance that is switched off. The filter sits on the wrapper
+     rather than the image so it also covers anything drawn over it. */
+  .linked-off {
+    filter: grayscale(90%);
+    opacity: 0.75;
+  }
 `;

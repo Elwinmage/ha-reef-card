@@ -388,6 +388,29 @@ describe("Dialog.display()", () => {
     spy.mockRestore();
   });
 });
+describe("Dialog.display() — unknown dialog type", () => {
+  it("warns and leaves the box untouched instead of crashing", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const dlg = makeDlg();
+    dlg.config = { known: { title_key: "'T'" } };
+    const box = { style: { display: "none" } };
+    dlg._shadowRoot = { querySelector: () => box };
+    const fill = vi.spyOn(dlg, "_fill_content");
+    const elt = makeElt_B();
+
+    expect(() => dlg.display({ type: "socket_schedule", elt })).not.toThrow();
+
+    expect(fill).not.toHaveBeenCalled();
+    expect(box.style.display).toBe("none");
+    expect(dlg.elt).not.toBe(elt);
+    expect(warn).toHaveBeenCalledWith(
+      "Dialog: unknown dialog type",
+      "socket_schedule",
+    );
+    warn.mockRestore();
+  });
+});
+
 describe("Dialog.set hass() — elts falsy (L126 false)", () => {
   it("does not throw when elts is null", () => {
     const dlg = makeDlg();
@@ -1033,5 +1056,241 @@ describe("Dialog._render_content() — unresolvable entities", () => {
     ).not.toThrow();
     expect(warn.mock.calls[0]![2]).toBe(42);
     warn.mockRestore();
+  });
+});
+
+// ─── Dynamic card options ───────────────────────────────────────────────────
+
+describe("Dialog.evaluate_conf()", () => {
+  /** An element resolving any expression to a fixed marker. */
+  function elt(resolved = "redsea:rsdose4-on"): any {
+    return { evaluate: vi.fn(() => resolved) };
+  }
+
+  it("resolves an expression in a row option", () => {
+    // Row options may depend on the device — an icon showing what is
+    // plugged into a socket, say.
+    const conf: any = { entities: [{ icon: "${device.linked_icon()}" }] };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].icon).toBe("redsea:rsdose4-on");
+    expect(e.evaluate).toHaveBeenCalledWith("${device.linked_icon()}");
+  });
+
+  it("leaves constants alone", () => {
+    const conf: any = {
+      entities: [{ icon: "mdi:power-plug", name: "Socket" }],
+    };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].icon).toBe("mdi:power-plug");
+    expect(e.evaluate).not.toHaveBeenCalled();
+  });
+
+  it("never touches entity, which was already resolved", () => {
+    // Re-evaluating it would undo the entity_id resolved just before.
+    const conf: any = { entities: [{ entity: "${something}" }] };
+    const e = elt();
+
+    Dialog.evaluate_conf(conf, e);
+
+    expect(conf.entities[0].entity).toBe("${something}");
+  });
+
+  it("reaches options nested several levels down", () => {
+    const conf: any = { a: { b: { c: { icon: "${x}" } } } };
+
+    Dialog.evaluate_conf(conf, elt("done"));
+
+    expect(conf.a.b.c.icon).toBe("done");
+  });
+
+  it("leaves non-string values as they are", () => {
+    const conf: any = { entities: [{ icon: "${x}", show: true, count: 3 }] };
+
+    Dialog.evaluate_conf(conf, elt("done"));
+
+    expect(conf.entities[0].show).toBe(true);
+    expect(conf.entities[0].count).toBe(3);
+  });
+
+  it("does nothing without a configuration to walk", () => {
+    expect(() => Dialog.evaluate_conf(null, elt())).not.toThrow();
+    expect(() => Dialog.evaluate_conf("text" as any, elt())).not.toThrow();
+  });
+
+  it("does nothing without an element to evaluate with", () => {
+    const conf: any = { icon: "${x}" };
+
+    Dialog.evaluate_conf(conf, null);
+    Dialog.evaluate_conf(conf, {});
+
+    expect(conf.icon).toBe("${x}");
+  });
+});
+describe("Dialog._render_content — pictures stay in colour", () => {
+  it("turns a click-image on, and leaves other views alone", async () => {
+    const { dlg } = await makeDialog();
+    dlg._hass = makeHass_C();
+    dlg.elts = [];
+    dlg.elt = { get_entity: vi.fn(), device: { name: "dev" } };
+    if (!customElements.get("click-image")) {
+      class FakeClickImage extends HTMLElement {
+        conf: any;
+        hass: any;
+      }
+      customElements.define("click-image", FakeClickImage);
+    }
+    const ClickImage = customElements.get("click-image") as any;
+    if (!ClickImage.prototype.setConfig)
+      ClickImage.prototype.setConfig = () => {};
+    const shadow = document.createElement("div");
+    shadow.innerHTML = `<div id="dialog-content"></div>`;
+    dlg._shadowRoot = shadow;
+
+    dlg._render_content({
+      view: "click-image",
+      conf: { type: "click-image", image: "/img/x.png", tap_action: [] },
+    });
+    expect(dlg.elts.at(-1).stateOn).toBe(true);
+
+    const viewTag = uid("dlg-view");
+    class ViewEl extends HTMLElement {
+      setConfig(_c: any) {}
+      hass: any = null;
+      device: any = null;
+    }
+    customElements.define(viewTag, ViewEl);
+    dlg._render_content({ view: viewTag, conf: { name: "x" } });
+    expect(dlg.elts.at(-1).stateOn).toBeUndefined();
+  });
+});
+
+describe("Dialog — entity cards follow entities swapped while open", () => {
+  /**
+   * The range bounds of an EC probe exist once per display unit and only the
+   * set of the selected unit is available. Changing the unit from the probe
+   * dialog swaps which entity a key stands for: the open dialog must rebuild
+   * its card on the new entities instead of keeping the ones it opened with.
+   */
+  class LiveCard extends HTMLElement {
+    configs: any[] = [];
+    hass: any = null;
+    setConfig(c: any) {
+      this.configs.push(c);
+    }
+  }
+  if (!customElements.get("live-entities-card")) {
+    customElements.define("live-entities-card", LiveCard);
+  }
+
+  function open(unit: { current: string }) {
+    const dlg = makeDlg();
+    dlg._shadowRoot = makeSR();
+    dlg.elt = {
+      device: makeDevice(),
+      get_entity: (k: string) =>
+        k === "probe_desired_range_low"
+          ? { entity_id: `number.low_${unit.current}` }
+          : k === "probe_ec_unit"
+            ? { entity_id: "select.unit" }
+            : null,
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    dlg._render_content({
+      view: "live-entities-card",
+      conf: {
+        entities: [
+          { entity: "probe_ec_unit" },
+          { type: "divider" },
+          { entity: "probe_desired_range_low" },
+          { entity: "probe_leak_status" },
+        ],
+      },
+    });
+    const card = dlg.live_contents[0].content as LiveCard;
+    return { dlg, card, warn };
+  }
+
+  it("rebuilds the card on the bounds of the newly selected unit", () => {
+    const unit = { current: "ec" };
+    const { dlg, card, warn } = open(unit);
+    expect(card.configs).toHaveLength(1);
+    expect(card.configs[0].entities.map((r: any) => r.entity)).toEqual([
+      "select.unit",
+      undefined,
+      "number.low_ec",
+    ]);
+
+    unit.current = "ppt";
+    dlg.hass = makeHass();
+
+    expect(card.configs).toHaveLength(2);
+    expect(card.configs[1].entities[2].entity).toBe("number.low_ppt");
+    // Missing rows were reported once, at opening, not on every update
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it("lets the device re-read its entities before resolving", () => {
+    const unit = { current: "ec" };
+    const { dlg, card, warn } = open(unit);
+    // The device learns about the new unit only when asked
+    dlg.elt.device.refresh_entities = vi.fn(() => {
+      unit.current = "sg";
+    });
+    const hass = makeHass();
+    dlg.hass = hass;
+    expect(dlg.elt.device.refresh_entities).toHaveBeenCalledWith(hass);
+    expect(card.configs[1].entities[2].entity).toBe("number.low_sg");
+    warn.mockRestore();
+  });
+
+  it("leaves the card alone while its entities stay the same", () => {
+    const unit = { current: "ec" };
+    const { dlg, card, warn } = open(unit);
+    dlg.hass = makeHass();
+    dlg.hass = makeHass();
+    expect(card.configs).toHaveLength(1);
+    warn.mockRestore();
+  });
+
+  it("forgets the cards of a closed dialog", () => {
+    const { dlg, warn } = open({ current: "ec" });
+    dlg.live_contents = [];
+    dlg.elt = null;
+    expect(() => {
+      dlg.hass = makeHass();
+    }).not.toThrow();
+    warn.mockRestore();
+  });
+
+  it("keeps a single-entity card whose entity went missing", () => {
+    const dlg = makeDlg();
+    dlg._shadowRoot = makeSR();
+    let present = true;
+    dlg.elt = {
+      device: makeDevice(),
+      get_entity: () => (present ? { entity_id: "sensor.a" } : null),
+    };
+    dlg._render_content({
+      view: "live-entities-card",
+      conf: { entity: "a" },
+    });
+    const card = dlg.live_contents[0].content as LiveCard;
+    present = false;
+    dlg.hass = makeHass();
+    expect(card.configs).toHaveLength(1);
+  });
+
+  it("lists the entity ids of a single-entity card too", () => {
+    expect(Dialog.entity_ids({ entity: "sensor.a" })).toBe("sensor.a");
+    expect(Dialog.entity_ids({ entities: ["sensor.a", { entity: "b" }] })).toBe(
+      "sensor.a,b",
+    );
   });
 });

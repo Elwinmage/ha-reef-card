@@ -757,6 +757,8 @@ function makeCtx(): any {
     stroke: () => calls.push(["stroke"]),
     fill: () => calls.push(["fill"]),
     fillText: (...a: any[]) => calls.push(["fillText", ...a]),
+    save: () => calls.push(["save"]),
+    restore: () => calls.push(["restore"]),
     // Width follows the font actually set, otherwise the stub cannot show a
     // gutter that widens with the font size.
     measureText: (t: string) => ({
@@ -1514,5 +1516,109 @@ describe("HistoryChart canvas acquisition", () => {
     el.updated();
     expect(el._canvas).toBeNull();
     expect(el._ro).toBeNull();
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   Level zones
+//----------------------------------------------------------------------------//
+
+describe("HistoryChart zones", () => {
+  const RANGES = [24, 25, 26.5, 28];
+
+  function zoneChart(
+    conf: any = {},
+    attributes: any = { ranges: RANGES },
+  ): any {
+    const el = makeChart({ zones: true, baseline: "min", ...conf });
+    el._hass = {
+      states: {
+        "sensor.usage": { entity_id: "sensor.usage", state: "25", attributes },
+      },
+    };
+    el.series = [
+      series_of([
+        { t: Date.now() - 3600 * 1000, v: 25 },
+        { t: Date.now(), v: 26 },
+      ]),
+    ];
+    return el;
+  }
+
+  it("is off unless asked", () => {
+    const el = zoneChart({ zones: undefined });
+    expect(el.zone_ranges()).toBeNull();
+  });
+
+  it("reads the bounds of the first series", () => {
+    expect(zoneChart().zone_ranges()).toEqual(RANGES);
+  });
+
+  it("takes bounds given directly", () => {
+    expect(zoneChart({ zones: [1, 2, 3, 4] }).zone_ranges()).toEqual([
+      1, 2, 3, 4,
+    ]);
+  });
+
+  it("ignores unusable bounds or a chart without series", () => {
+    expect(zoneChart({}, { ranges: [1, 2] }).zone_ranges()).toBeNull();
+    expect(zoneChart({}, {}).zone_ranges()).toBeNull();
+    const el = zoneChart();
+    el.series = [];
+    expect(el.zone_ranges()).toBeNull();
+    el._hass = null;
+    el.series = [series_of([{ t: 0, v: 1 }])];
+    expect(el.zone_ranges()).toBeNull();
+  });
+
+  it("keeps the acceptable span in view, with danger around it", () => {
+    const el = zoneChart();
+    const scale = el.build_scale(el.series);
+    // margin = (28 - 24) * 0.25 = 1
+    expect(scale.low).toBe(23);
+    expect(scale.low + scale.range).toBe(29);
+  });
+
+  it("widens for a reading beyond the bands", () => {
+    const el = zoneChart();
+    el.series = [series_of([{ t: Date.now(), v: 35 }])];
+    const scale = el.build_scale(el.series);
+    expect(scale.low + scale.range).toBe(35);
+  });
+
+  it("survives bounds without a span", () => {
+    const el = zoneChart({ zones: [5, 5, 5, 5] });
+    const scale = el.build_scale(el.series);
+    expect(scale.low).toBe(4);
+  });
+
+  it("draws the five bands behind the curve", () => {
+    const el = zoneChart();
+    const ctx = attachCanvas(el);
+    el.draw();
+    const rects = ctx.calls.filter((c: any) => c[0] === "fillRect");
+    expect(rects).toHaveLength(5);
+    expect(ctx.calls.some((c: any) => c[0] === "save")).toBe(true);
+    expect(ctx.globalAlpha).toBe(0.3);
+    // Bottom band first: the lowest drawn lowest on the canvas
+    expect(rects[0][2]).toBeGreaterThan(rects[4][2]);
+  });
+
+  it("takes the band opacity from the configuration", () => {
+    const el = zoneChart({ zone_alpha: 0.5 });
+    const ctx = attachCanvas(el);
+    el.draw();
+    expect(ctx.globalAlpha).toBe(0.5);
+    const bad = zoneChart({ zone_alpha: "x" });
+    const bad_ctx = attachCanvas(bad);
+    bad.draw();
+    expect(bad_ctx.globalAlpha).toBe(0.3);
+  });
+
+  it("labels a fine scale with decimals", () => {
+    expect(HistoryChart.format_tick(8.2, 0.1)).toBe("8.2");
+    expect(HistoryChart.format_tick(8.25, 0.05)).toBe("8.25");
+    expect(HistoryChart.format_tick(26.4, 2)).toBe("26");
+    expect(HistoryChart.format_tick(26.6, 1)).toBe("27");
   });
 });

@@ -9,7 +9,10 @@ import {
   create_hour,
   create_select,
   default as DeviceList,
+  domain_of,
   hexToRgb,
+  list_linkable_devices,
+  resolve_device_model,
   rgbToHex,
   stringToTime,
   toTime,
@@ -527,6 +530,72 @@ describe("DeviceList (init_devices, get_by_name, device_compare)", () => {
 
     expect(list.devices["entry_1"].elements).toHaveLength(2);
   });
+
+  function makeAquamedic(
+    id: string,
+    hass_device_id: string,
+    name: string,
+    entry: string,
+    model = "DC Runner",
+  ): any {
+    return {
+      id: hass_device_id,
+      identifiers: [["aquamedic", id]],
+      name,
+      model,
+      primary_config_entry: entry,
+    };
+  }
+
+  it("keeps independent Aqua Medic pumps separate even under one config entry", async () => {
+    // ha-aquamedic-component can register several devices (one per pump)
+    // under a single config entry, unlike Red Sea's per-appliance entries:
+    // they must not be merged into a single selectable device.
+    const hass = makeHass({
+      d1: makeAquamedic(
+        "p1",
+        "dev-p1",
+        "SmartDrift",
+        "shared_entry",
+        "SmartDrift",
+      ),
+      d2: makeAquamedic("p2", "dev-p2", "Skimmer #1", "shared_entry"),
+    });
+    const list = await getDeviceList(hass);
+
+    expect(list.main_devices).toHaveLength(2);
+    expect(list.main_devices.map((d: any) => d.text)).toEqual(
+      expect.arrayContaining(["SmartDrift", "Skimmer #1"]),
+    );
+    // Each pump keeps its own single-element entry — no merging — and is
+    // keyed by its own hass device id rather than the shared config entry.
+    expect(list.devices["dev-p1"].elements).toHaveLength(1);
+    expect(list.devices["dev-p1"].elements[0].name).toBe("SmartDrift");
+    expect(list.devices["dev-p2"].elements).toHaveLength(1);
+    expect(list.devices["dev-p2"].elements[0].name).toBe("Skimmer #1");
+  });
+
+  it("sets DeviceInfo.key to the primary config entry for a grouped domain", async () => {
+    const hass = makeHass({ d1: makeRedsea("ABC", "Skimmer", "entry_1") });
+    const list = await getDeviceList(hass);
+    expect(list.devices["entry_1"].key).toBe("entry_1");
+    expect(list.main_devices[0].value).toBe("entry_1");
+  });
+
+  it("sets DeviceInfo.key to the device id for a non-grouped domain", async () => {
+    const hass = makeHass({
+      d1: makeAquamedic(
+        "p1",
+        "dev-p1",
+        "SmartDrift",
+        "shared_entry",
+        "SmartDrift",
+      ),
+    });
+    const list = await getDeviceList(hass);
+    expect(list.devices["dev-p1"].key).toBe("dev-p1");
+    expect(list.main_devices[0].value).toBe("dev-p1");
+  });
 });
 describe("toTime() edge cases", () => {
   it("handles exactly midnight (0)", () => {
@@ -626,5 +695,499 @@ describe("DeviceList init_devices — L120 false: device is undefined after L118
     }).not.toThrow();
 
     expect(realEntry.name).toBe("Original");
+  });
+});
+
+// ─── Resolving a device by hardware id ──────────────────────────────────────
+
+describe("DeviceList.get_config_entry_by_hwid", () => {
+  /** A list holding one device per config entry, keyed by hardware id. */
+  function makeList(entries: Record<string, any>): any {
+    const list = Object.create(DeviceList.prototype);
+    list.devices = entries;
+    list.main_devices = [];
+    return list;
+  }
+
+  it("finds the config entry carrying the hardware id", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ model_id: "111" }] },
+      "cfg-b": { elements: [{ model_id: "222" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("222")).toBe("cfg-b");
+  });
+
+  it("searches every element of an entry, not just the first", () => {
+    // Sub-devices share their parent's config entry.
+    const list = makeList({
+      "cfg-a": { elements: [{ model_id: "111" }, { model_id: "999" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("999")).toBe("cfg-a");
+  });
+
+  it("falls back to the redsea identifier when model_id is absent", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ identifiers: [["redsea", "333"]] }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("333")).toBe("cfg-a");
+  });
+
+  it("ignores an identifier belonging to another integration", () => {
+    const list = makeList({
+      "cfg-a": { elements: [{ identifiers: [["other", "333"]] }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("333")).toBeUndefined();
+  });
+
+  it("returns undefined for an unknown hardware id", () => {
+    const list = makeList({ "cfg-a": { elements: [{ model_id: "111" }] } });
+
+    expect(list.get_config_entry_by_hwid("nope")).toBeUndefined();
+  });
+
+  it("returns undefined for an empty hardware id", () => {
+    const list = makeList({ "cfg-a": { elements: [{ model_id: "111" }] } });
+
+    expect(list.get_config_entry_by_hwid("")).toBeUndefined();
+  });
+
+  it("tolerates an entry with no elements", () => {
+    const list = makeList({
+      "cfg-a": {},
+      "cfg-b": { elements: [{ model_id: "1" }] },
+    });
+
+    expect(list.get_config_entry_by_hwid("1")).toBe("cfg-b");
+  });
+});
+
+// ─── Devices offered for linking to a socket ────────────────────────────────
+
+describe("list_linkable_devices", () => {
+  /** A hass whose registry holds the given devices, keyed by id. */
+  function makeRegistry(devices: any[]): any {
+    const registry: Record<string, any> = {};
+    for (const dev of devices) {
+      registry[dev.id] = dev;
+    }
+    return { devices: registry };
+  }
+
+  const redsea = (id: string, name: string, key = id) => ({
+    id,
+    name,
+    identifiers: [["redsea", key]],
+  });
+
+  it("offers Red Sea devices", () => {
+    const hass = makeRegistry([redsea("d1", "ReefLed")]);
+
+    expect(list_linkable_devices(hass)).toEqual([
+      { value: "d1", text: "ReefLed" },
+    ]);
+  });
+
+  it("offers Aqua Medic devices", () => {
+    const hass = makeRegistry([
+      { id: "d1", name: "DC Skimmer", identifiers: [["aquamedic", "x"]] },
+    ]);
+
+    expect(list_linkable_devices(hass)).toHaveLength(1);
+  });
+
+  it("offers the backup service published over MQTT", () => {
+    const hass = makeRegistry([
+      {
+        id: "d1",
+        name: "Reef Battery Backup",
+        identifiers: [["mqtt", "backup"]],
+        model_id: "reefbeat-energy-backup",
+      },
+    ]);
+
+    expect(list_linkable_devices(hass)).toHaveLength(1);
+  });
+
+  it("leaves out unrelated MQTT devices", () => {
+    // Without the model check the picker would list every MQTT device in the
+    // installation, which is usually most of it.
+    const hass = makeRegistry([
+      { id: "d1", name: "Doorbell", identifiers: [["mqtt", "bell"]] },
+      {
+        id: "d2",
+        name: "Thermostat",
+        identifiers: [["mqtt", "t"]],
+        model_id: "some-other-thing",
+      },
+    ]);
+
+    expect(list_linkable_devices(hass)).toEqual([]);
+  });
+
+  it("leaves out integrations that are not linkable", () => {
+    const hass = makeRegistry([
+      { id: "d1", name: "Lamp", identifiers: [["hue", "1"]] },
+    ]);
+
+    expect(list_linkable_devices(hass)).toEqual([]);
+  });
+
+  it("leaves out dosing heads, which share their doser's lead", () => {
+    const hass = makeRegistry([
+      redsea("d1", "Doser", "rsdose"),
+      redsea("d2", "Doser head 1", "rsdose_head_1"),
+    ]);
+
+    expect(list_linkable_devices(hass)).toEqual([
+      { value: "d1", text: "Doser" },
+    ]);
+  });
+
+  it("offers each ReefRun pump on its own", () => {
+    // A skimmer and a return pump are two appliances on two leads, and may
+    // well sit on two different sockets.
+    const hass = makeRegistry([
+      redsea("d2", "Skimmer pump", "rsrun_pump_1"),
+      redsea("d3", "Return pump", "rsrun_pump_2"),
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "Return pump",
+      "Skimmer pump",
+    ]);
+  });
+
+  it("leaves out the ReefRun controller, which has no lead of its own", () => {
+    // It is fed by whichever pump is plugged in, so only the pumps can be
+    // tied to a socket.
+    const hass = makeRegistry([
+      { ...redsea("d1", "ReefRun", "rsrun"), model: "RSRUN" },
+      { ...redsea("d2", "ReefRun pump 1", "rsrun_pump_1"), model: "RSRUN" },
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "ReefRun pump 1",
+    ]);
+  });
+
+  it("numbers the two pumps when they share the controller's name", () => {
+    // Renaming the controller gives both pumps the same registry name.
+    const hass = makeRegistry([
+      { ...redsea("d2", "Bac principal", "rsrun_pump_1"), model: "RSRUN" },
+      { ...redsea("d3", "Bac principal", "rsrun_pump_2"), model: "RSRUN" },
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "Bac principal — 1",
+      "Bac principal — 2",
+    ]);
+  });
+
+  it("leaves a pump name that already carries its number alone", () => {
+    const hass = makeRegistry([
+      { ...redsea("d2", "ReefRun pump 1", "rsrun_pump_1"), model: "RSRUN" },
+    ]);
+
+    expect(list_linkable_devices(hass)[0].text).toBe("ReefRun pump 1");
+  });
+
+  it("leaves out the cloud account and its aquarium groupings", () => {
+    // Registry entries with nothing to plug in.
+    const hass = makeRegistry([
+      { ...redsea("d1", "ReefBeat account", "cloud"), model: "ReefBeat" },
+      { ...redsea("d2", "Mon bac", "cloud_Mon bac"), model: "ReefBeat" },
+      redsea("d3", "ReefLed"),
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual(["ReefLed"]);
+  });
+
+  it("leaves out the device asked to be excluded", () => {
+    const hass = makeRegistry([redsea("d1", "Strip"), redsea("d2", "Led")]);
+
+    expect(list_linkable_devices(hass, "d1")).toEqual([
+      { value: "d2", text: "Led" },
+    ]);
+  });
+
+  it("prefers the name the user set in Home Assistant", () => {
+    const hass = makeRegistry([
+      { ...redsea("d1", "SIMU-RSLED"), name_by_user: "Rampe principale" },
+    ]);
+
+    expect(list_linkable_devices(hass)[0].text).toBe("Rampe principale");
+  });
+
+  it("falls back to the registry id for a nameless device", () => {
+    const hass = makeRegistry([{ id: "d1", identifiers: [["redsea", "x"]] }]);
+
+    expect(list_linkable_devices(hass)[0].text).toBe("d1");
+  });
+
+  it("sorts by display name", () => {
+    const hass = makeRegistry([
+      redsea("d1", "Zeta"),
+      redsea("d2", "Alpha"),
+      redsea("d3", "Mu"),
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "Alpha",
+      "Mu",
+      "Zeta",
+    ]);
+  });
+
+  it("skips entries with no usable identifier", () => {
+    const hass = makeRegistry([
+      { id: "d1", name: "Broken", identifiers: [] },
+      { id: "d2", name: "Odd", identifiers: ["not-a-tuple"] },
+      redsea("d3", "Good"),
+    ]);
+
+    expect(list_linkable_devices(hass)).toEqual([
+      { value: "d3", text: "Good" },
+    ]);
+  });
+
+  it("tolerates an empty registry slot", () => {
+    const hass: any = { devices: { d0: null, d1: redsea("d1", "Led") } };
+
+    expect(list_linkable_devices(hass)).toHaveLength(1);
+  });
+
+  it("returns nothing without a device registry", () => {
+    expect(list_linkable_devices(null)).toEqual([]);
+    expect(list_linkable_devices({} as any)).toEqual([]);
+  });
+});
+
+describe("list_linkable_devices — edge cases", () => {
+  it("tolerates an identifier tuple with no key", () => {
+    const hass: any = {
+      devices: { d1: { id: "d1", name: "Led", identifiers: [["redsea"]] } },
+    };
+
+    expect(list_linkable_devices(hass)).toEqual([{ value: "d1", text: "Led" }]);
+  });
+
+  it("falls back to the registry key when the entry carries no id", () => {
+    const hass: any = {
+      devices: { d1: { name: "Led", identifiers: [["redsea", "x"]] } },
+    };
+
+    expect(list_linkable_devices(hass)[0].value).toBe("d1");
+  });
+
+  it("keeps both devices when two share a name", () => {
+    const hass: any = {
+      devices: {
+        d1: { id: "d1", name: "Led", identifiers: [["redsea", "a"]] },
+        d2: { id: "d2", name: "Led", identifiers: [["redsea", "b"]] },
+      },
+    };
+
+    expect(list_linkable_devices(hass)).toHaveLength(2);
+  });
+});
+
+describe("list_linkable_devices — label disambiguation", () => {
+  function makeRegistry2(devices: any[]): any {
+    const registry: Record<string, any> = {};
+    for (const dev of devices) registry[dev.id] = dev;
+    return { devices: registry };
+  }
+
+  it("leaves distinct pump names untouched", () => {
+    // Numbering everything would add noise to the common case.
+    const hass = makeRegistry2([
+      { id: "d1", name: "Skimmer", identifiers: [["redsea", "r_pump_1"]] },
+      { id: "d2", name: "Return", identifiers: [["redsea", "r_pump_2"]] },
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "Return",
+      "Skimmer",
+    ]);
+  });
+
+  it("keeps colliding names that carry no channel as they are", () => {
+    // Nothing in the identifier tells them apart, so inventing a number
+    // would be worse than showing the duplicate.
+    const hass = makeRegistry2([
+      { id: "d1", name: "Led", identifiers: [["redsea", "a"]] },
+      { id: "d2", name: "Led", identifiers: [["redsea", "b"]] },
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "Led",
+      "Led",
+    ]);
+  });
+});
+
+describe("list_linkable_devices — excluding the strip itself", () => {
+  function reg(devices: any[]): any {
+    const registry: Record<string, any> = {};
+    for (const dev of devices) registry[dev.id ?? dev._key] = dev;
+    return { devices: registry };
+  }
+
+  const strip = {
+    id: "d-strip",
+    name: "Power strip",
+    identifiers: [["redsea", "power"]],
+    primary_config_entry: "cfg-power",
+  };
+  const other = { id: "d-led", name: "Led", identifiers: [["redsea", "led"]] };
+
+  it("leaves out the strip when given its registry id", () => {
+    expect(list_linkable_devices(reg([strip, other]), "d-strip")).toEqual([
+      { value: "d-led", text: "Led" },
+    ]);
+  });
+
+  it("leaves out the strip when given its config entry", () => {
+    // A socket cannot power the strip it belongs to, whichever handle the
+    // caller happens to hold.
+    expect(list_linkable_devices(reg([strip, other]), "cfg-power")).toEqual([
+      { value: "d-led", text: "Led" },
+    ]);
+  });
+
+  it("leaves out an entry keyed by id but carrying none", () => {
+    const hass: any = {
+      devices: {
+        "d-strip": { name: "Power strip", identifiers: [["redsea", "p"]] },
+        "d-led": other,
+      },
+    };
+
+    expect(list_linkable_devices(hass, "d-strip")).toEqual([
+      { value: "d-led", text: "Led" },
+    ]);
+  });
+
+  it("keeps every device when nothing is excluded", () => {
+    expect(list_linkable_devices(reg([strip, other]))).toHaveLength(2);
+    expect(list_linkable_devices(reg([strip, other]), null)).toHaveLength(2);
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   domain_of
+//----------------------------------------------------------------------------//
+
+describe("domain_of", () => {
+  it("reads the domain of the first identifier tuple", () => {
+    expect(domain_of([["redsea", "abc"]])).toBe("redsea");
+    expect(domain_of([["aquamedic", "def"]])).toBe("aquamedic");
+  });
+
+  it("returns undefined when there is no identifier tuple", () => {
+    expect(domain_of([])).toBeUndefined();
+    expect(domain_of(undefined)).toBeUndefined();
+  });
+
+  it("returns undefined when the first identifier is not a tuple", () => {
+    expect(domain_of(["not-a-tuple"])).toBeUndefined();
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   resolve_device_model — pump_role driven DC Runner / DC Skimmer switch
+//----------------------------------------------------------------------------//
+
+describe("resolve_device_model", () => {
+  function hassWithRole(role: string | undefined): any {
+    if (role === undefined) {
+      return { states: {}, devices: {}, callService: vi.fn() };
+    }
+    return {
+      states: { "select.pump_pump_role": { state: role } },
+      entities: {
+        "select.pump_pump_role": {
+          device_id: "dev1",
+          translation_key: "pump_role",
+        },
+      },
+      devices: {},
+      callService: vi.fn(),
+    };
+  }
+
+  function device(): any {
+    return { name: "Pump", elements: [{ id: "dev1" }] };
+  }
+
+  it("resolves to DC Skimmer when the role entity says skimmer", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("skimmer"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Skimmer");
+  });
+
+  it("resolves to DC Runner when the role entity says return", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("return"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when the role is not (yet) mapped", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("unknown"),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when the domain declares no override", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole("skimmer"),
+        device(),
+        "redsea",
+        "RSDoser",
+      ),
+    ).toBe("RSDoser");
+  });
+
+  it("keeps the raw model when hass carries no entities", () => {
+    expect(
+      resolve_device_model(
+        hassWithRole(undefined),
+        device(),
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
+  });
+
+  it("keeps the raw model when no entity matches the device", () => {
+    const hass = hassWithRole("skimmer");
+    expect(
+      resolve_device_model(
+        hass,
+        { name: "Pump", elements: [{ id: "other-device" }] },
+        "aquamedic",
+        "DC Runner",
+      ),
+    ).toBe("DC Runner");
   });
 });

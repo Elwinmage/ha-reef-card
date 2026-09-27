@@ -13,6 +13,14 @@ export interface MainDevice {
 
 export interface DeviceInfo {
   name: string;
+  /**
+   * The identity this device is selected/looked up by (a MainDevice's
+   * `value`, and the key of DeviceList.devices). Usually a config entry id
+   * (several devices grouped under one physical appliance), but a plain
+   * hass device id for an integration whose devices are not grouped — see
+   * KNOWN_DEVICE_DOMAINS.group_by_config_entry.
+   */
+  key?: string;
   elements: import("./homeassistant").HassDevice[];
 }
 
@@ -53,6 +61,33 @@ export interface Device {
 export interface HeadEntity {
   entities: Record<string, any>;
   dose_head?: any;
+}
+
+export interface SocketEntity {
+  entities: Record<string, any>;
+  /** Cached PowerSocket LitElement rendering this socket */
+  power_socket?: any;
+}
+
+export interface ProbeEntity {
+  /** Probe uid, unique within its type */
+  uid: string;
+  /** Probe type: ph, orp, ec, temperature, ato, leak */
+  type: string;
+  /** Position in the hub's probe list, null when not reported */
+  index: number | null;
+  /** 1-based slot the probe is drawn in, set when it is placed */
+  slot?: number;
+  /** Probe entities keyed by translation key */
+  entities: Record<string, any>;
+  /**
+   * Every entity of each translation key, when several share it: an EC
+   * probe has one set of range bounds per display unit, only the set of the
+   * selected unit being available at a time.
+   */
+  alternates?: Record<string, any[]>;
+  /** Cached ControlProbe LitElement rendering this probe */
+  control_probe?: any;
 }
 
 export interface PumpEntity {

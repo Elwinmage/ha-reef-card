@@ -72,6 +72,11 @@ export class RSMaintenance extends RSDevice {
   @state()
   private _hide_muted: boolean = default_options.hide_muted;
 
+  // Runtime equipment filter: device_id selected in the toolbar dropdown.
+  // null means "show all" (within the editor's persisted filter).
+  @state()
+  private _filter_device: string | null = null;
+
   // entity_id of the task whose interval editor is currently expanded.
   @state()
   private _editing: string | null = null;
@@ -231,6 +236,15 @@ export class RSMaintenance extends RSDevice {
    */
   private _toggle_hide_muted(): void {
     this._hide_muted = !this._hide_muted;
+    this.requestUpdate();
+  }
+
+  /**
+   * Set the runtime equipment filter from the toolbar dropdown.
+   * @param device_id: the device_id to filter on, or "" for all
+   */
+  private _set_filter_device(device_id: string): void {
+    this._filter_device = device_id === "" ? null : device_id;
     this.requestUpdate();
   }
 
@@ -419,26 +433,69 @@ export class RSMaintenance extends RSDevice {
   }
 
   /**
-   * Render the sort selector and the filter toggle.
+   * Render the equipment filter dropdown in the toolbar.
+   * The list is built from items already filtered by the editor's device
+   * selection, so the dropdown only offers devices the user chose to see.
+   * @param items: the items after the editor device filter
    */
-  private _render_toolbar(): TemplateResult {
+  private _render_equipment_filter(items: MaintenanceItem[]): TemplateResult {
+    const devices = list_maintenance_devices(items);
+    // No point showing a dropdown with zero or one device.
+    if (devices.length <= 1) {
+      return html``;
+    }
+    return html`
+      <select
+        class="maint-equip-select"
+        @change="${(e: Event) =>
+          this._set_filter_device(
+            (e.currentTarget as HTMLSelectElement).value,
+          )}"
+      >
+        <option value="" ?selected="${this._filter_device === null}">
+          ${i18n._("maintenance_all_equipment")}
+        </option>
+        ${devices.map(
+          (ref) => html`
+            <option
+              value="${ref.id}"
+              ?selected="${this._filter_device === ref.id}"
+            >
+              ${this._device_label(ref.name, ref.pump_type, ref.pump_model)}
+              (${ref.count})
+            </option>
+          `,
+        )}
+      </select>
+    `;
+  }
+
+  /**
+   * Render the sort selector and the filter toggle.
+   * @param items: items after the editor device filter, used to populate
+   *               the equipment quick-filter dropdown
+   */
+  private _render_toolbar(items: MaintenanceItem[]): TemplateResult {
     return html`
       <div class="maint-toolbar">
-        <div class="maint-sort">
-          <button
-            id="sort-device"
-            class="${this._sort === "device" ? "active" : ""}"
-            @click="${() => this._set_sort("device")}"
-          >
-            ${i18n._("sort_by_equipment")}
-          </button>
-          <button
-            id="sort-due"
-            class="${this._sort === "due" ? "active" : ""}"
-            @click="${() => this._set_sort("due")}"
-          >
-            ${i18n._("sort_by_due_date")}
-          </button>
+        <div class="maint-toolbar-left">
+          <div class="maint-sort">
+            <button
+              id="sort-device"
+              class="${this._sort === "device" ? "active" : ""}"
+              @click="${() => this._set_sort("device")}"
+            >
+              ${i18n._("sort_by_equipment")}
+            </button>
+            <button
+              id="sort-due"
+              class="${this._sort === "due" ? "active" : ""}"
+              @click="${() => this._set_sort("due")}"
+            >
+              ${i18n._("sort_by_due_date")}
+            </button>
+          </div>
+          ${this._render_equipment_filter(items)}
         </div>
         <div class="maint-filters">
           <label class="maint-filter">
@@ -673,7 +730,24 @@ export class RSMaintenance extends RSDevice {
       }),
       options.devices,
     );
-    let visible = this._hide_ok ? all.filter((i) => i.status !== "ok") : all;
+
+    // Runtime equipment filter from the toolbar dropdown.
+    // Reset the selection when the chosen device is no longer available
+    // (e.g. the editor filter removed it).
+    let filtered = all;
+    if (this._filter_device !== null) {
+      const subset = all.filter((i) => i.device_id === this._filter_device);
+      if (subset.length > 0) {
+        filtered = subset;
+      } else {
+        // The selected device disappeared; reset silently.
+        this._filter_device = null;
+      }
+    }
+
+    let visible = this._hide_ok
+      ? filtered.filter((i) => i.status !== "ok")
+      : filtered;
     if (this._hide_muted) {
       visible = visible.filter((i) => i.notify);
     }
@@ -688,7 +762,7 @@ export class RSMaintenance extends RSDevice {
           </div>
           ${this._render_counters(all)}
         </div>
-        ${this._render_toolbar()} ${this._render_list(sorted, options)}
+        ${this._render_toolbar(all)} ${this._render_list(sorted, options)}
       </div>
     `;
   }
@@ -751,7 +825,7 @@ export class RSMaintenance extends RSDevice {
   /**
    * Editor block letting the user restrict the overview to some devices.
    * The list is built from the tasks currently exposed by the integration,
-   * one entry per controller (sub-device tasks are counted in their parent).
+   * one entry per sub-device (individual equipment).
    * @param options: the effective view options
    */
   private _render_device_filter(
@@ -785,7 +859,13 @@ export class RSMaintenance extends RSDevice {
                     (e.currentTarget as HTMLInputElement).checked,
                   )}"
               />
-              <span class="maint-device-name">${ref.name}</span>
+              <span class="maint-device-name"
+                >${this._device_label(
+                  ref.name,
+                  ref.pump_type,
+                  ref.pump_model,
+                )}</span
+              >
               <span class="maint-device-count">${ref.count}</span>
             </label>
           `,

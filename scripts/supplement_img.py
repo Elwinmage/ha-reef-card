@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-Update the Supplements section in README.md and all doc/<lang>/README.<lang>.md files.
+Update the Supplements section of the ReefDose pages: doc/en/reefdose.md and
+every doc/<lang>/reefdose.<lang>.md.
 
-For each README:
+The section runs from its localized heading down to the END_MARKER comment,
+which is kept so the next run finds the same boundaries.
+
+For each page:
   - Supplements are grouped by brand
   - Each brand is a collapsible <details> block showing:
       * brand name
       * count of supplements with image / total for that brand
-  - Image paths are adjusted relative to each README's location
+  - Image paths are adjusted relative to each page's location
   - Section heading and intro text are localized per language
 
 Exit code is always 0: pre-commit detects file modifications automatically.
@@ -99,11 +103,21 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
 
 DEFAULT_LANG = "en"
 
+# End of the generated block in every ReefDose page
+END_MARKER = "<!-- supplements:end -->"
+
+
+def reefdose_page(lang: str) -> Path:
+    """ReefDose page of a language."""
+    if lang == DEFAULT_LANG:
+        return DOC_DIR / "en" / "reefdose.md"
+    return DOC_DIR / lang / f"reefdose.{lang}.md"
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 def img_path(uid: str, readme_path: Path) -> str:
-    """Return the image src path relative to the given README file location."""
+    """Return the image src path relative to the given page location."""
     img_file = IMG_DIR / f"{uid}.supplement.png"
     return os.path.relpath(img_file, readme_path.parent).replace("\\", "/")
 
@@ -162,7 +176,7 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
 
 def update_readme(readme_path: Path, lang: str) -> bool:
     """
-    Replace the Supplements section in a README file.
+    Replace the Supplements section of a ReefDose page.
     Returns True if the file was modified.
     """
     if not readme_path.exists():
@@ -172,20 +186,19 @@ def update_readme(readme_path: Path, lang: str) -> bool:
     heading, intro = LANG_CONFIG.get(lang, LANG_CONFIG[DEFAULT_LANG])
     data = readme_path.read_text(encoding="utf-8")
 
-    if heading not in data:
-        print(f"  SKIP (marker '{heading}' not found): {readme_path}")
+    if END_MARKER not in data:
+        print(f"  SKIP (marker '{END_MARKER}' not found): {readme_path}")
+        return False
+    end = data.index(END_MARKER)
+    # Last localized heading before the marker: the same words may title
+    # another section earlier in the page.
+    start = data.rfind(heading + "\n", 0, end)
+    if start < 0:
+        print(f"  SKIP (heading '{heading}' not found): {readme_path}")
         return False
 
     new_section = build_supplement_block(readme_path, heading, intro)
-    new_section += "\n# ReefLed"
-
-    heading_escaped = re.escape(heading)
-    updated = re.sub(
-        rf"{heading_escaped}.+?# ReefLed",
-        new_section,
-        data,
-        flags=re.DOTALL,
-    )
+    updated = data[:start] + new_section + "\n" + data[end:]
 
     if updated == data:
         print(f"  OK        : {readme_path}")
@@ -201,25 +214,19 @@ def update_readme(readme_path: Path, lang: str) -> bool:
 # ---------------------------------------------------------------------------
 def main() -> None:
     print(f"Loaded {len(SUPPLEMENTS)} supplements.")
-    print("Checking Supplements section in READMEs...")
+    print("Checking Supplements section in the ReefDose pages...")
     changed = False
 
-    # 1. Main README.md (English)
-    changed |= update_readme(CARD_DIR / "README.md", "en")
-
-    # 2. All doc/<lang>/README.<lang>.md
     if DOC_DIR.exists():
         for lang_dir in sorted(DOC_DIR.iterdir()):
             if not lang_dir.is_dir() or lang_dir.name == "img":
                 continue
-            lang   = lang_dir.name
-            readme = lang_dir / f"README.{lang}.md"
-            changed |= update_readme(readme, lang)
+            changed |= update_readme(reefdose_page(lang_dir.name), lang_dir.name)
 
     if changed:
-        print("\n⚠  READMEs were updated.")
+        print("\n⚠  ReefDose pages were updated.")
     else:
-        print("\n✓  All READMEs are up to date.")
+        print("\n✓  All ReefDose pages are up to date.")
     sys.exit(0)
 
 

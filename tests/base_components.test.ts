@@ -459,6 +459,16 @@ describe("Sensor._render()", () => {
     expect(result).toBeDefined();
   });
 
+  it("renders ha-icon with string icon expression", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { icon: "'mdi:power'" };
+    s.stateObj = makeState_B("on", "sensor.x");
+    s.evaluate = vi.fn(() => "mdi:power");
+    const result = s._render("");
+    expect(result).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'mdi:power'");
+  });
+
   it("L87: falls back to mdi:help when stateObj.attributes.icon is absent", () => {
     const s = new StubSensor2() as any;
     s.conf = { icon: true };
@@ -562,6 +572,61 @@ describe("Sensor._render()", () => {
     };
     s._render("");
     expect(s._hass.formatEntityState).not.toHaveBeenCalled();
+  });
+
+  // `value` exists for text that comes from the device rather than from one
+  // entity — a linked device's name, say. Elements are built once and cached,
+  // so such text has to be re-evaluated at render time or it freezes.
+  it("renders conf.value in place of the entity state", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "${device.linked_control_name()}" };
+    s.stateObj = makeState_B("on", "sensor.x");
+    s.evaluate = vi.fn(() => "ReefControl Pro");
+
+    const result = s._render("");
+
+    expect(result).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("${device.linked_control_name()}");
+  });
+
+  it("renders conf.value without any entity behind it", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'text'" };
+    s.stateObj = null;
+    s.evaluate = vi.fn(() => "text");
+
+    expect(s._render("")).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'text'");
+  });
+
+  it("appends the unit to conf.value when one is configured", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'21'", unit: "'°C'" };
+    s.stateObj = null;
+    s.evaluate = vi.fn((e: string) => (e === "'21'" ? "21" : "°C"));
+
+    expect(s._render("")).toBeDefined();
+    expect(s.evaluate).toHaveBeenCalledWith("'°C'");
+  });
+
+  it("leaves the unit out when conf.value carries none", () => {
+    const s = new StubSensor2() as any;
+    s.conf = { value: "'text'" };
+    s.stateObj = makeState_B("on", "sensor.x", { unit_of_measurement: "W" });
+    s.evaluate = vi.fn(() => "text");
+
+    s._render("");
+
+    // The entity's own unit must not leak onto device-derived text
+    expect(s.evaluate).not.toHaveBeenCalledWith("W");
+  });
+
+  it("keeps reading the entity state when conf.value is absent", () => {
+    const s = new StubSensor2() as any;
+    s.conf = {};
+    s.stateObj = makeState_B("42", "sensor.x");
+
+    expect(s._render("")).toBeDefined();
   });
 });
 describe("RSSwitch._render()", () => {
@@ -673,6 +738,52 @@ describe("RSMessages._render()", () => {
     expect(result).toBeDefined();
   });
 
+  // The message band spans the full card width and is drawn on top of the
+  // other elements. With nothing to show it must render no content at all,
+  // or it silently eats clicks aimed at whatever sits underneath it.
+  function messageMarkup(result: any): string {
+    if (!result || typeof result !== "object" || !("strings" in result)) {
+      return "";
+    }
+    return (
+      (result.strings as string[]).join("") +
+      (result.values as any[]).map((v) => messageMarkup(v)).join("")
+    );
+  }
+
+  it("renders no content when there is no message to show", () => {
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("");
+    m._hass = null;
+
+    expect(messageMarkup(m._render("")).trim()).toBe("");
+  });
+
+  it("renders no content for an unavailable message sensor", () => {
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("unavailable");
+    m._hass = null;
+
+    expect(messageMarkup(m._render("")).trim()).toBe("");
+  });
+
+  it("marks the content interactive when a message is shown", () => {
+    // The host opts out of pointer events; the content opts back in so the
+    // text and its trash button stay clickable.
+    const m = new StubMessages_B() as any;
+    m.conf = { name: "msg" };
+    m.stateObj = makeState_B("Hello World");
+    m._hass = null;
+    m.device = null;
+
+    const markup = messageMarkup(m._render(""));
+
+    expect(markup).toContain("messages_content");
+    expect(markup).toContain("marquee");
+  });
+
   it("creates trash element when _hass and device are set", () => {
     const m = new StubMessages_B() as any;
     m.conf = { name: "msg" };
@@ -705,6 +816,29 @@ describe("RSMessages._render()", () => {
   });
 });
 describe("ClickImage._render()", () => {
+  // An image may depend on device state — a linked appliance's picture.
+  // Static entries pass a URL object built at module load, so only strings
+  // carrying an interpolation are evaluated.
+  it("evaluates an image expression at render time", () => {
+    const ci = new StubClickImage() as any;
+    ci.conf = { image: "${device.linked_image()}", name: "linked" };
+    ci.evaluate = vi.fn(() => "/img/led.png");
+
+    ci._render("");
+
+    expect(ci.evaluate).toHaveBeenCalledWith("${device.linked_image()}");
+  });
+
+  it("leaves a plain image source untouched", () => {
+    const ci = new StubClickImage() as any;
+    ci.conf = { image: "/img/test.png", name: "test_img" };
+    ci.evaluate = vi.fn();
+
+    ci._render("");
+
+    expect(ci.evaluate).not.toHaveBeenCalled();
+  });
+
   it("renders img element for standard image source", () => {
     const ci = new StubClickImage() as any;
     ci.conf = { image: "/img/test.png", name: "test_img" };

@@ -439,12 +439,49 @@ describe("device tag of a model", () => {
     // The ReefATO+ reports RSATO+, and "+" cannot appear in a custom element
     // name: the editor built the tag on its own, kept the +, and found
     // nothing to instantiate.
-    expect(RSDevice.tag_for_model("RSATO+")).toBe("redsea-rsato");
-    expect(customElements.get(RSDevice.tag_for_model("RSATO+"))).toBeDefined();
+    expect(RSDevice.tag_for_model("redsea", "RSATO+")).toBe("redsea-rsato");
+    expect(
+      customElements.get(RSDevice.tag_for_model("redsea", "RSATO+")),
+    ).toBeDefined();
   });
 
   it("leaves a plain model alone", () => {
-    expect(RSDevice.tag_for_model("RSMAT")).toBe("redsea-rsmat");
+    expect(RSDevice.tag_for_model("redsea", "RSMAT")).toBe("redsea-rsmat");
+  });
+
+  it("drops spaces in a model name", () => {
+    // Aqua Medic reports "DC Runner", and a space cannot appear in a custom
+    // element name either.
+    expect(RSDevice.tag_for_model("aquamedic", "DC Runner")).toBe(
+      "aquamedic-dcrunner",
+    );
+    expect(
+      customElements.get(RSDevice.tag_for_model("aquamedic", "DC Runner")),
+    ).toBeDefined();
+  });
+
+  it("uses the domain of a registered manufacturer as tag prefix", () => {
+    expect(RSDevice.tag_for_model("aquamedic", "SmartDrift")).toBe(
+      "aquamedic-smartdrift",
+    );
+  });
+
+  it("falls back to the domain itself for an unregistered manufacturer", () => {
+    expect(RSDevice.tag_for_model("acme", "Widget")).toBe("acme-widget");
+  });
+
+  it("fails safely into an unregistered tag rather than throwing when the model is missing", () => {
+    // Guards against a caller still on the single-argument signature,
+    // which passes its model as `domain` and leaves `model` undefined.
+    expect(() =>
+      RSDevice.tag_for_model("redsea", undefined as any),
+    ).not.toThrow();
+    expect(RSDevice.tag_for_model("redsea", undefined as any)).toBe(
+      "redsea-unknown",
+    );
+    expect(
+      customElements.get(RSDevice.tag_for_model("redsea", undefined as any)),
+    ).toBeUndefined();
   });
 });
 

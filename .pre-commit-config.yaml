@@ -1,12 +1,24 @@
 repos:
   - repo: local
     hooks:
+      - id: display_banner
+        name: Header Banner
+        language: system
+        verbose: true
+        pass_filenames: false
+        entry: bash -c 'echo -e "\033[1;36m========================================================================\n                  EXÉCUTION DES VÉRIFICATIONS PRE-COMMIT\n                   $(date)\n========================================================================\033[0m"'
+
       - id: prettier
         name: Prettier
         entry: npx prettier --write
         types_or: [ts, javascript, json, css, markdown, yaml]
         exclude: ^dist/
         language: system
+
+  - repo: https://github.com/Elwinmage/create_ha_project
+    rev: v1.0.1
+    hooks:
+      - id: check-mdi
 
   - repo: local
     hooks:
@@ -41,4 +53,11 @@ repos:
         name: Tests coverage
         language: system
         entry: npm run test:coverage
+        pass_filenames: false
+
+      - id: display_coverage
+        name: 100% coverage
+        language: system
+        verbose: true
+        entry: bash -c "[ `head -n 3 reports/cobertura-coverage.xml |grep -oE 'line-rate=\"\b(0(\.[0-9]+)?|1(\.0+)?)\b\"';` == 'line-rate=\"1\"' ]"
         pass_filenames: false

@@ -11,7 +11,7 @@ import { property, state } from "lit/decorators.js";
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n.js";
-import DeviceList from "./utils/common";
+import DeviceList, { domain_of, resolve_device_model } from "./utils/common";
 import { has_maintenance_entities } from "./utils/maintenance";
 import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
@@ -62,6 +62,16 @@ export class ReefCard extends LitElement {
   private messages?: any;
 
   /**
+   * Devices navigated away from, innermost last.
+   *
+   * Instances are kept rather than ids so going back restores the device as
+   * it was left — an open editor, a sort order — instead of rebuilding it
+   * from scratch. The stack lives in memory only: a page reload returns to
+   * whatever the card configuration pins.
+   */
+  private _nav_stack: any[] = [];
+
+  /**
    * Constructor
    */
   constructor() {
@@ -69,6 +79,9 @@ export class ReefCard extends LitElement {
     //Treat dialog box requests
     this.addEventListener("display-dialog", (e: Event) => {
       this._handle_display_dialog(e as CustomEvent);
+    });
+    this.addEventListener("show-device", (e: Event) => {
+      this._handle_show_device(e as CustomEvent);
     });
     this.addEventListener("config-dialog", (e: Event) => {
       if (this._dialog_box) {
@@ -114,11 +127,103 @@ export class ReefCard extends LitElement {
    *                 - overload_quit: the dialog box to display when closing this, if null close close this box
    *                 - elt: the lit element caller
    */
+  /**
+   * Mark the card while it is showing a device reached through a link.
+   *
+   * The border is the only cue that what is on screen is not the card's own
+   * device: the picture changes completely, so without it a user who has
+   * forgotten they followed a link has no way to tell.
+   */
+  override updated(): void {
+    this.classList.toggle("following-link", this._nav_stack.length > 0);
+  }
+
   private _handle_display_dialog(event: CustomEvent): void {
     if (this._dialog_box) {
       this._dialog_box.display(event.detail);
     }
   } // end of function - _handle_display_dialog
+
+  /**
+   * Navigate to another device managed by this card.
+   *
+   * The request names its target by hardware id; devices unknown to Home
+   * Assistant simply have no entry, and the navigation is dropped rather
+   * than blanking the card.
+   * @param event: carries detail.hwid, the target's hardware id
+   */
+  private _handle_show_device(event: CustomEvent): void {
+    const hwid = event.detail?.hwid;
+    if (!hwid || !this.devices_list) {
+      return;
+    }
+    const entry = this.devices_list.get_config_entry_by_hwid(hwid);
+    if (!entry) {
+      console.warn("show_device: no device found for hwid", hwid);
+      return;
+    }
+    // A device already showing needs no navigation, and pushing it would
+    // put an identical entry on the stack for the back button to undo.
+    if (this._current_config_entry() === entry) {
+      return;
+    }
+    const previous = this.current_device;
+    this._set_current_device(entry);
+    // create_device returns null for a model the card has no mapping for.
+    // Staying put beats replacing the card with a blank the back button
+    // would then have to rescue.
+    if (!this.current_device) {
+      this.current_device = previous;
+      return;
+    }
+    if (this.current_device !== previous) {
+      this._nav_stack.push(previous);
+    }
+    this.current_device.hass = this._hass;
+    this.re_render = true;
+    this.requestUpdate();
+  } // end of function - _handle_show_device
+
+  /**
+   * Return to the device navigated away from.
+   */
+  private _navigate_back = (): void => {
+    const previous = this._nav_stack.pop();
+    if (!previous) {
+      return;
+    }
+    this.current_device = previous;
+    this.current_device.hass = this._hass;
+    this.re_render = true;
+    this.requestUpdate();
+  };
+
+  /**
+   * Selector key of the device currently on screen, when there is one.
+   * @return the device's key (see DeviceInfo.key), or null
+   */
+  private _current_config_entry(): string | null {
+    return this.current_device?.device?.key ?? null;
+  }
+
+  /**
+   * Back control, rendered only while a navigation is in progress.
+   *
+   * It is the only way home when the card is pinned to a device, since the
+   * device selector is not rendered in that case.
+   */
+  private _back_button() {
+    if (this._nav_stack.length === 0) {
+      return html``;
+    }
+    return html`<button
+      id="nav_back"
+      title="${i18n._("back")}"
+      @click="${this._navigate_back}"
+    >
+      ←
+    </button>`;
+  }
 
   /**
    * Main render method.
@@ -150,6 +255,15 @@ export class ReefCard extends LitElement {
     }
     //If a device as been specialy selected, set it as current device and display it
     if (this.user_config["device"]) {
+      // A navigation in progress wins over the pinned device: the config is
+      // re-applied on every render, and would otherwise snap the card back
+      // to its configured device on the next state update.
+      if (this._nav_stack.length > 0) {
+        this.current_device.hass = this._hass;
+        return html`
+          ${this._back_button()} ${this.messages} ${this.current_device}
+        `;
+      }
       // The maintenance overview is a virtual device: it is matched on its
       // language independent id rather than on a localized display name.
       if (ReefCard.is_maintenance_selector(this.user_config.device)) {
@@ -164,7 +278,8 @@ export class ReefCard extends LitElement {
     }
     // no secific device selected, display select form
     return html`
-      ${this.device_select()} ${this.messages} ${this.current_device}
+      ${this.device_select()} ${this._back_button()} ${this.messages}
+      ${this.current_device}
     `;
   }
 
@@ -179,8 +294,7 @@ export class ReefCard extends LitElement {
             value="${option.value}"
             ?selected=${option.value === MAINTENANCE_DEVICE_ID
               ? this.current_device?.is_maintenance === true
-              : this.current_device?.device?.elements?.[0]
-                  ?.primary_config_entry === option.value}
+              : this.current_device?.device?.key === option.value}
           >
             ${option.text}
           </option>
@@ -264,11 +378,9 @@ export class ReefCard extends LitElement {
       return;
     }
     // The current device has not change, so no update
-    if (
-      this.current_device.device !== null &&
-      this.current_device.device.elements &&
-      this.current_device.device.elements[0].primary_config_entry === device_id
-    ) {
+    // The placeholder shown before any selection carries no `device` at all,
+    // so this reads through rather than assuming one is there.
+    if (this.current_device?.device?.key === device_id) {
       console.debug(
         "current device not updated",
         this.current_device.device.name,
@@ -283,14 +395,25 @@ export class ReefCard extends LitElement {
       return;
     }
     //Get device model
-    const model = device.elements[0]?.model;
+    const el = device.elements[0];
+    const model = el?.model;
     if (!model) {
       console.error("Device model not found");
       return;
     }
+    // The integration domain (redsea, aquamedic...) picks the tag prefix.
+    const domain = domain_of(el?.identifiers) ?? "redsea";
+    // Some models are ambiguous (ex: Aqua Medic's "DC Runner" covers both
+    // the return pump and the skimmer) and get resolved via a role entity.
+    const resolved_model = resolve_device_model(
+      this._hass,
+      device,
+      domain,
+      model,
+    );
     //Create the new "lit device"
     this.current_device = RSDevice.create_device(
-      RSDevice.tag_for_model(model),
+      RSDevice.tag_for_model(domain, resolved_model),
       this._hass,
       this.user_config,
       device,
@@ -314,6 +437,10 @@ export class ReefCard extends LitElement {
         }
       }
       this.current_device = this.no_device;
+
+      // An explicit pick is a fresh start: keeping the stack would leave a
+      // back button pointing at a device the user has moved on from.
+      this._nav_stack = [];
 
       if (this.selected === "unselected") {
         console.debug("Nothing selected");

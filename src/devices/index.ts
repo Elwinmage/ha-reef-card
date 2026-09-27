@@ -21,8 +21,17 @@ import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
-import { RSPower6, RSPower8 } from "./redsea/rspower";
-import { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+import { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
+import {
+  RSControlLite,
+  RSControlPro,
+  ControlProbe,
+  ControlPort,
+  PortSensor,
+} from "./redsea/rscontrol";
+import { AMSmartDrift } from "./aquamedic/smartdrift";
+import { AMDCRunner } from "./aquamedic/dcrunner";
+import { AMDCSkimmer } from "./aquamedic/dcskimmer";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -31,6 +40,12 @@ if (!customElements.get("redsea-rscontrollite"))
   customElements.define("redsea-rscontrollite", RSControlLite);
 if (!customElements.get("redsea-rscontrolpro"))
   customElements.define("redsea-rscontrolpro", RSControlPro);
+if (!customElements.get("redsea-control-probe"))
+  customElements.define("redsea-control-probe", ControlProbe);
+if (!customElements.get("redsea-control-port"))
+  customElements.define("redsea-control-port", ControlPort);
+if (!customElements.get("port-sensor"))
+  customElements.define("port-sensor", PortSensor);
 if (!customElements.get("redsea-rsdose4"))
   customElements.define("redsea-rsdose4", RSDose4);
 if (!customElements.get("redsea-rsdose2"))
@@ -69,10 +84,20 @@ if (!customElements.get("redsea-rswave45"))
   customElements.define("redsea-rswave45", RSWave25);
 if (!customElements.get("redsea-maintenance"))
   customElements.define("redsea-maintenance", RSMaintenance);
+if (!customElements.get("redsea-power-socket"))
+  customElements.define("redsea-power-socket", PowerSocket);
+if (!customElements.get("power-sensor"))
+  customElements.define("power-sensor", PowerSensor);
 if (!customElements.get("redsea-rspower6"))
   customElements.define("redsea-rspower6", RSPower6);
 if (!customElements.get("redsea-rspower8"))
   customElements.define("redsea-rspower8", RSPower8);
+if (!customElements.get("aquamedic-smartdrift"))
+  customElements.define("aquamedic-smartdrift", AMSmartDrift);
+if (!customElements.get("aquamedic-dcrunner"))
+  customElements.define("aquamedic-dcrunner", AMDCRunner);
+if (!customElements.get("aquamedic-dcskimmer"))
+  customElements.define("aquamedic-dcskimmer", AMDCSkimmer);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -90,5 +115,14 @@ export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";
 export { RSWave25, RSWave45 } from "./redsea/rswave";
 export { RSMaintenance } from "./redsea/maintenance";
-export { RSPower6, RSPower8 } from "./redsea/rspower";
-export { RSControlLite, RSControlPro } from "./redsea/rscontrol";
+export { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
+export {
+  RSControlLite,
+  RSControlPro,
+  ControlProbe,
+  ControlPort,
+  PortSensor,
+} from "./redsea/rscontrol";
+export { AMSmartDrift } from "./aquamedic/smartdrift";
+export { AMDCRunner } from "./aquamedic/dcrunner";
+export { AMDCSkimmer } from "./aquamedic/dcskimmer";

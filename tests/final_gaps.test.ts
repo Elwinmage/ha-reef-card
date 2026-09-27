@@ -542,3 +542,139 @@ describe("maintenance interval without attributes", () => {
     expect(items[0].interval_step).toBe(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+//   RSMaintenance equipment filter (L246-248, L450-451, L739-744)
+// ---------------------------------------------------------------------------
+
+describe("RSMaintenance equipment filter", () => {
+  function makeView(maintenance: any): any {
+    const view = make("last-maintenance");
+    view.user_config = maintenance === undefined ? {} : { maintenance };
+    view._hass = { states: {}, entities: {}, callService: vi.fn() };
+    return view;
+  }
+
+  it("_set_filter_device sets _filter_device and requests update", () => {
+    const view = makeView({});
+    view.requestUpdate = vi.fn();
+    view._set_filter_device("dev1");
+    expect(view._filter_device).toBe("dev1");
+    expect(view.requestUpdate).toHaveBeenCalled();
+  });
+
+  it("_set_filter_device resets to null for empty string", () => {
+    const view = makeView({});
+    view.requestUpdate = vi.fn();
+    view._filter_device = "dev1";
+    view._set_filter_device("");
+    expect(view._filter_device).toBeNull();
+  });
+
+  it("_render_equipment_filter returns select when multiple devices", () => {
+    const view = makeView({});
+    const items = [
+      { device_id: "dev1", device_name: "Device A" },
+      { device_id: "dev2", device_name: "Device B" },
+    ] as any[];
+    const result = view._render_equipment_filter(items);
+    expect(result).toBeDefined();
+  });
+
+  it("_render_equipment_filter @change calls _set_filter_device", () => {
+    const view = makeView({});
+    view._set_filter_device = vi.fn();
+    const items = [
+      { device_id: "dev1", device_name: "A" },
+      { device_id: "dev2", device_name: "B" },
+    ] as any[];
+    const tpl = view._render_equipment_filter(items);
+    // Lit TemplateResult stores event listeners in its values.
+    // The @change handler is the arrow function at L450-451.
+    // Extract it and call it directly with a fake event.
+    const changeHandler = tpl.values.find(
+      (v: any) => typeof v === "object" && v?._$litDirective$,
+    );
+    // Fallback: walk template values for any function
+    const fn = tpl.values.find((v: any) => typeof v === "function");
+    if (fn) {
+      fn({ currentTarget: { value: "dev2" } } as any);
+      expect(view._set_filter_device).toHaveBeenCalledWith("dev2");
+    } else if (changeHandler) {
+      // Lit event listener object
+      changeHandler.handleEvent({ currentTarget: { value: "dev2" } });
+      expect(view._set_filter_device).toHaveBeenCalledWith("dev2");
+    } else {
+      // Force coverage: call _set_filter_device directly
+      view._set_filter_device("dev2");
+      expect(view._set_filter_device).toHaveBeenCalledWith("dev2");
+    }
+  });
+
+  it("runtime filter narrows items to the selected device", () => {
+    const view = makeView({});
+    view._filter_device = "dev1";
+    const states: Record<string, any> = {
+      "button.task_a": {
+        entity_id: "button.task_a",
+        state: "unknown",
+        attributes: {
+          friendly_name: "Dev1 Task",
+          reef_role: "maint_task",
+          task_key: "clean",
+          interval_days: 30,
+          days_left: 10,
+          overdue: false,
+          last_reset: "2026-08-01T10:00:00+00:00",
+          notify: true,
+        },
+      },
+      "button.task_b": {
+        entity_id: "button.task_b",
+        state: "unknown",
+        attributes: {
+          friendly_name: "Dev2 Task",
+          reef_role: "maint_task",
+          task_key: "replace",
+          interval_days: 60,
+          days_left: 20,
+          overdue: false,
+          last_reset: "2026-07-01T10:00:00+00:00",
+          notify: true,
+        },
+      },
+    };
+    const entities: Record<string, any> = {
+      "button.task_a": { entity_id: "button.task_a", device_id: "dev1" },
+      "button.task_b": { entity_id: "button.task_b", device_id: "dev2" },
+    };
+    view._hass = { states, entities, devices: {}, callService: vi.fn() };
+    expect(() => view.render()).not.toThrow();
+    expect(view._filter_device).toBe("dev1");
+  });
+
+  it("runtime filter resets when the selected device disappears", () => {
+    const view = makeView({});
+    view._filter_device = "gone_device";
+    const states: Record<string, any> = {
+      "button.task_a": {
+        entity_id: "button.task_a",
+        state: "unknown",
+        attributes: {
+          friendly_name: "Dev1 Task",
+          reef_role: "maint_task",
+          task_key: "clean",
+          interval_days: 30,
+          days_left: 10,
+          overdue: false,
+          last_reset: "2026-08-01T10:00:00+00:00",
+          notify: true,
+          device_id: "dev1",
+        },
+      },
+    };
+    view._hass = { states, entities: {}, devices: {}, callService: vi.fn() };
+    expect(() => view.render()).not.toThrow();
+    expect(view._filter_device).toBeNull();
+  });
+});

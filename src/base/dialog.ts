@@ -48,6 +48,8 @@ export class Dialog extends LitElement {
   protected elt: DialogElement | null = null;
   protected elts: any[] = [];
   protected extends_to_re_render: any[] = [];
+  // Entity cards of the open dialog, with the entity ids they were built on
+  protected live_contents: { content: any; conf: any; ids: string }[] = [];
   protected to_render: any = null;
   protected overload_quit: any = null;
   protected evalCtx: SafeEvalContext;
@@ -61,15 +63,24 @@ export class Dialog extends LitElement {
     this.elt = null;
     this.elts = [];
     this.extends_to_re_render = [];
+    this.live_contents = [];
     this.to_render = null;
     this.overload_quit = null;
   }
 
   createContext() {
     if (!this.evalCtx) {
+      const entitiesObj = MyElement.createEntitiesContext(
+        this.elt?.device,
+        this._hass,
+      );
       const context = {
         config: this.elt.device.config,
+        // The element behind the dialog, for titles computed by the device
+        // (a probe's name in the card's language, say)
+        device: this.elt.device,
         i18n: i18n,
+        entity: entitiesObj,
       };
       this.evalCtx = new SafeEval(context);
     }
@@ -95,6 +106,12 @@ export class Dialog extends LitElement {
       "#window-mask",
     ) as HTMLElement | null;
     if (!box) return;
+    // A dialog type absent from the configuration would crash
+    // _fill_content(); report it and leave the current screen alone.
+    if (!this.config?.[conf.type]) {
+      console.warn("Dialog: unknown dialog type", conf.type);
+      return;
+    }
     this.elt = conf.elt;
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;
@@ -128,6 +145,7 @@ export class Dialog extends LitElement {
         elt.hass = obj;
       }
     }
+    this._refresh_live_contents();
     if (this.to_render && this.extends_to_re_render) {
       for (const _elt of this.extends_to_re_render) {
         run_action(
@@ -232,60 +250,174 @@ export class Dialog extends LitElement {
       const r_element = customElements.get(content_conf.view);
       content = new r_element();
 
-      const clone = structuredClone(content_conf.conf);
-      if ("entities" in content_conf.conf) {
-        for (const pos in content_conf.conf.entities) {
-          // Skip dividers and other non-entity elements
-          if (content_conf.conf.entities[pos]?.type === "divider") {
-            continue;
-          }
-          try {
-            if (typeof clone.entities[pos] === "string") {
-              clone.entities[pos] = this.elt.get_entity(
-                content_conf.conf.entities[pos],
-              ).entity_id;
-            } else {
-              clone.entities[pos].entity = this.elt.get_entity(
-                content_conf.conf.entities[pos].entity,
-              ).entity_id;
-            }
-          } catch (e) {
-            // `catch` binds unknown: a thrown non-Error has no `.message`,
-            // and reading it blind would replace a useful warning with a
-            // TypeError.
-            console.warn(
-              "Dialog: skipping unresolved entity",
-              content_conf.conf.entities[pos],
-              e instanceof Error ? e.message : e,
-            );
-            // Remove unresolvable entity from the clone so the card doesn't crash
-            delete clone.entities[pos];
-          }
-        }
-        // Clean up gaps left by deleted entries
-        if (Array.isArray(clone.entities)) {
-          clone.entities = clone.entities.filter(Boolean);
-        }
-      } else if ("entity" in content_conf.conf) {
-        try {
-          clone.entity = this.elt.get_entity(
-            content_conf.conf.entity,
-          ).entity_id;
-        } catch (e) {
-          console.warn(
-            "Dialog: skipping unresolved entity",
-            content_conf.conf.entity,
-            e instanceof Error ? e.message : e,
-          );
-          return;
-        }
+      const clone = this._resolve_entities(content_conf.conf);
+      if (!clone) {
+        return;
       }
+      // Row options may depend on the device — an icon reflecting what is
+      // plugged into a socket, say. Only `entity` was ever rewritten, so
+      // anything else had to be a constant.
+      Dialog.evaluate_conf(clone, this.elt);
+
       content.setConfig(clone);
       content.hass = this._hass;
       content.device = this.elt.device;
+      if ("entities" in content_conf.conf || "entity" in content_conf.conf) {
+        this.live_contents.push({
+          content,
+          conf: content_conf.conf,
+          ids: Dialog.entity_ids(clone),
+        });
+      }
+      // A picture of a dialog illustrates what to do: always in colour. Built
+      // here rather than by MyElement.create_element, it would otherwise
+      // keep the default "off" state and be greyed out.
+      if (content_conf.view === "click-image") {
+        content.stateOn = true;
+      }
     }
     this.elts.push(content);
     this._shadowRoot.querySelector("#dialog-content").appendChild(content);
+  }
+
+  /**
+   * Turn the translation keys of a card configuration into entity ids.
+   *
+   * Rows whose entity cannot be found are dropped so the card does not
+   * crash. A card naming a single entity that cannot be found is not built.
+   * @param conf: the card configuration from the dialog definition
+   * @param quiet: do not warn about missing entities (already reported)
+   * @return the resolved copy, or null when its single entity is missing
+   */
+  _resolve_entities(conf: any, quiet: boolean = false): any {
+    const clone = structuredClone(conf);
+    if ("entities" in conf) {
+      for (const pos in conf.entities) {
+        // Skip dividers and other non-entity elements
+        if (conf.entities[pos]?.type === "divider") {
+          continue;
+        }
+        try {
+          if (typeof clone.entities[pos] === "string") {
+            clone.entities[pos] = this.elt.get_entity(
+              conf.entities[pos],
+            ).entity_id;
+          } else {
+            clone.entities[pos].entity = this.elt.get_entity(
+              conf.entities[pos].entity,
+            ).entity_id;
+          }
+        } catch (e) {
+          // `catch` binds unknown: a thrown non-Error has no `.message`,
+          // and reading it blind would replace a useful warning with a
+          // TypeError.
+          if (!quiet) {
+            console.warn(
+              "Dialog: skipping unresolved entity",
+              conf.entities[pos],
+              e instanceof Error ? e.message : e,
+            );
+          }
+          // Remove unresolvable entity from the clone so the card doesn't crash
+          delete clone.entities[pos];
+        }
+      }
+      // Clean up gaps left by deleted entries
+      if (Array.isArray(clone.entities)) {
+        clone.entities = clone.entities.filter(Boolean);
+      }
+    } else if ("entity" in conf) {
+      try {
+        clone.entity = this.elt.get_entity(conf.entity).entity_id;
+      } catch (e) {
+        if (!quiet) {
+          console.warn(
+            "Dialog: skipping unresolved entity",
+            conf.entity,
+            e instanceof Error ? e.message : e,
+          );
+        }
+        return null;
+      }
+    }
+    return clone;
+  }
+
+  /**
+   * Entity ids a resolved card configuration shows, as one comparable string.
+   * @param conf: a resolved card configuration
+   * @return the ids, in row order
+   */
+  static entity_ids(conf: any): string {
+    if (Array.isArray(conf?.entities)) {
+      return conf.entities
+        .map((row: any) =>
+          typeof row === "string" ? row : (row?.entity ?? "-"),
+        )
+        .join(",");
+    }
+    return String(conf?.entity ?? "");
+  }
+
+  /**
+   * Rebuild the entity cards whose entities changed while the dialog is open.
+   *
+   * A key can stand for several entities of which only one is usable at a
+   * time: the range bounds of an EC probe exist once per display unit, and
+   * only those of the selected unit are available. Changing the unit from
+   * the dialog must swap the bounds it shows, without closing it.
+   */
+  _refresh_live_contents(): void {
+    if (!this.elt || !this.live_contents.length) {
+      return;
+    }
+    // A device whose entities are sorted at render time (the probes of a
+    // ReefControl) re-reads them now, so the rows below see this update
+    (this.elt as any).device?.refresh_entities?.(this._hass);
+    for (const live of this.live_contents) {
+      const clone = this._resolve_entities(live.conf, true);
+      if (!clone) {
+        continue;
+      }
+      const ids = Dialog.entity_ids(clone);
+      if (ids === live.ids) {
+        continue;
+      }
+      live.ids = ids;
+      Dialog.evaluate_conf(clone, this.elt);
+      live.content.setConfig(clone);
+      live.content.hass = this._hass;
+    }
+  }
+
+  /**
+   * Resolve `${…}` expressions anywhere in a card configuration.
+   *
+   * Walks the cloned configuration in place, so nested row options are
+   * covered too. `entity` is skipped: it was already turned into an
+   * entity_id above, and re-evaluating it would only risk undoing that.
+   *
+   * @param node: the configuration fragment to walk
+   * @param elt: the element providing the evaluation context
+   */
+  static evaluate_conf(node: any, elt: any): void {
+    if (
+      !node ||
+      typeof node !== "object" ||
+      typeof elt?.evaluate !== "function"
+    ) {
+      return;
+    }
+    for (const key of Object.keys(node)) {
+      const value = node[key];
+      if (typeof value === "string") {
+        if (key !== "entity" && value.includes("${")) {
+          node[key] = elt.evaluate(value);
+        }
+      } else if (typeof value === "object") {
+        Dialog.evaluate_conf(value, elt);
+      }
+    }
   }
 
   /**
@@ -327,7 +459,6 @@ export class Dialog extends LitElement {
         "background-color": "rgba(0,0,0,0)",
       },
     };
-
     if (this.to_render !== null) {
       let submit_conf = close_conf;
       let cancel_conf = null;
@@ -366,6 +497,7 @@ export class Dialog extends LitElement {
 
       this.elts = [];
       this.extends_to_re_render = [];
+      this.live_contents = [];
       this.to_render.content.map((c) => this._render_content(c));
 
       // Check if submit button has a timer (now handled in run_actions via action.timer)
