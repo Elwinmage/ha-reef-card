@@ -140,7 +140,7 @@ export const elements = {
     },
     // The dot goes on the tube, under the cog, and low enough for a "+"
     // above it to clear the cog: margins in % of the bar's width
-    dot_css: { "margin-left": "250%", "margin-top": "150%" },
+    dot_css: { "margin-left": "180%", "margin-top": "150%" },
   },
   power_temperature_conf: {
     name: "power_temperature_conf",

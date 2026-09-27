@@ -1981,3 +1981,143 @@ describe("RSPower socket colour — no prior user_config", () => {
     ).toBe("255,255,255");
   });
 });
+
+describe("RSPower linked Aqua Medic DC Runner", () => {
+  const dcRunner = {
+    id: "d-led",
+    name: "DC Runner",
+    model: "DC Runner",
+    identifiers: [["aquamedic", "did-1"]],
+  };
+  const roleEntity = {
+    "select.pump_role": {
+      entity_id: "select.pump_role",
+      device_id: "d-led",
+      translation_key: "pump_role",
+    },
+  };
+
+  function linkedRunner(role: string | null): any {
+    return makeLinkedPowerStrip(
+      dcRunner,
+      role === null ? {} : roleEntity,
+      role === null ? {} : { "select.pump_role": { state: role } },
+    );
+  }
+
+  it("pictures a DC Runner declared as a skimmer as the skimmer", () => {
+    const dev = linkedRunner("skimmer");
+    expect(dev.linked_device_image(1)).toContain("am-dcskimmer.png");
+    expect(dev.linked_device_icon(1, true)).toBe("redsea:skimmer-on");
+  });
+
+  it("pictures a DC Runner declared as a return pump as the runner", () => {
+    const dev = linkedRunner("return");
+    expect(dev.linked_device_image(1)).toContain("am-dcrunner.png");
+    expect(dev.linked_device_icon(1, false)).toBe("redsea:pump-off");
+  });
+
+  it("falls back to the runner while the role is unknown", () => {
+    expect(linkedRunner("unknown").linked_device_image(1)).toContain(
+      "am-dcrunner.png",
+    );
+  });
+
+  it("does not take an Aqua Medic role for a ReefRun one", () => {
+    // "return" must not resolve to the ReefRun return pump picture
+    expect(linkedRunner("return").linked_device_image(1)).not.toContain(
+      "rsreturn.png",
+    );
+  });
+
+  it("uses the model recorded at link time once the role is unreadable", () => {
+    const dev = linkedRunner(null);
+    dev.config.sockets.socket_1.linked_model = "DC Skimmer";
+    expect(dev.linked_device_image(1)).toContain("am-dcskimmer.png");
+  });
+
+  it("prefers the live role over the recorded model", () => {
+    const dev = linkedRunner("return");
+    dev.config.sockets.socket_1.linked_model = "DC Skimmer";
+    expect(dev.linked_device_image(1)).toContain("am-dcrunner.png");
+  });
+
+  it("falls back to the runner when nothing tells the role", () => {
+    expect(linkedRunner(null).linked_device_image(1)).toContain(
+      "am-dcrunner.png",
+    );
+  });
+
+  it("pictures a SmartDrift from its model", () => {
+    const dev = makeLinkedPowerStrip({
+      id: "d-led",
+      model: "SmartDrift",
+      identifiers: [["aquamedic", "did-2"]],
+    });
+    expect(dev.linked_device_image(1)).toContain("am-ecodrift.png");
+  });
+});
+
+describe("RSPower socket link — recording the resolved model", () => {
+  function changeLinkOn(dev: any, socket: number, value: string): any {
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+    dev._handle_socket_link_change(socket, { target: { value } } as any);
+    return seen[0]?.config?.conf?.RSPOWER6?.devices?.["Power strip"]?.sockets;
+  }
+
+  const runner = {
+    id: "d-am",
+    name: "Skimmer",
+    model: "DC Runner",
+    identifiers: [["aquamedic", "did-1"]],
+  };
+
+  function editorWithRole(role: string): any {
+    const dev = makeEditorPower(2, { "d-am": runner });
+    dev._hass.entities = {
+      "select.pump_role": {
+        entity_id: "select.pump_role",
+        device_id: "d-am",
+        translation_key: "pump_role",
+      },
+    };
+    dev._hass.states["select.pump_role"] = { state: role };
+    return dev;
+  }
+
+  it("records the resolved model of a DC Runner used as a skimmer", () => {
+    const sockets = changeLinkOn(editorWithRole("skimmer"), 1, "d-am");
+    expect(sockets.socket_1.linked_model).toBe("DC Skimmer");
+  });
+
+  it("records nothing when the model needs no resolution", () => {
+    const sockets = changeLinkOn(editorWithRole("return"), 1, "d-am");
+    expect(sockets.socket_1).not.toHaveProperty("linked_model");
+  });
+
+  it("records nothing for a device with no model", () => {
+    const dev = makeEditorPower(2, { "d-x": { id: "d-x", name: "X" } });
+    const sockets = changeLinkOn(dev, 1, "d-x");
+    expect(sockets.socket_1).not.toHaveProperty("linked_model");
+  });
+
+  it("drops the recorded model when the link is removed", () => {
+    const dev = editorWithRole("skimmer");
+    dev.user_config = {
+      conf: {
+        RSPOWER6: {
+          devices: {
+            "Power strip": {
+              sockets: {
+                socket_1: { linked_device: "d-am", linked_model: "DC Skimmer" },
+              },
+            },
+          },
+        },
+      },
+    };
+    const sockets = changeLinkOn(dev, 1, "");
+    expect(sockets.socket_1).not.toHaveProperty("linked_model");
+  });
+});

@@ -9,8 +9,11 @@ import style_common from "../../../utils/common.styles";
 import i18n from "../../../translations/myi18n";
 import { merge } from "../../../utils/merge";
 import {
+  ambiguous_model_of,
+  domain_of,
   list_linkable_devices,
   OTHER_DEVICE_VALUE,
+  resolve_device_model,
   rgbToHex,
   hexToRgb,
 } from "../../../utils/common";
@@ -46,6 +49,9 @@ const SUB_DEVICE_ICONS: Record<string, string> = {
   RSWAVE45: "redsea:gyre",
   return: "redsea:pump",
   skimmer: "redsea:skimmer",
+  // Aqua Medic, keyed by the model once resolved from the pump role
+  "DC Runner": "redsea:pump",
+  "DC Skimmer": "redsea:skimmer",
 };
 
 /** Plug icons shown for anything with no drawing of its own. */
@@ -65,9 +71,26 @@ const DEFAULT_SOCKET_ICONS = {
  * model: both pumps carry the controller's, so only their job tells a return
  * pump from a skimmer. First and second generation lights share a picture.
  *
+ * Aqua Medic's "DC Runner" is keyed by its resolved model: the same model
+ * covers the return pump and the skimmer, told apart by the device's
+ * `pump_role` select (see KNOWN_DEVICE_DOMAINS model_overrides). A role not
+ * declared yet ("unknown") keeps the raw model, hence the return pump image.
+ *
  * Models absent from this table simply get no thumbnail.
  */
 const SUB_DEVICE_IMAGES: Record<string, URL> = {
+  "DC Runner": new URL(
+    "../../../img/redsea/RSPOWER/subdevices/am-dcrunner.png",
+    import.meta.url,
+  ),
+  "DC Skimmer": new URL(
+    "../../../img/redsea/RSPOWER/subdevices/am-dcskimmer.png",
+    import.meta.url,
+  ),
+  SmartDrift: new URL(
+    "../../../img/redsea/RSPOWER/subdevices/am-ecodrift.png",
+    import.meta.url,
+  ),
   "RSATO+": new URL(
     "../../../img/redsea/RSPOWER/subdevices/rsato.png",
     import.meta.url,
@@ -717,15 +740,13 @@ export class RSPower extends RSDevice {
     if (!device_id) {
       return null;
     }
-    const model = String(
-      (this._hass?.devices?.[device_id] as any)?.model ?? "",
-    );
+    const model = this._linked_model(socket);
     // The role is tried first and the model only as a fallback. Keying on
     // the controller's model instead would tie this to the exact string the
     // firmware reports, and a pump is better pictured by its job anyway.
     const file =
       SUB_DEVICE_IMAGES[this._pump_role(socket)] ?? SUB_DEVICE_IMAGES[model];
-    // Aqua Medic and MQTT appliances have no picture of their own yet.
+    // MQTT appliances have no picture of their own yet.
     return file ? String(file) : null;
   }
 
@@ -771,14 +792,42 @@ export class RSPower extends RSDevice {
     if (!device_id) {
       return fallback;
     }
-    const model = String(
-      (this._hass?.devices?.[device_id] as any)?.model ?? "",
-    );
+    const model = this._linked_model(socket);
     // As for the thumbnail, a pump is described by its job rather than by
     // the controller's model, which both its channels share.
     const icon =
       SUB_DEVICE_ICONS[this._pump_role(socket)] ?? SUB_DEVICE_ICONS[model];
     return icon ? `${icon}-${on ? "on" : "off"}` : fallback;
+  }
+
+  /**
+   * Model of the device linked to a socket, resolved when it is ambiguous.
+   *
+   * Some models cover several appliances (Aqua Medic's "DC Runner" is both
+   * the return pump and the skimmer) and are told apart by a role entity,
+   * the same resolution the card uses to pick which device to draw. When
+   * that entity cannot be read — a device disabled in Home Assistant has
+   * none — the model recorded by the editor at link time is used instead.
+   * @param socket: the 1-based socket number
+   * @return the concrete model, or "" when nothing usable is linked
+   */
+  private _linked_model(socket: number): string {
+    const device_id = this.linked_device_id(socket);
+    const dev: any = device_id ? this._hass?.devices?.[device_id] : null;
+    const raw = String(dev?.model ?? "");
+    if (!dev || !raw) {
+      return raw;
+    }
+    const info = { name: String(dev.name ?? ""), elements: [dev] };
+    const domain = domain_of(dev.identifiers);
+    const found = ambiguous_model_of(this._hass, info, domain, raw);
+    if (found && !found.entity_id) {
+      const stored = this.config?.sockets?.["socket_" + socket]?.linked_model;
+      if (typeof stored === "string" && stored) {
+        return stored;
+      }
+    }
+    return resolve_device_model(this._hass, info, domain, raw);
   }
 
   /**
@@ -919,9 +968,27 @@ export class RSPower extends RSDevice {
       } else {
         delete socket_conf.linked_role;
       }
+      // Same for an ambiguous model (Aqua Medic DC Runner): its resolved
+      // form is kept, but only when it differs from what the registry says.
+      const dev: any = this._hass?.devices?.[value];
+      const raw = String(dev?.model ?? "");
+      const resolved = raw
+        ? resolve_device_model(
+            this._hass,
+            { name: String(dev.name ?? ""), elements: [dev] },
+            domain_of(dev.identifiers),
+            raw,
+          )
+        : raw;
+      if (resolved && resolved !== raw) {
+        socket_conf.linked_model = resolved;
+      } else {
+        delete socket_conf.linked_model;
+      }
     } else {
       delete socket_conf.linked_device;
       delete socket_conf.linked_role;
+      delete socket_conf.linked_model;
     }
 
     this.dispatchEvent(
