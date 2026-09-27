@@ -72,11 +72,6 @@ export default css`
     margin: 8px 0;
   }
 
-  /* ── Schedule ───────────────────────────────────────────────────────── */
-  .sce-schedule-wrap {
-    /* power-schedule renders itself */
-  }
-
   /* ── Sensor section ─────────────────────────────────────────────────── */
   .sce-sensor-container {
     display: flex;

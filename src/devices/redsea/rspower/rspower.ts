@@ -42,6 +42,9 @@ import type { SocketEntity } from "../../../types/index";
  * Models absent here keep the generic plug icon.
  */
 const SUB_DEVICE_ICONS: Record<string, string> = {
+  "RSATO+": "redsea:ato",
+  RSCONTROLLITE: "redsea:control",
+  RSCONTROLPRO: "redsea:control",
   RSDOSE2: "redsea:rsdose2",
   RSDOSE4: "redsea:rsdose4",
   RSMAT: "redsea:rsmat",
@@ -52,6 +55,7 @@ const SUB_DEVICE_ICONS: Record<string, string> = {
   // Aqua Medic, keyed by the model once resolved from the pump role
   "DC Runner": "redsea:pump",
   "DC Skimmer": "redsea:skimmer",
+  SmartDrift: "redsea:gyre",
 };
 
 /** Plug icons shown for anything with no drawing of its own. */

@@ -10,6 +10,7 @@ import {
 } from "../src/devices/redsea/rspower/rspower";
 import { PowerSocket } from "../src/devices/redsea/rspower/power_socket";
 import { RSDevice } from "../src/devices/device";
+import { socket_common } from "../src/devices/redsea/rspower/rspower.common.mapping";
 // Registers every device tag: linked_device_image resolves a model to its
 // registered element to borrow that mapping's picture.
 import "../src/devices/index";
@@ -1698,6 +1699,23 @@ describe("RSPower.linked_device_icon", () => {
     expect(dev.linked_device_icon(1, false)).toBe("redsea:rsdose4-off");
   });
 
+  it("covers every model the redsea icon set draws", () => {
+    const cases: Record<string, string> = {
+      "RSATO+": "redsea:ato",
+      RSCONTROLLITE: "redsea:control",
+      RSCONTROLPRO: "redsea:control",
+      RSMAT: "redsea:rsmat",
+      RSWAVE25: "redsea:gyre",
+      RSWAVE45: "redsea:gyre",
+      SmartDrift: "redsea:gyre",
+    };
+    for (const [model, icon] of Object.entries(cases)) {
+      const dev = makeLinkedPowerStrip({ id: "d-led", model });
+      expect(dev.linked_device_icon(1, true)).toBe(icon + "-on");
+      expect(dev.linked_device_icon(1, false)).toBe(icon + "-off");
+    }
+  });
+
   it("tells the two dosers apart", () => {
     const two = makeLinkedPowerStrip({ id: "d-led", model: "RSDOSE2" });
 
@@ -1773,6 +1791,58 @@ describe("PowerSocket.linked_icon", () => {
     socket.is_on = () => false;
 
     expect(socket.linked_icon()).toBe("mdi:power-plug-off");
+  });
+});
+
+describe("PowerSocket.socket_icon", () => {
+  function socketWith(icon: string): any {
+    const socket = new StubPowerSocket() as any;
+    socket.socket_id = 1;
+    socket.device = { linked_device_icon: vi.fn(() => icon) };
+    socket.is_on = () => true;
+    return socket;
+  }
+
+  it("shows the linked appliance's icon", () => {
+    expect(socketWith("redsea:pump-on").socket_icon()).toBe("redsea:pump-on");
+    expect(socketWith("redsea:pump-off").socket_icon()).toBe("redsea:pump-off");
+  });
+
+  it("keeps the switch state icon when nothing known is linked", () => {
+    expect(socketWith("mdi:power-plug").socket_icon()).toBe("state");
+    expect(socketWith("mdi:power-plug-off").socket_icon()).toBe("state");
+  });
+
+  it("keeps the switch state icon without a parent strip", () => {
+    const socket = new StubPowerSocket() as any;
+    socket.device = null;
+    socket.is_on = () => false;
+    expect(socket.socket_icon()).toBe("state");
+  });
+});
+
+describe("RSPower socket mapping", () => {
+  const els = socket_common({
+    width: "10%",
+    name_top: "0%",
+    button_top: "20%",
+    button_radius: "50%",
+  }).elements;
+
+  it("draws the on/off button with the socket icon", () => {
+    expect(els.socket_on_off.icon).toBe("${device.socket_icon()}");
+    expect(els.socket_on_off.icon_color).toContain("socket_on_off?.state");
+  });
+
+  it("opens the unified editor from the schedule clock", () => {
+    // No socket_schedule dialog exists: it crashed the dialog box
+    expect(els.socket_mode_icon.tap_action.data.type).toBe("socket_config");
+  });
+
+  it("keeps the clock's clickable box to the icon itself", () => {
+    // A larger box covered the consumption label and stole its clicks
+    expect(els.socket_mode_icon.css.width).toBe("28%");
+    expect(els.socket_mode_icon.css["--mdc-icon-size"]).toBe("100%");
   });
 });
 

@@ -388,6 +388,29 @@ describe("Dialog.display()", () => {
     spy.mockRestore();
   });
 });
+describe("Dialog.display() — unknown dialog type", () => {
+  it("warns and leaves the box untouched instead of crashing", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const dlg = makeDlg();
+    dlg.config = { known: { title_key: "'T'" } };
+    const box = { style: { display: "none" } };
+    dlg._shadowRoot = { querySelector: () => box };
+    const fill = vi.spyOn(dlg, "_fill_content");
+    const elt = makeElt_B();
+
+    expect(() => dlg.display({ type: "socket_schedule", elt })).not.toThrow();
+
+    expect(fill).not.toHaveBeenCalled();
+    expect(box.style.display).toBe("none");
+    expect(dlg.elt).not.toBe(elt);
+    expect(warn).toHaveBeenCalledWith(
+      "Dialog: unknown dialog type",
+      "socket_schedule",
+    );
+    warn.mockRestore();
+  });
+});
+
 describe("Dialog.set hass() — elts falsy (L126 false)", () => {
   it("does not throw when elts is null", () => {
     const dlg = makeDlg();

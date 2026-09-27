@@ -22,7 +22,6 @@ import { RSAto } from "./redsea/rsato";
 import { RSWave25, RSWave45 } from "./redsea/rswave";
 import { RSMaintenance } from "./redsea/maintenance";
 import { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
-import { PowerSchedule } from "./redsea/rspower/power_schedule";
 import {
   RSControlLite,
   RSControlPro,
@@ -87,8 +86,6 @@ if (!customElements.get("redsea-maintenance"))
   customElements.define("redsea-maintenance", RSMaintenance);
 if (!customElements.get("redsea-power-socket"))
   customElements.define("redsea-power-socket", PowerSocket);
-if (!customElements.get("power-schedule"))
-  customElements.define("power-schedule", PowerSchedule);
 if (!customElements.get("power-sensor"))
   customElements.define("power-sensor", PowerSensor);
 if (!customElements.get("redsea-rspower6"))

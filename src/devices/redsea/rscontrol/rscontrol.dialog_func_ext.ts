@@ -52,9 +52,14 @@ export const PH_SOLUTIONS: Record<string, Solution[]> = {
 /** EC solution range the hub accepts (mS/cm), as the ReefBeat app checks. */
 export const EC_RANGE = { min: 20, max: 99 };
 
-/** Polling of the calibration status. */
+/**
+ * Polling of the calibration status, as the ReefBeat app does it
+ * (CalibrationInProcessActivity): every 3 s. The wait itself is the hub's:
+ * its `time_left` (the app starts its bar at 180 s, 3 min, until the first
+ * answer gives the real figure).
+ */
 export const timing = {
-  poll_ms: 2000,
+  poll_ms: 3000,
   max_ms: 10 * 60 * 1000,
   sleep: (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms)),

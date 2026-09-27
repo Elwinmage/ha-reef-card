@@ -400,9 +400,8 @@ export function socket_common(geometry: SocketGeometry): Record<string, any> {
         },
         css: {
           position: "absolute",
-          bottom: "0%",
+          bottom: "0.1%",
           left: "0%",
-          width: "100%",
           "text-align": "center",
           "font-size": "0.55em",
           color: "rgba(255,255,255,0.8)",
@@ -411,10 +410,15 @@ export function socket_common(geometry: SocketGeometry): Record<string, any> {
       socket_on_off: {
         name: "socket_on_off",
         type: "click-image",
-        icon: "state",
+        // The linked appliance's own icon (redsea:pump-on/off...) when it has
+        // one, the switch state icon otherwise
+        icon: "${device.socket_icon()}",
+        icon_color:
+          "${entity.socket_on_off?.state === 'off' ? '#666666' : '" +
+          COLOR_RS_RGBSTR +
+          "'}",
         class: "on_off",
         style: "button",
-        icon_color: COLOR_RS_RGBSTR,
         disabled_if: "entity.socket_mode?.state === 'setup'",
         no_br_if_disabled: true,
         tap_action: {
@@ -478,18 +482,22 @@ export function socket_common(geometry: SocketGeometry): Record<string, any> {
         icon_color: "rgba(255,255,255,0.5)",
         disabled_if: "device.auto_mode() !== 'schedule'",
         no_br_if_disabled: true,
+        // The schedule is edited in the socket's unified mode editor
         tap_action: {
           domain: "redsea_ui",
           action: "dialog",
-          data: { type: "socket_schedule" },
+          data: { type: "socket_config" },
         },
+        // The box is the icon itself (40% of the former 70% box, same
+        // top-left corner): a larger box covered the bottom of the on/off
+        // button and the consumption label, and stole their clicks.
         css: {
           position: "absolute",
-          width: "70%",
+          width: "28%",
           "aspect-ratio": "1/1",
           top: "60%",
           left: "15%",
-          "--mdc-icon-size": "40%",
+          "--mdc-icon-size": "100%",
           cursor: "pointer",
         },
       },

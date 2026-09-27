@@ -100,6 +100,12 @@ export class Dialog extends LitElement {
       "#window-mask",
     ) as HTMLElement | null;
     if (!box) return;
+    // A dialog type absent from the configuration would crash
+    // _fill_content(); report it and leave the current screen alone.
+    if (!this.config?.[conf.type]) {
+      console.warn("Dialog: unknown dialog type", conf.type);
+      return;
+    }
     this.elt = conf.elt;
     this.to_render = this.config?.[conf.type];
     this.overload_quit = conf.overload_quit;

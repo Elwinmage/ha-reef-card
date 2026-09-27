@@ -228,6 +228,19 @@ export class PowerSocket extends RSDevice {
   }
 
   /**
+   * Icon of the socket's on/off button.
+   *
+   * A socket feeding a known appliance shows that appliance (a return pump
+   * shows redsea:pump-on / redsea:pump-off); otherwise the button keeps the
+   * switch's own state icon.
+   * @return an icon name, or "state" for the switch state icon
+   */
+  socket_icon(): string {
+    const icon = this.linked_icon();
+    return icon.startsWith("mdi:power-plug") ? "state" : icon;
+  }
+
+  /**
    * CSS class conveying the linked appliance's state.
    * @return the class to apply, empty for the normal state
    */
