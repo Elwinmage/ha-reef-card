@@ -91,7 +91,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 
 # Compatibilité
 
-✅ Implémenté ☑️ En cours ❌ Planifié
+> ✅ Supporté &nbsp;|&nbsp; 🚧 En cours &nbsp;|&nbsp; 🧪 Non testé (peut fonctionner) &nbsp;|&nbsp; ❌ Pas encore supporté
 
 <table>
   <th>
@@ -100,27 +100,42 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
     <td><b>Issues</b>  <br/>📆(Planifié) <br/> 🐛(Bugs)</td>
   </th>
   <tr>
-    <td><a href="#reefato">ReefATO+</a></td>
-    <td>RSATO+</td><td>☑️</td>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefato.fr.md#reefato">ReefATO+</a></td>
+    <td>RSATO+</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSATO+.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:enhancement" style="text-decoration:none">📆</a>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsato,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
-
-  </tr>
-    <tr>
-    <td><a href="#reefcontrol">ReefControl</a></td>
-    <td>RSSENSE<br /> Si vous en possédez un, vous pouvez me contacter <a href="https://github.com/Elwinmage/ha-reefbeat-component/discussions/8">ici</a> et j'ajouterai sa prise en charge.</td><td>❌</td>
-    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROL.png"/></td>
-    <td>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
-      <a href="https://github.com/Elwinmage/ha-reefbeat-component/issues?q=is:issue state:open label:rscontrol,all label:bug" style="text-decoration:none">🐛</a>
-    </td>
-      </tr>  
   <tr>
-    <td rowspan="2"><a href="#reefdose">ReefDose</a></td>
+    <td rowspan="2"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol.fr.md#reefcontrol">ReefControl</a></td>
+    <td>RSCONTROLPRO</td><td>✅</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROLPRO.png"/></td>
+    <td rowspan="2">
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rscontrol,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
+  <tr>
+    <td>RSCONTROLLITE</td><td>🧪</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROLLITE.png"/></td>
+  </tr>
+  <tr>
+    <td rowspan="2"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol-power.fr.md#reefcontrol-power">ReefControl-Power</a></td>
+    <td>RSPOWER6</td><td>✅</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSPOWER6.png"/></td>
+    <td rowspan="2">
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rspower,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rspower,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
+  <tr>
+    <td>RSPOWER8</td><td>🧪</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSPOWER8.png"/></td>
+  </tr>
+  <tr>
+    <td rowspan="2"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefdose.fr.md#reefdose">ReefDose</a></td>
     <td>RSDOSE2</td>
     <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSDOSE2.png"/></td>
@@ -134,21 +149,22 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSDOSE4.png"/></td>
     </tr>
   <tr>
-    <td rowspan="2"> <a href="#reefled">ReefLed</a></td>
+    <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefled.fr.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>❌</td>
+    <td>🚧</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:bug" style="text-decoration:none">🐛</a>
 </td>
   </tr>
-   <td >G2</td>
-    <td>❌</td>
+  <tr>
+    <td>G2</td>
+    <td>🚧</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
-    <td rowspan="3"><a href="#reefmat">ReefMat</a></td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefmat.fr.md#reefmat">ReefMat</a></td>
     <td>RSMAT250</td>
     <td>✅</td>
     <td rowspan="3" width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSMAT.png"/></td>
@@ -166,7 +182,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
     <td>✅</td>
   </tr>
   <tr>
-    <td><a href="#reefrun">ReefRun</a></td>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefrun.fr.md#reefrun">ReefRun</a></td>
     <td>RSRUN</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSRUN.png"/></td>
     <td>
@@ -175,7 +191,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
     </td>
   </tr>
   <tr>
-    <td><a href="#reefwave">ReefWave</a></td>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefwave.fr.md#reefwave">ReefWave</a></td>
     <td>RSWAVE</td><td>❌</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
@@ -183,21 +199,45 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
+  <tr>
+    <td colspan="5"><b>Aqua Medic</b> — via <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
+  </tr>
+  <tr>
+    <td rowspan="3">Aqua Medic</td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(brasseur)</td><td>❌</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
+    <td rowspan="3">
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
+  <tr>
+    <td>DC Runner<br />(pompe de remontée)</td><td>❌</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
+  </tr>
+  <tr>
+    <td>DC Runner<br />(pompe d'écumeur)</td><td>❌</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
+  </tr>
 </table>
+
+> [!NOTE]
+> La pompe de remontée DC Runner et la pompe d'écumeur sont le même matériel avec des têtes différentes : même firmware, même clé produit Gizwits, entités identiques. L'intégration les distingue par son sélecteur **Rôle de la pompe**, et la carte suivra ce rôle.
 
 # Sommaire
 
-- [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
-- [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
-- [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
-- [ReefControl](https://github.com/Elwinmage/ha-reef-card/#reefcontrol)
-- [ReefDose](https://github.com/Elwinmage/ha-reef-card/#reefdose)
-- [ReefLED](https://github.com/Elwinmage/ha-reef-card/#reefled)
-- [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
-- [ReefRun](https://github.com/Elwinmage/ha-reef-card/#reefrun)
-- [ReefWave](https://github.com/Elwinmage/ha-reef-card/#reefwave)
-- [Maintenance](https://github.com/Elwinmage/ha-reef-card/#maintenance)
-- [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [ReefATO+](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefato.fr.md#reefato)
+- [ReefControl](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol.fr.md#reefcontrol)
+- [ReefControl-Power](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol-power.fr.md#reefcontrol-power)
+- [ReefDose](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefdose.fr.md#reefdose)
+- [ReefLED](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefled.fr.md#reefled)
+- [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefmat.fr.md#reefmat)
+- [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefrun.fr.md#reefrun)
+- [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefwave.fr.md#reefwave)
+- [Maintenance](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/maintenance.fr.md#maintenance)
+- [FAQ](#faq)
 
 # Installation
 
@@ -225,1102 +265,6 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
-
-# ReefATO
-
-ReefATO+ avec ha-reef-card en action :
-
-[![Regarder la vidéo](https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg)](https://www.youtube.com/watch?v=2R0DHp2eqT4)
-
-La carte ReefATO+ permet de gérer visuellement le contrôleur RSATO+, le
-réservoir d'eau osmosée et sa pompe, la sonde de niveau clipsée sur la cuve, et
-la sonde de fuite posée au sol.
-
-La sonde de niveau du ReefATO+ est toujours dessinée. La **pompe** et la **sonde
-de fuite** sont optionnelles. Celle que l'appareil ne signale pas n'est pas
-dessinée du tout, et les commandes qui en dépendent sont masquées avec elle : un
-ReefATO+ sans sonde de fuite affiche une carte sans sonde de fuite, pas une sonde
-grisée.
-
-<img src="../img/rsato/rsato_zones.png"/>
-
-La carte est découpée en 7 zones :
-
-1. Contrôleur : mode de fonctionnement, alimentation, mode maintenance, configuration, Wifi et appoint automatique
-2. Réglages des accessoires : pompe d'appoint, sonde de fuite, sonde de niveau
-3. Réservoir d'eau osmosée : commandes de remplissage, volume restant et autonomie
-4. Buzzer
-5. Sonde de fuite
-6. Aquarium : niveau d'eau, température et consommation quotidienne
-7. Dernier message et dernière alerte
-
-## Contrôleur
-
-<img src="../img/rsato/zone_1.png"/>
-
----
-
-Le texte sur la face du contrôleur est le **mode de fonctionnement** remonté par
-l'appareil (Auto, Manuel, Fuite…), traduit dans la langue de Home Assistant.
-
-<span>L'interrupteur <img src="../img/mdi/mdi_power-plug.png" width="20"/> allume ou éteint le ReefATO+.</span>
-
-<img src="../img/rsato/off_mode.png" width="50%"/>
-
-<span>L'interrupteur <img src="../img/mdi/mdi_account-wrench.png" width="20"/> bascule en mode maintenance.</span>
-
-<img src="../img/rsato/maintenance.png" width="50%"/>
-
-<span>Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30"/> pour gérer la configuration générale du ReefATO+ : rafraîchir les réglages ou les données interrogées, réinitialiser l'appareil, mettre à jour son firmware.</span>
-
-<img src="../img/rsato/zone_1_dialog_config.png" width="50%"/>
-
-<span>Cliquez sur l'icône <img src="../img/mdi/wifi_icon.png" width="30"/> pour gérer les réglages réseau.</span>
-
-<img src="../img/rsato/zone_1_dialog_wifi.png" width="50%"/>
-
-<span>L'interrupteur <img src="../img/mdi/mdi_waves-arrow-up.png" width="20"/> de la deuxième ligne active ou désactive l'**appoint automatique**. Désactivé, l'appareil ne remplit jamais de lui-même et seuls les boutons de la zone 3 agissent encore sur la pompe. Il est masqué quand aucune pompe n'est appairée.</span>
-
-## Réglages des accessoires
-
-<img src="../img/rsato/zone_2.png"/>
-
----
-
-Les trois icônes suivent les trois prises de la face avant, dans le même ordre :
-de gauche à droite la **pompe d'appoint**, la **sonde de fuite** et la **sonde de
-niveau**. Chacune ouvre une boîte de dialogue dédiée à l'accessoire. Les icônes
-de la pompe et de la sonde de fuite disparaissent avec l'accessoire quand leur
-prise est inutilisée.
-
-<span>L'icône de la pompe <img src="../img/mdi/mdi_pump.png" width="30"/> montre l'état de marche, la consommation et le débit mesurés, les trois seuils de courant auxquels le firmware se réfère pour déclarer une marche à sec ou un blocage, et ce qui a déclenché le dernier remplissage.</span>
-
-<img src="../img/rsato/zone_2_dialog_pump.png" width="50%"/>
-
-<span>L'icône de la sonde de fuite <img src="../img/mdi/mdi_pipe-leak.png" width="30"/> montre si la sonde est branchée, si elle est armée, le verdict sec/mouillé et la mesure brute derrière lui, ainsi que le buzzer que cette sonde pilote.</span>
-
-<img src="../img/rsato/zone_2_dialog_leak.png" width="50%"/>
-
-<span>L'icône de la sonde de niveau <img src="../img/mdi/mdi_hydraulic-oil-level.png" width="30"/> montre d'abord la santé de la sonde — connectée, calibrée, à vérifier, en erreur — car une sonde non calibrée ou encrassée rend toutes les mesures qui suivent sans valeur. Puis le niveau lui-même, les deux électrodes derrière lui, la sonde de température qui partage le même corps, ainsi que l'identité et les dates d'entretien de la cartouche.</span>
-
-<img src="../img/rsato/zone_2_dialog_ato_sensor.png" width="50%"/>
-
-## Réservoir d'eau osmosée
-
-<img src="../img/rsato/zone_3.png"/>
-
----
-
-Cette zone représente le réservoir dans lequel l'appoint puise, et les trois
-boutons qui pilotent sa pompe à la main :
-
-<table>
-  <tr>
-    <td align="center"><img src="../img/mdi/mdi_water-pump.png" width="40"/><br/><b>Remplir</b><br/>Démarre un remplissage manuel</td>
-    <td align="center"><img src="../img/mdi/mdi_water-pump-off.png" width="40"/><br/><b>Arrêter</b><br/>Arrête le remplissage en cours</td>
-    <td align="center"><img src="../img/mdi/mdi_play-circle-outline.png" width="40"/><br/><b>Reprendre</b><br/>Réactive la pompe</td>
-  </tr>
-</table>
-
-Cette partie indique visuellement le niveau de la réserve d'eau, calculé depuis
-la capacité du réservoir et la valeur réelle. Un réservoir vide montre toujours
-une ligne d'eau, celle que la pompe ne peut pas remonter. En dessous de 10 %,
-l'eau clignote pour signifier que le réservoir sera bientôt vide.
-
-Cliquer sur l'eau ouvre la boîte de dialogue du réservoir, où la capacité peut
-être éditée :
-
-<img src="../img/rsato/zone_3_dialog_ato_tank.png" width="50%"/>
-
-Le chiffre en bas à gauche du réservoir est l'**autonomie** : le nombre de jours
-restants avant qu'il ne soit à sec, calculé par l'intégration à partir de la
-consommation quotidienne moyenne. Cliquer dessus ouvre sa fiche détaillée.
-
-Pendant un remplissage, l'eau s'écoule à la sortie au-dessus de la décantation.
-
-<img src="../img/rsato/zone_3_filling.png"/>
-
-## Buzzer
-
-<img src="../img/mdi/mdi_bell-ring_red.png" width="40"/>
-
----
-
-<span>La cloche <img src="../img/mdi/mdi_bell-ring_red.png" width="20"/> <img src="../img/mdi/mdi_bell-off_red.png" width="20"/> suit le réglage du buzzer de l'appareil, et se grise quand il est coupé.</span>
-
-Un clic ouvre la boîte de dialogue du buzzer : le réglage lui-même, s'il sonne en
-ce moment, et l'état de la sonde de fuite en contexte.
-
-<img src="../img/rsato/zone_4_dialog_buzzer.png" width="50%"/>
-
-Un **appui long** bascule directement le buzzer. Les deux gestes sont
-volontairement séparés : couper l'alarme est un réglage de sécurité, pas quelque
-chose à faire par mégarde en allant chercher le détail.
-
-> [!NOTE]
-> Le buzzer n'est pas seulement l'alarme de fuite : l'appareil le fait aussi
-> sonner sur les défauts de pompe, il reste donc disponible sur un ReefATO+ sans
-> sonde de fuite. L'icône n'est masquée que sur les versions de l'intégration qui
-> n'exposent pas encore le réglage.
-
-## Sonde de fuite
-
-<img src="../img/rsato/zone_5.png"/>
-
----
-
-La sonde n'est dessinée que lorsqu'elle est physiquement branchée. Branchée mais
-désactivée dans l'application, elle est grisée : elle est là, elle ne détecte
-rien.
-
-Quand de l'eau est détectée, la sonde clignote et une flaque s'étale au pied de
-l'image.
-
-<table>
-  <tr>
-    <th align="center">Fuite sur l'aquarium</th>
-    <th align="center">Fuite sur le réservoir d'eau osmosée</th>
-    <th align="center">Fuite d'origine inconnue</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="../img/rsato/zone_5_leak_aquarium.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_5_leak_rodi.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_5_leak_unknown.png"/></td>
-  </tr>
-</table>
-
-## Aquarium
-
-<img src="../img/rsato/zone_6.png"/>
-
----
-
-Le niveau de l'eau dans cette partie indique l'état de détection du capteur
-ATO.
-
-| État            | Signification                                                   |
-| --------------- | --------------------------------------------------------------- |
-| En dessous      | La surface est sous la sonde : l'appoint ne suit pas            |
-| Niveau désiré 1 | Première marque d'appoint                                       |
-| Niveau désiré 2 | Deuxième marque d'appoint                                       |
-| Au dessus       | La surface est au-dessus de la sonde : la cuve est trop remplie |
-
-Les deux extrémités sont anormales, donc **En dessous** et **Au dessus** font
-clignoter l'eau. Une sonde en erreur, ou une entité qui n'a encore rien remonté,
-n'a aucune hauteur : la carte dessine sa marque d'absence de mesure plutôt qu'une
-cuve vide.
-
-<table>
-  <tr>
-    <th align="center">En dessous</th>
-    <th align="center">Niveau désiré 1</th>
-    <th align="center">Niveau désiré 2</th>
-    <th align="center">Au dessus</th>
-    <th align="center">Pas de mesure</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="../img/rsato/zone_6_water_level_below.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_6_water_level_1.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_6_water_level_2.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_6_water_level_above.png"/></td>
-    <td align="center"><img src="../img/rsato/zone_6_water_level_error.png"/></td>
-  </tr>
-</table>
-
-La température en bas de la cuve vient du capteur intégré à la sonde de niveau,
-et n'est remontée que lorsqu'il est activé sur l'appareil.
-
-Le graphique dans le coin est la **consommation du jour** : le volume d'appoint
-depuis minuit, rempli en orange, face à la moyenne quotidienne glissante en
-rouge. La fenêtre est calée sur le jour calendaire plutôt que sur 24 heures
-glissantes, puisque le compteur est remis à zéro à minuit.
-
-Cliquer sur le graphique ouvre la boîte de dialogue de consommation, la même
-histoire avec les chiffres énoncés : remplissages et volume, mesurés aujourd'hui,
-en moyenne quotidienne et en cumul depuis l'origine, plus ce qu'il reste au
-réservoir pour les alimenter.
-
-<img src="../img/rsato/zone_6_dialog_usage.png" width="50%"/>
-
-## Défauts
-
-La carte n'a pas de voyant d'alerte séparé : ce qui est en défaut est ce qui
-clignote, sous une teinte rouge clair.
-
-| Élément clignotant | Ce que l'appareil remonte                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| La pompe           | Dysfonctionnement, pompe bloquée, remplissage trop long, réservoir vide, ou sonde de niveau absente                      |
-| La sonde de fuite  | Eau détectée, côté osmoseur ou côté aquarium                                                                             |
-| Le niveau d'eau    | La surface est en dessous ou au-dessus de la sonde                                                                       |
-| Toute l'image      | La sonde de niveau demande à être vérifiée, ou ne parvient plus à mesurer — tous les niveaux affichés deviennent douteux |
-
-Une pompe signalée absente n'est pas un défaut : la pompe, les boutons de
-remplissage, le réservoir et le graphique de consommation ne sont simplement pas
-dessinés.
-
-## Messages
-
-<img src="../img/rsato/zone_7.png"/>
-
----
-
-Cette zone affiche les derniers messages système du ReefATO+. Elle a deux lignes :
-
-- La ligne grise montre le **dernier message** reçu.
-- La ligne rose montre la **dernière alerte**, précédée du symbole ⚠.
-
-Cliquer sur l'icône <img src="../img/mdi/mdi_delete-empty.png" width="20"/> efface le message correspondant.
-
-Ces lignes peuvent être masquées depuis l'interface de l'éditeur de carte.
-
-## Éditeur de carte
-
-<img src="../img/rsato/editor.png" width="50%"/>
-
----
-
-En plus des deux lignes de messages, le ReefATO+ a trois options. Elles existent
-pour une boucle d'appoint pour laquelle l'appareil n'a pas été conçu : un
-osmoseur branché directement sur la décantation, avec une vanne pilotée par Home
-Assistant plutôt que par la pompe Red Sea.
-
-### Réservoir d'eau osmosée infini
-
-Désactivé par défaut. Un osmoseur qui fait l'appoint au fil de l'eau n'a pas de
-bidon, donc rien ne peut se vider — et tout ce que la carte dit du réservoir
-parle d'un bidon qui n'existe pas.
-
-Activé, le pourcentage sur le réservoir et la boîte de dialogue derrière lui sont
-retirés, l'autonomie devient ∞, et l'icône des réglages de la pompe ainsi que le
-bouton de reprise sont masqués : une alimentation continue n'a pas de cycle de
-remplissage à rendre à l'appareil. L'eau, les boutons de remplissage et le
-graphique de consommation restent.
-
-### Entité du volume distribué
-
-Un interrupteur et un sélecteur d'entité. Activé, la courbe orange du graphique
-quotidien est lue depuis une de vos entités — un débitmètre sur la ligne osmosée
-— au lieu du compteur de l'appareil. La moyenne glissante rouge reste celle de
-l'appareil : seule la source du volume change, pas la comparaison à laquelle il
-est confronté.
-
-C'est l'interrupteur qui active l'option, de sorte qu'une entité restée d'une
-configuration précédente est ignorée plutôt que de reprendre la main en silence.
-
-### Entités de remplissage et d'arrêt
-
-Chacun des deux boutons peut être lié à une entité d'une autre intégration, pour
-piloter votre propre vanne. Le service est déduit du domaine de l'entité,
-puisqu'en choisir une dit déjà de quoi il s'agit :
-
-| Domaine de l'entité       | Remplir      | Arrêter       |
-| ------------------------- | ------------ | ------------- |
-| `button`, `input_button`  | `press`      | `press`       |
-| `switch`, `input_boolean` | `turn_on`    | `turn_off`    |
-| `valve`                   | `open_valve` | `close_valve` |
-| `script`                  | `turn_on`    | `turn_on`     |
-
-Un seul interrupteur est une commande complète : activé il remplit, désactivé il
-arrête. Laissez l'autre sélecteur vide et le second bouton réutilise la même
-entité avec le service opposé — il en va de même pour un `input_boolean` ou une
-`valve`. Deux boutons à impulsion doivent être choisis séparément, car une
-pression ne porte pas de direction.
-
-Une commande liée ne suit plus non plus la pompe Red Sea : elle reste visible sur
-un ReefATO+ qui ne signale aucune pompe, ce qui est tout l'intérêt de la lier.
-
-Les options sont enregistrées sous le modèle tel que Home Assistant le remonte :
-
-```yaml
-type: custom:reef-card
-device: MY-RSATO
-conf:
-  RSATO+:
-    devices:
-      MY-RSATO:
-        infinite_tank: true
-        external_usage: true
-        external_usage_entity: sensor.rodi_flow_meter
-        fill_entity: switch.rodi_valve
-        stop_fill_entity: "" # laissé vide : l'interrupteur ci-dessus l'arrête aussi
-```
-
-# ReefControl
-
-Planifié.
-
-Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefDose
-
-ReefDose avec ha-reef-card en action:
-
-[![Regarder la vidéo](https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg)](https://www.youtube.com/watch?v=Qee5LH0T9wQ)
-
-La carte ReefDose est découpée en 6 zones:
-
-1.  Configuration/Informations Wifi
-2.  Etats
-3.  Dosage Manuel
-4.  Configuration et planning des têtes
-5.  Gestion des suppléments
-6.  File d'attentes des futures doses
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/rsdose4_ex1.png"/>
-
-## Configuration/Informations Wifi
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1.png"/>
-
----
-
-<span >Cliquez sur l'icône <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefDose.</span>
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_config.png"/>
-
-<span>Cliquez sur l'icône <img width="30px" src="../img/rsdose/wifi_icon.png"/> pour gérer les paramètres réseaux.</span>
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_1_dialog_wifi.png"/>
-
-## États
-
- <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2.png"/>
-
----
-
-<span>L'interrupteur de maintenance <img width="30px" src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_2_maintenance.png"/> permet de basculer vers le mode maintenance.</span>
-
- <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/maintenance_view.png"/>
-
-<span>L'interrupteur de on/off <img width="30px" src="../img/rsdose/zone_2_off.png"/> permet de basculer entre les états on et off du ReefMat.</span>
-
- <img  src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/off_view.png"/>
-
-## Dosage Manuel
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3.png"/>
-
----
-
-<span>Le bouton <img src="../img/rsdose/zone_3_manula_config_button.png"/> affiche la dose manuelle par default pour cette tête. Un clique dessus permet d'ouvrir la boîte de configuration de ce dosage.</span>
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose_without.png"/>
-
-Vous pouvez ajouter des raccourcis en utilisant l'édition de la carte :
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/editor.png"/>
-
-Par exemple la tête 1 propose comme raccourcis les valeurs 2, 5 et 10mL.
-
-Ces valeurs apparaîtront en haut de la boite de dialogue. Un clic sur ces raccourcis lancera une commande pour doser la valeur définie.
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_3_dialog_manual_dose.png"/>
-
-<span>Un appui sur le bouton de dose manuel : <img src="../img/rsdose/zone_3_manual_button.png"/> enverra une commande de dose avec la valeur par défaut visible juste au dessus: <img src="../img/rsdose/zone_3_manual_dose.png"/>, soit 10mL dans cet exemple.
-</span>
-
-## Configuration et planning des têtes
-
- <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_4.png"/>
-
----
-
-Cette zone permet de visualiser la programmation courante des têtes et de la changer.
-
-- La bague circulaire colorée indique le pourcentage de dose journalière déjà distribué.
-- le chiffre jaune en haut indique le cumul de dose manuel journalier
-- la partie centrale indique le volume distributé par rapport au volume journalier programmé total
-- le partie bleue en bas indique le nombre de doses distribuées par rapport au nombre de doses totales de la journées (exemple: 14/24 pour le bleu car c'est une programmation horaire que ce cette capture a été prise a 14h15.) Les valeurs pour le violet et le vert indiquent 0/0 car ces dosent doivent être distribuées à 8h mais l'intégration a été lancée aprés 8h donc il n'y aura aucune dose aujourd'hui.
-- un clic long sur une des 4 têtes basculera la tête en on/off
-- un clic sur une des têtes ouvrira la boîte de programmation.
-  Depuis cette boite vous pouvez lancer un amorçage, recalibrer la tête, changer la dose journalière et sa programmation. N'oubliez pas de sauvegarder la programmation avant de quitter.
-
-  <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_4_dialog_schedule.png"/>
-
-## Gestion des suppléments
-
- <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5.png"/>
-
----
-
-Cette zone permet de gérer les suppléments.
-Si un supplément est déjà déclaré, un clic dessus permettra d'ouvrir la boîte de configuration où vous pourrez:
-
-- supprimer le supplément (icone corbeille en haut à droite)
-- indiquer le volume total du container
-- indiquer le volume réel du supplément
-- décider si vous voulez suivre le volume restant. Un clic sur les raccourcis en haut activera le contrôle et positionnera les valeurs par défaut avec un conteneur plein.
-- modifier le nom d'affichage du supplément.
-
- <img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_dialog_container.png"/>
-
-Si aucun supplément n'est lié à une tête vous pouvez en ajouter un en cliquant sur le container avec un '+' (tête 4 dans notre exemple)
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_add_container.png"/>
-
-Suivez ensuite les instructions:
-
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsdose/zone_5_dialog_add.png"/>
-
-### Suppléments
-
-Voici la liste des images de suppléments supportées, regroupées par marque. Si la vôtre affiche ❌, vous pouvez demander son ajout [ici](https://github.com/Elwinmage/ha-reef-card/discussions/25).
-
-<details>
-<summary><b>ATI &nbsp; <sup>2/2 🖼️</sup></b></summary>
-
-<table>
-<tr><td>✅</td><td>Essential Pro 1</td><td><img style='width:20%;' src='../../public/img/supplements/69692902-dcf9-4f41-b104-402154dc348a.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Essential Pro 2</td><td><img style='width:20%;' src='../../public/img/supplements/e1dbec89-2396-4269-8f28-ab7534cb2d7d.supplement.png'/></td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Aqua Forest &nbsp; <sup>3/9 🖼️</sup></b></summary>
-
-<table>
-<tr><td>✅</td><td>Ca Plus</td><td><img style='width:20%;' src='../../public/img/supplements/9ea6c9f2-b6f3-41ee-9370-06457f286fe5.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Calcium </td></tr>
-<tr><td>❌</td><td colspan='2'>Component 1+</td></tr>
-<tr><td>❌</td><td colspan='2'>Component 2+</td></tr>
-<tr><td>❌</td><td colspan='2'>Component 3+</td></tr>
-<tr><td>❌</td><td colspan='2'>KH Buffer</td></tr>
-<tr><td>✅</td><td>KH Plus</td><td><img style='width:20%;' src='../../public/img/supplements/e391e8d1-0d4c-4355-8887-9231500703ef.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Magnesium</td></tr>
-<tr><td>✅</td><td>Mg Plus</td><td><img style='width:20%;' src='../../public/img/supplements/deb3a943-68a5-40a9-860b-e6d259eee947.supplement.png'/></td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>BRS &nbsp; <sup>0/4 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>Liquid Calcium</td></tr>
-<tr><td>❌</td><td colspan='2'>Liquid alkalinity</td></tr>
-<tr><td>❌</td><td colspan='2'>Magnesium Mix</td></tr>
-<tr><td>❌</td><td colspan='2'>Part C</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Brightwell &nbsp; <sup>0/12 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>Calcion</td></tr>
-<tr><td>❌</td><td colspan='2'>Ferrion</td></tr>
-<tr><td>❌</td><td colspan='2'>Hydrate - MG</td></tr>
-<tr><td>❌</td><td colspan='2'>KoralAmino</td></tr>
-<tr><td>❌</td><td colspan='2'>Koralcolor</td></tr>
-<tr><td>❌</td><td colspan='2'>Liquid Reef</td></tr>
-<tr><td>❌</td><td colspan='2'>Potassion</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Code A</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Code B</td></tr>
-<tr><td>❌</td><td colspan='2'>Replenish</td></tr>
-<tr><td>❌</td><td colspan='2'>Restore</td></tr>
-<tr><td>❌</td><td colspan='2'>Strontion</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>ESV &nbsp; <sup>0/5 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>B-Ionic Component 1</td></tr>
-<tr><td>❌</td><td colspan='2'>B-Ionic Component 2</td></tr>
-<tr><td>❌</td><td colspan='2'>B-Ionic Magnesium</td></tr>
-<tr><td>❌</td><td colspan='2'>Transition elements </td></tr>
-<tr><td>❌</td><td colspan='2'>Transition elements plus</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Fauna Marine &nbsp; <sup>0/11 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>Amin</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light  trace 1</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light  trace 2</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light  trace 3</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light Ca</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light KH</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling light Mg</td></tr>
-<tr><td>❌</td><td colspan='2'>Blue trace elements</td></tr>
-<tr><td>❌</td><td colspan='2'>Green trace elements</td></tr>
-<tr><td>❌</td><td colspan='2'>Min S</td></tr>
-<tr><td>❌</td><td colspan='2'>Red trace elements</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Quantum &nbsp; <sup>7/7 🖼️</sup></b></summary>
-
-<table>
-<tr><td>✅</td><td>Aragonite A</td><td><img style='width:20%;' src='../../public/img/supplements/322c1c47-7259-4fd9-9050-f6157036ea36.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Aragonite B</td><td><img style='width:20%;' src='../../public/img/supplements/e6537278-0e0a-4fd7-8146-566334bb74ed.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Aragonite C</td><td><img style='width:20%;' src='../../public/img/supplements/5f491b59-4f54-4572-bbce-aa9b708ccb51.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Bio Kalium</td><td><img style='width:20%;' src='../../public/img/supplements/8fec18b0-adf6-4dfa-b923-c7226a6fb87d.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Bio Metals</td><td><img style='width:20%;' src='../../public/img/supplements/a1d797e3-4679-4be4-9219-22e35822ab97.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Bio enhance</td><td><img style='width:20%;' src='../../public/img/supplements/fd8dee42-f3da-4660-b491-880d7dac869a.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Gbio Gen</td><td><img style='width:20%;' src='../../public/img/supplements/26a4f030-e78c-459c-90cb-5c6099de10fd.supplement.png'/></td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Red Sea &nbsp; <sup>10/13 🖼️</sup></b></summary>
-
-<table>
-<tr><td>✅</td><td>Bio Active (Colors D)</td><td><img style='width:20%;' src='../../public/img/supplements/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Calcium (Foundation A)</td><td><img style='width:20%;' src='../../public/img/supplements/7d67412c-fde0-44d4-882a-dc8746fd4acb.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Calcium (Powder)</td></tr>
-<tr><td>✅</td><td>Iodine (Colors A)</td><td><img style='width:20%;' src='../../public/img/supplements/93e742b0-67c9-4800-9aa9-212e52532343.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Iron (Colors C)</td><td><img style='width:20%;' src='../../public/img/supplements/c7a26034-8e40-41bb-bfb5-169089470f1e.supplement.png'/></td></tr>
-<tr><td>✅</td><td>KH/Alkalinity (Foundation B)</td><td><img style='width:20%;' src='../../public/img/supplements/76830db3-a0bd-459a-9974-76a57d026893.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>KH/Alkalinity (Powder)</td></tr>
-<tr><td>✅</td><td>Magnesium (Foundation C)</td><td><img style='width:20%;' src='../../public/img/supplements/f524734e-8651-496e-b09b-640b40fc8bab.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Magnesium (Powder)</td></tr>
-<tr><td>✅</td><td>NO3PO4-X</td><td><img style='width:20%;' src='../../public/img/supplements/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Potassium (Colors B)</td><td><img style='width:20%;' src='../../public/img/supplements/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Reef Energy Plus</td><td><img style='width:20%;' src='../../public/img/supplements/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr>
-<tr><td>✅</td><td>ReefCare Program</td><td><img style='width:20%;' src='../../public/img/supplements/redsea-reefcare.supplement.png'/></td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Seachem &nbsp; <sup>0/9 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>Reef Calcium</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Carbonate</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Complete</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Fusion 1</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Fusion 2</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Iodine</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Plus</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Strontium</td></tr>
-<tr><td>❌</td><td colspan='2'>Reef Trace</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Triton &nbsp; <sup>0/4 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>Core7 elements 1</td></tr>
-<tr><td>❌</td><td colspan='2'>Core7 elements 2</td></tr>
-<tr><td>❌</td><td colspan='2'>Core7 elements 3A</td></tr>
-<tr><td>❌</td><td colspan='2'>Core7 elements 3B</td></tr>
-</table>
-</details>
-
-<details>
-<summary><b>Tropic Marin &nbsp; <sup>6/14 🖼️</sup></b></summary>
-
-<table>
-<tr><td>❌</td><td colspan='2'>A Element</td></tr>
-<tr><td>✅</td><td>All-For-Reef</td><td><img style='width:20%;' src='../../public/img/supplements/aff00331-3c23-4357-b6d4-6609dbc4fed1.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Amino Organic</td><td><img style='width:20%;' src='../../public/img/supplements/fddbe0a4-02eb-4903-969b-6c27c805bf6b.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Balling A</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling B</td></tr>
-<tr><td>❌</td><td colspan='2'>Balling C</td></tr>
-<tr><td>✅</td><td>Bio-Magnesium</td><td><img style='width:20%;' src='../../public/img/supplements/2f04f694-3743-4e12-a45f-a3eb63aef806.supplement.png'/></td></tr>
-<tr><td>✅</td><td>Carbo Calcium</td><td><img style='width:20%;' src='../../public/img/supplements/8cdabb9f-ebcf-4675-a10f-f9020941928f.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Elimi-NP</td></tr>
-<tr><td>❌</td><td colspan='2'>K Element</td></tr>
-<tr><td>❌</td><td colspan='2'>Liquid Buffer</td></tr>
-<tr><td>✅</td><td>NP-Bacto-Balance</td><td><img style='width:20%;' src='../../public/img/supplements/43b51c1f-0363-4ef5-be89-f129e512e25b.supplement.png'/></td></tr>
-<tr><td>❌</td><td colspan='2'>Plus-NP</td></tr>
-<tr><td>✅</td><td>Potassium</td><td><img style='width:20%;' src='../../public/img/supplements/964e897e-9668-4fc8-9cd9-e8c42a27cf85.supplement.png'/></td></tr>
-</table>
-</details>
-
-# ReefLed
-
-Planifié.
-
-Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# ReefMat
-
-ReefMat avec ha-reef-card en action:
-
-[![Regarder la vidéo](https://img.youtube.com/vi/yyNyUSitb1E/0.jpg)](https://www.youtube.com/watch?v=yyNyUSitb1E)
-
-La carte ReefMat est découpée en 7 zones :
-
-1. Configuration / Informations Wifi
-2. Etats
-3. Informations du rouleau (longueur totale utilisée, longueur restante, fin de rouleau, mode...)
-4. Avance manuelle/automatique
-5. Sonde
-6. Avance programmée
-7. Graphique d'utilisation hebdomadaire / mensuel
-
-<img src="../img/rsmat/rsmat_zones.png"/>
-
-L'image de fond change en fonction de l'état d'utilisation du rouleau avec 5 images différentes:
-
-<table>
-  <tr>
-    <td align="center"><img src="../img/rsmat/RSMAT_100_BASE.png" width="100%"/><br/><b>0%</b></td>
-    <td align="center"><img src="../img/rsmat/RSMAT_75_BASE.png" width="100%"/><br/><b>25%</b></td>
-    <td align="center"><img src="../img/rsmat/RSMAT_50_BASE.png" width="100%"/><br/><b>50%</b></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="../img/rsmat/RSMAT_25_BASE.png" width="100%"/><br/><b>75%</b></td>
-    <td align="center"><img src="../img/rsmat/RSMAT_0_BASE.png" width="100%"/><br/><b>100%</b></td>
-    <td></td>
-  </tr>
-</table>
-
-## Configuration / Informations Wifi
-
-<img src="../img/rsmat/zone_1.png"/>
-
----
-
-<span>Cliquez sur l'icône <img src="../img/rsdose/cog_icon.png" width="30" /> pour gérer la configuration générale du ReefMat.</span>
-
-<img src="../img/rsmat/zone_1_dialog_configuration.png"/>
-
-<span>Cliquez sur l'icône <img src="../img/rsdose/wifi_icon.png" width="30" /> pour gérer les paramètres réseau.</span>
-
-<img src="../img/rsmat/zone_1_dialog_wifi.png"/>
-
-## États
-
-<img src="../img/rsmat/zone_2.png"/>
-
----
-
-<span>L'interrupteur de maintenance <img src="../img/mdi/mdi_account-wrench.png" width="20"/> permet de basculer vers le mode maintenance.</span>
-
- <img  src="../img/rsmat/maintenance.png"/>
-
-<span>L'interrupteur de on/off <img src="../img/mdi/mdi_power-plug.png" width="20"/> permet de basculer entre les états on et off du ReefMat.</span>
-
- <img  src="../img/rsmat/off_mode.png"/>
-
-## Informations du rouleau
-
-<img src="../img/rsmat/zone_3.png"/>
-
----
-
-Cette zone affiche en temps réel l'état du rouleau filtrant, avec de haut en bas :
-
-- La **longueur totale utilisée** depuis le début du rouleau (en haut, en rouge)
-- La **longueur restante** au centre en rouge. Si le rouleau est vide, une icône <img src="../img/mdi/mdi_paper-roll.png" width="20"/> clignotante s'affiche à la place et une boîte de dialogue propose de remplacer le rouleau.
-
-<img src="../img/rsmat/zone_3_dialog_new_roll.png"/>
-
-- Le **nombre de jours restants** avant la fin du rouleau estimé selon la consommation journalière moyenne (en noir)
-- La **consommation journalière moyenne** en cm (en bas à gauche)
-- Le **mode de fonctionnement** courant: Auto, Maintenance, Off… (sous le logo RedSea)
-- Le **pourcentage de rouleau utilisé** (arc de cercle en bas à droite)
-
-Si une anomalie est détectée le logo RedSea se transformera en <img src="../img/mdi/mdi_alert-decagram.png" width="20"/> clignotant.
-Un clic sur cette alerte ouvre la boîte de dialogue des anomalies :
-
-<img src="../img/rsmat/alert.png"/>
-<img src="../img/rsmat/zone_3_dialog_alert.png" />
-
-## Avance Manuelle/Automatique
-
-<img src="../img/rsmat/zone_4.png"/>
-<img src="../img/rsmat/zone_4_auto_off.png"/>
----
-
-Cette zone permet de contrôler l'avance du rouleau.
-
-De gauche à droite :
-
-- Le bouton <img src="../img/mdi/mdi_send.png" width="20"/> permet de lancer une **avance manuelle** du rouleau de la longueur indiquée par le chiffre au centre.
-- La **valeur d'avance** affichée (en cm) correspond à la valeur qui sera envoyée lors d'un appui sur le bouton. Un clic sur ce chiffre ouvre la boîte d'édition.
-
-<img src="../img/rsmat/zone_4_dialog_manual_advance.png"/>
-
-- Le **bouton de d'avance automatiquement** <img src="../img/mdi/mdi_autorenew.png" width="20"/> <img src="../img/mdi/mdi_autorenew-off.png" width="20"/> permet d'activer/désactiver l'avance automatique du rouleau.
-
-## Sonde
-
-<img src="../img/rsmat/zone_5.png"/>
-
----
-
-Cette zone indique l'état de la sonde de niveau.
-
-Trois états sont possibles :
-
-| État              | Image                                                           |
-| ----------------- | --------------------------------------------------------------- |
-| Capteur branché   | <img src="../img/rsmat/RSMAT_SENSOR_PLUGGED.png" width="80"/>   |
-| Capteur débranché | <img src="../img/rsmat/RSMAT_SENSOR_UNPLUGGED.png" width="80"/> |
-| Capteur sale      | <img src="../img/mdi/mdi_liquid-spot.png" width="80"/>          |
-
-## Avance programmée
-
-<img src="../img/rsmat/zone_6.png"/>
-
----
-
-Ce bouton <img src="../img/mdi/mdi_auto-mode_red.png" width="20"/><img src="../img/mdi/mdi_auto-mode_black.png" width="20"/> permet de donner l'état de l'avance programmée et de l'éditer en cliquant dessus.
-
-<img src="../img/rsmat/zone_6_dialog_schedule.png"/>
-
-## Graphique d'utilisation
-
-<img src="../img/rsmat/zone_7.png"/> 
-<img src="../img/rsmat/monthly.png"/>
-
----
-
-Cette zone affiche un graphique de la consommation du rouleau dans le temps.
-Un clic sur le bouton bascule entre les deux modes disponibles:
-
-- Le mode **Weekly** affiche la consommation sur les 7 derniers jours.
-- Le mode **Monthly** affiche la consommation sur les 30 derniers jours.
-
-Un appui en haut à gauche du graphique ouvre la vue détaillée dans Home Assistant.
-
-## Messages
-
-<img src="../img/rsmat/zone_8.png"/>
-
----
-
-Cette zone affiche les derniers messages système du ReefMat. Elle comporte deux lignes :
-
-- La ligne grise affiche le **dernier message** reçu.
-- La ligne rose affiche la **dernière alerte**, précédée du symbole ⚠.
-
-Un clic sur l'icône <img src="../img/mdi/mdi_delete-empty.png" width="20"/> efface le message correspondant.
-
-Ces lignes peuvent être masquées via l'intefrace d'edition de la carte.
-
-<img src="../img/rsmat/editor.png" />
-
-# ReefRun
-
-ReefRun avec ha-reef-card en action:
-
-[![Voir la vidéo](https://img.youtube.com/vi/Xxv38OPqiGI/0.jpg)](https://www.youtube.com/watch?v=Xxv38OPqiGI)
-
-La carte ReefRun présente le contrôleur et ses deux pompes telles qu'elles sont
-physiquement câblées, chacune avec son câble et sa tuyauterie. La pompe 1 est
-celle de gauche, la pompe 2 celle de droite — typiquement la pompe de remontée
-et le DC Skimmer, mais chaque prise accepte l'un ou l'autre modèle.
-
-<img src="../img/rsrun/rsrun_zones.png"/>
-
-La carte est divisée en 6 zones :
-
-1. État d'alimentation et mode maintenance
-2. Informations batterie et Wifi
-3. Contrôleur : mode de fonctionnement, boutons des pompes et calibrations
-4. Pompe 1 : programme journalier, corps avec débit d'eau en direct, température
-5. Pompe 2 : programme journalier, corps avec débit d'eau en direct, température
-6. Dernier message et dernière alerte
-
-## État d'alimentation et mode maintenance
-
-<img src="../img/rsrun/zone_1.png" >
-
-<span>L'interrupteur de maintenance <img src="../img/mdi/mdi_account-wrench.png" width="20"/> bascule en mode maintenance.</span>
-
-<img src="../img/rsrun/maintenance.png" >
-
-<span>L'interrupteur marche/arrêt <img src="../img/mdi/mdi_power-plug.png" width="20"/> allume ou éteint le Reef Dual Controller.</span>
-
-<img src="../img/rsrun/off_mode.png" >
-
-## Informations batterie et Wifi
-
-<img src="../img/rsrun/zone_2.png"/>
-
----
-
-<span>Cette icône <img src="../img/mdi/battery.png" width="30" /> indique le niveau de batterie du Dual Controller.</span>
-
-<span>Cliquez sur l'icône <img src="../img/mdi/wifi_icon.png" width="30" /> pour gérer les paramètres réseau.</span>
-
-<img src="../img/rsrun/zone_2_dialog_wifi.png"/>
-
-## Contrôleur : mode de fonctionnement, boutons des pompes et calibrations
-
-<img src="../img/rsrun/zone_3.png"/>
-
-### Réglages des pompes
-
-Un clic sur <img src="../img/mdi/cog-1.png" width="5%"/> ou <img src="../img/mdi/cog-2.png" width="5%"/> ouvre le dialogue de configuration de la pompe 1 ou 2.
-
-<img src="../img/rsrun/zone_3_return_pump.png"/>
-<img src="../img/rsrun/zone_3_skimmer.png"/>
-
-> [!CAUTION]
-> **Supprimer la pompe** remet ses réglages aux valeurs d'usine : le programme
-> horaire et le pilotage par sonde sont perdus. Une confirmation est toujours
-> demandée.
-
-### Réglages de la sonde
-
-Un clic sur <img src="../img/mdi/cog-s.png" width="5%"/> ouvre le dialogue de configuration de la sonde.
-<img src="../img/rsrun/zone_3_sensor.png"/>
-
-### Marche/pause d'une pompe <img src="../img/mdi/play.png" width="5%"/> / <img src="../img/mdi/pause.png" width="5%"/>
-
-Un clic démarre ou arrête la pompe concernée.
-
-L'anneau rouge indique la vitesse courante.
-<img src="../img/rsrun/speed.png"/>
-
-Pour modifier la vitesse courante, maintenez <img src="../img/mdi/play.png" width="5%"/> / <img src="../img/mdi/pause.png" width="5%"/> ou cliquez sur le programme horaire :
-
-<img src="../img/rsrun/schedule.png"/>
-
-## États d'une pompe
-
-Le corps de la pompe reflète ce que fait réellement l'appareil, un coup d'œil
-suffit. Les deux types de pompe n'ont pas les mêmes états, ils sont donc décrits
-séparément.
-
-## Pompes 1 & 2
-
-### Pompe de remontée
-
-<img src="../../src/img/redsea/RSRUN/reefrun_return.png" width="30%"/>
-
-Une seule illustration couvre tous les états, la carte ne change que sa façon de
-la dessiner :
-
-- **En marche** — couleurs pleines, eau animée à la vitesse courante.
-- **Arrêtée** — la même illustration grisée, pas de flux.
-- **Débranchée** — le même grisage, plus le câble d'alimentation qui clignote.
-
-### Écumeur
-
-Trois illustrations distinctes, une par état du godet :
-
-<table>
-  <tr>
-    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_on.png" width="100%"/><br/><b>En marche</b><br/>Mousse dans le godet, bulles qui montent, eau animée</td>
-    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_full.png" width="100%"/><br/><b>Godet plein</b><br/>Mousse réduite à une bande sous le couvercle</td>
-    <td align="center"><img src="../../src/img/redsea/RSRUN/reefrun_skimmer_off.png" width="100%"/><br/><b>Arrêté</b><br/>Godet vide, grisé, plus de bulles</td>
-  </tr>
-</table>
-
-Un écumeur débranché est visuellement identique à un écumeur arrêté : seul le
-câble qui clignote les distingue. Ce clignotement signifie que le ReefRun remonte
-`missing_pump`, donc la pompe est configurée mais le contrôleur ne la voit plus.
-Vérifiez la prise avant de chercher plus loin.
-
-L'état godet plein est remonté par le capteur d'écume situé dans le godet
-collecteur. Le corps bascule sur sa propre illustration et l'animation de mousse
-se réduit à une fine bande sous le couvercle, que l'auto-régulation soit activée
-ou non. L'icône d'alerte clignotante à côté de l'interrupteur godet plein
-n'apparaît que si `sensor_controlled` est actif, puisque capteur désactivé le
-contrôleur n'agit pas sur un godet plein.
-
-### Ajouter une pompe
-
-Un emplacement sans pompe configurée affiche un visuel d'**ajout** à la place du
-corps de pompe :
-
-<img src="../../src/img/redsea/RSRUN/add_pump.png" width="20%"/>
-
-Un clic ouvre le dialogue de configuration, où **Détecter et ajouter** demande
-au contrôleur ce qui est branché et l'enregistre en une seule opération. Le
-modèle détecté n'est qu'une suggestion et se trompe parfois : la liste des
-modèles reste donc modifiable ensuite, pour un DC Skimmer choisissez rsk-300,
-rsk-600 ou rsk-900. Le nom de la pompe s'édite dans le même dialogue.
-
-Le visuel est présent sur tout emplacement non configuré, il apparaît donc aussi
-sur un emplacement que vous ne comptez pas utiliser. Ceux qui n'ont qu'une seule
-pompe peuvent le masquer complètement depuis l'éditeur de carte.
-
-<img src="../img/rsrun/editor.png"/>
-
-### Programme horaire
-
-<img src="../img/rsrun/schedule.png"/>
-
-La courbe bleue est la vitesse programmée sur 24 heures. Le trait rouge vertical
-marque l'heure courante, et le point qui s'y trouve la vitesse demandée par le
-programme.
-
-Quand la pompe ne suit pas son programme — mode nourrissage, détection de
-coupelle pleine, protection contre le sur-écumage — le point se déplace sur la
-vitesse **réelle** et un segment rouge matérialise l'écart, chiffré à côté :
-
-<img src="../img/rsrun/schedule_deviation.png"/>
-
-Un clic sur le graphique ouvre l'éditeur de programme : ajout et suppression de points, modification des heures et des vitesses, aperçu d'un point sur l'appareil, puis enregistrement.
-
-<img src="../img/rsrun/schedule_editor.png"/>
-
-## Messages
-
-<img src="../img/rsrun/zone_6.png"/>
-
----
-
-Cette zone affiche les derniers messages système du ReefRun. Elle comporte deux lignes :
-
-- La ligne grise affiche le **dernier message** reçu.
-- La ligne rose affiche la **dernière alerte**, précédée du symbole ⚠.
-
-Un clic sur l'icône <img src="../img/mdi/mdi_delete-empty.png" width="20"/> efface le message correspondant.
-
-Ces lignes peuvent être masquées depuis l'éditeur de carte.
-
-<img src="../img/rsrun/editor_2.png" />
-
-# ReefWave
-
-Planifié.
-
-Vous souhaitez qu'il soit supporté plus rapidement ? Votez [ici](https://github.com/Elwinmage/ha-reef-card/discussions/22).
-
-# Maintenance
-
-La vue maintenance de ha-reef-card en action :
-
-[![Voir la vidéo](https://img.youtube.com/vi/Ko46fHonOP4/0.jpg)](https://www.youtube.com/watch?v=Ko46fHonOP4)
-
-<img src="../img/maintenance/overview.png"/>
-
-En plus des vues par appareil, la carte propose une vue **Maintenance** qui
-regroupe toutes les échéances de maintenance exposées par
-`ha-reefbeat-component`, `ha-reef-maintenance-component` et
-`ha-aquamedic-component`, comme si l'ensemble du sous-système de maintenance
-était un appareil à part entière. La vue cherche le marqueur que chacune d'elles
-pose sur ses entités, pas une intégration en particulier.
-
-Chaque tâche est affichée sous forme de barre de progression indiquant la part
-de l'intervalle déjà écoulée, avec une couleur qui dépend du temps restant :
-
-| Couleur | Signification                                                    |
-| ------- | ---------------------------------------------------------------- |
-| Vert    | À jour                                                           |
-| Orange  | Échéance proche (derniers 20% de l'intervalle, au moins un jour) |
-| Rouge   | Échéance dépassée, le libellé passe à `+X j`                     |
-| Gris    | Jamais effectuée (aucune remise à zéro enregistrée)              |
-
-Les tâches peuvent être triées **par équipement** (regroupées, avec un en-tête
-par appareil) ou **par échéance** (liste unique, la plus urgente en premier).
-Les tâches jamais effectuées sont toujours placées en fin de liste. Deux filtres se trouvent dans la barre d'outils : une case à cocher masquant
-les tâches encore à jour, et un bouton **Masquer / Afficher les silencieuses**
-masquant les tâches dont l'interrupteur de notification est coupé. Le bouton
-démarre en position « afficher », pour que couper une alerte ne fasse jamais
-disparaître une échéance de lui-même. Ce défaut se règle depuis l'éditeur de
-carte (ou via `hide_muted` ci-dessous), et le bouton permet toujours de le
-contourner ponctuellement.
-
-Un clic sur une ligne ouvre la fenêtre d'informations Home Assistant de la
-tâche, et le bouton rond à droite marque la tâche comme effectuée (il actionne
-l'entité `button` sous-jacente, exactement comme le ferait la fenêtre
-d'informations).
-
-La vue n'apparaît dans le sélecteur d'appareils que si au moins une tâche de
-maintenance existe dans votre installation. Les nouvelles tâches ajoutées au
-catalogue de l'intégration apparaissent automatiquement, sans mise à jour de la
-carte.
-
-### Notifications
-
-Chaque tâche dispose aussi d'un **interrupteur de notification** dans
-l'intégration (`switch.*_notify`, affiché « <nom de la tâche> (notifications) »).
-Le désactiver coupe l'alerte de retard de cette seule tâche sans toucher à son
-échéancier : la barre de progression continue d'avancer, la ligne est
-simplement estompée et la cloche s'éteint.
-
-La cloche à droite de chaque ligne bascule directement cet interrupteur. Elle
-n'apparaît que si l'intégration expose l'interrupteur. Mettez
-`show_notify: false` pour masquer les cloches.
-
-Le blueprint d'alertes lit exactement le même réglage : couper une tâche depuis
-la carte fait donc aussi taire l'automatisation.
-
-### Modifier l'intervalle
-
-Le bouton calendrier de chaque ligne déplie un curseur qui écrit dans l'entité
-`number` d'intervalle de la tâche. Le curseur travaille dans l'unité que
-l'intégration annonce pour cette tâche (jours, semaines ou mois, lue depuis son
-rôle), et l'intégration reconvertit en jours avant stockage. Les bornes
-proviennent de l'entité elle-même, la carte ne peut donc jamais écrire une
-valeur hors plage. Un seul éditeur reste ouvert à la fois. Mettez
-`show_interval: false` pour masquer les boutons.
-
-### Filtrer par appareil
-
-Par défaut, la vue liste les tâches de tous les appareils. Le bloc **Filtrer par
-appareil** de l'éditeur de carte permet de la restreindre : cochez un ou
-plusieurs appareils et seules leurs tâches sont conservées, compteurs compris.
-
-<img src="../img/maintenance/editor_devices.png"/>
-
-La liste contient une entrée par contrôleur, avec le nombre de tâches qui lui
-sont rattachées. Les sous-appareils (têtes ReefDose, pompes ReefRun) sont
-regroupés sous leur contrôleur grâce au lien `via_device` du registre Home
-Assistant : cocher **RSDose4** conserve donc les tâches des quatre têtes. Aucune
-case cochée signifie « pas de filtre » : tous les appareils sont affichés, ce que
-rétablit aussi le raccourci **Afficher tous les appareils**.
-
-La sélection est enregistrée sous forme de noms d'appareils (voir `devices`
-ci-dessous), pour garder un YAML lisible. Un nom saisi à la main correspond aussi
-à ses sous-appareils par préfixe, ce qui couvre les installations où
-`via_device` n'est pas déclaré. Les appareils sans nom sont identifiés par leur
-identifiant Home Assistant.
-
-### Pompes ReefRun
-
-Les sous-appareils ReefRun s'appellent « … pump 1 » / « … pump 2 », ce qui ne
-dit rien de ce qu'est réellement chaque pompe. Quand l'appareil expose à la fois
-un capteur `type` et un capteur `model`, la carte les ajoute entre parenthèses :
-**ReefRun pump 1 (Retour 12000)**, **ReefRun pump 2 (Écumeur 900)**.
-
-Le type est traduit, et seul le nombre final du modèle est conservé
-(`return-12000` -> `12000`, `rsk-900` -> `900`), le préfixe étant soit redondant
-avec le type, soit obscur. Les appareils qui ne sont pas des pompes gardent leur
-nom tel quel.
-
-## Icônes
-
-| Icône                                                                                                    | Rôle                                                                             |
-| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| <img src="../img/mdi/mdi_check.png" width="20"/>                                                         | **Tâche réalisée.** Marque la tâche comme faite et relance son compte à rebours. |
-| <img src="../img/mdi/mdi_bell-ring.png" width="20"/> <img src="../img/mdi/mdi_bell-off.png" width="20"/> | **Sourdine.** Bascule l'interrupteur de notification de cette seule tâche.       |
-| <img src="../img/mdi/mdi_calendar-edit.png" width="20"/>                                                 | **Changer l'intervalle.** Déplie un curseur relié à l'intervalle de la tâche.    |
-
-## Éditeur
-
-L'état par défaut des filtres, le filtre par appareil et la visibilité des trois
-boutons se règlent depuis l'éditeur de carte.
-
-<img src="../img/maintenance/editor.png"/>
-
-## Configuration
-
-```yaml
-type: custom:reef-card
-device: __maintenance__
-maintenance:
-  sort: due # "device" (défaut) ou "due"
-  devices: # n'afficher que les tâches de ces appareils (vide : tous)
-    - SIMU-RSDOSE4
-    - SIMU-RSATO
-  hide_ok: false # masquer les tâches ni dépassées ni proches
-  hide_muted: false # masquer les tâches dont les notifications sont coupées
-  warning_ratio: 0.2 # part de l'intervalle affichée en orange
-  show_reset: true # afficher le bouton « marquer comme effectuée »
-  show_notify: true # afficher la cloche activer/couper les alertes
-  show_interval: true # afficher le bouton de modification de l'intervalle
-```
-
-Toutes les clés de `maintenance` sont optionnelles. `sort` et `hide_ok` ne
-définissent que l'état initial : l'utilisateur peut toujours les modifier
-depuis la vue elle-même. `devices` accepte aussi bien des noms d'appareils que
-des identifiants Home Assistant ; une liste vide (le défaut) désactive le
-filtre.
 
 # FAQ
 
