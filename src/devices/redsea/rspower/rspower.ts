@@ -913,6 +913,17 @@ export class RSPower extends RSDevice {
    * @return the CSS class to apply, empty for the normal state
    */
   linked_device_class(socket: number): string {
+    // Only Red Sea devices report a status this reading understands: an
+    // appliance from another integration (Aqua Medic...) names its entities
+    // differently and would blink for no reason, so it is drawn plain.
+    const device_id = this.linked_device_id(socket);
+    const identifiers = device_id
+      ? this._hass?.devices?.[device_id]?.identifiers
+      : undefined;
+    const domain = domain_of(identifiers);
+    if (domain !== undefined && domain !== "redsea") {
+      return "";
+    }
     const mode = this.linked_device_mode(socket);
     if (mode === "auto") {
       return "";

@@ -1499,6 +1499,41 @@ describe("RSPower.linked_device_hwid", () => {
 
 // ─── Health of a pump, which has no mode ────────────────────────────────────
 
+describe("RSPower.linked_device_class — other integrations", () => {
+  it("never blinks for a device outside Red Sea", () => {
+    for (const mode of [null, "manual", "off", "unavailable"]) {
+      const dev = makeLinkedPowerStrip(
+        {
+          id: "d-led",
+          model: "DC Runner",
+          identifiers: [["aquamedic", "did-1"]],
+        },
+        mode === null
+          ? {}
+          : {
+              "select.mode": {
+                entity_id: "select.mode",
+                device_id: "d-led",
+                translation_key: "mode",
+              },
+            },
+        mode === null ? {} : { "select.mode": { state: mode } },
+      );
+      expect(dev.linked_device_class(1)).toBe("");
+    }
+  });
+
+  it("keeps the status reading for a Red Sea device", () => {
+    const dev = makeLinkedPowerStrip({
+      id: "d-led",
+      model: "RSDOSE4",
+      identifiers: [["redsea", "DOSE1"]],
+    });
+    // No mode and no state entity: worth a look
+    expect(dev.linked_device_class(1)).toBe("blink-alert");
+  });
+});
+
 describe("RSPower.linked_device_class — ReefRun pumps", () => {
   /** A strip linked to a pump reporting the given state and no mode. */
   function pumpInState(state: string | null): any {
