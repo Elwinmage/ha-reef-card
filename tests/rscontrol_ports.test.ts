@@ -1134,6 +1134,8 @@ describe("RSControl summary", () => {
   it("is placed in the picture layer with the probes and ports", () => {
     const hub = makeHub(makeHass(fullSpecs()));
     hub._render_elements = vi.fn(() => "");
+    // Ports and summary are drawn while the hub is on
+    hub.is_on = () => true;
     const dom = toDom(hub._render("", ""));
     const layer = dom.querySelector(".canvas_layer")!;
     expect(layer.querySelector(".summary")).not.toBeNull();
@@ -1330,7 +1332,7 @@ describe("RSControl probe slots", () => {
     expect(hub.requestUpdate).toHaveBeenCalledTimes(2);
   });
 
-  it("names probes by their name, else by their type", () => {
+  it("names probes by their name, else by their translated type", () => {
     const hub = makeHub(
       makeHass([
         ...probes(1),
@@ -1340,7 +1342,7 @@ describe("RSControl probe slots", () => {
       ]),
     );
     expect(hub.probe_label(hub._all_probes[0])).toBe("Sump ORP (0x0)");
-    expect(hub.probe_label(hub._all_probes[1])).toBe("ph (0x9)");
+    expect(hub.probe_label(hub._all_probes[1])).toBe("pH 9 (0x9)");
   });
 });
 

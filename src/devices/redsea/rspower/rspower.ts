@@ -402,6 +402,7 @@ export class RSPower extends RSDevice {
     if ("power_socket" in this._sockets[socket_id]) {
       // Reuse existing LitElement
       const ps = this._sockets[socket_id].power_socket;
+      (ps as any).device_on = this.is_on();
       ps.update_state(this.is_on());
       ps.hass = this._hass;
     } else {
@@ -419,6 +420,7 @@ export class RSPower extends RSDevice {
           ...this.entities,
         };
         ps.config = socket_conf;
+        (ps as any).device_on = this.is_on();
         (ps as any).update_state(this.is_on());
         this._sockets[socket_id].power_socket = ps;
       }

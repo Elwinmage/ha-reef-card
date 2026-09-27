@@ -782,6 +782,7 @@ export class MyElement extends LitElement {
       this.conf?.tap_action &&
       (!this.device ||
         this.device.masterOn ||
+        this.conf?.off_clickable === true ||
         ["device_state", "trash", "wifi"].includes(this.conf?.name))
     ) {
       this.run_actions(this.conf.tap_action, this.conf.timer);
@@ -796,6 +797,7 @@ export class MyElement extends LitElement {
       this.conf?.hold_action &&
       (!this.device ||
         this.device.masterOn ||
+        this.conf?.off_clickable === true ||
         ["device_state", "trash", "wifi"].includes(this.conf?.name))
     ) {
       this.run_actions(this.conf.hold_action, this.conf.timer);
@@ -810,6 +812,7 @@ export class MyElement extends LitElement {
       this.conf?.double_tap_action &&
       (!this.device ||
         this.device.masterOn ||
+        this.conf?.off_clickable === true ||
         ["device_state", "trash", "wifi"].includes(this.conf?.name))
     ) {
       this.run_actions(this.conf.double_tap_action, this.conf.timer);

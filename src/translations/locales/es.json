@@ -238,5 +238,11 @@
   "calibration_ph_high": "pH 10 (agua salada)",
   "calibration_ph_low": "pH 4 (agua dulce)",
   "probe_calibrate_temperature": "Calibrar la temperatura",
-  "calibration_dip_temperature": "Sumerja la sonda en agua de temperatura conocida (medida con un termómetro de referencia), espere a que la medida se estabilice e introduzca la temperatura real"
+  "calibration_dip_temperature": "Sumerja la sonda en agua de temperatura conocida (medida con un termómetro de referencia), espere a que la medida se estabilice e introduzca la temperatura real",
+  "probe_type_ph": "pH",
+  "probe_type_orp": "ORP",
+  "probe_type_ec": "Salinidad",
+  "probe_type_temperature": "Temperatura",
+  "probe_type_ato": "ATO",
+  "probe_type_leak": "Fuga"
 }

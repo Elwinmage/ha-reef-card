@@ -1,5 +1,6 @@
 import {
   links,
+  off_keep,
   pro_extends,
   power_sockets,
   probes,
@@ -28,4 +29,5 @@ export const config2 = {
   ports: pro_ports,
   power_sockets: power_sockets,
   summary: summary,
+  off_keep: off_keep,
 };

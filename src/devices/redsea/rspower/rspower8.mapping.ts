@@ -1,5 +1,6 @@
 import {
   elements,
+  off_keep,
   socket_common,
   socket_slots,
 } from "./rspower.common.mapping";
@@ -16,6 +17,7 @@ export const config2 = {
   },
   sockets_nb: 8,
   elements: elements,
+  off_keep: off_keep,
   sockets: {
     common: socket_common({
       width: "10.8%",

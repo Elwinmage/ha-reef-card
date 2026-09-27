@@ -41,6 +41,7 @@ import {
   sign_side,
 } from "../../../utils/levels";
 import type { ProbeLevel } from "../../../utils/levels";
+import i18n from "../../../translations/myi18n";
 
 // Re-exported: they were first written here, for the probes
 export {
@@ -164,6 +165,67 @@ interface BarSeries {
   ranges: number[] | null;
 }
 
+// ─── Probe title ─────────────────────────────────────────────────────────────
+
+/** Translation key of each probe type's name, for the titles. */
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  ph: "probe_type_ph",
+  orp: "probe_type_orp",
+  ec: "probe_type_ec",
+  temperature: "probe_type_temperature",
+  ato: "probe_type_ato",
+  leak: "probe_type_leak",
+};
+
+/** Names the hub gives a probe of each type when nothing else names it. */
+const HUB_DEFAULT_NAMES: Record<string, string> = {
+  ph: "ph",
+  orp: "orp",
+  ec: "ec",
+  temperature: "temperature",
+  ato: "ato",
+  leak: "leak",
+};
+
+/**
+ * Title of a probe, in the language of the card.
+ *
+ * A probe is named when it is installed, in the language of whatever
+ * installed it: the ReefBeat app writes its type then its uid digits
+ * ("Salinité 7BF", "Fuite 32B"), the integration "Leak 32B", the hub alone
+ * just the type. Such a name is not the user's: shown as is, a French app
+ * puts French in an English dashboard. It is rewritten with the type in the
+ * card's language and the same digits. A name the user chose is kept.
+ * @param name: the name the hub reports, empty when there is none
+ * @param type: the probe type (ph, orp, ec, temperature, ato, leak)
+ * @param uid: the probe uid, e.g. 0x007BF
+ * @return the title to show
+ */
+export function probe_title(name: string, type: string, uid: string): string {
+  const key = TYPE_LABEL_KEYS[type];
+  const label = key ? i18n._(key) : type;
+  const digits = String(uid || "")
+    .replace(/^0x/i, "")
+    .replace(/^0+/, "")
+    .toUpperCase();
+  const trimmed = String(name || "").trim();
+  if (!trimmed) {
+    return digits ? `${label} ${digits}` : label;
+  }
+  // "<type in any language> <uid digits>": the default name of an install
+  if (digits && trimmed.toUpperCase().endsWith(` ${digits}`)) {
+    const head = trimmed.slice(0, -(digits.length + 1)).trim();
+    // A single word or two before the digits: a type name, not a sentence
+    if (head && head.split(/\s+/).length <= 2) {
+      return `${label} ${digits}`;
+    }
+  }
+  if (trimmed.toLowerCase() === HUB_DEFAULT_NAMES[type]) {
+    return digits ? `${label} ${digits}` : label;
+  }
+  return trimmed;
+}
+
 // ─── Element ─────────────────────────────────────────────────────────────────
 
 export class ControlProbe extends RSDevice {
@@ -208,6 +270,19 @@ export class ControlProbe extends RSDevice {
   update_state(value: boolean): void {
     this.state_on = value;
     this.requestUpdate();
+  }
+
+  /**
+   * Title of this probe in the card's language, for the dialogs.
+   * @return the translated default name, or the name the user chose
+   */
+  display_name(): string {
+    const name = this.get_entity("probe_name")?.state;
+    return probe_title(
+      name && !["unknown", "unavailable"].includes(name) ? name : "",
+      this.probe_type,
+      this.probe_uid,
+    );
   }
 
   /**
@@ -425,6 +500,17 @@ export class ControlProbe extends RSDevice {
     }
     const view = this.view();
     const box_style = this.get_style({ css: view.img_css });
+    if (!this.state_on) {
+      // Hub switched off: the probe is still there, but it measures nothing,
+      // so only its picture is drawn (no value, bar, cog or alert)
+      return html`
+        <div class="probe">
+          <div class="probe_box" style="${box_style}">
+            <img class="probe_img off" src="${this.probe_image()}" alt="" />
+          </div>
+        </div>
+      `;
+    }
     const alert = this.is_disconnected()
       ? "blink-alert"
       : this.leak_muted()

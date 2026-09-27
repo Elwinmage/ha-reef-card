@@ -5,6 +5,7 @@ import { config2 } from "./rscontrolpro.mapping";
 import {
   probe_aliases,
   probe_disconnected,
+  probe_title,
   reading_level,
   level_color,
   PRIMARY_KEYS,
@@ -876,11 +877,17 @@ export class RSControl extends RSDevice {
       <div class="canvas_layer">
         ${this._render_socket_masks()}
         ${this._probes.map((probe) => this._render_probe(probe, probe.slot))}
-        ${Array.from(
-          { length: Number(this.config.ports?.nb ?? 0) },
-          (_, i) => i + 1,
-        ).map((port) => this._render_port(port))}
-        ${this._render_summary()}
+        ${
+          // Switched off, the hub drives no port and reads no probe: no port
+          // settings, no summary
+          this.is_on()
+            ? html`${Array.from(
+                { length: Number(this.config.ports?.nb ?? 0) },
+                (_, i) => i + 1,
+              ).map((port) => this._render_port(port))}
+              ${this._render_summary()}`
+            : nothing
+        }
       </div>
     </div>`;
   }
@@ -906,9 +913,12 @@ export class RSControl extends RSDevice {
    */
   probe_label(probe: ProbeEntity): string {
     const name = this._probe_state(probe, "probe_name")?.state;
-    return name && !EMPTY_STATES.includes(name)
-      ? `${name} (${probe.uid})`
-      : `${probe.type} (${probe.uid})`;
+    const title = probe_title(
+      name && !EMPTY_STATES.includes(name) ? name : "",
+      probe.type,
+      probe.uid,
+    );
+    return `${title} (${probe.uid})`;
   }
 
   /**

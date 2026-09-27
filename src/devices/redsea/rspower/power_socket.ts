@@ -43,6 +43,8 @@ export class PowerSocket extends RSDevice {
   state_on: boolean = false;
   socket_state: string | null = null;
   socket_id: number = 0;
+  /** Whether the strip itself is on: off, the socket only shows its link */
+  device_on: boolean = true;
 
   constructor() {
     super();
@@ -87,7 +89,10 @@ export class PowerSocket extends RSDevice {
       return html``;
     }
 
-    this.state_on = this.is_on();
+    // A socket of a strip switched off is not powered, whatever its mode
+    this.state_on = this.device_on && this.is_on();
+    // The strip's own state decides what is drawn (see `off_keep`)
+    this.masterOn = this.device_on;
 
     return html`
       <div class="socket_container">

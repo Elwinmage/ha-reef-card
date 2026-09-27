@@ -58,6 +58,25 @@ ZONE_SETS = {
         (449, 550, 875, 1004),  # 6 aquarium: level probe, temperature, usage
         (0, 341, 872, 434),  # 7 last message / last alert message
     ],
+    # 596x525 ReefControl-Power (RSPOWER6) render
+    "rspower": [
+        (95, 45, 160, 76),  # 1 power state / maintenance mode
+        (438, 45, 538, 76),  # 2 configuration, wifi & battery
+        (95, 78, 586, 188),  # 3 power sockets: mode, consumption, sockets
+        (36, 92, 84, 474),  # 4 temperature probe or ReefControl link
+        (98, 190, 486, 426),  # 5 linked devices
+        (40, 494, 594, 523),  # 6 last message / last alert message
+    ],
+    # 594x692 ReefControl Pro render
+    "rscontrol": [
+        (375, 26, 552, 96),  # 1 controller head: state, config, wifi, buzzer
+        (46, 85, 326, 149),  # 2 paired power center
+        (12, 195, 390, 221),  # 3 summary of the readings
+        (12, 223, 444, 682),  # 4 probes
+        (444, 100, 512, 182),  # 5 12V ports
+        (448, 285, 560, 640),  # 6 ATO pump
+        (8, 23, 342, 58),  # 7 last message / last alert message
+    ],
 }
 DEFAULT_DEVICE = "rsrun"
 

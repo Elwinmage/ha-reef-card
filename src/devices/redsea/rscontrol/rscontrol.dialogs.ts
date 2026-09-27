@@ -74,7 +74,7 @@ function calibration_dialog(name: string, text: string, controls: any[]): any {
   return {
     name: `probe_calibration_${name}`,
     title_key:
-      "${i18n._('probe_calibration')} ${entity.probe_name?.state || ''}",
+      "${i18n._('probe_calibration')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''}",
     close_cross: false,
     content: [
       ...(picture
@@ -160,12 +160,12 @@ export const dialogs_rscontrol = {
   probe_history: history_dialog(
     "probe_history",
     "probe_primary",
-    "${i18n._('history_24h')} ${entity.probe_name?.state || ''}",
+    "${i18n._('history_24h')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''}",
   ),
   probe_temp_history: history_dialog(
     "probe_temp_history",
     "probe_secondary",
-    "${i18n._('history_24h')} ${entity.probe_name?.state || ''} · ${i18n._('temperature')}",
+    "${i18n._('history_24h')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''} · ${i18n._('temperature')}",
   ),
 
   /**
@@ -322,7 +322,7 @@ export const dialogs_rscontrol = {
   probe_conf: {
     name: "probe_conf",
     title_key:
-      "${i18n._('dialog_probe_conf')} ${entity.probe_name?.state || ''}",
+      "${i18n._('dialog_probe_conf')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''}",
     close_cross: false,
     content: [
       {

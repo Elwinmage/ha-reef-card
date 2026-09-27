@@ -281,6 +281,34 @@ export const links = {
   ),
 };
 
+/**
+ * What stays on the card while the hub is switched off: its on/off switch
+ * and the pictures of the hardware (extension boxes, cables, the paired
+ * strip, an ATO pump). Readings, settings, the buzzer and every "powered"
+ * light go, since the hub measures and drives nothing. Keys a model does not
+ * declare are simply ignored.
+ */
+export const off_keep: string[] = [
+  "device_state",
+  "port_extend_lite",
+  "port_extend_1",
+  "port_extend_2",
+  "link_sense_1",
+  "link_sense_2",
+  "link_sense_3",
+  "link_sense_4",
+  "link_sense_4E",
+  "link_sense_5",
+  "link_sense_6",
+  "link_sense_7",
+  "link_power",
+  "link_ato_1",
+  "link_ato_2",
+  "ato_pump",
+  "rspower6",
+  "rspower8",
+];
+
 // ── Device-level widgets ───────────────────────────────────────────────────
 
 export const widgets = {

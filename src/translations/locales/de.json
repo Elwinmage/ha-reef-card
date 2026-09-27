@@ -238,5 +238,11 @@
   "calibration_ph_high": "pH 10 (Meerwasser)",
   "calibration_ph_low": "pH 4 (Süßwasser)",
   "probe_calibrate_temperature": "Temperatur kalibrieren",
-  "calibration_dip_temperature": "Tauchen Sie die Sonde in Wasser bekannter Temperatur (mit einem Referenzthermometer gemessen), warten Sie, bis sich der Messwert stabilisiert, und geben Sie dann die tatsächliche Temperatur ein"
+  "calibration_dip_temperature": "Tauchen Sie die Sonde in Wasser bekannter Temperatur (mit einem Referenzthermometer gemessen), warten Sie, bis sich der Messwert stabilisiert, und geben Sie dann die tatsächliche Temperatur ein",
+  "probe_type_ph": "pH",
+  "probe_type_orp": "ORP",
+  "probe_type_ec": "Salinität",
+  "probe_type_temperature": "Temperatur",
+  "probe_type_ato": "ATO",
+  "probe_type_leak": "Leck"
 }

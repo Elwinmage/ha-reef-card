@@ -21,7 +21,8 @@ export const elements = {
     // same corner, so the probe steps aside rather than overlapping.
     disabled_if: "!device.has_temperature_link()",
     no_br_if_disabled: true,
-    class: "${device.temperature_link_alert() ? 'blink-alert' : ''}",
+    class:
+      "${device.is_on() && device.temperature_link_alert() ? 'blink-alert' : ''}",
     image: new URL(
       "../../../img/redsea/RSPOWER/rssense-temperature-power.png",
       import.meta.url,
@@ -42,8 +43,10 @@ export const elements = {
     type: "click-image",
     disabled_if: "!device.has_control_link()",
     no_br_if_disabled: true,
-    // Paired but unreachable: blink under a light red tint.
-    class: "${device.control_link_alert() ? 'blink-alert' : ''}",
+    // Paired but unreachable: blink under a light red tint (not while the
+    // strip is off: it reads nothing from the hub then)
+    class:
+      "${device.is_on() && device.control_link_alert() ? 'blink-alert' : ''}",
     image: new URL(
       "../../../img/redsea/RSPOWER/rscontrol_rspower_link.png",
       import.meta.url,
@@ -72,6 +75,8 @@ export const elements = {
     // clickable label leading nowhere is worse than no label.
     disabled_if: "!device.linked_control_name()",
     no_br_if_disabled: true,
+    // A link to another device: still followed while the strip is off
+    off_clickable: true,
     tap_action: {
       domain: "redsea_ui",
       action: "show_device",
@@ -338,6 +343,18 @@ export const elements = {
   },
 };
 
+/**
+ * What stays on the card while the strip is switched off: its on/off switch,
+ * the picture of its local probe or of the paired hub, and the link to that
+ * hub. Readings, settings and the sockets' controls go.
+ */
+export const off_keep: string[] = [
+  "device_state",
+  "rssense_temperature",
+  "rscontrol_link",
+  "rscontrol_name",
+];
+
 /** What sets the sockets of a model apart. */
 export interface SocketGeometry {
   /** Width of a socket, in % of the picture */
@@ -358,6 +375,8 @@ export interface SocketGeometry {
 export function socket_common(geometry: SocketGeometry): Record<string, any> {
   return {
     alpha: "0.2",
+    // Strip switched off: a socket only keeps the device plugged into it
+    off_keep: ["linked_thumbnail"],
     css: {
       top: "9.5%",
       position: "absolute",
@@ -455,6 +474,8 @@ export function socket_common(geometry: SocketGeometry): Record<string, any> {
         disabled_if: "!device.linked_image()",
         no_br_if_disabled: true,
         class: "${device.linked_class()}",
+        // A link to another device: still followed while the strip is off
+        off_clickable: true,
         tap_action: {
           domain: "redsea_ui",
           action: "show_device",

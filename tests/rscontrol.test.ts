@@ -1227,3 +1227,110 @@ describe("RSControl mapping expressions", () => {
     );
   });
 });
+
+// ─── Hub switched off ───────────────────────────────────────────────────────
+
+describe("RSControl switched off", () => {
+  const specs = (state: string): Spec[] => [
+    { id: "switch.hub_state", key: "device_state", state },
+    probeSpec("sensor.orp", "probe_orp_value", "300", "orp", "0x1", 0),
+    {
+      id: "sensor.hub_port_1_mode",
+      key: "port_mode",
+      state: "on",
+      attrs: { port: 0 },
+    },
+  ];
+
+  it("keeps only the on/off switch and the hardware pictures", () => {
+    const hub = makeHub(makeHass(specs("off")));
+    hub.masterOn = false;
+    const drawn: string[] = [];
+    hub._render_element = vi.fn(
+      (_conf: any, _state: any, _put: any, key: string) => {
+        drawn.push(key);
+        return "";
+      },
+    );
+    hub._render_elements(false);
+    expect(drawn).toContain("device_state");
+    expect(drawn).toContain("link_sense_1");
+    for (const gone of [
+      "buzzer",
+      "configuration",
+      "wifi_quality",
+      "maintenance",
+      "mode",
+      "last_message",
+      "last_alert_message",
+      "is_on_sensors",
+      "is_on_12v_1",
+      "ato_flow",
+      "ato_reservoir",
+    ]) {
+      expect(drawn).not.toContain(gone);
+    }
+  });
+
+  it("draws every element while on", () => {
+    const hub = makeHub(makeHass(specs("on")));
+    hub.masterOn = true;
+    const drawn: string[] = [];
+    hub._render_element = vi.fn((_c: any, _s: any, _p: any, key: string) => {
+      drawn.push(key);
+      return "";
+    });
+    hub._render_elements(true);
+    expect(drawn).toEqual(Object.keys(hub.config.elements));
+  });
+
+  it("draws no port settings and no summary", () => {
+    const off = makeHub(makeHass(specs("off")));
+    off._render_elements = vi.fn(() => "");
+    const dom = toDom(off._render("", ""));
+    expect(dom.querySelectorAll(".probe_slot").length).toBe(1);
+    expect(dom.querySelector(".port_slot")).toBeNull();
+    expect(dom.querySelector(".summary")).toBeNull();
+
+    const on = makeHub(makeHass(specs("on")));
+    on._render_elements = vi.fn(() => "");
+    const dom_on = toDom(on._render("", ""));
+    expect(dom_on.querySelector(".port_slot")).not.toBeNull();
+  });
+
+  it("draws only the picture of a probe: no value, bar, cog or alert", () => {
+    const probe = makeProbe(
+      "orp",
+      { probe_status: { state: "disconnected" } },
+      {
+        image: "orp.png",
+        img_css: {},
+        bar: { top: 50, bottom: 100, left: [0, 20] },
+      },
+    );
+    probe._render_elements = vi.fn(() => "");
+    probe.state_on = false;
+    const dom = toDom(probe._render());
+    expect(probe._render_elements).not.toHaveBeenCalled();
+    expect(dom.querySelector("svg.bars")).toBeNull();
+    expect(dom.querySelector(".probe")!.classList.contains("blink-alert")).toBe(
+      false,
+    );
+    expect(dom.querySelector("img.probe_img.off")).not.toBeNull();
+  });
+
+  it.each([
+    ["lite", liteConfig],
+    ["pro", proConfig],
+  ])("%s: keeps the switch and only pictures", (_name, conf: any) => {
+    expect(conf.off_keep).toContain("device_state");
+    for (const key of conf.off_keep) {
+      const elt = conf.elements[key];
+      if (!elt || key === "device_state") continue;
+      // Pictures only: nothing that reads or drives the hub
+      expect(elt.type).toBe("click-image");
+      expect(elt.image).toBeDefined();
+      expect(elt.tap_action).toBeUndefined();
+    }
+  });
+});

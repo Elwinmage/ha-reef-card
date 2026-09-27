@@ -224,11 +224,13 @@ describe("ControlProbe dots", () => {
     };
     const bar = { top: 50, bottom: 100, left: [0, 20] };
     const compact = makeProbe("orp", states, { bar, dots, compact: true });
+    compact.state_on = true;
     compact._render_elements = vi.fn(() => "");
     const dom = toDom(compact._render());
     expect(dom.querySelector(".dot")).not.toBeNull();
     expect(dom.querySelector(".bars")).toBeNull();
     const full = makeProbe("orp", states, { bar, dots });
+    full.state_on = true;
     full._render_elements = vi.fn(() => "");
     const dom2 = toDom(full._render());
     expect(dom2.querySelector(".dot")).toBeNull();
@@ -658,6 +660,7 @@ describe("RSControl connectivity and leak detection", () => {
       { image: "leak.png" },
     );
     probe._render_elements = vi.fn(() => "");
+    probe.state_on = true;
     const dom = toDom(probe._render());
     expect(dom.querySelector(".probe")!.classList.contains("muted")).toBe(true);
   });

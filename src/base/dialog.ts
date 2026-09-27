@@ -73,6 +73,9 @@ export class Dialog extends LitElement {
       );
       const context = {
         config: this.elt.device.config,
+        // The element behind the dialog, for titles computed by the device
+        // (a probe's name in the card's language, say)
+        device: this.elt.device,
         i18n: i18n,
         entity: entitiesObj,
       };

@@ -930,7 +930,15 @@ export class RSDevice extends LitElement {
    */
   _render_elements(state: boolean, put_in: string | null = null) {
     const elements: any[] = [];
+    // A device switched off may keep only some of its elements (its on/off
+    // switch, the pictures of its hardware): the mapping lists them in
+    // `off_keep`. Without that list every element stays, greyed out.
+    const keep: string[] | null =
+      !this.masterOn && Array.isArray(this.config.off_keep)
+        ? this.config.off_keep
+        : null;
     for (const i in this.config.elements) {
+      if (keep && !keep.includes(i)) continue;
       elements.push({ conf: this.config.elements[i], key: i });
     }
     return html`${elements.map(({ conf, key }) =>

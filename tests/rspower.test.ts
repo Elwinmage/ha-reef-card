@@ -11,6 +11,9 @@ import {
 import { PowerSocket } from "../src/devices/redsea/rspower/power_socket";
 import { RSDevice } from "../src/devices/device";
 import { socket_common } from "../src/devices/redsea/rspower/rspower.common.mapping";
+import { config as power6Config } from "../src/devices/redsea/rspower/rspower6.mapping";
+import { config2 as power8Config } from "../src/devices/redsea/rspower/rspower8.mapping";
+import { MyElement } from "../src/base/element";
 // Registers every device tag: linked_device_image resolves a model to its
 // registered element to borrow that mapping's picture.
 import "../src/devices/index";
@@ -2224,5 +2227,117 @@ describe("RSPower socket link — recording the resolved model", () => {
     };
     const sockets = changeLinkOn(dev, 1, "");
     expect(sockets.socket_1).not.toHaveProperty("linked_model");
+  });
+});
+
+// ─── Strip switched off ─────────────────────────────────────────────────────
+
+class StubOffElement extends MyElement {}
+if (!customElements.get("stub-off-element"))
+  customElements.define("stub-off-element", StubOffElement);
+
+describe("RSPower switched off", () => {
+  /** Keys a device draws, from _render_element calls. */
+  function drawn(dev: any, on: boolean): string[] {
+    const keys: string[] = [];
+    dev._render_element = vi.fn((_c: any, _s: any, _p: any, key: string) => {
+      keys.push(key);
+      return "";
+    });
+    dev.masterOn = on;
+    dev._render_elements(on);
+    return keys;
+  }
+
+  it("keeps the switch, the probe or hub picture and the hub link", () => {
+    const dev = new StubRSPower6() as any;
+    dev.config = { ...power6Config };
+    const keys = drawn(dev, false);
+    expect(keys).toEqual([
+      "rssense_temperature",
+      "rscontrol_link",
+      "rscontrol_name",
+      "device_state",
+    ]);
+    expect(drawn(dev, true).length).toBe(
+      Object.keys(power6Config.elements).length,
+    );
+  });
+
+  it("a socket only keeps the device plugged into it", () => {
+    const ps = new StubPowerSocket() as any;
+    ps.config = socket_common({
+      width: "10%",
+      name_top: "0%",
+      button_top: "0%",
+      button_radius: "0%",
+    });
+    ps._hass = makeHass({
+      "sensor.mode": { state: "on" },
+      "sensor.state": { state: "on" },
+    });
+    ps.entities = {
+      socket_mode: { entity_id: "sensor.mode" },
+      socket_state: { entity_id: "sensor.state" },
+    };
+    const keys: string[] = [];
+    ps._render_element = vi.fn((_c: any, _s: any, _p: any, key: string) => {
+      keys.push(key);
+      return "";
+    });
+
+    ps.device_on = false;
+    ps._render();
+    expect(keys).toEqual(["linked_thumbnail"]);
+    // Not powered, whatever its own mode says: the pipe goes grey
+    expect(ps.state_on).toBe(false);
+
+    keys.length = 0;
+    ps.device_on = true;
+    ps._render();
+    expect(keys).toContain("socket_on_off");
+    expect(ps.state_on).toBe(true);
+  });
+
+  it("hands the strip state to its sockets", () => {
+    const dev = new StubRSPower6() as any;
+    dev.config = { ...power6Config };
+    dev._hass = makeHass();
+    dev.entities = {};
+    dev._sockets = [{ entities: {} }, { entities: {} }];
+    dev.is_on = () => false;
+    dev._render_socket(1);
+    expect(dev._sockets[1].power_socket.device_on).toBe(false);
+    dev.is_on = () => true;
+    dev._render_socket(1);
+    expect(dev._sockets[1].power_socket.device_on).toBe(true);
+  });
+
+  it.each([
+    ["6", power6Config],
+    ["8", power8Config],
+  ])("RSPOWER%s: links to other devices stay clickable", (_n, conf: any) => {
+    expect(conf.off_keep).toContain("device_state");
+    expect(conf.elements.rscontrol_name.off_clickable).toBe(true);
+    expect(conf.sockets.common.elements.linked_thumbnail.off_clickable).toBe(
+      true,
+    );
+    expect(conf.sockets.common.off_keep).toEqual(["linked_thumbnail"]);
+  });
+
+  it("a click on an off_clickable element runs on a device switched off", () => {
+    const elt = new StubOffElement() as any;
+    elt.run_actions = vi.fn();
+    elt.device = { masterOn: false };
+    elt.conf = { name: "rscontrol_name", tap_action: { action: "x" } };
+    elt._click();
+    expect(elt.run_actions).not.toHaveBeenCalled();
+    elt.conf.off_clickable = true;
+    elt._click();
+    elt.conf.hold_action = { action: "y" };
+    elt._longclick();
+    elt.conf.double_tap_action = { action: "z" };
+    elt._dblclick();
+    expect(elt.run_actions).toHaveBeenCalledTimes(3);
   });
 });

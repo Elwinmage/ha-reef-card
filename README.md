@@ -117,7 +117,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   </tr>
   <tr>
     <td rowspan="2"><a href="#reefcontrol">ReefControl</a></td>
-    <td>RSCONTROLPRO</td><td>❌</td>
+    <td>RSCONTROLPRO</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROLPRO.png"/></td>
     <td rowspan="2">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rscontrol,all label:enhancement" style="text-decoration:none">📆</a>
@@ -125,12 +125,12 @@ All of them are documented together on the [ReefTech project page](https://elwin
     </td>
   </tr>
   <tr>
-    <td>RSCONTROLLITE</td><td>❌</td>
+    <td>RSCONTROLLITE</td><td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSCONTROLLITE.png"/></td>
   </tr>
   <tr>
     <td rowspan="2"><a href="#reefcontrol-power">ReefControl-Power</a></td>
-    <td>RSPOWER6</td><td>🚧</td>
+    <td>RSPOWER6</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSPOWER6.png"/></td>
     <td rowspan="2">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rspower,all label:enhancement" style="text-decoration:none">📆</a>
@@ -138,7 +138,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
     </td>
   </tr>
   <tr>
-    <td>RSPOWER8</td><td>🚧</td>
+    <td>RSPOWER8</td><td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSPOWER8.png"/></td>
   </tr>
   <tr>
@@ -158,7 +158,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   <tr>
     <td rowspan="2"> <a href="#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>❌</td>
+    <td>🚧</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -167,7 +167,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   </tr>
   <tr>
     <td>G2</td>
-    <td>❌</td>
+    <td>🚧</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -237,6 +237,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
 - [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/#reefcontrol)
+- [ReefControl-Power](https://github.com/Elwinmage/ha-reef-card/#reefcontrol-power)
 - [ReefDose](https://github.com/Elwinmage/ha-reef-card/#reefdose)
 - [ReefLED](https://github.com/Elwinmage/ha-reef-card/#reefled)
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/#reefmat)
@@ -581,9 +582,583 @@ conf:
 
 # ReefControl
 
-Planned.
+ReefControl and ReefControl-Power with ha-reef-card in action:
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+The ReefControl card draws the hub as it is wired: the ReefSense probes hanging
+from their extension boxes, the 12V ports, the ATO pump when a port drives one,
+and the paired [ReefControl-Power](#reefcontrol-power) above it.
+
+Both models are supported. The Pro takes up to 7 probes (a second extension box
+is drawn as soon as a fifth probe is plugged in) and has two 12V ports; the Lite
+takes 2 probes and has a single 12V port.
+
+<table>
+  <tr>
+    <th align="center">RSCONTROLPRO</th>
+    <th align="center">RSCONTROLLITE</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rscontrol/rscontrolpro.png"/></td>
+    <td align="center"><img src="doc/img/rscontrol/rscontrollite.png"/></td>
+  </tr>
+</table>
+
+The rest of this section is illustrated with the Pro: everything works the same
+way on the Lite.
+
+<img src="doc/img/rscontrol/rscontrol_zones.png"/>
+
+The card is divided into 7 zones:
+
+1. Controller: power, maintenance mode, configuration, Wifi and buzzer
+2. Paired power center (ReefControl-Power)
+3. Summary of the readings
+4. Probes
+5. 12V ports
+6. ATO
+7. Last message and last alert
+
+## Controller
+
+<img src="doc/img/rscontrol/zone_1.png"/>
+
+---
+
+The text on the hub face is the **operating mode** reported by the device
+(Auto, Setup, Maintenance…), translated into the language of Home Assistant.
+
+<span>The on/off switch <img src="doc/img/mdi/mdi_power-plug.png" width="20"/> switches the ReefControl between on and off states.</span>
+
+<img src="doc/img/rscontrol/off_mode.png" width="50%"/>
+
+Switched off, the hub measures and drives nothing, so the card only keeps its
+on/off switch and the pictures of the hardware: the probes lose their values,
+bars and settings, and the buzzer, the summary, the 12V ports and the
+configuration icons are hidden.
+
+<span>The maintenance switch <img src="doc/img/mdi/mdi_account-wrench.png" width="20"/> switches to maintenance mode.</span>
+
+<img src="doc/img/rscontrol/maintenance.png" width="50%"/>
+
+<span>Click the icon <img src="doc/img/rsdose/cog_icon.png" width="30"/> to manage the general configuration of the ReefControl: refresh the settings or the polled data, reset the device, update its firmware, the [temperature fusion](https://github.com/Elwinmage/ha-reefbeat-component/#multi-probe-temperature-fusion) settings, the network and cable state, and the pairing with a ReefControl-Power.</span>
+
+<img src="doc/img/rscontrol/zone_1_dialog_config.png" width="50%"/>
+
+<span>Click the icon <img src="doc/img/mdi/wifi_icon.png" width="30"/> to manage the network settings.</span>
+
+<img src="doc/img/rscontrol/zone_1_dialog_wifi.png" width="50%"/>
+
+### Buzzer
+
+<span>The bell <img src="doc/img/mdi/mdi_bell-alert.png" width="20"/> sits on the status LED of the hub. It is green while the buzzer is quiet, red and blinking while it sounds, and stays red once the alarm has been dismissed.</span>
+
+A click opens the buzzer dialog: what it is doing now and why, then its two
+alarm sounds — the **danger** alarm (a reading out of its range) and the
+**leak** alarm — each with its switch, frequency and duty cycle, the danger
+debounce and the leak detector.
+
+<img src="doc/img/rscontrol/zone_1_dialog_buzzer.png" width="50%"/>
+
+## Paired power center
+
+<img src="doc/img/rscontrol/zone_2.png"/>
+
+---
+
+When a ReefControl-Power is paired with the hub, it is drawn above it, 6 or 8
+sockets according to its model, linked to the hub by its cable. A powered socket
+is lit with a light red mask.
+
+Clicking the power center opens its own card (see
+[ReefControl-Power](#reefcontrol-power)).
+
+When the power center is paired but cannot be reached, it blinks under a light
+red tint. Pairing and unpairing are done from the configuration dialog of the
+controller.
+
+## Summary
+
+<img src="doc/img/rscontrol/zone_3.png"/>
+
+---
+
+The bar between the power center and the probes sums up every reading of the
+hub, from left to right:
+
+- An alert <img src="doc/img/mdi/mdi_alert.png" width="20"/>, only when something is wrong: orange when the worst reading is acceptable, red when one is in danger. Embedded temperatures count too.
+- The **temperature**: the fused value when the hub has several temperature sources, else the one of the temperature probe, else the first embedded temperature.
+- <span>A thermometer <img src="doc/img/mdi/mdi_thermometer-alert.png" width="20"/>, only when the hub suspects one of its temperature sources; its tooltip names the probe at fault.</span>
+- pH, ORP and salinity, one entry per probe.
+- <span>A drop <img src="doc/img/mdi/mdi_water-alert.png" width="20"/> per leak probe, red when it is wet.</span>
+- <span>Waves <img src="doc/img/mdi/mdi_waves.png" width="20"/> per ATO probe, green on a desired level, orange below or above it.</span>
+
+Each reading takes the colour of its level: green for desired, orange for
+acceptable, red for danger, white when the probe gives no valid reading.
+Clicking a reading opens its more-info dialog.
+
+## Probes
+
+<img src="doc/img/rscontrol/zone_4.png"/>
+
+---
+
+Every probe of the hub hangs from an extension box, in the order the hub lists
+them. Each one shows:
+
+- Its **reading**, and the **embedded temperature** right under it for the pH,
+  salinity and ATO probes, coloured by their level. Clicking a value opens its
+  more-info dialog.
+- A **situation bar** per reading: the red, orange and green bands are the
+  danger, acceptable and desired ranges set on the probe, and the black marker
+  is where the reading stands. The main reading goes on the left bar, the
+  temperature on the right one. Clicking a bar opens the last 24 hours of the
+  reading over its bands.
+
+<img src="doc/img/rscontrol/zone_4_history.png" width="50%"/>
+
+- <span>A cog <img src="doc/img/rsdose/cog_icon.png" width="30"/> opening the settings of the probe.</span>
+
+An unplugged probe blinks under a light red tint, and gives no reading.
+
+### Probe settings
+
+<img src="doc/img/rscontrol/zone_4_dialog_probe.png" width="50%"/>
+
+The dialog gathers everything about one probe: its readings, its status, its
+desired and acceptable ranges (and those of its embedded temperature), the
+display unit of a salinity probe, and its switches — enabled, buzzer,
+notifications, and maintenance, which keeps the probe out of the temperature
+fusion while it is cleaned or calibrated.
+
+The **Read now** button asks the hub for a fresh reading rather than waiting for
+the next poll; the values of the dialog refresh in place.
+
+The calibration buttons at the bottom only show the calibrations of the probe's
+type, and none while it is unplugged. Each calibration opens its own dialog,
+described per probe type below.
+
+### Probe types
+
+#### pH
+
+<img src="src/img/redsea/RSSENSE/rssense-ph-temperature.png" width="10%"/> <img src="src/img/redsea/RSSENSE/rssense-ph.png" width="10%"/>
+
+The pH reading, and the temperature when the probe has one — a pH probe without
+temperature has a picture of its own, with a single bar.
+
+The calibration takes two points, as in the ReefBeat app: pH 7 first, then pH 10
+for salt water or pH 4 for fresh water, each solution given with the temperature
+it is rated at. After each point the hub waits for the reading to settle: the
+dialog shows the stability and the time left, and the next step only unlocks
+once the hub is done. Closing the dialog cancels the calibration.
+
+<img src="doc/img/rscontrol/zone_4_calibration_ph.png" width="50%"/>
+
+#### Salinity
+
+<img src="src/img/redsea/RSSENSE/rssense-salinity-temperature.png" width="10%"/>
+
+The salinity, in the unit chosen in the probe settings, and the temperature.
+
+The calibration takes a single point: dip the probe in the solution and enter
+its value in mS/cm (between 20 and 99).
+
+<img src="doc/img/rscontrol/zone_4_calibration_ec.png" width="50%"/>
+
+#### ORP
+
+<img src="src/img/redsea/RSSENSE/rssense-orp.png" width="10%"/>
+
+The ORP in mV. To calibrate it, dip the probe in the reference solution and
+enter the value of the solution: the probe then reads that value.
+
+<img src="doc/img/rscontrol/zone_4_calibration_orp.png" width="50%"/>
+
+#### Temperature
+
+<img src="src/img/redsea/RSSENSE/temperature.png" width="10%"/>
+
+The temperature, on a single bar. To calibrate it, put the probe in water whose
+temperature you measured with a reference thermometer, wait for the reading to
+settle, and enter the real temperature.
+
+The embedded temperature of the pH, salinity and ATO probes is calibrated the
+same way, from their own **Calibrate temperature** button.
+
+<img src="doc/img/rscontrol/zone_4_calibration_temperature.png" width="50%"/>
+
+#### ATO
+
+<img src="src/img/redsea/RSSENSE/rssense-ato.png" width="10%"/>
+
+The water level probe is drawn in the sump water, at the mark the probe
+reports, as on the [ReefATO+](#aquarium). Its temperature is shown on the black
+body, just under the connector.
+
+| State           | Meaning                                                   |
+| --------------- | --------------------------------------------------------- |
+| Below           | The surface is under the probe: the ATO is not keeping up |
+| Desired level 1 | First top-off mark                                        |
+| Desired level 2 | Second top-off mark                                       |
+| Above           | The surface is over the probe: the tank is overfilled     |
+
+**Below** and **Above** make the water blink. A probe in error has no water
+line at all.
+
+#### Leak
+
+<img src="src/img/redsea/RSSENSE/rssense-leak.png" width="10%"/>
+
+When water is detected, a puddle spreads at the foot of the probe, and a
+blinking icon tells where the water comes from, as the probe reports it:
+
+<table>
+  <tr>
+    <th align="center">Leak of aquarium water <img src="doc/img/mdi/mdi_fish.png" width="20"/></th>
+    <th align="center">Leak of RO/DI water <img src="doc/img/mdi/mdi_cup-water.png" width="20"/></th>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rscontrol/zone_4_leak_aquarium.png"/></td>
+    <td align="center"><img src="doc/img/rscontrol/zone_4_leak_rodi.png"/></td>
+  </tr>
+</table>
+
+A leak probe whose detection is turned off is greyed out: it is there, it
+detects nothing.
+
+> [!NOTE]
+> Probes are added, replaced and removed from the integration's options menu
+> (see [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-component/#probe-management-add--replace--remove)):
+> the card follows on its own.
+
+## 12V ports
+
+<img src="doc/img/rscontrol/zone_5.png"/>
+
+---
+
+Each 12V port of the hub has its cog on its connector, and its consumption
+above it (a click opens its more-info dialog). A powered port lights its
+connector. The Pro has two ports, the cog of the second one being drawn
+differently; the Lite has one.
+
+<span>A click on the cog <img src="doc/img/mdi/cog-1.png" width="5%"/> opens the port settings: its name, switch, state, type and consumption, then the mode editor.</span>
+
+<img src="doc/img/rscontrol/zone_5_dialog_port.png" width="50%"/>
+
+A port is driven like a [socket of the power center](#socket), with the same
+four modes — **On**, **Off**, **Schedule** and **Sensor** — plus the **power**
+it delivers when on, in %. Nothing is sent to the hub until **Save** is pressed.
+A port that was never installed is installed on save, as the ReefBeat app does.
+
+<span>The trash icon <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> at the top right uninstalls the port, after a confirmation: it goes back to its factory state and loses its name, schedule and probe rule.</span>
+
+<img src="doc/img/rscontrol/zone_5_dialog_delete.png" width="50%"/>
+
+## ATO
+
+<img src="doc/img/rscontrol/zone_6.png"/>
+
+---
+
+When a 12V port drives an ATO pump — the Red Sea ATO kit, or any pump following
+an ATO probe — the pump is drawn in its reservoir, wired to its port. While the
+port is powered, water flows out of the outlet above the sump.
+
+## Messages
+
+<img src="doc/img/rscontrol/zone_7.png"/>
+
+---
+
+This zone displays the latest system messages from the ReefControl. It has two lines:
+
+- The grey line shows the **last message** received.
+- The pink line shows the **last alert**, preceded by the ⚠ symbol.
+
+Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
+
+These lines can be hidden via the card editor interface.
+
+## Card editor
+
+<img src="doc/img/rscontrol/editor.png" width="50%"/>
+
+---
+
+Besides the two message lines, the ReefControl has two options:
+
+- **Compact probes**: each reading is shown as a dot coloured by its level
+  instead of a situation bar. A sign on the dot tells on which side of the
+  desired range the reading lies. Clicking the dot opens its last 24 hours, as
+  the bar does.
+- **Probe slots**: the probes are placed in the order the hub lists them. A
+  probe can be pinned to a slot of the extension boxes instead, so the card
+  matches the way the probes are actually plugged in. **Auto** gives it back to
+  the hub's order.
+
+# ReefControl-Power
+
+ReefControl and ReefControl-Power with ha-reef-card in action:
+
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+The ReefControl-Power card draws the power center with its sockets, what is
+plugged into each of them, and on its left either its own temperature probe or
+the [ReefControl](#reefcontrol) it is paired with.
+
+Both models are supported: they only differ by their number of sockets.
+
+<table>
+  <tr>
+    <th align="center">RSPOWER6</th>
+    <th align="center">RSPOWER8</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/img/rspower/rspower6.png"/></td>
+    <td align="center"><img src="doc/img/rspower/rspower8.png"/></td>
+  </tr>
+</table>
+
+The rest of this section is illustrated with the RSPOWER6: everything works the
+same way on the RSPOWER8.
+
+<img src="doc/img/rspower/rspower_zones.png"/>
+
+The card is divided into 6 zones:
+
+1. Power state and maintenance mode
+2. Configuration, Wifi and battery
+3. Power sockets
+4. Temperature probe or ReefControl link
+5. Linked devices
+6. Last message and last alert
+
+## Power state and maintenance mode
+
+<img src="doc/img/rspower/zone_1.png"/>
+
+---
+
+<span>The on/off switch <img src="doc/img/mdi/mdi_power-plug.png" width="20"/> switches the ReefControl-Power between on and off states.</span>
+
+<img src="doc/img/rspower/off_mode.png" width="50%"/>
+
+Switched off, the card only keeps the on/off switch, the picture of the
+temperature probe or of the paired ReefControl, and the links to other devices:
+the name of the hub and the devices plugged into the sockets still open their
+own card. The sockets lose their buttons, names and consumption, and the probe
+its reading and settings.
+
+<span>The maintenance switch <img src="doc/img/mdi/mdi_account-wrench.png" width="20"/> switches to maintenance mode.</span>
+
+<img src="doc/img/rspower/maintenance.png" width="50%"/>
+
+## Configuration / Wifi Information
+
+<img src="doc/img/rspower/zone_2.png"/>
+
+---
+
+<span>Click the icon <img src="doc/img/rsdose/cog_icon.png" width="30"/> to manage the general configuration of the ReefControl-Power: refresh the settings or the polled data, reset the device, update its firmware, and see its region and number of sockets.</span>
+
+The same dialog adds or removes the local temperature probe, and unpairs the
+ReefControl. The probe and the hub exclude each other, so a button that does not
+apply is greyed out rather than hidden: you can see which actions exist.
+
+<img src="doc/img/rspower/zone_2_dialog_config.png" width="50%"/>
+
+<span>Click the icon <img src="doc/img/mdi/wifi_icon.png" width="30"/> to manage the network settings.</span>
+
+<img src="doc/img/rspower/zone_2_dialog_wifi.png" width="50%"/>
+
+<span>The icon <img src="doc/img/mdi/battery.png" width="30"/> shows the battery level of the ReefControl-Power.</span>
+
+## Power sockets
+
+<img src="doc/img/rspower/zone_3.png"/>
+
+---
+
+The text on the face of the power center is its **operating mode** (Auto,
+Setup…), next to the **total consumption** of its sockets. Clicking the
+consumption opens its more-info dialog.
+
+Each socket shows, from top to bottom:
+
+- Its **name**.
+- Its **button**, framed in the socket's colour, its icon red when the socket is
+  powered and grey when it is off. It shows a plug, or the icon of the device
+  plugged into it (see [Linked devices](#linked-devices)).
+- Its **consumption**, which opens its more-info dialog.
+
+Small icons at the bottom of the button tell how the socket is driven:
+
+| Icon                                                                                                                                                                                                                                                                                                                                      | Meaning                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| <img src="doc/img/mdi/mdi_power.png" width="20"/>                                                                                                                                                                                                                                                                                         | On or off by hand                                                           |
+| <img src="doc/img/mdi/mdi_clock-time-nine-outline.png" width="20"/>                                                                                                                                                                                                                                                                       | Follows a schedule — a click opens its editor                               |
+| <img src="doc/img/mdi/mdi_thermometer.png" width="20"/> <img src="doc/img/mdi/mdi_ph.png" width="20"/> <img src="doc/img/mdi/mdi_water-percent.png" width="20"/> <img src="doc/img/mdi/mdi_flash-triangle.png" width="20"/> <img src="doc/img/mdi/mdi_water-alert.png" width="20"/> <img src="doc/img/mdi/mdi_cup-water.png" width="20"/> | Follows a probe: temperature, pH, salinity, ORP, leak or ATO water level    |
+| <img src="doc/img/mdi/mdi_hand-back-left-outline.png" width="20"/>                                                                                                                                                                                                                                                                        | Its schedule or its probe is suspended: the socket was switched off by hand |
+
+A socket that was never configured shows a **+** instead of its button: a click
+opens its settings to give it a mode.
+
+A **click** on the button opens the socket settings. A **long press** switches
+the socket on or off directly.
+
+### Socket
+
+<img src="doc/img/rspower/zone_3_dialog_socket.png" width="50%"/>
+
+The dialog starts with the name, switch, state and consumption of the socket,
+then offers its four modes:
+
+- **On** / **Off**: the socket stays powered, or not.
+- **Schedule**: a 24-hour timeline and the list of its **on** intervals. Add,
+  edit or remove intervals; an interval that ends before it starts, or overlaps
+  the previous one, is explained under the list and blocks the save.
+
+<img src="doc/img/rspower/zone_3_socket_schedule.png" width="50%"/>
+
+- **Sensor**: the socket follows a probe — the local temperature probe of the
+  power center, or any probe of the paired ReefControl, embedded temperatures
+  included. Choose whether the socket turns **on** or **off**, when the reading
+  goes **above** or **below** a **threshold**, with a **hysteresis** (a dead-band
+  around the threshold, so the socket does not flicker), and what to do if the
+  probe is lost. A socket following an ATO probe needs no threshold.
+
+<img src="doc/img/rspower/zone_3_socket_sensor.png" width="50%"/>
+
+Nothing is sent to the device until **Save** is pressed.
+
+When a socket following a schedule or a probe was switched off by hand, the
+dialog opens on that automatic mode, says it is suspended, and offers to
+**resume** it without rewriting its schedule or its rule.
+
+<img src="doc/img/rspower/zone_3_socket_override.png" width="50%"/>
+
+<span>The trash icon <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> at the top right deletes the socket configuration, after a confirmation: the socket goes back to its factory name and has no mode anymore.</span>
+
+<img src="doc/img/rspower/zone_3_dialog_delete.png" width="50%"/>
+
+## Temperature probe or ReefControl link
+
+The left of the card shows what the power center reads its temperature from:
+its own probe, or the ReefControl it is paired with. The two exclude each other.
+
+### Temperature probe
+
+<img src="doc/img/rspower/zone_4_temperature.png"/>
+
+---
+
+The local temperature probe is drawn plugged into the power center, with its
+reading coloured by its level, and a situation bar along the probe (a dot in the
+compact mode of the card editor). Clicking the bar opens the last 24 hours of the
+temperature over its bands.
+
+A disconnected probe blinks under a light red tint.
+
+<span>A click on the cog <img src="doc/img/rsdose/cog_icon.png" width="30"/> opens the probe settings: its name, a button to read it now, its desired and acceptable ranges, its calibration against the real temperature, and its logging and notification switches.</span>
+
+<img src="doc/img/rspower/zone_4_dialog_temperature.png" width="50%"/>
+
+### ReefControl link
+
+<img src="doc/img/rspower/zone_4_rscontrol.png"/>
+
+---
+
+A paired ReefControl takes the place of the probe: its cable is drawn with the
+name of the hub along it. Clicking the name opens the card of the hub.
+
+<span>The icon <img src="doc/img/mdi/mdi_web.png" width="20"/> opens the link dialog: the paired hub, its type and status, and whether it is connected to the power center and to the internet.</span>
+
+<img src="doc/img/rspower/zone_4_dialog_rscontrol.png" width="50%"/>
+
+When the hub is paired but cannot be reached, the link blinks under a light red
+tint.
+
+## Linked devices
+
+<img src="doc/img/rspower/zone_5.png"/>
+
+---
+
+The power center does not know what is plugged into its sockets: the card lets
+you tell it, from the card editor. A socket linked to a Red Sea device or to an
+Aqua Medic pump shows:
+
+- a picture of the device under the socket, in two staggered rows so that
+  neighbours do not overlap, joined to it by a pipe in the socket's colour
+  (grey while the socket is off);
+- the icon of the device on the socket button, instead of the plug.
+
+A ReefRun pump is pictured by its job, return pump or skimmer, rather than by its
+controller. Any other device known to Home Assistant can be linked too, but has
+no picture yet.
+
+The picture follows the state of the device:
+
+| Look       | Red Sea device state                                                          |
+| ---------- | ----------------------------------------------------------------------------- |
+| Plain      | Running normally                                                              |
+| Greyed out | Switched off                                                                  |
+| Blinking   | Anything else: manual mode, maintenance, unavailable, a pump not operational… |
+
+Devices of other integrations are always drawn plain.
+
+Clicking the picture opens the card of the device.
+
+## Messages
+
+<img src="doc/img/rspower/zone_6.png"/>
+
+---
+
+This zone displays the latest system messages from the ReefControl-Power. It has two lines:
+
+- The grey line shows the **last message** received.
+- The pink line shows the **last alert**, preceded by the ⚠ symbol.
+
+Clicking the <img src="doc/img/mdi/mdi_delete-empty.png" width="20"/> icon clears the corresponding message.
+
+These lines can be hidden via the card editor interface.
+
+## Card editor
+
+<img src="doc/img/rspower/editor.png" width="50%"/>
+
+---
+
+Besides the two message lines, the ReefControl-Power has three options:
+
+- **Compact probes**: the temperature is shown as a dot coloured by its level
+  instead of a situation bar.
+- **Sockets colors**: the colour of each socket, used by its button and by the
+  pipe to its linked device.
+- **Linked device**: per socket, the device plugged into it, or **None**.
+
+The options are stored under the model as Home Assistant reports it:
+
+```yaml
+type: custom:reef-card
+device: MY-RSPOWER
+conf:
+  RSPOWER6:
+    devices:
+      MY-RSPOWER:
+        compact_probes: false
+        sockets:
+          socket_1:
+            color: "255,0,0"
+            linked_device: 0123456789abcdef0123456789abcdef
+          socket_3:
+            linked_device: fedcba9876543210fedcba9876543210
+```
 
 # ReefDose
 
@@ -869,9 +1444,10 @@ Here is the list of supported images for supplements, grouped by brand. If yours
 
 # ReefLed
 
-Planned.
+Next step on the roadmap: ReefLed support (G1 and G2) is the next device to be
+added to the card.
 
-Want it supported sooner? Vote [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
+Follow its progress or share what you expect from it [here](https://github.com/Elwinmage/ha-reef-card/discussions/22).
 
 # ReefMat
 

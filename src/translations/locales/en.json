@@ -238,5 +238,11 @@
   "calibration_ph_high": "pH 10 (salt water)",
   "calibration_ph_low": "pH 4 (fresh water)",
   "probe_calibrate_temperature": "Calibrate temperature",
-  "calibration_dip_temperature": "Dip the probe into water of known temperature (measured with a reference thermometer), wait for the reading to settle, then enter the real temperature"
+  "calibration_dip_temperature": "Dip the probe into water of known temperature (measured with a reference thermometer), wait for the reading to settle, then enter the real temperature",
+  "probe_type_ph": "pH",
+  "probe_type_orp": "ORP",
+  "probe_type_ec": "Salinity",
+  "probe_type_temperature": "Temperature",
+  "probe_type_ato": "ATO",
+  "probe_type_leak": "Leak"
 }

@@ -238,5 +238,11 @@
   "calibration_ph_high": "pH 10 (woda morska)",
   "calibration_ph_low": "pH 4 (woda słodka)",
   "probe_calibrate_temperature": "Kalibruj temperaturę",
-  "calibration_dip_temperature": "Zanurz sondę w wodzie o znanej temperaturze (zmierzonej termometrem wzorcowym), poczekaj, aż odczyt się ustabilizuje, a następnie wpisz rzeczywistą temperaturę"
+  "calibration_dip_temperature": "Zanurz sondę w wodzie o znanej temperaturze (zmierzonej termometrem wzorcowym), poczekaj, aż odczyt się ustabilizuje, a następnie wpisz rzeczywistą temperaturę",
+  "probe_type_ph": "pH",
+  "probe_type_orp": "ORP",
+  "probe_type_ec": "Zasolenie",
+  "probe_type_temperature": "Temperatura",
+  "probe_type_ato": "ATO",
+  "probe_type_leak": "Wyciek"
 }
