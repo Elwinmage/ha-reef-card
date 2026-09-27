@@ -11,6 +11,7 @@ import { config } from "./dcskimmer.mapping";
 // sub-elements from a "type" sensor, one level up since here each pump is
 // its own top-level device rather than a sub-element of a shared one.
 // TODO : Implement AQUAMEDIC DC Skimmer support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/105
 // labels: enhancement, aquamedic
 export class AMDCSkimmer extends RSDevice {
   constructor() {

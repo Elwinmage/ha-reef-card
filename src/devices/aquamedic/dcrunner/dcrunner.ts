@@ -3,6 +3,7 @@ import { RSDevice } from "../../device";
 import { config } from "./dcrunner.mapping";
 
 // TODO : Implement AQUAMEDIC DC Runner support
+// Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/104
 // labels: enhancement, aquamedic
 export class AMDCRunner extends RSDevice {
   constructor() {
