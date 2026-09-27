@@ -4,7 +4,7 @@
 
 ReefControl e ReefControl-Power con ha-reef-card in azione:
 
-[![Guarda il video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Guarda il video](https://img.youtube.com/vi/voFobfc7Slk/0.jpg)](https://www.youtube.com/watch?v=voFobfc7Slk)
 
 La card ReefControl disegna l'hub così com'è cablato: le sonde ReefSense appese
 alle loro scatole di estensione, le porte a 12V, la pompa ATO quando una porta ne

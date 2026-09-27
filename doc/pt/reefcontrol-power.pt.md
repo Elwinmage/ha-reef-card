@@ -4,7 +4,7 @@
 
 ReefControl e ReefControl-Power com o ha-reef-card em ação:
 
-[![Ver o vídeo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Ver o vídeo](https://img.youtube.com/vi/voFobfc7Slk/0.jpg)](https://www.youtube.com/watch?v=voFobfc7Slk)
 
 O cartão ReefControl-Power desenha o Power Center com as suas tomadas, o que está
 ligado a cada uma, e à sua esquerda a sua própria sonda de temperatura ou o

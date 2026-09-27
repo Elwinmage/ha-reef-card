@@ -4,7 +4,7 @@
 
 ReefControl and ReefControl-Power with ha-reef-card in action:
 
-[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Watch the video](https://img.youtube.com/vi/voFobfc7Slk/0.jpg)](https://www.youtube.com/watch?v=voFobfc7Slk)
 
 The ReefControl-Power card draws the power center with its sockets, what is
 plugged into each of them, and on its left either its own temperature probe or

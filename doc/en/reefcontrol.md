@@ -4,7 +4,7 @@
 
 ReefControl and ReefControl-Power with ha-reef-card in action:
 
-[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Watch the video](https://img.youtube.com/vi/voFobfc7Slk/0.jpg)](https://www.youtube.com/watch?v=voFobfc7Slk)
 
 The ReefControl card draws the hub as it is wired: the ReefSense probes hanging
 from their extension boxes, the 12V ports, the ATO pump when a port drives one,

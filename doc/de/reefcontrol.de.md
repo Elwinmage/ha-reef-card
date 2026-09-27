@@ -4,7 +4,7 @@
 
 ReefControl und ReefControl-Power mit ha-reef-card in Aktion:
 
-[![Video ansehen](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Video ansehen](https://img.youtube.com/vi/voFobfc7Slk/0.jpg)](https://www.youtube.com/watch?v=voFobfc7Slk)
 
 Die ReefControl-Karte zeichnet den Hub so, wie er verkabelt ist: die
 ReefSense-Sonden an ihren Erweiterungsboxen, die 12V-Ports, die ATO-Pumpe, wenn
