@@ -72,7 +72,14 @@ export class ControlPort extends RSDevice {
 
   set hass(obj: any) {
     this._setting_hass(obj);
-    const signature = ["port_mode", "port_state", "port_consumption"]
+    const signature = [
+      "port_mode",
+      "port_state",
+      "port_consumption",
+      // The ATO module's icon follows its status
+      "port_ato_status",
+      "port_ato_fault",
+    ]
       .map((key) => this.get_entity(key)?.state ?? "")
       .join("|");
     if (signature !== this._signature) {

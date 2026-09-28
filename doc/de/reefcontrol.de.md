@@ -297,6 +297,16 @@ einer ATO-Sonde folgt —, wird die Pumpe in ihrem Vorratsbehälter gezeichnet, 
 ihrem Port verbunden. Solange der Port eingeschaltet ist, fließt Wasser aus dem
 Auslauf über dem Technikbecken.
 
+Das Red Sea ATO-Kit selbst (ein Port vom Typ `ato`, installiert über die Optionen der
+Integration, _ATO-Modul installieren_) ersetzt das Zahnrad des Ports durch ein
+Pumpensymbol, das die Einstellungen des Moduls öffnet: Status und heutiges Volumen,
+automatisches Nachfüllen, Behälterüberwachung und Restvolumen, Schlauchlänge und
+-höhe, Pumpendurchfluss, Benachrichtigungen und Temperaturprotokoll. **Jetzt füllen**
+startet eine manuelle Füllung, **Stoppen** beendet sie, **Fortsetzen** löscht eine
+Störung. Solange das Modul eine Störung meldet (Pumpe fehlt oder blockiert, Behälter
+leer, Füllzeit überschritten, Leck, Portstörung), wird sein Symbol rot, Pumpe und
+Kabel blinken, und die Störung erscheint als Alarm in der Übersicht.
+
 ## Meldungen
 
 <img src="../img/rscontrol/zone_7.png"/>

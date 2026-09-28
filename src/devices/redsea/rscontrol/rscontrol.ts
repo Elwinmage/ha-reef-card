@@ -471,13 +471,37 @@ export class RSControl extends RSDevice {
   }
 
   /**
-   * Whether the ATO pump is running: a port driving it is powered.
+   * Whether the ATO pump is running: a port driving it is powered. The
+   * ATO module's port reports its pump through its state too.
    * @return true while it pumps
    */
   ato_pump_on(): boolean {
     return [1, 2].some(
       (port) => this.is_ato_port(port) && this.is_port_on(port),
     );
+  }
+
+  /**
+   * Fault the ATO module (Red Sea ATO kit) reports on a port: pump missing
+   * or stalled, reservoir empty, fill timeout, leak, port malfunction.
+   * @param port: the 1-based port number
+   * @return the fault, or null when the module is fine or not on this port
+   */
+  // check-entities: uses port_ato_status
+  ato_module_fault(port: number): string | null {
+    const status = this.get_entity("port_ato_status_" + port)?.state;
+    return typeof status === "string" &&
+      ![...EMPTY_STATES, "ok"].includes(status)
+      ? status
+      : null;
+  }
+
+  /**
+   * Whether the ATO module reports a fault, on any port.
+   * @return true while a fault stops it
+   */
+  ato_fault(): boolean {
+    return [1, 2].some((port) => this.ato_module_fault(port) !== null);
   }
 
   // ── Probe rendering ───────────────────────────────────────────────────
@@ -716,7 +740,8 @@ export class RSControl extends RSDevice {
 
   /**
    * Readings of the summary bar, in its order: pH, ORP, salinity, leak,
-   * ATO water level; every probe of a type is listed.
+   * ATO water level; every probe of a type is listed. A fault of the ATO
+   * module comes last.
    * @return one entry per reading, with the level it is drawn with
    */
   summary_items(): {
@@ -789,6 +814,20 @@ export class RSControl extends RSDevice {
           });
         }
       }
+    }
+    // The ATO module's fault, which stops it until resumed
+    for (const port of [1, 2]) {
+      const fault = this.ato_module_fault(port);
+      const entity = this.get_entity("port_ato_status_" + port);
+      if (!fault || !entity) continue;
+      items.push({
+        type: "ato_module",
+        entity_id: entity.entity_id,
+        text: "",
+        title: this._format(entity),
+        icon: "mdi:water-pump-off",
+        level: "danger",
+      });
     }
     return items;
   }

@@ -293,6 +293,17 @@ cualquier bomba que siga una sonda ATO —, la bomba se dibuja en su depósito,
 unida a su puerto. Mientras el puerto está alimentado, el agua sale por la salida
 sobre el sump.
 
+El propio kit ATO de Red Sea (un puerto de tipo `ato`, instalado desde las opciones de
+la integración, _Instalar el módulo ATO_) sustituye el engranaje del puerto por un
+icono de bomba, que abre los ajustes del módulo: su estado y el volumen de hoy, el
+llenado automático, el seguimiento del depósito y el volumen restante, la longitud y
+la altura del tubo, el caudal de la bomba, las notificaciones y el registro de
+temperatura. **Llenar ahora** inicia un llenado manual, **Detener** lo para y
+**Reanudar** borra un fallo. Mientras el módulo indica un fallo (falta la bomba o está
+bloqueada, depósito vacío, tiempo de llenado excedido, fuga, fallo del puerto), su
+icono se vuelve rojo, la bomba y su cable parpadean y el fallo se añade al resumen
+como alarma.
+
 ## Mensajes
 
 <img src="../img/rscontrol/zone_7.png"/>

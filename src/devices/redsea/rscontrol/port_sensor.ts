@@ -28,8 +28,9 @@
  * thresholds of the other types (is_above, value, hysteresis, trigger_op)
  * use the names of the hub's socket rules.
  * A factory-fresh port (type "unknown") refuses every write until
- * installed; "other" is any 12V device — an ATO port is installed by the
- * app's ATO kit wizard, which this editor does not replace.
+ * installed; "other" is any 12V device. The Red Sea ATO kit (port type
+ * "ato") is installed from the integration's options (Install the ATO
+ * module), as the app's wizard does, and set in its own dialog (ato_conf).
  */
 
 import { html, TemplateResult } from "lit";
