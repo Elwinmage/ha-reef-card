@@ -244,5 +244,9 @@
   "probe_type_ec": "Salinität",
   "probe_type_temperature": "Temperatur",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Leck"
+  "probe_type_leak": "Leck",
+  "dialog_ato_conf": "ATO-Modul",
+  "ato_resume": "Fortsetzen",
+  "ato_manual_fill": "Jetzt füllen",
+  "ato_stop": "Stoppen"
 }

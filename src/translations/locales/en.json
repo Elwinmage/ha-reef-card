@@ -244,5 +244,9 @@
   "probe_type_ec": "Salinity",
   "probe_type_temperature": "Temperature",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Leak"
+  "probe_type_leak": "Leak",
+  "dialog_ato_conf": "ATO module",
+  "ato_resume": "Resume",
+  "ato_manual_fill": "Fill now",
+  "ato_stop": "Stop"
 }

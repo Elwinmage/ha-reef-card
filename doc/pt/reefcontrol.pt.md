@@ -294,6 +294,17 @@ qualquer bomba que siga uma sonda ATO —, a bomba é desenhada no seu
 reservatório, ligada à sua porta. Enquanto a porta está alimentada, a água corre
 pela saída por cima da sump.
 
+O próprio kit ATO Red Sea (uma porta do tipo `ato`, instalada a partir das opções da
+integração, _Instalar o módulo ATO_) substitui a engrenagem da porta por um ícone de
+bomba, que abre as definições do módulo: o seu estado e o volume de hoje, o
+enchimento automático, a monitorização do reservatório e o volume restante, o
+comprimento e a altura do tubo, o caudal da bomba, as notificações e o registo de
+temperatura. **Encher agora** inicia um enchimento manual, **Parar** interrompe-o e
+**Retomar** apaga uma falha. Enquanto o módulo indica uma falha (bomba ausente ou
+bloqueada, reservatório vazio, tempo de enchimento excedido, fuga, falha da porta), o
+seu ícone fica vermelho, a bomba e o seu cabo piscam e a falha é adicionada ao resumo
+como alarme.
+
 ## Mensagens
 
 <img src="../img/rscontrol/zone_7.png"/>

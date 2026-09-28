@@ -66,6 +66,12 @@ function overlay(
 /** Blink while the paired power strip is unreachable. */
 const POWER_ALERT = "${device.power_link_alert() ? 'blink-alert' : ''}";
 
+/** Blink while the ATO module reports a fault (on a port, or any). */
+const ato_alert = (port?: number): string =>
+  port === undefined
+    ? "${device.ato_fault() ? 'blink-alert' : ''}"
+    : `\${device.ato_module_fault(${port}) ? 'blink-alert' : ''}`;
+
 // ── Extension boxes, one set per model ─────────────────────────────────────
 
 export const lite_extends = {
@@ -161,17 +167,20 @@ export const links = {
     "device_state",
     new URL("../../../img/redsea/RSCONTROL/link_ato_1.png", import.meta.url),
     "!device.is_ato_port(1)",
+    ato_alert(1),
   ),
   link_ato_2: overlay(
     "device_state",
     new URL("../../../img/redsea/RSCONTROL/link_ato_2.png", import.meta.url),
     "!device.is_ato_port(2)",
+    ato_alert(2),
   ),
   // One pump, whichever port drives it.
   ato_pump: overlay(
     "device_state",
     new URL("../../../img/redsea/RSCONTROL/ato.png", import.meta.url),
     "!device.has_ato_link()",
+    ato_alert(),
   ),
   // Water pouring from the outlet while the ATO pump runs, as on the
   // RSATO+: from the nozzle clipped on the wall, x 1575..1597, down to the
@@ -529,12 +538,39 @@ const port_common = {
       type: "click-image",
       icon: "mdi:cog",
       icon_color: COLOR_RS_RGBSTR,
-      // Always shown, a port not installed yet included: its editor
-      // installs it on save
+      // Shown for every port, a port not installed yet included (its editor
+      // installs it on save), but the ATO module's: see ato_conf
+      disabled_if: "!!entity.port_ato_status",
+      no_br_if_disabled: true,
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
         data: { type: "port_conf" },
+      },
+      css: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        "line-height": "0",
+        "--mdc-icon-size": "70cqw",
+        cursor: "pointer",
+      },
+    },
+    // The ATO module (Red Sea ATO kit) in place of the cog on its port: red
+    // and blinking while a fault stops it. Opens its settings.
+    ato_conf: {
+      name: "port_ato_status",
+      type: "click-image",
+      icon: "mdi:water-pump",
+      icon_color: `\${entity.port_ato_fault?.state === 'on' ? '${COLOR_LEVEL_DANGER_HEX}' : '${COLOR_RS_RGBSTR}'}`,
+      class: "${entity.port_ato_fault?.state === 'on' ? 'blink-alert' : ''}",
+      disabled_if: "!entity.port_ato_status",
+      no_br_if_disabled: true,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "ato_conf" },
       },
       css: {
         position: "absolute",

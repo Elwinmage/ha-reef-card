@@ -297,6 +297,17 @@ suit une sonde ATO — la pompe est dessinée dans son réservoir, reliée à so
 Tant que le port est alimenté, l'eau s'écoule de la sortie au-dessus de la
 décantation.
 
+Le kit ATO Red Sea lui-même (un port de type `ato`, installé depuis les options de
+l'intégration, _Installer le module osmolateur_) remplace le rouage du port par une
+icône de pompe, qui ouvre les réglages du module : son état et le volume du jour, le
+remplissage automatique, le suivi du réservoir et le volume restant, la longueur et la
+hauteur du tuyau, le débit de la pompe, les notifications et le journal de
+température. **Remplir maintenant** lance un remplissage manuel, **Arrêter**
+l'interrompt et **Reprendre** efface un défaut. Tant que le module signale un défaut
+(pompe absente ou bloquée, réservoir vide, délai de remplissage dépassé, fuite, défaut
+du port), son icône passe au rouge, la pompe et son câble clignotent, et le défaut
+s'ajoute au résumé comme une alarme.
+
 ## Messages
 
 <img src="../img/rscontrol/zone_7.png"/>
