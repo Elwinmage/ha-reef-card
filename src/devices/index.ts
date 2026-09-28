@@ -16,6 +16,13 @@ import {
   RSLed170,
   RSLed115,
   RSLed60,
+  RSLedVirtual,
+  RSLedSky,
+  RSLedBeam,
+  RSLedSlider,
+  RSLedProgramEditor,
+  RSLedLinked,
+  RSLedName,
 } from "./redsea/rsled";
 import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
@@ -68,6 +75,20 @@ if (!customElements.get("redsea-rsled115"))
   customElements.define("redsea-rsled115", RSLed115);
 if (!customElements.get("redsea-rsled60"))
   customElements.define("redsea-rsled60", RSLed60);
+if (!customElements.get("redsea-virtual_led"))
+  customElements.define("redsea-virtual_led", RSLedVirtual);
+if (!customElements.get("rsled-linked"))
+  customElements.define("rsled-linked", RSLedLinked);
+if (!customElements.get("rsled-name"))
+  customElements.define("rsled-name", RSLedName);
+if (!customElements.get("rsled-sky"))
+  customElements.define("rsled-sky", RSLedSky);
+if (!customElements.get("rsled-beam"))
+  customElements.define("rsled-beam", RSLedBeam);
+if (!customElements.get("rsled-slider"))
+  customElements.define("rsled-slider", RSLedSlider);
+if (!customElements.get("rsled-program-editor"))
+  customElements.define("rsled-program-editor", RSLedProgramEditor);
 if (!customElements.get("redsea-rsrun"))
   customElements.define("redsea-rsrun", RSRun);
 if (!customElements.get("redsea-rsrun-unknown"))
@@ -110,6 +131,13 @@ export {
   RSLed170,
   RSLed115,
   RSLed60,
+  RSLedVirtual,
+  RSLedSky,
+  RSLedBeam,
+  RSLedSlider,
+  RSLedProgramEditor,
+  RSLedLinked,
+  RSLedName,
 } from "./redsea/rsled";
 export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";

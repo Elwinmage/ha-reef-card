@@ -244,5 +244,18 @@
   "probe_type_ec": "Salinité",
   "probe_type_temperature": "Température",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Fuite"
+  "probe_type_leak": "Fuite",
+  "led_intensity": "Intensité",
+  "led_moon": "Phase lunaire",
+  "led_acclimation": "Acclimatation",
+  "white_blue_sliders": "Curseurs : intensité/couleur (K) ou blanc/bleu (W/B)",
+  "led_program": "Programme",
+  "led_apply_all_days": "Tous les jours",
+  "led_add_point": "Ajouter un point",
+  "led_rise": "Lever",
+  "led_set": "Coucher",
+  "led_channel_white": "Blanc",
+  "led_channel_blue": "Bleu",
+  "led_channel_moon": "Lune",
+  "led_channel_intensity": "Intensité"
 }

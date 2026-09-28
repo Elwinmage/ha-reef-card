@@ -485,7 +485,8 @@ _DECLARATIVE_SUFFIXES: tuple[str, ...] = (".mapping.ts", ".dialogs.ts", "dialog_
 _SHORT_ENTITY_KEYS: frozenset[str] = frozenset({'ip'})
 
 # Map card device folder name → canonical device name
-# rsled folder contains both G1 (rsled.mapping.ts) and G2 (rsled_g2.mapping.ts)
+# rsled folder contains G1 (rsled_g1.mapping.ts), G2 (rsled_g2.mapping.ts) and
+# what they share (rsled.common.mapping.ts, dialogs, view elements)
 # We map all three logical devices to the same folder; filtering is done by
 # restricting which TS files are scanned per variant (see DEVICE_TS_FILTER).
 CARD_DEVICE_FOLDERS: dict[str, str] = {
@@ -503,11 +504,26 @@ CARD_DEVICE_FOLDERS: dict[str, str] = {
 
 # Restrict TS file scanning per device variant.
 # Key: device name. Value: set of filename patterns to INCLUDE (None = all files).
-# This lets us give rsled_g1 only rsled.mapping.ts and rsled_g2 only rsled_g2.mapping.ts.
+# This lets us give rsled_g1 only rsled_g1.mapping.ts and rsled_g2 only rsled_g2.mapping.ts
+# (plus the files every ReefLED shares).
+# Files every ReefLED variant shares: the common mapping, the dialogs, the
+# device logic and the view elements (sky, beam, sliders, program editor).
+_RSLED_COMMON_FILES: set[str] = {
+    "rsled.common.mapping.ts",
+    "rsled.dialogs.ts",
+    "rsled.ts",
+    "rsled_sky.ts",
+    "rsled_beam.ts",
+    "rsled_slider.ts",
+    "rsled_program_editor.ts",
+    "rsled_linked.ts",
+    "index.ts",
+}
+
 DEVICE_TS_INCLUDE: dict[str, set[str] | None] = {
-    "rsled_g1":      {"rsled.mapping.ts", "rsled.ts", "index.ts"},
-    "rsled_g2":      {"rsled_g2.mapping.ts", "rsled.ts", "index.ts"},
-    "rsled_virtual": {"rsled.mapping.ts", "rsled.ts", "index.ts"},  # virtual uses same UI as G1 for now
+    "rsled_g1":      _RSLED_COMMON_FILES | {"rsled_g1.mapping.ts"},
+    "rsled_g2":      _RSLED_COMMON_FILES | {"rsled_g2.mapping.ts"},
+    "rsled_virtual": _RSLED_COMMON_FILES | {"rsled_virtual.mapping.ts"},
 }
 
 # device.dialogs.ts is imported by ALL real devices via:

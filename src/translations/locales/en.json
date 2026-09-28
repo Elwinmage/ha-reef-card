@@ -244,5 +244,18 @@
   "probe_type_ec": "Salinity",
   "probe_type_temperature": "Temperature",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Leak"
+  "probe_type_leak": "Leak",
+  "led_intensity": "Intensity",
+  "led_moon": "Moon phase",
+  "led_acclimation": "Acclimation",
+  "white_blue_sliders": "Sliders: intensity/colour (K) or white/blue (W/B)",
+  "led_program": "Program",
+  "led_apply_all_days": "All days",
+  "led_add_point": "Add a point",
+  "led_rise": "Rise",
+  "led_set": "Set",
+  "led_channel_white": "White",
+  "led_channel_blue": "Blue",
+  "led_channel_moon": "Moon",
+  "led_channel_intensity": "Intensity"
 }

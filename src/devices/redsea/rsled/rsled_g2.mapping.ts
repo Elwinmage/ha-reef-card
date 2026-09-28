@@ -1,81 +1,39 @@
-export const config2 = {
-  name: null,
-  model: "RSLED",
-  background_img: new URL(
-    "../../../img/redsea/RSLED/rsled_g2.png",
-    import.meta.url,
-  ),
-  css: {
-    width: "100%",
-  },
-  elements: {
-    last_message: {
-      name: "last_message",
-      type: "redsea-messages",
-      // Absolutely positioned: never emit a <br> that shifts the flow
-      no_br_if_disabled: true,
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        width: "100%",
-        height: "15px",
-        top: "33%",
-        left: "0px",
-      },
-      "elt.css": {
-        "background-color": "rgba(220,220,220,0.7)",
-      },
-    },
+/**
+ * ReefLED G2 (RSLED60, RSLED115, RSLED170) mapping: see
+ * rsled.common.mapping.ts for the view every ReefLED shares. The rounder lamp
+ * moves the icons on its faces and its higher top pushes the mode up. The G2
+ * has no white/blue lights: its colour only goes through kelvin and
+ * intensity, so the white/blue sliders never show.
+ */
+import { FaceLayout, rsled_config } from "./rsled.common.mapping";
 
-    last_alert_message: {
-      name: "last_alert_message",
-      type: "redsea-messages",
-      // Absolutely positioned: never emit a <br> that shifts the flow
-      no_br_if_disabled: true,
-      label: "'⚠'",
-      css: {
-        color: "red",
-        flex: "0 0 auto",
-        position: "absolute",
-        width: "100%",
-        height: "20px",
-        top: "37%",
-        left: "0px",
-      },
-      "elt.css": {
-        "background-color": "rgba(240,200,200,0.7)",
-      },
-    },
-    device_states: {
-      type: "hui-entities-card",
-      conf: {
-        type: "entities",
-        entities: [
-          { entity: "device_state", name: { type: "entity" } },
-          { entity: "maintenance", name: { type: "entity" } },
-        ],
-      },
-    },
-    wifi_quality: {
-      name: "wifi_quality",
-      type: "common-sensor",
-      master: true,
-      label: false,
-      icon: true,
-      icon_color: "#ec2330",
-      tap_action: {
-        domain: "redsea_ui",
-        action: "dialog",
-        data: { type: "wifi" },
-      },
-      css: {
-        flex: "0 0 auto",
-        position: "absolute",
-        width: "5.5%",
-        height: "2%",
-        top: "0%",
-        right: "0%",
-      },
-    },
-  },
+/** G2: rounded lamp, faces on the smooth band under the vents. */
+export const G2_FACE: FaceLayout = {
+  device_state: ["6.8%", "39.2%"],
+  maintenance: ["14.4%", "36.8%"],
+  configuration: ["22%", "34.3%"],
+  battery_level: ["29.6%", "31.8%"],
+  wifi_quality: ["37.2%", "29.4%"],
+  identify: ["58.4%", "29.4%"],
+  moon_phase: ["68.5%", "32.1%"],
+  acclimation: ["78.7%", "36.5%"],
+  acclimation_text: ["85.5%", "37.6%"],
+  right_skew: "21deg",
 };
+
+/** The G2 top rises higher than the G1's: the mode goes up with it. */
+export const G2_SKY = {
+  mode: { x: 295.5, y: 84 },
+  clouds: { x: 405, y: 78 },
+};
+
+/** The G2's edge is less steep and higher than the G1's. */
+export const G2_NAME = { x: 140, y: 150, angle: -31 };
+
+export const config2 = rsled_config({
+  image: new URL("../../../img/redsea/RSLED/rsled_g2.png", import.meta.url),
+  face: G2_FACE,
+  sky: G2_SKY,
+  name: G2_NAME,
+  white_blue: false,
+});

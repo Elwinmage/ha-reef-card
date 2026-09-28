@@ -244,5 +244,18 @@
   "probe_type_ec": "Zasolenie",
   "probe_type_temperature": "Temperatura",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Wyciek"
+  "probe_type_leak": "Wyciek",
+  "led_intensity": "Intensywność",
+  "led_moon": "Faza księżyca",
+  "led_acclimation": "Aklimatyzacja",
+  "white_blue_sliders": "Suwaki: intensywność/kolor (K) lub biały/niebieski (W/B)",
+  "led_program": "Program",
+  "led_apply_all_days": "Wszystkie dni",
+  "led_add_point": "Dodaj punkt",
+  "led_rise": "Wschód",
+  "led_set": "Zachód",
+  "led_channel_white": "Biały",
+  "led_channel_blue": "Niebieski",
+  "led_channel_moon": "Księżyc",
+  "led_channel_intensity": "Intensywność"
 }

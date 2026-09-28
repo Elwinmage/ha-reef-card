@@ -244,5 +244,18 @@
   "probe_type_ec": "Salinität",
   "probe_type_temperature": "Temperatur",
   "probe_type_ato": "ATO",
-  "probe_type_leak": "Leck"
+  "probe_type_leak": "Leck",
+  "led_intensity": "Intensität",
+  "led_moon": "Mondphase",
+  "led_acclimation": "Akklimatisierung",
+  "white_blue_sliders": "Regler: Intensität/Farbe (K) oder Weiß/Blau (W/B)",
+  "led_program": "Programm",
+  "led_apply_all_days": "Alle Tage",
+  "led_add_point": "Punkt hinzufügen",
+  "led_rise": "Aufgang",
+  "led_set": "Untergang",
+  "led_channel_white": "Weiß",
+  "led_channel_blue": "Blau",
+  "led_channel_moon": "Mond",
+  "led_channel_intensity": "Intensität"
 }
