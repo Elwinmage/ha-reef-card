@@ -363,9 +363,20 @@ describe("RSControl ports", () => {
   });
 
   it("shows the cog on every port, a new one included", () => {
-    // A port not installed yet must stay configurable: its editor installs it
-    const conf = (proConfig.ports.common as any).elements.port_conf;
-    expect(conf.disabled_if).toBeUndefined();
+    // A port not installed yet must stay configurable: its editor installs
+    // it. Only the ATO module's port has its own icon instead.
+    const els = (proConfig.ports.common as any).elements;
+    const hidden = (entity: any, expr: string): boolean =>
+      new SafeEval({ device: {}, entity, config: {} }).evaluate(expr);
+    expect(hidden({}, els.port_conf.disabled_if)).toBe(false);
+    expect(
+      hidden({ port_ato_status: { state: "ok" } }, els.port_conf.disabled_if),
+    ).toBe(true);
+    expect(hidden({}, els.ato_conf.disabled_if)).toBe(true);
+    expect(
+      hidden({ port_ato_status: { state: "ok" } }, els.ato_conf.disabled_if),
+    ).toBe(false);
+    expect(els.ato_conf.tap_action.data.type).toBe("ato_conf");
   });
 
   it("keeps the ports up to date between two renders", () => {
@@ -1253,6 +1264,112 @@ describe("RSControl ATO ports", () => {
     expect(hub(port2("on", ato)).is_ato_port(2)).toBe(false);
     expect(hub(port2("sensor", null)).is_ato_port(2)).toBe(false);
     expect(hub([]).is_ato_port(2)).toBe(false);
+  });
+
+  // The ATO module (Red Sea ATO kit) on port 2, as captured
+  function module(status: string, pump = "standby"): Spec[] {
+    return [
+      { id: "sensor.t2", key: "port_type", state: "ato", attrs: { port: 1 } },
+      { id: "sensor.s2", key: "port_state", state: pump, attrs: { port: 1 } },
+      {
+        id: "sensor.a2",
+        key: "port_ato_status",
+        state: status,
+        attrs: { port: 1 },
+      },
+    ];
+  }
+
+  it("runs the pump while the module's port is on", () => {
+    expect(hub(module("ok", "on")).ato_pump_on()).toBe(true);
+    expect(hub(module("ok")).ato_pump_on()).toBe(false);
+  });
+
+  it("reports the module's fault", () => {
+    const faulty = hub(module("missing_pump"));
+    expect(faulty.ato_module_fault(2)).toBe("missing_pump");
+    expect(faulty.ato_module_fault(1)).toBeNull();
+    expect(faulty.ato_fault()).toBe(true);
+    for (const state of ["ok", "unknown", "unavailable"]) {
+      expect(hub(module(state)).ato_fault()).toBe(false);
+    }
+    expect(hub([]).ato_fault()).toBe(false);
+  });
+
+  it("blinks the pump and its cable during a fault", () => {
+    const els: any = proConfig.elements;
+    const blink = (h: any, expr: string): string =>
+      new SafeEval({ device: h, entity: {}, config: {} }).evaluate(expr);
+    const faulty = hub(module("stalled"));
+    const fine = hub(module("ok"));
+    expect(blink(faulty, els.ato_pump.class)).toBe("blink-alert");
+    expect(blink(fine, els.ato_pump.class)).toBe("");
+    expect(blink(faulty, els.link_ato_2.class)).toBe("blink-alert");
+    expect(blink(faulty, els.link_ato_1.class)).toBe("");
+  });
+
+  it("colours the module's icon by its fault", () => {
+    const conf = (proConfig.ports.common as any).elements.ato_conf;
+    const ev = (fault: string): SafeEval =>
+      new SafeEval({
+        device: {},
+        entity: { port_ato_fault: { state: fault } },
+        config: {},
+      });
+    expect(ev("on").evaluate(conf.icon_color)).toBe(COLOR_LEVEL_DANGER_HEX);
+    expect(ev("on").evaluate(conf.class)).toBe("blink-alert");
+    expect(ev("off").evaluate(conf.icon_color)).not.toBe(
+      COLOR_LEVEL_DANGER_HEX,
+    );
+    expect(ev("off").evaluate(conf.class)).toBe("");
+  });
+
+  it("puts the module's fault in the summary, as an alarm", () => {
+    const faulty = hub(module("empty"));
+    const items = faulty.summary_items();
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      type: "ato_module",
+      entity_id: "sensor.a2",
+      icon: "mdi:water-pump-off",
+      level: "danger",
+      title: "empty",
+    });
+    expect(faulty.summary_alarm()).toBe("danger");
+    expect(hub(module("ok")).summary_items()).toEqual([]);
+  });
+
+  it("opens the module's settings", () => {
+    const dialog: any = dialogs_rscontrol.ato_conf;
+    expect(dialog.name).toBe("ato_conf");
+    const entities = dialog.content[0].conf.entities.map((e: any) => e.entity);
+    for (const key of [
+      "port_ato_status",
+      "port_ato_auto_fill",
+      "port_ato_volume_left_set",
+      "port_ato_hose_length",
+      "port_ato_flow_rate",
+    ]) {
+      expect(entities).toContain(key);
+    }
+    const buttons = dialog.content
+      .filter((c: any) => c.view === "common-button")
+      .map((c: any) => c.conf);
+    buttons.push(dialog.other.conf);
+    expect(buttons.map((b: any) => b.tap_action[0].data.entity_id)).toEqual([
+      "port_ato_resume",
+      "port_ato_stop",
+      "port_ato_manual_pump",
+    ]);
+    // Hidden while its integration button is unavailable
+    const resume = buttons[0];
+    const hidden = (entity: any): boolean =>
+      new SafeEval({ device: {}, entity, config: {} }).evaluate(
+        resume.disabled_if,
+      );
+    expect(hidden({})).toBe(true);
+    expect(hidden({ port_ato_resume: { state: "unavailable" } })).toBe(true);
+    expect(hidden({ port_ato_resume: { state: "unknown" } })).toBe(false);
   });
 });
 

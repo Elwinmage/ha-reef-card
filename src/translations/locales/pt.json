@@ -257,5 +257,9 @@
   "led_channel_white": "Branco",
   "led_channel_blue": "Azul",
   "led_channel_moon": "Lua",
-  "led_channel_intensity": "Intensidade"
+  "led_channel_intensity": "Intensidade",
+  "dialog_ato_conf": "Módulo ATO",
+  "ato_resume": "Retomar",
+  "ato_manual_fill": "Encher agora",
+  "ato_stop": "Parar"
 }

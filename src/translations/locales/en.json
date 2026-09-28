@@ -257,5 +257,9 @@
   "led_channel_white": "White",
   "led_channel_blue": "Blue",
   "led_channel_moon": "Moon",
-  "led_channel_intensity": "Intensity"
+  "led_channel_intensity": "Intensity",
+  "dialog_ato_conf": "ATO module",
+  "ato_resume": "Resume",
+  "ato_manual_fill": "Fill now",
+  "ato_stop": "Stop"
 }

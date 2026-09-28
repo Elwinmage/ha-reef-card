@@ -115,6 +115,38 @@ function reference_controls(entity: string): any[] {
   ];
 }
 
+/**
+ * Button of the ATO module pressing one of its integration buttons; hidden
+ * while that button is unavailable (resume without a fault).
+ * @param key: the button entity's key
+ * @param icon: the button's icon
+ * @param label: the button's text (an i18n expression)
+ * @return the dialog content entry
+ */
+function ato_button(key: string, icon: string, label: string): any {
+  return {
+    view: "common-button",
+    conf: {
+      type: "common-button",
+      stateObj: null,
+      icon,
+      label,
+      class: "dialog_button",
+      disabled_if: `!entity.${key} || entity.${key}.state === 'unavailable'`,
+      no_br_if_disabled: true,
+      css: {},
+      "elt.css": { "background-color": "rgba(0,0,0,0)" },
+      tap_action: [
+        {
+          domain: "button",
+          action: "press",
+          data: { entity_id: key },
+        },
+      ],
+    },
+  };
+}
+
 export const dialogs_rscontrol = {
   /**
    * Hub-wide buzzer, opened from the bell on the hub's status LED: what it
@@ -229,6 +261,99 @@ export const dialogs_rscontrol = {
         },
       },
     ],
+  },
+
+  /**
+   * ato_conf is opened from the ATO module's icon, on the port the Red Sea
+   * ATO kit is installed on (port type "ato", from the integration's
+   * options: Install the ATO module). Its status and readings, then its
+   * settings; the buttons clear a fault, fill now or stop the pump.
+   */
+  ato_conf: {
+    name: "ato_conf",
+    title_key: "${i18n._('dialog_ato_conf')} n°${config.id}",
+    close_cross: false,
+    content: [
+      {
+        view: "hui-entities-card",
+        conf: {
+          type: "entities",
+          entities: [
+            { entity: "text.port_name", name: { type: "entity" } },
+            { type: "divider" },
+            { entity: "port_ato_status", name: { type: "entity" } },
+            { entity: "port_ato_fault", name: { type: "entity" } },
+            { entity: "port_ato_pump_on", name: { type: "entity" } },
+            { entity: "port_ato_today_volume", name: { type: "entity" } },
+            { entity: "port_ato_volume_left", name: { type: "entity" } },
+            {
+              entity: "port_ato_last_pump_on_cause",
+              name: { type: "entity" },
+            },
+            { type: "divider" },
+            { entity: "port_ato_auto_fill", name: { type: "entity" } },
+            // The volume left is followed while monitoring is on: set it
+            // after refilling the reservoir
+            { entity: "port_ato_volume_monitor", name: { type: "entity" } },
+            { entity: "port_ato_volume_left_set", name: { type: "entity" } },
+            { type: "divider" },
+            { entity: "port_ato_hose_length", name: { type: "entity" } },
+            { entity: "port_ato_hose_height", name: { type: "entity" } },
+            // 0: the pump's own flow rate
+            { entity: "port_ato_flow_rate", name: { type: "entity" } },
+            { type: "divider" },
+            { entity: "port_ato_notify", name: { type: "entity" } },
+            { entity: "port_ato_temp_log", name: { type: "entity" } },
+            { entity: "port_consumption", name: { type: "entity" } },
+          ],
+        },
+      },
+      // Clear the fault that stopped the module: only while there is one
+      ato_button(
+        "port_ato_resume",
+        "mdi:play-circle-outline",
+        "${i18n._('ato_resume')}",
+      ),
+      // Stop a fill in progress
+      ato_button(
+        "port_ato_stop",
+        "mdi:stop-circle-outline",
+        "${i18n._('ato_stop')}",
+      ),
+      // Uninstall the port, and with it the module (top-right)
+      {
+        view: "click-image",
+        conf: {
+          icon: "mdi:delete",
+          icon_color: "rgb(51,151,232)",
+          type: "click-image",
+          stateObj: null,
+          disabled_if:
+            "!entity.port_delete || entity.port_delete.state === 'unavailable'",
+          no_br_if_disabled: true,
+          tap_action: [
+            {
+              domain: "redsea_ui",
+              action: "dialog",
+              data: { type: "port_delete" },
+            },
+          ],
+          css: {
+            position: "absolute",
+            top: "7%",
+            right: "5%",
+          },
+        },
+      },
+    ],
+    // Center button: fill now
+    other: {
+      conf: ato_button(
+        "port_ato_manual_pump",
+        "mdi:water-plus",
+        "${i18n._('ato_manual_fill')}",
+      ).conf,
+    },
   },
 
   /**

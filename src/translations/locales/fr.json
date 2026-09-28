@@ -257,5 +257,9 @@
   "led_channel_white": "Blanc",
   "led_channel_blue": "Bleu",
   "led_channel_moon": "Lune",
-  "led_channel_intensity": "Intensité"
+  "led_channel_intensity": "Intensité",
+  "dialog_ato_conf": "Module osmolateur",
+  "ato_resume": "Reprendre",
+  "ato_manual_fill": "Remplir maintenant",
+  "ato_stop": "Arrêter"
 }

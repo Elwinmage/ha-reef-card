@@ -286,6 +286,15 @@ Gdy port 12V steruje pompą ATO — zestawem ATO Red Sea lub dowolną pompą
 podążającą za sondą ATO — pompa jest rysowana w swoim zbiorniku, połączona ze
 swoim portem. Gdy port jest zasilony, woda płynie z wylotu nad sumpem.
 
+Sam zestaw ATO Red Sea (port typu `ato`, instalowany z opcji integracji, _Zainstaluj
+moduł ATO_) zastępuje zębatkę portu ikoną pompy, która otwiera ustawienia modułu: jego
+stan i dzisiejszą objętość, automatyczną dolewkę, monitorowanie zbiornika i pozostałą
+objętość, długość i wysokość węża, przepływ pompy, powiadomienia i dziennik
+temperatury. **Dolej teraz** uruchamia ręczną dolewkę, **Zatrzymaj** ją przerywa, a
+**Wznów** kasuje awarię. Dopóki moduł zgłasza awarię (brak lub blokada pompy, pusty
+zbiornik, przekroczony czas dolewki, wyciek, awaria portu), jego ikona jest czerwona,
+pompa i jej kabel migają, a awaria trafia do podsumowania jako alarm.
+
 ## Komunikaty
 
 <img src="../img/rscontrol/zone_7.png"/>

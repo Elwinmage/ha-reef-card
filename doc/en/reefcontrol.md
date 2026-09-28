@@ -289,6 +289,15 @@ When a 12V port drives an ATO pump — the Red Sea ATO kit, or any pump followin
 an ATO probe — the pump is drawn in its reservoir, wired to its port. While the
 port is powered, water flows out of the outlet above the sump.
 
+The Red Sea ATO kit itself (a port of type `ato`, installed from the integration's
+options, _Install the ATO module_) replaces the port's cog with a pump icon, which
+opens the module's settings: its status and today's volume, auto fill, reservoir
+monitoring and the volume left, the hose length and height, the pump flow rate,
+notifications and temperature log. **Fill now** starts a manual fill, **Stop** stops
+it, and **Resume** clears a fault. While the module reports a fault (pump missing or
+stalled, reservoir empty, fill timeout, leak, port malfunction), its icon turns red,
+the pump and its cable blink, and the fault is added to the summary as an alarm.
+
 ## Messages
 
 <img src="../img/rscontrol/zone_7.png"/>

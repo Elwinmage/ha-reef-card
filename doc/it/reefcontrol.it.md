@@ -295,6 +295,16 @@ qualsiasi pompa che segue una sonda ATO —, la pompa è disegnata nel suo
 serbatoio, collegata alla sua porta. Mentre la porta è alimentata, l'acqua
 scorre dall'uscita sopra la sump.
 
+Il kit ATO Red Sea stesso (una porta di tipo `ato`, installata dalle opzioni
+dell'integrazione, _Installa il modulo ATO_) sostituisce l'ingranaggio della porta con
+un'icona di pompa, che apre le impostazioni del modulo: stato e volume di oggi,
+rabbocco automatico, monitoraggio del serbatoio e volume residuo, lunghezza e altezza
+del tubo, portata della pompa, notifiche e registro della temperatura. **Rabbocca
+ora** avvia un rabbocco manuale, **Ferma** lo interrompe e **Riprendi** cancella un
+guasto. Finché il modulo segnala un guasto (pompa assente o bloccata, serbatoio vuoto,
+tempo di rabbocco superato, perdita, guasto della porta), la sua icona diventa rossa,
+la pompa e il suo cavo lampeggiano e il guasto compare nel riepilogo come allarme.
+
 ## Messaggi
 
 <img src="../img/rscontrol/zone_7.png"/>
