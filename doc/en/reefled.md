@@ -82,10 +82,11 @@ rows are the rise and the set of the channel: their intensity stays at 0 %.
 > [!NOTE]
 > The lamp stores its programs on a weekly timeline (day N starts at
 > (N - 1) × 1440 min); the card shows and edits each day on its own 24 h.
-> A G2 program is read either as the app's G1 parser sees it (white =
-> intensities, blue = colour temperatures, an in and an out value per
-> point) or as `color` points, and is written as `color` points
-> `{t, i1, i2, k1, k2}` with the moon and the clouds of the day.
+> A G2 stores its program as `color` points `{t, i1, k1, i2, k2}` (an in
+> and an out value per point) plus the moon, its clouds on `/clouds/<day>`
+> like a G1. The card reads and writes that format; it also reads the
+> program as the app's G1 parser sees it (white = intensities, blue =
+> colour temperatures).
 
 > [!NOTE]
 > The acclimation progress needs ha-reefbeat-component with the

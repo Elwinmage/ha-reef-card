@@ -88,10 +88,11 @@ programmation du jour affiché, ou de tous les jours avec _Tous les jours_.
 > [!NOTE]
 > La rampe stocke ses programmations sur une semaine (le jour N commence à
 > (N - 1) × 1440 min) ; la carte affiche et édite chaque jour sur ses 24 h.
-> Une programmation G2 est lue soit comme le parseur G1 de l'appli la voit
-> (blanc = intensités, bleu = températures de couleur, une valeur d'entrée et
-> une de sortie par point), soit en points `color`, et elle est écrite en
-> points `color` `{t, i1, i2, k1, k2}` avec la lune et les nuages du jour.
+> Une G2 stocke sa programmation en points `color` `{t, i1, k1, i2, k2}` (une
+> valeur d'entrée et une de sortie par point) plus la lune, ses nuages étant
+> sur `/clouds/<jour>` comme pour une G1. La carte lit et écrit ce format ;
+> elle lit aussi la programmation telle que le parseur G1 de l'appli la voit
+> (blanc = intensités, bleu = températures de couleur).
 
 > [!NOTE]
 > La progression de l'acclimatation nécessite une version de

@@ -11,6 +11,7 @@ import * as P from "../src/devices/redsea/rsled/rsled_program";
 import {
   chart_scale,
   kelvin_label,
+  label_rows,
   program_chart,
 } from "../src/devices/redsea/rsled/rsled_chart";
 import {
@@ -1173,5 +1174,121 @@ describe("rsled_program: channels without points", () => {
       true,
     );
     expect(out.color).toEqual({ rise: 600, set: 900, points: [] });
+  });
+});
+
+// Real /auto/1 and /clouds/1 of a G2, read from a user's lamp
+const G2_REAL = {
+  color: {
+    rise: 540,
+    set: 1260,
+    points: [
+      { t: 60, i1: 60, k1: 14000, i2: 60, k2: 14000 },
+      { t: 540, i1: 60, k1: 16000, i2: 60, k2: 16000 },
+      { t: 615, i1: 60, k1: 20000, i2: 60, k2: 20000 },
+      { t: 660, i1: 50, k1: 23000, i2: 50, k2: 23000 },
+    ],
+  },
+  moon: {
+    rise: 1245,
+    set: 1410,
+    points: [
+      { t: 60, i: 10 },
+      { t: 105, i: 10 },
+    ],
+  },
+};
+const G2_REAL_CLOUDS = {
+  from: 601,
+  to: 1182,
+  intensity: "Medium",
+  cloud_duration: 4,
+  no_cloud_duration: 6,
+};
+
+describe("rsled_program: real G2 payload", () => {
+  it("reads the colour points as intensity + colour temperature", () => {
+    const prog = P.normalize_program(G2_REAL, 1, true)!;
+    expect(prog.intensity).toEqual({
+      rise: 540,
+      set: 1260,
+      points: [
+        { t: 60, i: 60, k: 14000 },
+        { t: 540, i: 60, k: 16000 },
+        { t: 615, i: 60, k: 20000 },
+        { t: 660, i: 50, k: 23000 },
+      ],
+    });
+    expect(prog.moon).toEqual(G2_REAL.moon);
+    expect(P.sun_window(prog)).toEqual({ rise: 540, set: 1260 });
+  });
+
+  it("writes back the very same payload, on any day's timeline", () => {
+    const prog = P.normalize_program(G2_REAL, 1, true)!;
+    const clouds = P.normalize_clouds(G2_REAL_CLOUDS, 1);
+    expect(P.device_program(prog, 1, true, clouds)).toEqual({
+      ...G2_REAL,
+      clouds: G2_REAL_CLOUDS,
+    });
+    const day3 = P.device_program(prog, 3, true, clouds);
+    expect(day3.color.rise).toBe(540 + 2 * 1440);
+    expect(day3.color.points).toEqual(G2_REAL.color.points);
+    expect(day3.clouds.from).toBe(601 + 2 * 1440);
+  });
+
+  it("edits and saves it unchanged through the editor", async () => {
+    const led = {
+      program: (day: number) => P.normalize_program(G2_REAL, day, true),
+      clouds: () => G2_REAL_CLOUDS,
+      has_white_blue: () => false,
+      kelvin_range: () => ({ min: 8000, max: 23000 }),
+      hass: { callService: vi.fn() },
+      device: { elements: [{ primary_config_entry: "g2", model: "RSLED170" }] },
+    };
+    const ed = await mountEditor(led, 1, "kelvin");
+    expect(ed.format).toBe("kelvin");
+    expect(ed.points.intensity.length).toBe(6); // rise, 4 points, set
+    await ed.save();
+    const sent = led.hass.callService.mock.calls[0][2];
+    expect(sent.access_path).toBe("/auto/1");
+    expect(sent.data.color).toEqual(G2_REAL.color);
+    expect(sent.data.moon).toEqual(G2_REAL.moon);
+  });
+});
+
+describe("rsled_chart: colour labels of short zones", () => {
+  it("label_rows() stacks labels too close to each other", () => {
+    expect(label_rows([10, 50, 90])).toEqual([0, 0, 0]);
+    expect(label_rows([10, 20, 30, 100])).toEqual([0, 1, 2, 0]);
+    // No row left: the label is left out
+    expect(label_rows([10, 15, 20, 25], 28, 3)).toEqual([0, 1, 2, null]);
+  });
+
+  it("the real G2 program gets its three late labels on three rows", () => {
+    const today = P.normalize_program(G2_REAL, 1, true)!;
+    const el = draw(program_chart(EDITOR_CHART, { id: "real", today }));
+    const ys = [...el.querySelectorAll(".kelvin_label")].map((t) =>
+      Number(t.getAttribute("y")),
+    );
+    const base = EDITOR_CHART.y + EDITOR_CHART.h - 5;
+    expect(ys).toEqual([base, base, base - 14, base - 28]);
+  });
+
+  it("leaves out a label finding no room", () => {
+    const today = {
+      intensity: {
+        rise: 600,
+        set: 700,
+        points: [
+          { t: 10, i: 50, k: 9000 },
+          { t: 15, i: 50, k: 12000 },
+          { t: 20, i: 50, k: 15000 },
+          { t: 25, i: 50, k: 18000 },
+        ],
+      },
+    };
+    const el = draw(program_chart(EDITOR_CHART, { id: "tight", today }));
+    // Four zones within a few minutes: three rows, one label left out
+    expect(el.querySelectorAll(".kelvin_label").length).toBe(3);
   });
 });

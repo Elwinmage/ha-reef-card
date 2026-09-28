@@ -60,6 +60,38 @@ export function chart_scale(box: ChartBox) {
  * Label of a colour temperature: 12000 -> "12K", 12500 -> "12.5K".
  * @param k: the colour temperature
  */
+/** Width a colour label needs, in chart units ("23K" at 12 px, plus air). */
+export const LABEL_GAP = 28;
+/** Height of a row of stacked colour labels, in chart units. */
+export const LABEL_ROW_HEIGHT = 14;
+/** Rows of stacked labels before one is left out. */
+export const LABEL_ROWS = 3;
+
+/**
+ * Row of each colour label: the lowest one where it does not overlap the
+ * previous label of that row. A label finding no room is left out.
+ * @param xs: centre of each label, from left to right
+ * @param gap: least distance between two centres on a row
+ * @param rows: number of rows
+ * @return the row of each label (0 = bottom), or null when left out
+ */
+export function label_rows(
+  xs: number[],
+  gap: number = LABEL_GAP,
+  rows: number = LABEL_ROWS,
+): (number | null)[] {
+  const last: number[] = [];
+  return xs.map((x) => {
+    for (let r = 0; r < rows; r++) {
+      if (last[r] === undefined || x - last[r] >= gap) {
+        last[r] = x;
+        return r;
+      }
+    }
+    return null;
+  });
+}
+
 export function kelvin_label(k: number): string {
   const v = Math.round(k / 100) / 10;
   return `${Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1)}K`;
@@ -187,9 +219,15 @@ function kelvin_curve(
     return svg`<line class="kelvin_mark" x1="${px(z.m0)}" y1="${y + h}"
       x2="${px(z.m0)}" y2="${py(v)}"></line>`;
   });
-  const labels = zones.map(
-    (z) => svg`<text class="kelvin_label" x="${px((z.m0 + z.m1) / 2)}"
-      y="${y + h - 5}" text-anchor="middle"
+  // Short zones would write their labels over each other: stack them
+  const xs = zones.map((z) => px((z.m0 + z.m1) / 2));
+  const rows = label_rows(xs);
+  const labels = zones.map((z, n) =>
+    rows[n] === null
+      ? ""
+      : svg`<text class="kelvin_label" x="${xs[n]}"
+      y="${y + h - 5 - (rows[n] as number) * LABEL_ROW_HEIGHT}"
+      text-anchor="middle"
       fill="${rgb_css(kelvin_rgb(z.k))}">${kelvin_label(z.k)}</text>`,
   );
 
