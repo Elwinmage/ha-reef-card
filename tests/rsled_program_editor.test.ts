@@ -9,8 +9,15 @@ import { render, svg } from "lit";
 import "../src/devices/index";
 import * as P from "../src/devices/redsea/rsled/rsled_program";
 import {
+  CLOUD_BAND_OPACITY,
   chart_scale,
+  clouds_band,
+  CLOUD_COUNT,
+  CLOUD_ICONS,
+  CLOUD_ICON,
   kelvin_label,
+  kelvin_labels,
+  LABEL_CHAR,
   label_rows,
   program_chart,
 } from "../src/devices/redsea/rsled/rsled_chart";
@@ -748,7 +755,8 @@ describe("RSLedProgramEditor", () => {
     // The integration answers with its own values (compensation, table)
     led.hass.callWS = vi.fn(async (msg: any) => ({
       response: {
-        points: msg.service_data.points.map((p: any) =>
+        // The editor also asks for the cloud library: not linked
+        points: (msg.service_data.points ?? []).map((p: any) =>
           "kelvin" in p
             ? { white: 42, blue: 84 }
             : { kelvin: 12300, intensity: Math.max(p.white, p.blue) },
@@ -757,7 +765,9 @@ describe("RSLedProgramEditor", () => {
     }));
     const ed = await mountEditor(led);
     await ed.set_mode("kelvin");
-    const msg = led.hass.callWS.mock.calls[0][0];
+    const msg = led.hass.callWS.mock.calls
+      .map((c: any[]) => c[0])
+      .find((m: any) => m.service === "led_convert");
     expect(msg).toMatchObject({
       type: "call_service",
       domain: "redsea",
@@ -1258,20 +1268,43 @@ describe("rsled_program: real G2 payload", () => {
 
 describe("rsled_chart: colour labels of short zones", () => {
   it("label_rows() stacks labels too close to each other", () => {
-    expect(label_rows([10, 50, 90])).toEqual([0, 0, 0]);
-    expect(label_rows([10, 20, 30, 100])).toEqual([0, 1, 2, 0]);
+    expect(label_rows([10, 50, 90], 28, 3)).toEqual([0, 0, 0]);
+    expect(label_rows([10, 20, 30, 100], 28, 3)).toEqual([0, 1, 2, 0]);
     // No row left: the label is left out
     expect(label_rows([10, 15, 20, 25], 28, 3)).toEqual([0, 1, 2, null]);
+    // Upright labels: one row, the height of the text apart
+    expect(label_rows([10, 20, 30])).toEqual([0, null, 0]);
   });
 
-  it("the real G2 program gets its three late labels on three rows", () => {
+  it("the real G2 program gets its labels upright, at the bottom", () => {
     const today = P.normalize_program(G2_REAL, 1, true)!;
     const el = draw(program_chart(EDITOR_CHART, { id: "real", today }));
-    const ys = [...el.querySelectorAll(".kelvin_label")].map((t) =>
-      Number(t.getAttribute("y")),
+    const labels = [...el.querySelectorAll(".kelvin_label")];
+    const base = EDITOR_CHART.y + EDITOR_CHART.h - 4;
+    expect(labels.length).toBe(3);
+    for (const t of labels) {
+      expect(Number(t.getAttribute("y"))).toBe(base);
+      expect(t.parentElement!.getAttribute("transform")).toBe(
+        `rotate(-90 ${t.getAttribute("x")} ${base})`,
+      );
+      expect(t.getAttribute("text-anchor")).toBe("start");
+      // On a small box as long as the text
+      const rect = t.parentElement!.querySelector(".kelvin_box")!;
+      expect(Number(rect.getAttribute("width"))).toBeCloseTo(
+        t.textContent!.length * LABEL_CHAR + 4,
+      );
+    }
+    // Over everything, taking no clicks
+    const group = el.querySelector(".kelvin_labels")!;
+    expect(group.getAttribute("pointer-events")).toBe("none");
+    expect(group.parentElement!.lastElementChild).toBe(group);
+    // Left to the caller, or nothing for a G1
+    const apart = draw(
+      program_chart(EDITOR_CHART, { id: "apart", today, labels: false }),
     );
-    const base = EDITOR_CHART.y + EDITOR_CHART.h - 5;
-    expect(ys).toEqual([base, base, base - 14, base - 28]);
+    expect(apart.querySelector(".kelvin_label")).toBeNull();
+    expect(kelvin_labels(EDITOR_CHART, G1)).toBe("");
+    expect(kelvin_labels(EDITOR_CHART, null)).toBe("");
   });
 
   it("leaves out a label finding no room", () => {
@@ -1288,7 +1321,92 @@ describe("rsled_chart: colour labels of short zones", () => {
       },
     };
     const el = draw(program_chart(EDITOR_CHART, { id: "tight", today }));
-    // Four zones within a few minutes: three rows, one label left out
-    expect(el.querySelectorAll(".kelvin_label").length).toBe(3);
+    // Four zones within a few minutes: room for one label only
+    expect(el.querySelectorAll(".kelvin_label").length).toBe(1);
+  });
+});
+
+describe("rsled_chart: clouds band", () => {
+  it("shades the clouds' window by their intensity", () => {
+    const el = draw(
+      program_chart(EDITOR_CHART, {
+        id: "cl",
+        today: G1,
+        clouds: { from: 720, to: 900, intensity: "High" },
+      }),
+    );
+    const rect = el.querySelector(".clouds_band rect") as SVGRectElement;
+    const { px } = chart_scale(EDITOR_CHART);
+    expect(Number(rect.getAttribute("x"))).toBeCloseTo(px(720));
+    expect(Number(rect.getAttribute("width"))).toBeCloseTo(px(900) - px(720));
+    expect(rect.getAttribute("opacity")).toBe(String(CLOUD_BAND_OPACITY.High));
+    expect(el.querySelectorAll(".clouds_band line").length).toBe(2);
+  });
+
+  it("clouds in the band: the cloudier, the more", () => {
+    const clouds = (level: string, from = 480, to = 1140, box = EDITOR_CHART) =>
+      [
+        ...draw(
+          clouds_band(box, { from, to, intensity: level }) as any,
+        ).querySelectorAll(".clouds_icon"),
+      ] as SVGPathElement[];
+    expect(clouds("Low").length).toBe(CLOUD_COUNT.Low);
+    expect(clouds("Medium").length).toBe(CLOUD_COUNT.Medium);
+    expect(clouds("High").length).toBe(CLOUD_COUNT.High);
+    expect(clouds("Storm").length).toBe(CLOUD_COUNT.Medium);
+    // The pictogram of the intensity
+    expect(clouds("Low")[0].getAttribute("d")).toBe(CLOUD_ICONS.Low);
+    expect(clouds("Medium")[0].getAttribute("d")).toBe(CLOUD_ICONS.Medium);
+    expect(clouds("High")[2].getAttribute("d")).toBe(CLOUD_ICONS.High);
+    expect(clouds("Storm")[0].getAttribute("d")).toBe(CLOUD_ICONS.Medium);
+    // Sized by the chart, spread over the band
+    const size = Math.min(CLOUD_ICON.max, EDITOR_CHART.h * CLOUD_ICON.share);
+    const high = clouds("High").map((c) => c.getAttribute("transform")!);
+    expect(high[0]).toContain(`scale(${(size / 24).toFixed(3)})`);
+    expect(new Set(high).size).toBe(3);
+    // A narrow band: fewer, smaller clouds, never under the least size
+    const { px } = chart_scale(EDITOR_CHART);
+    const narrow = clouds("High", 600, 600 + 30);
+    const room = px(630) - px(600);
+    expect(narrow.length).toBe(Math.max(1, Math.floor(room / size)));
+    const tiny = clouds("High", 600, 602);
+    expect(tiny.length).toBe(1);
+    expect(tiny[0].getAttribute("transform")).toContain(
+      `scale(${(CLOUD_ICON.min / 24).toFixed(3)})`,
+    );
+  });
+
+  it("nothing without a window; an unknown intensity is a medium one", () => {
+    expect(clouds_band(EDITOR_CHART, null)).toBe("");
+    expect(clouds_band(EDITOR_CHART, { from: 900, to: 800 })).toBe("");
+    expect(clouds_band(EDITOR_CHART, { from: 2000, to: 2100 })).toBe("");
+    const el = draw(clouds_band(EDITOR_CHART, { from: -100, to: 100 }) as any);
+    const rect = el.querySelector("rect") as SVGRectElement;
+    expect(Number(rect.getAttribute("x"))).toBe(EDITOR_CHART.x);
+    expect(rect.getAttribute("opacity")).toBe(
+      String(CLOUD_BAND_OPACITY.Medium),
+    );
+    const odd = draw(
+      clouds_band(EDITOR_CHART, {
+        from: 0,
+        to: 100,
+        intensity: "Storm",
+      }) as any,
+    );
+    expect(odd.querySelector("rect")?.getAttribute("opacity")).toBe(
+      String(CLOUD_BAND_OPACITY.Medium),
+    );
+  });
+
+  it("the editor shows the clouds of the day, the beam today's", async () => {
+    const led: any = {
+      program: () => G1,
+      clouds: () => ({ from: 720, to: 900, intensity: "Low" }),
+      kelvin_range: () => ({ min: 8000, max: 23000 }),
+      hass: { callService: vi.fn() },
+      device: { elements: [{ primary_config_entry: "e" }] },
+    };
+    const ed = await mountEditor(led);
+    expect(ed.shadowRoot.querySelector(".clouds_band")).not.toBeNull();
   });
 });

@@ -173,6 +173,12 @@ describe("virtual mapping and dialogs", () => {
 });
 
 describe("RSLedVirtual", () => {
+  it("has the dialogs of a lamp; the weather is in the program editor", () => {
+    const dev = makeVirtual([LED_G1A, LED_G2], false);
+    expect(dev.dialogs).not.toHaveProperty("led_weather");
+    expect(dev.dialogs).toHaveProperty("led_moon");
+  });
+
   it("is registered for the virtual_led model", () => {
     expect(customElements.get("redsea-virtual_led")).toBe(RSLedVirtual);
     expect(customElements.get("rsled-linked")).toBe(RSLedLinked);

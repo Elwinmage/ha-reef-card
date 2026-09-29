@@ -284,6 +284,53 @@ export function format_minutes(minutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
+/** A day of the weather program: the sun on the tank and at the place. */
+export interface WeatherDayTimes {
+  sunrise?: string;
+  sunset?: string;
+  place_sunrise?: string;
+  place_sunset?: string;
+}
+
+/**
+ * Minute at the weather program's place matching a minute of the tank.
+ *
+ * The integration moves the place's day onto the tank's clock: shifted to
+ * the tank's sunrise or sunset, stretched between both, or kept at the
+ * place's own time. In every case the tank's day (sunrise to sunset) maps
+ * linearly onto the place's, which this inverts, before and after the day
+ * too.
+ * @param minute: minute of the tank's day
+ * @param day: the day of the weather program (times as "HH:MM")
+ * @return the place's minute of the day (0..1439), null without the times
+ */
+export function weather_place_minute(
+  minute: number,
+  day: WeatherDayTimes | null | undefined,
+): number | null {
+  const rise = parse_time(day?.sunrise ?? "");
+  const set = parse_time(day?.sunset ?? "");
+  const place_rise = parse_time(day?.place_sunrise ?? "");
+  const place_set = parse_time(day?.place_sunset ?? "");
+  if (
+    rise === null ||
+    set === null ||
+    place_rise === null ||
+    place_set === null
+  )
+    return null;
+  // A day running past midnight
+  const span = set > rise ? set - rise : set + MINUTES_PER_DAY - rise;
+  const place_span =
+    place_set > place_rise
+      ? place_set - place_rise
+      : place_set + MINUTES_PER_DAY - place_rise;
+  const m = place_rise + ((minute - rise) * place_span) / span;
+  return (
+    ((Math.round(m) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY
+  );
+}
+
 /**
  * Whether clouds are programmed for the day, and whether we are inside
  * their window right now.
@@ -1164,16 +1211,103 @@ export function device_program(
   }
   const moon = shift(prog.moon);
   if (moon) out.moon = moon;
-  if (clouds && typeof clouds === "object") {
-    const from = Number(clouds.from);
-    const to = Number(clouds.to);
-    out.clouds = {
-      ...clouds,
-      ...(Number.isFinite(from) ? { from: from + offset } : {}),
-      ...(Number.isFinite(to) ? { to: to + offset } : {}),
-    };
-  }
+  const shifted = device_clouds(clouds, day);
+  if (shifted) out.clouds = shifted;
   return out;
+}
+
+/**
+ * Clouds of a day as the lamp stores them: on its weekly timeline.
+ * @param clouds: clouds on the day's own timeline
+ * @param day: ISO weekday
+ * @return the clouds with their offset, null when there are none
+ */
+export function device_clouds(clouds: any, day: number): any {
+  if (!clouds || typeof clouds !== "object") return null;
+  const offset = day_offset(day);
+  const from = Number(clouds.from);
+  const to = Number(clouds.to);
+  return {
+    ...clouds,
+    ...(Number.isFinite(from) ? { from: from + offset } : {}),
+    ...(Number.isFinite(to) ? { to: to + offset } : {}),
+  };
+}
+
+/**
+ * Whether clouds are set: a window with its start and end.
+ * @param clouds: clouds as the lamp holds them ({} once removed)
+ */
+export function has_clouds(clouds: any): boolean {
+  return (
+    !!clouds &&
+    typeof clouds === "object" &&
+    Number.isFinite(Number(clouds.from ?? NaN)) &&
+    Number.isFinite(Number(clouds.to ?? NaN))
+  );
+}
+
+/**
+ * Clouds kept inside a program's day. A lamp refuses clouds outside the
+ * [rise, set] of the program it holds ("Cloud period is outside the preset
+ * [rise:set] interval"), and a program whose day leaves its clouds out.
+ * @param clouds: clouds on the day's timeline
+ * @param prog: the program on the same timeline
+ * @return the clouds cut to the day of light (moon left out), null when
+ *         none, or when nothing of them is left
+ */
+export function fit_clouds(clouds: any, prog: DayProgram | null): any {
+  if (!has_clouds(clouds)) return null;
+  const from = Number(clouds.from);
+  const to = Number(clouds.to);
+  const channels = (["white", "blue", "intensity"] as const)
+    .map((key) => (prog as any)?.[key])
+    .filter(is_channel);
+  if (!channels.length) return null;
+  const rise = Math.min(...channels.map((ch) => Number(ch.rise)));
+  const set = Math.max(...channels.map((ch) => Number(ch.set)));
+  const start = Math.max(from, rise);
+  const end = Math.min(to, set);
+  if (end <= start) return null;
+  return start === from && end === to
+    ? clouds
+    : { ...clouds, from: start, to: end };
+}
+
+/**
+ * Name of a program as the user gave it. The ReefBeat app stores the name
+ * of a library program on the lamp with a creation stamp in milliseconds
+ * ("Perso-1745049718480"): the stamp is left out.
+ * @param name: the preset name read from the lamp
+ */
+export function preset_label(name: string): string {
+  return name.replace(/-\d{13}$/, "");
+}
+
+/**
+ * Name the lamp stores for a library program: its name and a stamp, as
+ * the ReefBeat app writes it.
+ * @param name: the program's name in the library
+ * @param now: the time of the write
+ */
+export function preset_name(name: string, now: Date = new Date()): string {
+  return `${name}-${now.getTime()}`;
+}
+
+/**
+ * Default name of a new program: "prog-" and the local date, YYYYMMDDHHMM.
+ * @param now: the date
+ */
+export function default_program_name(now: Date = new Date()): string {
+  const two = (n: number) => String(n).padStart(2, "0");
+  return (
+    "prog-" +
+    now.getFullYear() +
+    two(now.getMonth() + 1) +
+    two(now.getDate()) +
+    two(now.getHours()) +
+    two(now.getMinutes())
+  );
 }
 
 /**

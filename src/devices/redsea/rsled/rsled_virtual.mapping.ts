@@ -6,7 +6,7 @@
  */
 import { rsled_virtual_config } from "./rsled.common.mapping";
 import { G1_FACE } from "./rsled_g1.mapping";
-import { G2_FACE, G2_NAME, G2_SKY } from "./rsled_g2.mapping";
+import { G2_BEAM, G2_FACE, G2_NAME, G2_SKY } from "./rsled_g2.mapping";
 
 /** Only G1 lamps: white/blue channels available. */
 export const config_virtual_g1 = rsled_virtual_config({
@@ -21,5 +21,6 @@ export const config_virtual_g2 = rsled_virtual_config({
   face: G2_FACE,
   sky: G2_SKY,
   name: G2_NAME,
+  beam: G2_BEAM,
   white_blue: false,
 });

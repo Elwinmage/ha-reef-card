@@ -45,11 +45,16 @@ export const style_rsled_overlay = css`
   }
 
   /* Name of the lamp, along its upper left edge */
+  /* Written on the dark body of the lamp: a light grey, whatever the theme */
   .lamp_name {
     font-weight: 400;
     letter-spacing: 1.5px;
-    fill: var(--primary-text-color, #444);
-    opacity: 0.8;
+    fill: #e6e6e6;
+    opacity: 0.85;
+  }
+
+  .lamp_name.sky_mode_off {
+    fill: #9a9a9a;
   }
 
   .sky_mode_off {
@@ -102,6 +107,15 @@ export const style_rsled_overlay = css`
     stroke-width: 2;
   }
 
+  .now_time {
+    font-size: 15px;
+    font-weight: 600;
+    fill: #ec2330;
+    paint-order: stroke;
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 3px;
+  }
+
   /* The lamp identifies itself: the beam blinks */
   .beam_identify {
     animation: rsled-identify 0.8s steps(2, jump-none) infinite;
@@ -122,6 +136,10 @@ export const style_rsled_overlay = css`
     paint-order: stroke;
     stroke: rgba(10, 20, 40, 0.7);
     stroke-width: 3px;
+  }
+
+  .kelvin_box {
+    fill: rgba(22, 33, 58, 0.4);
   }
 
   .kelvin_mark {

@@ -1,16 +1,16 @@
 /**
- * ReefLED name: the name of the lamp, written in the sky along the upper
- * left edge of the lamp, parallel to it.
+ * ReefLED name: the name of the lamp, written on its upper left face, on
+ * the grey band between the vents and the icons, parallel to the edge.
  *
  * The element is a full-canvas SVG in the design space (see RSLED_CANVAS).
  * Each model sets where the text sits and its slant (the edge of a G2 is
  * less steep than a G1's). A long name is squeezed to the length of the
- * edge: set smaller, then cut with an ellipsis (the whole name shows on
- * hover), rather than overflowing onto the rise time.
+ * band: set smaller, then cut with an ellipsis (the whole name shows on
+ * hover), rather than overflowing onto the icons.
  *
  * Example mapping:
  *   lamp_name: { name: "lamp_name", type: "rsled-name", stateObj: null,
- *                geometry: { x: 150, y: 181, angle: -33 },
+ *                geometry: { x: 120, y: 300, angle: -35 },
  *                css: {...full canvas...} }
  */
 import { html, TemplateResult } from "lit";
@@ -22,15 +22,15 @@ import { style_rsled_overlay } from "./rsled.styles";
 /** Default geometry (G1), in design-space pixels and degrees. */
 export const NAME_DEFAULTS = {
   /** Centre of the text */
-  x: 150,
-  y: 181,
+  x: 120,
+  y: 300,
   /** Slant of the text, the one of the lamp's edge */
-  angle: -33,
+  angle: -35,
   /** Longest text before it is squeezed */
-  max_width: 215,
-  font_size: 21,
+  max_width: 205,
+  font_size: 16,
   /** Smallest size before the name is cut */
-  min_font_size: 14,
+  min_font_size: 11,
 };
 
 /** Rough width of a character, as a share of the font size. */

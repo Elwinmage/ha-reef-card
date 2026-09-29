@@ -12,7 +12,11 @@ import { render } from "lit";
 import "../src/devices/index";
 import { RSLed, RSLed160, RSLed170 } from "../src/devices/redsea/rsled/rsled";
 import { RSLedSky, SKY_DEFAULTS } from "../src/devices/redsea/rsled/rsled_sky";
-import { RSLedBeam } from "../src/devices/redsea/rsled/rsled_beam";
+import {
+  BEAM_DEFAULTS,
+  RSLedBeam,
+  is_dark,
+} from "../src/devices/redsea/rsled/rsled_beam";
 import {
   RSLedSlider,
   KELVIN_MIN,
@@ -953,7 +957,73 @@ describe("RSLedSky", () => {
 
 // ─── Beam ────────────────────────────────────────────────────────────────────
 
+describe("weather place time", () => {
+  const day = {
+    weekday: 2,
+    sunrise: "11:00",
+    sunset: "22:00",
+    place_sunrise: "06:00",
+    place_sunset: "17:00",
+  };
+
+  it("weather_place_minute(): shifted, stretched, across midnight", () => {
+    // Anchored on the sunrise: 09:04 on the tank, 04:04 at the place
+    expect(P.weather_place_minute(544, day)).toBe(244);
+    expect(P.weather_place_minute(0, day)).toBe(1140);
+    // Both anchored: the day is stretched
+    const both = { ...day, sunset: "23:00" };
+    expect(P.weather_place_minute(1380, both)).toBe(1020);
+    expect(P.weather_place_minute(1020, both)).toBe(690);
+    // Days running past midnight
+    const late = {
+      sunrise: "20:00",
+      sunset: "02:00",
+      place_sunrise: "22:00",
+      place_sunset: "04:00",
+    };
+    expect(P.weather_place_minute(0, late)).toBe(120);
+    expect(P.weather_place_minute(1380, late)).toBe(60);
+    expect(P.weather_place_minute(600, { ...day, sunset: "x" })).toBeNull();
+    expect(P.weather_place_minute(600, null)).toBeNull();
+    expect(P.weather_place_minute(600, {})).toBeNull();
+  });
+
+  it("RSLed.weather_place_now(): only in weather mode, with today", () => {
+    at("09:04");
+    const dev = makeLed();
+    const entities: Record<string, any> = {};
+    vi.spyOn(dev, "get_entity").mockImplementation(
+      (key: any) => entities[key] ?? null,
+    );
+    expect(dev.weather_place_now()).toBeNull();
+    entities.weather_sync = { state: "on" };
+    expect(dev.weather_place_now()).toBeNull();
+    entities.weather_program = { attributes: { days: [day] } };
+    // The fixed clock is UTC: 09:04 in the tests' time zone
+    expect(dev.weather_place_now()).toBe(
+      P.weather_place_minute(dev.now().minute, day),
+    );
+    expect(dev.weather_place_now()).not.toBeNull();
+    entities.weather_program = {
+      attributes: { days: [{ ...day, weekday: 5 }] },
+    };
+    expect(dev.weather_place_now()).toBeNull();
+    entities.weather_sync = { state: "off" };
+    expect(dev.weather_place_now()).toBeNull();
+  });
+});
+
 describe("RSLedBeam", () => {
+  it("is_dark(): off, or no intensity; channels without an intensity", () => {
+    const lit = { white: 40, blue: 0 };
+    const none = { white: 0, blue: 0 };
+    expect(is_dark(false, 80, lit)).toBe(true);
+    expect(is_dark(true, 0, lit)).toBe(true);
+    expect(is_dark(true, 5, none)).toBe(false);
+    expect(is_dark(true, null, lit)).toBe(false);
+    expect(is_dark(true, undefined, none)).toBe(true);
+  });
+
   it("draws the program, the texts and the now marker", async () => {
     at("15:00");
     const dev = makeLed({ white: 80, blue: 100, intensity: 90 });
@@ -985,7 +1055,58 @@ describe("RSLedBeam", () => {
     const dev = makeLed({ mode: "manual", device_state: "off" });
     const root = await mount(makeElement(RSLedBeam, dev, {}));
     expect(root.querySelector("g")?.getAttribute("opacity")).toBe("0.45");
+    // No light: the beam is transparent, the lens greyed out
     expect(root.innerHTML).toContain("rgb(140,140,140)");
+    expect(root.querySelector(".lens_off")).not.toBeNull();
+    expect(root.querySelector(".beam_pool")).toBeNull();
+  });
+
+  it("the current time under the chart, with the weather's place time", async () => {
+    at("15:00");
+    const dev = makeLed({ white: 50, intensity: 40 });
+    const root = await mount(makeElement(RSLedBeam, dev, {}));
+    const clock = root.querySelector(".now_time")!;
+    expect(clock.textContent?.trim()).toBe("15:00");
+    expect(clock.querySelector("title")).toBeNull();
+    dev.weather_place_now = () => 604;
+    at("00:10");
+    const early = await mount(makeElement(RSLedBeam, dev, {}));
+    const text = early.querySelector(".now_time")!;
+    expect(text.textContent?.trim().startsWith("00:10 (10:04)")).toBe(true);
+    expect(text.querySelector("title")).not.toBeNull();
+    // Kept inside the chart at midnight
+    expect(Number(text.getAttribute("x"))).toBe(
+      BEAM_DEFAULTS.chart.x + BEAM_DEFAULTS.clock.margin,
+    );
+  });
+
+  it("no beam at 0 % intensity, even with the moon lit", async () => {
+    at("15:00");
+    const dark = makeLed({ moon: 30, intensity: 0 });
+    const root = await mount(makeElement(RSLedBeam, dark, {}));
+    const lens = root.querySelector(".lens_off")!;
+    expect(lens.getAttribute("cx")).toBe(String(BEAM_DEFAULTS.lens.cx));
+    expect(lens.getAttribute("ry")).toBe(String(BEAM_DEFAULTS.lens.ry));
+    expect(root.querySelector(".beam_pool")).toBeNull();
+    // The beam stays tappable
+    expect(root.querySelector(".beam_shape")).not.toBeNull();
+    const lit = await mount(
+      makeElement(RSLedBeam, makeLed({ white: 50, intensity: 40 }), {}),
+    );
+    expect(lit.querySelector(".lens_off")).toBeNull();
+    expect(lit.querySelector(".beam_pool")).not.toBeNull();
+  });
+
+  it("the G2 lens, from the model's geometry", async () => {
+    at("15:00");
+    const dev = makeLed({}, true);
+    const root = await mount(
+      makeElement(RSLedBeam, dev, config2.elements.beam),
+    );
+    expect(root.querySelector(".lens_off")?.getAttribute("cy")).toBe(
+      String(config2.elements.beam.geometry.lens.cy),
+    );
+    expect(config.elements.beam.geometry).toBeUndefined();
   });
 
   it("no program: no curve, no marker, no intensity", async () => {

@@ -211,6 +211,12 @@ function slider_at(column: number) {
   };
 }
 
+/**
+ * Weather icon, bottom right, beside the beam (free on every model, under
+ * the lamps of a virtual LED), as [left, top] in %.
+ */
+export const WEATHER_ICON: [string, string] = ["91.5%", "88.3%"];
+
 /** A G1 switched to white/blue sliders (K | W/B switch on the card). */
 const WHITE_BLUE = "device.white_blue() === true";
 
@@ -231,7 +237,7 @@ export const view_elements = {
     stateObj: null,
     css: FULL_CANVAS,
   },
-  // Name of the lamp, in the sky along its upper left edge
+  // Name of the lamp, on its upper left face
   lamp_name: {
     name: "lamp_name",
     type: "rsled-name",
@@ -290,6 +296,20 @@ export const view_elements = {
     no_br_if_disabled: true,
     css: slider_at(1),
   },
+  // Weather program (GPS weather): lit while the lamp follows the weather
+  weather: {
+    name: "weather_sync",
+    type: "click-image",
+    icon: "mdi:weather-partly-cloudy",
+    icon_color:
+      "${entity.weather_sync?.state === 'on' ? '#f2c230' : 'rgba(127,127,127,0.55)'}",
+    // Only with an integration offering the weather program
+    disabled_if: "!entity.weather_sync",
+    no_br_if_disabled: true,
+    // Turns the GPS weather mode on or off
+    tap_action: { domain: "switch", action: "toggle", data: "default" },
+    css: icon_at(WEATHER_ICON),
+  },
   moon_slider: {
     name: "light.moon",
     type: "rsled-slider",
@@ -342,6 +362,7 @@ export const off_keep: string[] = [
   "beam",
   "sky_front",
   "lamp_name",
+  "weather",
   "device_state",
   "last_message",
   "last_alert_message",
@@ -357,6 +378,8 @@ export interface RSLedModel {
   sky?: Record<string, unknown>;
   /** Where the name sits and its slant, over the defaults (G1) */
   name?: Record<string, unknown>;
+  /** Geometry of the beam (lens, cone), over the defaults (G1) */
+  beam?: Record<string, unknown>;
   /**
    * Whether the lamp can be driven channel by channel (G1): the K | W/B
    * switch then swaps intensity/colour for white/blue sliders.
@@ -392,6 +415,9 @@ export function rsled_config(model: RSLedModel) {
   }
   if (model.name) {
     elements.lamp_name = { ...view.lamp_name, geometry: model.name };
+  }
+  if (model.beam) {
+    elements.beam = { ...view.beam, geometry: model.beam };
   }
   return {
     name: null,
@@ -430,7 +456,8 @@ export const linked_element = {
     left: "83%",
     top: "55.8%",
     width: "15.6%",
-    height: "37%",
+    // Leaves the bottom right corner to the weather icon
+    height: "28%",
   },
 };
 

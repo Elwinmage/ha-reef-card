@@ -25,9 +25,11 @@ import {
   local_time,
   normalize_clouds,
   normalize_program,
+  preset_label,
   previous_weekday,
   sky_state,
   wb_to_kelvin_program,
+  weather_place_minute,
 } from "./rsled_program";
 
 /** A lamp a program is written to (the lamp itself, or those of a group). */
@@ -130,14 +132,15 @@ export class RSLed extends RSDevice {
 
   /**
    * Name of the program running: from the lamp's dashboard when available
-   * (G1 and G2), else from today's program entity.
+   * (G1 and G2), else from today's program entity; without the stamp the
+   * app adds to library programs.
    */
   program_name(): string {
     const valid = (state?: string) =>
       state && state !== "unknown" && state !== "unavailable" ? state : "";
-    return (
+    return preset_label(
       valid(this.get_entity("current_program")?.state) ||
-      valid(this.get_entity(this.today_program_key())?.state)
+        valid(this.get_entity(this.today_program_key())?.state),
     );
   }
 
@@ -206,6 +209,26 @@ export class RSLed extends RSDevice {
   display_name(): string {
     const el: any = this.device?.elements?.[0];
     return String(el?.name_by_user || el?.name || this.device?.name || "");
+  }
+
+  // ── Weather program ───────────────────────────────────────────────────
+
+  // check-entities: uses weather_sync, weather_program
+
+  /**
+   * Current minute at the place of the weather program, while the lamp
+   * follows it: the moment of the place's day the program plays now (with
+   * the tank's day anchored on its own sunrise, 09:04 in France can be
+   * 04:04 in the Maldives). Null outside the weather mode, or without
+   * today in the generated week.
+   */
+  weather_place_now(): number | null {
+    if (this.get_entity("weather_sync")?.state !== "on") return null;
+    const days = this.get_entity("weather_program")?.attributes?.days;
+    if (!Array.isArray(days)) return null;
+    const now = this.now();
+    const day = days.find((d: any) => d?.weekday === now.weekday);
+    return weather_place_minute(now.minute, day);
   }
 
   // ── Mode and moon ─────────────────────────────────────────────────────
@@ -289,6 +312,16 @@ export class RSLed extends RSDevice {
       .device_bg {
         aspect-ratio: ${RSLED_CANVAS.width} / ${RSLED_CANVAS.height};
       }
+      /* The program editor over the view, in the same grid cell: the card
+         grows when the editor needs more height than the view */
+      .rsled_stack {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .rsled_stack > * {
+        grid-area: 1 / 1;
+        min-width: 0;
+      }
       /* K | W/B switch, above the sliders */
       .rsled_switch {
         position: absolute;
@@ -316,18 +349,20 @@ export class RSLed extends RSDevice {
 
   override _render(style?: any, substyle?: any): TemplateResult {
     const on = this.is_on();
-    return html` <div class="device_bg">
-      ${style}
-      <div>${this._render_elements(on, "back")}</div>
-      <img
-        class="device_img"
-        id="rsdevice_img"
-        alt=""
-        src="${this.config.background_img}"
-        style="${substyle}"
-      />
-      <div>${this._render_elements(on)}</div>
-      ${this.has_white_blue() ? this._render_slider_switch() : ""}
+    return html`<div class="rsled_stack">
+      <div class="device_bg">
+        ${style}
+        <div>${this._render_elements(on, "back")}</div>
+        <img
+          class="device_img"
+          id="rsdevice_img"
+          alt=""
+          src="${this.config.background_img}"
+          style="${substyle}"
+        />
+        <div>${this._render_elements(on)}</div>
+        ${this.has_white_blue() ? this._render_slider_switch() : ""}
+      </div>
       ${this._program_editor ?? ""}
     </div>`;
   }
@@ -427,6 +462,12 @@ export class RSLed extends RSDevice {
     this._program_editor = null;
     this.requestUpdate();
   };
+
+  /** New states: the program editor follows them (GPS weather mode). */
+  override _setting_hass(obj: any): void {
+    super._setting_hass(obj);
+    this._program_editor?.hass_changed();
+  }
 
   override async connectedCallback() {
     this.addEventListener("device-event", this._on_device_event);

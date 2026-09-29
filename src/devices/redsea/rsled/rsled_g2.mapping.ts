@@ -27,13 +27,19 @@ export const G2_SKY = {
   clouds: { x: 405, y: 78 },
 };
 
-/** The G2's edge is less steep and higher than the G1's. */
-export const G2_NAME = { x: 140, y: 150, angle: -31 };
+/** The G2's face is less steep and higher than the G1's. */
+export const G2_NAME = { x: 118, y: 278, angle: -27 };
+
+/** The G2's lens is a little higher and rounder than the G1's. */
+export const G2_BEAM = {
+  lens: { cx: 300, cy: 418, rx: 152, ry: 70 },
+};
 
 export const config2 = rsled_config({
   image: new URL("../../../img/redsea/RSLED/rsled_g2.png", import.meta.url),
   face: G2_FACE,
   sky: G2_SKY,
   name: G2_NAME,
+  beam: G2_BEAM,
   white_blue: false,
 });

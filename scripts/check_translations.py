@@ -58,6 +58,10 @@ class TranslationVerifier:
         self.translations_dir = base_path / translations_dir
         self.report_path = base_path / "translation_report.txt"
         self.code_keys: Set[str] = set()
+        # Every plain string literal of the code: a translation key held in a
+        # table, passed to a helper or picked by a ternary is used even though
+        # no i18n._('key') call names it. Only the unused check reads it.
+        self.code_literals: Set[str] = set()
         self.translation_keys: Dict[str, Set[str]] = {}
         self.errors: List[str] = []
         self.warnings: List[str] = []
@@ -187,6 +191,11 @@ class TranslationVerifier:
             try:
                 file_content = ts_file.read_text(encoding='utf-8')
                 lines = file_content.split('\n')
+                code_only = re.sub(r"/\*.*?\*/", "", file_content, flags=re.S)
+                code_only = re.sub(r"(?m)^\s*//.*$", "", code_only)
+                self.code_literals.update(
+                    re.findall(r"['\"`]([A-Za-z0-9_.-]+)['\"`]", code_only)
+                )
                 file_has_keys = False
 
                 # Helper: find line number from character offset in file_content
@@ -407,7 +416,7 @@ class TranslationVerifier:
         
         for lang, trans_keys in self.translation_keys.items():
             # Find unused keys (excluding known dynamic keys)
-            unused = sorted(trans_keys - self.code_keys)
+            unused = sorted(trans_keys - self.code_keys - self.code_literals)
             
             if unused:
                 unused_by_lang[lang] = unused
@@ -598,7 +607,7 @@ class TranslationVerifier:
         
         has_unused = False
         for lang, trans_keys in self.translation_keys.items():
-            unused = sorted(trans_keys - self.code_keys)
+            unused = sorted(trans_keys - self.code_keys - self.code_literals)
             if unused:
                 has_unused = True
                 report.append(f"{lang}.json has {len(unused)} UNUSED key(s):")

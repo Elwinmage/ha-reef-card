@@ -2,9 +2,12 @@
  * ReefLED beam: the cone of light under the lamp.
  *
  * Its colour and opacity follow the light currently produced (white, blue
- * and moon channels). Inside it: the current intensity, the name of today's
- * program and a chart of that program over the day, with a red marker at
- * the current time.
+ * and moon channels). At 0 % intensity (or with the lamp off) there is no
+ * beam, even with the moon lit, and the lens of the picture is greyed out.
+ * Inside it: the current intensity, the name of today's program and a
+ * chart of that program over the day, with a red marker at the current
+ * time, written under the chart. In weather mode the time of the weather's
+ * place follows in brackets: the moment of the place's day played now.
  *
  * Tapping the beam opens the program editor. While the lamp identifies
  * itself, the beam blinks.
@@ -20,7 +23,12 @@ import { RSLED_CANVAS } from "./rsled_sky";
 import { style_rsled_overlay } from "./rsled.styles";
 import style_animations from "../../../utils/animations.styles";
 import i18n from "../../../translations/myi18n";
-import { DayProgram, light_color, rgb_css } from "./rsled_program";
+import {
+  DayProgram,
+  format_minutes,
+  light_color,
+  rgb_css,
+} from "./rsled_program";
 import { chart_scale, program_chart } from "./rsled_chart";
 
 /** Default geometry of the beam, in design-space pixels. */
@@ -31,7 +39,27 @@ export const BEAM_DEFAULTS = {
   intensity: { x: 296, y: 478 },
   program: { x: 296, y: 504 },
   chart: { x: 152, y: 526, w: 288, h: 210 },
+  // Current time, under the chart, following the marker
+  clock: { dy: 42, margin: 44 },
+  // Lit part of the lens in the picture, greyed out when nothing is lit
+  lens: { cx: 296, cy: 424, rx: 150, ry: 64 },
 };
+
+/**
+ * Whether the lamp produces no daylight: off, or at 0 % intensity. The moon
+ * alone does not make a beam.
+ * @param on: whether the lamp is on
+ * @param intensity: overall intensity in %, null when not reported
+ * @param levels: level of each channel, in %, used without intensity
+ */
+export function is_dark(
+  on: boolean,
+  intensity: number | null | undefined,
+  levels: { white: number; blue: number },
+): boolean {
+  const main = intensity ?? Math.max(levels.white, levels.blue);
+  return !on || main <= 0;
+}
 
 export class RSLedBeam extends RSLedElement {
   static override styles = [style_animations, style_rsled_overlay];
@@ -48,16 +76,18 @@ export class RSLedBeam extends RSLedElement {
       blue: 0,
       moon: 0,
     };
-    const light = on
-      ? light_color(levels.white, levels.blue, levels.moon)
-      : { rgb: [140, 140, 140] as [number, number, number], alpha: 0.12 };
+    const intensity = this.led?.intensity_pct?.();
+    const dark = is_dark(on, intensity, levels);
+    // No light, no beam: only its outline is left, to keep it tappable
+    const light = dark
+      ? { rgb: [140, 140, 140] as [number, number, number], alpha: 0 }
+      : light_color(levels.white, levels.blue, levels.moon);
     const shape =
       `M ${g.top.x1} ${g.top.y} L ${g.top.x2} ${g.top.y} ` +
       `L ${g.bottom.x2} ${g.bottom.y} L ${g.bottom.x1} ${g.bottom.y} Z`;
     // Unique per instance: several lamps can share a dashboard
     const grad_id = `rsled_beam_${this._uid}`;
 
-    const intensity = this.led?.intensity_pct?.();
     const intensity_txt =
       intensity === null || intensity === undefined
         ? ""
@@ -107,6 +137,7 @@ export class RSLedBeam extends RSLedElement {
           ></stop>
         </radialGradient>
       </defs>
+      ${dark ? this._lens(g, grad_id) : ""}
       <path
         class="clickable beam_shape ${this.led?.identifying?.()
           ? "beam_identify"
@@ -114,13 +145,16 @@ export class RSLedBeam extends RSLedElement {
         d="${shape}"
         fill="url(#${grad_id})"
       ></path>
-      <ellipse
-        cx="${(g.bottom.x1 + g.bottom.x2) / 2}"
-        cy="${g.bottom.y}"
-        rx="${(g.bottom.x2 - g.bottom.x1) / 2}"
-        ry="18"
-        fill="url(#${grad_id}_pool)"
-      ></ellipse>
+      ${dark
+        ? ""
+        : svg`<ellipse
+              class="beam_pool"
+              cx="${(g.bottom.x1 + g.bottom.x2) / 2}"
+              cy="${g.bottom.y}"
+              rx="${(g.bottom.x2 - g.bottom.x1) / 2}"
+              ry="18"
+              fill="url(#${grad_id}_pool)"
+            ></ellipse>`}
       <text
         class="beam_text"
         x="${g.intensity.x}"
@@ -139,6 +173,24 @@ export class RSLedBeam extends RSLedElement {
       </text>
       ${this._chart(g, on)}
     </svg>`;
+  }
+
+  /**
+   * Lens of the picture, greyed out: the lamp produces no light.
+   */
+  private _lens(g: typeof BEAM_DEFAULTS, grad_id: string) {
+    const { cx, cy, rx, ry } = g.lens;
+    return svg`
+      <defs>
+        <radialGradient id="${grad_id}_lens">
+          <stop offset="0" stop-color="#3b3e45" stop-opacity="0.96"></stop>
+          <stop offset="0.85" stop-color="#303238" stop-opacity="0.93"></stop>
+          <stop offset="1" stop-color="#26282d" stop-opacity="0.4"></stop>
+        </radialGradient>
+      </defs>
+      <ellipse class="lens_off" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"
+        fill="url(#${grad_id}_lens)"></ellipse>
+    `;
   }
 
   /** Identifier used to keep gradient ids unique in the page. */
@@ -167,16 +219,41 @@ export class RSLedBeam extends RSLedElement {
           today,
           yesterday,
           ticks: true,
+          clouds: this.led?.clouds?.(this.led?.today?.()) ?? null,
         })}
       </g>
       ${
         today
           ? svg`<line class="now_marker" x1="${px(now)}" y1="${y - 4}"
                 x2="${px(now)}" y2="${y + h}"></line>
-              <circle cx="${px(now)}" cy="${y - 4}" r="3.5" fill="#ec2330"></circle>`
+              <circle cx="${px(now)}" cy="${y - 4}" r="3.5" fill="#ec2330"></circle>
+              ${this._clock(g, px(now), now)}`
           : ""
       }
     `;
+  }
+
+  /**
+   * Current time under the chart, and the weather's place time in weather
+   * mode: "09:04 (04:04)".
+   */
+  private _clock(g: typeof BEAM_DEFAULTS, x: number, now: number) {
+    const { dy, margin } = g.clock;
+    const place = this.led?.weather_place_now?.() ?? null;
+    const text =
+      format_minutes(now) +
+      (place === null ? "" : ` (${format_minutes(place)})`);
+    // Kept inside the chart's width: the marker runs to both ends
+    const cx = Math.max(
+      g.chart.x + margin,
+      Math.min(g.chart.x + g.chart.w - margin, x),
+    );
+    return svg`<text class="now_time" x="${cx}" y="${g.chart.y + g.chart.h + dy}"
+      text-anchor="middle">${text}${
+        place === null
+          ? ""
+          : svg`<title>${i18n._("led_weather_place_time")}</title>`
+      }</text>`;
   }
 
   /** Tap on the beam: edit today's program. */
