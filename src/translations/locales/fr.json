@@ -248,5 +248,20 @@
   "dialog_ato_conf": "Module osmolateur",
   "ato_resume": "Reprendre",
   "ato_manual_fill": "Remplir maintenant",
-  "ato_stop": "Arrêter"
+  "ato_stop": "Arrêter",
+  "tooltip_tap": "Clic",
+  "tooltip_double_tap": "Double clic",
+  "tooltip_hold": "Appui long",
+  "tooltip_action_dialog": "ouvrir {name}",
+  "tooltip_action_dialog_generic": "ouvrir une boîte de dialogue",
+  "tooltip_action_more_info": "afficher les détails",
+  "tooltip_action_show_device": "afficher l'appareil lié",
+  "tooltip_action_close": "fermer",
+  "tooltip_action_schedule": "modifier la programmation",
+  "tooltip_action_info": "afficher une information",
+  "tooltip_svc_toggle": "basculer {name}",
+  "tooltip_svc_turn_on": "allumer {name}",
+  "tooltip_svc_turn_off": "éteindre {name}",
+  "tooltip_svc_press": "activer {name}",
+  "tooltip_svc_generic": "exécuter {name}"
 }

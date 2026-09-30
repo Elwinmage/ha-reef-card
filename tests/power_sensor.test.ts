@@ -2074,3 +2074,96 @@ describe("PowerSensor probe defaults", () => {
     expect(el._value).toBe(25);
   });
 });
+
+// ─── Temperature unit ───────────────────────────────────────────────────────
+
+describe("PowerSensor temperature unit", () => {
+  /** A mounted element on a Home Assistant set to `unit`. */
+  async function mountIn(unit: string, opts: SetupOptions = {}): Promise<any> {
+    const el = makeElement({ mode: "sensor", ...opts });
+    el.hass = { ...el.hass, config: { unit_system: { temperature: unit } } };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  function inputs(el: any): HTMLInputElement[] {
+    return Array.from(el.shadowRoot.querySelectorAll(".sce-number-input"));
+  }
+
+  it("shows a temperature threshold in °F, kept in °C", async () => {
+    const el = await mountIn("°F");
+    const [value, hysteresis] = inputs(el);
+    expect(value!.value).toBe("77");
+    expect(hysteresis!.value).toBe("0.9");
+    const units = Array.from(el.shadowRoot.querySelectorAll(".sce-unit")).map(
+      (u: any) => u.textContent.trim(),
+    );
+    expect(units).toContain("°F");
+    expect(units).not.toContain("°C");
+    expect(el._value).toBe(25);
+    expect(el._hysteresis).toBe(0.5);
+  });
+
+  it("converts what is typed in °F back to °C", async () => {
+    const el = await mountIn("°F");
+    const [value, hysteresis] = inputs(el);
+    value!.value = "80.6";
+    value!.dispatchEvent(new Event("input"));
+    hysteresis!.value = "1.8";
+    hysteresis!.dispatchEvent(new Event("input"));
+    expect(el._value).toBeCloseTo(27, 6);
+    expect(el._hysteresis).toBeCloseTo(1, 6);
+  });
+
+  it("sends the device Celsius values, rounded", async () => {
+    const el = await mountIn("°F", { name: null });
+    el._probeIdx = 0;
+    el._setShownValue({ unit: "°C" }, 78);
+    await el._save();
+    const sub = lastRequest(el);
+    expect(sub.access_path).toBe("/temperature/subscribe");
+    expect(sub.data.sockets[0].value).toBe(25.56);
+    expect(sub.data.sockets[0].hysteresis).toBe(0.5);
+  });
+
+  it("leaves a Celsius installation untouched", async () => {
+    const el = await mountIn("°C");
+    const [value] = inputs(el);
+    expect(value!.value).toBe("25");
+    value!.value = "26.3";
+    value!.dispatchEvent(new Event("input"));
+    expect(el._value).toBe(26.3);
+  });
+
+  it("never converts a threshold that is not a temperature", async () => {
+    const el = makeElement({ mode: "sensor" });
+    el.hass = { ...el.hass, config: { unit_system: { temperature: "°F" } } };
+    const ph = {
+      unit: "pH",
+      defaultValue: 8.2,
+      defaultDelta: 0.1,
+    } as any;
+    el._value = 8.2;
+    el._hysteresis = 0.1;
+    expect(el._thresholdUnit(ph)).toBe("pH");
+    expect(el._shownValue(ph)).toBe(8.2);
+    expect(el._shownHysteresis(ph)).toBe(0.1);
+    el._setShownValue(ph, 8.3);
+    el._setShownHysteresis(ph, 0.2);
+    expect(el._value).toBe(8.3);
+    expect(el._hysteresis).toBe(0.2);
+  });
+});
+
+describe("PowerSensor override notice", () => {
+  it("names the state the socket was forced to", async () => {
+    const el = await mount({ mode: "off", prevMode: "sensor" });
+    el._override = { mode: "sensor", state: "on" };
+    await el.updateComplete;
+    const box = el.shadowRoot.querySelector(".sce-override");
+    expect(box.textContent.replace(/\s+/g, " ")).toContain(
+      "switched ON manually",
+    );
+  });
+});

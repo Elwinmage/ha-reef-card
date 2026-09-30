@@ -2370,3 +2370,32 @@ describe("RSPower switched off", () => {
     expect(elt.run_actions).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("RSPower — unlinked sockets and unnamed devices", () => {
+  it("gives no class to a socket with nothing linked", () => {
+    expect(makeLinkedPowerStrip().linked_device_class(1)).toBe("");
+  });
+
+  it("resolves the model of a linked device that has no name", () => {
+    const dev = makeEditorPower(2, {
+      "d-am": {
+        id: "d-am",
+        model: "DC Runner",
+        identifiers: [["aquamedic", "did-1"]],
+      },
+    });
+    dev._hass.entities = {
+      "select.pump_role": {
+        entity_id: "select.pump_role",
+        device_id: "d-am",
+        translation_key: "pump_role",
+      },
+    };
+    dev._hass.states["select.pump_role"] = { state: "skimmer" };
+    const seen: any[] = [];
+    dev.addEventListener("config-changed", (e: any) => seen.push(e.detail));
+    dev._handle_socket_link_change(1, { target: { value: "d-am" } } as any);
+    const sockets = seen[0].config.conf.RSPOWER6.devices["Power strip"].sockets;
+    expect(sockets.socket_1.linked_model).toBe("DC Skimmer");
+  });
+});

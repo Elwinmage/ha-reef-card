@@ -248,5 +248,20 @@
   "dialog_ato_conf": "Moduł ATO",
   "ato_resume": "Wznów",
   "ato_manual_fill": "Dolej teraz",
-  "ato_stop": "Zatrzymaj"
+  "ato_stop": "Zatrzymaj",
+  "tooltip_tap": "Kliknięcie",
+  "tooltip_double_tap": "Podwójne kliknięcie",
+  "tooltip_hold": "Długie naciśnięcie",
+  "tooltip_action_dialog": "otwórz {name}",
+  "tooltip_action_dialog_generic": "otwórz okno dialogowe",
+  "tooltip_action_more_info": "pokaż szczegóły",
+  "tooltip_action_show_device": "pokaż powiązane urządzenie",
+  "tooltip_action_close": "zamknij",
+  "tooltip_action_schedule": "edytuj harmonogram",
+  "tooltip_action_info": "pokaż informację",
+  "tooltip_svc_toggle": "przełącz {name}",
+  "tooltip_svc_turn_on": "włącz {name}",
+  "tooltip_svc_turn_off": "wyłącz {name}",
+  "tooltip_svc_press": "naciśnij {name}",
+  "tooltip_svc_generic": "wykonaj {name}"
 }

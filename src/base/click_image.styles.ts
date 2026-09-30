@@ -6,15 +6,17 @@
 import { css } from "lit";
 
 export default css`
-  /* Styles MDI icons */
-  ha-icon.click-icon {
-    cursor: pointer;
+  /* Styles MDI icons. The cursor comes from MyElement, which sets it on
+     clickable elements only; so does the hover feedback. */
+  ha-icon.click-icon,
+  ha-state-icon.click-icon {
     transition:
       transform 0.2s ease,
       opacity 0.2s ease;
   }
 
-  ha-icon.click-icon:hover {
+  .clickable ha-icon.click-icon:hover,
+  .clickable ha-state-icon.click-icon:hover {
     transform: scale(1.1);
     opacity: 0.8;
   }

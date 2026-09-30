@@ -248,5 +248,20 @@
   "dialog_ato_conf": "ATO module",
   "ato_resume": "Resume",
   "ato_manual_fill": "Fill now",
-  "ato_stop": "Stop"
+  "ato_stop": "Stop",
+  "tooltip_tap": "Click",
+  "tooltip_double_tap": "Double click",
+  "tooltip_hold": "Long press",
+  "tooltip_action_dialog": "open {name}",
+  "tooltip_action_dialog_generic": "open a dialog",
+  "tooltip_action_more_info": "show details",
+  "tooltip_action_show_device": "show the linked device",
+  "tooltip_action_close": "close",
+  "tooltip_action_schedule": "edit the schedule",
+  "tooltip_action_info": "show information",
+  "tooltip_svc_toggle": "toggle {name}",
+  "tooltip_svc_turn_on": "turn on {name}",
+  "tooltip_svc_turn_off": "turn off {name}",
+  "tooltip_svc_press": "press {name}",
+  "tooltip_svc_generic": "run {name}"
 }

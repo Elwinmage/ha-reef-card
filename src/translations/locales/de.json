@@ -248,5 +248,20 @@
   "dialog_ato_conf": "ATO-Modul",
   "ato_resume": "Fortsetzen",
   "ato_manual_fill": "Jetzt füllen",
-  "ato_stop": "Stoppen"
+  "ato_stop": "Stoppen",
+  "tooltip_tap": "Klick",
+  "tooltip_double_tap": "Doppelklick",
+  "tooltip_hold": "Langes Drücken",
+  "tooltip_action_dialog": "{name} öffnen",
+  "tooltip_action_dialog_generic": "Dialog öffnen",
+  "tooltip_action_more_info": "Details anzeigen",
+  "tooltip_action_show_device": "verknüpftes Gerät anzeigen",
+  "tooltip_action_close": "schließen",
+  "tooltip_action_schedule": "Zeitplan bearbeiten",
+  "tooltip_action_info": "Information anzeigen",
+  "tooltip_svc_toggle": "{name} umschalten",
+  "tooltip_svc_turn_on": "{name} einschalten",
+  "tooltip_svc_turn_off": "{name} ausschalten",
+  "tooltip_svc_press": "{name} auslösen",
+  "tooltip_svc_generic": "{name} ausführen"
 }

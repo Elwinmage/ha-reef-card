@@ -19,6 +19,12 @@
  */
 
 import i18n from "../../../translations/myi18n.js";
+import {
+  CELSIUS,
+  from_celsius,
+  ha_temperature_unit,
+  round_display,
+} from "../../../utils/temperature";
 
 /** One calibration solution: its value and the temperature it holds at. */
 export interface Solution {
@@ -278,12 +284,19 @@ export function set_message(
 }
 
 /**
- * Label of a pH solution, e.g. "7.01 (25 °C)".
+ * Label of a pH solution, e.g. "7.01 (25 °C)", or "7.01 (77 °F)" when Home
+ * Assistant displays Fahrenheit. The temperature sent to the hub stays the
+ * solution's own, in Celsius.
  * @param solution: the solution
+ * @param unit: the temperature unit to show it in
  * @return the label
  */
-export function solution_label(solution: Solution): string {
-  return `${solution.value} (${solution.temp} °C)`;
+export function solution_label(
+  solution: Solution,
+  unit: string = CELSIUS,
+): string {
+  const temp = round_display(from_celsius(solution.temp, unit));
+  return `${solution.value} (${temp} ${unit})`;
 }
 
 /**
@@ -322,15 +335,16 @@ function button(id: string, label: string, onclick: () => void): any {
  * A select listing the solutions of a pH point.
  * @param id: its id
  * @param point: LOW, MID or HIGH
+ * @param unit: the temperature unit of the labels
  * @return the select
  */
-function solution_select(id: string, point: string): any {
+function solution_select(id: string, point: string, unit: string): any {
   const select = make("select", { id });
   PH_SOLUTIONS[point]!.forEach((solution, index) => {
     select.append(
       make("option", {
         value: String(index),
-        textContent: solution_label(solution),
+        textContent: solution_label(solution, unit),
       }),
     );
   });
@@ -467,7 +481,8 @@ export function probe_calibration_ph(
 
     // Step 1: pH 7
     const step1 = make("div", { id: "calibration_ph_step1" });
-    const mid = solution_select("calibration_ph_mid", "MID");
+    const unit = ha_temperature_unit(hass);
+    const mid = solution_select("calibration_ph_mid", "MID", unit);
     const start1 = button(
       "calibration_ph_start1",
       i18n._("calibration_start"),
@@ -498,9 +513,13 @@ export function probe_calibration_ph(
         textContent: i18n._("calibration_ph_low"),
       }),
     );
-    let solutions = solution_select("calibration_ph_second", "HIGH");
+    let solutions = solution_select("calibration_ph_second", "HIGH", unit);
     second.addEventListener("change", () => {
-      const fresh = solution_select("calibration_ph_second", second.value);
+      const fresh = solution_select(
+        "calibration_ph_second",
+        second.value,
+        unit,
+      );
       solutions.replaceWith(fresh);
       solutions = fresh;
     });

@@ -565,7 +565,7 @@ export class RSControl extends RSDevice {
     alternates: Record<string, any[]>;
   } | null {
     this._scan_entities();
-    const probe = (this._all_probes ?? []).find(
+    const probe = this._all_probes.find(
       (p: ProbeEntity) => p.type === type && p.uid === uid,
     );
     if (!probe) return null;

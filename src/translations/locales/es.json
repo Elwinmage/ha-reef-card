@@ -248,5 +248,20 @@
   "dialog_ato_conf": "Módulo ATO",
   "ato_resume": "Reanudar",
   "ato_manual_fill": "Llenar ahora",
-  "ato_stop": "Detener"
+  "ato_stop": "Detener",
+  "tooltip_tap": "Clic",
+  "tooltip_double_tap": "Doble clic",
+  "tooltip_hold": "Pulsación larga",
+  "tooltip_action_dialog": "abrir {name}",
+  "tooltip_action_dialog_generic": "abrir un diálogo",
+  "tooltip_action_more_info": "mostrar detalles",
+  "tooltip_action_show_device": "mostrar el dispositivo vinculado",
+  "tooltip_action_close": "cerrar",
+  "tooltip_action_schedule": "editar la programación",
+  "tooltip_action_info": "mostrar información",
+  "tooltip_svc_toggle": "alternar {name}",
+  "tooltip_svc_turn_on": "encender {name}",
+  "tooltip_svc_turn_off": "apagar {name}",
+  "tooltip_svc_press": "pulsar {name}",
+  "tooltip_svc_generic": "ejecutar {name}"
 }

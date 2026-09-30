@@ -88,7 +88,7 @@ export class ClickImage extends MyElement {
         class="click-image ${this.stateOn ? "" : "off"}"
         src="${imageSrc}"
         style="${_style}"
-        alt="${this.conf?.name || "clickable image"}"
+        alt="${this.tooltip_subject() || this.conf?.name || "clickable image"}"
       />
     `;
   }

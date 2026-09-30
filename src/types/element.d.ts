@@ -134,6 +134,12 @@ export interface BaseElementConfig {
   tap_action?: Action | Action[];
   hold_action?: Action | Action[];
   double_tap_action?: Action | Action[];
+  /**
+   * Native tooltip (and accessible name) of the element. A string is an i18n
+   * key, a `${...}` template or plain text; false removes the tooltip. When
+   * absent, it is built from the entity and the actions of the element.
+   */
+  tooltip?: DynamicValue<string> | false;
   [key: string]: any;
 }
 

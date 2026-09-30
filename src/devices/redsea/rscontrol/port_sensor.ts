@@ -37,7 +37,12 @@ import { html, TemplateResult } from "lit";
 import { state } from "lit/decorators.js";
 
 import i18n from "../../../translations/myi18n";
-import { PowerSensor, probeDef, TOTAL_MINUTES } from "../rspower/power_sensor";
+import {
+  PowerSensor,
+  probeDef,
+  round2,
+  TOTAL_MINUTES,
+} from "../rspower/power_sensor";
 
 /** Port type of any third-party 12V device, the one given on install. */
 const PORT_TYPE_OTHER = "other";
@@ -188,8 +193,8 @@ export class PortSensor extends PowerSensor {
           sensor: probe.sensor,
         };
         if (def.hasDirection) rule["is_above"] = this._isAbove;
-        if (def.hasValue) rule["value"] = this._value;
-        if (def.hasHysteresis) rule["hysteresis"] = this._hysteresis;
+        if (def.hasValue) rule["value"] = round2(this._value);
+        if (def.hasHysteresis) rule["hysteresis"] = round2(this._hysteresis);
         if (def.hasTurnOn) rule["trigger_op"] = this._turnOn;
         await this._request(
           "/ports/subscribe",

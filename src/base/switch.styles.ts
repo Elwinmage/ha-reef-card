@@ -1,10 +1,6 @@
 import { css } from "lit";
 
 export default css`
-  :hover {
-    cursor: pointer;
-  }
-
   .switch_on {
     position: absolute;
     border-radius: 30px;

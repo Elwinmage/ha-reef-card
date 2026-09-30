@@ -21,8 +21,8 @@ import {
 import {
   HUB_LEVELS,
   level_color,
+  entity_ranges,
   level_from_ranges,
-  parse_ranges,
 } from "../../../utils/levels";
 import type { ProbeLevel } from "../../../utils/levels";
 
@@ -309,7 +309,7 @@ export class RSPower extends RSDevice {
     if (Number.isFinite(value)) {
       level =
         HUB_LEVELS[st.attributes?.level] ??
-        level_from_ranges(value, parse_ranges(st.attributes?.ranges));
+        level_from_ranges(value, entity_ranges(st));
     }
     return level_color(level);
   }
@@ -753,7 +753,7 @@ export class RSPower extends RSDevice {
     if (!device_id) {
       return null;
     }
-    const model = this._linked_model(socket);
+    const model = this._linked_model(socket, device_id);
     // The role is tried first and the model only as a fallback. Keying on
     // the controller's model instead would tie this to the exact string the
     // firmware reports, and a pump is better pictured by its job anyway.
@@ -808,7 +808,7 @@ export class RSPower extends RSDevice {
     if (device_id === OTHER_DEVICE_VALUE) {
       return OTHER_DEVICE_ICON;
     }
-    const model = this._linked_model(socket);
+    const model = this._linked_model(socket, device_id);
     // As for the thumbnail, a pump is described by its job rather than by
     // the controller's model, which both its channels share.
     const icon =
@@ -825,11 +825,11 @@ export class RSPower extends RSDevice {
    * that entity cannot be read — a device disabled in Home Assistant has
    * none — the model recorded by the editor at link time is used instead.
    * @param socket: the 1-based socket number
+   * @param device_id: the registry id of the device linked to it
    * @return the concrete model, or "" when nothing usable is linked
    */
-  private _linked_model(socket: number): string {
-    const device_id = this.linked_device_id(socket);
-    const dev: any = device_id ? this._hass?.devices?.[device_id] : null;
+  private _linked_model(socket: number, device_id: string): string {
+    const dev: any = this._hass?.devices?.[device_id];
     const raw = String(dev?.model ?? "");
     if (!dev || !raw) {
       return raw;
@@ -929,14 +929,12 @@ export class RSPower extends RSDevice {
     // appliance from another integration (Aqua Medic...) names its entities
     // differently and would blink for no reason, so it is drawn plain.
     const device_id = this.linked_device_id(socket);
-    // An appliance unknown to Home Assistant has no state to read
-    if (device_id === OTHER_DEVICE_VALUE) {
+    // Nothing linked, or an appliance unknown to Home Assistant: no state
+    // to read
+    if (!device_id || device_id === OTHER_DEVICE_VALUE) {
       return "";
     }
-    const identifiers = device_id
-      ? this._hass?.devices?.[device_id]?.identifiers
-      : undefined;
-    const domain = domain_of(identifiers);
+    const domain = domain_of(this._hass?.devices?.[device_id]?.identifiers);
     if (domain !== undefined && domain !== "redsea") {
       return "";
     }

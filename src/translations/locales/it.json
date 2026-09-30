@@ -248,5 +248,20 @@
   "dialog_ato_conf": "Modulo ATO",
   "ato_resume": "Riprendi",
   "ato_manual_fill": "Rabbocca ora",
-  "ato_stop": "Ferma"
+  "ato_stop": "Ferma",
+  "tooltip_tap": "Clic",
+  "tooltip_double_tap": "Doppio clic",
+  "tooltip_hold": "Pressione prolungata",
+  "tooltip_action_dialog": "apri {name}",
+  "tooltip_action_dialog_generic": "apri una finestra di dialogo",
+  "tooltip_action_more_info": "mostra dettagli",
+  "tooltip_action_show_device": "mostra il dispositivo collegato",
+  "tooltip_action_close": "chiudi",
+  "tooltip_action_schedule": "modifica la programmazione",
+  "tooltip_action_info": "mostra informazioni",
+  "tooltip_svc_toggle": "commuta {name}",
+  "tooltip_svc_turn_on": "accendi {name}",
+  "tooltip_svc_turn_off": "spegni {name}",
+  "tooltip_svc_press": "premi {name}",
+  "tooltip_svc_generic": "esegui {name}"
 }

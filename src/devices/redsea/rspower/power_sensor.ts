@@ -59,6 +59,15 @@ import styles from "./power_sensor.styles";
 import i18n from "../../../translations/myi18n";
 import { socketSensorType } from "./power_socket";
 import {
+  CELSIUS,
+  delta_from_celsius,
+  delta_to_celsius,
+  from_celsius,
+  ha_temperature_unit,
+  round_display,
+  to_celsius,
+} from "../../../utils/temperature";
+import {
   IntervalError,
   scheduleSavable,
   validateIntervals,
@@ -214,7 +223,7 @@ export function probeDef(probe: ProbeOption): ProbeTypeDef {
  * app sends float64 noise (0.4999999999999991): keep two decimals, the
  * finest step any probe type uses.
  */
-function round2(v: unknown): number {
+export function round2(v: unknown): number {
   return Math.round(Number(v) * 100) / 100;
 }
 
@@ -766,6 +775,51 @@ export class PowerSensor extends LitElement {
     this._fallbackOn = false;
   }
 
+  // ── Temperature unit ────────────────────────────────────────────────────
+  //
+  // Thresholds are kept in the device's unit (_value, _hysteresis): the
+  // devices only accept Celsius. A temperature threshold is converted to the
+  // unit Home Assistant displays only on its way to and from the inputs.
+
+  /**
+   * Unit a threshold is shown in.
+   * @param def: the probe parameters
+   * @return Home Assistant's unit for a temperature, the probe's otherwise
+   */
+  protected _thresholdUnit(def: ProbeTypeDef): string {
+    return def.unit === CELSIUS ? ha_temperature_unit(this.hass) : def.unit;
+  }
+
+  /** Threshold as shown in the editor. */
+  protected _shownValue(def: ProbeTypeDef): number {
+    if (def.unit !== CELSIUS) return this._value;
+    return round_display(from_celsius(this._value, this._thresholdUnit(def)));
+  }
+
+  /** Store a threshold typed in the editor, back in Celsius. */
+  protected _setShownValue(def: ProbeTypeDef, value: number): void {
+    this._value =
+      def.unit === CELSIUS
+        ? to_celsius(value, this._thresholdUnit(def))
+        : value;
+  }
+
+  /** Hysteresis as shown in the editor: a difference, scaled only. */
+  protected _shownHysteresis(def: ProbeTypeDef): number {
+    if (def.unit !== CELSIUS) return this._hysteresis;
+    return round_display(
+      delta_from_celsius(this._hysteresis, this._thresholdUnit(def)),
+    );
+  }
+
+  /** Store an hysteresis typed in the editor, back in Celsius. */
+  protected _setShownHysteresis(def: ProbeTypeDef, value: number): void {
+    this._hysteresis =
+      def.unit === CELSIUS
+        ? delta_to_celsius(value, this._thresholdUnit(def))
+        : value;
+  }
+
   // ── Save ────────────────────────────────────────────────────────────────
 
   protected async _save(): Promise<void> {
@@ -858,8 +912,9 @@ export class PowerSensor extends LitElement {
           };
           if (def.hasTurnOn) subscriber["turn_on"] = this._turnOn;
           if (def.hasDirection) subscriber["is_above"] = this._isAbove;
-          if (def.hasValue) subscriber["value"] = this._value;
-          if (def.hasHysteresis) subscriber["hysteresis"] = this._hysteresis;
+          if (def.hasValue) subscriber["value"] = round2(this._value);
+          if (def.hasHysteresis)
+            subscriber["hysteresis"] = round2(this._hysteresis);
           subscriber["sensor"] = probe.sensor;
 
           await this.hass.callService("redsea", "request", {
@@ -904,8 +959,8 @@ export class PowerSensor extends LitElement {
             sensor: probe.sensor,
           };
           if (def.hasDirection) rule["is_above"] = this._isAbove;
-          if (def.hasValue) rule["value"] = this._value;
-          if (def.hasHysteresis) rule["hysteresis"] = this._hysteresis;
+          if (def.hasValue) rule["value"] = round2(this._value);
+          if (def.hasHysteresis) rule["hysteresis"] = round2(this._hysteresis);
           if (def.hasTurnOn) rule["trigger_op"] = this._turnOn;
           // A water-level rule repeats the fallback state on the hub
           if (def.isAto) rule["default_state"] = this._fallbackOn;
@@ -1226,13 +1281,14 @@ export class PowerSensor extends LitElement {
                   class="sce-number-input"
                   type="number"
                   step="0.1"
-                  .value="${String(this._value)}"
+                  .value="${String(this._shownValue(def))}"
                   @input="${(e: Event) =>
-                    (this._value = Number(
-                      (e.target as HTMLInputElement).value,
-                    ))}"
+                    this._setShownValue(
+                      def,
+                      Number((e.target as HTMLInputElement).value),
+                    )}"
                 />
-                <span class="sce-unit">${def.unit}</span>
+                <span class="sce-unit">${this._thresholdUnit(def)}</span>
               </div>
             `
           : nothing}
@@ -1248,13 +1304,14 @@ export class PowerSensor extends LitElement {
                   type="number"
                   step="0.1"
                   min="0"
-                  .value="${String(this._hysteresis)}"
+                  .value="${String(this._shownHysteresis(def))}"
                   @input="${(e: Event) =>
-                    (this._hysteresis = Number(
-                      (e.target as HTMLInputElement).value,
-                    ))}"
+                    this._setShownHysteresis(
+                      def,
+                      Number((e.target as HTMLInputElement).value),
+                    )}"
                 />
-                <span class="sce-unit">${def.unit}</span>
+                <span class="sce-unit">${this._thresholdUnit(def)}</span>
               </div>
             `
           : nothing}

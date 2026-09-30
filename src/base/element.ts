@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------------//
 //   IMPORT
 //----------------------------------------------------------------------------//
-import { html, LitElement } from "lit";
+import { html, LitElement, nothing } from "lit";
 import type { CSSResultGroup } from "lit";
 import { property, state } from "lit/decorators.js";
 
@@ -28,6 +28,15 @@ import { OFF_COLOR } from "../utils/constants";
 import style_animations from "../utils/animations.styles";
 
 //----------------------------------------------------------------------------//
+
+/** Tooltip text of the card's own actions (redsea_ui), by action. */
+const UI_ACTION_TOOLTIPS: Record<string, string> = {
+  "more-info": "tooltip_action_more_info",
+  show_device: "tooltip_action_show_device",
+  "exit-dialog": "tooltip_action_close",
+  open_schedule: "tooltip_action_schedule",
+  message_box: "tooltip_action_info",
+};
 
 /**
  * MyElement component
@@ -84,6 +93,9 @@ export class MyElement extends LitElement {
   protected c?: string;
 
   protected evalCtx: SafeEvalContext;
+
+  // Dialog titles already resolved for the tooltip, by dialog type
+  private _dialog_titles: Record<string, string> = {};
 
   /**
    * Create the list of entities taht can be used in a context for string evaluation
@@ -233,6 +245,14 @@ export class MyElement extends LitElement {
       onHold: () => {
         this._longclick();
       },
+    });
+    // Keyboard users reach actionable elements through tabindex (see
+    // render()): Enter or Space runs the tap action, as a click does.
+    this.addEventListener("keydown", (e: KeyboardEvent) => {
+      if ((e.key === "Enter" || e.key === " ") && this.is_actionable()) {
+        e.preventDefault();
+        this._click();
+      }
     });
   }
 
@@ -476,8 +496,28 @@ export class MyElement extends LitElement {
       this.c = this.color;
     }
 
+    // Native tooltip and accessible name: tells what a symbol is and what
+    // a click would do before anything is triggered
+    const tooltip = this.get_tooltip();
+    this._update_a11y(tooltip);
+    // The pointer cursor shows only where a click, a double click or a hold
+    // would do something now, whatever the element type draws inside. A
+    // mapping may pick another cursor for a clickable element, never a
+    // pointer for one that is not.
+    const clickable = this.is_clickable();
+    let style = this.get_style();
+    let cursor = "";
+    if (!clickable) {
+      cursor = "cursor:default";
+    } else if (!("cursor" in (this.conf?.css ?? {}))) {
+      cursor = "cursor:pointer";
+    }
+    if (cursor) style = style ? `${style};${cursor}` : cursor;
+    const cls = [this.get_class(), clickable ? "clickable" : ""]
+      .filter((c) => c)
+      .join(" ");
     return html`
-      <div class="${this.get_class()}" style="${this.get_style()}">
+      <div class="${cls}" style="${style}" title="${tooltip || nothing}">
         ${this._render(this.get_style("elt_css"))}
       </div>
     `;
@@ -486,6 +526,226 @@ export class MyElement extends LitElement {
         ${this._render(this.get_style("css"))}
       </div>
     `;*/
+  }
+
+  //--------------------------------------------------------------------------//
+  //   Tooltip
+  //--------------------------------------------------------------------------//
+
+  /**
+   * Enabled actions of one trigger.
+   * @param actions: the tap, hold or double tap actions
+   * @return the enabled ones
+   */
+  private _enabled_actions(actions: Action | Action[] | undefined): Action[] {
+    if (!actions) return [];
+    const list = Array.isArray(actions) ? actions : [actions];
+    return list.filter((a) => a.enabled !== false);
+  }
+
+  /**
+   * Whether a click, a double click or a hold does something.
+   * @return true when at least one action is enabled
+   */
+  is_actionable(): boolean {
+    return (
+      this._enabled_actions(this.conf?.tap_action).length > 0 ||
+      this._enabled_actions(this.conf?.double_tap_action).length > 0 ||
+      this._enabled_actions(this.conf?.hold_action).length > 0
+    );
+  }
+
+  /**
+   * Whether the element reacts to a pointer in the device's current state:
+   * a device switched off ignores them, except on the few elements that
+   * must stay usable (its on/off switch, wifi, trash, `off_clickable`).
+   * @return true when actions may run
+   */
+  accepts_actions(): boolean {
+    return (
+      !this.device ||
+      this.device.masterOn ||
+      this.conf?.off_clickable === true ||
+      ["device_state", "trash", "wifi"].includes(this.conf?.name)
+    );
+  }
+
+  /**
+   * Whether a click, a double click or a hold would do something now.
+   * @return true for an element with enabled actions that accepts them
+   */
+  is_clickable(): boolean {
+    return this.is_actionable() && this.accepts_actions();
+  }
+
+  /**
+   * Expose a clickable element as a focusable button named by its
+   * tooltip, for keyboards and screen readers.
+   * @param tooltip: the element's tooltip
+   */
+  private _update_a11y(tooltip: string): void {
+    if (this.is_clickable()) {
+      this.setAttribute("role", "button");
+      if (!this.hasAttribute("tabindex")) this.setAttribute("tabindex", "0");
+    } else {
+      this.removeAttribute("role");
+      this.removeAttribute("tabindex");
+    }
+    if (tooltip) this.setAttribute("aria-label", tooltip);
+    else this.removeAttribute("aria-label");
+  }
+
+  /**
+   * Translate a key, or return null when no language has it.
+   * @param key: the translation key
+   * @param params: the parameters of the string
+   * @return the translation or null
+   */
+  private _tr(
+    key: string,
+    params?: Record<string, string | number>,
+  ): string | null {
+    if (!i18n.hasTranslation(key) && !i18n.hasTranslation(key, "en")) {
+      return null;
+    }
+    return i18n._(key, params);
+  }
+
+  /**
+   * Evaluate a tooltip or title expression into plain text.
+   * @param value: what the evaluation returned
+   * @return the text, "" when the evaluation failed
+   */
+  private static _text(value: unknown): string {
+    return value === undefined || value === null ? "" : String(value);
+  }
+
+  /**
+   * Title of a dialog of the device, as the dialog box would show it.
+   * @param type: the dialog type
+   * @return the title, or "" when unknown
+   */
+  private _dialog_title(type: string): string {
+    if (type in this._dialog_titles) return this._dialog_titles[type]!;
+    let title = "";
+    // Sub-devices (a pump, a head, a port) may borrow their parent's dialogs
+    let node: any = this.device;
+    while (node && !node.dialogs?.[type]?.title_key) node = node.device;
+    if (node) {
+      const ctx = new SafeEval({
+        config: node.config,
+        device: node,
+        i18n: i18n,
+        entity: MyElement.createEntitiesContext(node, this._hass),
+      });
+      // Titles are written as HTML into the dialog box: keep the text only
+      title = MyElement._text(ctx.evaluate(node.dialogs[type].title_key))
+        .replace(/<[^>]*>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+    this._dialog_titles[type] = title;
+    return title;
+  }
+
+  /**
+   * Describe what one action does.
+   * @param action: the action
+   * @return the description, or "" for an action with nothing to tell
+   */
+  private _describe_action(action: Action): string {
+    const data: any = action.data;
+    if (action.domain === "redsea_ui") {
+      if (action.action === "dialog") {
+        const title = this._dialog_title(String(data?.type));
+        return title
+          ? i18n._("tooltip_action_dialog", { name: title })
+          : i18n._("tooltip_action_dialog_generic");
+      }
+      // wait, update_conf, device_event: internal steps, nothing to tell
+      const key = UI_ACTION_TOOLTIPS[action.action];
+      return key ? i18n._(key) : "";
+    }
+    // Home Assistant service: name the entity it acts on, when it is not
+    // the one the element already shows
+    let target: StateObject | null = null;
+    if (typeof data?.entity_id === "string") {
+      try {
+        target = this.get_entity(data.entity_id);
+      } catch {
+        target = null;
+      }
+    }
+    const name =
+      target && target.entity_id !== this.stateObj?.entity_id
+        ? String(target.attributes?.friendly_name ?? "")
+        : "";
+    const verb =
+      this._tr("tooltip_svc_" + action.action, { name }) ??
+      i18n._("tooltip_svc_generic", {
+        name: name || `${action.domain}.${action.action}`,
+      });
+    return verb.replace(/\s+/g, " ").trim();
+  }
+
+  /**
+   * Describe what a trigger (tap, hold...) does.
+   * @param key: the translation key of the trigger
+   * @param actions: its actions
+   * @return one line, or "" when it does nothing worth telling
+   */
+  private _describe_trigger(
+    key: string,
+    actions: Action | Action[] | undefined,
+  ): string {
+    const parts = this._enabled_actions(actions)
+      .map((a) => this._describe_action(a))
+      .filter((d) => d);
+    if (parts.length === 0) return "";
+    return `${i18n._(key)}: ${[...new Set(parts)].join(", ")}`;
+  }
+
+  /**
+   * What the element shows, for the first line of its tooltip.
+   * @return the entity name and its value, the label, or ""
+   */
+  protected tooltip_subject(): string {
+    if (!this.stateObj) return String(this.label).trim();
+    const format = (this._hass as any)?.formatEntityState;
+    const value = format
+      ? format.call(this._hass, this.stateObj)
+      : this.stateObj.state;
+    return [this.stateObj.attributes?.friendly_name, value]
+      .filter((part) => part)
+      .join(": ");
+  }
+
+  /**
+   * Text of the element's native tooltip, also used as its accessible name.
+   *
+   * `tooltip` in the configuration wins (false removes it). Otherwise it
+   * names what the element shows, then what a click, a double click and a
+   * hold would do, so nothing has to be pressed to find out.
+   * @return the tooltip, or "" for none
+   */
+  get_tooltip(): string {
+    const custom = this.conf?.tooltip;
+    if (custom === false) return "";
+    if (typeof custom === "string" && custom && !custom.includes("${")) {
+      return this._tr(custom) ?? custom;
+    }
+    if (custom) return MyElement._text(this.evaluate(custom));
+    return [
+      this.tooltip_subject(),
+      this._describe_trigger("tooltip_tap", this.conf?.tap_action),
+      this._describe_trigger(
+        "tooltip_double_tap",
+        this.conf?.double_tap_action,
+      ),
+      this._describe_trigger("tooltip_hold", this.conf?.hold_action),
+    ]
+      .filter((line) => line)
+      .join("\n");
   }
 
   /**
@@ -778,13 +1038,7 @@ export class MyElement extends LitElement {
    * Test if the click must be taken into account and run associated actions
    */
   _click(): void {
-    if (
-      this.conf?.tap_action &&
-      (!this.device ||
-        this.device.masterOn ||
-        this.conf?.off_clickable === true ||
-        ["device_state", "trash", "wifi"].includes(this.conf?.name))
-    ) {
+    if (this.conf?.tap_action && this.accepts_actions()) {
       this.run_actions(this.conf.tap_action, this.conf.timer);
     }
   }
@@ -793,13 +1047,7 @@ export class MyElement extends LitElement {
    * Test if the hold click  must be taken into account and run associated actions
    */
   _longclick(): void {
-    if (
-      this.conf?.hold_action &&
-      (!this.device ||
-        this.device.masterOn ||
-        this.conf?.off_clickable === true ||
-        ["device_state", "trash", "wifi"].includes(this.conf?.name))
-    ) {
+    if (this.conf?.hold_action && this.accepts_actions()) {
       this.run_actions(this.conf.hold_action, this.conf.timer);
     }
   }
@@ -808,13 +1056,7 @@ export class MyElement extends LitElement {
    * Test if the double click  must be taken into account and run associated actions
    */
   _dblclick(): void {
-    if (
-      this.conf?.double_tap_action &&
-      (!this.device ||
-        this.device.masterOn ||
-        this.conf?.off_clickable === true ||
-        ["device_state", "trash", "wifi"].includes(this.conf?.name))
-    ) {
+    if (this.conf?.double_tap_action && this.accepts_actions()) {
       this.run_actions(this.conf.double_tap_action, this.conf.timer);
     }
   }

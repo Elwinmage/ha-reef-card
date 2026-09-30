@@ -1415,3 +1415,33 @@ describe("RSControl switched off", () => {
     }
   });
 });
+
+describe("RSControl — probes without alternates", () => {
+  const ph = () =>
+    makeHub(
+      makeHass([probeSpec("sensor.ph", "probe_ph", "8.1", "ph", "0xA", 0)]),
+    );
+
+  it("hands an empty set to an open dialog", () => {
+    const hub = ph();
+    const probe = hub._all_probes[0];
+    hub._scan_entities = () => {
+      delete probe.alternates;
+    };
+    expect(hub.probe_entities_now("ph", "0xA").alternates).toEqual({});
+  });
+
+  it("gives the probe element an empty set", () => {
+    const hub = ph();
+    const probe = { ...hub._all_probes[0] };
+    delete probe.alternates;
+    hub._render_probe(probe, 1);
+    expect(probe.control_probe.alternates).toEqual({});
+  });
+
+  it("the probe element copes with no set at all", () => {
+    const probe = makeProbe("ph", { probe_primary: { state: "8.1" } });
+    probe.alternates = undefined;
+    expect(() => probe.pick_alternates()).not.toThrow();
+  });
+});

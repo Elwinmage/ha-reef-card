@@ -33,6 +33,7 @@ import style_animations from "../../../utils/animations.styles";
 import {
   BAR_ZONES,
   bar_position,
+  entity_ranges,
   HUB_LEVELS,
   level_color,
   level_from_ranges,
@@ -109,10 +110,7 @@ export function reading_level(
   const hub = HUB_LEVELS[level?.state];
   if (hub) return hub;
   if (!value) return "error";
-  return level_from_ranges(
-    parseFloat(value.state),
-    parse_ranges(value.attributes?.ranges),
-  );
+  return level_from_ranges(parseFloat(value.state), entity_ranges(value));
 }
 
 /**
@@ -429,7 +427,7 @@ export class ControlProbe extends RSDevice {
     return {
       key: key,
       value: parseFloat(st.state),
-      ranges: parse_ranges(st.attributes?.ranges),
+      ranges: entity_ranges(st),
     };
   }
 
@@ -566,11 +564,7 @@ export class ControlProbe extends RSDevice {
     return html`
       <div class="probe ${alert}">
         <div class="probe_box" style="${box_style}">
-          <img
-            class="probe_img ${this.state_on ? "" : "off"}"
-            src="${this.probe_image()}"
-            alt=""
-          />
+          <img class="probe_img" src="${this.probe_image()}" alt="" />
           ${this.is_compact() ? this._render_dots() : this._render_bars()}
           ${this._render_elements(this.state_on)}
         </div>
