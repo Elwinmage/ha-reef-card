@@ -50,7 +50,7 @@ import {
   level_color,
   level_from_ranges,
   level_sign,
-  parse_ranges,
+  entity_ranges,
   sign_side,
 } from "../utils/levels";
 import type { ProbeLevel } from "../utils/levels";
@@ -75,7 +75,7 @@ export class LevelIndicator extends MyElement {
 
   /** Bounds of the reading, null when unknown. */
   ranges(): number[] | null {
-    return parse_ranges(this.stateObj?.attributes?.ranges);
+    return entity_ranges(this.stateObj);
   }
 
   /**

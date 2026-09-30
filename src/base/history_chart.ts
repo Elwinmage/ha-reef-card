@@ -92,7 +92,7 @@ import type { HassConfig } from "../types/index";
 
 import style_history_chart from "./history_chart.styles";
 import style_animations from "../utils/animations.styles";
-import { BAR_ZONES, parse_ranges } from "../utils/levels";
+import { BAR_ZONES, entity_ranges, parse_ranges } from "../utils/levels";
 
 //----------------------------------------------------------------------------//
 
@@ -574,14 +574,14 @@ export class HistoryChart extends MyElement {
     if (!zones) {
       return null;
     }
-    let raw: any = zones;
-    if (!Array.isArray(zones)) {
-      const first = this.series[0]?.entity_id;
-      raw = first
-        ? (this._hass as any)?.states?.[first]?.attributes?.ranges
-        : null;
+    if (Array.isArray(zones)) {
+      return parse_ranges(zones);
     }
-    return parse_ranges(raw);
+    // Read from the entity: raw device bounds, brought to its displayed unit
+    const first = this.series[0]?.entity_id;
+    return first
+      ? entity_ranges((this._hass as any)?.states?.[first] ?? null)
+      : null;
   }
 
   /**

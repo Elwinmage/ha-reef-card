@@ -101,3 +101,15 @@ describe("ControlProbe.display_name()", () => {
     expect(probe("unavailable").display_name()).toBe("Salinity 7BF");
   });
 });
+
+describe("probe_title() fallbacks", () => {
+  it("shows an unknown type as is", () => {
+    (i18n as any).currentLanguage = "en";
+    expect(probe_title("", "salinity2", "")).toBe("salinity2");
+  });
+
+  it("translates the hub's type name when the probe has no uid", () => {
+    (i18n as any).currentLanguage = "en";
+    expect(probe_title("leak", "leak", "")).toBe("Leak");
+  });
+});

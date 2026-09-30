@@ -14,6 +14,7 @@ import {
   COLOR_LEVEL_DESIRED_HEX,
   COLOR_LEVEL_ERROR_HEX,
 } from "./colors";
+import { attribute_to_entity_unit } from "./temperature";
 
 /** Where a reading stands against its bounds. */
 export type ProbeLevel = "desired" | "acceptable" | "danger" | "error";
@@ -51,6 +52,18 @@ export function parse_ranges(raw: any): number[] | null {
   if (!Array.isArray(raw) || raw.length !== 4) return null;
   const values = raw.map((v) => (typeof v === "number" ? v : NaN));
   return values.every((v) => Number.isFinite(v)) ? values : null;
+}
+
+/**
+ * Read the `ranges` attribute of an entity, in the unit its state is
+ * displayed in. The attribute holds raw device values (°C for a
+ * temperature) that Home Assistant does not convert, unlike the state.
+ * @param stateObj: the entity state
+ * @return the four bounds, or null when unusable
+ */
+export function entity_ranges(stateObj: any): number[] | null {
+  const ranges = parse_ranges(stateObj?.attributes?.ranges);
+  return ranges ? attribute_to_entity_unit(ranges, stateObj) : null;
 }
 
 /**
