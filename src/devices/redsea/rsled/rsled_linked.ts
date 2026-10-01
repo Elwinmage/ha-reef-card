@@ -6,7 +6,10 @@
  *
  * The list comes from the `leds` attribute of the `linked_leds` sensor of
  * the virtual lamp, or of a lamp of the group: [{hwid, name, model, g2,
- * entry_id}, …] (empty for a lamp alone: nothing is shown).
+ * offset, entry_id}, …] (empty for a lamp alone: nothing is shown).
+ *
+ * A staggered group (one lamp at least starting late) shows each lamp's
+ * sunrise offset under its name: +0 min, +5 min…
  *
  * Example mapping:
  *   linked: { name: "linked_leds", type: "rsled-linked", stateObj: null,
@@ -26,6 +29,19 @@ export interface LinkedLed {
   g2?: boolean;
   /** Config entry of the lamp: the device_id of redsea services */
   entry_id?: string | null;
+  /** Minutes its day starts late (staggered sunrise); null without /offset */
+  offset?: number | null;
+}
+
+/**
+ * Sunrise offset of a lamp, as shown under its name ("" when unknown).
+ * @param lamp: the lamp
+ */
+export function offset_label(lamp: LinkedLed): string {
+  const offset = lamp.offset;
+  return typeof offset === "number" && Number.isFinite(offset)
+    ? `+${Math.round(offset)} min`
+    : "";
 }
 
 /** Thumbnail of each generation. */
@@ -78,6 +94,10 @@ export class RSLedLinked extends RSLedElement {
       height: auto;
       display: block;
     }
+    .lamp .offset {
+      color: #c99a10;
+      font-weight: 600;
+    }
     .lamp span {
       max-width: 100%;
       overflow: hidden;
@@ -122,6 +142,8 @@ export class RSLedLinked extends RSLedElement {
     const lamps = this.lamps();
     if (!lamps.length) return html``;
     const current = this.current();
+    // Offsets are shown for a staggered group only
+    const staggered = lamps.some((l) => (l.offset ?? 0) > 0);
     return html`<div class="linked">
       ${lamps.map(
         (lamp) =>
@@ -139,6 +161,9 @@ export class RSLedLinked extends RSLedElement {
               src="${lamp.g2 ? LINKED_THUMBS.g2 : LINKED_THUMBS.g1}"
             />
             <span>${lamp.name}</span>
+            ${staggered && offset_label(lamp)
+              ? html`<span class="offset">${offset_label(lamp)}</span>`
+              : ""}
           </div>`,
       )}
     </div>`;

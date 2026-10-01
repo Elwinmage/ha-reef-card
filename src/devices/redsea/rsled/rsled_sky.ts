@@ -14,6 +14,7 @@
  *               layer: "back", put_in: "back", css: {...full canvas...} }
  */
 import { html, svg, TemplateResult } from "lit";
+import { mdiWeatherSunsetUp } from "@mdi/js";
 
 import { RSLedElement } from "./rsled_element";
 import { style_rsled_overlay } from "./rsled.styles";
@@ -34,6 +35,8 @@ export const SKY_DEFAULTS = {
   sun_r: 22,
   moon_r: 22,
   left_label: { x: 62, y: 262 },
+  /** Offset badge, under the left time */
+  offset_label: { x: 62, y: 284 },
   right_label: { x: 529, y: 262 },
   mode: { x: 295.5, y: 118 },
   clouds: { x: 400, y: 104 },
@@ -170,6 +173,7 @@ export class RSLedSky extends RSLedElement {
     const mode = String(this.led?.mode_label?.() ?? "");
     return svg`
       ${labels}
+      ${this._offset(g)}
       <text
         class="sky_mode clickable ${on ? "" : "sky_mode_off"}"
         x="${g.mode.x}" y="${g.mode.y}" text-anchor="middle"
@@ -211,6 +215,40 @@ export class RSLedSky extends RSLedElement {
   }
 
   /** Tap on the mode: open the mode selector of Home Assistant. */
+  /**
+   * Staggered sunrise of the lamp: "+15 min" with a sunrise pictogram under
+   * the left time, only when the lamp starts late. A click opens its
+   * setting.
+   */
+  private _offset(g: typeof SKY_DEFAULTS) {
+    const offset: number = this.led?.sunrise_offset?.() ?? 0;
+    if (!offset) return "";
+    const { x, y } = g.offset_label;
+    const text = `+${offset} min`;
+    // Pictogram (24 px scaled to 14) then the text, centred together
+    const width = 14 + 3 + text.length * 7.4;
+    const x0 = x - width / 2;
+    return svg`<g class="sky_offset clickable" @click=${this._open_offset}>
+      <title>${text}</title>
+      <path d="${mdiWeatherSunsetUp}"
+        transform="translate(${x0.toFixed(1)} ${y - 12}) scale(${14 / 24})"></path>
+      <text x="${(x0 + 17).toFixed(1)}" y="${y}">${text}</text>
+    </g>`;
+  }
+
+  private _open_offset = (ev: Event): void => {
+    ev.stopPropagation();
+    const entity = this.led?.get_entity?.("number.sunrise_offset");
+    if (!entity?.entity_id) return;
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        bubbles: true,
+        composed: true,
+        detail: { entityId: entity.entity_id },
+      }),
+    );
+  };
+
   private _open_mode = (ev: Event): void => {
     ev.stopPropagation();
     const entity = this.led?.entities?.["select.mode"];

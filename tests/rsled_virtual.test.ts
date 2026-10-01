@@ -13,6 +13,7 @@ import { RSLed160, RSLedVirtual } from "../src/devices/redsea/rsled/rsled";
 import {
   RSLedLinked,
   LINKED_THUMBS,
+  offset_label,
 } from "../src/devices/redsea/rsled/rsled_linked";
 import {
   config_virtual_g1,
@@ -161,12 +162,15 @@ describe("virtual mapping and dialogs", () => {
     expect(g1).toContain("light.white");
     expect(g1).not.toContain("current_program");
     expect(g1).not.toContain("firmware_update");
+    // Each lamp's own offset: set by the virtual LED, not shown
+    expect(g1).not.toContain("number.sunrise_offset");
     expect(g1.indexOf("linked_leds")).toBe(
       g1.indexOf("binary_sensor.status") - 1,
     );
     const g2 = names(dialogs_rsled_virtual_g2);
     expect(g2).toContain("sensor.white");
     expect(g2).not.toContain("light.white");
+    expect(g2).not.toContain("number.sunrise_offset");
     expect(dialogs_rsled_virtual_g2).toHaveProperty("led_moon");
     expect(dialogs_rsled_virtual_g1).toHaveProperty("led_acclimation");
   });
@@ -312,6 +316,31 @@ describe("RSLedLinked", () => {
     expect(lamps[1].querySelector("img").getAttribute("src")).toBe(
       String(LINKED_THUMBS.g2),
     );
+  });
+
+  it("a staggered group shows each lamp's sunrise offset", async () => {
+    const el = await mountLinked(
+      makeVirtual([
+        { ...LED_G1A, offset: 0 },
+        { ...LED_G2, offset: 10 },
+        { ...LED_G1B, offset: null },
+      ]),
+    );
+    const offsets = [...el.shadowRoot.querySelectorAll(".lamp")].map(
+      (l: any) => l.querySelector(".offset")?.textContent ?? null,
+    );
+    expect(offsets).toEqual(["+0 min", "+10 min", null]);
+    // Not staggered (all on time): no offset shown
+    const flat = await mountLinked(
+      makeVirtual([
+        { ...LED_G1A, offset: 0 },
+        { ...LED_G2, offset: 0 },
+      ]),
+    );
+    expect(flat.shadowRoot.querySelector(".offset")).toBeNull();
+    expect(offset_label({ hwid: "h", name: "n", offset: 7.6 })).toBe("+8 min");
+    expect(offset_label({ hwid: "h", name: "n", offset: NaN })).toBe("");
+    expect(offset_label({ hwid: "h", name: "n" })).toBe("");
   });
 
   it("a lamp without a model is titled by its name only", async () => {

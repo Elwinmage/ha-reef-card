@@ -18,6 +18,9 @@ export const dialogs_rsled = {
           entities: [
             { entity: "select.mode", name: { type: "entity" } },
             { entity: "manual_duration", name: { type: "entity" } },
+            // Staggered sunrise: minutes the lamp's day starts late (lamps
+            // with /offset only, dropped elsewhere)
+            { entity: "number.sunrise_offset", name: { type: "entity" } },
             { type: "divider" },
             { entity: "light.kelvin_intensity", name: { type: "entity" } },
             { entity: "light.white", name: { type: "entity" } },
@@ -104,6 +107,9 @@ export const dialogs_rsled_g2 = {
           entities: [
             { entity: "select.mode", name: { type: "entity" } },
             { entity: "manual_duration", name: { type: "entity" } },
+            // Staggered sunrise: minutes the lamp's day starts late (lamps
+            // with /offset only, dropped elsewhere)
+            { entity: "number.sunrise_offset", name: { type: "entity" } },
             { type: "divider" },
             { entity: "light.kelvin_intensity", name: { type: "entity" } },
             { entity: "light.moon", name: { type: "entity" } },
@@ -129,6 +135,8 @@ export const dialogs_rsled_g2 = {
 /** Entities of the config dialog a virtual ReefLED does not have. */
 const VIRTUAL_NO_ENTITY = [
   "current_program",
+  // Each lamp's own: the virtual LED sets them from its staggered delay
+  "number.sunrise_offset",
   "sensor.temperature",
   "sensor.fan",
   "firmware_update",

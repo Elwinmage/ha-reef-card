@@ -84,6 +84,14 @@
   intensity, mode, timer, programs, acclimation, moon phase) is applied to
   every lamp of the group. Per-lamp settings (name, Wi-Fi, cloud,
   firmware, identify, reset...) stay on the lamp.
+- ReefLED config dialog: the lamp's sunrise offset
+  (`number.sunrise_offset`, staggered sunrise; lamps with `/offset` only,
+  not on a virtual LED which sets it on each lamp).
+- ReefLED view, staggered sunrise: the sky plays the lamp's program late by
+  its offset (sun position, rise and set times, clouds); a "+15 min" badge
+  under the rise time (lamps starting late only) opens the offset setting.
+  The lamps of a staggered group list their offset under their name
+  (`offset` of the `linked_leds` sensor's lamps).
 - A group write is refused when a lamp of the group is not loaded or does
   not answer (translated error naming the lamps): nothing is sent, the
   lamps stay in sync, as the app does.

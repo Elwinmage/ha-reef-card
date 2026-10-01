@@ -512,6 +512,10 @@ describe("RSLed device helpers", () => {
       expect.arrayContaining(["wifi", "config", "led_moon", "led_acclimation"]),
     );
     expect(dialogs_rsled.config.content.length).toBe(1);
+    // A real lamp's dialog offers its staggered sunrise offset
+    expect(
+      dialogs_rsled.config.content[0].conf.entities.map((e: any) => e.entity),
+    ).toContain("number.sunrise_offset");
   });
 
   it("reads today's program from the weekday entity", () => {
@@ -571,6 +575,49 @@ describe("RSLed device helpers", () => {
     expect(g2.clouds(2)).toEqual(CLOUDS);
     delete g2.entities["auto_3"];
     expect(g2.clouds(3)).toBeNull();
+  });
+
+  it("plays the program late by the lamp's sunrise offset", () => {
+    const dev = makeLed();
+    expect(dev.sunrise_offset()).toBe(0);
+    const base = dev.sky_state();
+    const id = "number.led_sunrise_offset";
+    dev.hass.states[id] = {
+      entity_id: id,
+      state: "60",
+      attributes: {},
+      last_updated: "t",
+    };
+    dev.entities["number.sunrise_offset"] = { entity_id: id };
+    expect(dev.sunrise_offset()).toBe(60);
+    const late = dev.sky_state();
+    // Times one hour later, the sun one hour behind
+    expect(late.start).toBe(base.start! + 60);
+    expect(late.end).toBe(base.end! + 60);
+    expect(late.progress).toBeLessThan(base.progress);
+    // 15:00 is 14:00 of the program: the clouds (14:19) have not come yet
+    expect(dev.clouds_state()).toEqual({ count: 2, active: false });
+    // Not a number, or negative: no offset
+    dev.hass.states[id].state = "unavailable";
+    expect(dev.sunrise_offset()).toBe(0);
+    dev.hass.states[id].state = "-5";
+    expect(dev.sunrise_offset()).toBe(0);
+  });
+
+  it("keeps unknown sky ends unknown with an offset", () => {
+    const dev = makeLed({ program: null, clouds: null });
+    const id = "number.led_sunrise_offset";
+    dev.hass.states[id] = {
+      entity_id: id,
+      state: "10",
+      attributes: {},
+      last_updated: "t",
+    };
+    dev.entities["number.sunrise_offset"] = { entity_id: id };
+    for (const k of ["auto_1", "auto_3"]) delete dev.entities[k];
+    const sky = dev.sky_state();
+    expect(sky.start).toBeNull();
+    expect(sky.end).toBeNull();
   });
 
   it("copes with a missing program", () => {
@@ -895,6 +942,44 @@ describe("RSLedSky", () => {
     );
     expect(texts).toEqual(["11:00", "22:21", "AUTO"]);
     expect(root.querySelectorAll(".cloud_active").length).toBe(2);
+  });
+
+  it("front layer: the sunrise offset under the left time", async () => {
+    at("15:00");
+    const dev = makeLed();
+    const id = "number.led_sunrise_offset";
+    dev.hass.states[id] = {
+      entity_id: id,
+      state: "15",
+      attributes: {},
+      last_updated: "t",
+    };
+    dev.entities["number.sunrise_offset"] = { entity_id: id };
+    const el = makeElement(RSLedSky, dev, { layer: "front" });
+    const root = await mount(el);
+    const texts = [...root.querySelectorAll("text")].map((t) =>
+      t.textContent?.trim(),
+    );
+    // Times moved 15 min later, the badge under the left one
+    expect(texts).toEqual(["11:15", "22:36", "+15 min", "AUTO"]);
+    const seen: any[] = [];
+    el.addEventListener("hass-more-info", (e: any) => seen.push(e.detail));
+    (root.querySelector(".sky_offset") as any).dispatchEvent(
+      new Event("click"),
+    );
+    expect(seen).toEqual([{ entityId: id }]);
+    // The setting gone: the click does nothing
+    delete dev.entities["number.sunrise_offset"];
+    (el as any)._open_offset(new Event("click"));
+    expect(seen).toHaveLength(1);
+  });
+
+  it("front layer: no offset badge on a lamp on time", async () => {
+    at("15:00");
+    const root = await mount(
+      makeElement(RSLedSky, makeLed(), { layer: "front" }),
+    );
+    expect(root.querySelector(".sky_offset")).toBeNull();
   });
 
   it("front layer: faint cloud badge outside the cloud window", async () => {

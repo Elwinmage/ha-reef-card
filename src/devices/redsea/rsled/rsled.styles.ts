@@ -36,6 +36,20 @@ export const style_rsled_overlay = css`
     stroke-width: 4px;
   }
 
+  /* Staggered sunrise badge: the times' colour, lighter */
+  .sky_offset {
+    fill: #f2c230;
+    opacity: 0.75;
+  }
+
+  .sky_offset text {
+    font-size: 13px;
+    font-weight: 600;
+    paint-order: stroke;
+    stroke: rgba(20, 20, 20, 0.75);
+    stroke-width: 3px;
+  }
+
   .sky_mode {
     font-size: 34px;
     font-weight: 300;

@@ -162,20 +162,42 @@ export class RSLed extends RSDevice {
     );
   }
 
-  /** Clouds programmed for today, and whether they are passing now. */
-  clouds_state(): { count: number; active: boolean } {
-    return clouds_state(this.clouds(this.today()), this.now().minute);
+  // check-entities: uses sunrise_offset
+
+  /**
+   * Minutes the lamp's day starts late (staggered sunrise): the lamp plays
+   * its whole program that much later. 0 without the setting (a lamp
+   * without /offset, a virtual LED).
+   */
+  sunrise_offset(): number {
+    const value = Number(this.get_entity("number.sunrise_offset")?.state);
+    return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
   }
 
-  /** Where the sun (or the moon) stands on its course. */
+  /** Clouds programmed for today, and whether they are passing now. */
+  clouds_state(): { count: number; active: boolean } {
+    // The lamp plays its program `offset` minutes late
+    return clouds_state(
+      this.clouds(this.today()),
+      this.now().minute - this.sunrise_offset(),
+    );
+  }
+
+  /**
+   * Where the sun (or the moon) stands on its course, the lamp's offset
+   * applied: the program read `offset` minutes back, its times moved later.
+   */
   sky_state(): SkyState {
     const { minute } = this.now();
-    return sky_state(
-      minute,
+    const offset = this.sunrise_offset();
+    const sky = sky_state(
+      minute - offset,
       this.yesterday_program(),
       this.today_program(),
       this.tomorrow_program(),
     );
+    const shift = (m: number | null) => (m === null ? null : m + offset);
+    return { ...sky, start: shift(sky.start), end: shift(sky.end) };
   }
 
   // ── Light ─────────────────────────────────────────────────────────────
