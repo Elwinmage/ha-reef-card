@@ -36,7 +36,6 @@ import {
   RSWaveLinked,
   RSWaveSchedule,
   RSWaveSpeed,
-  RSWaveWeather,
 } from "./redsea/rswave";
 import { RSPlaceSearch } from "../utils/place_search";
 import { RSMaintenance } from "./redsea/maintenance";
@@ -129,8 +128,6 @@ if (!customElements.get("rswave-schedule"))
   customElements.define("rswave-schedule", RSWaveSchedule);
 if (!customElements.get("rswave-speed"))
   customElements.define("rswave-speed", RSWaveSpeed);
-if (!customElements.get("rswave-weather"))
-  customElements.define("rswave-weather", RSWaveWeather);
 if (!customElements.get("rs-place-search"))
   customElements.define("rs-place-search", RSPlaceSearch);
 if (!customElements.get("redsea-maintenance"))
@@ -181,7 +178,6 @@ export {
   RSWaveLinked,
   RSWaveSchedule,
   RSWaveSpeed,
-  RSWaveWeather,
 } from "./redsea/rswave";
 export { RSPlaceSearch } from "../utils/place_search";
 export { RSMaintenance } from "./redsea/maintenance";

@@ -244,6 +244,19 @@ describe("RSLedWeatherSettings", () => {
     expect(none.place()).toEqual({ latitude: 0, longitude: 0 });
   });
 
+  it("a place found by its name becomes the place", async () => {
+    const el = await mount();
+    const changes = told(el);
+    const search = el.shadowRoot.querySelector("rs-place-search");
+    expect(search.hass).toBe(el.hass);
+    search.dispatchEvent(
+      new CustomEvent("place-picked", {
+        detail: { latitude: 3.2, longitude: 73.2, label: "Maldives" },
+      }),
+    );
+    expect(changes).toEqual([["location", "3.2000, 73.2000"]]);
+  });
+
   it("a point picked on Home Assistant's map becomes the place", async () => {
     class FakeSelector extends HTMLElement {}
     if (!customElements.get("ha-selector"))

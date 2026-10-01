@@ -270,7 +270,6 @@ describe("rswave_api", () => {
       usage: {},
       group: [],
       grouped: null,
-      weather: {},
     });
     expect(
       (await API.fetch_library(makeDevice({ grouped: true }).device)).value!

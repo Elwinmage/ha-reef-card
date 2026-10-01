@@ -54,28 +54,11 @@
 - Needs ha-reefbeat-component exposing the day program (`schedule`
   attribute of the `wave_type` sensor) and the `redsea.wave_*` services.
 
-### RSWAVE GPS weather
-
-- Program editor, new "GPS weather" zone (`rswave-weather`): the speeds of
-  the pumps follow the water speed of a place, hour by hour (wind, or ocean
-  current where the sea model covers it, from Open-Meteo through the
-  integration), between four bounds: slowest / fastest by day and by night,
-  with the speed giving the maximum (km/h) and the spread of speeds merged
-  into one slot (following hours of the same wave). Each pump of the group has its
-  offset (percent of the speed, e.g. -10 for the second pump). Each change
-  previews today's speeds of every pump (one line per pump, the night
-  shaded; `redsea.wave_weather_preview`); Apply saves for the whole group
-  and writes the pumps (`redsea.wave_weather_save`).
-- While the GPS weather is on, the program table edits the pump's own
-  program (the base the weather is made from), with a note saying so; the
-  view's program title shows "· 🌍 GPS" (`switch.wave_weather`).
-
 ### PLACE SEARCH
 
 - New `rs-place-search`: a place searched by its name ("Maldives",
   "Fakarava"…, Open-Meteo geocoding), the map of the GPS weather then goes
-  there before the fine pick. In the ReefLED weather settings and the
-  ReefWave GPS weather.
+  there before the fine pick. In the ReefLED weather settings.
 
 ### VIRTUAL LED (groups)
 

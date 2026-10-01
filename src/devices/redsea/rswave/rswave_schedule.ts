@@ -31,7 +31,6 @@ import {
   draft_intervals,
   hhmm,
   next_slot,
-  normalize_schedule,
   parse_hhmm,
   slots_of,
   type_color,
@@ -265,8 +264,6 @@ export class RSWaveSchedule extends RSWaveElement {
   @state() protected _busy = false;
   /** Wave shown in the wave zone under the table */
   @state() protected _focus = "";
-  /** The pump's own program (GPS weather on) is still to be taken */
-  protected _take_base = false;
   /** Pump of the group being dragged, pump hovered by the drag */
   @state() protected _drag = "";
   @state() protected _over = "";
@@ -276,14 +273,7 @@ export class RSWaveSchedule extends RSWaveElement {
     const program = this.wave?.get_entity?.("sensor.wave_type");
     return `${JSON.stringify(program?.attributes?.schedule ?? null)}|${
       this.wave?.state_signature?.() ?? ""
-    }|${this.gps()}`;
-  }
-
-  // check-entities: uses wave_weather
-
-  /** Whether the speeds follow the GPS weather. */
-  gps(): boolean {
-    return this.wave?.get_entity?.("switch.wave_weather")?.state === "on";
+    }`;
   }
 
   /**
@@ -299,7 +289,6 @@ export class RSWaveSchedule extends RSWaveElement {
     this._error = "";
     this._busy = false;
     this._open = true;
-    this._take_base = true;
     void this.load_library();
   }
 
@@ -313,29 +302,9 @@ export class RSWaveSchedule extends RSWaveElement {
     const res = await fetch_library(this.wave);
     if (res.ok) {
       this._library = res.value as WaveLibrary;
-      this.take_base();
     } else {
       this._error = res.error as string;
     }
-  }
-
-  /**
-   * GPS weather on: the pump runs the weather's program, made from its own
-   * one (the base), which is the one edited here. Taken once per opening.
-   */
-  protected take_base(): void {
-    const weather = this._library?.weather;
-    if (!this._take_base || weather?.settings?.enabled !== true) return;
-    this._take_base = false;
-    const base = normalize_schedule(weather.base);
-    if (base.length) this._slots = slots_of(base);
-  }
-
-  /** The GPS weather saved: the program is read again. */
-  protected async on_weather_saved(e: Event): Promise<void> {
-    e.stopPropagation();
-    this._take_base = true;
-    await this.load_library();
   }
 
   private _onClick(e: Event): void {
@@ -502,9 +471,6 @@ export class RSWaveSchedule extends RSWaveElement {
     const notes: TemplateResult[] = [];
     if (!lib.linked) {
       notes.push(html`<p class="note">${i18n._("wave_local_only")}</p>`);
-    }
-    if (lib.weather?.settings?.enabled === true) {
-      notes.push(html`<p class="note gps">${i18n._("wave_weather_base")}</p>`);
     }
     if (lib.group.length > 1) {
       notes.push(
@@ -757,17 +723,6 @@ export class RSWaveSchedule extends RSWaveElement {
                   ${i18n._("wave_add_slot")}
                 </button>`}
         </div>
-        ${loading
-          ? nothing
-          : html`<div class="weather_zone">
-              <h4>🌍 ${i18n._("wave_weather")}</h4>
-              <rswave-weather
-                .hass=${this._hass}
-                .wave=${this.wave}
-                .library=${this._library}
-                @wave-weather-saved=${(e: Event) => this.on_weather_saved(e)}
-              ></rswave-weather>
-            </div>`}
         ${loading || !this._library?.linked
           ? nothing
           : html`<div class="wave_zone">
@@ -811,9 +766,7 @@ export class RSWaveSchedule extends RSWaveElement {
         >
           ${program_graph(intervals, now, {
             ...SMALL_GRAPH,
-            title:
-              i18n._("wave_program") +
-              (this.gps() ? ` · 🌍 ${i18n._("wave_weather_short")}` : ""),
+            title: i18n._("wave_program"),
           })}
         </svg>
       </div>

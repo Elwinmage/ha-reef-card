@@ -11,7 +11,6 @@
  *   wave_group_set      group the pump with its aquarium's ReefWaves, or
  *                       ungroup it
  *   wave_group_order    order the pumps of the group
- *   wave_weather_*      GPS weather (see rswave_weather)
  *
  * A refused call comes back as a translated Home Assistant error: its
  * message is given to the user as is.
@@ -50,8 +49,6 @@ export interface WaveLibrary {
   group: GroupPump[];
   /** Grouped in the app; null without a cloud account */
   grouped: boolean | null;
-  /** GPS weather: {settings, base (the pump's own program while on), result} */
-  weather: any;
 }
 
 /** Slot of a day program, as redsea.wave_program_save takes it. */
@@ -140,7 +137,6 @@ export async function fetch_library(
       usage: v.usage && typeof v.usage === "object" ? v.usage : {},
       group: Array.isArray(v.group) ? v.group : [],
       grouped: typeof v.grouped === "boolean" ? v.grouped : null,
-      weather: v.weather && typeof v.weather === "object" ? v.weather : {},
     },
   };
 }

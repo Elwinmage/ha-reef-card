@@ -260,15 +260,13 @@ export const style_rswave_schedule = css`
     overflow: visible;
   }
 
-  .wave_zone,
-  .weather_zone {
+  .wave_zone {
     flex: 0 0 auto;
     border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
     padding-top: 8px;
   }
 
-  .wave_zone h4,
-  .weather_zone h4 {
+  .wave_zone h4 {
     margin: 0 0 6px;
     font-size: 14px;
     font-weight: 500;

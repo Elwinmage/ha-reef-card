@@ -797,7 +797,7 @@ describe("RSWaveSchedule (view)", () => {
     expect((await mount(off)).querySelector(".program.off")).not.toBeNull();
     const bare = makeElement(StubSchedule, {});
     expect((await mount(bare)).querySelector(".program.off")).toBeNull();
-    expect(bare.signature()).toBe("null||false");
+    expect(bare.signature()).toBe("null|");
   });
 
   it("re-renders when the program changes", () => {
