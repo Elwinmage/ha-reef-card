@@ -34,6 +34,8 @@ class TranslationVerifier:
         'day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7',  # Day names
         # Built as `pump_type_${type}` in maintenance.ts::_pump_suffix()
         'pump_type_return', 'pump_type_skimmer',
+        # Built as `tooltip_svc_${action}` in element.ts::_describe_action()
+        'tooltip_svc_press', 'tooltip_svc_toggle', 'tooltip_svc_turn_on',
     }
     
     # Keys to ignore completely (template/placeholder keys)

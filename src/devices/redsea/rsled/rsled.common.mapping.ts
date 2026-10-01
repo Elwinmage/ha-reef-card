@@ -296,19 +296,20 @@ export const view_elements = {
     no_br_if_disabled: true,
     css: slider_at(1),
   },
-  // Weather program (GPS weather): lit while the lamp follows the weather
+  // Weather program (GPS weather), for information only (the mode is chosen
+  // in the program editor): lit while the lamp follows the weather, blue
+  // while a weather week is being written to the lamp
   weather: {
     name: "weather_sync",
     type: "click-image",
     icon: "mdi:weather-partly-cloudy",
     icon_color:
-      "${entity.weather_sync?.state === 'on' ? '#f2c230' : 'rgba(127,127,127,0.55)'}",
+      "${entity.weather_program?.attributes?.writing ? '#3fa9f5' : entity.weather_sync?.state === 'on' ? '#f2c230' : 'rgba(127,127,127,0.55)'}",
     // Only with an integration offering the weather program
     disabled_if: "!entity.weather_sync",
     no_br_if_disabled: true,
-    // Turns the GPS weather mode on or off
-    tap_action: { domain: "switch", action: "toggle", data: "default" },
-    css: icon_at(WEATHER_ICON),
+    // No tap, hold nor double tap action
+    css: { ...icon_at(WEATHER_ICON), cursor: "default" },
   },
   moon_slider: {
     name: "light.moon",
@@ -353,6 +354,21 @@ export const view_elements = {
     "elt.css": {
       "background-color": "rgba(240,200,200,0.7)",
     },
+  },
+};
+
+/** Lamps of a group (virtual LED, or a lamp of a group): bottom right. */
+export const linked_element = {
+  name: "linked_leds",
+  type: "rsled-linked",
+  stateObj: null,
+  css: {
+    position: "absolute",
+    left: "83%",
+    top: "55.8%",
+    width: "15.6%",
+    // Leaves the bottom right corner to the weather icon
+    height: "28%",
   },
 };
 
@@ -426,10 +442,12 @@ export function rsled_config(model: RSLedModel) {
     css: {
       width: "100%",
     },
-    off_keep,
+    off_keep: [...off_keep, "linked"],
     elements: {
       ...elements,
       ...face_elements(model.face),
+      // The lamps of its group, when the lamp is in one
+      linked: linked_element,
     },
   };
 }
@@ -446,21 +464,6 @@ export const VIRTUAL_MISSING: string[] = [
   "last_alert_message",
 ];
 
-/** Lamps driven by a virtual ReefLED: bottom right, under the lamp. */
-export const linked_element = {
-  name: "linked_leds",
-  type: "rsled-linked",
-  stateObj: null,
-  css: {
-    position: "absolute",
-    left: "83%",
-    top: "55.8%",
-    width: "15.6%",
-    // Leaves the bottom right corner to the weather icon
-    height: "28%",
-  },
-};
-
 /**
  * Mapping of a virtual ReefLED: the view of the generation it drives (G2 as
  * soon as one of its lamps is a G2), without what only a real lamp has,
@@ -473,14 +476,10 @@ export function rsled_virtual_config(model: RSLedModel) {
   for (const [key, elt] of Object.entries(base.elements)) {
     if (!VIRTUAL_MISSING.includes(key)) elements[key] = elt;
   }
-  elements.linked = linked_element;
   return {
     ...base,
     model: "virtual_led",
-    off_keep: [
-      ...off_keep.filter((key) => !VIRTUAL_MISSING.includes(key)),
-      "linked",
-    ],
+    off_keep: base.off_keep.filter((key) => !VIRTUAL_MISSING.includes(key)),
     elements,
   };
 }

@@ -322,6 +322,23 @@ describe("RSLedLinked", () => {
     );
   });
 
+  it("on a lamp of the group: the lamp circled, not tapped", async () => {
+    const dev: any = makeVirtual([LED_G1A, LED_G1B]);
+    dev.current_hwid = () => "h2";
+    const el = await mountLinked(dev);
+    const lamps = el.shadowRoot.querySelectorAll(".lamp");
+    expect(lamps[0].classList.contains("current")).toBe(false);
+    expect(lamps[1].classList.contains("current")).toBe(true);
+    const seen: any[] = [];
+    document.body.addEventListener("show-device", (e: any) =>
+      seen.push(e.detail),
+    );
+    lamps[1].click();
+    expect(seen).toEqual([]);
+    lamps[0].click();
+    expect(seen.length).toBe(1);
+  });
+
   it("a tap shows the lamp's own card", async () => {
     const el = await mountLinked(makeVirtual([LED_G1A, LED_G1B]));
     const seen: any[] = [];

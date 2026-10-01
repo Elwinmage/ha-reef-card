@@ -1,0 +1,2039 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Gerät bereits konfiguriert",
+      "cannot_create": "ReefBeat-Gerät mit den angegebenen Parametern kann nicht erstellt werden"
+    },
+    "error": {
+      "auth_failed": "Authentifizierung fehlgeschlagen, Anmeldedaten prüfen",
+      "nothing_detected": "Kein Gerät erkannt"
+    },
+    "flow_title": "ReefBeat Konfiguration",
+    "step": {
+      "user": {
+        "data": {
+          "add_type": "Hinzufügemethode wählen",
+          "cloud_server": "Cloud-Server (Adresse des Simulators)",
+          "disable_supplements": "Nahrungsergänzungsmittel deaktivieren",
+          "hw_model": "Hardware-Modell",
+          "ip_address": "IP- oder Subnetzadresse (z.B.: 10.0.1.0/255.255.255.0)",
+          "platform": "Plattform",
+          "scan_interval": "Scanintervall",
+          "virtual_led": "Neuer virtueller LED-Regler"
+        },
+        "title": "Neues Gerät hinzufügen"
+      },
+      "select_devices": {
+        "data": {
+          "ip_address": "Hinzuzufügende Geräte"
+        },
+        "description": "Alle im Netzwerk gefundenen Geräte sind vorausgewählt. Deaktivieren Sie die Geräte, die Sie nicht hinzufügen möchten, und bestätigen Sie — alle verbleibenden Geräte werden auf einmal hinzugefügt.",
+        "title": "Erkannte Geräte hinzufügen"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ato_sensor_connected": {
+        "name": "Temperatursonde verbunden"
+      },
+      "battery_level": {
+        "name": "Batteriestand"
+      },
+      "bundled_heads": {
+        "name": "Gebündelte Köpfe"
+      },
+      "buzzer_active": {
+        "name": "Buzzer active"
+      },
+      "buzzer_dismissed": {
+        "name": "Buzzer dismissed"
+      },
+      "buzzer_on": {
+        "name": "Summer ertönt"
+      },
+      "cable_connected": {
+        "name": "Cable connected"
+      },
+      "check_sensor": {
+        "name": "Sensor prüfen"
+      },
+      "cloud_state": {
+        "name": "Cloud-Verbindungsstatus"
+      },
+      "connected": {
+        "name": "Lecksensor verbunden"
+      },
+      "constant_speed": {
+        "name": "Konstante Geschwindigkeit"
+      },
+      "control_link_up": {
+        "name": "Control hub link"
+      },
+      "ec_sensor_connected": {
+        "name": "EC-Sensor verbunden"
+      },
+      "is_calibrated": {
+        "name": "Sonde kalibriert"
+      },
+      "is_ec_sensor_connected": {
+        "name": "Ist EC-Sensor verbunden"
+      },
+      "is_internet_connected": {
+        "name": "Internet connected"
+      },
+      "is_pump_on": {
+        "name": "Ist Pumpe an?"
+      },
+      "is_sensor_error": {
+        "name": "Sensor fehlerhaft?"
+      },
+      "is_temp_enabled": {
+        "name": "Ist Temperatur aktiviert"
+      },
+      "leak_detector": {
+        "name": "Leak detector"
+      },
+      "missing_pump": {
+        "name": "Pumpe fehlt"
+      },
+      "missing_sensor": {
+        "name": "Sensor fehlt"
+      },
+      "power_link_up": {
+        "name": "Power center link"
+      },
+      "probe_leak_detected": {
+        "name": "{probe} Leck"
+      },
+      "recalibration_required": {
+        "name": "Kalibrierung"
+      },
+      "reconnect_pump": {
+        "name": "Pumpe neu verbinden"
+      },
+      "sensor_controlled": {
+        "name": "Sensorgesteuert"
+      },
+      "status": {
+        "name": "Status"
+      },
+      "temperature_log_enabled": {
+        "name": "Temperaturaufzeichnung"
+      },
+      "unclean_sensor": {
+        "name": "Sensorzustand"
+      },
+      "water_level": {
+        "name": "Wasserstand"
+      },
+      "control_paired": {
+        "name": "Control gekoppelt"
+      },
+      "control_internet_connected": {
+        "name": "Control-Internet"
+      },
+      "temperature_coherent": {
+        "name": "Temperaturkohärenz"
+      }
+    },
+    "button": {
+      "advance": {
+        "name": "Vorschub"
+      },
+      "delete_emergency": {
+        "name": "Notfallalarm löschen"
+      },
+      "delete_pump": {
+        "name": "Pumpe löschen"
+      },
+      "delete_supplement": {
+        "name": "Nahrungsergänzungsmittel löschen"
+      },
+      "detect_pump": {
+        "name": "Pumpe erkennen und hinzufügen"
+      },
+      "ec_calibration_cup": {
+        "name": "EC-Kalibrierung Voller Becher"
+      },
+      "ec_calibration_end": {
+        "name": "EC-Kalibrierung Beenden"
+      },
+      "ec_calibration_skim": {
+        "name": "EC-Kalibrierung Überschäumen"
+      },
+      "ec_calibration_start": {
+        "name": "EC-Kalibrierung Starten"
+      },
+      "end_calibration": {
+        "name": "Kalibrierung stoppen und speichern"
+      },
+      "fetch_config": {
+        "name": "Konfiguration abrufen"
+      },
+      "fetch_data": {
+        "name": "Daten abrufen"
+      },
+      "fill": {
+        "name": "Befüllen"
+      },
+      "firmware_update": {
+        "name": "Firmware-Update erzwingen"
+      },
+      "led_identify": {
+        "name": "Identifizieren"
+      },
+      "get_temperature": {
+        "name": "Temperatur abrufen"
+      },
+      "probe_get_value": {
+        "name": "{probe} jetzt auslesen"
+      },
+      "maint_ato_ec_sensor": {
+        "name": "EC-Sensor reinigen"
+      },
+      "maint_ato_return_pump": {
+        "name": "Rückförderpumpe reinigen"
+      },
+      "maint_control_probe_calibration_orp": {
+        "name": "Sonde {probe} prüfen"
+      },
+      "maint_control_probe_calibration_ph": {
+        "name": "Sonde {probe} kalibrieren"
+      },
+      "maint_control_probe_calibration_ec": {
+        "name": "Sonde {probe} kalibrieren"
+      },
+      "maint_control_probe_clean": {
+        "name": "Sonde {probe} reinigen"
+      },
+      "maint_control_probe_replace": {
+        "name": "Sonde {probe} ersetzen"
+      },
+      "maint_dose_heads_calibration": {
+        "name": "Dosierkopf kalibrieren"
+      },
+      "maint_dose_heads_replace": {
+        "name": "Dosierkopf und Schläuche ersetzen"
+      },
+      "maint_led_fan": {
+        "name": "Lüfter und Gitter entstauben"
+      },
+      "maint_led_lens": {
+        "name": "Linse reinigen"
+      },
+      "maint_mat_carbon_replace": {
+        "name": "Aktivkohle ersetzen"
+      },
+      "maint_run_pump_motor": {
+        "name": "Motor und Rotor reinigen"
+      },
+      "maint_run_pump_strainer": {
+        "name": "Ansaugsieb reinigen"
+      },
+      "maint_run_skim_fullcup_calibration": {
+        "name": "Fullcup-Sensor kalibrieren"
+      },
+      "maint_run_skim_overskimming_calibration": {
+        "name": "Überschäumungs-Sensor kalibrieren"
+      },
+      "maint_run_skim_rotor": {
+        "name": "Rotor der Abschäumerpumpe reinigen"
+      },
+      "maint_run_skim_venturi": {
+        "name": "Venturi und Luftschlauch reinigen"
+      },
+      "maint_wave_rotor_cages": {
+        "name": "Rotorkäfige reinigen"
+      },
+      "manual_head": {
+        "name": "Manuelle Dosierung"
+      },
+      "new_roll": {
+        "name": "Neue Rolle"
+      },
+      "port_delete": {
+        "name": "Port {port} deinstallieren"
+      },
+      "preview_save": {
+        "name": "Vorschau speichern"
+      },
+      "preview_set_from_current": {
+        "name": "Vorschau aus aktuell setzen"
+      },
+      "preview_start": {
+        "name": "Vorschau starten"
+      },
+      "preview_stop": {
+        "name": "Vorschau stoppen"
+      },
+      "reset": {
+        "name": "Neustart"
+      },
+      "resume": {
+        "name": "Fortsetzen"
+      },
+      "set_calibration_value": {
+        "name": "Kalibriervolumen setzen"
+      },
+      "set_supplement": {
+        "name": "Neues Nahrungsergänzungsmittel setzen"
+      },
+      "set_supplement_name": {
+        "name": "Neuen Namen setzen"
+      },
+      "start_calibration": {
+        "name": "Kalibrierung starten"
+      },
+      "start_priming": {
+        "name": "Befüllung starten"
+      },
+      "stop_fill": {
+        "name": "Befüllung stoppen"
+      },
+      "stop_priming": {
+        "name": "Befüllung stoppen"
+      },
+      "test_calibration": {
+        "name": "Neue Kalibrierung testen"
+      },
+      "socket_0_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_1_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_2_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_3_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_4_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_5_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_6_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_7_delete": {
+        "name": "Steckdose {socket} löschen"
+      },
+      "socket_0_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_1_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_2_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_3_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_4_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_5_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_6_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "socket_7_unsubscribe": {
+        "name": "Steckdose {socket} abmelden"
+      },
+      "install_temperature": {
+        "name": "Temperatursonde hinzufügen"
+      },
+      "remove_temperature": {
+        "name": "Temperatursonde entfernen"
+      },
+      "pair_power": {
+        "name": "Power Center koppeln"
+      },
+      "unpair_power": {
+        "name": "Power Center entkoppeln"
+      },
+      "unpair_control": {
+        "name": "Steuerungs-Hub entkoppeln"
+      }
+    },
+    "light": {
+      "blue": {
+        "name": "Blau"
+      },
+      "kelvin_intensity": {
+        "name": "Kelvin"
+      },
+      "moon": {
+        "name": "Mond"
+      },
+      "white": {
+        "name": "Weiß"
+      }
+    },
+    "number": {
+      "acclimation_duration": {
+        "name": "Akklimatisierungsdauer"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Startintensitätsfaktor der Akklimatisierung"
+      },
+      "ato_tank_volume": {
+        "name": "ATO-Behältervolumen"
+      },
+      "ato_volume_left": {
+        "name": "Verbleibendes ATO-Volumen"
+      },
+      "calibration_dose_value": {
+        "name": "Kalibrierungsdosis"
+      },
+      "container_volume": {
+        "name": "Behältervolumen"
+      },
+      "custom_advance_value": {
+        "name": "Vorschubwert"
+      },
+      "daily_dose": {
+        "name": "Tagesdosis aktualisieren"
+      },
+      "dosing_waiting_period": {
+        "name": "Dosierwartezeit"
+      },
+      "maint_ato_ec_sensor_interval_weeks": {
+        "name": "EC-Sensor reinigen (Wochen)"
+      },
+      "maint_ato_return_pump_interval_months": {
+        "name": "Rückförderpumpe reinigen (Monate)"
+      },
+      "maint_control_probe_calibration_orp_interval_months": {
+        "name": "Sonde {probe} prüfen (Monate)"
+      },
+      "maint_control_probe_calibration_ph_interval_months": {
+        "name": "Sonde {probe} kalibrieren (Monate)"
+      },
+      "maint_control_probe_calibration_ec_interval_months": {
+        "name": "Sonde {probe} kalibrieren (Monate)"
+      },
+      "maint_control_probe_clean_interval_weeks": {
+        "name": "Sonde {probe} reinigen (Wochen)"
+      },
+      "maint_control_probe_replace_interval_months": {
+        "name": "Sonde {probe} ersetzen (Monate)"
+      },
+      "maint_dose_heads_calibration_interval_days": {
+        "name": "Dosierkopf kalibrieren (Tage)"
+      },
+      "maint_dose_heads_replace_interval_months": {
+        "name": "Dosierkopf und Schläuche ersetzen (Monate)"
+      },
+      "maint_led_fan_interval_months": {
+        "name": "Lüfter und Gitter entstauben (Monate)"
+      },
+      "maint_led_lens_interval_weeks": {
+        "name": "Linse reinigen (Wochen)"
+      },
+      "maint_mat_carbon_replace_interval_weeks": {
+        "name": "Aktivkohle ersetzen (Wochen)"
+      },
+      "maint_run_pump_motor_interval_months": {
+        "name": "Motor und Rotor reinigen (Monate)"
+      },
+      "maint_run_pump_strainer_interval_weeks": {
+        "name": "Ansaugsieb reinigen (Wochen)"
+      },
+      "maint_run_skim_fullcup_calibration_interval_weeks": {
+        "name": "Fullcup-Sensor kalibrieren (Wochen)"
+      },
+      "maint_run_skim_overskimming_calibration_interval_weeks": {
+        "name": "Überschäumungs-Sensor kalibrieren (Wochen)"
+      },
+      "maint_run_skim_rotor_interval_months": {
+        "name": "Rotor der Abschäumerpumpe reinigen (Monate)"
+      },
+      "maint_run_skim_venturi_interval_weeks": {
+        "name": "Venturi und Luftschlauch reinigen (Wochen)"
+      },
+      "maint_wave_rotor_cages_interval_months": {
+        "name": "Rotorkäfige reinigen (Monate)"
+      },
+      "manual_duration": {
+        "name": "Manuelle Dauer"
+      },
+      "manual_head_volume": {
+        "name": "Manuelles Volumen"
+      },
+      "moon_day": {
+        "name": "Mondtag"
+      },
+      "overskimming_threshold": {
+        "name": "Überschäumungsschwelle"
+      },
+      "preview_speed": {
+        "name": "Vorschaugeschwindigkeit"
+      },
+      "save_initial_container_volume": {
+        "name": "Anfängliches Behältervolumen"
+      },
+      "schedule_length": {
+        "name": "Zeitplanlänge"
+      },
+      "shortcut_off_delay": {
+        "name": "Verknüpfung AUS-Verzögerung"
+      },
+      "speed": {
+        "name": "Geschwindigkeit"
+      },
+      "started_roll_diameter": {
+        "name": "Rollendurchmesser"
+      },
+      "stock_alert_days": {
+        "name": "Bestandsalarmtage"
+      },
+      "wave_backward_intensity": {
+        "name": "Vorsch. Rückwärtsintensität"
+      },
+      "wave_backward_time": {
+        "name": "Vorsch. Rückwärtszeit"
+      },
+      "wave_forward_intensity": {
+        "name": "Vorsch. Vorwärtsintensität"
+      },
+      "wave_forward_time": {
+        "name": "Vorsch. Vorwärtszeit"
+      },
+      "wave_preview_duration": {
+        "name": "Vorschaudauer"
+      },
+      "wave_preview_step": {
+        "name": "Vorschauschritte"
+      },
+      "wave_preview_wave_duration": {
+        "name": "Vorsch. Wellendauer"
+      },
+      "temperature_coherence_threshold": {
+        "name": "Schwelle Temperaturkohärenz"
+      },
+      "probe_orp_calibration": {
+        "name": "{probe} kalibrieren (Wert der Lösung)"
+      },
+      "probe_temperature_calibration": {
+        "name": "{probe} kalibrieren (tatsächliche Temperatur)"
+      },
+      "probe_temp_calibration": {
+        "name": "Temperatur von {probe} kalibrieren (tatsächliche Temperatur)"
+      },
+      "temperature_calibration": {
+        "name": "Temperatur kalibrieren (tatsächliche Temperatur)"
+      },
+      "temperature_desired_range_low": {
+        "name": "Gewünschter Temperaturbereich (niedrig)"
+      },
+      "temperature_desired_range_high": {
+        "name": "Gewünschter Temperaturbereich (hoch)"
+      },
+      "temperature_acceptable_range_low": {
+        "name": "Akzeptabler Temperaturbereich (niedrig)"
+      },
+      "temperature_acceptable_range_high": {
+        "name": "Akzeptabler Temperaturbereich (hoch)"
+      },
+      "probe_acceptable_range_low": {
+        "name": "Akzeptabler Bereich {probe} (min)"
+      },
+      "probe_desired_range_low": {
+        "name": "Gewünschter Bereich {probe} (min)"
+      },
+      "probe_desired_range_high": {
+        "name": "Gewünschter Bereich {probe} (max)"
+      },
+      "probe_acceptable_range_high": {
+        "name": "Akzeptabler Bereich {probe} (max)"
+      },
+      "probe_temp_acceptable_range_low": {
+        "name": "Akzeptabler Temperaturbereich {probe} (min)"
+      },
+      "probe_temp_desired_range_low": {
+        "name": "Gewünschter Temperaturbereich {probe} (min)"
+      },
+      "probe_temp_desired_range_high": {
+        "name": "Gewünschter Temperaturbereich {probe} (max)"
+      },
+      "probe_temp_acceptable_range_high": {
+        "name": "Akzeptabler Temperaturbereich {probe} (max)"
+      },
+      "leak_buzzer_frequency": {
+        "name": "Frequenz Leck-Summer"
+      },
+      "leak_buzzer_duty_cycle": {
+        "name": "Tastverhältnis Leck-Summer"
+      },
+      "danger_buzzer_frequency": {
+        "name": "Frequenz Gefahren-Summer"
+      },
+      "danger_buzzer_duty_cycle": {
+        "name": "Tastverhältnis Gefahren-Summer"
+      },
+      "danger_debounce_seconds": {
+        "name": "Entprellzeit Gefahr"
+      },
+      "weather_min_intensity": {
+        "name": "Wetter Mindestintensität"
+      },
+      "weather_max_intensity": {
+        "name": "Wetter Höchstintensität"
+      },
+      "weather_refresh_days": {
+        "name": "Wetteraktualisierung (Tage)"
+      },
+      "sunrise_offset": {
+        "name": "Sonnenaufgang-Versatz"
+      },
+      "staggered_delay": {
+        "name": "Verzögerung des versetzten Sonnenaufgangs"
+      }
+    },
+    "select": {
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "auto": "Auto",
+          "end_of_roll": "Rollenende",
+          "manual": "Manuell",
+          "timer": "Timer",
+          "other": "Sonstige",
+          "off": "Aus"
+        }
+      },
+      "model": {
+        "name": "Modell"
+      },
+      "position": {
+        "name": "Position",
+        "state": {
+          "left": "Links",
+          "right": "Rechts"
+        }
+      },
+      "preview_wave_direction": {
+        "name": "Vorschau Wellenrichtung",
+        "state": {
+          "alt": "Abwechselnd",
+          "fw": "Vorwärts",
+          "rw": "Rückwärts"
+        }
+      },
+      "preview_wave_type": {
+        "name": "Vorschau Wellentyp",
+        "state": {
+          "nw": "Keine Welle",
+          "ra": "Zufällig",
+          "re": "Regelmäßig",
+          "st": "Stufe",
+          "su": "Oberfläche",
+          "un": "Gleichmäßig"
+        }
+      },
+      "supplements": {
+        "name": "Nahrungsergänzungsmittel",
+        "state": {
+          "other": "Sonstige"
+        }
+      },
+      "temperature_fusion_method": {
+        "name": "Temperatur-Fusionsmethode",
+        "state": {
+          "median": "Median",
+          "mean": "Mittelwert",
+          "min": "Minimum",
+          "max": "Maximum"
+        }
+      },
+      "probe_ec_unit": {
+        "name": "Einheit {probe}",
+        "state": {
+          "ec": "Leitfähigkeit (mS/cm)",
+          "ppt": "Salinität (ppt)",
+          "sg": "Dichte (SG)"
+        }
+      },
+      "weather_period": {
+        "name": "Wetterzeitraum",
+        "state": {
+          "next_week": "Nächste Woche (Vorhersage)",
+          "last_week": "Letzte Woche (gemessen)"
+        }
+      },
+      "weather_anchor": {
+        "name": "Wettertag im Aquarium",
+        "state": {
+          "place": "Uhrzeit des Ortes",
+          "sunrise": "Am Sonnenaufgang ausgerichtet",
+          "sunset": "Am Sonnenuntergang ausgerichtet",
+          "both": "Zwischen Auf- und Untergang gestreckt"
+        }
+      }
+    },
+    "sensor": {
+      "acclimation_current_intensity_factor": {
+        "name": "Aktueller Akklimatisierungs-Intensitätsfaktor"
+      },
+      "acclimation_duration": {
+        "name": "Akklimatisierungsdauer"
+      },
+      "acclimation_remaining_days": {
+        "name": "Verbleibende Akklimatisierungstage"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Startintensitätsfaktor der Akklimatisierung"
+      },
+      "current_program": {
+        "name": "Aktuelles Programm"
+      },
+      "linked_leds": {
+        "name": "Verknüpfte LEDs"
+      },
+      "ato_sensor_code": {
+        "name": "Code der Temperatursonde"
+      },
+      "ato_sensor_last_adjustment_date": {
+        "name": "Justagedatum der Sonde"
+      },
+      "ato_sensor_last_installation_date": {
+        "name": "Installationsdatum der Sonde"
+      },
+      "auto_1": {
+        "name": "Sonntag"
+      },
+      "auto_2": {
+        "name": "Montag"
+      },
+      "auto_3": {
+        "name": "Dienstag"
+      },
+      "auto_4": {
+        "name": "Mittwoch"
+      },
+      "auto_5": {
+        "name": "Donnerstag"
+      },
+      "auto_6": {
+        "name": "Freitag"
+      },
+      "auto_7": {
+        "name": "Samstag"
+      },
+      "auto_dosed_today": {
+        "name": "Heute automatisch dosiert"
+      },
+      "backup_email": {
+        "name": "Backup-E-Mail"
+      },
+      "battery_level": {
+        "name": "Battery level"
+      },
+      "blue": {
+        "name": "Blau"
+      },
+      "buzzer_cause": {
+        "name": "Buzzer cause"
+      },
+      "cloud_account": {
+        "name": "Verknüpft mit Konto",
+        "state": {
+          "none": "Keiner"
+        }
+      },
+      "connected_control": {
+        "name": "Paired control hub"
+      },
+      "connected_power": {
+        "name": "Paired power center"
+      },
+      "connected_power_state": {
+        "name": "Paired power center state"
+      },
+      "control_mode": {
+        "name": "Mode",
+        "state": {
+          "auto": "Automatik",
+          "off": "Aus",
+          "setup": "Einrichtung",
+          "feeding": "Fütterung",
+          "maintenance": "Wartung"
+        }
+      },
+      "country": {
+        "name": "Land"
+      },
+      "cup_last_calibration": {
+        "name": "Letzte Becher-Kalibrierung"
+      },
+      "current_level": {
+        "name": "Aktueller Stand"
+      },
+      "current_read": {
+        "name": "Temperature"
+      },
+      "daily_average_usage": {
+        "name": "Daily Average Usage"
+      },
+      "daily_dose": {
+        "name": "Tagesdosis"
+      },
+      "daily_doses": {
+        "name": "Daily doses"
+      },
+      "daily_fills_average": {
+        "name": "Daily fills average"
+      },
+      "daily_volume_average": {
+        "name": "Daily volume average"
+      },
+      "days_till_empty": {
+        "name": "Tage bis leer"
+      },
+      "days_till_end_of_roll": {
+        "name": "Days till end of roll"
+      },
+      "doses_today": {
+        "name": "Doses today"
+      },
+      "dosing_queue": {
+        "name": "Dosing Queue",
+        "state": {
+          "empty": "Empty"
+        }
+      },
+      "email": {
+        "name": "Email"
+      },
+      "fan": {
+        "name": "Fan"
+      },
+      "first_name": {
+        "name": "Vorname"
+      },
+      "flow_rate": {
+        "name": "Durchflussrate"
+      },
+      "head_state": {
+        "name": "Status"
+      },
+      "ip": {
+        "name": "IP-Adresse"
+      },
+      "language": {
+        "name": "Sprache"
+      },
+      "last_alert_message": {
+        "name": "Letzte Alarmmeldung"
+      },
+      "last_calibration": {
+        "name": "Letzte Kalibrierung"
+      },
+      "last_fill_date": {
+        "name": "Letzte Befüllung"
+      },
+      "last_message": {
+        "name": "Letzte Meldung"
+      },
+      "last_name": {
+        "name": "Nachname"
+      },
+      "last_pump_on_cause": {
+        "name": "Ursache des letzten Starts"
+      },
+      "leak_sensor_current_read": {
+        "name": "Aktuelle Lecksensorablesung"
+      },
+      "leak_sensor_status": {
+        "name": "Status des Lecksensors",
+        "state": {
+          "dry": "Trocken",
+          "aquarium_water_leak": "Aquarienwasser-Leck",
+          "rodi_water_leak": "RO/DI-Wasser-Leck"
+        }
+      },
+      "led_program": {
+        "name": "LED-Programm"
+      },
+      "manual_dosed_today": {
+        "name": "Heute manuell dosiert"
+      },
+      "max_sockets": {
+        "name": "Max sockets"
+      },
+      "mobile_number": {
+        "name": "Mobilnummer"
+      },
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "auto": "Auto",
+          "blockage": "Blockierung",
+          "calibration": "Kalibrierung",
+          "controller": "Regler",
+          "emergency": "Notfall",
+          "empty": "Leer",
+          "end_of_roll": "Rollenende",
+          "feeding": "Fütterung",
+          "high_water": "Hoher Wasserstand",
+          "leak": "Leck",
+          "maintenance": "Wartung",
+          "malfunction": "Fehlfunktion",
+          "manual": "Manuell",
+          "mat_error": "Materialfehler",
+          "missing_pump": "Pumpe fehlt",
+          "missing_sensor": "Sensor fehlt",
+          "no_ec_sensor": "Kein EC-Sensor",
+          "off": "Aus",
+          "overheating": "Überhitzung",
+          "partial_auto": "Halbautomatisch",
+          "preview": "Vorschau",
+          "priming": "Befüllung",
+          "pump_timeout": "Pumpen-Timeout",
+          "setup": "Einrichtung",
+          "setup_error_high": "Einrichtungsfehler: zu hoch",
+          "setup_error_torn": "Einrichtungsfehler: gerissen",
+          "shortcut_off_delay": "Verknüpfung AUS-Verzögerung",
+          "stalled": "Blockiert",
+          "timer": "Timer",
+          "torn_mat": "Gerissenes Material",
+          "user_test": "Benutzertest",
+          "no_roll": "Keine Rolle"
+        }
+      },
+      "model": {
+        "name": "Modell"
+      },
+      "model_type": {
+        "name": "Model region"
+      },
+      "moon_intensity": {
+        "name": "Mondphasenintensität"
+      },
+      "name": {
+        "name": "Name"
+      },
+      "next_full_moon": {
+        "name": "Nächster Vollmond"
+      },
+      "next_new_moon": {
+        "name": "Nächster Neumond"
+      },
+      "port_consumption": {
+        "name": "Port {port} consumption"
+      },
+      "port_mode": {
+        "name": "Port {port} mode"
+      },
+      "port_name": {
+        "name": "Port {port} name"
+      },
+      "port_state": {
+        "name": "Port {port} state"
+      },
+      "port_type": {
+        "name": "Port {port} type"
+      },
+      "power_temperature": {
+        "name": "Temperature"
+      },
+      "prev_pump_state": {
+        "name": "Vorheriger Pumpenstatus"
+      },
+      "probe_ec": {
+        "name": "{probe} conductivity"
+      },
+      "probe_leak_status": {
+        "name": "{probe} Leckursprung",
+        "state": {
+          "dry": "Trocken",
+          "aquarium_water_leak": "Aquariumwasser",
+          "rodi_water_leak": "Osmosewasser"
+        }
+      },
+      "probe_leak_conductivity": {
+        "name": "{probe} Leitfähigkeit des Lecks"
+      },
+      "probe_ec_value": {
+        "name": "{probe} value"
+      },
+      "probe_last_adjustment": {
+        "name": "{probe} last calibration"
+      },
+      "probe_last_installation": {
+        "name": "{probe} last installation"
+      },
+      "probe_level": {
+        "name": "{probe} level",
+        "state": {
+          "desired": "Optimal",
+          "acceptable": "Akzeptabel",
+          "danger": "Gefahr",
+          "sensor_data_error": "Sensorfehler"
+        }
+      },
+      "probe_measurement_unit": {
+        "name": "{probe} display unit"
+      },
+      "probe_name": {
+        "name": "{probe} name"
+      },
+      "probe_orp_value": {
+        "name": "{probe} ORP"
+      },
+      "probe_ph_value": {
+        "name": "{probe} pH"
+      },
+      "probe_ppt": {
+        "name": "{probe} salinity"
+      },
+      "probe_sg": {
+        "name": "{probe} specific gravity"
+      },
+      "probe_status": {
+        "name": "{probe} status"
+      },
+      "probe_temp_level": {
+        "name": "{probe} temperature level",
+        "state": {
+          "desired": "Optimal",
+          "acceptable": "Akzeptabel",
+          "danger": "Gefahr",
+          "sensor_data_error": "Sensorfehler"
+        }
+      },
+      "probe_temperature": {
+        "name": "{probe} temperature"
+      },
+      "probe_value": {
+        "name": "{probe} value"
+      },
+      "probe_water_level": {
+        "name": "{probe} Wasserstand",
+        "state": {
+          "above": "Zu hoch",
+          "below": "Zu niedrig",
+          "desired_level_1": "Sollwert (Sensor 1)",
+          "desired_level_2": "Sollwert (Sensor 2)",
+          "error": "Sensor-Fehler"
+        }
+      },
+      "pump_blockage_threshold": {
+        "name": "Schwelle Blockade"
+      },
+      "pump_consumption": {
+        "name": "Pumpenverbrauch"
+      },
+      "pump_empty_threshold": {
+        "name": "Schwelle Pumpe leer"
+      },
+      "pump_soft_blockage_threshold": {
+        "name": "Schwelle Teilblockade"
+      },
+      "pump_speed": {
+        "name": "Pumpendrehzahl"
+      },
+      "pump_state": {
+        "name": "Pumpenstatus",
+        "state": {
+          "malfunction": "Fehlfunktion",
+          "pump_on": "An",
+          "off": "Aus"
+        }
+      },
+      "remaining_days": {
+        "name": "Verbleibende Tage"
+      },
+      "remaining_length": {
+        "name": "Verbleibende Länge"
+      },
+      "s1_average": {
+        "name": "Mittelwert Füllstandsensor S1"
+      },
+      "s2_average": {
+        "name": "Mittelwert Füllstandsensor S2"
+      },
+      "schedule_head": {
+        "name": "Kopfzeitplan",
+        "state": {
+          "custom": "Benutzerdefiniert",
+          "daily": "Täglich",
+          "hourly": "Stündlich",
+          "single": "Einzeln"
+        }
+      },
+      "skim_last_calibration": {
+        "name": "Letzte Abschäum-Kalibrierung"
+      },
+      "state": {
+        "name": "Zustand",
+        "state": {
+          "calibration": "Kalibrierung",
+          "dry-run": "Trockenlauf",
+          "emergency": "Notfall",
+          "feeding": "Fütterung",
+          "full-cup": "Voller Behälter",
+          "locked-rotor": "Blockierter Rotor",
+          "maintenance": "Wartung",
+          "not-connected": "Nicht verbunden",
+          "operational": "Betriebsbereit",
+          "over-skimming": "Überschäumung",
+          "preview": "Vorschau",
+          "shortcut-off-delay": "Verknüpfung AUS-Verzögerung",
+          "wrong-pump": "Falsche Pumpe"
+        }
+      },
+      "supplement": {
+        "name": "Nahrungsergänzungsmittel"
+      },
+      "supplement_program": {
+        "name": "Nahrungsergänzungsmittel"
+      },
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "temperature_probe_status": {
+        "name": "Status der Temperatursonde",
+        "state": {
+          "connected": "Verbunden",
+          "disconnected": "Getrennt"
+        }
+      },
+      "today_fills": {
+        "name": "Heutige Befüllungen"
+      },
+      "today_usage": {
+        "name": "Heutiger Verbrauch"
+      },
+      "today_volume_usage": {
+        "name": "Heutiger Volumenverbrauch"
+      },
+      "todays_moon_day": {
+        "name": "Heutiger Mondtag"
+      },
+      "total_fills": {
+        "name": "Gesamtbefüllungen"
+      },
+      "total_usage": {
+        "name": "Gesamtverbrauch"
+      },
+      "total_volume_usage": {
+        "name": "Verbrauch seit dem Nachfüllen"
+      },
+      "type": {
+        "name": "Typ",
+        "state": {
+          "return": "Rücklauf",
+          "skimmer": "Abschäumer",
+          "unknown": "Unbekannt"
+        }
+      },
+      "volume_left": {
+        "name": "Verbleibendes Volumen"
+      },
+      "water_level": {
+        "name": "Wasserstand",
+        "state": {
+          "above": "Über",
+          "acceptable": "Akzeptabel",
+          "below": "Unter",
+          "danger": "Gefahr",
+          "desired": "Gewünscht",
+          "desired_level_1": "Gewünschter Pegel 1",
+          "desired_level_2": "Gewünschter Pegel 2"
+        }
+      },
+      "wave_backward_intensity": {
+        "name": "Rückwärtsintensität"
+      },
+      "wave_backward_time": {
+        "name": "Rückwärtszeit"
+      },
+      "wave_direction": {
+        "name": "Wellenrichtung",
+        "state": {
+          "alt": "Abwechselnd",
+          "fw": "Vorwärts",
+          "rw": "Rückwärts"
+        }
+      },
+      "wave_forward_intensity": {
+        "name": "Vorwärtsintensität",
+        "state": {
+          "alt": "Abwechselnd",
+          "fw": "Vorwärts",
+          "rw": "Rückwärts"
+        }
+      },
+      "wave_forward_time": {
+        "name": "Vorwärtszeit"
+      },
+      "wave_program": {
+        "name": "Wellenprogramm"
+      },
+      "wave_step": {
+        "name": "Schritte"
+      },
+      "wave_type": {
+        "name": "Wellentyp",
+        "state": {
+          "nw": "Keine Welle",
+          "ra": "Zufällig",
+          "re": "Regelmäßig",
+          "st": "Stufe",
+          "su": "Oberfläche",
+          "un": "Gleichmäßig"
+        }
+      },
+      "white": {
+        "name": "Weiß"
+      },
+      "wifi_quality": {
+        "name": "WLAN-Signalqualität",
+        "state": {
+          "poor": "Schlech",
+          "low": "Niedrig",
+          "medium": "Mittel",
+          "good": "Gut",
+          "excellent": "Ausgezeichnet"
+        }
+      },
+      "wifi_signal": {
+        "name": "WLAN-Signalstärke"
+      },
+      "wifi_ssid": {
+        "name": "WLAN-SSID"
+      },
+      "zip_code": {
+        "name": "Postleitzahl"
+      },
+      "socket_0_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_1_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_2_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_3_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_4_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_5_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_6_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_7_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_0_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_1_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_2_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_3_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_4_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_5_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_6_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_7_state": {
+        "name": "Steckdose {socket} Zustand"
+      },
+      "socket_0_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_1_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_2_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_3_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_4_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_5_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_6_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_7_mode": {
+        "name": "Steckdose {socket} Modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_0_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_1_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_2_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_3_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_4_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_5_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_6_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_7_prev_mode": {
+        "name": "Steckdose {socket} vorheriger Modus"
+      },
+      "socket_0_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_1_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_2_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_3_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_4_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_5_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_6_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "socket_7_consumption": {
+        "name": "Steckdose {socket} Verbrauch"
+      },
+      "total_consumption": {
+        "name": "Gesamtverbrauch"
+      },
+      "connected_control_type": {
+        "name": "Typ des verbundenen Control"
+      },
+      "connected_control_status": {
+        "name": "Status des verbundenen Control"
+      },
+      "temperature_fusion": {
+        "name": "Fusionierte Temperatur"
+      },
+      "temperature_spread": {
+        "name": "Temperaturspanne"
+      },
+      "temperature_anomaly_source": {
+        "name": "Temperatur-Anomaliequelle",
+        "state": {
+          "ok": "OK",
+          "unknown": "Unbekannt",
+          "maintenance": "Wartung"
+        }
+      },
+      "probe_uid": {
+        "name": "UID von {probe}"
+      },
+      "weather_program": {
+        "name": "Wetterprogramm",
+        "state": {
+          "ok": "OK",
+          "error": "Fehler"
+        }
+      }
+    },
+    "switch": {
+      "acclimation": {
+        "name": "Akklimatisierung"
+      },
+      "auto_advance": {
+        "name": "Automatischer Vorschub"
+      },
+      "auto_fill": {
+        "name": "Automatische Befüllung"
+      },
+      "buzzer_enabled": {
+        "name": "Summer aktiviert"
+      },
+      "cloud_connect": {
+        "name": "Mit Cloud verbinden"
+      },
+      "device_state": {
+        "name": "Gerätestatus"
+      },
+      "dose_compensation": {
+        "name": "Dosiskompensation"
+      },
+      "enabled": {
+        "name": "Lecksensor aktiviert"
+      },
+      "fullcup_enabled": {
+        "name": "Voller-Behälter-Erkennung"
+      },
+      "maint_ato_ec_sensor_notify": {
+        "name": "EC-Sensor reinigen (Benachrichtigungen)"
+      },
+      "maint_ato_return_pump_notify": {
+        "name": "Rückförderpumpe reinigen (Benachrichtigungen)"
+      },
+      "maint_control_probe_calibration_orp_notify": {
+        "name": "Sonde {probe} prüfen (Benachrichtigungen)"
+      },
+      "maint_control_probe_calibration_ph_notify": {
+        "name": "Sonde {probe} kalibrieren (Benachrichtigungen)"
+      },
+      "maint_control_probe_calibration_ec_notify": {
+        "name": "Sonde {probe} kalibrieren (Benachrichtigungen)"
+      },
+      "maint_control_probe_clean_notify": {
+        "name": "Sonde {probe} reinigen (Benachrichtigungen)"
+      },
+      "maint_control_probe_replace_notify": {
+        "name": "Sonde {probe} ersetzen (Benachrichtigungen)"
+      },
+      "maint_dose_heads_calibration_notify": {
+        "name": "Dosierkopf kalibrieren (Benachrichtigungen)"
+      },
+      "maint_dose_heads_replace_notify": {
+        "name": "Dosierkopf und Schläuche ersetzen (Benachrichtigungen)"
+      },
+      "maint_led_fan_notify": {
+        "name": "Lüfter und Gitter entstauben (Benachrichtigungen)"
+      },
+      "maint_led_lens_notify": {
+        "name": "Linse reinigen (Benachrichtigungen)"
+      },
+      "maint_mat_carbon_replace_notify": {
+        "name": "Aktivkohle ersetzen (Benachrichtigungen)"
+      },
+      "maint_run_pump_motor_notify": {
+        "name": "Motor und Rotor reinigen (Benachrichtigungen)"
+      },
+      "maint_run_pump_strainer_notify": {
+        "name": "Ansaugsieb reinigen (Benachrichtigungen)"
+      },
+      "maint_run_skim_fullcup_calibration_notify": {
+        "name": "Fullcup-Sensor kalibrieren (Benachrichtigungen)"
+      },
+      "maint_run_skim_overskimming_calibration_notify": {
+        "name": "Überschäumungs-Sensor kalibrieren (Benachrichtigungen)"
+      },
+      "maint_run_skim_rotor_notify": {
+        "name": "Rotor der Abschäumerpumpe reinigen (Benachrichtigungen)"
+      },
+      "maint_run_skim_venturi_notify": {
+        "name": "Venturi und Luftschlauch reinigen (Benachrichtigungen)"
+      },
+      "maint_wave_rotor_cages_notify": {
+        "name": "Rotorkäfige reinigen (Benachrichtigungen)"
+      },
+      "maintenance": {
+        "name": "Wartung"
+      },
+      "moon_phase": {
+        "name": "Mondphase"
+      },
+      "overskimming_enabled": {
+        "name": "Überschäumung"
+      },
+      "port_on_off": {
+        "name": "Anschluss {port}"
+      },
+      "schedule_enabled": {
+        "name": "Zeitplan aktiviert"
+      },
+      "scheduled_advance": {
+        "name": "Geplanter Vorschub"
+      },
+      "sensor_controlled_switch": {
+        "name": "Sondengesteuerter Betrieb"
+      },
+      "shortcut_emergency": {
+        "name": "Verknüpfung Notfall"
+      },
+      "shortcut_feeding": {
+        "name": "Verknüpfung Fütterung"
+      },
+      "shortcut_maintenance": {
+        "name": "Verknüpfung Wartung"
+      },
+      "slm": {
+        "name": "Volumenregler"
+      },
+      "use_cloud_api": {
+        "name": "Cloud-API verwenden"
+      },
+      "socket_0_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_1_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_2_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_3_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_4_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_5_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_6_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "socket_7_on_off": {
+        "name": "Steckdose {socket} Schalter"
+      },
+      "probe_maintenance": {
+        "name": "Wartung {probe}"
+      },
+      "probe_buzzer": {
+        "name": "{probe} Summer"
+      },
+      "probe_enabled": {
+        "name": "{probe} aktiviert"
+      },
+      "probe_notify": {
+        "name": "{probe} Benachrichtigungen"
+      },
+      "temperature_notifications_enabled": {
+        "name": "Temperaturbenachrichtigungen aktiviert"
+      },
+      "temperature_log_enabled": {
+        "name": "Temperaturprotokollierung aktiviert"
+      },
+      "leak_buzzer_enabled": {
+        "name": "Leck-Summer"
+      },
+      "danger_buzzer_enabled": {
+        "name": "Gefahren-Summer"
+      },
+      "leak_detector_enabled": {
+        "name": "Leckdetektor"
+      },
+      "weather_sync": {
+        "name": "GPS-Wettermodus"
+      },
+      "weather_clouds": {
+        "name": "Wetterwolken"
+      },
+      "staggered_sunrise": {
+        "name": "Versetzter Sonnenaufgang"
+      }
+    },
+    "text": {
+      "new_supplement_brand_name": {
+        "name": "Markenname"
+      },
+      "new_supplement_display_name": {
+        "name": "Anzeigename des Nahrungsergänzungsmittels"
+      },
+      "new_supplement_name": {
+        "name": "Name des Nahrungsergänzungsmittels"
+      },
+      "new_supplement_short_name": {
+        "name": "Kurzname des Nahrungsergänzungsmittels"
+      },
+      "port_name": {
+        "name": "Port {port} Name"
+      },
+      "pump_name": {
+        "name": "Pumpenname"
+      },
+      "socket_0_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_1_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_2_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_3_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_4_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_5_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_6_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "socket_7_name": {
+        "name": "Steckdose {socket} Name"
+      },
+      "temperature_probe_name": {
+        "name": "Name der Temperatursonde"
+      },
+      "weather_location": {
+        "name": "Wetterort"
+      }
+    },
+    "time": {
+      "schedule_time": {
+        "name": "Zeitplanzeit"
+      },
+      "weather_sunrise": {
+        "name": "Wetter Sonnenaufgang"
+      },
+      "weather_sunset": {
+        "name": "Wetter Sonnenuntergang"
+      }
+    },
+    "update": {
+      "firmware_update": {
+        "name": "Firmware-Update"
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "wifi_change_success": "WLAN-Netzwerk erfolgreich geändert. Gerät erreichbar unter {new_ip}.",
+      "wifi_change_failed_connect": "Die neuen WLAN-Zugangsdaten konnten nicht an das Gerät gesendet werden.",
+      "wifi_change_failed_reset": "Das Gerät konnte nach dem Senden der neuen WLAN-Zugangsdaten nicht neu gestartet werden.",
+      "wifi_change_failed_rediscover": "Das Gerät wurde neu gestartet, konnte aber im Netzwerk nicht gefunden werden. Prüfen Sie, ob es {ssid} beigetreten ist, und konfigurieren Sie die IP bei Bedarf manuell neu.",
+      "wifi_change_failed_unknown": "Unerwarteter Fehler beim Ändern des WLAN-Netzwerks.",
+      "no_probes": "Dieser Hub hat keine Sonden zum Entfernen."
+    },
+    "error": {
+      "auth_failed": "Authentifizierung fehlgeschlagen, Anmeldedaten prüfen",
+      "wifi_scan_failed": "Konnte das Gerät nicht nach verfügbaren WLAN-Netzwerken abfragen.",
+      "wifi_no_networks": "Das Gerät meldet keine verfügbaren WLAN-Netzwerke.",
+      "wifi_no_ssid": "Bitte wählen Sie ein Netzwerk aus, bevor Sie absenden.",
+      "wifi_bad_cidr": "Kein gültiger IPv4-CIDR (erwartet z. B. 10.0.0.0/24).",
+      "wifi_manual_not_found": "Gerät auf diesem Subnetz nicht gefunden. Versuchen Sie einen anderen CIDR oder lassen Sie das Feld leer, um aufzugeben.",
+      "no_probe_detected": "Keine neue Sonde des gewählten Typs erkannt. In den Kopplungsmodus versetzen und erneut versuchen.",
+      "group_min_members": "Wählen Sie mindestens zwei LEDs.",
+      "group_duplicate_position": "Jede LED muss genau eine Position haben."
+    },
+    "progress": {
+      "applying": "Die neuen WLAN-Zugangsdaten werden gesendet und das Gerät im Netzwerk gesucht..."
+    },
+    "step": {
+      "init": {
+        "data": {
+          "live_config_update": "Live-Konfigurationsaktualisierung",
+          "disable_supplements": "Nahrungsergänzungsmittel deaktivieren",
+          "not_virtual": "Nicht konfigurierbar",
+          "slaves": "LED"
+        },
+        "menu_options": {
+          "settings": "Geräteeinstellungen",
+          "wifi_scan": "WLAN-Netzwerk ändern",
+          "add_probe": "Sonde hinzufügen",
+          "del_probe": "Sonde entfernen",
+          "change_probe": "Sonde ersetzen"
+        },
+        "title": "Konfiguration"
+      },
+      "settings": {
+        "data": {
+          "live_config_update": "Live-Konfigurationsaktualisierung",
+          "disable_supplements": "Nahrungsergänzungsmittel deaktivieren",
+          "intensity_compensation": "Intensitätskompensation",
+          "scan_interval": "Aktualisierungsintervall",
+          "not_virtual": "Nicht konfigurierbar",
+          "slaves": "LED"
+        },
+        "title": "Geräteeinstellungen"
+      },
+      "wifi_scan": {
+        "data": {
+          "wifi_ssid": "WLAN-Netzwerk",
+          "wifi_password": "Passwort",
+          "wifi_rescan": "Netzwerke erneut scannen"
+        },
+        "description": "Vom Gerät bei {ip} sichtbare Netzwerke: {count}. Wählen Sie eines aus und geben Sie das Passwort ein, oder aktivieren Sie „Netzwerke erneut scannen“ und senden Sie ab, um die Liste zu aktualisieren.",
+        "title": "WLAN-Netzwerk ändern"
+      },
+      "wifi_apply": {
+        "title": "WLAN-Netzwerk wird geändert"
+      },
+      "wifi_manual_subnet": {
+        "data": {
+          "wifi_manual_subnet": "Subnetz-CIDR"
+        },
+        "description": "Das Gerät ist {ssid} beigetreten, wurde jedoch in keinem der direkt an Home Assistant angebundenen Subnetze gefunden (versucht: {tried_subnets}). Wenn Sie wissen, in welchem Netzwerk das Gerät gelandet ist und Home Assistant es über einen Router erreichen kann, geben Sie hier den CIDR ein (z. B. 10.0.0.0/24). Lassen Sie das Feld leer und senden Sie ab, um aufzugeben.",
+        "title": "Gerät in einem anderen Subnetz suchen"
+      },
+      "add_probe": {
+        "title": "Sonde hinzufügen",
+        "description": "Versetzen Sie die Sonde in den Kopplungsmodus, wählen Sie den Typ und bestätigen Sie den Scan.",
+        "data": {
+          "probe_type": "Sondentyp"
+        }
+      },
+      "del_probe": {
+        "title": "Sonde entfernen",
+        "description": "Wählen Sie die zu entfernende(n) Sonde(n).",
+        "data": {
+          "probes": "Sonden"
+        }
+      },
+      "change_probe": {
+        "title": "Sonde ersetzen",
+        "description": "Wähle die zu ersetzende Sonde, versetze eine neue Sonde desselben Typs in den Kopplungsmodus und bestätige. Die neue Sonde übernimmt den Verlauf der alten.",
+        "data": {
+          "old_probe": "Zu ersetzende Sonde"
+        }
+      },
+      "del_probe_confirm": {
+        "title": "Entfernen bestätigen",
+        "description": "Dies entfernt die gewählte(n) Sonde(n) samt allen Entitäten und deren Verlauf dauerhaft: {probes}.\n\nBestätigen zum Fortfahren, oder Dialog schließen zum Abbrechen."
+      },
+      "group_members": {
+        "title": "LEDs der Gruppe",
+        "description": "Wählen Sie die ReefLEDs, die diese virtuelle LED gemeinsam steuert (mindestens zwei). Eine LED kann nur zu einer Gruppe gehören.",
+        "data": {
+          "members": "LEDs"
+        }
+      },
+      "group_order": {
+        "title": "Reihenfolge der LEDs",
+        "description": "Reihenfolge der LEDs in der Gruppe, wie in der ReefBeat-App: der versetzte Sonnenaufgang beginnt mit der ersten.",
+        "data": {
+          "position_1": "Position 1",
+          "position_2": "Position 2",
+          "position_3": "Position 3",
+          "position_4": "Position 4",
+          "position_5": "Position 5",
+          "position_6": "Position 6",
+          "position_7": "Position 7",
+          "position_8": "Position 8",
+          "position_9": "Position 9",
+          "position_10": "Position 10"
+        }
+      }
+    }
+  },
+  "selector": {
+    "add_type": {
+      "options": {
+        "cloud_api": "Cloud-Konto",
+        "local_detect": "Lokale Erkennung",
+        "manual_mode": "Manueller Modus",
+        "virtual_led": "Virtuelles LED"
+      }
+    },
+    "ip_address": {
+      "options": {
+        "virtual_led": "Virtuelles LED hinzufügen"
+      }
+    }
+  },
+  "title": "ReefBeat",
+  "services": {
+    "reset_maintenance": {
+      "name": "Wartung zurücksetzen",
+      "description": "Eine Wartungsaufgabe für ein Gerät oder Untergerät als gerade erledigt markieren.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zielgerät (oder Untergerät, z. B. RSDOSE-Kopf, RSRUN-Pumpe)."
+        },
+        "task_key": {
+          "name": "Aufgaben-Schlüssel",
+          "description": "Stabile Kennung der Wartungsaufgabe (z. B. 'ato_ec_sensor', 'run_skim_venturi', 'led_lens')."
+        }
+      }
+    },
+    "get_control_probes": {
+      "name": "Steuerungssonden abrufen",
+      "description": "Liefert die Sonden (Identität und aktuelle Werte) eines gekoppelten RSCONTROL-Hubs anhand seiner Hardware-ID.",
+      "fields": {
+        "hwid": {
+          "name": "Hardware-ID des Hubs",
+          "description": "Die Hardware-ID (hwid) des RSCONTROL-Hubs, wie sie im connected_device.hwid eines gekoppelten RSPower angegeben ist."
+        }
+      }
+    },
+    "probe_calibration": {
+      "name": "Sondenkalibrierung",
+      "description": "Führt einen Schritt der Kalibrierung einer pH- oder EC-Sonde des RSCONTROL aus: Start, Punkt, Status oder Ende.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der RSCONTROL-Hub (Konfigurationseintrag)."
+        },
+        "probe_type": {
+          "name": "Sondentyp",
+          "description": "Typ der zu kalibrierenden Sonde."
+        },
+        "probe_uid": {
+          "name": "Sonden-UID",
+          "description": "UID der Sonde, wie der Hub sie meldet."
+        },
+        "action": {
+          "name": "Schritt",
+          "description": "Kalibrierschritt."
+        },
+        "point": {
+          "name": "Punkt",
+          "description": "Kalibrierpunkt (Schritt „point“)."
+        },
+        "solution_value": {
+          "name": "Wert der Lösung",
+          "description": "Wert der Kalibrierlösung (pH oder mS/cm für EC)."
+        },
+        "solution_rated_temp": {
+          "name": "Bezugstemperatur der Lösung",
+          "description": "Temperatur, für die der Wert der Lösung gilt, in °C (nur pH)."
+        }
+      }
+    },
+    "led_convert": {
+      "name": "ReefLED-Farben umrechnen",
+      "description": "Rechnet Punkte einer G1-ReefLED zwischen Weiß/Blau und Kelvin/Intensität um, mit der Tabelle des Modells und der Intensitätskompensation.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der G1-ReefLED."
+        },
+        "points": {
+          "name": "Punkte",
+          "description": "Liste von Punkten, jeweils (kelvin, intensity) oder (white, blue)."
+        }
+      }
+    },
+    "led_library": {
+      "name": "ReefLED-Bibliothek auflisten",
+      "description": "Lichtprogramme der Cloud-Bibliothek des Aquariums der ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        }
+      }
+    },
+    "led_library_save": {
+      "name": "ReefLED-Programm in der Bibliothek speichern",
+      "description": "Fügt der Cloud-Bibliothek der ReefLED ein Lichtprogramm hinzu oder ändert eines.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name des Programms in der Bibliothek."
+        },
+        "program": {
+          "name": "Programm",
+          "description": "Tagesprogramm im Format der Lampe, auf der Zeitachse eines einzelnen Tages."
+        },
+        "clouds": {
+          "name": "Wolken",
+          "description": "Wolken des Programms (from, to, intensity), falls vorhanden."
+        },
+        "uid": {
+          "name": "Programm-ID",
+          "description": "Das zu ändernde Bibliotheksprogramm; leer lassen, um ein neues hinzuzufügen. Red-Sea-Programme können nicht geändert werden."
+        }
+      }
+    },
+    "led_library_delete": {
+      "name": "ReefLED-Bibliotheksprogramm löschen",
+      "description": "Löscht ein Programm des Benutzers aus der Cloud-Bibliothek der ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        },
+        "uid": {
+          "name": "Programm-ID",
+          "description": "Das zu löschende Bibliotheksprogramm (kein Red-Sea-Programm)."
+        }
+      }
+    },
+    "led_weather_apply": {
+      "name": "ReefLED-Wetter aktualisieren",
+      "description": "Ruft das Wetter erneut ab und sendet die Woche an eine ReefLED im GPS-Wettermodus.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        }
+      }
+    },
+    "led_weather_preview": {
+      "name": "Vorschau der Wetterwoche",
+      "description": "Erzeugt die Woche, die das Wetter jetzt ergäbe, und gibt sie mit der eigenen Woche der Lampe zurück, ohne etwas zu schreiben.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        },
+        "settings": {
+          "name": "Einstellungen",
+          "description": "Bearbeitete Wettereinstellungen, über den gespeicherten."
+        }
+      }
+    },
+    "led_weather_save": {
+      "name": "Wetterprogramm speichern",
+      "description": "Speichert die Wettereinstellungen und den Modus und schreibt die Lampe einmal: die Wetterwoche oder die eigene Woche zurück.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte-ID",
+          "description": "Der Konfigurationseintrag der ReefLED (oder virtuellen LED)."
+        },
+        "settings": {
+          "name": "Einstellungen",
+          "description": "Bearbeitete Wettereinstellungen, über den gespeicherten."
+        },
+        "enabled": {
+          "name": "Wettermodus",
+          "description": "Ob die Lampe dem Wetter folgt."
+        },
+        "wait": {
+          "name": "Auf die Lampe warten",
+          "description": "Erst antworten, wenn die Lampe geschrieben ist (standardmäßig wird die Woche gespeichert und angezeigt, dann im Hintergrund geschrieben)."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "group_member_unavailable": {
+      "message": "{group}: Aktion abgelehnt, diese LEDs sind nicht verfügbar: {members}. Es wurde nichts gesendet, die Gruppe bleibt synchron."
+    },
+    "group_channel_unavailable": {
+      "message": "{group} enthält G1- und G2-Lampen: Weiß und Blau können nicht für die ganze Gruppe eingestellt werden. Verwenden Sie Farbtemperatur und Intensität."
+    }
+  },
+  "issues": {
+    "group_no_cloud": {
+      "title": "{group}: kein ReefBeat-Cloud-Konto",
+      "description": "Die LEDs von {group} könnten auch in der ReefBeat-App gruppiert werden, aber es ist kein ReefBeat-Cloud-Konto eingerichtet, das sie auflistet. Ohne es existiert die Gruppe nur in Home Assistant: die App sieht sie nicht und kann ihre LEDs getrennt steuern.\n\nUm die Gruppe mit der App zu teilen, fügen Sie Ihr ReefBeat-Cloud-Konto hinzu (Einstellungen > Geräte & Dienste > Integration hinzufügen > Red Sea > Cloud API): dieses Problem verschwindet dann von selbst. Oder behalten Sie die Gruppe nur in Home Assistant.",
+      "fix_flow": {
+        "step": {
+          "keep_local": {
+            "title": "Gruppe nur in Home Assistant behalten",
+            "description": "Die Gruppe wird nicht in die ReefBeat-Cloud geschrieben. Sie können das Cloud-Konto später noch hinzufügen."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "Die Gruppe ist nicht geladen: versuchen Sie es erneut, sobald sie es ist."
+        }
+      }
+    },
+    "group_mixed_models": {
+      "title": "{group}: LEDs in der ReefBeat-App gruppiert",
+      "description": "{group} enthält LEDs mehrerer Modelle, die die ReefBeat-App nicht zusammen gruppieren kann: die App gruppiert nur LEDs eines Modells. Diese LEDs sind in der App noch gruppiert und würden getrennt von den anderen gesteuert: {leds}.\n\nHeben Sie ihre Gruppierung in der ReefBeat-App auf: die Gruppe existiert dann nur in Home Assistant (ihre Reihenfolge ist global).",
+      "fix_flow": {
+        "step": {
+          "ungroup": {
+            "title": "Gruppierung in der ReefBeat-App aufheben",
+            "description": "Die Gruppierung dieser LEDs wird in der ReefBeat-Cloud aufgehoben (die App zeigt sie getrennt). Home Assistant steuert sie weiterhin gemeinsam."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "Die Gruppe ist nicht geladen: versuchen Sie es erneut, sobald sie es ist."
+        }
+      }
+    },
+    "group_conflict": {
+      "title": "{group}: in Home Assistant und in der ReefBeat-App geändert",
+      "description": "Die LEDs, ihre Reihenfolge oder der versetzte Sonnenaufgang von {group} wurden seit der letzten Synchronisation sowohl in Home Assistant als auch in der ReefBeat-App geändert. Wählen Sie die Gruppe, die behalten werden soll.",
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Welche Gruppe behalten?",
+            "menu_options": {
+              "keep_home_assistant": "Die von Home Assistant (in die ReefBeat-Cloud geschrieben)",
+              "keep_reefbeat": "Die der ReefBeat-App (von Home Assistant übernommen)"
+            }
+          }
+        },
+        "abort": {
+          "group_not_loaded": "Die Gruppe ist nicht geladen: versuchen Sie es erneut, sobald sie es ist."
+        }
+      }
+    }
+  }
+}

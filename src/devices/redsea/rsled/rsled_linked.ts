@@ -1,9 +1,12 @@
 /**
- * Lamps driven by a virtual ReefLED: a vertical list of thumbnails, bottom
- * right of the view. Tapping one shows that lamp's own card.
+ * Lamps of a group: a vertical list of thumbnails, bottom right of the view,
+ * in the group order (top to bottom). Tapping one shows that lamp's own
+ * card. On a lamp of the group, the lamp itself is circled in red and cannot
+ * be tapped.
  *
- * The list comes from the `leds` attribute of the virtual lamp's
- * `linked_leds` sensor: [{hwid, name, model, g2, entry_id}, …].
+ * The list comes from the `leds` attribute of the `linked_leds` sensor of
+ * the virtual lamp, or of a lamp of the group: [{hwid, name, model, g2,
+ * entry_id}, …] (empty for a lamp alone: nothing is shown).
  *
  * Example mapping:
  *   linked: { name: "linked_leds", type: "rsled-linked", stateObj: null,
@@ -62,6 +65,14 @@ export class RSLedLinked extends RSLedElement {
     .lamp:hover {
       background: rgba(127, 127, 127, 0.15);
     }
+    .lamp.current {
+      cursor: default;
+      outline: 2px solid var(--error-color, #db4437);
+      outline-offset: -2px;
+    }
+    .lamp.current:hover {
+      background: none;
+    }
     .lamp img {
       width: 82%;
       height: auto;
@@ -82,9 +93,14 @@ export class RSLedLinked extends RSLedElement {
     return this.led?.linked?.() ?? [];
   }
 
+  /** Hardware id of the lamp whose card this is (none on a virtual LED). */
+  current(): string | null {
+    return this.led?.current_hwid?.() ?? null;
+  }
+
   /** Re-render only when the list changes. */
   protected override signature(): string {
-    return JSON.stringify(this.lamps());
+    return JSON.stringify(this.lamps()) + "|" + this.current();
   }
 
   /**
@@ -105,15 +121,17 @@ export class RSLedLinked extends RSLedElement {
   protected override _render(_style?: string): TemplateResult {
     const lamps = this.lamps();
     if (!lamps.length) return html``;
+    const current = this.current();
     return html`<div class="linked">
       ${lamps.map(
         (lamp) =>
           html`<div
-            class="lamp"
+            class="lamp ${lamp.hwid === current ? "current" : ""}"
             title="${lamp.name}${lamp.model ? ` (${lamp.model})` : ""}"
             @click=${(ev: Event) => {
               ev.stopPropagation();
-              this.show(lamp);
+              // This lamp's own card is the one shown
+              if (lamp.hwid !== current) this.show(lamp);
             }}
           >
             <img

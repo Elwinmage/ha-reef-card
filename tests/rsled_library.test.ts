@@ -9,6 +9,7 @@ import * as P from "../src/devices/redsea/rsled/rsled_program";
 import {
   RSLedProgramEditor,
   library_clouds,
+  pause,
 } from "../src/devices/redsea/rsled/rsled_program_editor";
 import { RSLed160 } from "../src/devices/redsea/rsled/rsled";
 
@@ -591,7 +592,7 @@ describe("RSLedProgramEditor: editing and deleting library programs", () => {
 });
 
 describe("RSLedProgramEditor: GPS weather mode", () => {
-  it("in weather mode the day the weather made is shown, read only", async () => {
+  it("in weather mode the day the weather made is shown, colours only", async () => {
     const led: any = makeLed();
     const sunny = {
       white: { rise: 420, set: 1140, points: [{ t: 300, i: 70 }] },
@@ -607,15 +608,26 @@ describe("RSLedProgramEditor: GPS weather mode", () => {
     const ed = await mountEditor(led);
     const root = ed.shadowRoot;
     expect(ed.program().white.rise).toBe(420);
-    // Nothing to edit
+    // A G1 shows the colours of the slots as colour temperatures
+    await vi.waitFor(() => expect(ed.mode).toBe("kelvin"));
+    ed._tick++;
+    await ed.updateComplete;
+    // Only the colour of each slot can be changed
     expect(
-      [...root.querySelectorAll("td input")].every((i: any) => i.disabled),
+      [...root.querySelectorAll("td input.time, td input.intensity")].every(
+        (i: any) => i.disabled,
+      ),
     ).toBe(true);
+    const kelvins = [...root.querySelectorAll("td input.kelvin")];
+    expect(kelvins.length).toBeGreaterThan(0);
+    expect(kelvins.every((i: any) => !i.disabled)).toBe(true);
+    expect(root.querySelector(".colours_hint")).not.toBeNull();
     expect(root.querySelector("button.add")).toBeNull();
     expect(root.querySelector("button.remove")).toBeNull();
     expect(root.querySelector(".library")).toBeNull();
     expect(root.querySelector(".save").disabled).toBe(true);
-    expect(root.querySelector(".all_days").disabled).toBe(true);
+    // The colours go to this day, or to every day
+    expect(root.querySelector(".all_days").disabled).toBe(false);
     expect(root.querySelector(".handle.locked")).not.toBeNull();
     await ed.save();
     expect(ed.naming).toBeNull();
@@ -1009,5 +1021,229 @@ describe("RSLedProgramEditor: GPS weather mode", () => {
     await ed.save();
     expect(ed.weather_draft).toBe(false);
     expect(led.hass.callService).not.toHaveBeenCalled();
+  });
+});
+
+describe("RSLedProgramEditor: weather colours, loading and pacing", () => {
+  /** A G2 lamp following the weather, its week previewed by the service. */
+  function weatherLed() {
+    const led: any = makeLed({ g2: true });
+    const day = {
+      color: {
+        rise: 600,
+        set: 1200,
+        points: [
+          { t: 0, i1: 0, k1: 12000, i2: 0, k2: 12000 },
+          { t: 300, i1: 80, k1: 15000, i2: 80, k2: 15000 },
+          { t: 600, i1: 0, k1: 20000, i2: 0, k2: 20000 },
+        ],
+      },
+    };
+    const entities: Record<string, any> = {
+      weather_sync: { entity_id: "switch.led_weather_sync", state: "on" },
+    };
+    led.get_entity = (key: string) => entities[key] ?? null;
+    const asked: any[] = [];
+    const callWS = led.hass.callWS;
+    led.hass.callWS = vi.fn(async (msg: any) => {
+      if (msg.service === "led_weather_preview") {
+        asked.push(msg.service_data);
+        return {
+          response: {
+            status: "ok",
+            days: [{ weekday: 1, program: day }],
+            settings: { anchor: "place", colors: {} },
+          },
+        };
+      }
+      return callWS(msg);
+    });
+    return { led, asked };
+  }
+
+  it("the weather being read covers the chart and the slots", async () => {
+    const { led } = weatherLed();
+    const ed = await mountEditor(led, "kelvin");
+    ed.preview_loading = true;
+    ed._tick++;
+    await ed.updateComplete;
+    const zone = ed.shadowRoot.querySelector(".body .loading_zone");
+    expect(zone.querySelector(".spinner")).not.toBeNull();
+    expect(zone.textContent).toContain("Reading the weather");
+    // Nothing to change meanwhile
+    expect(ed.colour_only()).toBe(false);
+    expect(ed.shadowRoot.querySelector(".all_days").disabled).toBe(true);
+    await vi.waitFor(() => expect(ed.weather_settings).not.toBeNull());
+  });
+
+  it("the colour of a slot becomes the weather day's colour", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const { led, asked } = weatherLed();
+    const ed = await mountEditor(led, "kelvin");
+    await vi.waitFor(() => expect(ed.preview_loading).toBe(false));
+    await ed.updateComplete;
+    expect(ed.colour_only()).toBe(true);
+    const root = ed.shadowRoot;
+    expect(root.querySelector(".colours_hint").textContent).toContain(
+      "only the colour",
+    );
+    const k = root.querySelectorAll("td input.kelvin")[1];
+    expect(k.disabled).toBe(false);
+    k.value = "17000";
+    k.dispatchEvent(new Event("change"));
+    // The slots' colours, from the rise (0) to the set (1)
+    const pts = ed.points.intensity;
+    const profile = ed.weather_settings.colors["1"];
+    expect(Object.keys(ed.weather_settings.colors)).toEqual(["1"]);
+    expect(profile.length).toBe(pts.length);
+    expect(profile[0].at).toBe(0);
+    expect(profile.at(-1).at).toBe(1);
+    expect(profile[1].k).toBe(17000);
+    expect(profile.map((p: any) => p.k)).toEqual(
+      pts.map((p: any) => p.k ?? 15000),
+    );
+    expect(ed.settings_dirty).toBe(true);
+    // Every day at once
+    ed._all_days = true;
+    ed.set_kelvin(0, 9000);
+    expect(Object.keys(ed.weather_settings.colors)).toEqual([
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+    ]);
+    expect(ed.weather_settings.colors["7"][0]).toEqual({ at: 0, k: 9000 });
+    // The week they make is previewed
+    await vi.advanceTimersByTimeAsync(RSLedProgramEditor.PREVIEW_DELAY_MS);
+    await vi.waitFor(() =>
+      expect(asked.at(-1)?.settings?.colors?.["7"]).toBeDefined(),
+    );
+    // A day without its slots: nothing to take
+    ed.points.intensity = [{ m: 600, i: 0, k: 12000 }];
+    const before = ed.weather_settings.colors;
+    ed._weather_colors();
+    expect(ed.weather_settings.colors).toBe(before);
+    ed.points.intensity = [];
+    ed._weather_colors();
+    // Out of weather mode, a colour stays the program's
+    ed.weather_draft = false;
+    ed.points.intensity = [
+      { m: 600, i: 0, k: 12000 },
+      { m: 1200, i: 0, k: 12000 },
+    ];
+    ed._channel = "intensity";
+    ed.set_kelvin(1, 15000);
+    expect(ed.weather_settings.colors).toBe(before);
+    // A slot at the same moment as the rise: at 0
+    ed.weather_draft = null;
+    ed.points.intensity = [
+      { m: 600, i: 0 },
+      { m: 600, i: 0, k: 14000 },
+    ];
+    ed._weather_colors();
+    expect(ed.weather_settings.colors["1"]).toEqual([
+      { at: 0, k: 15000 },
+      { at: 0, k: 14000 },
+    ]);
+  });
+
+  it("a program is written paced, its progress shown", async () => {
+    const led: any = makeLed({ linked: false });
+    const ed = await mountEditor(led);
+    const seen: any[] = [];
+    led.hass.callService = vi.fn(async () => {
+      seen.push({ ...ed.writing });
+      await ed.updateComplete;
+      if (seen.length === 1) {
+        const zone = ed.shadowRoot.querySelector(".loading_zone.writing");
+        seen.push(zone.textContent.replace(/\s+/g, " ").trim());
+        seen.push(zone.querySelector(".progress > div").style.width);
+      }
+    });
+    const pauses: number[] = [];
+    const timer = vi.spyOn(globalThis, "setTimeout").mockImplementation(((
+      fn: any,
+      ms: number,
+    ) => {
+      pauses.push(ms);
+      fn();
+      return 0;
+    }) as any);
+    RSLedProgramEditor.WRITE_DELAY_MS = 2000;
+    try {
+      await ed.write(null);
+    } finally {
+      RSLedProgramEditor.WRITE_DELAY_MS = 0;
+      timer.mockRestore();
+    }
+    // /auto/1 and /auto/apply, a pause between them
+    expect(led.hass.callService).toHaveBeenCalledTimes(2);
+    expect(pauses).toEqual([2000]);
+    expect(seen[0]).toEqual({ done: 0, total: 2 });
+    expect(seen[1]).toContain("0/2");
+    expect(seen[2]).toBe("0%");
+    expect(seen[3]).toEqual({ done: 1, total: 2 });
+    expect(ed.writing).toBeNull();
+    expect(ed.shadowRoot.querySelector(".loading_zone.writing")).toBeNull();
+    // Nothing to write: no progress
+    ed.writing = { done: 0, total: 0 };
+    ed._tick++;
+    await ed.updateComplete;
+    expect(
+      ed.shadowRoot.querySelector(".loading_zone.writing .progress > div").style
+        .width,
+    ).toBe("0%");
+    ed.writing = null;
+  });
+
+  it("pause() waits the time asked, nothing for 0", async () => {
+    vi.useFakeTimers();
+    let done = false;
+    const wait = pause(2000).then(() => {
+      done = true;
+    });
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await wait;
+    expect(done).toBe(true);
+    await pause(0);
+  });
+});
+
+describe("RSLedProgramEditor: edge cases of the new helpers", () => {
+  it("weather colours without slots nor settings yet", async () => {
+    const ed = await mountEditor(makeLed({ g2: true }), "kelvin");
+    ed.points.intensity = undefined;
+    ed._weather_colors();
+    expect(ed.weather_settings).toBeNull();
+    ed.weather_settings = null;
+    ed.points.intensity = [
+      { m: 600, i: 0, k: 12000 },
+      { m: 1200, i: 0 },
+    ];
+    ed._weather_colors();
+    expect(ed.weather_settings.colors["1"]).toEqual([
+      { at: 0, k: 12000 },
+      { at: 1, k: 15000 },
+    ]);
+  });
+
+  it("a mode switch finished after another program was loaded is dropped", async () => {
+    const ed = await mountEditor(makeLed(), "wb");
+    await ed.set_mode("kelvin");
+    expect(ed.mode).toBe("kelvin");
+    const to_wb = ed.set_mode("wb");
+    ed._loaded++;
+    await to_wb;
+    expect(ed.mode).toBe("kelvin");
+    ed.mode = "wb";
+    const to_k = ed.set_mode("kelvin");
+    ed._loaded++;
+    await to_k;
+    expect(ed.mode).toBe("wb");
   });
 });

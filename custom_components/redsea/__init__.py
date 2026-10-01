@@ -1,0 +1,1103 @@
+"""Red Sea ReefBeat integration.
+
+This module is responsible for:
+- Creating the right coordinator for each config entry (cloud or local devices)
+- Storing coordinators in `hass.data[DOMAIN]`
+- Forwarding config entries to platform(s)
+- Registering integration services
+"""
+
+from __future__ import annotations
+
+import json  # pyright: ignore[reportUnusedImport]  # noqa: F401
+import logging
+import re
+from contextlib import suppress
+from pathlib import Path
+from typing import Any, cast
+
+from homeassistant.components.frontend import add_extra_js_url
+
+try:
+    # Home Assistant 2025.2+ exposes it from the http.server submodule.
+    from homeassistant.components.http.server import StaticPathConfig
+except ImportError:  # pragma: no cover - depends on the installed HA version
+    # Older Home Assistant kept StaticPathConfig in the package root.
+    from homeassistant.components.http import (
+        StaticPathConfig,  # pyright: ignore[reportPrivateImportUsage]
+    )
+import homeassistant.helpers.config_validation as cv
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+    callback,
+)
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.event import async_call_later, async_track_time_change
+from homeassistant.helpers.typing import ConfigType
+from homeassistant.util import dt as dt_util
+from homeassistant.util.json import JsonValueType
+
+from .const import (
+    CONFIG_FLOW_CLOUD_USERNAME,
+    CONFIG_FLOW_HW_MODEL,
+    CONFIG_FLOW_IP_ADDRESS,
+    CONF_GROUP_MEMBERS,
+    DOMAIN,
+    HW_ATO_IDS,
+    HW_CONTROL_IDS,
+    HW_DOSE_IDS,
+    HW_G1_LED_IDS,
+    HW_G2_LED_IDS,
+    HW_MAT_IDS,
+    HW_POWER_IDS,
+    HW_RUN_IDS,
+    HW_WAVE_IDS,
+    LINKED_LED,
+    PLATFORMS,
+    REFRESH_DEVICE_DELAY,
+    SIGNAL_GROUP_MEMBER_GONE,
+    SIGNAL_GROUP_MEMBER_READY,
+    VIRTUAL_LED,
+)
+from .coordinator import (
+    ReefATOCoordinator,
+    ReefBeatCloudCoordinator,
+    ReefBeatCoordinator,
+    ReefControlCoordinator,
+    ReefDoseCoordinator,
+    ReefLedCoordinator,
+    ReefLedG2Coordinator,
+    ReefMatCoordinator,
+    ReefPowerCoordinator,
+    ReefRunCoordinator,
+    ReefVirtualLedCoordinator,
+    ReefWaveCoordinator,
+)
+from .groups import GroupStore, members_from_legacy
+from .led_weather import (
+    WEATHER_SETTLE_SECONDS,
+    WEATHER_SHOW_SECONDS,
+    WeatherStore,
+    preview_weather,
+    publish_weather,
+    run_weather,
+    save_weather,
+)
+from .maintenance import MaintenanceStore, register_led_tasks
+from .reefbeat.cloud import InvalidAuth
+from .reefbeat.control import ReefControlAPI
+
+_LOGGER = logging.getLogger(__name__)
+
+
+_HEAD_NAME_RE = re.compile(r"^(?P<prefix>.+)_head_(?P<head>\d+)$")
+
+
+async def _migrate_head_device_names(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Migrate ReefDose per-head device display names.
+
+    This only updates the registry `name` when the user hasn't set a custom name.
+    """
+    device_registry = dr.async_get(hass)
+    for device_entry in dr.async_entries_for_config_entry(
+        device_registry, entry.entry_id
+    ):
+        name = getattr(device_entry, "name", None)
+        if not isinstance(name, str) or "_head_" not in name:
+            continue
+
+        # Don't override user customizations.
+        if getattr(device_entry, "name_by_user", None):
+            continue
+
+        match = _HEAD_NAME_RE.match(name)
+        if not match:
+            continue
+
+        new_name = f"{match.group('prefix')} head {match.group('head')}"
+
+        _LOGGER.debug(
+            "Migrating head device name: %s -> %s (device_id=%s)",
+            name,
+            new_name,
+            device_entry.id,
+        )
+        device_registry.async_update_device(device_entry.id, name=new_name)
+
+
+# =============================================================================
+# Helpers
+# =============================================================================
+
+
+def _build_coordinator(hass: HomeAssistant, entry: ConfigEntry) -> ReefBeatCoordinator:
+    """Create the correct coordinator for a local (non-cloud) device entry.
+
+    Raises:
+        ValueError: If the hardware model / configuration is unsupported.
+    """
+    ip = entry.data[CONFIG_FLOW_IP_ADDRESS]
+    hw = entry.data[CONFIG_FLOW_HW_MODEL]
+
+    if isinstance(ip, str) and ip.startswith(VIRTUAL_LED):
+        return ReefVirtualLedCoordinator(hass, entry)
+
+    if hw in HW_G1_LED_IDS:
+        return ReefLedCoordinator(hass, entry)
+    if hw in HW_G2_LED_IDS:
+        return ReefLedG2Coordinator(hass, entry)
+    if hw in HW_DOSE_IDS:
+        return ReefDoseCoordinator(hass, entry)
+    if hw in HW_MAT_IDS:
+        return ReefMatCoordinator(hass, entry)
+    if hw in HW_ATO_IDS:
+        return ReefATOCoordinator(hass, entry)
+    if hw in HW_RUN_IDS:
+        return ReefRunCoordinator(hass, entry)
+    if hw in HW_WAVE_IDS:
+        return ReefWaveCoordinator(hass, entry)
+    if hw in HW_POWER_IDS:
+        return ReefPowerCoordinator(hass, entry)
+    if hw in HW_CONTROL_IDS:
+        return ReefControlCoordinator(hass, entry)
+
+    raise ValueError(f"Unsupported hardware model or configuration: ip={ip} hw={hw}")
+
+
+# Config entry lifecycle
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up a config entry.
+
+    Creates a coordinator, runs its setup, stores it into hass.data, and forwards
+    entity platforms.
+    """
+    _LOGGER.debug(
+        "async_setup_entry: entry_id='%s', data='%s'",
+        entry.entry_id,
+        entry.data,
+    )
+
+    try:
+        if CONFIG_FLOW_CLOUD_USERNAME in entry.data:
+            coordinator: ReefBeatCloudCoordinator | ReefBeatCoordinator = (
+                ReefBeatCloudCoordinator(hass, entry)
+            )
+        else:
+            coordinator = _build_coordinator(hass, entry)
+    except Exception:
+        _LOGGER.exception(
+            "Failed to create coordinator for entry_id=%s", entry.entry_id
+        )
+        return False
+
+    try:
+        await coordinator.async_setup()
+    except InvalidAuth:
+        # Wrong cloud credentials: retrying cannot fix them, and retrying a
+        # login in a loop could get the account locked.
+        _LOGGER.exception("Cloud authentication failed for entry_id=%s", entry.entry_id)
+        _release(coordinator)
+        return False
+    except Exception as err:
+        # Usually the device is unreachable (powered off, rebooting, Wi-Fi
+        # down). ConfigEntryNotReady makes Home Assistant retry with backoff,
+        # so the entry recovers on its own once the device is back; returning
+        # False would leave it in setup_error until reloaded by hand. The
+        # traceback is kept at debug level: Home Assistant only logs the
+        # message, which would hide a genuine bug behind endless retries.
+        _LOGGER.debug("Setup of %s failed", entry.title, exc_info=True)
+        # The next attempt builds a fresh coordinator: drop this one's
+        # event-bus listeners, or each retry would leave one more behind.
+        _release(coordinator)
+        raise ConfigEntryNotReady(f"Failed to set up {entry.title}: {err}") from err
+
+    # Per-entry persistent storage for user-driven maintenance tasks.
+    # Loaded eagerly so platforms read fully-populated state at setup time.
+    maintenance_store = MaintenanceStore(hass, entry.entry_id)
+    await maintenance_store.async_load()
+    # Attach to the coordinator so platforms find it without going through
+    # hass.data again; also keeps the lifecycle tied to the entry.
+    coordinator.maintenance = maintenance_store  # type: ignore[attr-defined]
+
+    # ReefLED: settings of the week program following the weather of a place
+    if isinstance(coordinator, ReefLedCoordinator):
+        weather_store = WeatherStore(hass, entry.entry_id)
+        await weather_store.async_load()
+        coordinator.weather = weather_store  # type: ignore[attr-defined]
+
+        @callback
+        def _weather_tick(_now: Any) -> None:
+            """Every night, fetch the weather again when it is due.
+
+            A lamp of a group uses its group's weather program (see
+            ReefLedCoordinator.weather): the group runs it for all its lamps.
+            """
+            if coordinator.weather is not weather_store:
+                return
+            if weather_store.due(dt_util.now().date()):
+                hass.async_create_task(run_weather(hass, coordinator))
+
+        entry.async_on_unload(
+            async_track_time_change(hass, _weather_tick, hour=0, minute=10, second=0)
+        )
+
+        # A changed setting shows its new week at once, and sends it once
+        # the user is done (the settings are often changed one after the
+        # other)
+        pending: dict[str, Any] = {}
+
+        @callback
+        def _weather_show(_now: Any) -> None:
+            pending.pop("show", None)
+            hass.async_create_task(publish_weather(hass, coordinator))
+
+        @callback
+        def _weather_now(_now: Any) -> None:
+            pending.pop("cancel", None)
+            hass.async_create_task(run_weather(hass, coordinator))
+
+        def _cancel(key: str) -> None:
+            cancel = pending.pop(key, None)
+            if cancel is not None:
+                cancel()
+
+        @callback
+        def _weather_changed(_key: str) -> None:
+            _cancel("show")
+            _cancel("cancel")
+            pending["show"] = async_call_later(
+                hass, WEATHER_SHOW_SECONDS, _weather_show
+            )
+            pending["cancel"] = async_call_later(
+                hass, WEATHER_SETTLE_SECONDS, _weather_now
+            )
+
+        weather_store.on_settings_change = _weather_changed
+
+        @callback
+        def _weather_unload() -> None:
+            _cancel("show")
+            _cancel("cancel")
+
+        entry.async_on_unload(_weather_unload)
+
+    # Group (virtual LED): staggered sunrise and offsets written to the lamps
+    if isinstance(coordinator, ReefVirtualLedCoordinator):
+        group_store = GroupStore(hass, entry.entry_id)
+        await group_store.async_load()
+        coordinator.group_store = group_store
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+
+    # Before the platforms build their entities, so a leak probe keeps its
+    # entity_id (hence history) across the unique_id fix.
+    if isinstance(coordinator, ReefControlCoordinator):
+        with suppress(Exception):
+            _migrate_leak_unique_ids(hass, entry, coordinator)
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Presence: the group this device belongs to (if any) follows it now
+    async_dispatcher_send(hass, SIGNAL_GROUP_MEMBER_READY, entry.entry_id)
+    # A group whose members or order changed writes its offsets again
+    if isinstance(coordinator, ReefVirtualLedCoordinator):
+        coordinator.async_reconcile_staggered()
+
+    # After a probe is removed (via the options flow, which reloads the entry),
+    # its entities are no longer rebuilt but linger in the registry — drop them.
+    if isinstance(coordinator, ReefControlCoordinator):
+        with suppress(Exception):
+            _purge_orphan_probe_entities(hass, entry, coordinator)
+
+    # Entities this version no longer builds would linger as "no longer
+    # provided" — drop them.
+    if isinstance(coordinator, (ReefControlCoordinator, ReefPowerCoordinator)):
+        with suppress(Exception):
+            _purge_retired_entities(hass, entry, coordinator)
+
+    # Best-effort cosmetic migration; doesn't affect identifiers or entities.
+    with suppress(Exception):
+        await _migrate_head_device_names(hass, entry)
+
+    entry.async_on_unload(entry.add_update_listener(update_listener))
+    return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Migrate a config entry to the current version.
+
+    1.1 -> 1.2: a virtual LED keeps its members as an ordered list of entry
+    ids (CONF_GROUP_MEMBERS) instead of the "linked" mapping, whose keys
+    embedded the model and the title of each LED.
+    """
+    if entry.version > 1:
+        # Written by a newer version of the integration: cannot be read
+        return False
+    if entry.minor_version < 2:
+        data = dict(entry.data)
+        if LINKED_LED in data:
+            data[CONF_GROUP_MEMBERS] = members_from_legacy(data.pop(LINKED_LED) or {})
+            _LOGGER.info(
+                "Migrated %s to an ordered group of %d LEDs",
+                entry.title,
+                len(data[CONF_GROUP_MEMBERS]),
+            )
+        hass.config_entries.async_update_entry(entry, data=data, minor_version=2)
+    return True
+
+
+def _release(coordinator: Any) -> None:
+    """Best-effort teardown of a coordinator that will not be used."""
+    with suppress(Exception):
+        coordinator.unload()
+
+
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update by reloading the entry."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
+def _rename_probe_entities(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    coordinator: ReefControlCoordinator,
+    old_type: str,
+    old_uid: str,
+    new_uid: str,
+) -> int:
+    """Move an old probe's registry entities onto a new probe's uid.
+
+    Used when *replacing* a probe: the entity_id (hence history/statistics)
+    carries over because Home Assistant reuses a registry entry whose
+    ``unique_id`` matches the newly-built entity. Returns how many were renamed.
+    Collisions (target unique_id already present) are skipped.
+    """
+    from . import probe_entities as pe
+    from .const import CONFIG_FLOW_HW_MODEL
+    from .maintenance import PROBE_SCOPES, tasks_for
+
+    hw_model = str(entry.data.get(CONFIG_FLOW_HW_MODEL, ""))
+    probe_task_keys = {
+        task.key for task in tasks_for(hw_model) if task.applies_to_sub in PROBE_SCOPES
+    }
+    serial = coordinator.serial
+    registry = er.async_get(hass)
+    renamed = 0
+    for ent in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        new_unique_id = pe.rename_unique_id(
+            ent.unique_id, serial, old_type, old_uid, new_uid, probe_task_keys
+        )
+        if not new_unique_id or new_unique_id == ent.unique_id:
+            continue
+        if registry.async_get_entity_id(ent.domain, ent.platform, new_unique_id):
+            continue  # target already exists — do not collide
+        registry.async_update_entity(ent.entity_id, new_unique_id=new_unique_id)
+        renamed += 1
+    return renamed
+
+
+def _migrate_leak_unique_ids(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: ReefControlCoordinator
+) -> None:
+    """Move leak probe entities onto their typed unique_id.
+
+    See ``probe_entities.legacy_leak_key``. When the new unique_id is
+    already registered, the legacy entry is a leftover and is dropped.
+    """
+    from . import probe_entities as pe
+
+    leak_uid_keys = {
+        pe.sanitise_uid(p["uid"])
+        for p in coordinator.list_probes()
+        if p["type"].lower() == "leak"
+    }
+    if not leak_uid_keys:
+        return
+    serial_prefix = f"{coordinator.serial}_"
+    registry = er.async_get(hass)
+    for ent in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        if not ent.unique_id.startswith(serial_prefix):
+            continue
+        new_key = pe.legacy_leak_key(ent.unique_id[len(serial_prefix) :], leak_uid_keys)
+        if new_key is None:
+            continue
+        new_unique_id = serial_prefix + new_key
+        if registry.async_get_entity_id(ent.domain, ent.platform, new_unique_id):
+            registry.async_remove(ent.entity_id)
+        else:
+            registry.async_update_entity(ent.entity_id, new_unique_id=new_unique_id)
+
+
+def _purge_orphan_probe_entities(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: ReefControlCoordinator
+) -> None:
+    """Remove registry entities of probes that no longer exist on the hub.
+
+    Covers both a probe's direct entities (``probe_{type}_{uid}_…``) and its
+    per-probe maintenance instances (``{task_key}…_{sub_id}``). After a delete
+    the fresh dashboard no longer lists that probe, so neither is rebuilt; this
+    drops the leftovers. Guarded so a failed dashboard fetch (no probe data at
+    all) never wipes every probe entity.
+    """
+    from . import probe_entities as pe
+    from .const import CONFIG_FLOW_HW_MODEL
+    from .maintenance import PROBE_SCOPES, tasks_for
+
+    dashboard = coordinator.get_data(
+        "$.sources[?(@.name=='/dashboard')].data", is_None_possible=True
+    )
+    if not isinstance(dashboard, dict) or "probes" not in dashboard:
+        return  # no reliable probe snapshot → do not purge
+
+    probes = coordinator.list_probes()
+    valid_prefixes = {pe.probe_key_prefix(p["type"], p["uid"]) for p in probes}
+    current_sub_ids: set[int] = set()
+    for p in probes:
+        try:
+            current_sub_ids.add(pe.probe_sub_id(p["uid"]))
+        except (ValueError, TypeError):
+            pass
+
+    hw_model = str(entry.data.get(CONFIG_FLOW_HW_MODEL, ""))
+    probe_task_keys = {
+        task.key for task in tasks_for(hw_model) if task.applies_to_sub in PROBE_SCOPES
+    }
+
+    serial_prefix = f"{coordinator.serial}_"
+    registry = er.async_get(hass)
+    for ent in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if not ent.unique_id.startswith(serial_prefix):
+            continue
+        key = ent.unique_id[len(serial_prefix) :]
+        orphan = False
+        if key.startswith("probe_"):
+            orphan = pe.is_orphan_probe_entity(key, valid_prefixes)
+        else:
+            sub = pe.maintenance_probe_sub_id(key, probe_task_keys)
+            orphan = sub is not None and sub not in current_sub_ids
+        if orphan:
+            _LOGGER.info("Removing orphaned probe entity %s", ent.entity_id)
+            registry.async_remove(ent.entity_id)
+
+
+# unique_id keys (after ``{serial}_``) of entities no longer built:
+# the calibration offsets, replaced by the calibration against a reference
+# value (``probe_{type}_{uid}_calibration``, ``temperature_calibration``).
+_RETIRED_ENTITY_KEYS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"^probe_(temperature|orp)_[0-9a-z]+_offset$"),
+    re.compile(r"^temperature_offset$"),
+)
+
+
+def _purge_retired_entities(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: Any
+) -> None:
+    """Remove the registry entries of entities no longer built."""
+    serial_prefix = f"{coordinator.serial}_"
+    registry = er.async_get(hass)
+    for ent in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        if not ent.unique_id.startswith(serial_prefix):
+            continue
+        key = ent.unique_id[len(serial_prefix) :]
+        if any(pattern.match(key) for pattern in _RETIRED_ENTITY_KEYS):
+            _LOGGER.info("Removing retired entity %s", ent.entity_id)
+            registry.async_remove(ent.entity_id)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: dr.DeviceEntry
+) -> bool:
+    """Allow deleting a device from the UI only once no entities are left on it.
+
+    Devices still in use keep refusing deletion. Empty ones - e.g. the
+    pre-v2.0.0 RSRUN pump sub-devices whose entities moved to the new-format
+    sub-devices - can then be removed without deleting the whole entry.
+    """
+    ent_reg = er.async_get(hass)
+    return not er.async_entries_for_device(
+        ent_reg, device_entry.id, include_disabled_entities=True
+    )
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry and its platforms."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if not unload_ok:
+        return False
+
+    coordinator = hass.data[DOMAIN].pop(entry.entry_id, None)
+    # Presence: the group this device belongs to (if any) lets it go
+    async_dispatcher_send(hass, SIGNAL_GROUP_MEMBER_GONE, entry.entry_id)
+    if coordinator is not None:
+        # Cancel the DataUpdateCoordinator's internal Debouncer timer.
+        # Try async_shutdown() first (HA 2024.x+), then fall back to
+        # directly cancelling _debounced_refresh (older HA versions).
+        with suppress(Exception):
+            await coordinator.async_shutdown()
+        with suppress(Exception):
+            if hasattr(coordinator, "_debounced_refresh"):
+                coordinator._debounced_refresh.async_cancel()
+        # coordinator may provide additional unload() cleanup (best-effort)
+        with suppress(Exception):
+            coordinator.unload()
+
+    return True
+
+
+# Frontend resources
+_FRONTEND_DIR = Path(__file__).parent / "frontend"
+_ICONS_JS_URL = f"/{DOMAIN}/frontend/redsea-icons.js"
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema("redsea")
+
+
+# Services
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the integration (register services and frontend resources)."""
+
+    # RSLED hw ids share the same maintenance task list; register them once
+    # at integration setup so const.py stays the single source of truth.
+    register_led_tasks(HW_G1_LED_IDS + HW_G2_LED_IDS)
+
+    # Serve the frontend/ directory as a static path and register the icon JS
+    if hass.http:
+        await hass.http.async_register_static_paths(
+            [
+                StaticPathConfig(
+                    f"/{DOMAIN}/frontend", str(_FRONTEND_DIR), cache_headers=False
+                )
+            ]
+        )
+        add_extra_js_url(hass, _ICONS_JS_URL, es5=False)
+        _LOGGER.debug("Registered custom icon set at %s", _ICONS_JS_URL)
+
+    @callback
+    async def handle_request(call: ServiceCall) -> ServiceResponse:
+        """Handle the `redsea.request` service call."""
+        device_id = call.data.get("device_id")
+        if not isinstance(device_id, str):
+            return {"error": "Invalid device_id"}
+
+        device = hass.data.get(DOMAIN, {}).get(device_id)
+        if device is None:
+            return {"error": "Device not enabled"}
+
+        access_path = call.data.get("access_path")
+        method = call.data.get("method")
+
+        if not isinstance(access_path, str) or not isinstance(method, str):
+            return {"error": "Invalid access_path or method"}
+
+        try:
+            if method == "get":
+                r = await device.my_api.http_get(access_path)
+            else:
+                data: Any = call.data.get("data")
+                _LOGGER.debug(
+                    "Service request: device_id=%s path=%s method=%s data=%s",
+                    device_id,
+                    access_path,
+                    method,
+                    data,
+                )
+                r = await device.my_api.http_send(access_path, data, method)
+
+        except Exception:
+            _LOGGER.exception(
+                "Service request failed: device_id=%s path=%s method=%s",
+                device_id,
+                access_path,
+                method,
+            )
+            return {"error": "request failed"}
+
+        _LOGGER.debug("REQUEST RESPONSE %s", r)
+
+        if not r:
+            title = getattr(device, "title", getattr(device, "_title", device_id))
+            return {"error": f"can not access to device {title}"}
+
+        # An accepted write is already mirrored in the cache when the API
+        # knows it (optimistic update, see ReefBeatAPI._mirror_write): show
+        # it now rather than after the settle delay below.
+        if r.get("ok") and method != "get":
+            device.async_update_listeners()
+
+        # Debug-friendly structured response (matches reefbeat.api.HttpResult)
+        resp: dict[str, Any] = {
+            "ok": bool(r.get("ok")),
+            "status": int(r.get("status", 0)),
+            "reason": str(r.get("reason", "")),
+            "method": str(r.get("method", "")),
+            "url": str(r.get("url", "")),
+            "elapsed_ms": int(r.get("elapsed_ms", 0)),
+            "headers": dict(r.get("headers", {})),
+        }
+
+        if "json" in r:
+            resp["json"] = r.get("json")
+        else:
+            resp["text"] = r.get("text", "")
+        # The coordinator is always re-read before returning, so a caller
+        # never sees the data it just replaced. `refresh` chooses which
+        # sources and `wait` how long to let the device settle first: several
+        # endpoints acknowledge a write before they serve the new value back.
+        # Both default to the long-standing behaviour.
+        kind = call.data.get("refresh")
+        wait = call.data.get("wait", REFRESH_DEVICE_DELAY)
+        try:
+            wait = max(0, int(wait))
+        except (TypeError, ValueError):
+            wait = REFRESH_DEVICE_DELAY
+        await device.async_request_refresh(
+            config=kind is None or str(kind).lower() == "config", wait=wait
+        )
+        return resp
+
+    _LOGGER.debug("Registering service redsea.request")
+    hass.services.async_register(
+        DOMAIN, "request", handle_request, supports_response=SupportsResponse.OPTIONAL
+    )
+
+    @callback
+    async def handle_clean_message(call: ServiceCall) -> ServiceResponse:
+        """Handle the service action call."""
+        device_id = call.data.get("device_id")
+
+        if device_id not in hass.data[DOMAIN]:
+            return {"error": "Device not enabled"}
+        device = hass.data[DOMAIN][device_id]
+        type_msg = call.data.get("msg_type")
+        device.clean_message(type_msg)
+
+    _LOGGER.debug(f"clean_message service REGISTERED {config}")
+    hass.services.async_register(
+        DOMAIN,
+        "clean_message",
+        handle_clean_message,
+        supports_response=SupportsResponse.NONE,
+    )
+
+    @callback
+    async def handle_reset_maintenance(call: ServiceCall) -> ServiceResponse:
+        """Mark a maintenance task as just-done for the targeted device.
+
+        Parameters
+        ----------
+        device_id : str
+            HA device registry id. May be a main device or a sub-device
+            (RSDOSE head, RSRUN pump); the helper resolves the parent and
+            the sub_id (head/pump index) accordingly.
+        task_key : str
+            Stable task key as declared in maintenance.TASKS.
+        """
+        device_id = call.data.get("device_id")
+        task_key = call.data.get("task_key")
+        if not isinstance(device_id, str) or not isinstance(task_key, str):
+            return {"error": "device_id and task_key are required strings"}
+
+        dev_reg = dr.async_get(hass)
+        ha_device = dev_reg.async_get(device_id)
+        if ha_device is None:
+            return {"error": "Unknown device_id"}
+
+        # Resolve the redsea identifier "<serial>" or "<serial>_head_N" /
+        # "<serial>_pump_N" from the device's identifiers tuple.
+        serial: str | None = None
+        sub_id = 0
+        for domain, ident in ha_device.identifiers:
+            if domain != DOMAIN:
+                continue
+            # Sub-device identifier: <serial>_head_<n> or <serial>_pump_<n>
+            for kind in ("head", "pump"):
+                token = f"_{kind}_"
+                if token in ident:
+                    base, _, tail = ident.rpartition(token)
+                    if tail.isdigit():
+                        serial = base
+                        sub_id = int(tail)
+                        break
+            else:
+                serial = ident
+            if serial:
+                break
+
+        if serial is None:
+            return {"error": "Device is not part of redsea"}
+
+        # Locate the coordinator owning this serial (any entry_id).
+        coordinator = None
+        for entry_data in hass.data.get(DOMAIN, {}).values():
+            if getattr(entry_data, "serial", None) == serial:
+                coordinator = entry_data
+                break
+        if coordinator is None:
+            return {"error": f"No active coordinator for serial '{serial}'"}
+
+        store: MaintenanceStore | None = getattr(coordinator, "maintenance", None)
+        if store is None:
+            return {"error": "Maintenance store unavailable"}
+
+        now = await store.async_reset(serial, sub_id, task_key)
+        return {"reset_at": now.isoformat(), "serial": serial, "sub_id": sub_id}
+
+    _LOGGER.debug("Registering service redsea.reset_maintenance")
+    hass.services.async_register(
+        DOMAIN,
+        "reset_maintenance",
+        handle_reset_maintenance,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+
+    @callback
+    async def handle_probe_calibration(call: ServiceCall) -> ServiceResponse:
+        """Run one step of a RSCONTROL pH or EC probe's calibration.
+
+        Addressed like `redsea.request` (config entry id). Steps: `enter`,
+        `point` (with `point`, `solution_value` and, for pH,
+        `solution_rated_temp`), `status` (returns the calibration status to
+        poll) and `exit`. See ReefControlAPI.probe_calibration.
+        """
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefControlCoordinator):
+            return {"ok": False, "error": "Not a RSCONTROL hub"}
+        ptype = call.data.get("probe_type")
+        uid = call.data.get("probe_uid")
+        action = call.data.get("action")
+        if not isinstance(ptype, str) or not isinstance(uid, str) or not uid:
+            return {"ok": False, "error": "probe_type and probe_uid are required"}
+        if action not in ReefControlAPI.CALIBRATION_ACTIONS:
+            return {"ok": False, "error": f"unknown action {action!r}"}
+        try:
+            return await device.async_probe_calibration(
+                action,
+                ptype,
+                uid,
+                call.data.get("point"),
+                call.data.get("solution_value"),
+                call.data.get("solution_rated_temp"),
+            )
+        except Exception:
+            _LOGGER.exception(
+                "Probe calibration %s failed on %s/%s", action, ptype, uid
+            )
+            return {"ok": False, "error": "request failed"}
+
+    _LOGGER.debug("Registering service redsea.probe_calibration")
+    hass.services.async_register(
+        DOMAIN,
+        "probe_calibration",
+        handle_probe_calibration,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+
+    def _find_control_coordinator(hwid: str) -> ReefControlCoordinator | None:
+        """Return the RSCONTROL coordinator whose hardware id is `hwid`."""
+        for entry_data in hass.data.get(DOMAIN, {}).values():
+            if (
+                isinstance(entry_data, ReefControlCoordinator)
+                and entry_data.model_id == hwid
+            ):
+                return entry_data
+        return None
+
+    @callback
+    async def handle_get_control_probes(call: ServiceCall) -> ServiceResponse:
+        """Return a RSCONTROL hub's probes (identity + current values), by hwid.
+
+        Meant for a RSPower device's card to look up the probes of the
+        RSCONTROL hub it is paired with (RSPower only knows that hub's
+        hwid, from its own `/dashboard.connected_device.hwid`) — not a
+        Home Assistant device_id, which the card would have to resolve
+        separately and which doesn't apply across two different devices.
+
+        Served from the coordinator's own cached `/dashboard.probes` (same
+        shape as the hub's own `GET /probes/dashboard`, confirmed on a real
+        RSCONTROLPRO) rather than an extra live fetch — RSCONTROL already
+        polls this on its normal refresh cycle, so it's no less fresh than
+        any of its own entities.
+        """
+        hwid = call.data.get("hwid")
+        if not isinstance(hwid, str) or not hwid:
+            return {"error": "hwid is required"}
+
+        coordinator = _find_control_coordinator(hwid)
+        if coordinator is None:
+            return {"error": f"No RSCONTROL hub found for hwid '{hwid}'"}
+
+        probes = coordinator.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.probes", is_None_possible=True
+        )
+        return {"hwid": hwid, "probes": probes if isinstance(probes, list) else []}
+
+    _LOGGER.debug("Registering service redsea.get_control_probes")
+    hass.services.async_register(
+        DOMAIN,
+        "get_control_probes",
+        handle_get_control_probes,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    @callback
+    async def handle_get_control_subscriptions(
+        call: ServiceCall,
+    ) -> ServiceResponse:
+        """Return the rules a RSCONTROL hub applies to sockets, by hwid.
+
+        A RSPower socket in sensor mode is configured on both devices: the
+        RSPower only stores which probe *type* it follows, while the hub
+        keeps the rule itself — the exact probe (uid, as two probes may
+        share a type), sub-sensor and thresholds — under the RSPower socket
+        number. The card reads them back through this service to show the
+        socket's real configuration, addressed like `get_control_probes`.
+
+        Fetched live from the hub's `GET /subscription-info` rather than
+        from the coordinator cache: it is not part of the polled sources,
+        and the card calls it right after writing a rule, so a cached copy
+        would show the previous one.
+
+        Response: `{hwid, external: [...], internal: [...]}` where
+        `external` holds one rule per RSPower socket
+        (`{number, type, uid, sensor, is_above, value, hysteresis,
+        trigger_op, last_sock_op}`) and `internal` the hub's own ports.
+        """
+        hwid = call.data.get("hwid")
+        if not isinstance(hwid, str) or not hwid:
+            return {"error": "hwid is required"}
+
+        coordinator = _find_control_coordinator(hwid)
+        if coordinator is None:
+            return {"error": f"No RSCONTROL hub found for hwid '{hwid}'"}
+
+        try:
+            r = await coordinator.my_api.http_get("/subscription-info")
+        except Exception:
+            _LOGGER.exception("Cannot read /subscription-info from hub %s", hwid)
+            return {"error": "request failed"}
+
+        data = r.get("json") if r and r.get("ok") else None
+        if not isinstance(data, dict):
+            return {"error": f"can not read the subscriptions of hub '{hwid}'"}
+
+        external = data.get("external")
+        internal = data.get("internal")
+        return {
+            "hwid": hwid,
+            "external": external if isinstance(external, list) else [],
+            "internal": internal if isinstance(internal, list) else [],
+        }
+
+    _LOGGER.debug("Registering service redsea.get_control_subscriptions")
+    hass.services.async_register(
+        DOMAIN,
+        "get_control_subscriptions",
+        handle_get_control_subscriptions,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    @callback
+    async def handle_led_convert(call: ServiceCall) -> ServiceResponse:
+        """Convert G1 ReefLED points between white/blue and kelvin/intensity.
+
+        The card edits G1 programs either channel by channel or as
+        intensity + colour temperature. The conversion depends on the model
+        (LEDS_CONV table) and on the intensity compensation option of the
+        entry: rather than duplicating both, the card asks the lamp's own
+        API object, the one its light entities already use.
+
+        Each point is either `{kelvin, intensity}` or `{white, blue}`; every
+        answer carries all four values, in the same order.
+        """
+        device_id = call.data.get("device_id")
+        device = hass.data.get(DOMAIN, {}).get(device_id)
+        if not isinstance(device, ReefLedCoordinator) or isinstance(
+            device, (ReefLedG2Coordinator, ReefVirtualLedCoordinator)
+        ):
+            return {"error": "Not a G1 ReefLED"}
+
+        points = call.data.get("points")
+        if not isinstance(points, list):
+            return {"error": "points must be a list"}
+
+        api = device.my_api
+        result: list[JsonValueType] = []
+        for point in points:
+            if not isinstance(point, dict):
+                result.append({})
+                continue
+            if "kelvin" in point:
+                raw = api.kelvin_to_white_and_blue(
+                    point.get("kelvin"), int(point.get("intensity", 100))
+                )
+            else:
+                raw = api.white_and_blue_to_kelvin(
+                    point.get("white"), point.get("blue")
+                )
+            result.append(
+                {key: raw.get(key) for key in ("kelvin", "intensity", "white", "blue")}
+            )
+        return {"points": result}
+
+    async def handle_led_library(call: ServiceCall) -> ServiceResponse:
+        """List the cloud light programs of a ReefLED's aquarium.
+
+        The card's program editor offers them when the lamp is linked to a
+        ReefBeat cloud account (a virtual LED uses its first linked lamp).
+        """
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        programs = device.light_library()
+        if programs is None:
+            return {"linked": False, "programs": []}
+        return {"linked": True, "programs": cast(list[JsonValueType], programs)}
+
+    async def handle_led_library_save(call: ServiceCall) -> ServiceResponse:
+        """Add a light program to a ReefLED's cloud library, or update one.
+
+        With a `uid`, the user's program is updated (a Red Sea program cannot
+        be); without, a new one is added.
+        """
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        name = call.data.get("name")
+        program = call.data.get("program")
+        clouds = call.data.get("clouds")
+        if not isinstance(name, str) or not name.strip():
+            return {"error": "name is required"}
+        if not isinstance(program, dict):
+            return {"error": "program must be an object"}
+        if device.library_link() is None:
+            return {"error": "Not linked to a ReefBeat cloud account"}
+        uid = call.data.get("uid")
+        if uid is not None and not isinstance(uid, str):
+            return {"error": "uid must be a string"}
+        if uid is not None:
+            entry = device.library_program(uid)
+            if entry is None:
+                return {"error": "Program not found"}
+            if entry.get("default"):
+                return {"error": "Red Sea programs cannot be edited"}
+        saved = await device.save_light_program(
+            name.strip(),
+            cast(dict[str, Any], program),
+            cast(dict[str, Any], clouds) if isinstance(clouds, dict) else None,
+            uid,
+        )
+        return {"uid": saved}
+
+    async def handle_led_library_delete(call: ServiceCall) -> ServiceResponse:
+        """Delete one of the user's programs from a ReefLED's cloud library."""
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        if device.library_link() is None:
+            return {"error": "Not linked to a ReefBeat cloud account"}
+        uid = call.data.get("uid")
+        if not isinstance(uid, str) or not uid:
+            return {"error": "uid is required"}
+        entry = device.library_program(uid)
+        if entry is None:
+            return {"error": "Program not found"}
+        if entry.get("default"):
+            return {"error": "Red Sea programs cannot be deleted"}
+        return {"deleted": await device.delete_light_program(uid)}
+
+    async def handle_led_weather_apply(call: ServiceCall) -> ServiceResponse:
+        """Fetch the weather again and send the week now (weather mode only)."""
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        return cast(dict[str, JsonValueType], await run_weather(hass, device))
+
+    hass.services.async_register(
+        DOMAIN,
+        "led_weather_apply",
+        handle_led_weather_apply,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+
+    async def handle_led_weather_preview(call: ServiceCall) -> ServiceResponse:
+        """The week the weather would make, and the lamp's own: nothing is
+        written (the card's editor shows it before its Save)."""
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        settings = call.data.get("settings")
+        return cast(
+            dict[str, JsonValueType],
+            await preview_weather(
+                hass,
+                device,
+                settings=settings if isinstance(settings, dict) else None,
+            ),
+        )
+
+    hass.services.async_register(
+        DOMAIN,
+        "led_weather_preview",
+        handle_led_weather_preview,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def handle_led_weather_save(call: ServiceCall) -> ServiceResponse:
+        """Save the weather settings and mode, and write the lamp once."""
+        device = hass.data.get(DOMAIN, {}).get(call.data.get("device_id"))
+        if not isinstance(device, ReefLedCoordinator):
+            return {"error": "Not a ReefLED"}
+        settings = call.data.get("settings")
+        return cast(
+            dict[str, JsonValueType],
+            await save_weather(
+                hass,
+                device,
+                settings if isinstance(settings, dict) else None,
+                bool(call.data.get("enabled")),
+                bool(call.data.get("wait")),
+            ),
+        )
+
+    hass.services.async_register(
+        DOMAIN,
+        "led_weather_save",
+        handle_led_weather_save,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+
+    _LOGGER.debug("Registering services redsea.led_library(_save)")
+    hass.services.async_register(
+        DOMAIN,
+        "led_library",
+        handle_led_library,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "led_library_save",
+        handle_led_library_save,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "led_library_delete",
+        handle_led_library_delete,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+
+    _LOGGER.debug("Registering service redsea.led_convert")
+    hass.services.async_register(
+        DOMAIN,
+        "led_convert",
+        handle_led_convert,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    return True

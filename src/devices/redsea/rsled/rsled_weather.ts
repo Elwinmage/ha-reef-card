@@ -63,6 +63,11 @@ export interface WeatherSettings {
   sunset?: string;
   clouds?: boolean;
   refresh_days?: number;
+  /**
+   * Colours of the weather days, per weekday ("1".."7"): from the rise
+   * (at 0) to the set (at 1), colour temperatures (see the editor)
+   */
+  colors?: Record<string, { at: number; k: number }[]>;
 }
 
 export const WEATHER_PERIODS = ["next_week", "last_week"];

@@ -91,3 +91,11 @@ if (
     set() {},
   });
 }
+
+// The lamps of the tests answer at once: no pause between the requests
+// written by the ReefLED program editor
+beforeAll(async () => {
+  const editor =
+    await import("../src/devices/redsea/rsled/rsled_program_editor");
+  editor.RSLedProgramEditor.WRITE_DELAY_MS = 0;
+});

@@ -1,0 +1,753 @@
+"""Constants for the Red Sea ReefBeat integration.
+
+This module contains:
+- Integration identifiers and config keys
+- Hardware model identifiers
+- Default scan intervals / timeouts
+- JSONPath strings used to read device data
+- Static lookup tables used by platforms (LED conversions, wave types, etc.)
+"""
+
+from __future__ import annotations
+
+from typing import Any, Final, TypedDict
+
+# -----------------------------------------------------------------------------
+# Platforms
+# -----------------------------------------------------------------------------
+
+try:
+    from homeassistant.const import Platform
+
+    PLATFORMS: Final[list[Platform]] = [
+        Platform.BINARY_SENSOR,
+        Platform.BUTTON,
+        Platform.LIGHT,
+        Platform.NUMBER,
+        Platform.SELECT,
+        Platform.SENSOR,
+        Platform.SWITCH,
+        Platform.TEXT,
+        Platform.TIME,
+        Platform.UPDATE,
+    ]
+except Exception:  # pragma: no cover
+    # Allow importing this module outside of Home Assistant.
+    PLATFORMS = []  # type: ignore[assignment]
+
+# -----------------------------------------------------------------------------
+# Integration / config keys
+# -----------------------------------------------------------------------------
+
+# =============================================================================
+# Constants
+# =============================================================================
+
+DOMAIN: Final[str] = "redsea"
+
+DEVICE_MANUFACTURER: Final[str] = "Red Sea"
+CONF_FLOW_PLATFORM: Final[str] = "platform"
+MODEL_NAME: Final[str] = "hw_model"
+MODEL_ID: Final[str] = "hwid"
+HW_VERSION: Final[str] = "hw_revision"
+SW_VERSION: Final[str] = "version"
+
+CLOUD_SERVER_ADDR: Final[str] = "cloud.reef-beat.com"
+
+CONFIG_FLOW_IP_ADDRESS: Final[str] = "ip_address"
+
+CONFIG_FLOW_ADD_TYPE: Final[str] = "add_type"
+ADD_CLOUD_API: Final[str] = "cloud_api"
+ADD_LOCAL_DETECT: Final[str] = "local_detect"
+ADD_MANUAL_MODE: Final[str] = "manual_mode"
+VIRTUAL_LED: Final[str] = "virtual_led"
+
+ADD_TYPES: Final[tuple[str, ...]] = (
+    ADD_CLOUD_API,
+    ADD_LOCAL_DETECT,
+    ADD_MANUAL_MODE,
+    VIRTUAL_LED,
+)
+
+# CLOUD
+CONFIG_FLOW_CLOUD_USERNAME: Final[str] = "username"
+CONFIG_FLOW_CLOUD_PASSWORD: Final[str] = "password"
+# Cloud server, asked only with the local .simulator_enabled flag file: a
+# simulator answering the same API over HTTPS
+CONFIG_FLOW_CLOUD_SERVER: Final[str] = "cloud_server"
+CONFIG_FLOW_DISABLE_SUPPLEMENT: Final[str] = "disable_supplements"
+CLOUD_SCAN_INTERVAL: Final[int] = 600
+CLOUD_DEVICE_TYPE: Final[str] = "Smartphone App"
+CLOUD_AUTH_TIMEOUT: Final[int] = 2700  # seconds => 45m
+
+CONFIG_FLOW_CLOUD_ACCOUNT: Final[str] = "cloud_account"
+CONFIG_FLOW_HW_MODEL: Final[str] = "hw_model"
+CONFIG_FLOW_SCAN_INTERVAL: Final[str] = "scan_interval"
+CONFIG_FLOW_INTENSITY_COMPENSATION: Final[str] = "intensity_compensation"
+CONFIG_FLOW_CONFIG_TYPE: Final[str] = "live_config_update"
+
+SCAN_INTERVAL: Final[int] = 120  # seconds
+DO_NOT_REFRESH_TIME: Final[int] = 2  # seconds
+
+REFRESH_DEVICE_DELAY: Final[int] = (
+    2  # Time to wait for device to take data refresh into account
+)
+
+# A socket schedule is stored, not applied: the strip acknowledges the PUT
+# before the new programme shows up on its config endpoint, so reading back
+# too early returns the previous one.
+SCHEDULE_REFRESH_DELAY: Final[int] = 3  # seconds
+# Switching a pump to (or from) sensor control makes it ramp to a new speed:
+# wait a bit longer before reading /dashboard back
+SENSOR_CONTROLLED_REFRESH_DELAY: Final[int] = 3
+# Pairing/unpairing a BLE probe (RSPower's local temperature probe) takes a
+# moment to settle before /dashboard reports it — same rationale as the
+# schedule/sensor-control delays above.
+PROBE_REFRESH_DELAY: Final[int] = 3
+DEFAULT_TIMEOUT: Final[int] = 20
+
+HTTP_MAX_RETRY: Final[int] = 5
+HTTP_DELAY_BETWEEN_RETRY: Final[int] = 2
+
+# Budget for the one-time connectivity probe in `get_initial_data()` (the
+# device-info fetch that gates the whole entry setup). Deliberately much
+# smaller than HTTP_MAX_RETRY/DEFAULT_TIMEOUT: an unreachable device (e.g.
+# unplugged) fails identically on retry 1 as on retry 5, so burning the full
+# resilience budget here only blocks Home Assistant's startup longer for no
+# benefit — a transient blip still gets a fresh attempt shortly after via
+# ConfigEntryNotReady's own retry-with-backoff.
+INITIAL_PROBE_MAX_RETRY: Final[int] = 2
+INITIAL_PROBE_TIMEOUT: Final[int] = 5
+
+# -----------------------------------------------------------------------------
+# Wi-Fi provisioning (options flow)
+# -----------------------------------------------------------------------------
+
+# Options-flow menu entries
+OPTIONS_MENU_SETTINGS: Final[str] = "settings"
+OPTIONS_MENU_WIFI: Final[str] = "wifi_scan"
+OPTIONS_MENU_ADD_PROBE: Final[str] = "add_probe"
+OPTIONS_MENU_DEL_PROBE: Final[str] = "del_probe"
+OPTIONS_MENU_CHANGE_PROBE: Final[str] = "change_probe"
+# Probe types the RSCONTROL hub can install (matches the ReefBeat app).
+CONFIG_FLOW_PROBE_TYPE: Final[str] = "probe_type"
+CONFIG_FLOW_PROBES: Final[str] = "probes"
+CONFIG_FLOW_OLD_PROBE: Final[str] = "old_probe"
+CONTROL_PROBE_TYPES: Final[tuple[str, ...]] = (
+    "temperature",
+    "ph",
+    "ec",
+    "orp",
+    "ato",
+    "leak",
+)
+
+# Form field keys used by the Wi-Fi steps of the options flow
+CONFIG_FLOW_WIFI_SSID: Final[str] = "wifi_ssid"
+CONFIG_FLOW_WIFI_PASSWORD: Final[str] = "wifi_password"
+CONFIG_FLOW_WIFI_RESCAN: Final[str] = "wifi_rescan"
+# Manual subnet fallback: presented when neither the default subnet nor
+# any of the locally-attached subnets contained the device after reboot.
+CONFIG_FLOW_WIFI_MANUAL_SUBNET: Final[str] = "wifi_manual_subnet"
+
+# Timing budget for the Wi-Fi provisioning sequence.
+# The overall wait is at least: POST_CONNECT_WAIT + POST_RESET_WAIT
+#   + REDISCOVER_MAX_ATTEMPTS * REDISCOVER_INTERVAL   (worst case).
+WIFI_SCAN_TIMEOUT: Final[int] = 15  # seconds — HTTP timeout for GET /wifi/scan
+WIFI_CONNECT_TIMEOUT: Final[int] = 10  # seconds — HTTP timeout for POST /wifi/connect
+WIFI_RESET_TIMEOUT: Final[int] = 5  # seconds — HTTP timeout for POST /reset
+WIFI_POST_CONNECT_WAIT: Final[int] = 5  # seconds between /wifi/connect and /reset
+WIFI_POST_RESET_WAIT: Final[int] = 20  # seconds waited after /reset before rediscovery
+WIFI_REDISCOVER_MAX_ATTEMPTS: Final[int] = 6
+WIFI_REDISCOVER_INTERVAL: Final[int] = 10  # seconds between rediscovery attempts
+
+# -----------------------------------------------------------------------------
+# Hardware model identifiers
+# -----------------------------------------------------------------------------
+
+HW_G1_LED_IDS: Final[tuple[str, ...]] = ("RSLED50", "RSLED90", "RSLED160")
+HW_G2_LED_IDS: Final[tuple[str, ...]] = ("RSLED60", "RSLED115", "RSLED170")
+
+HW_LED_IDS: Final[tuple[str, ...]] = HW_G1_LED_IDS + HW_G2_LED_IDS
+
+HW_DOSE_IDS: Final[tuple[str, ...]] = ("RSDOSE2", "RSDOSE4")
+HW_MAT_IDS: Final[tuple[str, ...]] = ("RSMAT",)
+HW_MAT_MODEL: Final[tuple[str, ...]] = ("RSMAT250", "RSMAT500", "RSMAT1200")
+HW_ATO_IDS: Final[tuple[str, ...]] = ("RSATO+",)
+HW_RUN_IDS: Final[tuple[str, ...]] = ("RSRUN",)
+HW_WAVE_IDS: Final[tuple[str, ...]] = ("RSWAVE25", "RSWAVE45")
+
+# ReefControl smart power center (AC sockets)
+HW_POWER_IDS: Final[tuple[str, ...]] = ("RSPOWER6", "RSPOWER8")
+# ReefControl hub (ReefSense probes + 12V DC ports)
+HW_CONTROL_IDS: Final[tuple[str, ...]] = ("RSCONTROLPRO", "RSCONTROLLITE")
+
+HW_DEVICES_IDS: Final[tuple[str, ...]] = (
+    HW_LED_IDS
+    + HW_DOSE_IDS
+    + HW_MAT_IDS
+    + HW_RUN_IDS
+    + HW_ATO_IDS
+    + HW_WAVE_IDS
+    + HW_POWER_IDS
+    + HW_CONTROL_IDS
+)
+
+# -----------------------------------------------------------------------------
+# Common JSONPath names
+# -----------------------------------------------------------------------------
+
+JsonPath = str
+
+COMMON_ON_OFF_SWITCH: Final[JsonPath] = "$.sources[?(@.name=='/mode')].data.mode"
+COMMON_CLOUD_CONNECTION: Final[JsonPath] = "$.sources[?(@.name=='/cloud')].data.enabled"
+COMMON_MAINTENANCE_SWITCH: Final[JsonPath] = "$.sources[?(@.name=='/mode')].data.mode"
+
+# -----------------------------------------------------------------------------
+# REEFLED
+# -----------------------------------------------------------------------------
+
+LED_SCAN_INTERVAL: Final[int] = 120  # seconds
+
+LED_WHITE_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/manual')].data.white"
+LED_BLUE_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/manual')].data.blue"
+LED_MOON_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/manual')].data.moon"
+LED_INTENSITY_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/manual')].data.intensity"
+)
+LED_KELVIN_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/manual')].data.kelvin"
+)
+
+LED_ACCLIMATION_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/acclimation')].data.enabled"
+)
+LED_MOONPHASE_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/moonphase')].data.enabled"
+)
+
+LED_MOON_DAY_INTERNAL_NAME: Final[JsonPath] = "$.local.moonphase.moon_day"
+LED_ACCLIMATION_DURATION_INTERNAL_NAME: Final[JsonPath] = "$.local.acclimation.duration"
+LED_ACCLIMATION_INTENSITY_INTERNAL_NAME: Final[JsonPath] = (
+    "$.local.acclimation.start_intensity_factor"
+)
+
+LED_MANUAL_DURATION_INTERNAL_NAME: Final[JsonPath] = "$.local.manual_duration"
+
+DAILY_PROG_INTERNAL_NAME: Final[JsonPath] = "$.local.daily_prog"
+
+LED_CONVERSION_COEF: Final[float] = 100 / 255
+
+
+# =============================================================================
+# Classes
+# =============================================================================
+
+
+class LedConv(TypedDict):
+    name: str
+    kelvin: list[int]
+    white_blue: list[int]
+
+
+LEDS_CONV: Final[list[LedConv]] = [
+    {
+        "name": "RSLED160",
+        "kelvin": [9000, 12000, 15000, 20000, 23000],
+        "white_blue": [200, 125, 100, 50, 10],
+    },
+    {
+        "name": "RSLED90",
+        "kelvin": [9000, 12000, 15000, 20000, 23000],
+        "white_blue": [200, 134, 100, 50, 10],
+    },
+    {
+        "name": "RSLED50",
+        "kelvin": [9000, 12000, 15000, 20000, 23000],
+        "white_blue": [200, 100, 50, 25, 5],
+    },
+    {"name": "RSLED60", "kelvin": [], "white_blue": []},
+    {"name": "RSLED115", "kelvin": [], "white_blue": []},
+    {"name": "RSLED170", "kelvin": [], "white_blue": []},
+]
+
+
+class LedIntensityComp(TypedDict):
+    name: str
+    intensity: list[int]
+    white_blue: list[int]
+
+
+LEDS_INTENSITY_COMPENSATION: Final[list[LedIntensityComp]] = [
+    {
+        "name": "RSLED160",
+        "intensity": [10320, 14300, 17240, 20575, 23100, 22260, 20190, 18070, 13370],
+        "white_blue": [200, 170, 150, 125, 100, 75, 50, 30, 0],
+    }
+]
+
+LED_MODE_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/mode')].data.mode"
+LED_MODES: Final[tuple[str, ...]] = ("auto", "timer", "manual")
+
+EVENT_KELVIN_LIGHT_UPDATED: Final[str] = "Kelvin_light_updated"
+EVENT_WB_LIGHT_UPDATED: Final[str] = "Kelvin_wb_updated"
+
+# -----------------------------------------------------------------------------
+# Virtual LED
+# -----------------------------------------------------------------------------
+
+VIRTUAL_LED_MAX_WAITING_TIME: Final[int] = 15
+# Legacy (config entry minor version 1) storage of the linked LEDs: a dict
+# keyed by "LED-<model>-: <title> (<entry_id>)". Migrated to CONF_GROUP_MEMBERS.
+LINKED_LED: Final[str] = "linked"
+VIRTUAL_LED_SCAN_INTERVAL: Final[int] = 10  # seconds
+
+# -----------------------------------------------------------------------------
+# Device groups (virtual LED, later virtual wave)
+# -----------------------------------------------------------------------------
+
+# Ordered list of the config entry ids of the group members. The order is
+# the group order (staggered sunrise position, like group_index in the app).
+CONF_GROUP_MEMBERS: Final[str] = "members"
+# Options flow: one field per position when ordering the members
+CONF_GROUP_POSITION: Final[str] = "position_"
+GROUP_MIN_MEMBERS: Final[int] = 2
+
+# Dispatcher signals: a device entry is loaded / unloaded (arg: entry_id)
+SIGNAL_GROUP_MEMBER_READY: Final[str] = f"{DOMAIN}_group_member_ready"
+SIGNAL_GROUP_MEMBER_GONE: Final[str] = f"{DOMAIN}_group_member_gone"
+
+# LED sources a group drives as a whole: a write to one of them on a member
+# is applied to every member. Anything else (name, Wi-Fi, cloud, firmware,
+# identify, reset...) stays on the member it was made on.
+LED_GROUP_SOURCES: Final[tuple[str, ...]] = (
+    "/manual",
+    "/mode",
+    "/timer",
+    "/acclimation",
+    "/moonphase",
+    "/auto",
+    "/preset_name",
+    "/clouds",
+)
+# Local (not yet pushed) LED values a group shares, "$.local.<key>..."
+LED_GROUP_LOCAL_KEYS: Final[tuple[str, ...]] = (
+    "manual_trick",
+    "manual_duration",
+    "acclimation",
+    "moonphase",
+)
+# Staggered sunrise: each lamp of a group starts its day `delay` minutes after
+# the previous one (GET/POST /offset {"offset": minutes}, POST replaces it).
+# The app offers 1..15 minutes, 10 by default; offset = delay * position.
+LED_OFFSET_SOURCE: Final[str] = "/offset"
+LED_OFFSET_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/offset')].data.offset"
+)
+LED_OFFSET_MAX: Final[int] = 240  # minutes
+STAGGERED_DELAY_MIN: Final[int] = 1
+STAGGERED_DELAY_MAX: Final[int] = 15
+STAGGERED_DELAY_DEFAULT: Final[int] = 10
+# Persistent state of a group (staggered sunrise, offsets written)
+GROUP_STORE_VERSION: Final[int] = 1
+GROUP_STORE_KEY_TPL: Final[str] = DOMAIN + ".group.{entry_id}"
+# Kelvin/intensity: G1 keeps them locally, G2 in /manual
+LED_G1_KI_PATH: Final[str] = "$.local.manual_trick"
+LED_G2_KI_PATH: Final[str] = "$.sources[?(@.name=='/manual')].data"
+LED_KI_KEYS: Final[tuple[str, ...]] = ("kelvin", "intensity")
+
+# -----------------------------------------------------------------------------
+# REEFMAT
+# -----------------------------------------------------------------------------
+
+MAT_SCAN_INTERVAL: Final[int] = 300  # seconds
+MAT_MIN_ROLL_DIAMETER: Final[float] = 4.0
+# NOTE: keeping original constant name for compatibility (typo is in original name).
+MAT_MAX_ROLL_DIAMETERS: Final[dict[str, float]] = {
+    "RSMAT1200": 11.1,
+    "RSMAT500": 10.0,
+    "RSMAT250": 10.6,
+}
+MAT_ROLL_THICKNESS: Final[float] = 0.0237
+
+MAT_AUTO_ADVANCE_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.auto_advance"
+)
+MAT_SCHEDULE_ADVANCE_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.schedule_enable"
+)
+
+MAT_CUSTOM_ADVANCE_VALUE_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.custom_advance_value"
+)
+MAT_STARTED_ROLL_DIAMETER_INTERNAL_NAME: Final[JsonPath] = (
+    "$.local.started_roll_diameter"
+)
+
+MAT_MODEL_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.model"
+)
+MAT_POSITION_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.position"
+)
+
+# -----------------------------------------------------------------------------
+# REEFDOSE
+# -----------------------------------------------------------------------------
+
+DOSE_SCAN_INTERVAL: Final[int] = 120  # seconds
+# DOSE_MANUAL_DOSEE_INTERNAL_NAME="$.local.head.<head_nb>.manual_dose"
+
+# -----------------------------------------------------------------------------
+# REEFATO
+# -----------------------------------------------------------------------------
+
+ATO_SCAN_INTERVAL: Final[int] = 20  # seconds
+
+# `auto_fill` lives only on `/configuration` -- it is absent from `/dashboard`,
+# confirmed against the Red Sea app, whose dashboard parser never reads it.
+# That is why the RSATO declares `/configuration` as a polled "data" source
+# (see reefbeat/ato.py): otherwise this switch would go stale as soon as
+# anyone touched auto-fill from the Red Sea app.
+ATO_AUTO_FILL_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.auto_fill"
+)
+ATO_VOLUME_LEFT_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.volume_left"
+)
+
+# The leak alarm buzzer of the RSATO+, which the firmware exposes twice: as
+# `buzzer.enabled` on `/configuration` and as `leak_sensor.buzzer_enabled` on
+# `/dashboard`. The setting is written to the former -- the Red Sea app PUTs
+# `{"buzzer": {"enabled": <bool>}}` there, per
+# `ATODevice$Keys$Configuration$Buzzer` in the Android app -- but read from the
+# latter, because `/dashboard` is polled on every cycle while `/configuration`
+# is a config source: without `live_config_update` it is fetched once at
+# startup and then only on demand, so a change made in the Red Sea app would
+# not show up here for hours.
+#
+# Reading and writing therefore use different endpoints on purpose. The switch
+# entity updates this cache itself on toggle, and the next `/dashboard` poll
+# confirms it from the device.
+ATO_BUZZER_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.leak_sensor.buzzer_enabled"
+)
+
+# The leak probe's own arming flag, exposed the same way as the buzzer above:
+# written as `leak.sensor_enabled` on `/configuration`
+# (`ATODevice$Keys$Configuration$Leak` in the Android app), reported as
+# `leak_sensor.enabled` on the polled `/dashboard`. The app's cloud heartbeat
+# maps `AtoLeakConfiguration.isEnabled` onto the same model field, which is
+# what confirms the two names are one setting.
+ATO_LEAK_SENSOR_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.leak_sensor.enabled"
+)
+
+# Whether the ATO pump is pushing water right now. Named because two places
+# need the same path: the binary sensor that reports it, and the fill/stop
+# buttons that set it optimistically so the card reacts on the press instead
+# of on the read-back.
+ATO_IS_PUMP_ON_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.is_pump_on"
+)
+
+# Reservoir size of the ATO container. Like the doser's initial container
+# volume, this is a property of the installation rather than of the hardware:
+# the RSATO+ never reports it. It therefore lives under `$.local`, the branch
+# reserved for values Home Assistant owns, and is restored from the entity's
+# own state on restart.
+ATO_TANK_VOLUME_INTERNAL_NAME: Final[JsonPath] = "$.local.tank_volume"
+ATO_TANK_VOLUME_MIN: Final[float] = 5.0
+ATO_TANK_VOLUME_MAX: Final[float] = 300.0
+ATO_TANK_VOLUME_STEP: Final[float] = 1.0
+ATO_TANK_VOLUME_DEFAULT: Final[float] = 20.0
+
+ATO_MODES: Final[tuple[str, ...]] = ("auto", "empty", "error")
+
+# -----------------------------------------------------------------------------
+# REEFRUN
+# -----------------------------------------------------------------------------
+
+RUN_SCAN_INTERVAL: Final[int] = 60  # seconds
+
+RETURN_MODELS: Final[tuple[str, ...]] = (
+    "return-6",
+    "return-7",
+    "return-9",
+    "return-4000",
+    "return-6000",
+    "return-8000",
+    "return-12000",
+)
+SKIMMER_MODELS: Final[tuple[str, ...]] = ("rsk-300", "rsk-600", "rsk-900")
+
+FULLCUP_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/pump/settings')].data.fullcup_enabled"
+)
+OVERSKIMMING_ENABLED_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/pump/settings')].data.overskimming.enabled"
+)
+
+# -----------------------------------------------------------------------------
+# REEFWAVE
+# -----------------------------------------------------------------------------
+
+WAVE_SHORTCUT_OFF_DELAY: Final[JsonPath] = (
+    "$.sources[?(@.name=='/device-settings')].data.shortcut_off_delay"
+)
+
+WAVE_TYPES: Final[list[str]] = ["nw", "ra", "re", "st", "su", "un"]
+WAVE_DIRECTIONS: Final[list[str]] = ["alt", "fw", "rw"]
+
+# -----------------------------------------------------------------------------
+# REEFPOWER
+# -----------------------------------------------------------------------------
+
+POWER_SCAN_INTERVAL: Final[int] = 60  # seconds
+
+# Socket count per model (used to build per-socket entities)
+HW_POWER_SOCKET_COUNT: Final[dict[str, int]] = {
+    "RSPOWER6": 6,
+    "RSPOWER8": 8,
+}
+
+POWER_MODE_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/mode')].data.mode"
+POWER_MODES: Final[tuple[str, ...]] = ("auto", "off", "setup", "feeding", "maintenance")
+
+POWER_BATTERY_LEVEL_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.battery_level"
+)
+POWER_TEMPERATURE_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/dashboard')].data.temperature"
+)
+
+# Per-socket configuration modes accepted by the device
+POWER_SOCKET_MODES: Final[tuple[str, ...]] = (
+    "auto",
+    "on",
+    "off",
+    "setup",
+    "schedule",
+    "sensor",
+    "feeding",
+    "maintenance",
+    "master",
+    "emergency",
+)
+
+# -----------------------------------------------------------------------------
+# REEFCONTROL
+# -----------------------------------------------------------------------------
+
+CONTROL_SCAN_INTERVAL: Final[int] = 60  # seconds
+
+# 12V DC port count per model (Lite = 1, Pro = 2)
+HW_CONTROL_PORT_COUNT: Final[dict[str, int]] = {
+    "RSCONTROLLITE": 1,
+    "RSCONTROLPRO": 2,
+}
+
+CONTROL_MODE_INTERNAL_NAME: Final[JsonPath] = "$.sources[?(@.name=='/mode')].data.mode"
+CONTROL_MODES: Final[tuple[str, ...]] = (
+    "auto",
+    "off",
+    "setup",
+    "feeding",
+    "maintenance",
+)
+
+CONTROL_LEAK_DETECTOR_INTERNAL_NAME: Final[JsonPath] = (
+    "$.sources[?(@.name=='/configuration')].data.leak_detector"
+)
+
+# `/configuration` on the ReefControl hub, confirmed on RSCONTROLPRO fw 1.1.9:
+#   {"shortcut_off_delay": 0,
+#    "leak_buzzer_config":   {"enabled": true, "frequency": 12, "duty_cycle": 50},
+#    "danger_buzzer_config": {"enabled": true, "frequency": 6,  "duty_cycle": 20},
+#    "leak_detector": true,
+#    "danger_debounce_seconds": 30}
+# `leak_detector` is duplicated on `/leak/config`, which additionally carries
+# `notify` and accepts the write-only `emergency_shutdown` flag.
+CONTROL_CONFIGURATION_SOURCE: Final[str] = "/configuration"
+
+CONTROL_BUZZER_KINDS: Final[tuple[str, ...]] = ("leak", "danger")
+
+# Wire values of `ControlPortMode` (hub 12V ports). Recovered from the Red Sea
+# Android app enums; `/dashboard.ports[].mode` and `/ports/config[].mode` use
+# these strings.
+CONTROL_PORT_MODES: Final[tuple[str, ...]] = (
+    "on",
+    "off",
+    "setup",
+    "schedule",
+    "sensor",
+    "feeding",
+    "maintenance",
+    "emergency",
+    "shortcut_off_delay",
+    "port_overload",
+    "port_malfunction",
+    "missing_pump",
+    "stalled",
+    "timeout",
+    "empty",
+    "leak",
+    "qa_on",
+)
+
+# Wire values of `ControlPortState` / `PowerSocketState`.
+PORT_SOCKET_STATES: Final[tuple[str, ...]] = (
+    "on",
+    "standby",
+    "fallback_on",
+    "fallback_off",
+    "unknown",
+)
+
+# -----------------------------------------------------------------------------
+# Libraries / endpoints
+# -----------------------------------------------------------------------------
+
+LIGHTS_LIBRARY: Final[str] = "/reef-lights/library?include=all"
+# G2 programs live in their own, per-user library (ReefBeat app: E1.g2/w5)
+LIGHTS_G2_LIBRARY: Final[str] = "/v2/reef-lights/library"
+
+# Red Sea programs of the ReefBeat app, which cannot be edited nor deleted.
+# G1: they are stored in the cloud library, known by name (LedProgramType and
+# LedsProgram.updateIsDefaultFromName in the app).
+LIGHTS_G1_DEFAULT_NAMES: Final[frozenset[str]] = frozenset(
+    {"12K", "15K", "18K", "20K", "23K", "RS Accelerated Growth"}
+)
+
+
+def _g2_color(rise: int, set_: int, points: list[tuple[int, int, int]]) -> Any:
+    """G2 colour channel: points as (absolute minute, intensity, kelvin)."""
+    return {
+        "rise": rise,
+        "set": set_,
+        "points": [
+            {"t": m - rise, "i1": i, "i2": i, "k1": k, "k2": k} for m, i, k in points
+        ],
+    }
+
+
+def _g2_moon(rise: int, set_: int, points: list[tuple[int, int]]) -> Any:
+    """G2 moon channel: points as (absolute minute, intensity)."""
+    return {
+        "rise": rise,
+        "set": set_,
+        "points": [{"t": m - rise, "i": i} for m, i in points],
+    }
+
+
+# G2: built into the app, not stored in the cloud (LedG2Program.defaultPrograms)
+LIGHTS_G2_DEFAULTS: Final[list[dict[str, Any]]] = [
+    {
+        "name": "15K",
+        "color": _g2_color(480, 1140, [(540, 100, 15000), (1080, 100, 15000)]),
+        "moon": _g2_moon(1140, 1320, [(1215, 10), (1245, 10)]),
+    },
+    {
+        "name": "23K",
+        "color": _g2_color(480, 1140, [(540, 100, 23000), (1080, 100, 23000)]),
+        "moon": _g2_moon(1140, 1320, [(1215, 10), (1245, 10)]),
+    },
+    {
+        "name": "Shallow Reef",
+        "color": _g2_color(
+            480,
+            1200,
+            [
+                (540, 50, 11000),
+                (600, 100, 12000),
+                (660, 100, 15000),
+                (960, 100, 15000),
+                (1020, 100, 12000),
+                (1080, 100, 11000),
+                (1140, 50, 10000),
+            ],
+        ),
+        "moon": _g2_moon(1200, 1380, [(1275, 10), (1305, 10)]),
+    },
+    {
+        "name": "Deep Reef",
+        "color": _g2_color(
+            480,
+            1200,
+            [
+                (540, 50, 16000),
+                (600, 100, 17000),
+                (660, 100, 18000),
+                (720, 100, 20000),
+                (900, 100, 20000),
+                (960, 100, 21000),
+                (1080, 100, 23000),
+            ],
+        ),
+        "moon": _g2_moon(1200, 1380, [(1275, 10), (1305, 10)]),
+    },
+]
+# Uid prefix of the built-in G2 programs (they have no cloud uid)
+LIGHTS_DEFAULT_UID_PREFIX: Final[str] = "default:"
+WAVES_LIBRARY: Final[str] = "/reef-wave/library"
+SUPPLEMENTS_LIBRARY: Final[str] = "/reef-dosing/supplement"
+
+WAVE_SCHEDULE_PATH: Final[JsonPath] = "$.sources[?(@.name=='/auto')].data.intervals"
+WAVES_DATA_NAMES: Final[tuple[str, ...]] = (
+    "type",
+    "direction",
+    "frt",
+    "rrt",
+    "fti",
+    "rti",
+    "sn",
+    "pd",
+)
+
+# -----------------------------------------------------------------------------
+# RSCONTROL probe acceptable/desired range bounds
+# -----------------------------------------------------------------------------
+#
+# Input bounds per probe type/unit for the acceptable_range_low/high and
+# desired_range_low/high number entities. The acceptable bounds are the
+# ReefBeat app's own hard limits on those fields, extracted from
+# `ControlProbe.minimumValue()`/`maximumValue()` and
+# `EcProbeMeasuringUnit.getMinimumValue()`/`getMaximumValue()` (decompiled
+# classes2.dex); the desired bounds are a separate, narrower "recommended
+# zone" the app also enforces there (matching well-known reef-keeping
+# targets — e.g. pH 7.6-8.4 — for ec/ppt/sg the two coincide, so there is no
+# separate narrower zone for those two units). The device itself is the
+# arbiter of the acceptable_min < desired_min < desired_max < acceptable_max
+# nesting invariant — not enforced client-side (see the entity docstrings).
+# Temperature's bounds are reused for every probe's embedded
+# temperature-compensation threshold (the `temp.ranges` sub-object).
+PROBE_RANGE_BOUNDS: Final[dict[str, tuple[float, float, float, float, float]]] = {
+    # probe type -> (acceptable_min, acceptable_max, desired_min, desired_max, step)
+    "temperature": (0, 60, 21, 26, 0.1),
+    "ph": (0, 15, 7.6, 8.4, 0.1),
+    "orp": (-800, 800, 100, 400, 1),
+}
+
+# RSCONTROL EC (salinity) probes report in one of three units, selectable by
+# the user; each has its own bounds and step.
+EC_UNIT_BOUNDS: Final[dict[str, tuple[float, float, float, float, float]]] = {
+    # unit -> (acceptable_min, acceptable_max, desired_min, desired_max, step)
+    "ec": (0, 100, 46.2, 54.4, 0.1),  # conductivity, mS/cm
+    "ppt": (0, 70, 0, 70, 0.1),  # salinity, parts per thousand
+    "sg": (1.0, 1.04, 1.0, 1.04, 0.001),  # specific gravity
+}
+EC_UNITS: Final[tuple[str, ...]] = ("ec", "ppt", "sg")
+
+# Default [acceptable_min, desired_min, desired_max, acceptable_max] pushed to
+# a probe's `ranges` when its unit changes: the device does NOT rescale the
+# existing numeric range itself, so leaving it as-is after a unit switch
+# produces nonsensical bounds (e.g. an EC-scale value like 54 read as SG,
+# which only spans 1.0-1.04). "ec" is confirmed from a real hub's
+# /probe/config; "ppt" is confirmed from a real probe currently set to that
+# unit; "sg" is estimated (no observed sample yet) from the typical target
+# range for reef tanks — verify against a real device and adjust if needed.
+EC_UNIT_DEFAULT_RANGES: Final[dict[str, list[float]]] = {
+    "ec": [46.2, 49, 54.4, 59.7],
+    "ppt": [30, 32, 36, 40],
+    "sg": [1.020, 1.023, 1.026, 1.028],  # estimated — please verify
+}

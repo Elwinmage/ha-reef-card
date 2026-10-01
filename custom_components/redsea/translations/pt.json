@@ -1,0 +1,2039 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Dispositivo já configurado",
+      "cannot_create": "Não é possível criar o dispositivo ReefBeat com os parâmetros especificados"
+    },
+    "error": {
+      "auth_failed": "Autenticação falhada, verifique as suas credenciais",
+      "nothing_detected": "Nenhum dispositivo detetado"
+    },
+    "flow_title": "Configuração ReefBeat",
+    "step": {
+      "user": {
+        "data": {
+          "add_type": "Escolha o método de adição",
+          "cloud_server": "Servidor na nuvem (endereço do simulador)",
+          "disable_supplements": "Desativar suplementos",
+          "hw_model": "Modelo de hardware",
+          "ip_address": "IP ou endereço de sub-rede (ex: 10.0.1.0/255.255.255.0)",
+          "platform": "Plataforma",
+          "scan_interval": "Intervalo de análise",
+          "virtual_led": "Novo controlador LED virtual"
+        },
+        "title": "Adicionar novo dispositivo"
+      },
+      "select_devices": {
+        "data": {
+          "ip_address": "Dispositivos a adicionar"
+        },
+        "description": "Todos os dispositivos encontrados na rede estão pré-selecionados. Desmarque os que não pretende adicionar e confirme — todos os restantes dispositivos serão adicionados de uma só vez.",
+        "title": "Adicionar dispositivos detetados"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ato_sensor_connected": {
+        "name": "Sonda de temperatura ligada"
+      },
+      "battery_level": {
+        "name": "Nível de bateria"
+      },
+      "bundled_heads": {
+        "name": "Cabeças agrupadas"
+      },
+      "buzzer_active": {
+        "name": "Buzzer active"
+      },
+      "buzzer_dismissed": {
+        "name": "Buzzer dismissed"
+      },
+      "buzzer_on": {
+        "name": "Alarme sonoro ativo"
+      },
+      "cable_connected": {
+        "name": "Cable connected"
+      },
+      "check_sensor": {
+        "name": "Verificar o sensor"
+      },
+      "cloud_state": {
+        "name": "Estado da ligação à nuvem"
+      },
+      "connected": {
+        "name": "Sensor de fuga ligado"
+      },
+      "constant_speed": {
+        "name": "Velocidade constante"
+      },
+      "control_link_up": {
+        "name": "Control hub link"
+      },
+      "ec_sensor_connected": {
+        "name": "Sensor EC ligado"
+      },
+      "is_calibrated": {
+        "name": "Sonda calibrada"
+      },
+      "is_ec_sensor_connected": {
+        "name": "Sensor EC ligado?"
+      },
+      "is_internet_connected": {
+        "name": "Internet connected"
+      },
+      "is_pump_on": {
+        "name": "Bomba ligada?"
+      },
+      "is_sensor_error": {
+        "name": "Sensor em erro?"
+      },
+      "is_temp_enabled": {
+        "name": "Temperatura ativada?"
+      },
+      "leak_detector": {
+        "name": "Leak detector"
+      },
+      "missing_pump": {
+        "name": "Bomba em falta"
+      },
+      "missing_sensor": {
+        "name": "Sensor em falta"
+      },
+      "power_link_up": {
+        "name": "Power center link"
+      },
+      "probe_leak_detected": {
+        "name": "{probe} fuga"
+      },
+      "recalibration_required": {
+        "name": "Calibração"
+      },
+      "reconnect_pump": {
+        "name": "Reconectar bomba"
+      },
+      "sensor_controlled": {
+        "name": "Controlado por sensor"
+      },
+      "status": {
+        "name": "Estado"
+      },
+      "temperature_log_enabled": {
+        "name": "Registo de temperatura"
+      },
+      "unclean_sensor": {
+        "name": "Estado do sensor"
+      },
+      "water_level": {
+        "name": "Nível de água"
+      },
+      "control_paired": {
+        "name": "Control emparelhado"
+      },
+      "control_internet_connected": {
+        "name": "Internet do control"
+      },
+      "temperature_coherent": {
+        "name": "Coerência de temperatura"
+      }
+    },
+    "button": {
+      "advance": {
+        "name": "Avançar"
+      },
+      "delete_emergency": {
+        "name": "Eliminar alerta de emergência"
+      },
+      "delete_pump": {
+        "name": "Eliminar bomba"
+      },
+      "delete_supplement": {
+        "name": "Eliminar suplemento"
+      },
+      "detect_pump": {
+        "name": "Detetar e adicionar a bomba"
+      },
+      "ec_calibration_cup": {
+        "name": "Calibração EC Copo cheio"
+      },
+      "ec_calibration_end": {
+        "name": "Calibração EC Terminar"
+      },
+      "ec_calibration_skim": {
+        "name": "Calibração EC Sobreespumação"
+      },
+      "ec_calibration_start": {
+        "name": "Calibração EC Iniciar"
+      },
+      "end_calibration": {
+        "name": "Parar e guardar calibração"
+      },
+      "fetch_config": {
+        "name": "Obter configuração"
+      },
+      "fetch_data": {
+        "name": "Atualizar dados"
+      },
+      "fill": {
+        "name": "Encher"
+      },
+      "firmware_update": {
+        "name": "Forçar atualização de firmware"
+      },
+      "led_identify": {
+        "name": "Identificar"
+      },
+      "get_temperature": {
+        "name": "Obter temperatura"
+      },
+      "probe_get_value": {
+        "name": "Ler {probe} agora"
+      },
+      "maint_ato_ec_sensor": {
+        "name": "Limpar o sensor EC"
+      },
+      "maint_ato_return_pump": {
+        "name": "Limpar a bomba de retorno"
+      },
+      "maint_control_probe_calibration_orp": {
+        "name": "Verificar a sonda {probe}"
+      },
+      "maint_control_probe_calibration_ph": {
+        "name": "Calibrar a sonda {probe}"
+      },
+      "maint_control_probe_calibration_ec": {
+        "name": "Calibrar a sonda {probe}"
+      },
+      "maint_control_probe_clean": {
+        "name": "Limpar a sonda {probe}"
+      },
+      "maint_control_probe_replace": {
+        "name": "Substituir a sonda {probe}"
+      },
+      "maint_dose_heads_calibration": {
+        "name": "Calibrar cabeça de doseamento"
+      },
+      "maint_dose_heads_replace": {
+        "name": "Substituir cabeça e tubos de doseamento"
+      },
+      "maint_led_fan": {
+        "name": "Limpar o pó do ventilador e das grelhas"
+      },
+      "maint_led_lens": {
+        "name": "Limpar a lente"
+      },
+      "maint_mat_carbon_replace": {
+        "name": "Substituir o carvão ativado"
+      },
+      "maint_run_pump_motor": {
+        "name": "Limpar o motor e o rotor"
+      },
+      "maint_run_pump_strainer": {
+        "name": "Limpar o filtro de aspiração"
+      },
+      "maint_run_skim_fullcup_calibration": {
+        "name": "Calibrar o sensor de xícara cheia"
+      },
+      "maint_run_skim_overskimming_calibration": {
+        "name": "Calibrar o sensor de excesso de espuma"
+      },
+      "maint_run_skim_rotor": {
+        "name": "Limpar o rotor da bomba do escumador"
+      },
+      "maint_run_skim_venturi": {
+        "name": "Limpar o venturi e o tubo de ar"
+      },
+      "maint_wave_rotor_cages": {
+        "name": "Limpar as gaiolas do rotor"
+      },
+      "manual_head": {
+        "name": "Dosagem manual"
+      },
+      "new_roll": {
+        "name": "Novo rolo"
+      },
+      "port_delete": {
+        "name": "Desinstalar porta {port}"
+      },
+      "preview_save": {
+        "name": "Guardar pré-visualização"
+      },
+      "preview_set_from_current": {
+        "name": "Pré-vis. a partir do atual"
+      },
+      "preview_start": {
+        "name": "Iniciar pré-visualização"
+      },
+      "preview_stop": {
+        "name": "Parar pré-visualização"
+      },
+      "reset": {
+        "name": "Reiniciar"
+      },
+      "resume": {
+        "name": "Retomar"
+      },
+      "set_calibration_value": {
+        "name": "Definir volume de calibração"
+      },
+      "set_supplement": {
+        "name": "Definir novo suplemento"
+      },
+      "set_supplement_name": {
+        "name": "Definir novo nome"
+      },
+      "start_calibration": {
+        "name": "Iniciar calibração"
+      },
+      "start_priming": {
+        "name": "Iniciar preparação"
+      },
+      "stop_fill": {
+        "name": "Parar enchimento"
+      },
+      "stop_priming": {
+        "name": "Parar preparação"
+      },
+      "test_calibration": {
+        "name": "Testar nova calibração"
+      },
+      "socket_0_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_1_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_2_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_3_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_4_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_5_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_6_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_7_delete": {
+        "name": "Eliminar tomada {socket}"
+      },
+      "socket_0_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_1_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_2_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_3_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_4_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_5_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_6_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "socket_7_unsubscribe": {
+        "name": "Cancelar subscrição tomada {socket}"
+      },
+      "install_temperature": {
+        "name": "Adicionar sonda de temperatura"
+      },
+      "remove_temperature": {
+        "name": "Remover sonda de temperatura"
+      },
+      "pair_power": {
+        "name": "Emparelhar Power Center"
+      },
+      "unpair_power": {
+        "name": "Desemparelhar Power Center"
+      },
+      "unpair_control": {
+        "name": "Desemparelhar hub de controlo"
+      }
+    },
+    "light": {
+      "blue": {
+        "name": "Azul"
+      },
+      "kelvin_intensity": {
+        "name": "Kelvin"
+      },
+      "moon": {
+        "name": "Lua"
+      },
+      "white": {
+        "name": "Branco"
+      }
+    },
+    "number": {
+      "acclimation_duration": {
+        "name": "Duração da aclimatação"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Fator de intensidade inicial da aclimatação"
+      },
+      "ato_tank_volume": {
+        "name": "Volume do reservatório ATO"
+      },
+      "ato_volume_left": {
+        "name": "Volume ATO restante"
+      },
+      "calibration_dose_value": {
+        "name": "Dose de calibração"
+      },
+      "container_volume": {
+        "name": "Volume do recipiente"
+      },
+      "custom_advance_value": {
+        "name": "Valor de avanço"
+      },
+      "daily_dose": {
+        "name": "Atualizar dose diária"
+      },
+      "dosing_waiting_period": {
+        "name": "Período de espera de dosagem"
+      },
+      "maint_ato_ec_sensor_interval_weeks": {
+        "name": "Limpar o sensor EC (semanas)"
+      },
+      "maint_ato_return_pump_interval_months": {
+        "name": "Limpar a bomba de retorno (meses)"
+      },
+      "maint_control_probe_calibration_orp_interval_months": {
+        "name": "Verificar a sonda {probe} (meses)"
+      },
+      "maint_control_probe_calibration_ph_interval_months": {
+        "name": "Calibrar a sonda {probe} (meses)"
+      },
+      "maint_control_probe_calibration_ec_interval_months": {
+        "name": "Calibrar a sonda {probe} (meses)"
+      },
+      "maint_control_probe_clean_interval_weeks": {
+        "name": "Limpar a sonda {probe} (semanas)"
+      },
+      "maint_control_probe_replace_interval_months": {
+        "name": "Substituir a sonda {probe} (meses)"
+      },
+      "maint_dose_heads_calibration_interval_days": {
+        "name": "Calibrar cabeça de doseamento (dias)"
+      },
+      "maint_dose_heads_replace_interval_months": {
+        "name": "Substituir cabeça e tubos de doseamento (meses)"
+      },
+      "maint_led_fan_interval_months": {
+        "name": "Limpar o pó do ventilador e das grelhas (meses)"
+      },
+      "maint_led_lens_interval_weeks": {
+        "name": "Limpar a lente (semanas)"
+      },
+      "maint_mat_carbon_replace_interval_weeks": {
+        "name": "Substituir o carvão ativado (semanas)"
+      },
+      "maint_run_pump_motor_interval_months": {
+        "name": "Limpar o motor e o rotor (meses)"
+      },
+      "maint_run_pump_strainer_interval_weeks": {
+        "name": "Limpar o filtro de aspiração (semanas)"
+      },
+      "maint_run_skim_fullcup_calibration_interval_weeks": {
+        "name": "Calibrar o sensor de xícara cheia (semanas)"
+      },
+      "maint_run_skim_overskimming_calibration_interval_weeks": {
+        "name": "Calibrar o sensor de excesso de espuma (semanas)"
+      },
+      "maint_run_skim_rotor_interval_months": {
+        "name": "Limpar o rotor da bomba do escumador (meses)"
+      },
+      "maint_run_skim_venturi_interval_weeks": {
+        "name": "Limpar o venturi e o tubo de ar (semanas)"
+      },
+      "maint_wave_rotor_cages_interval_months": {
+        "name": "Limpar as gaiolas do rotor (meses)"
+      },
+      "manual_duration": {
+        "name": "Duração manual"
+      },
+      "manual_head_volume": {
+        "name": "Volume manual"
+      },
+      "moon_day": {
+        "name": "Dia lunar"
+      },
+      "overskimming_threshold": {
+        "name": "Limiar de sobre-espumagem"
+      },
+      "preview_speed": {
+        "name": "Velocidade de pré-visualização"
+      },
+      "save_initial_container_volume": {
+        "name": "Volume inicial do recipiente"
+      },
+      "schedule_length": {
+        "name": "Duração do agendamento"
+      },
+      "shortcut_off_delay": {
+        "name": "Atraso de desligamento do atalho"
+      },
+      "speed": {
+        "name": "Velocidade"
+      },
+      "started_roll_diameter": {
+        "name": "Diâmetro do rolo"
+      },
+      "stock_alert_days": {
+        "name": "Dias de alerta de stock"
+      },
+      "wave_backward_intensity": {
+        "name": "Pré-vis. intensidade retro."
+      },
+      "wave_backward_time": {
+        "name": "Pré-vis. tempo retro."
+      },
+      "wave_forward_intensity": {
+        "name": "Pré-vis. intensidade frente"
+      },
+      "wave_forward_time": {
+        "name": "Pré-vis. tempo frente"
+      },
+      "wave_preview_duration": {
+        "name": "Duração da pré-visualização"
+      },
+      "wave_preview_step": {
+        "name": "Passo da pré-visualização"
+      },
+      "wave_preview_wave_duration": {
+        "name": "Pré-vis. duração da onda"
+      },
+      "temperature_coherence_threshold": {
+        "name": "Limiar de coerência de temperatura"
+      },
+      "probe_orp_calibration": {
+        "name": "Calibrar {probe} (valor da solução)"
+      },
+      "probe_temperature_calibration": {
+        "name": "Calibrar {probe} (temperatura real)"
+      },
+      "probe_temp_calibration": {
+        "name": "Calibrar a temperatura de {probe} (temperatura real)"
+      },
+      "temperature_calibration": {
+        "name": "Calibrar a temperatura (temperatura real)"
+      },
+      "temperature_desired_range_low": {
+        "name": "Intervalo de temperatura desejado (baixo)"
+      },
+      "temperature_desired_range_high": {
+        "name": "Intervalo de temperatura desejado (alto)"
+      },
+      "temperature_acceptable_range_low": {
+        "name": "Intervalo de temperatura aceitável (baixo)"
+      },
+      "temperature_acceptable_range_high": {
+        "name": "Intervalo de temperatura aceitável (alto)"
+      },
+      "probe_acceptable_range_low": {
+        "name": "Intervalo aceitável de {probe} (mín)"
+      },
+      "probe_desired_range_low": {
+        "name": "Intervalo desejado de {probe} (mín)"
+      },
+      "probe_desired_range_high": {
+        "name": "Intervalo desejado de {probe} (máx)"
+      },
+      "probe_acceptable_range_high": {
+        "name": "Intervalo aceitável de {probe} (máx)"
+      },
+      "probe_temp_acceptable_range_low": {
+        "name": "Intervalo de temperatura aceitável de {probe} (mín)"
+      },
+      "probe_temp_desired_range_low": {
+        "name": "Intervalo de temperatura desejado de {probe} (mín)"
+      },
+      "probe_temp_desired_range_high": {
+        "name": "Intervalo de temperatura desejado de {probe} (máx)"
+      },
+      "probe_temp_acceptable_range_high": {
+        "name": "Intervalo de temperatura aceitável de {probe} (máx)"
+      },
+      "leak_buzzer_frequency": {
+        "name": "Frequência besouro de fuga"
+      },
+      "leak_buzzer_duty_cycle": {
+        "name": "Ciclo de trabalho besouro de fuga"
+      },
+      "danger_buzzer_frequency": {
+        "name": "Frequência besouro de perigo"
+      },
+      "danger_buzzer_duty_cycle": {
+        "name": "Ciclo de trabalho besouro de perigo"
+      },
+      "danger_debounce_seconds": {
+        "name": "Debounce de perigo"
+      },
+      "weather_min_intensity": {
+        "name": "Intensidade mínima meteorológica"
+      },
+      "weather_max_intensity": {
+        "name": "Intensidade máxima meteorológica"
+      },
+      "weather_refresh_days": {
+        "name": "Atualização do tempo (dias)"
+      },
+      "sunrise_offset": {
+        "name": "Desfasamento do nascer do sol"
+      },
+      "staggered_delay": {
+        "name": "Atraso do nascer do sol escalonado"
+      }
+    },
+    "select": {
+      "mode": {
+        "name": "Modo",
+        "state": {
+          "auto": "Auto",
+          "end_of_roll": "Fim de rolo",
+          "manual": "Manual",
+          "timer": "Temporizador",
+          "other": "Outro",
+          "off": "Desligado"
+        }
+      },
+      "model": {
+        "name": "Modelo"
+      },
+      "position": {
+        "name": "Posição",
+        "state": {
+          "left": "Esquerda",
+          "right": "Direita"
+        }
+      },
+      "preview_wave_direction": {
+        "name": "Direção das ondas em pré-visualização",
+        "state": {
+          "alt": "Alternado",
+          "fw": "Frente",
+          "rw": "Trás"
+        }
+      },
+      "preview_wave_type": {
+        "name": "Tipo de onda em pré-visualização",
+        "state": {
+          "nw": "Sem onda",
+          "ra": "Aleatório",
+          "re": "Regular",
+          "st": "Degrau",
+          "su": "Superfície",
+          "un": "Uniforme"
+        }
+      },
+      "supplements": {
+        "name": "Suplementos",
+        "state": {
+          "other": "Outro"
+        }
+      },
+      "temperature_fusion_method": {
+        "name": "Método de fusão de temperatura",
+        "state": {
+          "median": "Mediana",
+          "mean": "Média",
+          "min": "Mínimo",
+          "max": "Máximo"
+        }
+      },
+      "probe_ec_unit": {
+        "name": "Unidade de {probe}",
+        "state": {
+          "ec": "Condutividade (mS/cm)",
+          "ppt": "Salinidade (ppt)",
+          "sg": "Densidade (SG)"
+        }
+      },
+      "weather_period": {
+        "name": "Período meteorológico",
+        "state": {
+          "next_week": "Próxima semana (previsão)",
+          "last_week": "Semana passada (medida)"
+        }
+      },
+      "weather_anchor": {
+        "name": "Dia meteorológico no aquário",
+        "state": {
+          "place": "Hora do local",
+          "sunrise": "Alinhado ao nascer do sol",
+          "sunset": "Alinhado ao pôr do sol",
+          "both": "Esticado entre nascer e pôr do sol"
+        }
+      }
+    },
+    "sensor": {
+      "acclimation_current_intensity_factor": {
+        "name": "Fator de intensidade atual da aclimatação"
+      },
+      "acclimation_duration": {
+        "name": "Duração da aclimatação"
+      },
+      "acclimation_remaining_days": {
+        "name": "Dias de aclimatação restantes"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Fator de intensidade inicial da aclimatação"
+      },
+      "current_program": {
+        "name": "Programa atual"
+      },
+      "linked_leds": {
+        "name": "LEDs ligados"
+      },
+      "ato_sensor_code": {
+        "name": "Código da sonda de temperatura"
+      },
+      "ato_sensor_last_adjustment_date": {
+        "name": "Data de ajuste da sonda"
+      },
+      "ato_sensor_last_installation_date": {
+        "name": "Data de instalação da sonda"
+      },
+      "auto_1": {
+        "name": "Domingo"
+      },
+      "auto_2": {
+        "name": "Segunda-feira"
+      },
+      "auto_3": {
+        "name": "Terça-feira"
+      },
+      "auto_4": {
+        "name": "Quarta-feira"
+      },
+      "auto_5": {
+        "name": "Quinta-feira"
+      },
+      "auto_6": {
+        "name": "Sexta-feira"
+      },
+      "auto_7": {
+        "name": "Sábado"
+      },
+      "auto_dosed_today": {
+        "name": "Dosado automaticamente hoje"
+      },
+      "backup_email": {
+        "name": "Email de reserva"
+      },
+      "battery_level": {
+        "name": "Battery level"
+      },
+      "blue": {
+        "name": "Azul"
+      },
+      "buzzer_cause": {
+        "name": "Buzzer cause"
+      },
+      "cloud_account": {
+        "name": "Ligado à conta",
+        "state": {
+          "none": "Nenhum"
+        }
+      },
+      "connected_control": {
+        "name": "Paired control hub"
+      },
+      "connected_power": {
+        "name": "Paired power center"
+      },
+      "connected_power_state": {
+        "name": "Paired power center state"
+      },
+      "control_mode": {
+        "name": "Mode",
+        "state": {
+          "auto": "Auto",
+          "off": "Desligado",
+          "setup": "Configuração",
+          "feeding": "Alimentação",
+          "maintenance": "Manutenção"
+        }
+      },
+      "country": {
+        "name": "País"
+      },
+      "cup_last_calibration": {
+        "name": "Última calibração do copo"
+      },
+      "current_level": {
+        "name": "Nível atual"
+      },
+      "current_read": {
+        "name": "Temperature"
+      },
+      "daily_average_usage": {
+        "name": "Daily Average Usage"
+      },
+      "daily_dose": {
+        "name": "Dose diária"
+      },
+      "daily_doses": {
+        "name": "Daily doses"
+      },
+      "daily_fills_average": {
+        "name": "Daily fills average"
+      },
+      "daily_volume_average": {
+        "name": "Daily volume average"
+      },
+      "days_till_empty": {
+        "name": "Dias até esvaziar"
+      },
+      "days_till_end_of_roll": {
+        "name": "Days till end of roll"
+      },
+      "doses_today": {
+        "name": "Doses today"
+      },
+      "dosing_queue": {
+        "name": "Dosing Queue",
+        "state": {
+          "empty": "Empty"
+        }
+      },
+      "email": {
+        "name": "Email"
+      },
+      "fan": {
+        "name": "Fan"
+      },
+      "first_name": {
+        "name": "Nome próprio"
+      },
+      "flow_rate": {
+        "name": "Caudal"
+      },
+      "head_state": {
+        "name": "Estado"
+      },
+      "ip": {
+        "name": "Endereço IP"
+      },
+      "language": {
+        "name": "Idioma"
+      },
+      "last_alert_message": {
+        "name": "Última mensagem de alerta"
+      },
+      "last_calibration": {
+        "name": "Última calibração"
+      },
+      "last_fill_date": {
+        "name": "Último enchimento"
+      },
+      "last_message": {
+        "name": "Última mensagem"
+      },
+      "last_name": {
+        "name": "Apelido"
+      },
+      "last_pump_on_cause": {
+        "name": "Causa do último arranque"
+      },
+      "leak_sensor_current_read": {
+        "name": "Leitura atual do sensor de fuga"
+      },
+      "leak_sensor_status": {
+        "name": "Estado do sensor de fugas",
+        "state": {
+          "dry": "Seco",
+          "aquarium_water_leak": "Fuga de água do aquário",
+          "rodi_water_leak": "Fuga de água RO/DI"
+        }
+      },
+      "led_program": {
+        "name": "Programa LED"
+      },
+      "manual_dosed_today": {
+        "name": "Dosado manualmente hoje"
+      },
+      "max_sockets": {
+        "name": "Max sockets"
+      },
+      "mobile_number": {
+        "name": "Número de telemóvel"
+      },
+      "mode": {
+        "name": "Modo",
+        "state": {
+          "auto": "Auto",
+          "blockage": "Bloqueio",
+          "calibration": "Calibração",
+          "controller": "Controlador",
+          "emergency": "Emergência",
+          "empty": "Vazio",
+          "end_of_roll": "Fim de rolo",
+          "feeding": "Alimentação",
+          "high_water": "Nível de água elevado",
+          "leak": "Fuga",
+          "maintenance": "Manutenção",
+          "malfunction": "Avaria",
+          "manual": "Manual",
+          "mat_error": "Erro de material",
+          "missing_pump": "Bomba em falta",
+          "missing_sensor": "Sensor em falta",
+          "no_ec_sensor": "Sem sensor EC",
+          "off": "Desligado",
+          "overheating": "Sobreaquecimento",
+          "partial_auto": "Semiautomático",
+          "preview": "Pré-visualização",
+          "priming": "Preparação",
+          "pump_timeout": "Tempo limite da bomba",
+          "setup": "Configuração",
+          "setup_error_high": "Erro de configuração: demasiado alto",
+          "setup_error_torn": "Erro de configuração: rasgado",
+          "shortcut_off_delay": "Atraso de desligamento do atalho",
+          "stalled": "Bloqueado",
+          "timer": "Temporizador",
+          "torn_mat": "Material rasgado",
+          "user_test": "Teste de utilizador",
+          "no_roll": "Sem rolo"
+        }
+      },
+      "model": {
+        "name": "Modelo"
+      },
+      "model_type": {
+        "name": "Model region"
+      },
+      "moon_intensity": {
+        "name": "Intensidade da fase lunar"
+      },
+      "name": {
+        "name": "Nome"
+      },
+      "next_full_moon": {
+        "name": "Próxima lua cheia"
+      },
+      "next_new_moon": {
+        "name": "Próxima lua nova"
+      },
+      "port_consumption": {
+        "name": "Port {port} consumption"
+      },
+      "port_mode": {
+        "name": "Port {port} mode"
+      },
+      "port_name": {
+        "name": "Port {port} name"
+      },
+      "port_state": {
+        "name": "Port {port} state"
+      },
+      "port_type": {
+        "name": "Port {port} type"
+      },
+      "power_temperature": {
+        "name": "Temperature"
+      },
+      "prev_pump_state": {
+        "name": "Estado anterior da bomba"
+      },
+      "probe_ec": {
+        "name": "{probe} conductivity"
+      },
+      "probe_leak_status": {
+        "name": "{probe} origem da fuga",
+        "state": {
+          "dry": "Seco",
+          "aquarium_water_leak": "Água do aquário",
+          "rodi_water_leak": "Água osmotizada"
+        }
+      },
+      "probe_leak_conductivity": {
+        "name": "{probe} condutividade da fuga"
+      },
+      "probe_ec_value": {
+        "name": "{probe} value"
+      },
+      "probe_last_adjustment": {
+        "name": "{probe} last calibration"
+      },
+      "probe_last_installation": {
+        "name": "{probe} last installation"
+      },
+      "probe_level": {
+        "name": "{probe} level",
+        "state": {
+          "desired": "Ideal",
+          "acceptable": "Aceitável",
+          "danger": "Perigo",
+          "sensor_data_error": "Erro do sensor"
+        }
+      },
+      "probe_measurement_unit": {
+        "name": "{probe} display unit"
+      },
+      "probe_name": {
+        "name": "{probe} name"
+      },
+      "probe_orp_value": {
+        "name": "{probe} ORP"
+      },
+      "probe_ph_value": {
+        "name": "{probe} pH"
+      },
+      "probe_ppt": {
+        "name": "{probe} salinity"
+      },
+      "probe_sg": {
+        "name": "{probe} specific gravity"
+      },
+      "probe_status": {
+        "name": "{probe} status"
+      },
+      "probe_temp_level": {
+        "name": "{probe} temperature level",
+        "state": {
+          "desired": "Ideal",
+          "acceptable": "Aceitável",
+          "danger": "Perigo",
+          "sensor_data_error": "Erro do sensor"
+        }
+      },
+      "probe_temperature": {
+        "name": "{probe} temperature"
+      },
+      "probe_value": {
+        "name": "{probe} value"
+      },
+      "probe_water_level": {
+        "name": "{probe} nível de água",
+        "state": {
+          "above": "Acima",
+          "below": "Abaixo",
+          "desired_level_1": "Nível desejado (sensor 1)",
+          "desired_level_2": "Nível desejado (sensor 2)",
+          "error": "Erro de sensor"
+        }
+      },
+      "pump_blockage_threshold": {
+        "name": "Limiar de obstrução"
+      },
+      "pump_consumption": {
+        "name": "Consumo da bomba"
+      },
+      "pump_empty_threshold": {
+        "name": "Limiar de bomba em vazio"
+      },
+      "pump_soft_blockage_threshold": {
+        "name": "Limiar de obstrução parcial"
+      },
+      "pump_speed": {
+        "name": "Velocidade da bomba"
+      },
+      "pump_state": {
+        "name": "Estado da bomba",
+        "state": {
+          "malfunction": "Avaria",
+          "pump_on": "Ligada",
+          "off": "Desligada"
+        }
+      },
+      "remaining_days": {
+        "name": "Dias restantes"
+      },
+      "remaining_length": {
+        "name": "Comprimento restante"
+      },
+      "s1_average": {
+        "name": "Média do sensor de nível S1"
+      },
+      "s2_average": {
+        "name": "Média do sensor de nível S2"
+      },
+      "schedule_head": {
+        "name": "Agendamento da cabeça",
+        "state": {
+          "custom": "Personalizado",
+          "daily": "Diário",
+          "hourly": "Por hora",
+          "single": "Único"
+        }
+      },
+      "skim_last_calibration": {
+        "name": "Última calibração de sobreespumação"
+      },
+      "state": {
+        "name": "Estado",
+        "state": {
+          "calibration": "Calibração",
+          "dry-run": "Funcionamento em seco",
+          "emergency": "Emergência",
+          "feeding": "Alimentação",
+          "full-cup": "Copo cheio",
+          "locked-rotor": "Rotor bloqueado",
+          "maintenance": "Manutenção",
+          "not-connected": "Não ligado",
+          "operational": "Operacional",
+          "over-skimming": "Sobre-espumagem",
+          "preview": "Pré-visualização",
+          "shortcut-off-delay": "Atraso de desligamento do atalho",
+          "wrong-pump": "Bomba incorreta"
+        }
+      },
+      "supplement": {
+        "name": "Suplemento"
+      },
+      "supplement_program": {
+        "name": "Suplemento"
+      },
+      "temperature": {
+        "name": "Temperatura"
+      },
+      "temperature_probe_status": {
+        "name": "Estado da sonda de temperatura",
+        "state": {
+          "connected": "Ligado",
+          "disconnected": "Desligado"
+        }
+      },
+      "today_fills": {
+        "name": "Enchimentos hoje"
+      },
+      "today_usage": {
+        "name": "Utilização hoje"
+      },
+      "today_volume_usage": {
+        "name": "Volume utilizado hoje"
+      },
+      "todays_moon_day": {
+        "name": "Dia lunar de hoje"
+      },
+      "total_fills": {
+        "name": "Total de enchimentos"
+      },
+      "total_usage": {
+        "name": "Utilização total"
+      },
+      "total_volume_usage": {
+        "name": "Volume usado desde o enchimento"
+      },
+      "type": {
+        "name": "Tipo",
+        "state": {
+          "return": "Retorno",
+          "skimmer": "Espumador",
+          "unknown": "Desconhecido"
+        }
+      },
+      "volume_left": {
+        "name": "Volume restante"
+      },
+      "water_level": {
+        "name": "Nível de água",
+        "state": {
+          "above": "Acima",
+          "acceptable": "Aceitável",
+          "below": "Abaixo",
+          "danger": "Perigo",
+          "desired": "Desejado",
+          "desired_level_1": "Nível desejado 1",
+          "desired_level_2": "Nível desejado 2"
+        }
+      },
+      "wave_backward_intensity": {
+        "name": "Intensidade para trás"
+      },
+      "wave_backward_time": {
+        "name": "Tempo para trás"
+      },
+      "wave_direction": {
+        "name": "Direção das ondas",
+        "state": {
+          "alt": "Alternado",
+          "fw": "Frente",
+          "rw": "Trás"
+        }
+      },
+      "wave_forward_intensity": {
+        "name": "Intensidade para a frente",
+        "state": {
+          "alt": "Alternado",
+          "fw": "Frente",
+          "rw": "Trás"
+        }
+      },
+      "wave_forward_time": {
+        "name": "Tempo para a frente"
+      },
+      "wave_program": {
+        "name": "Programa de ondas"
+      },
+      "wave_step": {
+        "name": "Passos"
+      },
+      "wave_type": {
+        "name": "Tipo de onda",
+        "state": {
+          "nw": "Sem onda",
+          "ra": "Aleatório",
+          "re": "Regular",
+          "st": "Degrau",
+          "su": "Superfície",
+          "un": "Uniforme"
+        }
+      },
+      "white": {
+        "name": "Branco"
+      },
+      "wifi_quality": {
+        "name": "Qualidade do sinal WiFi",
+        "state": {
+          "poor": "Pobre",
+          "low": "Baixo",
+          "medium": "Médio",
+          "good": "Bom",
+          "excellent": "Excelente"
+        }
+      },
+      "wifi_signal": {
+        "name": "Intensidade do sinal WiFi"
+      },
+      "wifi_ssid": {
+        "name": "SSID WiFi"
+      },
+      "zip_code": {
+        "name": "Código postal"
+      },
+      "socket_0_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_1_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_2_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_3_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_4_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_5_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_6_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_7_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_0_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_1_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_2_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_3_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_4_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_5_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_6_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_7_state": {
+        "name": "Estado tomada {socket}"
+      },
+      "socket_0_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_1_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_2_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_3_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_4_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_5_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_6_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_7_mode": {
+        "name": "Modo tomada {socket}",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_0_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_1_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_2_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_3_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_4_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_5_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_6_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_7_prev_mode": {
+        "name": "Modo anterior tomada {socket}"
+      },
+      "socket_0_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_1_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_2_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_3_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_4_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_5_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_6_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "socket_7_consumption": {
+        "name": "Consumo tomada {socket}"
+      },
+      "total_consumption": {
+        "name": "Consumo total"
+      },
+      "connected_control_type": {
+        "name": "Tipo de control conectado"
+      },
+      "connected_control_status": {
+        "name": "Estado do control conectado"
+      },
+      "temperature_fusion": {
+        "name": "Temperatura fundida"
+      },
+      "temperature_spread": {
+        "name": "Amplitude de temperatura"
+      },
+      "temperature_anomaly_source": {
+        "name": "Origem de anomalia de temperatura",
+        "state": {
+          "ok": "OK",
+          "unknown": "Desconhecida",
+          "maintenance": "Manutenção"
+        }
+      },
+      "probe_uid": {
+        "name": "UID de {probe}"
+      },
+      "weather_program": {
+        "name": "Programa meteorológico",
+        "state": {
+          "ok": "OK",
+          "error": "Erro"
+        }
+      }
+    },
+    "switch": {
+      "acclimation": {
+        "name": "Aclimatação"
+      },
+      "auto_advance": {
+        "name": "Avanço automático"
+      },
+      "auto_fill": {
+        "name": "Enchimento automático"
+      },
+      "buzzer_enabled": {
+        "name": "Buzzer ativado"
+      },
+      "cloud_connect": {
+        "name": "Ligar à nuvem"
+      },
+      "device_state": {
+        "name": "Estado do dispositivo"
+      },
+      "dose_compensation": {
+        "name": "Compensação de dose"
+      },
+      "enabled": {
+        "name": "Sensor de fuga ativado"
+      },
+      "fullcup_enabled": {
+        "name": "Deteção de copo cheio"
+      },
+      "maint_ato_ec_sensor_notify": {
+        "name": "Limpar o sensor EC (notificações)"
+      },
+      "maint_ato_return_pump_notify": {
+        "name": "Limpar a bomba de retorno (notificações)"
+      },
+      "maint_control_probe_calibration_orp_notify": {
+        "name": "Verificar a sonda {probe} (notificações)"
+      },
+      "maint_control_probe_calibration_ph_notify": {
+        "name": "Calibrar a sonda {probe} (notificações)"
+      },
+      "maint_control_probe_calibration_ec_notify": {
+        "name": "Calibrar a sonda {probe} (notificações)"
+      },
+      "maint_control_probe_clean_notify": {
+        "name": "Limpar a sonda {probe} (notificações)"
+      },
+      "maint_control_probe_replace_notify": {
+        "name": "Substituir a sonda {probe} (notificações)"
+      },
+      "maint_dose_heads_calibration_notify": {
+        "name": "Calibrar cabeça de doseamento (notificações)"
+      },
+      "maint_dose_heads_replace_notify": {
+        "name": "Substituir cabeça e tubos de doseamento (notificações)"
+      },
+      "maint_led_fan_notify": {
+        "name": "Limpar o pó do ventilador e das grelhas (notificações)"
+      },
+      "maint_led_lens_notify": {
+        "name": "Limpar a lente (notificações)"
+      },
+      "maint_mat_carbon_replace_notify": {
+        "name": "Substituir o carvão ativado (notificações)"
+      },
+      "maint_run_pump_motor_notify": {
+        "name": "Limpar o motor e o rotor (notificações)"
+      },
+      "maint_run_pump_strainer_notify": {
+        "name": "Limpar o filtro de aspiração (notificações)"
+      },
+      "maint_run_skim_fullcup_calibration_notify": {
+        "name": "Calibrar o sensor de xícara cheia (notificações)"
+      },
+      "maint_run_skim_overskimming_calibration_notify": {
+        "name": "Calibrar o sensor de excesso de espuma (notificações)"
+      },
+      "maint_run_skim_rotor_notify": {
+        "name": "Limpar o rotor da bomba do escumador (notificações)"
+      },
+      "maint_run_skim_venturi_notify": {
+        "name": "Limpar o venturi e o tubo de ar (notificações)"
+      },
+      "maint_wave_rotor_cages_notify": {
+        "name": "Limpar as gaiolas do rotor (notificações)"
+      },
+      "maintenance": {
+        "name": "Manutenção"
+      },
+      "moon_phase": {
+        "name": "Fase lunar"
+      },
+      "overskimming_enabled": {
+        "name": "Sobre-espumagem"
+      },
+      "port_on_off": {
+        "name": "Porta {port}"
+      },
+      "schedule_enabled": {
+        "name": "Agendamento ativado"
+      },
+      "scheduled_advance": {
+        "name": "Avanço agendado"
+      },
+      "sensor_controlled_switch": {
+        "name": "Controlado por sonda"
+      },
+      "shortcut_emergency": {
+        "name": "Atalho emergência"
+      },
+      "shortcut_feeding": {
+        "name": "Atalho alimentação"
+      },
+      "shortcut_maintenance": {
+        "name": "Atalho manutenção"
+      },
+      "slm": {
+        "name": "Controlador de volume"
+      },
+      "use_cloud_api": {
+        "name": "Usar API na nuvem"
+      },
+      "socket_0_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_1_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_2_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_3_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_4_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_5_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_6_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "socket_7_on_off": {
+        "name": "Interruptor tomada {socket}"
+      },
+      "probe_maintenance": {
+        "name": "Manutenção {probe}"
+      },
+      "probe_buzzer": {
+        "name": "Besouro {probe}"
+      },
+      "probe_enabled": {
+        "name": "{probe} ativada"
+      },
+      "probe_notify": {
+        "name": "Notificações {probe}"
+      },
+      "temperature_notifications_enabled": {
+        "name": "Notificações de temperatura ativadas"
+      },
+      "temperature_log_enabled": {
+        "name": "Registo de temperatura ativado"
+      },
+      "leak_buzzer_enabled": {
+        "name": "Besouro de fuga"
+      },
+      "danger_buzzer_enabled": {
+        "name": "Besouro de perigo"
+      },
+      "leak_detector_enabled": {
+        "name": "Detetor de fugas"
+      },
+      "weather_sync": {
+        "name": "Modo tempo GPS"
+      },
+      "weather_clouds": {
+        "name": "Nuvens do tempo"
+      },
+      "staggered_sunrise": {
+        "name": "Nascer do sol escalonado"
+      }
+    },
+    "text": {
+      "new_supplement_brand_name": {
+        "name": "Nome da marca"
+      },
+      "new_supplement_display_name": {
+        "name": "Nome visível do suplemento"
+      },
+      "new_supplement_name": {
+        "name": "Nome do suplemento"
+      },
+      "new_supplement_short_name": {
+        "name": "Nome curto do suplemento"
+      },
+      "port_name": {
+        "name": "Nome da porta {port}"
+      },
+      "pump_name": {
+        "name": "Nome da bomba"
+      },
+      "socket_0_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_1_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_2_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_3_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_4_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_5_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_6_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "socket_7_name": {
+        "name": "Nome tomada {socket}"
+      },
+      "temperature_probe_name": {
+        "name": "Nome da sonda de temperatura"
+      },
+      "weather_location": {
+        "name": "Local meteorológico"
+      }
+    },
+    "time": {
+      "schedule_time": {
+        "name": "Hora do agendamento"
+      },
+      "weather_sunrise": {
+        "name": "Nascer do sol meteorológico"
+      },
+      "weather_sunset": {
+        "name": "Pôr do sol meteorológico"
+      }
+    },
+    "update": {
+      "firmware_update": {
+        "name": "Atualização de firmware"
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "wifi_change_success": "Rede Wi-Fi alterada com sucesso. Equipamento acessível em {new_ip}.",
+      "wifi_change_failed_connect": "Não foi possível enviar as novas credenciais Wi-Fi para o equipamento.",
+      "wifi_change_failed_reset": "Não foi possível reiniciar o equipamento após enviar as novas credenciais Wi-Fi.",
+      "wifi_change_failed_rediscover": "O equipamento reiniciou mas não foi encontrado na rede. Verifica se aderiu a {ssid} e reconfigura o IP manualmente se necessário.",
+      "wifi_change_failed_unknown": "Erro inesperado ao alterar a rede Wi-Fi.",
+      "no_probes": "Este hub não tem sondas para remover."
+    },
+    "error": {
+      "auth_failed": "Falha de autenticação, verifica as credenciais",
+      "wifi_scan_failed": "Não foi possível consultar o equipamento para as redes Wi-Fi disponíveis.",
+      "wifi_no_networks": "O equipamento não indica redes Wi-Fi disponíveis.",
+      "wifi_no_ssid": "Seleciona uma rede antes de submeter.",
+      "wifi_bad_cidr": "CIDR IPv4 inválido (esperado, por exemplo, 10.0.0.0/24).",
+      "wifi_manual_not_found": "Equipamento não encontrado nessa sub-rede. Tenta outro CIDR ou deixa o campo vazio para desistir.",
+      "no_probe_detected": "Nenhuma sonda nova do tipo selecionado foi detetada. Coloque-a em emparelhamento e tente novamente.",
+      "group_min_members": "Escolha pelo menos dois LEDs.",
+      "group_duplicate_position": "Cada LED deve ter uma única posição."
+    },
+    "progress": {
+      "applying": "A aplicar as novas credenciais Wi-Fi e a localizar o equipamento na rede..."
+    },
+    "step": {
+      "init": {
+        "data": {
+          "live_config_update": "Atualização de configuração em direto",
+          "disable_supplements": "Desativar suplementos",
+          "not_virtual": "Não configurável",
+          "slaves": "LED"
+        },
+        "menu_options": {
+          "settings": "Definições do equipamento",
+          "wifi_scan": "Alterar rede Wi-Fi",
+          "add_probe": "Adicionar sonda",
+          "del_probe": "Remover sonda",
+          "change_probe": "Substituir uma sonda"
+        },
+        "title": "Configuração"
+      },
+      "settings": {
+        "data": {
+          "live_config_update": "Atualização de configuração em direto",
+          "disable_supplements": "Desativar suplementos",
+          "intensity_compensation": "Compensação de intensidade",
+          "scan_interval": "Intervalo de atualização",
+          "not_virtual": "Não configurável",
+          "slaves": "LED"
+        },
+        "title": "Definições do equipamento"
+      },
+      "wifi_scan": {
+        "data": {
+          "wifi_ssid": "Rede Wi-Fi",
+          "wifi_password": "Palavra-passe",
+          "wifi_rescan": "Voltar a analisar redes"
+        },
+        "description": "Redes visíveis a partir do equipamento em {ip}: {count}. Escolhe uma e introduz a palavra-passe, ou marca «Voltar a analisar redes» e envia para atualizar a lista.",
+        "title": "Alterar rede Wi-Fi"
+      },
+      "wifi_apply": {
+        "title": "A alterar a rede Wi-Fi"
+      },
+      "wifi_manual_subnet": {
+        "data": {
+          "wifi_manual_subnet": "CIDR da sub-rede"
+        },
+        "description": "O equipamento aderiu a {ssid} mas não foi encontrado em nenhuma das sub-redes diretamente ligadas ao Home Assistant (tentadas: {tried_subnets}). Se sabes em que rede o equipamento chegou e o Home Assistant o consegue alcançar através de um router, indica aqui o CIDR (ex. 10.0.0.0/24). Deixa o campo vazio e submete para desistir.",
+        "title": "Localizar o equipamento noutra sub-rede"
+      },
+      "add_probe": {
+        "title": "Adicionar sonda",
+        "description": "Coloque a sonda em emparelhamento, escolha o tipo e confirme para pesquisar.",
+        "data": {
+          "probe_type": "Tipo de sonda"
+        }
+      },
+      "del_probe": {
+        "title": "Remover sonda",
+        "description": "Selecione a(s) sonda(s) a remover.",
+        "data": {
+          "probes": "Sondas"
+        }
+      },
+      "change_probe": {
+        "title": "Substituir uma sonda",
+        "description": "Escolha a sonda a substituir, coloque uma nova sonda do mesmo tipo em emparelhamento e confirme. A nova sonda herda o histórico da anterior.",
+        "data": {
+          "old_probe": "Sonda a substituir"
+        }
+      },
+      "del_probe_confirm": {
+        "title": "Confirmar remoção",
+        "description": "Isto remove permanentemente a(s) sonda(s) selecionada(s) e todas as suas entidades e histórico: {probes}.\n\nConfirme para continuar, ou feche esta janela para cancelar."
+      },
+      "group_members": {
+        "title": "LEDs do grupo",
+        "description": "Escolha os ReefLED controlados em conjunto por este LED virtual (pelo menos dois). Um LED só pode pertencer a um grupo.",
+        "data": {
+          "members": "LEDs"
+        }
+      },
+      "group_order": {
+        "title": "Ordem dos LEDs",
+        "description": "Ordem dos LEDs no grupo, como na aplicação ReefBeat: o nascer do sol escalonado começa pelo primeiro.",
+        "data": {
+          "position_1": "Posição 1",
+          "position_2": "Posição 2",
+          "position_3": "Posição 3",
+          "position_4": "Posição 4",
+          "position_5": "Posição 5",
+          "position_6": "Posição 6",
+          "position_7": "Posição 7",
+          "position_8": "Posição 8",
+          "position_9": "Posição 9",
+          "position_10": "Posição 10"
+        }
+      }
+    }
+  },
+  "selector": {
+    "add_type": {
+      "options": {
+        "cloud_api": "Conta na nuvem",
+        "local_detect": "Deteção local",
+        "manual_mode": "Modo manual",
+        "virtual_led": "LED virtual"
+      }
+    },
+    "ip_address": {
+      "options": {
+        "virtual_led": "Adicionar LED virtual"
+      }
+    }
+  },
+  "title": "ReefBeat",
+  "services": {
+    "reset_maintenance": {
+      "name": "Repor manutenção",
+      "description": "Marcar uma tarefa de manutenção como acabada de realizar para um dispositivo ou subdispositivo.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Dispositivo alvo (ou subdispositivo, ex. cabeça RSDOSE, bomba RSRUN)."
+        },
+        "task_key": {
+          "name": "Identificador da tarefa",
+          "description": "Identificador estável da tarefa (ex. 'ato_ec_sensor', 'run_skim_venturi', 'led_lens')."
+        }
+      }
+    },
+    "get_control_probes": {
+      "name": "Obter sondas do controlo",
+      "description": "Devolve as sondas (identidade e valores atuais) de um hub RSCONTROL emparelhado, a partir do seu ID de hardware.",
+      "fields": {
+        "hwid": {
+          "name": "ID de hardware do hub",
+          "description": "O ID de hardware (hwid) do hub RSCONTROL, tal como indicado no connected_device.hwid de um RSPower emparelhado."
+        }
+      }
+    },
+    "probe_calibration": {
+      "name": "Calibração da sonda",
+      "description": "Executa um passo da calibração de uma sonda pH ou EC do RSCONTROL: entrada, ponto, estado ou saída.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "O hub RSCONTROL (entrada de configuração)."
+        },
+        "probe_type": {
+          "name": "Tipo de sonda",
+          "description": "Tipo da sonda a calibrar."
+        },
+        "probe_uid": {
+          "name": "Uid da sonda",
+          "description": "Uid da sonda, tal como o hub a indica."
+        },
+        "action": {
+          "name": "Passo",
+          "description": "Passo da calibração."
+        },
+        "point": {
+          "name": "Ponto",
+          "description": "Ponto de calibração (passo «point»)."
+        },
+        "solution_value": {
+          "name": "Valor da solução",
+          "description": "Valor da solução de calibração (pH, ou mS/cm para EC)."
+        },
+        "solution_rated_temp": {
+          "name": "Temperatura de referência da solução",
+          "description": "Temperatura a que o valor da solução é dado, em °C (apenas pH)."
+        }
+      }
+    },
+    "led_convert": {
+      "name": "Converter cores ReefLED",
+      "description": "Converte pontos de uma ReefLED G1 entre branco/azul e kelvin/intensidade, com a tabela do modelo e a compensação de intensidade.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED G1."
+        },
+        "points": {
+          "name": "Pontos",
+          "description": "Lista de pontos, cada um (kelvin, intensity) ou (white, blue)."
+        }
+      }
+    },
+    "led_library": {
+      "name": "Listar a biblioteca ReefLED",
+      "description": "Programas de luz da biblioteca na nuvem do aquário da ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        }
+      }
+    },
+    "led_library_save": {
+      "name": "Guardar um programa ReefLED na biblioteca",
+      "description": "Adiciona um programa de luz à biblioteca na nuvem da ReefLED, ou altera um.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome do programa na biblioteca."
+        },
+        "program": {
+          "name": "Programa",
+          "description": "Programa diário no formato da lâmpada, na linha temporal de um único dia."
+        },
+        "clouds": {
+          "name": "Nuvens",
+          "description": "Nuvens do programa (from, to, intensity), se existirem."
+        },
+        "uid": {
+          "name": "ID do programa",
+          "description": "O programa da biblioteca a alterar; vazio para adicionar um novo. Os programas Red Sea não podem ser alterados."
+        }
+      }
+    },
+    "led_library_delete": {
+      "name": "Eliminar um programa da biblioteca ReefLED",
+      "description": "Elimina um programa do utilizador da biblioteca na nuvem da ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        },
+        "uid": {
+          "name": "ID do programa",
+          "description": "O programa a eliminar (não um programa Red Sea)."
+        }
+      }
+    },
+    "led_weather_apply": {
+      "name": "Atualizar o tempo ReefLED",
+      "description": "Obtém novamente o tempo e envia a semana a uma ReefLED em modo tempo GPS.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        }
+      }
+    },
+    "led_weather_preview": {
+      "name": "Pré-visualização da semana do tempo",
+      "description": "Gera a semana que o tempo faria agora e devolve-a com a semana própria da luminária, sem escrever nada.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        },
+        "settings": {
+          "name": "Definições",
+          "description": "Definições do tempo em edição, sobre as guardadas."
+        }
+      }
+    },
+    "led_weather_save": {
+      "name": "Guardar o programa do tempo",
+      "description": "Guarda as definições e o modo do tempo e escreve a luminária uma só vez: a semana do tempo ou o regresso da sua própria semana.",
+      "fields": {
+        "device_id": {
+          "name": "ID do dispositivo",
+          "description": "A entrada de configuração da ReefLED (ou LED virtual)."
+        },
+        "settings": {
+          "name": "Definições",
+          "description": "Definições do tempo em edição, sobre as guardadas."
+        },
+        "enabled": {
+          "name": "Modo tempo",
+          "description": "Se a luminária segue o tempo."
+        },
+        "wait": {
+          "name": "Esperar pela luminária",
+          "description": "Responder depois de escrita a luminária (por omissão a semana é guardada e mostrada, e depois escrita em segundo plano)."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "group_member_unavailable": {
+      "message": "{group}: ação recusada, estes LEDs não estão disponíveis: {members}. Nada foi enviado, o grupo continua sincronizado."
+    },
+    "group_channel_unavailable": {
+      "message": "{group} contém lâmpadas G1 e G2: o branco e o azul não podem ser ajustados em todo o grupo. Use a temperatura de cor e a intensidade."
+    }
+  },
+  "issues": {
+    "group_no_cloud": {
+      "title": "{group}: sem conta cloud ReefBeat",
+      "description": "Os LEDs de {group} também poderiam ser agrupados na aplicação ReefBeat, mas não está configurada nenhuma conta cloud ReefBeat que os liste. Sem ela, o grupo só existe no Home Assistant: a aplicação não o vê e pode controlar os seus LEDs separadamente.\n\nPara partilhar o grupo com a aplicação, adicione a sua conta cloud ReefBeat (Definições > Dispositivos e serviços > Adicionar integração > Red Sea > Cloud API): este problema desaparece sozinho. Ou mantenha o grupo apenas no Home Assistant.",
+      "fix_flow": {
+        "step": {
+          "keep_local": {
+            "title": "Manter o grupo apenas no Home Assistant",
+            "description": "O grupo não será escrito na cloud ReefBeat. Ainda pode adicionar a conta cloud mais tarde."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "O grupo não está carregado: tente novamente quando estiver."
+        }
+      }
+    },
+    "group_mixed_models": {
+      "title": "{group}: LEDs agrupados na aplicação ReefBeat",
+      "description": "{group} contém LEDs de vários modelos, que a aplicação ReefBeat não consegue agrupar juntos: a aplicação só agrupa LEDs do mesmo modelo. Estes LEDs continuam agrupados na aplicação, que os controlaria à parte dos outros: {leds}.\n\nDesagrupe-os na aplicação ReefBeat: o grupo passa então a existir apenas no Home Assistant (a sua ordem é global).",
+      "fix_flow": {
+        "step": {
+          "ungroup": {
+            "title": "Desagrupar na aplicação ReefBeat",
+            "description": "Estes LEDs serão desagrupados na cloud ReefBeat (a aplicação mostra-os separadamente). O Home Assistant continua a controlá-los em conjunto."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "O grupo não está carregado: tente novamente quando estiver."
+        }
+      }
+    },
+    "group_conflict": {
+      "title": "{group}: alterado no Home Assistant e na aplicação ReefBeat",
+      "description": "Os LEDs, a sua ordem ou o nascer do sol escalonado de {group} mudaram tanto no Home Assistant como na aplicação ReefBeat desde a última sincronização. Escolha o grupo a manter.",
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Que grupo manter?",
+            "menu_options": {
+              "keep_home_assistant": "O do Home Assistant (escrito na cloud ReefBeat)",
+              "keep_reefbeat": "O da aplicação ReefBeat (adotado pelo Home Assistant)"
+            }
+          }
+        },
+        "abort": {
+          "group_not_loaded": "O grupo não está carregado: tente novamente quando estiver."
+        }
+      }
+    }
+  }
+}

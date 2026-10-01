@@ -138,6 +138,23 @@ const CHANNEL_LABELS: Record<string, string> = {
   intensity: "led_channel_intensity",
 };
 
+/** A request written to a lamp (the data of redsea.request). */
+interface WriteRequest {
+  device_id: string;
+  access_path: string;
+  method: string;
+  data: any;
+}
+
+/**
+ * Wait a while.
+ * @param ms: how long, in ms
+ */
+export function pause(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((done) => setTimeout(done, ms));
+}
+
 export class RSLedProgramEditor extends LitElement {
   static override styles = css`
     :host {
@@ -189,11 +206,59 @@ export class RSLedProgramEditor extends LitElement {
       border-width: 2px;
     }
     .body {
+      position: relative;
       display: flex;
       flex-direction: column;
       gap: 8px;
       flex: 1;
       min-height: 0;
+    }
+    /* Weather being read, or a program being written: covers what it
+       changes, with a spinner */
+    .loading_zone {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: inherit;
+      color: #fff;
+      font-weight: 500;
+      text-align: center;
+    }
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #f2c230;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .progress {
+      width: 60%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+    }
+    .progress > div {
+      height: 100%;
+      background: #f2c230;
+      transition: width 0.3s;
+    }
+    .colours_hint {
+      margin: 0 0 4px;
+      font-size: 0.9em;
+      color: var(--secondary-text-color, #666);
     }
     .chart {
       flex: none;
@@ -466,6 +531,7 @@ export class RSLedProgramEditor extends LitElement {
     library_entry: { state: true },
     naming: { state: true },
     deleting: { state: true },
+    writing: { state: true },
   };
 
   /** The lamp being edited */
@@ -498,6 +564,15 @@ export class RSLedProgramEditor extends LitElement {
   naming: string | null = null;
   /** Whether the deletion of the loaded library program is being confirmed */
   deleting: boolean = false;
+  /** A program being written to the lamp(s): requests sent / to send */
+  writing: { done: number; total: number } | null = null;
+
+  /**
+   * Pause between two requests written to a lamp (ms): a ReefLED takes time
+   * to handle a command, and answers late (or not at all) to one sent too
+   * soon.
+   */
+  static WRITE_DELAY_MS = 2000;
 
   /**
    * Load a day program into the editor.
@@ -665,7 +740,13 @@ export class RSLedProgramEditor extends LitElement {
       if (this._weather_sig === null) return;
       this._weather_sig = null;
       this.library_entry = null;
-      this._use(this.led?.program?.(this.day) ?? null, this.format, true);
+      // Out of weather mode: the lamp's own format again
+      this._use(
+        this.led?.program?.(this.day) ?? null,
+        this.format,
+        !this._weather_kelvin,
+      );
+      this._weather_kelvin = false;
       return;
     }
     const sig = `${this.weather_on()}|${JSON.stringify(prog)}`;
@@ -674,7 +755,46 @@ export class RSLedProgramEditor extends LitElement {
     this.library_entry = null;
     this.naming = null;
     this.deleting = false;
-    this._use(prog, this.format, true);
+    const keep = this.weather_on() || !this._weather_kelvin;
+    if (!this.weather_on()) this._weather_kelvin = false;
+    this._use(prog, this.format, keep);
+    // The colours of the weather days are set as colour temperatures: a G1
+    // shows them in intensity + colour
+    if (this.weather_on() && this.format === "wb" && this.mode !== "kelvin") {
+      this._weather_kelvin = true;
+      void this.set_mode("kelvin");
+    }
+  }
+
+  /** Whether the weather mode switched a G1 to intensity + colour. */
+  private _weather_kelvin: boolean = false;
+
+  /** Programs put in the editor so far (see set_mode). */
+  private _loaded: number = 0;
+
+  /** Weather mode: the slots are shown, only their colour can be changed. */
+  colour_only(): boolean {
+    return this.weather_on() && !this.preview_loading;
+  }
+
+  /**
+   * The colours of the day's slots become the weather days' colours (of
+   * this day, or of every day): a colour profile from the rise (0) to the
+   * set (1), previewed then saved with the weather settings.
+   */
+  private _weather_colors(): void {
+    const pts = this.points.intensity ?? [];
+    if (pts.length < 2) return;
+    const rise = pts[0].m;
+    const span = pts[pts.length - 1].m - rise || 1;
+    const profile = pts.map((p) => ({
+      at: Math.round(((p.m - rise) / span) * 1000) / 1000,
+      k: p.k ?? DEFAULT_KELVIN,
+    }));
+    const days = this._all_days ? [1, 2, 3, 4, 5, 6, 7] : [this.day];
+    const colors = { ...(this.weather_settings?.colors ?? {}) };
+    for (const day of days) colors[String(day)] = profile;
+    this.set_weather_setting("colors", colors);
   }
 
   /**
@@ -700,6 +820,7 @@ export class RSLedProgramEditor extends LitElement {
     keep_mode: boolean,
   ): void {
     const keep_kelvin = keep_mode && this.mode === "kelvin";
+    this._loaded++;
     this.source = data ? structuredClone(data) : {};
     this.format = program_format(this.source) ?? format_hint;
     this.points = {};
@@ -849,6 +970,8 @@ export class RSLedProgramEditor extends LitElement {
    */
   async set_mode(mode: ProgramFormat): Promise<void> {
     if (this.format !== "wb" || mode === this.mode) return;
+    // Another program put in the editor meanwhile: this one is dropped
+    const loaded = this._loaded;
     if (mode === "kelvin") {
       const samples = white_blue_samples(
         this.points.white ?? [],
@@ -857,12 +980,14 @@ export class RSLedProgramEditor extends LitElement {
       const converted = await this.convert(
         samples.map((p) => ({ white: Math.round(p.w), blue: Math.round(p.b) })),
       );
+      if (loaded !== this._loaded) return;
       this.points.intensity = kelvin_points_from_samples(
         samples,
         converted ?? convert_samples_locally(samples, this._model()),
       );
     } else {
       const { white, blue } = await this._to_white_blue();
+      if (loaded !== this._loaded) return;
       this.points.white = white;
       this.points.blue = blue;
     }
@@ -1099,6 +1224,7 @@ export class RSLedProgramEditor extends LitElement {
     const max = this.led?.kelvin_range?.().max ?? 23000;
     pts[n].k = Math.max(min, Math.min(max, Math.round(v / 100) * 100));
     this._changed();
+    if (this.weather_on()) this._weather_colors();
   }
 
   /** Add a point in the middle of the widest gap, or a default program. */
@@ -1264,18 +1390,16 @@ export class RSLedProgramEditor extends LitElement {
       return;
     }
     const days = this._all_days ? [1, 2, 3, 4, 5, 6, 7] : [this.day];
+    // Every request, in the order they are sent
+    const ops: WriteRequest[] = [];
     const request = (
       device_id: string,
       access_path: string,
       data: any,
       method: string = "post",
-    ) =>
-      hass.callService("redsea", "request", {
-        device_id,
-        access_path,
-        method,
-        data,
-      });
+    ) => {
+      ops.push({ device_id, access_path, method, data });
+    };
     for (const target of targets) {
       const prog = await this.program_for(target);
       // Names first, as the ReefBeat app
@@ -1284,7 +1408,7 @@ export class RSLedProgramEditor extends LitElement {
         // with its bare name
         const stamped = target.g2 ? name : preset_name(name);
         for (const day of days) {
-          await request(target.device_id, `/preset_name/${day}`, {
+          request(target.device_id, `/preset_name/${day}`, {
             name: stamped,
           });
         }
@@ -1296,7 +1420,7 @@ export class RSLedProgramEditor extends LitElement {
         const wanted = fit_clouds(this._clouds(day), prog);
         if (target.g2) {
           // A G2 keeps its clouds in its program
-          await request(
+          request(
             target.device_id,
             `/auto/${day}`,
             device_program(prog, day, true, wanted ?? undefined),
@@ -1312,15 +1436,15 @@ export class RSLedProgramEditor extends LitElement {
           wanted?.from !== own?.from ||
           wanted?.to !== own?.to;
         if (change && has_clouds(held)) {
-          await request(target.device_id, `/clouds/${day}`, {}, "delete");
+          request(target.device_id, `/clouds/${day}`, {}, "delete");
         }
-        await request(
+        request(
           target.device_id,
           `/auto/${day}`,
           device_program(prog, day, false),
         );
         if (change && wanted) {
-          await request(
+          request(
             target.device_id,
             `/clouds/${day}`,
             device_clouds(wanted, day),
@@ -1328,9 +1452,33 @@ export class RSLedProgramEditor extends LitElement {
         }
       }
       // The lamp only runs the new program once asked to (as the app does)
-      await request(target.device_id, "/auto/apply", {});
+      request(target.device_id, "/auto/apply", {});
     }
+    await this._send(hass, ops);
     this.close();
+  }
+
+  /**
+   * Send the requests one after the other, paced (WRITE_DELAY_MS), the
+   * progress shown meanwhile (see writing).
+   * @param hass: Home Assistant
+   * @param ops: the requests (redsea.request data)
+   */
+  private async _send(hass: any, ops: WriteRequest[]): Promise<void> {
+    const total = ops.length;
+    this.writing = { done: 0, total };
+    this._tick++;
+    try {
+      for (const [n, op] of ops.entries()) {
+        if (n > 0) await pause(RSLedProgramEditor.WRITE_DELAY_MS);
+        await hass.callService("redsea", "request", op);
+        this.writing = { done: n + 1, total };
+        this._tick++;
+      }
+    } finally {
+      this.writing = null;
+      this._tick++;
+    }
   }
 
   close(): void {
@@ -1649,16 +1797,27 @@ export class RSLedProgramEditor extends LitElement {
       <div class="body">
         <div class="chart">${this._render_chart()}</div>
         <div class="points">
-          ${this.weather_on() ? this._render_weather() : this._render_table()}
+          ${this.weather_on()
+            ? html`<div class="colours_hint">
+                  ${i18n._("led_weather_colours_only")}
+                </div>
+                ${this._render_table()} ${this._render_weather()}`
+            : this._render_table()}
         </div>
+        ${this.preview_loading
+          ? html`<div class="loading_zone">
+              <div class="spinner"></div>
+              <span>${i18n._("led_weather_loading")}</span>
+            </div>`
+          : ""}
       </div>
       <div class="footer">
-        <label style="${this.weather_on() ? "visibility:hidden" : ""}"
+        <label
           ><input
             type="checkbox"
             class="all_days"
             style="width:auto"
-            ?disabled=${this.locked()}
+            ?disabled=${this.preview_loading || this.saving !== null}
             .checked=${this._all_days}
             @change=${(e: Event) => {
               this._all_days = (e.target as HTMLInputElement).checked;
@@ -1687,6 +1846,19 @@ export class RSLedProgramEditor extends LitElement {
         </button>
       </div>
       ${this._render_naming()} ${this._render_deleting()}
+      ${this._render_writing()}
+    </div>`;
+  }
+
+  /** A program being written: its progress, over the editor. */
+  private _render_writing(): TemplateResult | string {
+    if (!this.writing) return "";
+    const { done, total } = this.writing;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    return html`<div class="loading_zone writing">
+      <div class="spinner"></div>
+      <span>${i18n._("led_writing", { done, total })}</span>
+      <div class="progress"><div style="width:${pct}%"></div></div>
     </div>`;
   }
 
@@ -1748,8 +1920,9 @@ export class RSLedProgramEditor extends LitElement {
     const pts = this._pts();
     const kelvin = this._channel === "intensity";
     const last = pts.length - 1;
-    // The weather writes the week: shown, not edited
+    // The weather writes the week: shown, only its colours edited
     const locked = this.locked();
+    const k_locked = locked && !this.colour_only();
     const rows = pts.map(
       (p, n) =>
         html`<tr>
@@ -1784,7 +1957,7 @@ export class RSLedProgramEditor extends LitElement {
                   class="kelvin"
                   type="number"
                   step="100"
-                  ?disabled=${locked}
+                  ?disabled=${k_locked}
                   .value=${String(p.k ?? DEFAULT_KELVIN)}
                   style="border-color:${rgb_css(
                     kelvin_rgb(p.k ?? DEFAULT_KELVIN),

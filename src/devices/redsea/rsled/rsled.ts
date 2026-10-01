@@ -63,6 +63,24 @@ export class RSLed extends RSDevice {
     elements: null,
   };
 
+  // ── Group ─────────────────────────────────────────────────────────────
+
+  /**
+   * Lamps of the group, in its order, from the `linked_leds` sensor: the
+   * lamps of a virtual LED, or of the group a lamp belongs to (none when
+   * the lamp is alone).
+   */
+  linked(): LinkedLed[] {
+    const leds = this.get_entity("linked_leds")?.attributes?.leds;
+    return Array.isArray(leds) ? leds : [];
+  }
+
+  /** Hardware id of this lamp (its device identifier), null when unknown. */
+  current_hwid(): string | null {
+    const ident = (this.device?.elements as any)?.[0]?.identifiers?.[0];
+    return Array.isArray(ident) && ident[1] ? String(ident[1]) : null;
+  }
+
   // ── Time and program ──────────────────────────────────────────────────
 
   /**
@@ -580,12 +598,6 @@ export class RSLedVirtual extends RSLed {
   constructor() {
     super();
     this._use_view(false);
-  }
-
-  /** Lamps of the group, from the `linked_leds` sensor. */
-  linked(): LinkedLed[] {
-    const leds = this.get_entity("linked_leds")?.attributes?.leds;
-    return Array.isArray(leds) ? leds : [];
   }
 
   /**

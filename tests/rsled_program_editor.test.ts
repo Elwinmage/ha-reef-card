@@ -9,7 +9,10 @@ import { render, svg } from "lit";
 import "../src/devices/index";
 import * as P from "../src/devices/redsea/rsled/rsled_program";
 import {
+  CLOUD_BAND_COLOR,
   CLOUD_BAND_OPACITY,
+  CLOUD_EDGE_COLOR,
+  CLOUD_STRIP_HEIGHT,
   chart_scale,
   clouds_band,
   CLOUD_COUNT,
@@ -1341,6 +1344,13 @@ describe("rsled_chart: clouds band", () => {
     expect(Number(rect.getAttribute("width"))).toBeCloseTo(px(900) - px(720));
     expect(rect.getAttribute("opacity")).toBe(String(CLOUD_BAND_OPACITY.High));
     expect(el.querySelectorAll(".clouds_band line").length).toBe(2);
+    // Visible on any theme: a strip along the top of the window
+    const strip = el.querySelector(".clouds_strip") as SVGRectElement;
+    expect(strip.getAttribute("x")).toBe(rect.getAttribute("x"));
+    expect(strip.getAttribute("width")).toBe(rect.getAttribute("width"));
+    expect(Number(strip.getAttribute("height"))).toBe(CLOUD_STRIP_HEIGHT);
+    expect(strip.getAttribute("fill")).toBe(CLOUD_EDGE_COLOR);
+    expect(rect.getAttribute("fill")).toBe(CLOUD_BAND_COLOR);
   });
 
   it("clouds in the band: the cloudier, the more", () => {

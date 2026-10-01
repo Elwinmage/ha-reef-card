@@ -1,0 +1,3031 @@
+"""Sensor entities for the Red Sea Reefeat integration.
+
+This module registers Home Assistant `sensor` entities for supported devices.
+
+Design notes (strict typing + HA patterns)
+------------------------------------------
+This file intentionally follows the "select/number style" used in this repo:
+
+- We do **not** subclass `CoordinatorEntity` here.
+- Instead, each entity subscribes to the device/coordinator via
+  `device.async_add_listener(...)` inside `async_added_to_hass`.
+- Entities read from a local data cache using `device.get_data(...)`.
+
+This approach avoids:
+- Pylance strict incompatibilities around `CoordinatorEntity.available`
+- Stubs mismatches for descriptor signatures
+- Unclear lifetime/availability semantics when the coordinator is custom
+
+Strict typing strategy
+----------------------
+- We define a `DescriptionT` union for all description dataclasses used by sensors.
+- Each entity stores the typed union in `self._description`.
+- Subclasses narrow `self._description` via `cast(...)` before accessing fields
+  specific to that description type (e.g. `value_name`, `id_name`).
+- Special coordinator capabilities (`cloud_link`, `get_current_value`) are modeled
+  with `Protocol`s and accessed using `cast(Protocol, device)`.
+
+StateType constraints
+---------------------
+Home Assistant `StateType` is typically `str | int | float | None` (and a few other
+simple types depending on HA version). It does **not** include `datetime.date`
+or `datetime.datetime`, but `SensorEntity` accepts both — and *requires* them
+for the corresponding device classes:
+
+- `device_class=DATE`      → the native value must be a `datetime.date`
+- `device_class=TIMESTAMP` → the native value must be a tz-aware
+  `datetime.datetime`
+
+Returning an ISO-8601 string for either one raises `ValueError` when the entity
+is added, because HA calls `.tzinfo` / `.isoformat()` on the value. Use the
+local alias `SensorNativeValue` for anything that may carry a date or datetime.
+
+DeviceInfo handling
+-------------------
+`device.device_info` may be shared between entities. When we need to customize
+it (e.g. per head / per pump), we clone it and adjust identifiers to avoid
+mutating shared state.
+"""
+
+from __future__ import annotations
+
+import datetime
+import logging
+import re
+from collections.abc import Callable
+from contextlib import suppress
+from dataclasses import dataclass, replace
+from functools import cached_property
+from typing import Any, Protocol, TypeAlias, cast, runtime_checkable
+
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import (
+    PERCENTAGE,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    EntityCategory,
+    UnitOfLength,
+    UnitOfPower,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolume,
+)
+from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
+
+from .const import (
+    DOMAIN,
+    LED_BLUE_INTERNAL_NAME,
+    LED_WHITE_INTERNAL_NAME,
+    LIGHTS_LIBRARY,
+    SUPPLEMENTS_LIBRARY,
+    WAVE_DIRECTIONS,
+    WAVE_SCHEDULE_PATH,
+    WAVE_TYPES,
+    WAVES_LIBRARY,
+)
+from .coordinator import (
+    ReefATOCoordinator,
+    ReefBeatCloudCoordinator,
+    ReefBeatCoordinator,
+    ReefControlCoordinator,
+    ReefDoseCoordinator,
+    ReefLedCoordinator,
+    ReefLedG2Coordinator,
+    ReefMatCoordinator,
+    ReefPowerCoordinator,
+    ReefRunCoordinator,
+    ReefVirtualLedCoordinator,
+    ReefWaveCoordinator,
+)
+from .entity import ReefBeatRestoreEntity, ReefRoleMixin, RestoreSpec
+from .led_weather_entities import weather_entities
+from .probe_entities import probe_state_attributes
+
+_LOGGER = logging.getLogger(__name__)
+
+# HA's StateType doesn't include date/datetime, but SensorEntity supports them for
+# device classes like DATE/TIMESTAMP.
+SensorNativeValue: TypeAlias = StateType | datetime.date | datetime.datetime
+
+# -----------------------------------------------------------------------------
+# Protocols (capability-based typing)
+# -----------------------------------------------------------------------------
+
+
+@runtime_checkable
+
+# =============================================================================
+# Classes
+# =============================================================================
+
+class _CloudLinkedCoordinator(Protocol):
+    """Coordinator capability: indicates a cloud-linked device.
+
+    Some coordinators expose a local device but are linked to a ReefBeat cloud account.
+    We previously detected this by checking base-class names. Prefer a capability check.
+    """
+
+    def cloud_link(self) -> StateType: ...
+
+
+@runtime_checkable
+class _WaveValueCoordinator(Protocol):
+    """Coordinator capability: expose current wave values.
+
+    Some coordinator implementations provide a convenience getter that returns
+    the current wave schedule values (e.g. type, direction, intensities).
+    We model it as a Protocol and cast before calling.
+    """
+
+    def get_current_value(self, basename: str, name: str) -> Any: ...
+
+
+# -----------------------------------------------------------------------------
+# Entity descriptions
+# -----------------------------------------------------------------------------
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefBeatSensorEntityDescription(SensorEntityDescription):
+    """Description for device-backed sensors (most sensors).
+
+    `value_fn` receives the coordinator instance and must return a value Home
+    Assistant accepts as a native sensor value: a `StateType` (str/int/float/
+    None) for plain sensors, a `datetime.datetime` for `device_class=TIMESTAMP`
+    and a `datetime.date` for `device_class=DATE`. Returning an ISO string for
+    the latter two raises at entity-add time.
+    """
+
+    exists_fn: Callable[[ReefBeatCoordinator], bool] = lambda _: True
+    value_fn: Callable[[ReefBeatCoordinator], SensorNativeValue]
+    # Optional extra attribute, read by JSONPath. Used to carry a schedule
+    # alongside its mode sensor so a card reads it from the state machine
+    # instead of issuing its own request.
+    with_attr_name: str | None = None
+    with_attr_value: str | None = None
+    # Optional computed attributes: a callable returning a dict merged into the
+    # entity's extra_state_attributes on every update. Used by the temperature
+    # fusion sensor to expose its per-source breakdown.
+    attributes_fn: Callable[[ReefBeatCoordinator], dict[str, Any]] | None = None
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefBeatCloudSensorEntityDescription(SensorEntityDescription):
+    """Description for cloud-library sensors.
+
+    These read by `value_name` JSONPath from the cloud coordinator response.
+    """
+
+    exists_fn: Callable[[ReefBeatCoordinator], bool] = lambda _: True
+    value_name: str = ""
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefDoseSensorEntityDescription(SensorEntityDescription):
+    """Description for per-head ReefDose sensors.
+
+    - `head` selects the dosing head index.
+    - `value_name` is the JSONPath to read.
+    - `with_attr_*` optionally adds extra attributes (e.g. schedule data).
+    """
+
+    exists_fn: Callable[[ReefDoseCoordinator], bool] = lambda _: True
+    value_name: str = ""
+    with_attr_name: str | None = None
+    with_attr_value: str | None = None
+    head: int = 0
+
+
+@dataclass(kw_only=True, frozen=True)
+class RestoreSensorEntityDescription(SensorEntityDescription):
+    """Description for restore-capable sensors.
+
+    These sensors keep an internal value that can be restored across restarts and
+    optionally sync that value into the coordinator cache.
+
+    - `value_name` is where to store the restored value into the cache.
+    - `dependency` is an event key (string) to listen to for updates.
+    """
+
+    exists_fn: Callable[[ReefDoseCoordinator], bool] = lambda _: True
+    head: int = 0
+    value_name: str | None = None
+    dependency: str | None = None
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefRunSensorEntityDescription(SensorEntityDescription):
+    """Description for per-pump ReefRun sensors."""
+
+    exists_fn: Callable[[ReefRunCoordinator], bool] = lambda _: True
+    value_name: str = ""
+    pump: int = 0
+    with_attr_name: str | None = None
+    with_attr_value: str | None = None
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefLedScheduleSensorEntityDescription(SensorEntityDescription):
+    """Description for LED schedule sensors.
+
+    These show the current program name for a schedule id and expose backing
+    raw data in extra attributes.
+    """
+
+    exists_fn: Callable[[ReefLedCoordinator], bool] = lambda _: True
+    value_name: str = ""
+    id_name: int = 0
+    with_attr_name: str | None = None
+    with_attr_value: str | None = None
+
+
+@dataclass(kw_only=True, frozen=True)
+class ReefWaveSensorEntityDescription(SensorEntityDescription):
+    """Description for current wave schedule sensors.
+
+    `value_basename` identifies the active schedule source, while `value_name`
+    selects the field (e.g. 'type', 'direction', 'fti').
+    """
+
+    exists_fn: Callable[[ReefBeatCoordinator], bool] = lambda _: True
+    value_basename: str = WAVE_SCHEDULE_PATH
+    value_name: str = ""
+
+
+DescriptionT = (
+    ReefBeatSensorEntityDescription
+    | ReefBeatCloudSensorEntityDescription
+    | ReefDoseSensorEntityDescription
+    | RestoreSensorEntityDescription
+    | ReefRunSensorEntityDescription
+    | ReefLedScheduleSensorEntityDescription
+    | ReefWaveSensorEntityDescription
+)
+
+
+# -----------------------------------------------------------------------------
+# Static sensors (descriptions)
+# -----------------------------------------------------------------------------
+
+CLOUD_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="cloud_account",
+        translation_key="cloud_account",
+        value_fn=lambda device: cast(_CloudLinkedCoordinator, device).cloud_link(),
+        icon="mdi:cloud-sync-outline",
+    ),
+)
+
+USER_SENSORS: tuple[ReefBeatCloudSensorEntityDescription, ...] = (
+    ReefBeatCloudSensorEntityDescription(
+        key="email",
+        translation_key="email",
+        value_name="$.sources[?(@.name=='/user')].data.email",
+        icon="mdi:at",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="backup_email",
+        translation_key="backup_email",
+        value_name="$.sources[?(@.name=='/user')].data.backup_email",
+        icon="mdi:at",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="first_name",
+        translation_key="first_name",
+        value_name="$.sources[?(@.name=='/user')].data.first_name",
+        icon="mdi:account",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="last_name",
+        translation_key="last_name",
+        value_name="$.sources[?(@.name=='/user')].data.last_name",
+        icon="mdi:account-outline",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="mobile_number",
+        translation_key="mobile_number",
+        value_name="$.sources[?(@.name=='/user')].data.mobile_number",
+        icon="mdi:phone",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="language",
+        translation_key="language",
+        value_name="$.sources[?(@.name=='/user')].data.language",
+        icon="mdi:translate",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="country",
+        translation_key="country",
+        value_name="$.sources[?(@.name=='/user')].data.country",
+        icon="mdi:earth",
+    ),
+    ReefBeatCloudSensorEntityDescription(
+        key="zip_code",
+        translation_key="zip_code",
+        value_name="$.sources[?(@.name=='/user')].data.zip_code",
+        icon="mdi:mailbox",
+    ),
+)
+
+COMMON_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="mode",
+        translation_key="mode",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/mode')].data.mode"
+        ),
+        icon="mdi:play",
+        device_class=SensorDeviceClass.ENUM,
+        options=[
+            "auto",
+            "blockage",
+            "calibration",
+            "controller",
+            "emergency",
+            "empty",
+            "end_of_roll",
+            "feeding",
+            "high_water",
+            "leak",
+            "maintenance",
+            "malfunction",
+            "manual",
+            "mat_error",
+            "missing_pump",
+            "missing_sensor",
+            "no_ec_sensor",
+            "off",
+            "overheating",
+            "partial_auto",
+            "preview",
+            "priming",
+            "pump_timeout",
+            "setup",
+            "setup_error_high",
+            "setup_error_torn",
+            "shortcut_off_delay",
+            "stalled",
+            "timer",
+            "torn_mat",
+            "user_test",
+            "no_roll",
+        ],
+    ),
+    ReefBeatSensorEntityDescription(
+        key="last_alert_message",
+        translation_key="last_alert_message",
+        value_fn=lambda device: device.get_data("$.message.alert.message", True),
+        icon="mdi:alert",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="last_message",
+        translation_key="last_message",
+        value_fn=lambda device: device.get_data("$.message.message", True),
+        icon="mdi:note-check",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="ip",
+        translation_key="ip",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/wifi')].data.ip"
+        ),
+        icon="mdi:check-network-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="wifi_ssid",
+        translation_key="wifi_ssid",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/wifi')].data.ssid"
+        ),
+        icon="mdi:wifi-star",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="wifi_signal",
+        translation_key="wifi_signal",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/wifi')].data.signal_dBm"
+        ),
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+        icon="mdi:signal",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="wifi_quality",
+        translation_key="wifi_quality",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/wifi')].data.signal_dBm"
+        ),
+        icon="mdi:wifi-strength-4",
+        device_class=SensorDeviceClass.ENUM,
+        options=[
+            "poor",
+            "low",
+            "medium",
+            "good",
+            "excellent",
+        ],
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+)
+
+LED_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="fan",
+        translation_key="fan",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.POWER_FACTOR,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/manual')].data.fan"
+        ),
+        exists_fn=lambda device: not isinstance(device, ReefVirtualLedCoordinator),
+        entity_category=EntityCategory.DIAGNOSTIC,
+        icon="mdi:fan",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="temperature",
+        translation_key="temperature",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/manual')].data.temperature"
+        ),
+        exists_fn=lambda device: not isinstance(device, ReefVirtualLedCoordinator),
+        entity_category=EntityCategory.DIAGNOSTIC,
+        icon="mdi:thermometer",
+        suggested_display_precision=1,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="moon_intensity",
+        translation_key="moon_intensity",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/moonphase')].data.intensity"
+        ),
+        icon="mdi:moon-waning-crescent",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="todays_moon_day",
+        translation_key="todays_moon_day",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/moonphase')].data.todays_moon_day"
+        ),
+        icon="mdi:calendar-today",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="next_full_moon",
+        translation_key="next_full_moon",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/moonphase')].data.next_full_moon"
+        ),
+        icon="mdi:moon-full",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="next_new_moon",
+        translation_key="next_new_moon",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/moonphase')].data.next_new_moon"
+        ),
+        icon="mdi:moon-new",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="acclimation_duration",
+        translation_key="acclimation_duration",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/acclimation')].data.duration"
+        ),
+        icon="mdi:calendar-expand-horizontal",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="acclimation_start_intensity_factor",
+        translation_key="acclimation_start_intensity_factor",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/acclimation')].data.start_intensity_factor"
+        ),
+        icon="mdi:sun-wireless-outline",
+    ),
+    # Live acclimation progress: the card shows both next to the acclimation
+    # switch ("3 days / 35 %"), the device reports them on /acclimation.
+    ReefBeatSensorEntityDescription(
+        key="acclimation_remaining_days",
+        translation_key="acclimation_remaining_days",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/acclimation')].data.remaining_days", True
+        ),
+        icon="mdi:calendar-clock",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="acclimation_current_intensity_factor",
+        translation_key="acclimation_current_intensity_factor",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/acclimation')].data.current_intensity_factor",
+            True,
+        ),
+        icon="mdi:brightness-percent",
+    ),
+    # Program the lamp is running, from its own clock: `active_preset` is the
+    # weekday of the /auto/<day> source in use (G1 and G2 dashboards).
+    ReefBeatSensorEntityDescription(
+        key="current_program",
+        translation_key="current_program",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.current_program.name", True
+        ),
+        attributes_fn=lambda device: {
+            "active_preset": device.get_data(
+                "$.sources[?(@.name=='/dashboard')].data.current_program.active_preset",
+                True,
+            )
+        },
+        exists_fn=lambda device: (
+            not isinstance(device, ReefVirtualLedCoordinator)
+            and device.get_data(
+                "$.sources[?(@.name=='/dashboard')].data.current_program", True
+            )
+            is not None
+        ),
+        icon="mdi:calendar-star",
+    ),
+)
+
+# The lamps of a group, in its order, for the card (list, links, program
+# writes): on the virtual LED, and on each of its lamps (none when alone)
+VIRTUAL_LED_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="linked_leds",
+        translation_key="linked_leds",
+        value_fn=lambda device: len(cast(ReefLedCoordinator, device).linked_leds()),
+        attributes_fn=lambda device: {
+            "leds": cast(ReefLedCoordinator, device).linked_leds()
+        },
+        icon="mdi:lightbulb-group",
+    ),
+)
+
+G2_LED_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="white",
+        translation_key="white",
+        value_fn=lambda device: device.get_data(LED_WHITE_INTERNAL_NAME),
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:lightbulb-outline",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="blue",
+        translation_key="blue",
+        value_fn=lambda device: device.get_data(LED_BLUE_INTERNAL_NAME),
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:lightbulb",
+    ),
+)
+
+MAT_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="days_till_end_of_roll",
+        translation_key="days_till_end_of_roll",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.days_till_end_of_roll"
+        ),
+        icon="mdi:sort-calendar-ascending",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="today_usage",
+        translation_key="today_usage",
+        native_unit_of_measurement=UnitOfLength.CENTIMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.today_usage"
+        ),
+        icon="mdi:tape-measure",
+        suggested_display_precision=2,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="daily_average_usage",
+        translation_key="daily_average_usage",
+        native_unit_of_measurement=UnitOfLength.CENTIMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.daily_average_usage"
+        ),
+        icon="mdi:tape-measure",
+        suggested_display_precision=1,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="total_usage",
+        translation_key="total_usage",
+        native_unit_of_measurement=UnitOfLength.METERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: (
+            device.get_data("$.sources[?(@.name=='/dashboard')].data.total_usage") / 100
+        ),
+        icon="mdi:paper-roll",
+        suggested_display_precision=2,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="remaining_length",
+        translation_key="remaining_length",
+        native_unit_of_measurement=UnitOfLength.METERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: (
+            device.get_data("$.sources[?(@.name=='/dashboard')].data.remaining_length")
+            / 100
+        ),
+        icon="mdi:paper-roll-outline",
+        suggested_display_precision=2,
+    ),
+)
+
+# -----------------------------------------------------------------------------
+# Derived dynamic description lists (LED schedules)
+# -----------------------------------------------------------------------------
+
+_led_schedules: list[ReefLedScheduleSensorEntityDescription] = []
+for auto_id in range(1, 8):
+    _led_schedules.extend(
+        [
+            ReefLedScheduleSensorEntityDescription(
+                key="auto_" + str(auto_id),
+                translation_key="auto_" + str(auto_id),
+                value_name="$.sources[?(@.name=='/preset_name')].data[?(@.day=="
+                + str(auto_id)
+                + ")].name",
+                exists_fn=lambda device: (
+                    device.get_data("$.sources[?(@.name=='/preset_name')].data", True)
+                    is not None
+                ),
+                id_name=auto_id,
+                icon="mdi:calendar",
+            ),
+            ReefLedScheduleSensorEntityDescription(
+                key="auto_" + str(auto_id),
+                translation_key="auto_" + str(auto_id),
+                value_name="$.sources[?(@.name=='/preset_name/"
+                + str(auto_id)
+                + "')].data.name",
+                exists_fn=lambda device, _aid=auto_id: (
+                    device.get_data(
+                        "$.sources[?(@.name=='/preset_name/"
+                        + str(_aid)
+                        + "')].data.name",
+                        True,
+                    )
+                    is not None
+                ),
+                id_name=auto_id,
+                icon="mdi:calendar",
+            ),
+        ]
+    )
+
+LED_SCHEDULES: tuple[ReefLedScheduleSensorEntityDescription, ...] = tuple(
+    _led_schedules
+)
+
+# -----------------------------------------------------------------------------
+# Wave / ATO descriptions
+# -----------------------------------------------------------------------------
+
+WAVE_SCHEDULE_SENSORS: tuple[ReefWaveSensorEntityDescription, ...] = (
+    ReefWaveSensorEntityDescription(
+        key="wave_type",
+        translation_key="wave_type",
+        value_name="type",
+        device_class=SensorDeviceClass.ENUM,
+        options=WAVE_TYPES,
+        icon="mdi:wave",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_name",
+        translation_key="name",
+        value_name="name",
+        icon="mdi:identifier",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_direction",
+        translation_key="wave_direction",
+        value_name="direction",
+        device_class=SensorDeviceClass.ENUM,
+        options=WAVE_DIRECTIONS,
+        icon="mdi:waves-arrow-right",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_forward_time",
+        translation_key="wave_forward_time",
+        value_name="frt",
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        device_class=SensorDeviceClass.DURATION,
+        icon="mdi:waves-arrow-right",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_backward_time",
+        translation_key="wave_backward_time",
+        value_name="rrt",
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        device_class=SensorDeviceClass.DURATION,
+        icon="mdi:waves-arrow-left",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_forward_intensity",
+        translation_key="wave_forward_intensity",
+        value_name="fti",
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:waves-arrow-right",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_backward_intensity",
+        translation_key="wave_backward_intensity",
+        value_name="rti",
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:waves-arrow-left",
+    ),
+    ReefWaveSensorEntityDescription(
+        key="wave_step",
+        translation_key="wave_step",
+        value_name="sn",
+        icon="mdi:stairs",
+    ),
+)
+
+# Possible values for `last_pump_on_cause` on an ATO port.
+#
+# The app only models two (`AtoAdvanceCause`: `manual` / `none`), but the
+# firmware reports more than the cloud dashboard carries: a real RSATO+
+# `/dashboard` returns `ec_sensor_s1`, the level sensor that triggered the
+# fill. `ec_sensor_s2` is the matching second level of the same probe.
+#
+# This list is therefore incomplete by construction — it holds what has been
+# observed or confirmed, not a closed enum. Any value outside it shows up as
+# `unknown` on the entity, which is preferable to a wrong translation.
+_ATO_PUMP_CAUSE_OPTIONS: tuple[str, ...] = (
+    "none",
+    "manual",
+    "ec_sensor_s1",
+    "ec_sensor_s2",
+)
+
+# `leak_status` enum on ATO ports.
+#
+# Values read from the `from(String)` mapper of the app's `AtoLeakStatus` and
+# `ControlLeakStatus` enums, which both accept exactly these three strings.
+# Careful: `$Keys.aquarium` is the name of the *field*, its value is the longer
+# `aquarium_water_leak` — the short forms never appear on the wire.
+#
+# `dry` is the healthy state: the leak sensor is dry. The other two indicate
+# water where it should not be, from the aquarium side or from the RO/DI feed
+# side respectively. The app falls back to `Dry` on an unrecognised value.
+_ATO_LEAK_STATUS_OPTIONS: tuple[str, ...] = (
+    "dry",
+    "aquarium_water_leak",
+    "rodi_water_leak",
+)
+
+
+ATO_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="s_water_level",
+        translation_key="water_level",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.water_level"
+        ),
+        icon="mdi:waves-arrow-up",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="today_fills",
+        translation_key="today_fills",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.today_fills"
+        ),
+        icon="mdi:counter",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="today_volume_usage",
+        translation_key="today_volume_usage",
+        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+        device_class=SensorDeviceClass.VOLUME,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.today_volume_usage"
+        ),
+        icon="mdi:waves-arrow-up",
+        suggested_display_precision=0,
+    ),
+    # Not a lifetime counter despite the firmware name: it holds the volume
+    # dispensed from the current container and resets when that container is
+    # refilled. `total_fills` next to it *is* lifetime and never resets — two
+    # `total_*` fields with opposite semantics.
+    #
+    # It also appears to be what `volume_left` is derived from:
+    # ato_tank_volume * 1000 - total_volume_usage matches on every payload
+    # seen so far.
+    ReefBeatSensorEntityDescription(
+        key="total_volume_usage",
+        translation_key="total_volume_usage",
+        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+        device_class=SensorDeviceClass.VOLUME,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.total_volume_usage"
+        ),
+        icon="mdi:waves-arrow-up",
+        suggested_display_precision=0,
+    ),
+    # Lifetime count, unlike total_volume_usage: a user reported 1111 with
+    # 4 of them from today.
+    ReefBeatSensorEntityDescription(
+        key="total_fills",
+        translation_key="total_fills",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.total_fills"
+        ),
+        icon="mdi:counter",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="daily_fills_average",
+        translation_key="daily_fills_average",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.daily_fills_average"
+        ),
+        icon="mdi:counter",
+        suggested_display_precision=1,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="daily_volume_average",
+        translation_key="daily_volume_average",
+        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+        device_class=SensorDeviceClass.VOLUME,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.daily_volume_average"
+        ),
+        icon="mdi:waves-arrow-up",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="volume_left",
+        translation_key="volume_left",
+        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+        device_class=SensorDeviceClass.VOLUME,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.volume_left"
+        ),
+        icon="mdi:water-pump-off",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="days_till_empty",
+        translation_key="days_till_empty",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.days_till_empty"
+        ),
+        icon="mdi:counter",
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="current_level",
+        translation_key="current_level",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.ato_sensor.current_level"
+        ),
+        icon="mdi:car-coolant-level",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="current_read",
+        translation_key="current_read",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.ato_sensor.current_read"
+        ),
+        icon="mdi:water-thermometer-outline",
+        suggested_display_precision=1,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="temperature_probe_status",
+        translation_key="temperature_probe_status",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.ato_sensor.temperature_probe_status"
+        ),
+        icon="mdi:thermometer-check",
+    ),
+    # `dry` / `aquarium_water_leak` / `rodi_water_leak`, read off the
+    # `AtoLeakStatus.from()` mapper in the Red Sea app. `dry` is the healthy
+    # state; the other two say which side the water came from, a distinction
+    # the companion `status` moisture binary_sensor cannot carry.
+    #
+    # `device_class=ENUM` is required for the `state` translations to apply at
+    # all: without it Home Assistant shows the raw firmware value and the
+    # strings.json block is ignored. The trade-off is the usual one — a value
+    # outside `options` is reported as `unknown` rather than displayed — and
+    # it is accepted here because this set really is closed: `AtoLeakStatus`
+    # maps exactly these three and falls back to `dry` for anything else.
+    ReefBeatSensorEntityDescription(
+        key="leak_sensor_status",
+        translation_key="leak_sensor_status",
+        device_class=SensorDeviceClass.ENUM,
+        options=list(_ATO_LEAK_STATUS_OPTIONS),
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.leak_sensor.status"
+        ),
+        icon="mdi:pipe-leak",
+    ),
+    ReefBeatSensorEntityDescription(
+        key="leak_sensor_current_read",
+        translation_key="leak_sensor_current_read",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.leak_sensor.current_read"
+        ),
+        icon="mdi:pipe-leak",
+        suggested_display_precision=0,
+    ),
+    # Observed values: `pump_on`, `off`, `malfunction`, the last one covering
+    # every fault (dry running, fill timeout...).
+    #
+    # Careful with the `on` form: a field report described the states as
+    # "on/off/malfunction", but that is the *rendered* label — a real
+    # `/dashboard` payload carries `prev_pump_state: "pump_on"`. Declaring
+    # `on` as an option would drop every running pump to `unknown`.
+    ReefBeatSensorEntityDescription(
+        key="pump_state",
+        translation_key="pump_state",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_state"
+        ),
+        icon="mdi:pump",
+    ),
+    # Previous value of `pump_state`, kept by the firmware across transitions.
+    # Neither field reaches the Red Sea app (the cloud dashboard is a subset of
+    # the local REST payload), so their value set is unknown and no `options`
+    # can be declared. Exposed as a diagnostic to let the two be compared:
+    # a payload reporting `is_pump_on: true` together with `pump_state: "off"`
+    # has been observed, so at least one of the three is not what its name
+    # suggests.
+    ReefBeatSensorEntityDescription(
+        key="prev_pump_state",
+        translation_key="prev_pump_state",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.prev_pump_state"
+        ),
+        icon="mdi:pump",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="pump_speed",
+        translation_key="pump_speed",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_speed"
+        ),
+        icon="mdi:speedometer",
+        suggested_display_precision=0,
+    ),
+    # Raw pump current draw. The firmware compares it to the three thresholds
+    # below to decide whether the pump is running dry, partially blocked or
+    # fully blocked, so the four are only meaningful together.
+    ReefBeatSensorEntityDescription(
+        key="pump_consumption",
+        translation_key="pump_consumption",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_consumption"
+        ),
+        icon="mdi:flash",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="pump_empty_threshold",
+        translation_key="pump_empty_threshold",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_empty_threshold"
+        ),
+        icon="mdi:flash-alert",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="pump_soft_blockage_threshold",
+        translation_key="pump_soft_blockage_threshold",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_soft_blockage_threshold"
+        ),
+        icon="mdi:flash-alert",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="pump_blockage_threshold",
+        translation_key="pump_blockage_threshold",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.pump_blockage_threshold"
+        ),
+        icon="mdi:flash-alert",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="flow_rate",
+        translation_key="flow_rate",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.flow_rate"
+        ),
+        icon="mdi:pipe",
+        suggested_display_precision=0,
+    ),
+    # What triggered the last fill. See _ATO_PUMP_CAUSE_OPTIONS: the firmware
+    # reports more causes than the app models, so the list is open-ended and
+    # this sensor is deliberately left without `device_class=ENUM` — an
+    # unlisted cause would otherwise be dropped to `unknown`.
+    ReefBeatSensorEntityDescription(
+        key="last_pump_on_cause",
+        translation_key="last_pump_on_cause",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.last_pump_on_cause"
+        ),
+        icon="mdi:history",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="last_fill_date",
+        translation_key="last_fill_date",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda device: _epoch_to_datetime(
+            device.get_data(
+                "$.sources[?(@.name=='/dashboard')].data.last_fill_date",
+                is_None_possible=True,
+            )
+        ),
+        icon="mdi:calendar-check",
+    ),
+    # Running averages of the two level-sensor electrodes. `last_pump_on_cause`
+    # names one of them (`ec_sensor_s1` / `ec_sensor_s2`) when a fill starts.
+    ReefBeatSensorEntityDescription(
+        key="s1_average",
+        translation_key="s1_average",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.s1_average"
+        ),
+        icon="mdi:sine-wave",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        suggested_display_precision=0,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="s2_average",
+        translation_key="s2_average",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.s2_average"
+        ),
+        icon="mdi:sine-wave",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        suggested_display_precision=0,
+    ),
+    # Temperature probe identity and history. `code` is the probe model
+    # reference printed on the sensor itself, not a status.
+    ReefBeatSensorEntityDescription(
+        key="ato_sensor_code",
+        translation_key="ato_sensor_code",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.ato_sensor.code"
+        ),
+        icon="mdi:barcode",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="ato_sensor_last_installation_date",
+        translation_key="ato_sensor_last_installation_date",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda device: _epoch_to_datetime(
+            device.get_data(
+                "$.sources[?(@.name=='/dashboard')].data.ato_sensor"
+                ".last_installation_date",
+                is_None_possible=True,
+            )
+        ),
+        icon="mdi:calendar-plus",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="ato_sensor_last_adjustment_date",
+        translation_key="ato_sensor_last_adjustment_date",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda device: _epoch_to_datetime(
+            device.get_data(
+                "$.sources[?(@.name=='/dashboard')].data.ato_sensor"
+                ".last_adjustment_date",
+                is_None_possible=True,
+            )
+        ),
+        icon="mdi:calendar-edit",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+)
+
+# -----------------------------------------------------------------------------
+# ReefControl Power (RSPOWER6, RSPOWER8) — read-only sensors
+# -----------------------------------------------------------------------------
+
+# Fixed (non-per-socket) sensors. Per-socket sensors are built dynamically in
+# async_setup_entry so we can iterate up to `device.socket_count`.
+POWER_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="battery_level",
+        translation_key="battery_level",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.battery_level"
+        ),
+        icon="mdi:battery",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="power_temperature",
+        translation_key="power_temperature",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        # On a standalone RSPower with a local temperature probe, `temperature`
+        # is an object {value,status,level,...}; without a probe it is null.
+        value_fn=lambda device: _power_local_temperature(device),
+        # Same shape as a hub probe's reading, so a card draws both alike
+        attributes_fn=lambda device: _power_temperature_attributes(device),
+        icon="mdi:thermometer",
+        suggested_display_precision=1,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="max_sockets",
+        translation_key="max_sockets",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/configuration')].data.max_sockets"
+        ),
+        icon="mdi:power-socket-eu",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="model_type",
+        translation_key="model_type",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/configuration')].data.model_type"
+        ),
+        icon="mdi:earth",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="connected_control",
+        translation_key="connected_control",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.connected_device.hwid",
+            is_None_possible=True,
+        ),
+        icon="mdi:link-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="connected_control_type",
+        translation_key="connected_control_type",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.connected_device.type",
+            is_None_possible=True,
+        ),
+        icon="mdi:devices",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="connected_control_status",
+        translation_key="connected_control_status",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.connected_device.status",
+            is_None_possible=True,
+        ),
+        icon="mdi:lan-connect",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="total_consumption",
+        translation_key="total_consumption",
+        icon="mdi:flash",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value_fn=lambda device: _total_power_consumption(device),
+    ),
+)
+
+
+def _total_power_consumption(device: ReefBeatCoordinator) -> float | None:
+    """Sum the consumption of every socket on a ReefPower device.
+
+    Returns None when no socket reports a valid wattage (the entity shows
+    as unavailable rather than 0 W in that case).
+    """
+    count = getattr(device, "socket_count", 0)
+    total: float = 0.0
+    any_valid = False
+    for idx in range(count):
+        raw = device.get_data(
+            f"$.sources[?(@.name=='/dashboard')].data.sockets[{idx}].consumption",
+            is_None_possible=True,
+        )
+        if raw is not None:
+            try:
+                total += float(raw)
+                any_valid = True
+            except (TypeError, ValueError):
+                pass
+    return round(total, 1) if any_valid else None
+
+
+# -----------------------------------------------------------------------------
+# ReefControl hub (RSCONTROLPRO, RSCONTROLLITE) — read-only sensors
+# -----------------------------------------------------------------------------
+
+CONTROL_SENSORS: tuple[ReefBeatSensorEntityDescription, ...] = (
+    ReefBeatSensorEntityDescription(
+        key="control_mode",
+        translation_key="control_mode",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/mode')].data.mode"
+        ),
+        icon="mdi:power-settings",
+        device_class=SensorDeviceClass.ENUM,
+        options=["auto", "off", "setup", "feeding", "maintenance"],
+    ),
+    ReefBeatSensorEntityDescription(
+        key="buzzer_cause",
+        translation_key="buzzer_cause",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.buzzer.cause"
+        ),
+        icon="mdi:bell-alert",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="connected_power",
+        translation_key="connected_power",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.connected_device.hwid",
+            is_None_possible=True,
+        ),
+        icon="mdi:link-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    ReefBeatSensorEntityDescription(
+        key="connected_power_state",
+        translation_key="connected_power_state",
+        value_fn=lambda device: device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.connected_device.state",
+            is_None_possible=True,
+        ),
+        icon="mdi:transit-connection-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+)
+
+
+# -----------------------------------------------------------------------------
+# ReefSense probes (dynamic) — helper for ReefControl hub
+# -----------------------------------------------------------------------------
+
+
+def _epoch_to_datetime(ts: Any) -> datetime.datetime | None:
+    """Convert a Unix epoch (int/float) into a tz-aware UTC datetime.
+
+    Home Assistant's ``SensorDeviceClass.TIMESTAMP`` requires a real tz-aware
+    ``datetime`` object: `SensorEntity.state` calls `value.tzinfo` on it, so an
+    ISO-8601 *string* raises ``AttributeError: 'str' object has no attribute
+    'tzinfo'`` and the entity fails to be added. Returns ``None`` for unusable
+    inputs so the entity gracefully reports "unavailable".
+    """
+    if ts is None:
+        return None
+    try:
+        # Some payloads report the epoch as a string; be permissive.
+        epoch = int(float(ts))
+    except (TypeError, ValueError):
+        return None
+    if epoch <= 0:
+        return None
+    return datetime.datetime.fromtimestamp(epoch, tz=datetime.UTC)
+
+
+# Modes under which the firmware forces `state` to a meaningless "unknown".
+# On these modes we derive the effective state from the mode itself.
+_MANUAL_OVERRIDE_MODES: frozenset[str] = frozenset({"on", "off"})
+
+
+def _socket_sensor_attributes(device: Any, socket: int) -> dict[str, Any]:
+    """``sensor_config``/``sensor_source`` attributes of a socket_N_mode sensor.
+
+    The rule comes either from the power center's local temperature probe or
+    from the paired RSCONTROL hub (see
+    ``ReefPowerCoordinator.socket_sensor_config``); ``sensor_source`` tells a
+    card which of the two shapes ``sensor_config`` has.
+    """
+    source, config = cast(ReefPowerCoordinator, device).socket_sensor_config(socket)
+    return {"sensor_config": config, "sensor_source": source}
+
+
+def _effective_socket_state(mode: Any, state: Any) -> str | None:
+    """Return a meaningful on/standby/off value for a RSPOWER socket or a
+    RSCONTROL 12V port, working around a Red Sea firmware quirk.
+
+    The `sockets[]` / `ports[]` entries in `/dashboard` expose two fields:
+
+        - `mode`: how the socket is driven — one of ``auto``, ``on``, ``off``,
+          ``setup``, ``schedule``, ``sensor``, ``feeding``, ``maintenance``,
+          ``master``, ``emergency``.
+        - `state`: whether the socket is currently powered — expected values
+          are ``on`` or ``standby``.
+
+    The firmware only populates `state` when the socket is driven by a
+    program (``schedule``, ``sensor``, ``auto``, ``feeding``, ...). When the
+    user has forced the socket via a manual override (``mode == "on"`` or
+    ``mode == "off"``), `state` comes back as the literal string
+    ``"unknown"``, which shows up in HA as an unhelpful sensor value.
+
+    This helper collapses the two fields into a single reliable answer:
+
+        - manual on  -> "on"
+        - manual off -> "off"
+        - anything else -> the raw `state` value (typically "on" or "standby")
+    """
+    if isinstance(mode, str) and mode in _MANUAL_OVERRIDE_MODES:
+        return mode
+    if isinstance(state, str):
+        return state
+    return None
+
+
+def _port_mode_attributes_fn(
+    port: int,
+) -> Callable[[ReefBeatCoordinator], dict[str, Any]]:
+    """Attributes of a hub port's mode sensor: its number, then everything
+    the card's port editor reads (see ``port_mode_attributes``)."""
+
+    def attributes(device: ReefBeatCoordinator) -> dict[str, Any]:
+        return {
+            "port": port,
+            **cast(ReefControlCoordinator, device).port_mode_attributes(port),
+        }
+
+    return attributes
+
+
+# JSONPath selector to find a probe by its stable `uid` (independent of the
+# probe's array position, so plug/unplug reordering doesn't break entities).
+def _probe_path(uid: str, field: str) -> str:
+    """Return the JSONPath to `<field>` of the probe with the given uid."""
+    return f"$.sources[?(@.name=='/dashboard')].data.probes[?(@.uid=='{uid}')].{field}"
+
+
+def _power_local_temperature(device: ReefBeatCoordinator) -> StateType:
+    """Read the RSPower local temperature, tolerating both payload shapes.
+
+    A local probe reports ``temperature`` as an object ``{value, status,
+    level, ...}``; with no probe the field is ``null``. Older firmware exposed
+    a bare float, which is still accepted.
+    """
+    temp = device.get_data(
+        "$.sources[?(@.name=='/dashboard')].data.temperature", is_None_possible=True
+    )
+    if isinstance(temp, dict):
+        value = temp.get("value")
+        return value if isinstance(value, (int, float)) else None
+    if isinstance(temp, (int, float)):
+        return temp
+    return None
+
+
+_POWER_RANGE_FIELDS: tuple[str, ...] = (
+    "acceptable_range_low",
+    "desired_range_low",
+    "desired_range_high",
+    "acceptable_range_high",
+)
+
+
+def _power_temperature_attributes(device: ReefBeatCoordinator) -> dict[str, Any]:
+    """Bounds and level of the RSPower local temperature.
+
+    ``ranges`` is ``[acceptable_low, desired_low, desired_high,
+    acceptable_high]`` from ``/temperature/config`` (None until it is cached
+    or when a bound is missing), as the hub probes carry it; ``level`` is the
+    power center's own verdict from ``/dashboard.temperature.level``.
+    """
+    config = device.get_data(
+        "$.sources[?(@.name=='/temperature/config')].data", is_None_possible=True
+    )
+    ranges: list[float] | None = None
+    if isinstance(config, dict):
+        values = [cast(dict[str, Any], config).get(f) for f in _POWER_RANGE_FIELDS]
+        if all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in values):
+            ranges = [float(cast(float, v)) for v in values]
+    temp = device.get_data(
+        "$.sources[?(@.name=='/dashboard')].data.temperature", is_None_possible=True
+    )
+    level: Any = (
+        cast(dict[str, Any], temp).get("level") if isinstance(temp, dict) else None
+    )
+    return {"ranges": ranges, "level": level}
+
+
+# Icons per probe type — falls back to a generic sensor icon if unknown.
+# Six types exist in the Red Sea protocol: temperature, ph, ec (salinity),
+# orp, leak, ato (LevelAndATO). See ControlProbeType enum in the app.
+_PROBE_ICONS: dict[str, str] = {
+    "temperature": "mdi:thermometer",
+    "ph": "mdi:ph",
+    "ec": "mdi:water-percent",
+    "orp": "mdi:flash-triangle",
+    "leak": "mdi:water-alert",
+    "ato": "mdi:cup-water",
+}
+
+# Quality-level enum values reported by the hub. Matches the app's
+# ControlProbeType.CurrentLevel enum: SensorDataError, Desired, Acceptable,
+# Danger. The API string form of SensorDataError is "sensor_data_error".
+_PROBE_LEVEL_OPTIONS: tuple[str, ...] = (
+    "desired",
+    "acceptable",
+    "danger",
+    "sensor_data_error",
+)
+
+# ATO probe `water_level` enum. Confirmed against the decompiled Red Sea app's
+# `AtoWaterLevel` enum (5 possible values):
+#   - `above`           water above the target band (overflow risk)
+#   - `below`           water below the target band (needs refill)
+#   - `desired_level_1` water at sensor 1 (nominal)
+#   - `desired_level_2` water at sensor 2 (nominal)
+#   - `error`           sensor unable to read (probe fault / disconnected)
+_ATO_WATER_LEVEL_OPTIONS: tuple[str, ...] = (
+    "above",
+    "below",
+    "desired_level_1",
+    "desired_level_2",
+    "error",
+)
+
+
+def _build_probe_descriptions(
+    probe: dict[str, Any],
+) -> list[ReefBeatSensorEntityDescription]:
+    """Build the list of sensor descriptions for a single ReefSense probe.
+
+    The probe's ``uid`` (e.g. ``0x0071C``) is used as a stable key so entities
+    survive plug/unplug reordering in the ``probes`` array. Extra entities
+    (temperature, calibration date, salinity units...) are added based on the
+    probe's ``type``.
+    """
+    uid = str(probe.get("uid", ""))
+    ptype = str(probe.get("type", "")).lower()
+    if not uid or not ptype:
+        return []
+
+    # Sanitise uid for use in an entity key: keep only alnum, lowercase, and
+    # prefix with the probe type so the key encodes the full (type, uid) pair
+    # that defines a probe (uids are only unique within a type).
+    uid_key = f"{ptype}_" + "".join(c for c in uid.lower() if c.isalnum())
+    tp = {"probe": probe.get("name") or uid}
+    icon = _PROBE_ICONS.get(ptype, "mdi:test-tube")
+
+    # Unit of the main `value` field varies by probe type.
+    value_unit: str | None
+    value_precision: int
+    value_device_class: SensorDeviceClass | None = None
+    if ptype == "ph":
+        value_unit = None  # dimensionless
+        value_precision = 2
+    elif ptype == "orp":
+        value_unit = "mV"
+        value_precision = 0
+    elif ptype == "ec":
+        # `value` mirrors whatever the device is displaying (ppt by default);
+        # dedicated ec/ppt/sg sensors below give access to each raw form.
+        value_unit = str(probe.get("measurement_unit") or "")
+        value_precision = 2
+    elif ptype == "temperature":
+        # Standalone temperature probe: the main value IS the temperature.
+        value_unit = UnitOfTemperature.CELSIUS
+        value_device_class = SensorDeviceClass.TEMPERATURE
+        value_precision = 1
+    elif ptype == "ato":
+        # LevelAndATO probe on RSCONTROL — the "main value" is NOT numeric;
+        # the payload's `water_level` field is an enum ("desired_level_1",
+        # "danger_low", …), so we branch the sensor definition entirely
+        # below and keep the placeholder values here inert.
+        value_unit = None
+        value_precision = 0
+    elif ptype == "leak":
+        # Leak probe (RS_LEAK) — confirmed payload on a real RSCONTROLPRO:
+        #   {"type","uid","name","status","detected","last_installation_date"}
+        # There is no `value` and no `level`; `detected` is a boolean and is
+        # exposed as a MOISTURE binary sensor instead. These placeholders stay
+        # inert because no main sensor is built for this type.
+        value_unit = None
+        value_precision = 0
+    else:
+        value_unit = None
+        value_precision = 2
+
+    # Translation key for the value entity is per-type so users see e.g.
+    # "{probe} pH" vs "{probe} ORP" vs "{probe} water level".
+    value_translation_key = {
+        "ph": "probe_ph_value",
+        "orp": "probe_orp_value",
+        "ec": "probe_ec_value",
+        "temperature": "probe_temperature",
+    }.get(ptype, "probe_value")
+
+    # Main measurement. Two probe types have no numeric `value` at all and get
+    # a dedicated treatment:
+    #   - ATO reports a discrete `water_level` enum -> ENUM sensor.
+    #   - Leak reports only the boolean `detected` -> handled in binary_sensor.py
+    #     as a MOISTURE binary sensor, so no main sensor is built here.
+    # Every other type gets a numeric MEASUREMENT sensor. The ATO branch uses a
+    # static translation_key literal so that the check_translation AST walker
+    # doesn't cross-attribute the water_level enum options to the numeric
+    # probes.
+    main_descriptor: ReefBeatSensorEntityDescription | None
+    if ptype == "ato":
+        main_descriptor = ReefBeatSensorEntityDescription(
+            key=f"probe_{uid_key}_water_level",
+            translation_key="probe_water_level",
+            translation_placeholders=tp,
+            icon="mdi:water",
+            device_class=SensorDeviceClass.ENUM,
+            options=list(_ATO_WATER_LEVEL_OPTIONS),
+            value_fn=lambda d, p=_probe_path(uid, "water_level"): d.get_data(
+                p, is_None_possible=True
+            ),
+        )
+    elif ptype == "leak":
+        main_descriptor = None
+    else:
+        main_descriptor = ReefBeatSensorEntityDescription(
+            key=f"probe_{uid_key}_value",
+            translation_key=value_translation_key,
+            translation_placeholders=tp,
+            icon=icon,
+            native_unit_of_measurement=value_unit or None,
+            device_class=value_device_class,
+            state_class=SensorStateClass.MEASUREMENT,
+            suggested_display_precision=value_precision,
+            value_fn=lambda d, p=_probe_path(uid, "value"): d.get_data(
+                p, is_None_possible=True
+            ),
+        )
+
+    descs: list[ReefBeatSensorEntityDescription] = (
+        [main_descriptor] if main_descriptor is not None else []
+    )
+
+    # Quality level (enum) — only for probes that actually report a `level`
+    # field in the payload. ATO probes have `water_level` (already the main
+    # sensor) and `temp_level` (added below); leak probes report nothing but
+    # the boolean `detected`. Neither has a top-level `level`, so a generic
+    # quality-level entity would be permanently unavailable — skip it.
+    if ptype not in ("ato", "leak"):
+        descs.append(
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_level",
+                translation_key="probe_level",
+                translation_placeholders=tp,
+                icon="mdi:alert-circle-outline",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(_PROBE_LEVEL_OPTIONS),
+                value_fn=lambda d, p=_probe_path(uid, "level"): d.get_data(
+                    p, is_None_possible=True
+                ),
+            )
+        )
+
+    descs.extend(
+        [
+            # Status (auto / manual / setup — inferred; unknown states appear as-is)
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_status",
+                translation_key="probe_status",
+                translation_placeholders=tp,
+                icon="mdi:cog-outline",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                value_fn=lambda d, p=_probe_path(uid, "status"): d.get_data(
+                    p, is_None_possible=True
+                ),
+            ),
+            # User-configured name (diagnostic string)
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_name",
+                translation_key="probe_name",
+                translation_placeholders=tp,
+                icon="mdi:tag-outline",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                value_fn=lambda d, p=_probe_path(uid, "name"): d.get_data(
+                    p, is_None_possible=True
+                ),
+            ),
+            # uid: useful to cross-reference the probe with the config flow's
+            # add/replace/remove probe steps, which list probes by uid.
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_uid",
+                translation_key="probe_uid",
+                translation_placeholders=tp,
+                icon="mdi:identifier",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                value_fn=lambda d, p=_probe_path(uid, "uid"): d.get_data(
+                    p, is_None_possible=True
+                ),
+            ),
+            # Installation date: the payload carries a unix epoch, which we
+            # convert to a tz-aware datetime — HA does NOT parse it for us.
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_last_installation",
+                translation_key="probe_last_installation",
+                translation_placeholders=tp,
+                icon="mdi:calendar-clock",
+                device_class=SensorDeviceClass.TIMESTAMP,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                value_fn=lambda d, p=_probe_path(uid, "last_installation_date"): (
+                    _epoch_to_datetime(d.get_data(p, is_None_possible=True))
+                ),
+            ),
+        ]
+    )
+
+    # pH, EC and ATO probes also expose a temperature reading and calibration
+    # date. (Standalone Temp probe already has the temperature as main value.)
+    if ptype in ("ph", "ec", "ato"):
+        descs.extend(
+            [
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_temp_value",
+                    translation_key="probe_temperature",
+                    translation_placeholders=tp,
+                    icon="mdi:thermometer",
+                    device_class=SensorDeviceClass.TEMPERATURE,
+                    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=1,
+                    value_fn=lambda d, p=_probe_path(uid, "temp_value"): d.get_data(
+                        p, is_None_possible=True
+                    ),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_temp_level",
+                    translation_key="probe_temp_level",
+                    translation_placeholders=tp,
+                    icon="mdi:thermometer-alert",
+                    device_class=SensorDeviceClass.ENUM,
+                    options=list(_PROBE_LEVEL_OPTIONS),
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    value_fn=lambda d, p=_probe_path(uid, "temp_level"): d.get_data(
+                        p, is_None_possible=True
+                    ),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_last_adjustment",
+                    translation_key="probe_last_adjustment",
+                    translation_placeholders=tp,
+                    icon="mdi:tune-vertical",
+                    device_class=SensorDeviceClass.TIMESTAMP,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    value_fn=lambda d, p=_probe_path(uid, "last_adjustment_date"): (
+                        _epoch_to_datetime(d.get_data(p, is_None_possible=True))
+                    ),
+                ),
+            ]
+        )
+
+    # ORP: no calibration date in /dashboard. The date of its last validation
+    # is the offset's, read from the per-probe /probe/offset source (updated
+    # by every validation, even one leaving the offset as is).
+    if ptype == "orp":
+        descs.append(
+            ReefBeatSensorEntityDescription(
+                key=f"probe_{uid_key}_last_adjustment",
+                translation_key="probe_last_adjustment",
+                translation_placeholders=tp,
+                icon="mdi:tune-vertical",
+                device_class=SensorDeviceClass.TIMESTAMP,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                value_fn=lambda d, p=(f"$.sources[?(@.name=='/probe/offset?type=orp&uid={uid}')].data.last_adjustment_date"): (
+                    _epoch_to_datetime(d.get_data(p, is_None_possible=True))
+                ),
+            )
+        )
+
+    # Leak probe: where the water comes from and the conductivity behind it,
+    # from the probe's own reading (the dashboard only has `detected`, see
+    # ReefControlAPI.leak_status). Read on its own as soon as it turns wet,
+    # and by its "read value" button.
+    if ptype == "leak":
+        descs.extend(
+            [
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_leak_status",
+                    translation_key="probe_leak_status",
+                    translation_placeholders=tp,
+                    icon="mdi:water-alert",
+                    device_class=SensorDeviceClass.ENUM,
+                    options=list(_PROBE_LEAK_STATUS_OPTIONS),
+                    value_fn=_leak_status_fn(uid),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_conductivity",
+                    translation_key="probe_leak_conductivity",
+                    translation_placeholders=tp,
+                    icon="mdi:current-ac",
+                    state_class=SensorStateClass.MEASUREMENT,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    value_fn=_leak_conductivity_fn(uid),
+                ),
+            ]
+        )
+
+    # EC probe: expose the three raw derived values plus the display unit.
+    if ptype == "ec":
+        descs.extend(
+            [
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_ec",
+                    translation_key="probe_ec",
+                    translation_placeholders=tp,
+                    icon="mdi:current-ac",
+                    native_unit_of_measurement="mS/cm",
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=2,
+                    value_fn=lambda d, p=_probe_path(uid, "ec"): d.get_data(
+                        p, is_None_possible=True
+                    ),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_ppt",
+                    translation_key="probe_ppt",
+                    translation_placeholders=tp,
+                    icon="mdi:water-percent",
+                    native_unit_of_measurement="ppt",
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=2,
+                    value_fn=lambda d, p=_probe_path(uid, "ppt"): d.get_data(
+                        p, is_None_possible=True
+                    ),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_sg",
+                    translation_key="probe_sg",
+                    translation_placeholders=tp,
+                    icon="mdi:scale-balance",
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=4,
+                    value_fn=lambda d, p=_probe_path(uid, "sg"): d.get_data(
+                        p, is_None_possible=True
+                    ),
+                ),
+                ReefBeatSensorEntityDescription(
+                    key=f"probe_{uid_key}_measurement_unit",
+                    translation_key="probe_measurement_unit",
+                    translation_placeholders=tp,
+                    icon="mdi:ruler",
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    value_fn=lambda d, p=_probe_path(uid, "measurement_unit"): (
+                        d.get_data(p, is_None_possible=True)
+                    ),
+                ),
+            ]
+        )
+
+    # Every probe of a type shares the same translation keys: tag each entity
+    # with the probe it belongs to (and, for measurements, the bounds they are
+    # judged against) so a card can group them per probe.
+    ranges_of = {
+        f"probe_{uid_key}_value": "primary",
+        f"probe_{uid_key}_temp_value": "temp",
+    }
+    return [
+        replace(
+            desc,
+            attributes_fn=_probe_attributes_fn(ptype, uid, ranges_of.get(desc.key)),
+        )
+        for desc in descs
+    ]
+
+
+_PROBE_LEAK_STATUS_OPTIONS: tuple[str, ...] = (
+    "dry",
+    "aquarium_water_leak",
+    "rodi_water_leak",
+)
+
+
+def _leak_status_fn(uid: str) -> Callable[[ReefBeatCoordinator], StateType]:
+    """Origin of a leak probe's water (``ReefControlCoordinator.leak_status``)."""
+
+    def value(device: ReefBeatCoordinator) -> StateType:
+        return cast(ReefControlCoordinator, device).leak_status(uid)
+
+    return value
+
+
+def _leak_conductivity_fn(uid: str) -> Callable[[ReefBeatCoordinator], StateType]:
+    """Conductivity of a leak probe's last reading."""
+
+    def value(device: ReefBeatCoordinator) -> StateType:
+        return cast(ReefControlCoordinator, device).leak_conductivity(uid)
+
+    return value
+
+
+def _probe_attributes_fn(
+    ptype: str, uid: str, ranges: str | None
+) -> Callable[[ReefBeatCoordinator], dict[str, Any]]:
+    """Attributes tying a probe entity to its probe (``probe_state_attributes``)."""
+
+    def attributes(device: ReefBeatCoordinator) -> dict[str, Any]:
+        return probe_state_attributes(device, ptype, uid, ranges)
+
+    return attributes
+
+
+# -----------------------------------------------------------------------------
+# Platform setup
+# -----------------------------------------------------------------------------
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up sensor entities for a config entry.
+
+    The device/coordinator instance is stored in `hass.data[DOMAIN][entry.entry_id]`.
+    This function:
+    - Narrows the coordinator type with `cast(...)` when we need device-specific fields.
+    - Creates entities from static description lists.
+    - Creates dynamic cloud library entities when running as a cloud coordinator.
+    """
+    device = cast(ReefBeatCoordinator, hass.data[DOMAIN][entry.entry_id])
+    entities: list[SensorEntity] = []
+
+    _LOGGER.debug("SENSORS")
+
+    # Cloud linked coordinator diagnostics
+    # Avoid brittle base-class-name checks; use capability instead.
+    if isinstance(device, _CloudLinkedCoordinator):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in CLOUD_SENSORS
+            if description.exists_fn(device)
+        )
+
+    if isinstance(device, (ReefLedG2Coordinator, ReefVirtualLedCoordinator)):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in G2_LED_SENSORS
+            if description.exists_fn(device)
+        )
+
+    if isinstance(device, ReefLedCoordinator):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in VIRTUAL_LED_SENSORS
+            if description.exists_fn(device)
+        )
+
+    if isinstance(device, (ReefLedCoordinator, ReefLedG2Coordinator)):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in LED_SENSORS
+            if description.exists_fn(device)
+        )
+    elif isinstance(device, ReefMatCoordinator):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in MAT_SENSORS
+            if description.exists_fn(device)
+        )
+    elif isinstance(device, ReefWaveCoordinator):
+        entities.extend(
+            ReefWaveSensorEntity(device, description)
+            for description in WAVE_SCHEDULE_SENSORS
+            if description.exists_fn(device)
+        )
+    elif isinstance(device, ReefDoseCoordinator):
+        dose_device = device  # already narrowed
+
+        ds0: tuple[ReefDoseSensorEntityDescription, ...] = (
+            ReefDoseSensorEntityDescription(
+                key="dosing_queue",
+                translation_key="dosing_queue",
+                icon="mdi:tray-full",
+                value_name="$.sources[?(@.name=='/dosing-queue')].data",
+                with_attr_name="queue",
+                with_attr_value="$.sources[?(@.name=='/dosing-queue')].data",
+                head=0,
+            ),
+        )
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in ds0
+            if description.exists_fn(dose_device)
+        )
+
+        # Build dynamic descriptions using lists (cheaper + clearer than tuple +=)
+        ds: list[ReefDoseSensorEntityDescription] = []
+        init_sensors: list[RestoreSensorEntityDescription] = []
+
+        for head in range(1, int(dose_device.heads_nb) + 1):
+            ds.extend(
+                [
+                    ReefDoseSensorEntityDescription(
+                        key="state_head_" + str(head),
+                        translation_key="head_state",
+                        icon="mdi:cog-play",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".state",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="last_calibration_head_" + str(head),
+                        translation_key="last_calibration",
+                        icon="mdi:calendar-start",
+                        value_name="$.sources[?(@.name=='/head/"
+                        + str(head)
+                        + "/settings')].data.last_calibrated",
+                        device_class=SensorDeviceClass.DATE,
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="supplement_head_" + str(head),
+                        translation_key="supplement",
+                        icon="mdi:shaker",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".supplement",
+                        with_attr_name="supplement",
+                        with_attr_value="$.sources[?(@.name=='/head/"
+                        + str(head)
+                        + "/settings')].data.supplement",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="auto_dosed_today_head_" + str(head),
+                        translation_key="auto_dosed_today",
+                        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+                        device_class=SensorDeviceClass.VOLUME,
+                        icon="mdi:cup-water",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".auto_dosed_today",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="manual_dosed_today_head_" + str(head),
+                        translation_key="manual_dosed_today",
+                        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+                        device_class=SensorDeviceClass.VOLUME,
+                        icon="mdi:cup-water",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".manual_dosed_today",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="doses_today_head_" + str(head),
+                        translation_key="doses_today",
+                        icon="mdi:counter",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".doses_today",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="daily_dose_head_" + str(head),
+                        translation_key="daily_dose",
+                        native_unit_of_measurement=UnitOfVolume.MILLILITERS,
+                        device_class=SensorDeviceClass.VOLUME,
+                        icon="mdi:cup-water",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".daily_dose",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="remaining_days_head_" + str(head),
+                        translation_key="remaining_days",
+                        native_unit_of_measurement=UnitOfTime.DAYS,
+                        icon="mdi:sort-calendar-ascending",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".remaining_days",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="daily_doses_head_" + str(head),
+                        translation_key="daily_doses",
+                        icon="mdi:counter",
+                        suggested_display_precision=0,
+                        value_name="$.sources[?(@.name=='/dashboard')].data.heads."
+                        + str(head)
+                        + ".daily_doses",
+                        head=head,
+                    ),
+                    ReefDoseSensorEntityDescription(
+                        key="schedule_head_" + str(head),
+                        translation_key="schedule_head",
+                        icon="mdi:chart-timeline",
+                        value_name="$.sources[?(@.name=='/head/"
+                        + str(head)
+                        + "/settings')].data.schedule.type",
+                        with_attr_name="schedule",
+                        with_attr_value="$.sources[?(@.name=='/head/"
+                        + str(head)
+                        + "/settings')].data.schedule",
+                        head=head,
+                    ),
+                ]
+            )
+
+        entities.extend(
+            RestoreSensorEntity(device, description)
+            for description in tuple(init_sensors)
+            if description.exists_fn(dose_device)
+        )
+
+        entities.extend(
+            ReefDoseSensorEntity(device, description)
+            for description in tuple(ds)
+            if description.exists_fn(dose_device)
+        )
+
+    elif isinstance(device, ReefATOCoordinator):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in ATO_SENSORS
+            if description.exists_fn(device)
+        )
+
+    elif isinstance(device, ReefRunCoordinator):
+        run_device = device  # already narrowed
+
+        ds_run: list[ReefRunSensorEntityDescription] = []
+        for pump in range(1, 3):
+            ds_run.extend(
+                [
+                    ReefRunSensorEntityDescription(
+                        key="type_pump_" + str(pump),
+                        translation_key="type",
+                        icon="mdi:pump",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.pump_"
+                        + str(pump)
+                        + ".type",
+                        device_class=SensorDeviceClass.ENUM,
+                        options=["return", "skimmer", "unknown"],
+                        pump=pump,
+                    ),
+                    ReefRunSensorEntityDescription(
+                        key="model_pump_" + str(pump),
+                        translation_key="model",
+                        icon="mdi:pump",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.pump_"
+                        + str(pump)
+                        + ".model",
+                        pump=pump,
+                    ),
+                    ReefRunSensorEntityDescription(
+                        key="state_pump_" + str(pump),
+                        translation_key="state",
+                        icon="mdi:pump",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.pump_"
+                        + str(pump)
+                        + ".state",
+                        entity_category=EntityCategory.DIAGNOSTIC,
+                        device_class=SensorDeviceClass.ENUM,
+                        options=[
+                            "calibration",
+                            "dry-run",
+                            "emergency",
+                            "feeding",
+                            "full-cup",
+                            "locked-rotor",
+                            "maintenance",
+                            "not-connected",
+                            "operational",
+                            "over-skimming",
+                            "preview",
+                            "shortcut-off-delay",
+                            "wrong-pump",
+                        ],
+                        pump=pump,
+                    ),
+                    ReefRunSensorEntityDescription(
+                        key="temperature_pump_" + str(pump),
+                        translation_key="temperature",
+                        icon="mdi:thermometer",
+                        value_name="$.sources[?(@.name=='/dashboard')].data.pump_"
+                        + str(pump)
+                        + ".temperature",
+                        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                        device_class=SensorDeviceClass.TEMPERATURE,
+                        state_class=SensorStateClass.MEASUREMENT,
+                        entity_category=EntityCategory.DIAGNOSTIC,
+                        suggested_display_precision=1,
+                        pump=pump,
+                    ),
+                ]
+            )
+
+        # -- Device-level calibration date sensors ----------------------------
+        ds_run.extend(
+            [
+                ReefRunSensorEntityDescription(
+                    key="skim_last_calibration_date",
+                    translation_key="skim_last_calibration",
+                    icon="mdi:calendar-clock",
+                    value_name="$.sources[?(@.name=='/calibration')].data.skim_last_calibration_date",
+                    device_class=SensorDeviceClass.DATE,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    pump=0,
+                ),
+                ReefRunSensorEntityDescription(
+                    key="cup_last_calibration_date",
+                    translation_key="cup_last_calibration",
+                    icon="mdi:calendar-clock",
+                    value_name="$.sources[?(@.name=='/calibration')].data.cup_last_calibration_date",
+                    device_class=SensorDeviceClass.DATE,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    pump=0,
+                ),
+            ]
+        )
+
+        entities.extend(
+            ReefRunSensorEntity(device, description)
+            for description in tuple(ds_run)
+            if description.exists_fn(run_device)
+        )
+
+    elif isinstance(device, ReefPowerCoordinator):
+        # Fixed (non-per-socket) sensors first.
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in POWER_SENSORS
+            if description.exists_fn(device)
+        )
+
+        # Per-socket sensors: name, state, mode, consumption.
+        # `sockets` is a JSON array indexed 0..socket_count-1.
+        power_descs: list[ReefBeatSensorEntityDescription] = []
+        for socket_idx in range(device.socket_count):
+            # Capture socket_idx in default arg to avoid late-binding in the closure.
+            base = f"$.sources[?(@.name=='/dashboard')].data.sockets[{socket_idx}]"
+            power_descs.extend(
+                [
+                    ReefBeatSensorEntityDescription(
+                        key=f"socket_{socket_idx}_name",
+                        translation_key=f"socket_{socket_idx}_name",
+                        translation_placeholders={"socket": str(socket_idx + 1)},
+                        icon="mdi:power-socket-eu",
+                        value_fn=lambda d, p=f"{base}.name": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"socket_{socket_idx}_state",
+                        translation_key=f"socket_{socket_idx}_state",
+                        translation_placeholders={"socket": str(socket_idx + 1)},
+                        icon="mdi:electric-switch",
+                        entity_registry_enabled_default=False,
+                        # Derive effective state from (mode, state):
+                        # firmware returns state="unknown" whenever the socket
+                        # is under manual override (mode == "on" | "off"), and
+                        # only fills state ("on" | "standby") when the socket
+                        # is driven by a program (mode == "schedule" | "sensor"
+                        # | "auto" | "feeding" | "maintenance" | ...).
+                        # We surface a single boolean-like value the user can
+                        # trust: mode wins when it is a manual override, state
+                        # wins otherwise.
+                        value_fn=lambda d, m=f"{base}.mode", s=f"{base}.state": (
+                            _effective_socket_state(
+                                d.get_data(m, is_None_possible=True),
+                                d.get_data(s, is_None_possible=True),
+                            )
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"socket_{socket_idx}_mode",
+                        translation_key=f"socket_{socket_idx}_mode",
+                        translation_placeholders={"socket": str(socket_idx + 1)},
+                        icon="mdi:cog-outline",
+                        value_fn=lambda d, p=f"{base}.mode": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                        # The socket's on/off programme travels with its mode,
+                        # the same way a dosing head carries its schedule —
+                        # and, when the socket is in "sensor" mode, so does
+                        # its threshold rule (value/is_above/turn_on), keyed
+                        # by probe type since a different probe would carry a
+                        # different range/unit (see reefbeat/power.py). A
+                        # card opening the editor then reads what it already
+                        # has instead of waiting on a request of its own.
+                        attributes_fn=lambda d, i=socket_idx, sched=(f"$.sources[?(@.name=='/socket/{socket_idx}/config/schedule')].data"): {
+                            "schedule": d.get_data(sched),
+                            **_socket_sensor_attributes(d, i),
+                        },
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"socket_{socket_idx}_prev_mode",
+                        translation_key=f"socket_{socket_idx}_prev_mode",
+                        translation_placeholders={"socket": str(socket_idx + 1)},
+                        icon="mdi:cog-transfer-outline",
+                        entity_registry_enabled_default=False,
+                        value_fn=lambda d, p=f"{base}.prev_mode": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"socket_{socket_idx}_consumption",
+                        translation_key=f"socket_{socket_idx}_consumption",
+                        translation_placeholders={"socket": str(socket_idx + 1)},
+                        icon="mdi:flash",
+                        native_unit_of_measurement=UnitOfPower.WATT,
+                        device_class=SensorDeviceClass.POWER,
+                        value_fn=lambda d, p=f"{base}.consumption": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                        state_class=SensorStateClass.MEASUREMENT,
+                        suggested_display_precision=1,
+                    ),
+                ]
+            )
+        entities.extend(
+            ReefBeatSensorEntity(device, description) for description in power_descs
+        )
+
+    elif isinstance(device, ReefControlCoordinator):
+        # Fixed (non-per-port) sensors first.
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in CONTROL_SENSORS
+            if description.exists_fn(device)
+        )
+
+        # Per-port sensors (12V DC ports). Only 1 for Lite, 2 for Pro.
+        control_descs: list[ReefBeatSensorEntityDescription] = []
+        for port_idx in range(device.port_count):
+            base = f"$.sources[?(@.name=='/dashboard')].data.ports[{port_idx}]"
+            control_descs.extend(
+                [
+                    ReefBeatSensorEntityDescription(
+                        key=f"port_{port_idx}_name",
+                        translation_key="port_name",
+                        translation_placeholders={"port": str(port_idx + 1)},
+                        attributes_fn=lambda _d, i=port_idx: {"port": i},
+                        icon="mdi:usb-port",
+                        value_fn=lambda d, p=f"{base}.name": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"port_{port_idx}_state",
+                        translation_key="port_state",
+                        translation_placeholders={"port": str(port_idx + 1)},
+                        attributes_fn=lambda _d, i=port_idx: {"port": i},
+                        icon="mdi:electric-switch",
+                        # Same firmware quirk as sockets: mode == "on" | "off"
+                        # forces state to "unknown". See _effective_socket_state
+                        # for the derivation rules.
+                        value_fn=lambda d, m=f"{base}.mode", s=f"{base}.state": (
+                            _effective_socket_state(
+                                d.get_data(m, is_None_possible=True),
+                                d.get_data(s, is_None_possible=True),
+                            )
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"port_{port_idx}_mode",
+                        translation_key="port_mode",
+                        translation_placeholders={"port": str(port_idx + 1)},
+                        # Everything the card's port editor reads, as the
+                        # socket_N_mode sensors of a power center do.
+                        attributes_fn=_port_mode_attributes_fn(port_idx),
+                        icon="mdi:cog-outline",
+                        value_fn=lambda d, p=f"{base}.mode": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"port_{port_idx}_type",
+                        translation_key="port_type",
+                        translation_placeholders={"port": str(port_idx + 1)},
+                        attributes_fn=lambda _d, i=port_idx: {"port": i},
+                        icon="mdi:import",
+                        value_fn=lambda d, p=f"{base}.type": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                        entity_category=EntityCategory.DIAGNOSTIC,
+                    ),
+                    ReefBeatSensorEntityDescription(
+                        key=f"port_{port_idx}_consumption",
+                        translation_key="port_consumption",
+                        translation_placeholders={"port": str(port_idx + 1)},
+                        attributes_fn=lambda _d, i=port_idx: {"port": i},
+                        icon="mdi:flash",
+                        native_unit_of_measurement=UnitOfPower.WATT,
+                        device_class=SensorDeviceClass.POWER,
+                        value_fn=lambda d, p=f"{base}.consumption": d.get_data(
+                            p, is_None_possible=True
+                        ),
+                        state_class=SensorStateClass.MEASUREMENT,
+                        suggested_display_precision=1,
+                    ),
+                ]
+            )
+        entities.extend(
+            ReefBeatSensorEntity(device, description) for description in control_descs
+        )
+
+        # Discover connected ReefSense probes (dynamic — depends on physical
+        # cabling at HA startup). Reload the config entry to pick up new ones.
+        #
+        # We read the /dashboard.probes array directly here rather than going
+        # through a helper method on the coordinator, so this platform stays
+        # decoupled from any refactor of the ReefControl coordinator surface.
+        raw_probes = device.get_data(
+            "$.sources[?(@.name=='/dashboard')].data.probes",
+            is_None_possible=True,
+        )
+        probes: list[dict[str, Any]] = (
+            [
+                p
+                for p in raw_probes
+                if isinstance(p, dict) and p.get("uid") and p.get("type")
+            ]
+            if isinstance(raw_probes, list)
+            else []
+        )
+        for probe in probes:
+            entities.extend(
+                ReefBeatSensorEntity(device, description)
+                for description in _build_probe_descriptions(probe)
+            )
+
+        # Temperature fusion — a single robust temperature aggregated from all
+        # the hub's temperature sources (dedicated probe + ec/ph/ato embedded
+        # temps). Only meaningful with at least two sources; otherwise it would
+        # just duplicate the one probe.
+        entities.append(
+            ReefBeatSensorEntity(
+                device,
+                ReefBeatSensorEntityDescription(
+                    key="temperature_fusion",
+                    translation_key="temperature_fusion",
+                    icon="mdi:thermometer-check",
+                    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                    device_class=SensorDeviceClass.TEMPERATURE,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=2,
+                    exists_fn=lambda d: (
+                        cast(ReefControlCoordinator, d).temperature_source_count() >= 2
+                    ),
+                    value_fn=lambda d: cast(
+                        ReefControlCoordinator, d
+                    ).fusion_temperature(),
+                    attributes_fn=lambda d: cast(
+                        ReefControlCoordinator, d
+                    ).fusion_attributes(),
+                ),
+            )
+        )
+        # Spread (max−min) between sources — a diagnostic magnitude that pairs
+        # with the coherence binary sensor.
+        entities.append(
+            ReefBeatSensorEntity(
+                device,
+                ReefBeatSensorEntityDescription(
+                    key="temperature_spread",
+                    translation_key="temperature_spread",
+                    icon="mdi:arrow-expand-vertical",
+                    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                    device_class=SensorDeviceClass.TEMPERATURE,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    suggested_display_precision=2,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    exists_fn=lambda d: (
+                        cast(ReefControlCoordinator, d).temperature_source_count() >= 2
+                    ),
+                    value_fn=lambda d: cast(
+                        ReefControlCoordinator, d
+                    ).temperature_spread(),
+                ),
+            )
+        )
+        # Anomaly provenance — which probe(s) look wrong, or ok / unknown /
+        # maintenance. Rich breakdown (per-source value, 1h change, reasons)
+        # lives in the attributes.
+        entities.append(
+            ReefBeatSensorEntity(
+                device,
+                ReefBeatSensorEntityDescription(
+                    key="temperature_anomaly_source",
+                    translation_key="temperature_anomaly_source",
+                    icon="mdi:thermometer-off",
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    exists_fn=lambda d: (
+                        cast(ReefControlCoordinator, d).temperature_source_count() >= 2
+                    ),
+                    value_fn=lambda d: cast(
+                        ReefControlCoordinator, d
+                    ).temperature_anomaly_state(),
+                    attributes_fn=lambda d: cast(
+                        ReefControlCoordinator, d
+                    ).fusion_attributes(),
+                ),
+            )
+        )
+
+    # Schedule sensors (LED coordinators)
+    if isinstance(device, (ReefLedCoordinator, ReefVirtualLedCoordinator)):
+        led_device = cast(ReefLedCoordinator, device)
+        entities.extend(
+            ReefLedScheduleSensorEntity(device, description)
+            for description in LED_SCHEDULES
+            if description.exists_fn(led_device)
+        )
+
+    # Common sensors (skip pure cloud + virtual LED to keep behavior consistent)
+    if not isinstance(device, (ReefBeatCloudCoordinator, ReefVirtualLedCoordinator)):
+        entities.extend(
+            ReefBeatSensorEntity(device, description)
+            for description in COMMON_SENSORS
+            if description.exists_fn(device)
+        )
+
+    # Cloud library sensors
+    if isinstance(device, ReefBeatCloudCoordinator):
+        entities.extend(
+            ReefBeatCloudSensorEntity(device, description)
+            for description in USER_SENSORS
+            if description.exists_fn(device)
+        )
+
+        progs = cast(
+            list[dict[str, Any]],
+            device.my_api.get_data(
+                "$.sources[?(@.name=='" + LIGHTS_LIBRARY + "')].data"
+            ),
+        )
+        cloud_descs: list[ReefBeatCloudSensorEntityDescription] = []
+        for prog in progs:
+            uid = prog.get("uid")
+            cloud_descs.append(
+                ReefBeatCloudSensorEntityDescription(
+                    key="prog_" + str(uid),
+                    translation_key="led_program",
+                    icon="mdi:chart-bell-curve",
+                    value_name="$.sources[?(@.name=='"
+                    + LIGHTS_LIBRARY
+                    + "')].data[?(@.uid=='"
+                    + str(uid)
+                    + "')].name",
+                )
+            )
+
+        waves = cast(
+            list[dict[str, Any]],
+            device.my_api.get_data(
+                "$.sources[?(@.name=='" + WAVES_LIBRARY + "')].data"
+            ),
+        )
+        for wave in waves:
+            uid = wave.get("uid")
+            cloud_descs.append(
+                ReefBeatCloudSensorEntityDescription(
+                    key="wave_" + str(uid),
+                    translation_key="wave_program",
+                    icon="mdi:sine-wave",
+                    value_name="$.sources[?(@.name=='"
+                    + WAVES_LIBRARY
+                    + "')].data[?(@.uid=='"
+                    + str(uid)
+                    + "')].name",
+                )
+            )
+        if not device.disable_supplement:
+            supplements = cast(
+                list[dict[str, Any]],
+                device.my_api.get_data(
+                    "$.sources[?(@.name=='" + SUPPLEMENTS_LIBRARY + "')].data"
+                ),
+            )
+            for supplement in supplements:
+                uid = supplement.get("uid")
+                cloud_descs.append(
+                    ReefBeatCloudSensorEntityDescription(
+                        key="supplement_" + str(uid),
+                        translation_key="supplement_program",
+                        icon="mdi:sine-wave",
+                        value_name="$.sources[?(@.name=='"
+                        + SUPPLEMENTS_LIBRARY
+                        + "')].data[?(@.uid=='"
+                        + str(uid)
+                        + "')].name",
+                    )
+                )
+
+        entities.extend(
+            ReefBeatCloudSensorEntity(device, description)
+            for description in cloud_descs
+            if description.exists_fn(device)
+        )
+
+    # ReefLED week program following the weather
+    entities.extend(weather_entities(device, "sensor"))
+
+    async_add_entities(entities, True)
+
+
+# -----------------------------------------------------------------------------
+# Entities
+# -----------------------------------------------------------------------------
+
+
+# REEFBEAT
+class ReefBeatSensorEntity(ReefRoleMixin, ReefBeatRestoreEntity, SensorEntity):  # type: ignore[reportIncompatibleVariableOverride]
+    """Base sensor entity backed by a ReefBeat device/coordinator.
+
+    Responsibilities:
+    - Subscribe to coordinator changes via `async_add_listener`.
+    - Compute native value + extra attributes using the entity description.
+    - Provide base `device_info` that points to the coordinator’s device.
+
+    Subclasses override `_get_value` and/or `_update_val` for specialized behavior.
+    """
+
+    _attr_has_entity_name = True
+
+    @staticmethod
+    def _restore_native_value(state: str) -> SensorNativeValue:
+        """Best-effort parse of restored state into a native value."""
+        text = state.strip()
+        try:
+            if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
+                return float(state)
+        except Exception:
+            pass
+        # A TIMESTAMP sensor is stored in the state machine as an ISO-8601
+        # string, but the entity must hold a tz-aware datetime: restoring the
+        # string as-is raises on the first state write, exactly as an epoch
+        # would. Requiring an offset keeps plain text sensors untouched.
+        with suppress(ValueError):
+            restored = datetime.datetime.fromisoformat(text)
+            if restored.tzinfo is not None:
+                return restored
+        return state
+
+    def __init__(
+        self, device: ReefBeatCoordinator, entity_description: DescriptionT
+    ) -> None:
+        ReefBeatRestoreEntity.__init__(
+            self,
+            device,
+            restore=RestoreSpec("_attr_native_value", self._restore_native_value),
+        )
+        self._device = device
+
+        self.entity_description = cast(SensorEntityDescription, entity_description)
+        self._description: DescriptionT = entity_description
+
+        self._attr_available = False
+        self._attr_unique_id = f"{device.serial}_{self._description.key}"
+
+    async def async_added_to_hass(self) -> None:
+        """Restore last known value and prime from coordinator cache."""
+        await super().async_added_to_hass()
+
+        # If we restored a value, mark available so HA doesn't show `unavailable`.
+        if self._attr_native_value is not None and not self._attr_available:
+            self._attr_available = True
+
+        # If coordinator already has fresh data, populate attributes now.
+        if self._device.last_update_success:
+            self._update_val()
+            super()._handle_coordinator_update()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update cached `_attr_*` values from coordinator data."""
+        self._update_val()
+        super()._handle_coordinator_update()
+
+    def _update_val(self) -> None:
+        """Update native value and extra state attributes.
+
+        Base behavior:
+        - Mark entity available when we can compute a value.
+        - Handle 'wifi_quality' as a derived sensor with an icon + qualitative output.
+        - Otherwise compute native value via `_get_value`.
+        - Optionally attach extra attributes based on `with_attr_*` description fields.
+        """
+        self._attr_available = True
+
+        if self._description.key == "wifi_quality":
+            signal_strength = self._device.get_data(
+                "$.sources[?(@.name=='/wifi')].data.signal_dBm",
+                is_None_possible=True,
+            )
+            if not isinstance(signal_strength, (int, float)):
+                # No signal reading yet (missing/null signal_dBm): leave the
+                # sensor unknown instead of crashing on a None comparison.
+                self._attr_available = False
+                self._attr_native_value = None
+                return
+            if signal_strength < -80:
+                self._attr_icon = "mdi:wifi-strength-outline"
+                self._attr_native_value = "poor"
+            elif signal_strength < -70:
+                self._attr_icon = "mdi:wifi-strength-1"
+                self._attr_native_value = "low"
+            elif signal_strength < -60:
+                self._attr_icon = "mdi:wifi-strength-2"
+                self._attr_native_value = "medium"
+            elif signal_strength < -50:
+                self._attr_icon = "mdi:wifi-strength-3"
+                self._attr_native_value = "good"
+            else:
+                self._attr_native_value = "excellent"
+            return
+
+        self._attr_native_value = self._clamp_enum(self._get_value())
+
+        with_attr_name = getattr(self._description, "with_attr_name", None)
+        with_attr_value = getattr(self._description, "with_attr_value", None)
+        if with_attr_name and with_attr_value:
+            self._attr_extra_state_attributes = {
+                with_attr_name: self._device.get_data(with_attr_value)
+            }
+
+        attributes_fn = getattr(self._description, "attributes_fn", None)
+        if attributes_fn is not None:
+            self._attr_extra_state_attributes = attributes_fn(self._device)
+
+    def _clamp_enum(self, value: SensorNativeValue) -> SensorNativeValue:
+        """Drop an ENUM value the description does not declare.
+
+        Home Assistant raises `ValueError` when an ENUM sensor writes a state
+        outside its `options`, which kills the entity and every listener of
+        the coordinator with it. The firmware enums are open-ended -- an
+        RSCONTROL ATO port reports `last_pump_on_cause: "unknown"`, and
+        "unknown" can never be an option since it is a reserved HA state --
+        so an unlisted value is reported as unknown rather than crashing.
+        """
+        options = getattr(self._description, "options", None)
+        if (
+            value is not None
+            and getattr(self._description, "device_class", None)
+            is SensorDeviceClass.ENUM
+            and options is not None
+            and value not in options
+        ):
+            _LOGGER.debug(
+                "Sensor %s: unlisted value %r reported as unknown",
+                self._description.key,
+                value,
+            )
+            return None
+        return value
+
+    def _get_value(self) -> SensorNativeValue:
+        """Compute the sensor native value for the current description."""
+        if getattr(self._description, "translation_key", None) == "dosing_queue":
+            value_name = cast(str, getattr(self._description, "value_name", ""))
+            data = cast(list[dict[str, Any]], self._device.get_data(value_name))
+            if data:
+                return data[0].get("head")
+            return "empty"
+
+        if isinstance(self._description, ReefBeatSensorEntityDescription):
+            return self._description.value_fn(self._device)
+
+        if hasattr(self._description, "value_name"):
+            value_name = cast(str, self._description.value_name)
+            return self._device.get_data(value_name)
+
+        _LOGGER.error("No method to get value for %s", self._description.key)
+        return None
+
+    @cached_property  # type: ignore[reportIncompatibleVariableOverride]
+    def device_info(self) -> DeviceInfo:
+        """Return base device info for the coordinator device."""
+        return self._device.device_info
+
+
+# REEFLED
+class ReefLedScheduleSensorEntity(ReefBeatSensorEntity):
+    """LED schedule sensor.
+
+    Exposes:
+    - A friendly schedule/program name (native value)
+    - Raw schedule/program data via extra attributes
+    """
+
+    _attr_has_entity_name = True
+
+    def _update_val(self) -> None:
+        self._attr_available = True
+        desc = cast(ReefLedScheduleSensorEntityDescription, self._description)
+
+        self._attr_native_value = self._device.get_data(desc.value_name)
+
+        id_name = desc.id_name
+        prog_data = self._device.get_data(
+            f"$.sources[?(@.name=='/auto/{id_name}')].data"
+        )
+        cloud_data = self._device.get_data(
+            f"$.sources[?(@.name=='/clouds/{id_name}')].data"
+        )
+        self._attr_extra_state_attributes = {"data": prog_data, "clouds": cloud_data}
+
+
+# REEFDOSE
+class ReefDoseSensorEntity(ReefBeatSensorEntity):
+    """Per-head ReefDose sensor.
+
+    This specializes:
+    - per-head unique device info
+    - date conversion for last calibration
+    - an event fire when container volume increases (used by restore logic)
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        device: ReefBeatCoordinator,
+        entity_description: ReefDoseSensorEntityDescription,
+    ) -> None:
+        super().__init__(device, entity_description)
+        self._head: int = entity_description.head
+
+    def _get_value(self) -> SensorNativeValue:
+        desc = cast(ReefDoseSensorEntityDescription, self._description)
+        if desc.translation_key == "last_calibration":
+            raw = self._device.get_data(desc.value_name)
+            if raw is None:
+                return None
+            try:
+                ts = int(cast(int, raw))
+            except (TypeError, ValueError):
+                return None
+
+            # Use UTC to avoid local timezone shifting the date (e.g. 1969-12-31).
+            dt = datetime.datetime.fromtimestamp(ts, tz=datetime.UTC).date()
+            return dt
+
+        return self._device.get_data(desc.value_name)
+
+    def _update_val(self) -> None:
+        old_value = self._attr_native_value
+        new_value = self._get_value()
+
+        super()._update_val()
+
+        desc = cast(ReefDoseSensorEntityDescription, self._description)
+        if desc.translation_key == "container_volume" and (
+            isinstance(new_value, (int, float))
+            and isinstance(old_value, (int, float))
+            and old_value < new_value
+        ):
+            self._device.hass.bus.fire(desc.value_name, {"value": new_value})
+
+    @cached_property  # type: ignore[reportIncompatibleVariableOverride]
+    def device_info(self) -> DeviceInfo:
+        """Return device info extended with the head identifier."""
+        return cast(ReefDoseCoordinator, self._device).head_device_info(self._head)
+
+
+# RESTORE
+class RestoreSensorEntity(ReefDoseSensorEntity):
+    """Restore-capable ReefDose sensor.
+
+    This entity:
+    - Restores its last state using HA's RestoreEntity
+    - Optionally listens to a bus event (`dependency`) to update the restored value
+    - Mirrors restored/updated values into the coordinator cache at `value_name`
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        device: ReefBeatCoordinator,
+        entity_description: RestoreSensorEntityDescription,
+    ) -> None:
+        super().__init__(
+            device, cast(ReefDoseSensorEntityDescription, entity_description)
+        )
+        self._restore_description = entity_description
+
+    async def async_added_to_hass(self) -> None:
+        """Register event listener (if configured), restore state, then subscribe to updates."""
+        dep = self._restore_description.dependency
+        if dep:
+            self.async_on_remove(
+                self._device.hass.bus.async_listen(dep, self._handle_restore_event)
+            )
+
+        last_state = await self.async_get_last_state()
+        if last_state is not None and last_state.state not in (
+            STATE_UNKNOWN,
+            STATE_UNAVAILABLE,
+        ):
+            # Prefer native_value (if present) so numbers restore as numbers.
+            restored: StateType = cast(
+                StateType, last_state.attributes.get("native_value", last_state.state)
+            )
+            self._attr_native_value = restored
+            if self._restore_description.value_name:
+                self._device.set_data(self._restore_description.value_name, restored)
+        else:
+            self._attr_native_value = None
+
+        await super().async_added_to_hass()
+
+    @callback
+    def _handle_restore_event(self, event: Event) -> None:
+        """Handle update events and persist the mirrored value into the cache."""
+        new_val: StateType = cast(StateType, event.data.get("value"))
+        vn = self._restore_description.value_name
+        if vn is not None:
+            self._device.set_data(vn, new_val)
+        self._attr_native_value = new_val
+        self.async_write_ha_state()
+
+
+# REEFRUN
+class ReefRunSensorEntity(ReefBeatSensorEntity):
+    """Per-pump ReefRun sensor entity.
+
+    Specializations:
+    - per-pump device info identifiers
+    - epoch-to-date conversion for calibration date sensors
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        device: ReefBeatCoordinator,
+        entity_description: ReefRunSensorEntityDescription,
+    ) -> None:
+        super().__init__(device, entity_description)
+        self._pump: int = entity_description.pump
+
+    def _get_value(self) -> SensorNativeValue:
+        desc = cast(ReefRunSensorEntityDescription, self._description)
+        # Convert epoch timestamps to date objects for calibration sensors
+        if desc.translation_key in ("skim_last_calibration", "cup_last_calibration"):
+            raw = self._device.get_data(desc.value_name, is_None_possible=True)
+            if raw is None:
+                return None
+            try:
+                ts = int(cast(int, raw))
+            except (TypeError, ValueError):
+                return None
+            dt = datetime.datetime.fromtimestamp(ts, tz=datetime.UTC).date()
+            return dt
+
+        return self._device.get_data(desc.value_name, is_None_possible=True)
+
+    @cached_property
+    def device_info(self) -> DeviceInfo:
+        """Return per-pump device info for ReefRun."""
+        return cast(ReefRunCoordinator, self._device).pump_device_info(self._pump)
+
+
+# REEFWAVE
+class ReefWaveSensorEntity(ReefBeatSensorEntity):
+    """Wave schedule sensor entity.
+
+    Values are fetched from `device.get_current_value(...)` and translated
+    for `type` and `direction` where needed.
+    """
+
+    _attr_has_entity_name = True
+
+    def _get_value(self) -> StateType:
+        desc = cast(ReefWaveSensorEntityDescription, self._description)
+        val = cast(_WaveValueCoordinator, self._device).get_current_value(
+            desc.value_basename, desc.value_name
+        )
+
+        if desc.value_name == "type" and val is not None:
+            return cast(str, val)
+
+        if desc.value_name == "direction":
+            if val is None:
+                return "fw"
+            return cast(str, val)
+
+        return cast(StateType, val)
+
+
+# REEFCLOUD
+class ReefBeatCloudSensorEntity(ReefBeatSensorEntity):
+    """Cloud library sensor entity.
+
+    These sensors read a name from a library entry and may include the aquarium
+    name in both:
+    - device name (DeviceInfo)
+    - sensor native value (formatted as "{name}-{aquarium}")
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        device: ReefBeatCoordinator,
+        entity_description: ReefBeatCloudSensorEntityDescription,
+    ) -> None:
+        super().__init__(device, entity_description)
+        self._cloud_desc = entity_description
+
+        aquarium_uid = device.get_data(
+            self._cloud_desc.value_name.replace("].name", "].aquarium_uid"),
+            True,
+        )
+        if aquarium_uid is not None:
+            self._aquarium_name = device.get_data(
+                "$.sources[?(@.name=='/aquarium')].data[?(@.uid=='"
+                + str(aquarium_uid)
+                + "')].name",
+                True,
+            )
+        elif self._cloud_desc.key.startswith("supplement_"):
+            self._aquarium_name = "Supplements"
+        else:
+            self._aquarium_name = None
+
+    def _get_value(self) -> StateType:
+        if self._aquarium_name is not None:
+            self._attr_extra_state_attributes = self._device.get_data(
+                self._cloud_desc.value_name.replace("].name", "]")
+            )
+            name = self._device.get_data(self._cloud_desc.value_name)
+            return f"{name}-{self._aquarium_name}"
+        return self._device.get_data(self._cloud_desc.value_name)
+
+    @cached_property  # type: ignore[reportIncompatibleVariableOverride]
+    def device_info(self) -> DeviceInfo:
+        """Return device info adjusted for aquarium/library grouping."""
+        return cast(ReefBeatCloudCoordinator, self._device).aquarium_device_info(
+            self._aquarium_name
+        )

@@ -52,12 +52,23 @@ export interface ChartOptions {
   labels?: boolean;
 }
 
-/** Opacity of the clouds band, by the lamp's cloud intensity. */
+/**
+ * Opacity of the clouds band, by the lamp's cloud intensity. Strong enough
+ * to be seen on light and dark themes, the curves being drawn over it.
+ */
 export const CLOUD_BAND_OPACITY: Record<string, number> = {
-  Low: 0.12,
-  Medium: 0.22,
-  High: 0.34,
+  Low: 0.3,
+  Medium: 0.42,
+  High: 0.55,
 };
+
+/**
+ * Colours of the clouds band: a slate grey-blue, contrasted on light and
+ * dark backgrounds, with solid edges and a strip along its top.
+ */
+export const CLOUD_BAND_COLOR = "rgb(130,150,180)";
+export const CLOUD_EDGE_COLOR = "rgb(90,110,145)";
+export const CLOUD_STRIP_HEIGHT = 4;
 
 /**
  * Pictogram of each cloud intensity (Material Design Icons, as Home
@@ -138,15 +149,18 @@ export function clouds_band(
   const opacity = CLOUD_BAND_OPACITY[level] ?? CLOUD_BAND_OPACITY["Medium"];
   return svg`<g class="clouds_band">
     <rect x="${x0}" y="${box.y}" width="${x1 - x0}" height="${box.h}"
-      fill="rgb(200,210,225)" opacity="${opacity}">
+      fill="${CLOUD_BAND_COLOR}" opacity="${opacity}">
       <title>☁ ${level}</title>
     </rect>
+    <rect class="clouds_strip" x="${x0}" y="${box.y}" width="${x1 - x0}"
+      height="${CLOUD_STRIP_HEIGHT}" fill="${CLOUD_EDGE_COLOR}"
+      opacity="0.9"></rect>
     <line x1="${x0}" y1="${box.y}" x2="${x0}" y2="${box.y + box.h}"
-      stroke="rgb(200,210,225)" stroke-opacity="${opacity + 0.2}"
-      stroke-dasharray="3 3"></line>
+      stroke="${CLOUD_EDGE_COLOR}" stroke-opacity="0.9"
+      stroke-width="1.5" stroke-dasharray="4 3"></line>
     <line x1="${x1}" y1="${box.y}" x2="${x1}" y2="${box.y + box.h}"
-      stroke="rgb(200,210,225)" stroke-opacity="${opacity + 0.2}"
-      stroke-dasharray="3 3"></line>
+      stroke="${CLOUD_EDGE_COLOR}" stroke-opacity="0.9"
+      stroke-width="1.5" stroke-dasharray="4 3"></line>
     ${band_clouds(box, x0, x1, level)}
   </g>`;
 }

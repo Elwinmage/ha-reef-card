@@ -265,18 +265,20 @@ describe("RSLedWeatherSettings", () => {
 });
 
 describe("weather icon", () => {
-  it("bottom right on every view, turns the GPS weather mode on/off", () => {
+  it("bottom right on every view, for information only", () => {
     expect(config.elements.weather.css.left).toBe(WEATHER_ICON[0]);
     expect(config.elements.weather.icon).toBe("mdi:weather-partly-cloudy");
     expect(config2.elements.weather.css.top).toBe(WEATHER_ICON[1]);
     expect(config_virtual_g2.elements.weather.css.left).toBe(WEATHER_ICON[0]);
     // The lamps of a virtual LED leave it the bottom right corner
     expect(config_virtual_g2.elements.linked.css.height).toBe("28%");
-    expect(config.elements.weather.tap_action).toEqual({
-      domain: "switch",
-      action: "toggle",
-      data: "default",
-    });
+    // The mode is chosen in the editor: no action on the icon
+    expect(config.elements.weather.tap_action).toBeUndefined();
+    expect(config.elements.weather).not.toHaveProperty("hold_action");
+    expect(config.elements.weather).not.toHaveProperty("double_tap_action");
+    expect(config.elements.weather.css.cursor).toBe("default");
+    // Blue while a weather week is written, yellow in weather mode
+    expect(config.elements.weather.icon_color).toContain("writing");
     expect(config.elements.weather.disabled_if).toBe("!entity.weather_sync");
     expect(config.off_keep).toContain("weather");
     expect(dialogs_rsled).not.toHaveProperty("led_weather");

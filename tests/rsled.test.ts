@@ -1396,4 +1396,27 @@ describe("RSLed mapping", () => {
   it("RSLed keeps its base model", () => {
     expect((new StubRSLed() as any).device.model).toBe("RSLED");
   });
+
+  it("a lamp lists the lamps of its group, and knows which one it is", () => {
+    // Every lamp view has the list (empty, hence not shown, when alone)
+    expect(config.elements.linked.type).toBe("rsled-linked");
+    expect(config2.elements.linked.type).toBe("rsled-linked");
+    expect(config.off_keep).toContain("linked");
+    const dev = makeLed();
+    expect(dev.linked()).toEqual([]);
+    dev.hass.states["sensor.led_linked_leds"] = {
+      entity_id: "sensor.led_linked_leds",
+      state: "2",
+      attributes: { leds: [{ hwid: "a", name: "A" }] },
+      last_updated: "t",
+    };
+    dev.entities["linked_leds"] = { entity_id: "sensor.led_linked_leds" };
+    expect(dev.linked()).toEqual([{ hwid: "a", name: "A" }]);
+    dev.device = { elements: [{}] };
+    expect(dev.current_hwid()).toBeNull();
+    dev.device = { elements: [{ identifiers: [["redsea", "a"]] }] };
+    expect(dev.current_hwid()).toBe("a");
+    dev.device = { elements: [{ identifiers: ["weird"] }] };
+    expect(dev.current_hwid()).toBeNull();
+  });
 });
