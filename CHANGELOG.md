@@ -2,6 +2,81 @@
 
 ## MODIFICATIONS
 
+### RSWAVE (view, in progress)
+
+- New ReefWave view (RSWAVE25 and RSWAVE45), on the pump picture:
+  - messages on top (`last_message`, `last_alert_message`);
+  - on the mounting clips: on/off, maintenance, settings dialog, Wi-Fi;
+  - on the LED strip: the mode, in light white (no background; a click
+    opens its more-info), and the name of the pump under it;
+  - on the end cap: the speed as a ring fitted on the cap (tilted ellipse,
+    bright red, `rswave-speed`): the forward intensity of the current wave,
+    of the preview settings while previewing, 0 when the pump does not run
+    (off, feeding, maintenance, no wave); arrows inside give the direction
+    (→ forward, ← reverse, both for alternate); a click opens this pump's
+    settings in the current wave (direction, forward / reverse intensities),
+    the other pumps of the group left as they are, as in the app;
+  - between the flow and the program: the pumps of the group in a row over
+    the whole width, thumbnail and name under it, the pump itself circled;
+    a tap shows the card of another (`rswave-linked`, `linked_waves`
+    sensor), as for the ReefLEDs; thumbnails fill the height of the row;
+  - under the pump: a flow animated at that speed, leftwards, rightwards or
+    back and forth with the direction (`rswave-flow`);
+  - the day program (`rswave-schedule`): forward intensity above the middle
+    line, reverse under it, one colour per wave type, the legend of the
+    types (pictogram + name) under the graph, a cursor on the current time.
+- Program editor (click on the program): graph of the draft, one row per
+  slot (start, end, wave picked in the library, type, direction, this
+  pump's intensities), add / remove slots, Save / Cancel. The program is
+  written to the whole group (each pump with its own intensities); a pump of
+  the group not available locks the save, as the ReefBeat app does. Under
+  the group note: a Group / Ungroup button, depending on the pump's state
+  (`redsea.wave_group_set`), and for a group the order of its pumps, changed
+  by drag and drop or with the ‹ › arrows (`redsea.wave_group_order`). Without
+  a cloud account, only the waves of the current program are offered and the
+  program is written to the pump itself. The table is shown whole (the panel
+  scrolls when taller than the screen). Under it, the wave zone: the
+  library embedded on the wave of the current slot; the pencil of a row, or
+  picking a wave, shows that wave.
+- Wave library (icon over the program): the aquarium's waves with the pumps
+  using them; type picked from the app's pictograms, times (min), pulse
+  duration (s), steps, this pump's intensities and sync; update a user wave,
+  create a new one (name asked), delete an unused user wave. Red Sea waves
+  can only be copied. Preview on this pump: direction and duration (1 to 10
+  min), Preview / Stop. Opened from the "Waves" button over the program.
+- Wave type pictograms (MDI format), shared with the integration's
+  `redsea:wave-*` icons, in the legend, the tables and the type picker.
+- Settings dialog: current wave, `shortcut_off_delay`, grouped with the
+  aquarium (`switch.wave_grouped`), preview settings and
+  buttons, device actions. Keys shared by a sensor and a number (current vs
+  preview wave) are always named with their domain.
+- The device box takes the ratio of the picture (688×800).
+- Needs ha-reefbeat-component exposing the day program (`schedule`
+  attribute of the `wave_type` sensor) and the `redsea.wave_*` services.
+
+### RSWAVE GPS weather
+
+- Program editor, new "GPS weather" zone (`rswave-weather`): the speeds of
+  the pumps follow the water speed of a place, hour by hour (wind, or ocean
+  current where the sea model covers it, from Open-Meteo through the
+  integration), between four bounds: slowest / fastest by day and by night,
+  with the speed giving the maximum (km/h) and the spread of speeds merged
+  into one slot (following hours of the same wave). Each pump of the group has its
+  offset (percent of the speed, e.g. -10 for the second pump). Each change
+  previews today's speeds of every pump (one line per pump, the night
+  shaded; `redsea.wave_weather_preview`); Apply saves for the whole group
+  and writes the pumps (`redsea.wave_weather_save`).
+- While the GPS weather is on, the program table edits the pump's own
+  program (the base the weather is made from), with a note saying so; the
+  view's program title shows "· 🌍 GPS" (`switch.wave_weather`).
+
+### PLACE SEARCH
+
+- New `rs-place-search`: a place searched by its name ("Maldives",
+  "Fakarava"…, Open-Meteo geocoding), the map of the GPS weather then goes
+  there before the fine pick. In the ReefLED weather settings and the
+  ReefWave GPS weather.
+
 ### VIRTUAL LED (groups)
 
 - A virtual LED is now a group, as the "grouped" LEDs of the ReefBeat app:
@@ -268,6 +343,11 @@ acceptable_high]`, read from `/probe/config` (`temp.ranges` for the
   `entity.binary_sensor.buzzer_enabled` removed with its entity.
 
 ## FIXES
+
+### RSWAVE
+
+- `redsea-rswave25` and `redsea-rswave45` were registered with each other's
+  class.
 
 ### RSCONTROL probes
 

@@ -8,7 +8,8 @@
  * previews the week they make (redsea.led_weather_preview) and saves them
  * only on Save (redsea.led_weather_save). Nothing is written from here.
  *
- * The place is typed ("lat, lon", or a map link the integration reads) or
+ * The place is typed ("lat, lon", or a map link the integration reads),
+ * searched by its name (rs-place-search: the map then goes there) or
  * picked on Home Assistant's own location selector, when there is one. The
  * week of the preview is listed day by day: the sun on the tank (the
  * place's times on hover), the sunshine, the cloud cover and the highest
@@ -386,6 +387,10 @@ export class RSLedWeatherSettings extends LitElement {
           @change=${(e: Event) =>
             this.change("location", (e.target as HTMLInputElement).value)}
       /></label>
+      <rs-place-search
+        .hass=${this.hass}
+        @place-picked=${(e: CustomEvent) => this.pick(e.detail)}
+      ></rs-place-search>
       ${this._render_map()}
       <div class="grid">
         ${this._select("period", WEATHER_PERIODS)}

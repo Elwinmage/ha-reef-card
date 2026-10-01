@@ -27,7 +27,18 @@ import {
 } from "./redsea/rsled";
 import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
-import { RSWave25, RSWave45 } from "./redsea/rswave";
+import {
+  RSWave25,
+  RSWave45,
+  RSWaveFlow,
+  RSWaveLabel,
+  RSWaveLibrary,
+  RSWaveLinked,
+  RSWaveSchedule,
+  RSWaveSpeed,
+  RSWaveWeather,
+} from "./redsea/rswave";
+import { RSPlaceSearch } from "../utils/place_search";
 import { RSMaintenance } from "./redsea/maintenance";
 import { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
 import {
@@ -103,9 +114,25 @@ if (!customElements.get("redsea-rsrun-skimmer"))
 if (!customElements.get("redsea-rsato"))
   customElements.define("redsea-rsato", RSAto);
 if (!customElements.get("redsea-rswave25"))
-  customElements.define("redsea-rswave25", RSWave45);
+  customElements.define("redsea-rswave25", RSWave25);
 if (!customElements.get("redsea-rswave45"))
-  customElements.define("redsea-rswave45", RSWave25);
+  customElements.define("redsea-rswave45", RSWave45);
+if (!customElements.get("rswave-flow"))
+  customElements.define("rswave-flow", RSWaveFlow);
+if (!customElements.get("rswave-library"))
+  customElements.define("rswave-library", RSWaveLibrary);
+if (!customElements.get("rswave-linked"))
+  customElements.define("rswave-linked", RSWaveLinked);
+if (!customElements.get("rswave-label"))
+  customElements.define("rswave-label", RSWaveLabel);
+if (!customElements.get("rswave-schedule"))
+  customElements.define("rswave-schedule", RSWaveSchedule);
+if (!customElements.get("rswave-speed"))
+  customElements.define("rswave-speed", RSWaveSpeed);
+if (!customElements.get("rswave-weather"))
+  customElements.define("rswave-weather", RSWaveWeather);
+if (!customElements.get("rs-place-search"))
+  customElements.define("rs-place-search", RSPlaceSearch);
 if (!customElements.get("redsea-maintenance"))
   customElements.define("redsea-maintenance", RSMaintenance);
 if (!customElements.get("redsea-power-socket"))
@@ -145,7 +172,18 @@ export {
 } from "./redsea/rsled";
 export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";
-export { RSWave25, RSWave45 } from "./redsea/rswave";
+export {
+  RSWave25,
+  RSWave45,
+  RSWaveFlow,
+  RSWaveLabel,
+  RSWaveLibrary,
+  RSWaveLinked,
+  RSWaveSchedule,
+  RSWaveSpeed,
+  RSWaveWeather,
+} from "./redsea/rswave";
+export { RSPlaceSearch } from "../utils/place_search";
 export { RSMaintenance } from "./redsea/maintenance";
 export { RSPower6, RSPower8, PowerSocket, PowerSensor } from "./redsea/rspower";
 export {
