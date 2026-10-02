@@ -31,8 +31,8 @@ W połączeniu z [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbea
 Redsea (ReefBeat), a [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component) dodaje do
 widoku konserwacji sprzęt, z którym Home Assistant nie potrafi się porozumieć.
 
-Obsługa urządzeń Aqua Medic z [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) jest w drodze;
-ich zadania konserwacyjne pojawiają się już w tym samym widoku.
+Obsługuje także pompy Aqua Medic z [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
+ich zadania konserwacyjne pojawiają się w tym samym widoku.
 
 <!-- ecosystem:start -->
 
@@ -151,7 +151,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
   <tr>
     <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefled.pl.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>🚧</td>
+    <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -160,7 +160,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
   </tr>
   <tr>
     <td>G2</td>
-    <td>🚧</td>
+    <td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -192,7 +192,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefwave.pl.md#reefwave">ReefWave</a></td>
-    <td>RSWAVE</td><td>❌</td>
+    <td>RSWAVE25<br />RSWAVE45</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
@@ -203,8 +203,8 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
     <td colspan="5"><b>Aqua Medic</b> — przez <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
   </tr>
   <tr>
-    <td rowspan="3">Aqua Medic</td>
-    <td>EcoDrift / SmartDrift x.1 / x.3<br />(cyrkulator)</td><td>❌</td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/aquamedic.pl.md#aqua-medic">Aqua Medic</a></td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(cyrkulator)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
@@ -212,17 +212,17 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
     </td>
   </tr>
   <tr>
-    <td>DC Runner<br />(pompa powrotna)</td><td>❌</td>
+    <td>DC Runner<br />(pompa powrotna)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
   </tr>
   <tr>
-    <td>DC Runner<br />(pompa odpieniacza)</td><td>❌</td>
+    <td>DC Runner<br />(pompa odpieniacza)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
 </table>
 
 > [!NOTE]
-> Pompa powrotna DC Runner i pompa odpieniacza to ten sam sprzęt z różnymi głowicami: ten sam firmware, ten sam klucz produktu Gizwits, identyczne encje. Integracja rozróżnia je za pomocą wyboru **Rola pompy**, a karta będzie podążać za tą rolą.
+> Pompa powrotna DC Runner i pompa odpieniacza to ten sam sprzęt z różnymi głowicami: ten sam firmware, ten sam klucz produktu Gizwits, identyczne encje. Integracja rozróżnia je za pomocą wyboru **Rola pompy**, a karta podąża za tą rolą.
 
 # Spis treści
 
@@ -236,6 +236,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefmat.pl.md#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefrun.pl.md#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefwave.pl.md#reefwave)
+- [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/aquamedic.pl.md#aqua-medic)
 - [Konserwacja](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/maintenance.pl.md#konserwacja)
 - [FAQ](#faq)
 

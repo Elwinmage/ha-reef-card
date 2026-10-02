@@ -31,8 +31,8 @@ In Kombination mit [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefb
 (ReefBeat) automatisch unterstützt, und [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
 ergänzt die Wartungsansicht um Geräte, mit denen Home Assistant nicht sprechen kann.
 
-Die Unterstützung der Aqua-Medic-Geräte von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) ist
-in Arbeit; ihre Wartungsaufgaben erscheinen bereits in derselben Ansicht.
+Sie unterstützt auch die Aqua-Medic-Pumpen von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
+ihre Wartungsaufgaben erscheinen in derselben Ansicht.
 
 <!-- ecosystem:start -->
 
@@ -151,7 +151,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
   <tr>
     <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefled.de.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>🚧</td>
+    <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -160,7 +160,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
   </tr>
   <tr>
     <td>G2</td>
-    <td>🚧</td>
+    <td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -192,7 +192,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefwave.de.md#reefwave">ReefWave</a></td>
-    <td>RSWAVE</td><td>❌</td>
+    <td>RSWAVE25<br />RSWAVE45</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
@@ -203,8 +203,8 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
     <td colspan="5"><b>Aqua Medic</b> — über <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
   </tr>
   <tr>
-    <td rowspan="3">Aqua Medic</td>
-    <td>EcoDrift / SmartDrift x.1 / x.3<br />(Strömungspumpe)</td><td>❌</td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/aquamedic.de.md#aqua-medic">Aqua Medic</a></td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(Strömungspumpe)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
@@ -212,17 +212,17 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
     </td>
   </tr>
   <tr>
-    <td>DC Runner<br />(Förderpumpe)</td><td>❌</td>
+    <td>DC Runner<br />(Förderpumpe)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
   </tr>
   <tr>
-    <td>DC Runner<br />(Abschäumerpumpe)</td><td>❌</td>
+    <td>DC Runner<br />(Abschäumerpumpe)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
 </table>
 
 > [!NOTE]
-> Die DC Runner Förderpumpe und die Abschäumerpumpe sind dieselbe Hardware mit unterschiedlichen Pumpenköpfen: gleiche Firmware, gleicher Gizwits-Produktschlüssel, identische Entitäten. Die Integration unterscheidet sie über ihre Auswahl **Pumpenrolle**, und die Karte wird dieser Rolle folgen.
+> Die DC Runner Förderpumpe und die Abschäumerpumpe sind dieselbe Hardware mit unterschiedlichen Pumpenköpfen: gleiche Firmware, gleicher Gizwits-Produktschlüssel, identische Entitäten. Die Integration unterscheidet sie über ihre Auswahl **Pumpenrolle**, und die Karte folgt dieser Rolle.
 
 # Inhaltsverzeichnis
 
@@ -236,6 +236,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefmat.de.md#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefrun.de.md#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefwave.de.md#reefwave)
+- [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/aquamedic.de.md#aqua-medic)
 - [Wartung](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/maintenance.de.md#wartung)
 - [FAQ](#faq)
 

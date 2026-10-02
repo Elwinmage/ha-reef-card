@@ -31,8 +31,8 @@ Combinada con [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 dispositivos Redsea (ReefBeat), y [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
 añade a la vista de mantenimiento el equipo con el que Home Assistant no puede comunicarse.
 
-La compatibilidad con los dispositivos Aqua Medic de [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component)
-está en camino; sus tareas de mantenimiento ya aparecen en esa misma vista.
+También es compatible con las bombas Aqua Medic de [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
+sus tareas de mantenimiento aparecen en esa misma vista.
 
 <!-- ecosystem:start -->
 
@@ -151,7 +151,7 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
   <tr>
     <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefled.es.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>🚧</td>
+    <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -160,7 +160,7 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
   </tr>
   <tr>
     <td>G2</td>
-    <td>🚧</td>
+    <td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -192,7 +192,7 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefwave.es.md#reefwave">ReefWave</a></td>
-    <td>RSWAVE</td><td>❌</td>
+    <td>RSWAVE25<br />RSWAVE45</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
@@ -203,8 +203,8 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
     <td colspan="5"><b>Aqua Medic</b> — a través de <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
   </tr>
   <tr>
-    <td rowspan="3">Aqua Medic</td>
-    <td>EcoDrift / SmartDrift x.1 / x.3<br />(bomba de circulación)</td><td>❌</td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/aquamedic.es.md#aqua-medic">Aqua Medic</a></td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(bomba de circulación)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
@@ -212,17 +212,17 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
     </td>
   </tr>
   <tr>
-    <td>DC Runner<br />(bomba de retorno)</td><td>❌</td>
+    <td>DC Runner<br />(bomba de retorno)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
   </tr>
   <tr>
-    <td>DC Runner<br />(bomba del skimmer)</td><td>❌</td>
+    <td>DC Runner<br />(bomba del skimmer)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
 </table>
 
 > [!NOTE]
-> La bomba de retorno DC Runner y la bomba del skimmer son el mismo hardware con cabezales distintos: mismo firmware, misma clave de producto Gizwits, entidades idénticas. La integración las distingue mediante su selector **Rol de la bomba**, y la tarjeta seguirá ese rol.
+> La bomba de retorno DC Runner y la bomba del skimmer son el mismo hardware con cabezales distintos: mismo firmware, misma clave de producto Gizwits, entidades idénticas. La integración las distingue mediante su selector **Rol de la bomba**, y la tarjeta sigue ese rol.
 
 # Índice
 
@@ -236,6 +236,7 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefmat.es.md#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefrun.es.md#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefwave.es.md#reefwave)
+- [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/aquamedic.es.md#aqua-medic)
 - [Mantenimiento](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/maintenance.es.md#mantenimiento)
 - [FAQ](#faq)
 

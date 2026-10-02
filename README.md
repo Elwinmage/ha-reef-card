@@ -31,8 +31,8 @@ Combined with [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 Redsea (ReefBeat) devices, and [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
 adds the equipment Home Assistant cannot talk to to the maintenance view.
 
-Support for the Aqua Medic devices of [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component) is on
-its way; their maintenance tasks already show up in that same view.
+It also supports the Aqua Medic pumps of [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
+their maintenance tasks show up in that same view.
 
 <!-- ecosystem:start -->
 
@@ -158,7 +158,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   <tr>
     <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefled.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>🚧</td>
+    <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -167,7 +167,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   </tr>
   <tr>
     <td>G2</td>
-    <td>🚧</td>
+    <td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -199,7 +199,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefwave.md#reefwave">ReefWave</a></td>
-    <td>RSWAVE</td><td>❌</td>
+    <td>RSWAVE25<br />RSWAVE45</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
@@ -210,8 +210,8 @@ All of them are documented together on the [ReefTech project page](https://elwin
     <td colspan="5"><b>Aqua Medic</b> — through <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
   </tr>
   <tr>
-    <td rowspan="3">Aqua Medic</td>
-    <td>EcoDrift / SmartDrift x.1 / x.3<br />(wavemaker)</td><td>❌</td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/aquamedic.md#aqua-medic">Aqua Medic</a></td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(wavemaker)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
@@ -219,17 +219,17 @@ All of them are documented together on the [ReefTech project page](https://elwin
     </td>
   </tr>
   <tr>
-    <td>DC Runner<br />(return pump)</td><td>❌</td>
+    <td>DC Runner<br />(return pump)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
   </tr>
   <tr>
-    <td>DC Runner<br />(skimmer pump)</td><td>❌</td>
+    <td>DC Runner<br />(skimmer pump)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
 </table>
 
 > [!NOTE]
-> The DC Runner return pump and skimmer pump are the same hardware with different pump heads: same firmware, same Gizwits product key, identical entities. The integration tells them apart through its **Pump role** select, and the card will follow that role.
+> The DC Runner return pump and skimmer pump are the same hardware with different pump heads: same firmware, same Gizwits product key, identical entities. The integration tells them apart through its **Pump role** select, and the card follows that role.
 
 # Table of contents
 
