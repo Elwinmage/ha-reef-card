@@ -434,6 +434,13 @@ export class RSDevice extends LitElement {
       re_render = true;
     }
 
+    // A delegate (see _render_delegate()) is the device actually on screen:
+    // it has to follow the states too, or its elements freeze on the values
+    // they had when the role was picked.
+    if (this._delegate) {
+      this._delegate.hass = obj;
+    }
+
     for (const element in this._elements) {
       const elt = this._elements[element];
       //If the element control a master state, re-render the device

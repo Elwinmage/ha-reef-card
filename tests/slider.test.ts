@@ -277,3 +277,69 @@ describe("Slider commit", () => {
     expect(callService).not.toHaveBeenCalled();
   });
 });
+
+describe("optimistic value", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  /** The value the thumb label shows. */
+  const shown = (slider: any): string =>
+    JSON.stringify(slider._render().values);
+
+  it("keeps showing the committed value until the entity reports it", () => {
+    const slider = makeSlider();
+    slider._displayValue = 80;
+    slider._commitValue();
+    // The entity still says 50: the thumb stays where it was released
+    expect(slider._displayValue).toBeNull();
+    expect(shown(slider)).toContain("80");
+
+    // The entity catches up: the hold is dropped
+    slider.stateObj = { ...slider.stateObj, state: "80" };
+    expect(shown(slider)).toContain("80");
+    expect(slider._pending).toBeNull();
+    expect(slider._pendingTimer).toBeNull();
+  });
+
+  it("gives up after the hold, so a refused value does not stay", () => {
+    const slider = makeSlider();
+    slider._displayValue = 80;
+    slider._commitValue();
+    slider.requestUpdate.mockClear();
+
+    vi.advanceTimersByTime(Slider.PENDING_HOLD_MS);
+
+    expect(slider._pending).toBeNull();
+    expect(slider.requestUpdate).toHaveBeenCalledTimes(1);
+    expect(shown(slider)).toContain("50");
+  });
+
+  it("restarts the hold on a second commit", () => {
+    const slider = makeSlider();
+    slider._displayValue = 80;
+    slider._commitValue();
+    vi.advanceTimersByTime(Slider.PENDING_HOLD_MS - 1000);
+    slider._displayValue = 60;
+    slider._commitValue();
+    vi.advanceTimersByTime(1500);
+    // The first timer would have fired by now
+    expect(slider._pending).toBe(60);
+  });
+
+  it("lets a drag in progress win over the held value", () => {
+    const slider = makeSlider();
+    slider._displayValue = 80;
+    slider._commitValue();
+    slider._displayValue = 30;
+    expect(shown(slider)).toContain("30");
+  });
+
+  it("drops the hold when the element is removed", () => {
+    const slider = makeSlider();
+    slider._displayValue = 80;
+    slider._commitValue();
+    slider.disconnectedCallback();
+    expect(slider._pending).toBeNull();
+    expect(slider._pendingTimer).toBeNull();
+  });
+});

@@ -2,10 +2,12 @@
 """
 check_entities.py
 =================
-Vérifie que toutes les entités HA déclarées dans ha-reefbeat-component
-sont bien référencées dans la custom card ha-reef-card.
+Vérifie que toutes les entités HA déclarées dans les intégrations supportées
+(ha-reefbeat-component, ha-aquamedic-component) sont bien référencées dans la
+custom card ha-reef-card.
 
 Étape 1 : Extraction AST des translation_keys par device et plateforme
+          (un extracteur par intégration, voir INTEGRATIONS)
 Étape 2 : Extraction des entity keys référencées dans les fichiers TS de la card
 Étape 3 : Rapport de couverture (présent / manquant)
 """
@@ -18,6 +20,8 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from textwrap import indent
 
@@ -34,6 +38,11 @@ COMPONENT_ROOT = CARD_ROOT.parent / "ha-reefbeat-component"  # ../ha-reefbeat-co
 COMPONENT_DIR  = COMPONENT_ROOT / "custom_components" / "redsea"
 
 COMPONENT_GIT_URL = "https://github.com/Elwinmage/ha-reefbeat-component"
+
+# ha-aquamedic-component/ = SCRIPT_DIR.parent.parent / "ha-aquamedic-component"
+AQUAMEDIC_ROOT    = CARD_ROOT.parent / "ha-aquamedic-component"
+AQUAMEDIC_DIR     = AQUAMEDIC_ROOT / "custom_components" / "aquamedic"
+AQUAMEDIC_GIT_URL = "https://github.com/Elwinmage/ha-aquamedic-component"
 
 # ---------------------------------------------------------------------------
 # Coordinator → device mapping
@@ -432,6 +441,368 @@ def extract_component_entities(component_dir: Path) -> dict[str, dict[str, list[
 
 
 # ---------------------------------------------------------------------------
+# Step 1 bis – AST extraction of the Aqua Medic component entities
+# ---------------------------------------------------------------------------
+#
+# ha-aquamedic-component has a single coordinator for the whole account, so
+# its platforms do not guard on a coordinator class like the Red Sea ones do:
+# they compare the Gizwits product key of each device. The walk below follows
+# those comparisons instead of isinstance() calls.
+
+# Firmware variants, as the platforms tell them apart (product key constants
+# of const.py). DC_SKIMMER_PRODUCT_KEY is an alias of the DC Runner series key.
+AQUAMEDIC_PRODUCT_KEYS: dict[str, str] = {
+    "SMARTDRIFT_PRODUCT_KEY":       "smartdrift",
+    "DC_RUNNER_SERIES_PRODUCT_KEY": "runner_series",
+    "DC_SKIMMER_PRODUCT_KEY":       "runner_series",
+    "DC_RUNNER_PRODUCT_KEY":        "runner_legacy",
+}
+
+AQUAMEDIC_VARIANTS: frozenset[str] = frozenset(AQUAMEDIC_PRODUCT_KEYS.values())
+
+# Firmware variant → card devices showing it. Both DC Runner firmwares serve
+# the return pump and the skimmer: the role comes from the user (pump_role
+# select), not from the product key, so each view must cover both.
+AQUAMEDIC_VARIANT_DEVICES: dict[str, list[str]] = {
+    "smartdrift":    ["smartdrift"],
+    "runner_series": ["dcrunner", "dcskimmer"],
+    "runner_legacy": ["dcrunner", "dcskimmer"],
+}
+
+# Helper predicates of the component, called with a product key, and the
+# variants for which they are true (resp. return something other than None).
+AQUAMEDIC_GUARD_FUNCTIONS: dict[str, frozenset[str]] = {
+    # maintenance.py: the role of these pumps cannot be read from the API
+    "role_is_user_defined": frozenset({"runner_series", "runner_legacy"}),
+    # schedule.py: products having a time-slot scheduler
+    "layout_for":           frozenset({"smartdrift", "runner_series"}),
+}
+
+AQUAMEDIC_DEVICES: list[str] = ["smartdrift", "dcrunner", "dcskimmer"]
+
+
+class AquaMedicEntityExtractor:
+    """
+    Walks one platform file of ha-aquamedic-component and builds:
+        { firmware_variant -> [translation_key, ...] }
+
+    Strategy:
+    1. Collect the module-level Description tuples (and single Descriptions),
+       and the `_attr_translation_key` of the entity classes that have no
+       description (e.g. the pump role select).
+    2. Walk the `for did, dev in coordinator.data.items()` loop of
+       async_setup_entry, following the product key tests:
+         - if / elif / else chains, each branch with its own variants;
+         - `if <test>: continue`, which restricts the rest of the loop;
+         - `descs = SOME_DESCRIPTIONS`, resolved when `descs` is iterated.
+    3. Record the translation keys of every entities.append() for the variants
+       active at that point.
+
+    Entities whose translation key is computed at run time (the maintenance
+    tasks) are deliberately not collected: the maintenance view picks them up
+    from their `reef_role` attribute, not from a mapping.
+    """
+
+    def __init__(self) -> None:
+        # { var_name -> [translation_key, ...] }
+        self.static_descs: dict[str, list[str]] = {}
+        # { class_name -> translation_key } from `_attr_translation_key = "..."`
+        self.class_keys: dict[str, str] = {}
+        # { var_name -> [(keys, variants)] } for `descs = X` made under a guard
+        self.aliases: dict[str, list[tuple[list[str], set[str]]]] = {}
+        # { var_name -> variants } for `x = guard_function(...)`
+        self.guard_vars: dict[str, frozenset[str]] = {}
+        # result: variant -> [translation_key]
+        self.result: dict[str, list[str]] = defaultdict(list)
+
+    # ---- Pass 1 ----
+
+    def visit(self, tree: ast.Module) -> None:
+        for stmt in tree.body:
+            if isinstance(stmt, (ast.Assign, ast.AnnAssign)) and stmt.value is not None:
+                targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+                keys = extract_translation_keys_from_collection(stmt.value)
+                for target in targets:
+                    if keys and isinstance(target, ast.Name):
+                        self.static_descs[target.id] = keys
+            elif isinstance(stmt, ast.ClassDef):
+                for item in stmt.body:
+                    if (
+                        isinstance(item, ast.Assign)
+                        and isinstance(item.value, ast.Constant)
+                        and isinstance(item.value.value, str)
+                        and any(
+                            isinstance(t, ast.Name) and t.id == "_attr_translation_key"
+                            for t in item.targets
+                        )
+                    ):
+                        self.class_keys[stmt.name] = item.value.value
+        for stmt in tree.body:
+            if isinstance(stmt, ast.AsyncFunctionDef) and stmt.name == "async_setup_entry":
+                self._walk(stmt.body, set(AQUAMEDIC_VARIANTS))
+
+    # ---- Guards ----
+
+    def _variants_of(self, node: ast.expr) -> set[str]:
+        """Variants named by a product key constant, or a tuple of them."""
+        if isinstance(node, ast.Name):
+            variant = AQUAMEDIC_PRODUCT_KEYS.get(node.id)
+            return {variant} if variant else set()
+        if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+            found: set[str] = set()
+            for elt in node.elts:
+                found |= self._variants_of(elt)
+            return found
+        return set()
+
+    def _eval(self, test: ast.expr, active: set[str]) -> set[str] | None:
+        """
+        Variants of `active` for which `test` is true.
+        Returns None when the test says nothing about the product key.
+        """
+        if isinstance(test, ast.BoolOp):
+            parts = [self._eval(v, active) for v in test.values]
+            known = [p for p in parts if p is not None]
+            if not known:
+                return None
+            if isinstance(test.op, ast.And):
+                result = set(active)
+                for part in known:
+                    result &= part
+                return result
+            # `or` with an unknown operand may be true for any variant
+            if len(known) != len(parts):
+                return None
+            result = set()
+            for part in known:
+                result |= part
+            return result
+        if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+            inner = self._eval(test.operand, active)
+            return None if inner is None else active - inner
+        if isinstance(test, ast.Call):
+            name = test.func.id if isinstance(test.func, ast.Name) else None
+            if name in AQUAMEDIC_GUARD_FUNCTIONS:
+                return active & AQUAMEDIC_GUARD_FUNCTIONS[name]
+            return None
+        if isinstance(test, ast.Compare) and len(test.ops) == 1:
+            op, right = test.ops[0], test.comparators[0]
+            # `layout is None` / `layout is not None`, layout = guard_function()
+            if (
+                isinstance(op, (ast.Is, ast.IsNot))
+                and isinstance(test.left, ast.Name)
+                and test.left.id in self.guard_vars
+                and isinstance(right, ast.Constant)
+                and right.value is None
+            ):
+                truthy = active & self.guard_vars[test.left.id]
+                return active - truthy if isinstance(op, ast.Is) else truthy
+            named = self._variants_of(right)
+            if not named:
+                return None
+            if isinstance(op, (ast.Eq, ast.In)):
+                return active & named
+            if isinstance(op, (ast.NotEq, ast.NotIn)):
+                return active - named
+        return None
+
+    # ---- Walk ----
+
+    @staticmethod
+    def _only_continues(body: list[ast.stmt]) -> bool:
+        return all(isinstance(stmt, ast.Continue) for stmt in body)
+
+    def _walk(self, stmts: list[ast.stmt], active: set[str]) -> None:
+        active = set(active)
+        for stmt in stmts:
+            if isinstance(stmt, ast.If):
+                # `if <test>: continue` narrows everything that follows
+                if self._only_continues(stmt.body) and not stmt.orelse:
+                    skipped = self._eval(stmt.test, active)
+                    if skipped is not None:
+                        active -= skipped
+                    continue
+                self._walk_if_chain(stmt, active)
+            elif isinstance(stmt, ast.For):
+                self._walk_for(stmt, active)
+            elif isinstance(stmt, (ast.Assign, ast.AnnAssign)) and stmt.value is not None:
+                targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+                for target in targets:
+                    if isinstance(target, ast.Name):
+                        self._assign(target.id, stmt.value, active)
+            elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+                self._handle_call(stmt.value, active, loop_keys=None)
+
+    def _walk_if_chain(self, node: ast.If, active: set[str]) -> None:
+        remaining = set(active)
+        current: ast.If | None = node
+        while current is not None:
+            matched = self._eval(current.test, remaining)
+            branch = remaining if matched is None else matched
+            self._walk(current.body, branch)
+            if matched is not None:
+                remaining = remaining - matched
+            if len(current.orelse) == 1 and isinstance(current.orelse[0], ast.If):
+                current = current.orelse[0]
+            else:
+                if current.orelse:
+                    self._walk(current.orelse, remaining)
+                break
+
+    def _assign(self, name: str, value: ast.expr, active: set[str]) -> None:
+        # layout = layout_for(dev.product_key)
+        if (
+            isinstance(value, ast.Call)
+            and isinstance(value.func, ast.Name)
+            and value.func.id in AQUAMEDIC_GUARD_FUNCTIONS
+        ):
+            self.guard_vars[name] = AQUAMEDIC_GUARD_FUNCTIONS[value.func.id]
+            return
+        # descs = SWITCH_DESCRIPTIONS / descs = ()
+        keys = self._keys_of(value)
+        if keys is not None:
+            self.aliases.setdefault(name, []).append((keys, set(active)))
+
+    def _keys_of(self, node: ast.expr) -> list[str] | None:
+        """Translation keys of a descriptions expression, None when unknown."""
+        if isinstance(node, ast.Name):
+            return self.static_descs.get(node.id)
+        if isinstance(node, (ast.Tuple, ast.List)):
+            return extract_translation_keys_from_collection(node)
+        return None
+
+    def _walk_for(self, node: ast.For, active: set[str]) -> None:
+        # for desc in descs: / for desc in SWITCH_DESCRIPTIONS:
+        loop_keys: list[tuple[list[str], set[str]]] | None = None
+        if isinstance(node.iter, ast.Name):
+            if node.iter.id in self.aliases:
+                loop_keys = [
+                    (keys, variants & active)
+                    for keys, variants in self.aliases[node.iter.id]
+                ]
+            elif node.iter.id in self.static_descs:
+                loop_keys = [(self.static_descs[node.iter.id], set(active))]
+        if loop_keys is None:
+            # The device loop itself, or a loop over run-time data
+            self._walk(node.body, active)
+            return
+        for stmt in node.body:
+            if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+                self._handle_call(stmt.value, active, loop_keys)
+            elif isinstance(stmt, ast.If):
+                # if desc.kind is LOCAL: append(A(...)) else: append(B(...))
+                for branch in (stmt.body, stmt.orelse):
+                    for inner in branch:
+                        if isinstance(inner, ast.Expr) and isinstance(inner.value, ast.Call):
+                            self._handle_call(inner.value, active, loop_keys)
+
+    def _handle_call(
+        self,
+        call: ast.Call,
+        active: set[str],
+        loop_keys: list[tuple[list[str], set[str]]] | None,
+    ) -> None:
+        if not (isinstance(call.func, ast.Attribute) and call.func.attr == "append" and call.args):
+            return
+        ctor = call.args[0]
+        if not isinstance(ctor, ast.Call):
+            return
+        # Entity class carrying its own translation key
+        cls = ctor.func.id if isinstance(ctor.func, ast.Name) else None
+        if cls in self.class_keys:
+            self._record([self.class_keys[cls]], active)
+            return
+        # Entity(coordinator, did, SOME_DESCRIPTION [, ...])
+        for arg in ctor.args:
+            if isinstance(arg, ast.Name) and arg.id in self.static_descs:
+                self._record(self.static_descs[arg.id], active)
+                return
+        # Entity(coordinator, did, desc) inside `for desc in descs`
+        if loop_keys is not None:
+            for keys, variants in loop_keys:
+                self._record(keys, variants)
+
+    def _record(self, keys: list[str], variants: set[str]) -> None:
+        for variant in variants:
+            for key in keys:
+                if key not in self.result[variant]:
+                    self.result[variant].append(key)
+
+
+def extract_aquamedic_entities(component_dir: Path) -> dict[str, dict[str, list[str]]]:
+    """
+    Returns: { card_device: { platform: [translation_key, ...] } }
+    """
+    result: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+
+    for platform in PLATFORMS:
+        py_file = component_dir / f"{platform}.py"
+        if not py_file.exists():
+            continue
+
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        extractor = AquaMedicEntityExtractor()
+        extractor.visit(tree)
+
+        for variant, keys in extractor.result.items():
+            for device in AQUAMEDIC_VARIANT_DEVICES[variant]:
+                for k in keys:
+                    if k not in result[device][platform]:
+                        result[device][platform].append(k)
+
+    return {dev: dict(platforms) for dev, platforms in result.items()}
+
+
+# ---------------------------------------------------------------------------
+# Integrations
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Integration:
+    """A Home Assistant integration whose entities the card must reference."""
+
+    name: str                 # hass domain
+    label: str                # repository name, for messages
+    root: Path                # local checkout, next to ha-reef-card
+    component_dir: Path       # custom_components/<domain> inside it
+    git_url: str              # cloned from there when the checkout is missing
+    devices: tuple[str, ...]  # card devices it provides
+    extract: Callable[[Path], dict[str, dict[str, list[str]]]]
+
+
+INTEGRATIONS: list[Integration] = [
+    Integration(
+        name="redsea",
+        label="ha-reefbeat-component",
+        root=COMPONENT_ROOT,
+        component_dir=COMPONENT_DIR,
+        git_url=COMPONENT_GIT_URL,
+        devices=tuple(EntityExtractor.ALL_DEVICES),
+        extract=extract_component_entities,
+    ),
+    Integration(
+        name="aquamedic",
+        label="ha-aquamedic-component",
+        root=AQUAMEDIC_ROOT,
+        component_dir=AQUAMEDIC_DIR,
+        git_url=AQUAMEDIC_GIT_URL,
+        devices=tuple(AQUAMEDIC_DEVICES),
+        extract=extract_aquamedic_entities,
+    ),
+]
+
+
+def extract_all_component_entities(
+    integrations: list[Integration],
+) -> dict[str, dict[str, list[str]]]:
+    """Merge the entities of every integration: { device: { platform: [key] } }."""
+    result: dict[str, dict[str, list[str]]] = {}
+    for integration in integrations:
+        result.update(integration.extract(integration.component_dir))
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Step 2 – Extract entity keys from the card's TypeScript files
 # ---------------------------------------------------------------------------
 
@@ -500,6 +871,17 @@ CARD_DEVICE_FOLDERS: dict[str, str] = {
     "rsmat":        "redsea/rsmat",
     "rspower":        "redsea/rspower",
     "rscontrol":        "redsea/rscontrol",
+    "smartdrift":   "aquamedic/smartdrift",
+    "dcrunner":     "aquamedic/dcrunner",
+    "dcskimmer":    "aquamedic/dcskimmer",
+}
+
+# Extra folders scanned for a device, on top of its own: the base class, the
+# elements and the dialogs several views of one manufacturer share.
+CARD_SHARED_FOLDERS: dict[str, list[str]] = {
+    "smartdrift": ["aquamedic/common"],
+    "dcrunner":   ["aquamedic/common"],
+    "dcskimmer":  ["aquamedic/common"],
 }
 
 # Restrict TS file scanning per device variant.
@@ -573,9 +955,12 @@ def extract_card_entities(card_src_dir: Path) -> dict[str, set[str]]:
         device_keys: set[str] = set(shared_keys)
         include_filter = DEVICE_TS_INCLUDE.get(device)  # None = include all
 
-        # Per-device folder: all .ts files (filtered if needed)
-        folder_path = card_src_dir / "devices" / folder
-        if folder_path.exists():
+        # Per-device folder: all .ts files (filtered if needed), then the
+        # folders it shares with the other views of its manufacturer
+        for rel_folder in [folder, *CARD_SHARED_FOLDERS.get(device, [])]:
+            folder_path = card_src_dir / "devices" / rel_folder
+            if not folder_path.exists():
+                continue
             for ts_file in folder_path.rglob("*.ts"):
                 if "supplements_list" in ts_file.name:
                     continue
@@ -669,7 +1054,11 @@ def _extract_keys_from_ts_file(path: Path) -> set[str]:
 # Step 3 – Cross-check and report
 # ---------------------------------------------------------------------------
 
-DEVICES = ["rsdose", "rsled_g1", "rsled_g2", "rsled_virtual", "rsato", "rsrun", "rswave", "rsmat","rspower","rscontrol"]
+DEVICES = [
+    "rsdose", "rsled_g1", "rsled_g2", "rsled_virtual", "rsato", "rsrun", "rswave", "rsmat","rspower","rscontrol",
+    # ha-aquamedic-component
+    *AQUAMEDIC_DEVICES,
+]
 
 # Some translation_keys are template-based (per head/pump) and the card uses
 # the base key without the suffix. We strip known suffixes for comparison.
@@ -825,7 +1214,7 @@ def print_report(
         dev_in_progress = []
 
     print(f"\n{BOLD}{'='*70}{RESET}")
-    print(f"{BOLD}  HA ReefBeat  —  Component ↔ Card entity coverage report{RESET}")
+    print(f"{BOLD}  HA Reef Card  —  Components ↔ Card entity coverage report{RESET}")
     if device_filter:
         print(f"{BOLD}  Filter: {CYAN}{device_filter}{RESET}")
     print(f"{BOLD}{'='*70}{RESET}\n")
@@ -976,7 +1365,7 @@ def dump_markdown(
     lines: list[str] = []
     a = lines.append
 
-    a("# HA ReefBeat — Entity coverage report")
+    a("# HA Reef Card — Entity coverage report")
     a("")
     a(f"*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
     if device_filter:
@@ -1078,16 +1467,16 @@ def dump_markdown(
 # Main
 # ---------------------------------------------------------------------------
 
-def ensure_component() -> None:
-    """Clone ha-reefbeat-component from GitHub if the directory doesn't exist."""
-    if COMPONENT_ROOT.exists():
+def ensure_component(integration: Integration) -> None:
+    """Clone an integration from GitHub if its directory doesn't exist."""
+    if integration.root.exists():
         return
 
-    print(f"{YELLOW}ha-reefbeat-component non trouvé à : {COMPONENT_ROOT}{RESET}")
-    print(f"Clonage depuis {COMPONENT_GIT_URL} …")
+    print(f"{YELLOW}{integration.label} non trouvé à : {integration.root}{RESET}")
+    print(f"Clonage depuis {integration.git_url} …")
     try:
         subprocess.run(
-            ["git", "clone", "--depth=1", COMPONENT_GIT_URL, str(COMPONENT_ROOT)],
+            ["git", "clone", "--depth=1", integration.git_url, str(integration.root)],
             check=True,
         )
         print(f"{GREEN}✓ Clonage terminé.{RESET}")
@@ -1098,30 +1487,42 @@ def ensure_component() -> None:
         print(f"{RED}Erreur lors du clonage (code {exc.returncode}).{RESET}", file=sys.stderr)
         sys.exit(1)
 
-    if not COMPONENT_DIR.exists():
+    if not integration.component_dir.exists():
         print(
             f"{RED}Erreur : le dossier attendu n'existe pas après clonage :\n"
-            f"  {COMPONENT_DIR}{RESET}",
+            f"  {integration.component_dir}{RESET}",
             file=sys.stderr,
         )
         sys.exit(1)
+
+
+def integrations_for(device_filter: str | None) -> list[Integration]:
+    """The integrations a run needs: all of them, or the one of a device."""
+    if device_filter is None:
+        return list(INTEGRATIONS)
+    return [i for i in INTEGRATIONS if device_filter in i.devices]
 
 
 def print_help() -> None:
     B, R, C, G, Y, D = BOLD, RESET, CYAN, GREEN, YELLOW, DIM
     script = Path(sys.argv[0]).name
     devices = ", ".join(DEVICES)
+    labels = ", ".join(i.label for i in INTEGRATIONS)
+    git_urls = "\n".join(f"    {D}{i.git_url}{R}" for i in INTEGRATIONS)
     print(f"""
 {B}Usage:{R}
   {G}python3 {script}{R} [options]
 
 {B}Description:{R}
-  Checks that every HA entity declared in {C}ha-reefbeat-component{R}
-  is referenced in the custom card {C}ha-reef-card{R}.
+  Checks that every HA entity declared in the supported integrations
+  ({C}{labels}{R}) is referenced in the custom card {C}ha-reef-card{R}.
 
   The script must be run from {C}ha-reef-card/scripts/{R}.
-  If {C}ha-reefbeat-component{R} is not found, it is cloned automatically from:
-    {D}{COMPONENT_GIT_URL}{R}
+  Each integration is expected next to {C}ha-reef-card{R}; one that is not
+  found is cloned automatically from GitHub:
+{git_urls}
+
+  With {G}--device{R}, only the integration of that device is needed.
 
 {B}Options:{R}
   {G}--device=<name>{R}
@@ -1228,10 +1629,11 @@ def main() -> None:
         if default_ignore.exists():
             ignore_path = default_ignore
 
-    # ---- Ensure the component repo is available ----
-    ensure_component()
-
-    print(f"  Composant : {COMPONENT_DIR}")
+    # ---- Ensure the component repos are available ----
+    integrations = integrations_for(device_filter)
+    for integration in integrations:
+        ensure_component(integration)
+        print(f"  Composant : {integration.component_dir}")
     print(f"  Card      : {CARD_DIR}")
     if device_filter:
         print(f"  Device    : {CYAN}{device_filter}{RESET}  (filtre actif)")
@@ -1247,8 +1649,8 @@ def main() -> None:
             print(f"  Dev       : {len(dev_in_progress)} device(s) en développement : {', '.join(dev_in_progress)}")
     print()
 
-    print("Extraction des entités du composant (AST)…")
-    component = extract_component_entities(COMPONENT_DIR)
+    print("Extraction des entités des composants (AST)…")
+    component = extract_all_component_entities(integrations)
 
     print("Extraction des entités de la card (TypeScript)…")
     card = extract_card_entities(CARD_DIR)

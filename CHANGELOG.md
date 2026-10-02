@@ -2,6 +2,51 @@
 
 ## MODIFICATIONS
 
+### AQUA MEDIC (views)
+
+- New views for the pumps of ha-aquamedic-component, replacing the
+  "development planned" banner: DC Runner return pump, DC Skimmer and
+  SmartDrift / EcoDrift. They share one base (`AMDevice`) and one set of
+  elements (`am.common.mapping.ts`):
+  - top band: power, feeding pause, timer, 0-10V control, settings dialog; a
+    SmartDrift adds the pulse / tide switch and its wave mode;
+  - a blinking line naming the faults the pump raises (`aquamedic-faults`);
+  - the speed as a ring on the picture and a slider under it (flow and wave
+    frequency on a SmartDrift), hidden while the pump is driven by its 0-10V
+    input;
+  - the time-slot program (`aquamedic-schedule`): one block per slot, speed
+    as height, feeding pauses dashed, stops on the base line, a cursor on the
+    current time, dimmed while the timer is off.
+- Program editor (click on the program, or hold the timer icon): one row per
+  slot (start, end, mode, value, plus frequency and tide on a SmartDrift),
+  add / remove, Save / Cancel. Saving calls `aquamedic.set_schedule`. The
+  editor refuses what the pump would: overlaps, slots crossing midnight, a
+  DC Runner slot under 30 %, a feeding pause outside 1-60 minutes.
+- Each view is laid out on its own picture (`PICTURE` and `LAYOUT` of its
+  mapping): icons over the motor of the DC Runner and the ring on its
+  housing; controls beside the tall DC Skimmer; on the SmartDrift the flow is
+  a ring fitted on the front cap, an ellipse like the ReefWave end cap, the
+  figure in its centre (`aquamedic-cap-ring`).
+- DC Skimmer activity, as on the ReefRun skimmer: the foaming picture
+  (`am-dcskimmer-on.png`) while the pump runs, the idle one when it is off or
+  held by the feeding pause; translucent bands rise in the reaction chamber,
+  faster with the motor speed, and bubbles pop in the collection cup. No
+  full-cup state: the Aqua Medic firmware does not detect it.
+- Water streams while a pump runs (`aquamedic-flow`): four wavy jets fanning
+  out of the front of the SmartDrift, swelling at the pace of the wave
+  frequency (steady in constant flow mode); on the DC Runner, water drawn
+  into the inlet and pushed up out of the outlet. The dashes travel faster
+  with the speed, and nothing is drawn when the pump is off, held by the
+  feeding pause or at 0 %. The DC Runner picture moved to make room for
+  them on its left and over it.
+- A device shown through the role picker (delegate) now follows the state
+  updates; it used to freeze on the values it had when the role was picked.
+- The legacy DC Runner firmware (speed named `flow`, no timer) uses the same
+  views: its speed is aliased and the elements it lacks are hidden.
+- `check_entities.py` now covers ha-aquamedic-component: a second extractor
+  follows the product key tests of its platforms, and the three views are
+  checked like the Red Sea ones (`--device=smartdrift|dcrunner|dcskimmer`).
+
 ### RSWAVE (view, in progress)
 
 - New ReefWave view (RSWAVE25 and RSWAVE45), on the pump picture:
@@ -53,6 +98,12 @@
 - The device box takes the ratio of the picture (688×800).
 - Needs ha-reefbeat-component exposing the day program (`schedule`
   attribute of the `wave_type` sensor) and the `redsea.wave_*` services.
+
+### SLIDER
+
+- The slider is optimistic: on release the thumb stays on the new value
+  until the entity reports it (at most 5 s), instead of jumping back to the
+  old value while the command travels.
 
 ### PLACE SEARCH
 

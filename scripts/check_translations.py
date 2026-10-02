@@ -36,6 +36,11 @@ class TranslationVerifier:
         'pump_type_return', 'pump_type_skimmer',
         # Built as `tooltip_svc_${action}` in element.ts::_describe_action()
         'tooltip_svc_press', 'tooltip_svc_toggle', 'tooltip_svc_turn_on',
+        # Built as `am_mode_${mode}` in am_schedule.ts::_render_row(), from the
+        # slot modes ha-aquamedic-component publishes on its schedule sensor
+        'am_mode_stop', 'am_mode_auto', 'am_mode_feeding',
+        'am_mode_classic_wave', 'am_mode_sine_wave', 'am_mode_random_wave',
+        'am_mode_constant_flow',
     }
     
     # Keys to ignore completely (template/placeholder keys)

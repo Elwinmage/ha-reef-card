@@ -47,6 +47,7 @@ import {
   ControlPort,
   PortSensor,
 } from "./redsea/rscontrol";
+import { AMCapRing, AMFaults, AMFlow, AMSchedule } from "./aquamedic/common";
 import { AMSmartDrift } from "./aquamedic/smartdrift";
 import { AMDCRunner } from "./aquamedic/dcrunner";
 import { AMDCSkimmer } from "./aquamedic/dcskimmer";
@@ -140,6 +141,14 @@ if (!customElements.get("redsea-rspower6"))
   customElements.define("redsea-rspower6", RSPower6);
 if (!customElements.get("redsea-rspower8"))
   customElements.define("redsea-rspower8", RSPower8);
+if (!customElements.get("aquamedic-cap-ring"))
+  customElements.define("aquamedic-cap-ring", AMCapRing);
+if (!customElements.get("aquamedic-faults"))
+  customElements.define("aquamedic-faults", AMFaults);
+if (!customElements.get("aquamedic-flow"))
+  customElements.define("aquamedic-flow", AMFlow);
+if (!customElements.get("aquamedic-schedule"))
+  customElements.define("aquamedic-schedule", AMSchedule);
 if (!customElements.get("aquamedic-smartdrift"))
   customElements.define("aquamedic-smartdrift", AMSmartDrift);
 if (!customElements.get("aquamedic-dcrunner"))
@@ -189,6 +198,7 @@ export {
   ControlPort,
   PortSensor,
 } from "./redsea/rscontrol";
+export { AMCapRing, AMFaults, AMFlow, AMSchedule } from "./aquamedic/common";
 export { AMSmartDrift } from "./aquamedic/smartdrift";
 export { AMDCRunner } from "./aquamedic/dcrunner";
 export { AMDCSkimmer } from "./aquamedic/dcskimmer";

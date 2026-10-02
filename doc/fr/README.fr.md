@@ -236,6 +236,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefmat.fr.md#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefrun.fr.md#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefwave.fr.md#reefwave)
+- [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/aquamedic.fr.md#aqua-medic)
 - [Maintenance](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/maintenance.fr.md#maintenance)
 - [FAQ](#faq)
 
