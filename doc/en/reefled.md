@@ -14,8 +14,8 @@ RSLED170) are supported, and so are [virtual LEDs](#virtual-led).
 > should work, but has not been tested yet: feedback is welcome.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g1.png" width="45%"/>
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g2.png" width="45%"/>
+<img src="../img/rsled/rsled_g1.png" width="45%"/>
+<img src="../img/rsled/rsled_g2.png" width="45%"/>
 </p>
 
 ## The view
@@ -120,7 +120,7 @@ setting, which is also in the configuration dialog (lamps answering
 
 ## Weather program
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_weather.png" width="300"/>
+<img src="../img/rsled/rsled_weather.png" width="300"/>
 
 With ha-reefbeat-component's weather program, the program editor has a
 **GPS weather mode** switch, and a weather icon
@@ -159,7 +159,7 @@ last change.
 
 ## Virtual LED
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_virtual.png" width="300"/>
+<img src="../img/rsled/rsled_virtual.png" width="300"/>
 
 A virtual LED drives several lamps as one. It shows the same view as a real
 lamp: the G2 one as soon as one of its lamps is a G2 (the group is then only
@@ -192,7 +192,7 @@ progress ("Sending the program to the lamps… 3/14").
 
 ## Program editor
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_program_editor.png" width="400"/>
+<img src="../img/rsled/rsled_program_editor.png" width="400"/>
 
 Tap the beam to edit a day program: the chart on top, the points of the
 selected channel below (time, intensity and, on a G2, colour

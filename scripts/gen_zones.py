@@ -100,13 +100,15 @@ ZONE_SETS = {
         (62, 390, 562, 480),  # 6 pumps of the group
         (62, 484, 640, 790),  # 7 day program and wave library button
     ],
-    # Aqua Medic render (one view stands for the three: the SmartDrift one):
-    # rectangles to measure, in the order of doc/en/aquamedic.md
+    # 591x768 Aqua Medic SmartDrift render: one view stands for the three,
+    # which share their zones (the icons and the ring sit elsewhere on the
+    # DC Runner and the DC Skimmer)
     "aquamedic": [
-        # (x0, y0, x1, y1),  # 1 top band: power, feeding, timer, 0-10V, config
-        # (x0, y0, x1, y1),  # 2 faults raised by the pump
-        # (x0, y0, x1, y1),  # 3 speed: ring and sliders
-        # (x0, y0, x1, y1),  # 4 time-slot program
+        (10, 8, 581, 52),  # 1 top band: power, feeding, timer, 0-10V, wave, config
+        (12, 420, 579, 450),  # 2 faults raised by the pump
+        # 3 speed: ring on the picture, sliders under it
+        [(288, 132, 448, 342), (22, 454, 569, 592)],
+        (12, 602, 579, 764),  # 4 time-slot program
     ],
 }
 DEFAULT_DEVICE = "rsrun"
@@ -117,6 +119,7 @@ DEFAULT_DEVICE = "rsrun"
 ZONE_SIZES = {
     "rsled": (591, 860),
     "rswave": (688, 800),
+    "aquamedic": (591, 768),
 }
 
 BADGE_RADIUS = 13

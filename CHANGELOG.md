@@ -469,7 +469,7 @@ CLOUD: Correct #63 - Cant log to redsea account
 
 ### Compatibility with the new ha-reef-card
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/refs/heads/main/doc/img/rsdose/rsdose4_ex1.png" />
+<img src="doc/img/rsdose/rsdose4_ex1.png" />
 
 Follow this link to install it:
 

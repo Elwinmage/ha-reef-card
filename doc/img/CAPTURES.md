@@ -31,13 +31,5 @@ capture of the whole card, once the rectangles of the device are filled in its
 
 | File                            | Section             |
 | ------------------------------- | ------------------- |
-| `aquamedic/smartdrift.png`      | Aqua Medic          |
-| `aquamedic/dcrunner.png`        | Aqua Medic          |
-| `aquamedic/dcskimmer.png`       | Aqua Medic          |
 | `aquamedic/role_picker.png`     | Aqua Medic          |
-| `aquamedic/aquamedic_zones.png` | What the view shows |
-| `aquamedic/zone_1.png`          | Top band            |
-| `aquamedic/zone_2.png`          | Faults              |
-| `aquamedic/zone_3.png`          | Speed               |
-| `aquamedic/zone_4.png`          | Time-slot program   |
 | `aquamedic/schedule_editor.png` | Editing the program |

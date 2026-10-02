@@ -15,8 +15,8 @@ RSLED170) sont prises en charge, ainsi que les [LED virtuelles](#led-virtuelle).
 > bienvenus.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g1.png" width="45%"/>
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g2.png" width="45%"/>
+<img src="../img/rsled/rsled_g1.png" width="45%"/>
+<img src="../img/rsled/rsled_g2.png" width="45%"/>
 </p>
 
 ## La vue
@@ -123,7 +123,7 @@ fenêtre de configuration (rampes répondant à `/offset` uniquement).
 
 ## Programme météo
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_weather.png" width="300"/>
+<img src="../img/rsled/rsled_weather.png" width="300"/>
 
 Avec le programme météo de ha-reefbeat-component, l'éditeur de programmation
 a un interrupteur **mode météo GPS**, et une icône météo
@@ -165,7 +165,7 @@ Home Assistant, automatisations) s'affiche en une seconde et la rampe est
 
 ## LED virtuelle
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_virtual.png" width="300"/>
+<img src="../img/rsled/rsled_virtual.png" width="300"/>
 
 Une LED virtuelle pilote plusieurs rampes comme une seule. Elle affiche la
 même vue qu'une vraie rampe : celle de la G2 dès qu'une de ses rampes est une
@@ -202,7 +202,7 @@ progression (« Envoi du programme aux lampes… 3/14 »).
 
 ## Éditeur de programmation
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_program_editor.png" width="400"/>
+<img src="../img/rsled/rsled_program_editor.png" width="400"/>
 
 Touchez le faisceau pour éditer la programmation d'un jour : le graphique en
 haut, les points du canal choisi en dessous (heure, intensité et, sur une G2,

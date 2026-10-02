@@ -15,8 +15,8 @@ RSLED170) werden unterstützt, ebenso [virtuelle LEDs](#virtuelle-led).
 > sind willkommen.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g1.png" width="45%"/>
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g2.png" width="45%"/>
+<img src="../img/rsled/rsled_g1.png" width="45%"/>
+<img src="../img/rsled/rsled_g2.png" width="45%"/>
 </p>
 
 ## Die Ansicht
@@ -127,7 +127,7 @@ Konfigurationsdialog befindet (nur Leuchten, die auf `/offset` antworten).
 
 ## Wetterprogramm
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_weather.png" width="300"/>
+<img src="../img/rsled/rsled_weather.png" width="300"/>
 
 Mit dem Wetterprogramm von ha-reefbeat-component hat der Programmeditor
 einen Schalter **GPS-Wettermodus**, und unten rechts erscheint ein
@@ -171,7 +171,7 @@ Leuchte wird 30 s nach der letzten Änderung geschrieben.
 
 ## Virtuelle LED
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_virtual.png" width="300"/>
+<img src="../img/rsled/rsled_virtual.png" width="300"/>
 
 Eine virtuelle LED steuert mehrere Leuchten wie eine. Sie zeigt dieselbe
 Ansicht wie eine echte Leuchte: die G2-Ansicht, sobald eine ihrer Leuchten
@@ -208,7 +208,7 @@ zeigt der Editor seinen Fortschritt („Programm wird an die Lampen gesendet… 
 
 ## Programmeditor
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_program_editor.png" width="400"/>
+<img src="../img/rsled/rsled_program_editor.png" width="400"/>
 
 Tippen Sie auf den Lichtkegel, um ein Tagesprogramm zu bearbeiten: oben das
 Diagramm, darunter die Punkte des gewählten Kanals (Zeit, Intensität und,

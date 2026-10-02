@@ -15,8 +15,8 @@ RSLED170) są obsługiwane, podobnie jak [wirtualne LED](#wirtualna-led).
 > uwagi są mile widziane.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g1.png" width="45%"/>
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g2.png" width="45%"/>
+<img src="../img/rsled/rsled_g1.png" width="45%"/>
+<img src="../img/rsled/rsled_g2.png" width="45%"/>
 </p>
 
 ## Widok
@@ -125,7 +125,7 @@ odpowiadające na `/offset`).
 
 ## Program pogodowy
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_weather.png" width="300"/>
+<img src="../img/rsled/rsled_weather.png" width="300"/>
 
 Z programem pogodowym ha-reefbeat-component edytor programów ma przełącznik
 **Tryb pogody GPS**, a w prawym dolnym rogu pojawia się ikona pogody
@@ -165,7 +165,7 @@ ostatniej zmianie.
 
 ## Wirtualna LED
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_virtual.png" width="300"/>
+<img src="../img/rsled/rsled_virtual.png" width="300"/>
 
 Wirtualna LED steruje kilkoma lampami jak jedną. Pokazuje ten sam widok co
 prawdziwa lampa: widok G2, gdy tylko jedna z jej lamp jest G2 (grupa jest
@@ -199,7 +199,7 @@ wcześnie: w tym czasie edytor pokazuje postęp („Wysyłanie programu do lamp�
 
 ## Edytor programów
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_program_editor.png" width="400"/>
+<img src="../img/rsled/rsled_program_editor.png" width="400"/>
 
 Dotknij snopa światła, aby edytować program dnia: na górze wykres, poniżej
 punkty wybranego kanału (godzina, intensywność i, na G2, temperatura

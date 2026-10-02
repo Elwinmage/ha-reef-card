@@ -251,7 +251,7 @@ Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Té
 Ou recherchez « reef-card » dans HACS.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/hacs_search.png" alt="Image">
+<img src="../img/hacs_search.png" alt="Image">
 </p>
 
 # Configuration
@@ -262,8 +262,8 @@ Pour supprimer la sélection d'appareil et forcer celui de votre choix, définis
 
 <table>
   <tr>
-<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config_2.png"/></td>
-<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config.png"/></td>
+<td><img src="../img/card_rsdose4_config_2.png"/></td>
+<td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
 

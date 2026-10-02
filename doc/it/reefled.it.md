@@ -15,8 +15,8 @@ RSLED170) sono supportate, così come i [LED virtuali](#led-virtuale).
 > benvenuti.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g1.png" width="45%"/>
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_g2.png" width="45%"/>
+<img src="../img/rsled/rsled_g1.png" width="45%"/>
+<img src="../img/rsled/rsled_g2.png" width="45%"/>
 </p>
 
 ## La vista
@@ -126,7 +126,7 @@ configurazione (solo lampade che rispondono a `/offset`).
 
 ## Programma meteo
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_weather.png" width="300"/>
+<img src="../img/rsled/rsled_weather.png" width="300"/>
 
 Con il programma meteo di ha-reefbeat-component, l'editor dei programmi ha
 un interruttore **Modalità meteo GPS**, e in basso a destra appare
@@ -169,7 +169,7 @@ secondo, e la lampada viene scritta 30 s dopo l'ultima modifica.
 
 ## LED virtuale
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_virtual.png" width="300"/>
+<img src="../img/rsled/rsled_virtual.png" width="300"/>
 
 Un LED virtuale comanda più lampade come una sola. Mostra la stessa vista di
 una lampada reale: quella G2 non appena una delle sue lampade è una G2 (il
@@ -206,7 +206,7 @@ comando inviato troppo presto: nel frattempo l'editor mostra l'avanzamento
 
 ## Editor dei programmi
 
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/rsled/rsled_program_editor.png" width="400"/>
+<img src="../img/rsled/rsled_program_editor.png" width="400"/>
 
 Tocca il fascio per modificare un programma giornaliero: in alto il grafico,
 sotto i punti del canale selezionato (ora, intensità e, su una G2,
