@@ -1234,6 +1234,34 @@ export function device_clouds(clouds: any, day: number): any {
   };
 }
 
+/** Cloud intensities of a lamp, lightest first (ReefBeat app). */
+export const CLOUD_LEVELS = ["Low", "Medium", "High"] as const;
+
+/**
+ * Minutes of cloud, then of clear sky, of each intensity: sent with the
+ * clouds of a G1, as the ReefBeat app does (CloudsIntensity).
+ */
+export const CLOUD_DURATIONS: Record<string, [number, number]> = {
+  Low: [3, 7],
+  Medium: [4, 6],
+  High: [6, 4],
+};
+
+/**
+ * Clouds with the cloud and clear durations of their intensity.
+ * @param clouds: clouds ({from, to, intensity})
+ * @return the clouds as a G1 takes them; unchanged for an unknown intensity
+ */
+export function with_cloud_durations(clouds: any): any {
+  const durations = CLOUD_DURATIONS[String(clouds?.intensity)];
+  if (!clouds || typeof clouds !== "object" || !durations) return clouds;
+  return {
+    ...clouds,
+    cloud_duration: durations[0],
+    no_cloud_duration: durations[1],
+  };
+}
+
 /**
  * Whether clouds are set: a window with its start and end.
  * @param clouds: clouds as the lamp holds them ({} once removed)

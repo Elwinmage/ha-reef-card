@@ -369,7 +369,6 @@
   "led_library_delete_confirm": "Aus der Bibliothek löschen:",
   "led_library_update": "Aktualisieren",
   "led_library_new": "Als neu speichern",
-  "led_weather_map_missing": "Karte hier nicht verfügbar: oben „lat, lon“ eingeben oder einen Kartenlink einfügen.",
   "led_weather_active": "GPS-Wettermodus: Die Integration schreibt diese Woche aus dem Wetter; eine Änderung gilt bis zum nächsten Abruf.",
   "led_weather_mode": "GPS-Wettermodus",
   "led_weather_saving": "Einstellungen werden gespeichert…",
@@ -410,5 +409,11 @@
   "tooltip_svc_generic": "{name} ausführen",
   "tooltip_svc_toggle": "{name} umschalten",
   "tooltip_svc_press": "{name} drücken",
-  "tooltip_svc_turn_on": "{name} einschalten"
+  "tooltip_svc_turn_on": "{name} einschalten",
+  "led_clouds_low": "Leicht",
+  "led_clouds_medium": "Mittel",
+  "led_clouds_high": "Dicht",
+  "led_library_rename": "Umbenennen",
+  "led_library_rename_failed": "Umbenennen fehlgeschlagen",
+  "wave_rename": "Welle umbenennen (mit Aktualisieren gespeichert)"
 }

@@ -369,7 +369,6 @@
   "led_library_delete_confirm": "Eliminar de la biblioteca:",
   "led_library_update": "Actualizar",
   "led_library_new": "Guardar como nuevo",
-  "led_weather_map_missing": "Mapa no disponible aquí: escriba «lat, lon» o pegue un enlace de mapa arriba.",
   "led_weather_active": "Modo tiempo GPS: la integración escribe esta semana según el tiempo; un cambio dura hasta la próxima actualización.",
   "led_weather_mode": "Modo tiempo GPS",
   "led_weather_saving": "Guardando los ajustes…",
@@ -410,5 +409,11 @@
   "tooltip_svc_generic": "ejecutar {name}",
   "tooltip_svc_toggle": "alternar {name}",
   "tooltip_svc_press": "pulsar {name}",
-  "tooltip_svc_turn_on": "encender {name}"
+  "tooltip_svc_turn_on": "encender {name}",
+  "led_clouds_low": "Ligeras",
+  "led_clouds_medium": "Medias",
+  "led_clouds_high": "Densas",
+  "led_library_rename": "Renombrar",
+  "led_library_rename_failed": "No se pudo renombrar",
+  "wave_rename": "Renombrar la ola (se guarda con Actualizar)"
 }

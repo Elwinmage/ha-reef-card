@@ -25,7 +25,9 @@ import style_animations from "../../../utils/animations.styles";
 import i18n from "../../../translations/myi18n";
 import {
   DayProgram,
+  RGB,
   format_minutes,
+  kelvin_rgb,
   light_color,
   rgb_css,
 } from "./rsled_program";
@@ -61,6 +63,36 @@ export function is_dark(
   return !on || main <= 0;
 }
 
+/**
+ * Colour and strength of the beam of a lit lamp.
+ *
+ * A lamp driven channel by channel (G1) shows the mix of its channels. A
+ * lamp driven by intensity and colour (G2) shows its colour temperature
+ * and its intensity: they follow the sliders at once, while its white and
+ * blue levels are computed by the lamp and read back later. So does any
+ * lamp lit without reporting a white or blue level.
+ * @param levels: level of each channel, in %
+ * @param intensity: overall intensity, in %, when reported
+ * @param kelvin: colour temperature, in K, when reported
+ * @param by_colour: whether the lamp is driven by intensity and colour
+ */
+export function beam_light(
+  levels: { white: number; blue: number; moon: number },
+  intensity: number | null | undefined,
+  kelvin: number | null | undefined,
+  by_colour: boolean = false,
+): { rgb: RGB; alpha: number } {
+  const power = Number(intensity ?? 0);
+  const no_mix = levels.white <= 0 && levels.blue <= 0;
+  if (power > 0 && kelvin && (by_colour || no_mix)) {
+    return {
+      rgb: kelvin_rgb(kelvin),
+      alpha: Number((0.15 + (0.6 * Math.min(100, power)) / 100).toFixed(3)),
+    };
+  }
+  return light_color(levels.white, levels.blue, levels.moon);
+}
+
 export class RSLedBeam extends RSLedElement {
   static override styles = [style_animations, style_rsled_overlay];
 
@@ -81,7 +113,14 @@ export class RSLedBeam extends RSLedElement {
     // No light, no beam: only its outline is left, to keep it tappable
     const light = dark
       ? { rgb: [140, 140, 140] as [number, number, number], alpha: 0 }
-      : light_color(levels.white, levels.blue, levels.moon);
+      : beam_light(
+          levels,
+          intensity,
+          this.led?.kelvin?.(),
+          // Driven by intensity and colour: a G2, or a G1 whose sliders
+          // are the intensity and colour ones (not the white/blue ones)
+          this.led?.white_blue?.() === false,
+        );
     const shape =
       `M ${g.top.x1} ${g.top.y} L ${g.top.x2} ${g.top.y} ` +
       `L ${g.bottom.x2} ${g.bottom.y} L ${g.bottom.x1} ${g.bottom.y} Z`;

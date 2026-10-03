@@ -50,6 +50,17 @@ export const style_rsled_overlay = css`
     stroke-width: 3px;
   }
 
+  /* Current time, in the sun or the moon: read on both */
+  .sky_time {
+    font-size: 15px;
+    font-weight: 700;
+    fill: #ffffff;
+    paint-order: stroke;
+    stroke: rgba(20, 20, 20, 0.8);
+    stroke-width: 3px;
+    pointer-events: none;
+  }
+
   .sky_mode {
     font-size: 34px;
     font-weight: 300;

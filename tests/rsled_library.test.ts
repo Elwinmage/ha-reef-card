@@ -311,7 +311,12 @@ describe("RSLedProgramEditor: saving with the library", () => {
     ]);
     const calls = led.hass.callService.mock.calls.map((c: any[]) => c[2].data);
     expect(calls[0]).toEqual({ name: "Perso-1745049836266" });
-    expect(calls[2]).toEqual(PERSO.clouds);
+    // With the durations of their intensity, as the app sends them
+    expect(calls[2]).toEqual({
+      ...PERSO.clouds,
+      cloud_duration: 4,
+      no_cloud_duration: 6,
+    });
   });
 
   it("the lamp's clouds go before a program that cuts them", async () => {
@@ -329,7 +334,13 @@ describe("RSLedProgramEditor: saving with the library", () => {
     ]);
     // Cut to the day of the program
     const set = Math.max(ed.program().white.set, ed.program().blue.set);
-    expect(calls[2].data).toEqual({ from: 1200, to: set, intensity: "High" });
+    expect(calls[2].data).toEqual({
+      from: 1200,
+      to: set,
+      intensity: "High",
+      cloud_duration: 6,
+      no_cloud_duration: 4,
+    });
   });
 
   it("the lamp's clouds inside the new day are left alone", async () => {
@@ -802,6 +813,11 @@ describe("RSLedProgramEditor: GPS weather mode", () => {
     expect(root.querySelector(".save").disabled).toBe(true);
     expect(root.querySelector(".cancel").disabled).toBe(true);
     await saving;
+    // The integration is given time to start writing the lamp
+    expect(ed.saving).toBe("saving");
+    await ed.save(); // being saved: nothing more
+    vi.advanceTimersByTime(RSLedProgramEditor.WRITE_GRACE_MS);
+    // Nothing being written: saved
     expect(ed.saving).toBe("saved");
     await ed.save(); // already saved: nothing more
     await ed.updateComplete;
@@ -911,6 +927,7 @@ describe("RSLedProgramEditor: GPS weather mode", () => {
     vi.useFakeTimers();
     await ed.save();
     expect(saved).toEqual([{ device_id: "own", enabled: false }]);
+    vi.advanceTimersByTime(RSLedProgramEditor.WRITE_GRACE_MS);
     vi.advanceTimersByTime(RSLedProgramEditor.SAVED_MS);
     vi.useRealTimers();
     expect(closed).toHaveBeenCalled();
@@ -1245,5 +1262,427 @@ describe("RSLedProgramEditor: edge cases of the new helpers", () => {
     ed._loaded++;
     await to_k;
     expect(ed.mode).toBe("wb");
+  });
+});
+
+describe("RSLedProgramEditor: clouds of the day", () => {
+  /** The requests sent, as "method path". */
+  const sent = (led: any) =>
+    led.hass.callService.mock.calls.map((c: any[]) => c[2]);
+  const paths = (led: any) =>
+    sent(led).map((c: any) => `${c.method} ${c.access_path}`);
+  const field = (ed: any, cls: string) =>
+    ed.shadowRoot.querySelector(`.clouds_edit .${cls}`) as any;
+  const change = async (ed: any, cls: string, set: (el: any) => void) => {
+    const el = field(ed, cls);
+    set(el);
+    el.dispatchEvent(new Event("change"));
+    await ed.updateComplete;
+  };
+
+  it("with_cloud_durations(): the durations of each intensity", () => {
+    expect(
+      P.with_cloud_durations({ from: 1, to: 2, intensity: "Low" }),
+    ).toEqual({
+      from: 1,
+      to: 2,
+      intensity: "Low",
+      cloud_duration: 3,
+      no_cloud_duration: 7,
+    });
+    const odd = { from: 1, to: 2, intensity: "Storm" };
+    expect(P.with_cloud_durations(odd)).toBe(odd);
+    expect(P.with_cloud_durations(null)).toBeNull();
+  });
+
+  it("adds one window of clouds to a day, inside its light", async () => {
+    const led = makeLed({ linked: false });
+    const ed = await mountEditor(led);
+    const window = P.sun_window(ed.chart_program())!;
+    expect(field(ed, "clouds_on").checked).toBe(false);
+    expect(field(ed, "clouds_from")).toBeNull();
+    await change(ed, "clouds_on", (el) => (el.checked = true));
+    // The whole day of light, medium
+    expect(ed.clouds()).toEqual({
+      from: window.rise,
+      to: window.set,
+      intensity: "Medium",
+    });
+    expect(ed.dirty).toBe(true);
+    expect(ed.shadowRoot.querySelector(".clouds_band")).not.toBeNull();
+    expect(field(ed, "clouds_level").value).toBe("Medium");
+    await change(ed, "clouds_from", (el) => (el.value = "14:00"));
+    await change(ed, "clouds_to", (el) => (el.value = "16:30"));
+    await change(ed, "clouds_level", (el) => (el.value = "High"));
+    expect(ed.clouds()).toEqual({ from: 840, to: 990, intensity: "High" });
+    // Kept inside the day of light; a time leaving nothing is not taken
+    ed.set_clouds_time("from", "00:10");
+    expect(ed.clouds().from).toBe(window.rise);
+    ed.set_clouds_time("to", "23:59");
+    expect(ed.clouds().to).toBe(window.set);
+    ed.set_clouds_time("from", "14:00");
+    ed.set_clouds_time("to", "16:30");
+    ed.set_clouds_time("to", "13:00");
+    ed.set_clouds_time("to", "nope");
+    ed.set_clouds_intensity("Storm");
+    expect(ed.clouds()).toEqual({ from: 840, to: 990, intensity: "High" });
+
+    await ed.save();
+    expect(paths(led)).toEqual([
+      "post /auto/1",
+      "post /clouds/1",
+      "post /auto/apply",
+    ]);
+    expect(sent(led)[1].data).toEqual({
+      from: 840,
+      to: 990,
+      intensity: "High",
+      cloud_duration: 6,
+      no_cloud_duration: 4,
+    });
+  });
+
+  it("changes or removes the clouds the lamp holds", async () => {
+    const led = makeLed({ linked: false });
+    led.clouds = () => ({ from: 800, to: 900, intensity: "Low" });
+    const ed = await mountEditor(led);
+    expect(field(ed, "clouds_on").checked).toBe(true);
+    expect(field(ed, "clouds_from").value).toBe("13:20");
+    // The intensity alone: written again
+    ed.set_clouds_intensity("Medium");
+    ed._all_days = true;
+    await ed.save();
+    expect(paths(led).filter((p: string) => p.includes("clouds")).length).toBe(
+      14,
+    );
+    expect(sent(led)[2].data.intensity).toBe("Medium");
+    // Day 2, on the weekly timeline
+    expect(sent(led)[5].data.from).toBe(800 + 1440);
+
+    led.hass.callService.mockClear();
+    const again = await mountEditor(led);
+    await change(again, "clouds_on", (el) => (el.checked = false));
+    expect(again.clouds()).toBeNull();
+    expect(field(again, "clouds_level")).toBeNull();
+    await again.save();
+    expect(paths(led)).toEqual([
+      "delete /clouds/1",
+      "post /auto/1",
+      "post /auto/apply",
+    ]);
+    // Another day loaded: the lamp's own again
+    again.load(led, 2, "wb");
+    expect(again.clouds_edit).toBeUndefined();
+    // Clouds held without an intensity: medium once edited
+    led.clouds = () => ({ from: 800, to: 900 });
+    again.set_clouds_time("to", "15:10");
+    expect(again.clouds()).toEqual({ from: 800, to: 910, intensity: "Medium" });
+  });
+
+  it("a G2 takes them in its program; a past-midnight day", async () => {
+    const led = makeLed({ g2: true, linked: false });
+    const ed = await mountEditor(led, "kelvin");
+    // Nothing to put clouds on without a day of light
+    expect(field(ed, "clouds_on").disabled).toBe(true);
+    ed.set_clouds(true);
+    ed.set_clouds_time("from", "10:00");
+    ed.set_clouds_intensity("Low");
+    expect(ed.clouds()).toBeNull();
+    // A day of light from 18:00 to 02:00
+    ed.points.intensity = [
+      { m: 1080, i: 0, k: 15000 },
+      { m: 1200, i: 60, k: 15000 },
+      { m: 1560, i: 0, k: 15000 },
+    ];
+    ed.set_clouds(true);
+    ed.set_clouds_time("from", "23:00");
+    ed.set_clouds_time("to", "01:00");
+    expect(ed.clouds()).toEqual({ from: 1380, to: 1500, intensity: "Medium" });
+    await ed.save();
+    const auto = sent(led).find((c: any) => c.access_path === "/auto/1");
+    expect(auto.data.clouds).toEqual({
+      from: 1380,
+      to: 1500,
+      intensity: "Medium",
+    });
+    expect(paths(led).some((p: string) => p.includes("/clouds/"))).toBe(false);
+  });
+
+  it("is left to the weather in GPS mode", async () => {
+    const led: any = makeLed({ linked: false });
+    led.get_entity = (name: string) =>
+      name === "weather_sync" ? { state: "on" } : undefined;
+    const ed = await mountEditor(led);
+    await ed.updateComplete;
+    expect(ed.shadowRoot.querySelector(".clouds_edit")).toBeNull();
+  });
+});
+
+describe("RSLedProgramEditor: a G1 grouped with a G2", () => {
+  it("is edited as intensity and colour, saved as white/blue", async () => {
+    const led: any = makeLed({ linked: false });
+    led.can_white_blue = () => false;
+    const ed = await mountEditor(led);
+    await vi.waitFor(() => expect(ed.mode).toBe("kelvin"));
+    await ed.updateComplete;
+    expect(ed.white_blue_allowed()).toBe(false);
+    expect(ed.format).toBe("wb");
+    // No W/B | K choice
+    expect(ed.shadowRoot.querySelector(".mode")).toBeNull();
+    const prog = await ed.program_to_save();
+    expect(prog.white).toBeDefined();
+    expect(prog.blue).toBeDefined();
+    // A G1 on its own keeps the choice
+    const free = await mountEditor(makeLed({ linked: false }));
+    expect(free.white_blue_allowed()).toBe(true);
+    expect(free.mode).toBe("wb");
+    expect(free.shadowRoot.querySelector(".mode")).not.toBeNull();
+  });
+});
+
+describe("RSLedProgramEditor: the lamp written by the integration", () => {
+  /** A lamp whose weather mode and writing progress can be set. */
+  function weatherLed(on: boolean) {
+    const led: any = makeLed({ linked: false });
+    const entities: Record<string, any> = {
+      weather_sync: {
+        entity_id: "switch.led_weather_sync",
+        state: on ? "on" : "off",
+      },
+      weather_program: {
+        entity_id: "sensor.led_weather_program",
+        attributes: {},
+      },
+    };
+    led.get_entity = (key: string) => entities[key] ?? null;
+    const saved: any[] = [];
+    led.hass.callWS = vi.fn(async (msg: any) => {
+      if (msg.service === "led_weather_preview") {
+        return { response: { status: "ok", days: [], standard: {} } };
+      }
+      if (msg.service === "led_weather_save") {
+        saved.push(msg.service_data);
+        return { response: { status: "ok" } };
+      }
+      return { response: { linked: false, programs: [] } };
+    });
+    const write = (writing: any) => {
+      entities.weather_program.attributes = { writing };
+    };
+    return { led, saved, write, entities };
+  }
+  const overlay = (ed: any) =>
+    ed.shadowRoot.querySelector(".loading_zone.writing");
+
+  it("standard to GPS: the progress is shown until the week is written", async () => {
+    const { led, saved, write } = weatherLed(false);
+    const ed = await mountEditor(led);
+    ed.set_weather_mode(true);
+    await vi.waitFor(() => expect(ed.preview_loading).toBe(false));
+    const closed = vi.fn();
+    ed.addEventListener("rsled-editor-close", closed);
+    vi.useFakeTimers();
+    await ed.save();
+    expect(saved).toEqual([{ device_id: "own", enabled: true }]);
+    expect(ed.saving).toBe("saving");
+    // The integration starts writing: seen through the states
+    write({ done: 0, total: 7 });
+    ed.hass_changed();
+    await ed.updateComplete;
+    expect(overlay(ed).textContent).toContain("0/7");
+    // Past the time given to start: still being written, the editor stays
+    vi.advanceTimersByTime(RSLedProgramEditor.WRITE_GRACE_MS);
+    write({ done: 3, total: 7 });
+    ed.hass_changed();
+    await ed.updateComplete;
+    expect(overlay(ed).textContent).toContain("3/7");
+    expect(overlay(ed).querySelector(".progress div").style.width).toBe("43%");
+    expect(ed.saving).toBe("saving");
+    expect(closed).not.toHaveBeenCalled();
+    // Written: said, then the editor closes
+    write(null);
+    ed.hass_changed();
+    await ed.updateComplete;
+    expect(overlay(ed)).toBeNull();
+    expect(ed.saving).toBe("saved");
+    ed.hass_changed(); // nothing more to follow
+    vi.advanceTimersByTime(RSLedProgramEditor.SAVED_MS);
+    vi.useRealTimers();
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it("GPS to the lamp's own week: the same, already being written", async () => {
+    const { led, saved, write } = weatherLed(true);
+    const ed = await mountEditor(led);
+    await vi.waitFor(() => expect(ed.preview_loading).toBe(false));
+    ed.set_weather_mode(false);
+    const closed = vi.fn();
+    ed.addEventListener("rsled-editor-close", closed);
+    vi.useFakeTimers();
+    // The states already tell the week is being written back
+    write({ done: 1, total: 14 });
+    await ed.save();
+    expect(saved).toEqual([{ device_id: "own", enabled: false }]);
+    await ed.updateComplete;
+    expect(overlay(ed).textContent).toContain("1/14");
+    // Done before the time given to start is over
+    write(null);
+    ed.hass_changed();
+    expect(ed.saving).toBe("saved");
+    vi.advanceTimersByTime(
+      RSLedProgramEditor.WRITE_GRACE_MS + RSLedProgramEditor.SAVED_MS,
+    );
+    vi.useRealTimers();
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it("started late: still followed after the time given to start", async () => {
+    const { led, write } = weatherLed(false);
+    const ed = await mountEditor(led);
+    ed.set_weather_mode(true);
+    await vi.waitFor(() => expect(ed.preview_loading).toBe(false));
+    vi.useFakeTimers();
+    await ed.save();
+    // The states changed for something else: nothing written yet
+    ed.hass_changed();
+    expect(ed.saving).toBe("saving");
+    // Being written when the time is over, the states not followed yet
+    write({ done: 0, total: 7 });
+    vi.advanceTimersByTime(RSLedProgramEditor.WRITE_GRACE_MS);
+    expect(ed.saving).toBe("saving");
+    ed.hass_changed();
+    write(null);
+    ed.hass_changed();
+    expect(ed.saving).toBe("saved");
+    vi.useRealTimers();
+  });
+
+  it("shows a lamp being written when the editor opens; odd progress", async () => {
+    const { led, write, entities } = weatherLed(true);
+    write({ done: 2, total: 7 });
+    const ed = await mountEditor(led);
+    await ed.updateComplete;
+    expect(overlay(ed).textContent).toContain("2/7");
+    write({ total: 0 });
+    expect(ed.lamp_writing()).toEqual({ done: 0, total: 0 });
+    write("soon");
+    expect(ed.lamp_writing()).toBeNull();
+    delete entities.weather_program;
+    expect(ed.lamp_writing()).toBeNull();
+  });
+});
+
+describe("RSLedProgramEditor: renaming a library program", () => {
+  /** A lamp whose library answers the rename service. */
+  function renamable(answer: any = { uid: "c", renamed: 2 }) {
+    const led: any = makeLed();
+    const asked: any[] = [];
+    let library = LIBRARY.map((p) => ({ ...p, default: p.uid === "b" }));
+    const callWS = led.hass.callWS;
+    led.hass.callWS = vi.fn(async (msg: any) => {
+      if (msg.service === "led_library_rename") {
+        asked.push(msg.service_data);
+        if (answer && !answer.error) {
+          library = library.map((p) =>
+            p.uid === msg.service_data.uid
+              ? { ...p, name: msg.service_data.name }
+              : p,
+          );
+        }
+        return { response: answer };
+      }
+      if (msg.service === "led_library") {
+        return { response: { linked: true, programs: library } };
+      }
+      return callWS(msg);
+    });
+    return { led, asked };
+  }
+  const box = (ed: any, cls: string) => ed.shadowRoot.querySelector(cls) as any;
+
+  it("renames the loaded user's program, the lamps following", async () => {
+    const { led, asked } = renamable();
+    const ed = await mountEditor(led);
+    // Nothing to rename on the lamp's own program, nor a Red Sea one
+    expect(box(ed, ".library_rename")).toBeNull();
+    await ed.use_library("b");
+    await ed.updateComplete;
+    expect(box(ed, ".library_rename")).toBeNull();
+    await ed.rename_in_library();
+    expect(asked).toEqual([]);
+
+    await ed.use_library("c");
+    await ed.updateComplete;
+    box(ed, ".library_rename").click();
+    await ed.updateComplete;
+    const input = box(ed, ".renaming_input");
+    expect(input.value).toBe("Perso");
+    // The same name: nothing asked
+    await ed.rename_in_library();
+    expect(asked).toEqual([]);
+    expect(ed.renaming).toBeNull();
+
+    box(ed, ".library_rename").click();
+    await ed.updateComplete;
+    // An empty name cannot be sent
+    const typed = box(ed, ".renaming_input");
+    typed.value = "  ";
+    typed.dispatchEvent(new Event("input"));
+    await ed.updateComplete;
+    expect(box(ed, ".renaming_confirm").disabled).toBe(true);
+    await ed.rename_in_library();
+    typed.value = " Reef ";
+    typed.dispatchEvent(new Event("input"));
+    typed.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    typed.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    await vi.waitFor(() => expect(ed.renaming).toBeNull());
+    expect(asked).toEqual([{ device_id: "own", uid: "c", name: "Reef" }]);
+    // The library is read again, the program still loaded under its name
+    expect(ed.library_entry.name).toBe("Reef");
+    await ed.updateComplete;
+    expect(box(ed, ".renaming_input")).toBeNull();
+    expect(
+      [...ed.shadowRoot.querySelectorAll(".library_select option")].some(
+        (o: any) => o.textContent.trim() === "Reef",
+      ),
+    ).toBe(true);
+    // Cancelled
+    box(ed, ".library_rename").click();
+    await ed.updateComplete;
+    box(ed, ".renaming_cancel").click();
+    expect(ed.renaming).toBeNull();
+  });
+
+  it("says why a renaming was refused", async () => {
+    const { led } = renamable({ error: "Name already used" });
+    const ed = await mountEditor(led);
+    await ed.use_library("c");
+    ed.renaming = "cyano";
+    await ed.rename_in_library();
+    expect(ed.renaming).toBe("cyano");
+    await ed.updateComplete;
+    expect(box(ed, ".rename_error").textContent).toContain("Name already used");
+    box(ed, ".renaming_confirm").click();
+    await vi.waitFor(() => expect(ed.rename_error).not.toBe(""));
+    // No answer at all
+    const silent = renamable(null);
+    const ed2 = await mountEditor(silent.led);
+    await ed2.use_library("c");
+    ed2.renaming = "x";
+    await ed2.rename_in_library();
+    expect(ed2.rename_error).toBe("Renaming failed");
+  });
+
+  it("keeps the program loaded when the library no longer lists it", async () => {
+    const { led } = renamable({ uid: "c", renamed: 0 });
+    const ed = await mountEditor(led);
+    await ed.use_library("c");
+    ed.fetch_library = async () => {
+      ed.library = [];
+    };
+    ed.renaming = "Reef";
+    await ed.rename_in_library();
+    expect(ed.library_entry.name).toBe("Reef");
+    expect(ed.library_entry.uid).toBe("c");
   });
 });

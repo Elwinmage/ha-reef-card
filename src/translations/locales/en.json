@@ -369,7 +369,6 @@
   "led_library_delete_confirm": "Delete from the library:",
   "led_library_update": "Update",
   "led_library_new": "Save as new",
-  "led_weather_map_missing": "Map unavailable here: type \"lat, lon\" or paste a map link above.",
   "led_weather_active": "GPS weather mode: the integration writes this week from the weather; an edit lasts until its next fetch.",
   "led_weather_mode": "GPS weather mode",
   "led_weather_saving": "Saving the settings…",
@@ -410,5 +409,11 @@
   "tooltip_svc_generic": "run {name}",
   "tooltip_svc_toggle": "toggle {name}",
   "tooltip_svc_press": "press {name}",
-  "tooltip_svc_turn_on": "turn on {name}"
+  "tooltip_svc_turn_on": "turn on {name}",
+  "led_clouds_low": "Light",
+  "led_clouds_medium": "Medium",
+  "led_clouds_high": "Heavy",
+  "led_library_rename": "Rename",
+  "led_library_rename_failed": "Renaming failed",
+  "wave_rename": "Rename the wave (saved with Update)"
 }

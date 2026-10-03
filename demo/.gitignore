@@ -1,0 +1,2 @@
+# Bundle built by `vite build --config demo/vite.config.ts`
+dist/

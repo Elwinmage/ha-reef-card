@@ -169,6 +169,15 @@ export class RSWaveLibrary extends RSWaveElement {
     this._wave = { ...this._wave, [key]: value };
   }
 
+  /** Rename the wave being edited: saved with "update". */
+  protected set_name(e: Event): void {
+    if (!this._wave) return;
+    this._wave = {
+      ...this._wave,
+      name: (e.target as HTMLInputElement).value,
+    };
+  }
+
   protected set_sync(e: Event): void {
     if (!this._wave) return;
     this._wave = {
@@ -238,9 +247,15 @@ export class RSWaveLibrary extends RSWaveElement {
   async update_wave(): Promise<void> {
     const w = this._wave;
     if (!w || !w.uid || w.default) return;
+    // The name can be changed too (the pumps using the wave follow)
+    const name = w.name.trim();
+    if (!name) {
+      this._error = i18n._("wave_name_required");
+      return;
+    }
     const res = await this.run("wave_library_save", {
       uid: w.uid,
-      name: w.name,
+      name,
       settings: wave_settings(w),
     });
     if (!res) return;
@@ -361,7 +376,15 @@ export class RSWaveLibrary extends RSWaveElement {
     const users = isNew ? [] : this.users(w.uid);
     const busy = this._busy;
     return html`<div class="lib_edit">
-      <h4>${isNew ? i18n._("wave_new_title") : w.name}</h4>
+      ${isNew || w.default || nw
+        ? html`<h4>${isNew ? i18n._("wave_new_title") : w.name}</h4>`
+        : html`<input
+            type="text"
+            class="wave_name"
+            title="${i18n._("wave_rename")}"
+            .value=${w.name}
+            @input=${(e: Event) => this.set_name(e)}
+          />`}
       ${w.default
         ? html`<p class="note">${i18n._("wave_redsea_readonly")}</p>`
         : nothing}

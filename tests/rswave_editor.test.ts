@@ -748,6 +748,37 @@ describe("RSWaveLibrary", () => {
     expect(el._wave.uid).toBe("nuit");
   });
 
+  it("renames a user wave: its name typed over, saved with update", async () => {
+    const { el, root, calls } = await openLibrary();
+    // A Red Sea wave keeps its title
+    el.pick("rsstep");
+    await el.updateComplete;
+    expect(root.querySelector(".wave_name")).toBeNull();
+    expect(root.querySelector(".lib_edit h4")).not.toBeNull();
+    el.pick("nuit");
+    await el.updateComplete;
+    const name = root.querySelector(".wave_name") as HTMLInputElement;
+    expect(name.value).toBe("nuit");
+    expect(root.querySelector(".lib_edit h4")).toBeNull();
+    // A wave needs a name
+    name.value = "  ";
+    name.dispatchEvent(new Event("input"));
+    await el.update_wave();
+    expect(el._error).not.toBe("");
+    expect(calls.some((c) => c.service === "wave_library_save")).toBe(false);
+    name.value = " Night swell ";
+    name.dispatchEvent(new Event("input"));
+    (root.querySelector(".btn_save.update") as HTMLElement).click();
+    await settle(el);
+    const save = calls.find((c) => c.service === "wave_library_save");
+    expect(save.service_data.uid).toBe("nuit");
+    expect(save.service_data.name).toBe("Night swell");
+    // Without a wave picked: nothing to rename
+    el._wave = null;
+    el.set_name(new Event("input"));
+    expect(el._wave).toBeNull();
+  });
+
   it("creates a copy under a new name", async () => {
     const { el, root, calls } = await openLibrary();
     el.pick("rsstep");

@@ -15,6 +15,7 @@ import { RSLedSky, SKY_DEFAULTS } from "../src/devices/redsea/rsled/rsled_sky";
 import {
   BEAM_DEFAULTS,
   RSLedBeam,
+  beam_light,
   is_dark,
 } from "../src/devices/redsea/rsled/rsled_beam";
 import {
@@ -904,6 +905,35 @@ describe("RSLedSky", () => {
     ).not.toBeNull();
   });
 
+  it("back layer: the current time is written in the sun or the moon", async () => {
+    at("15:07");
+    const day = await mount(
+      makeElement(RSLedSky, makeLed(), { layer: "back" }),
+    );
+    const time = day.querySelector("text.sky_time") as SVGTextElement;
+    expect(time.textContent).toBe("15:07");
+    // Inside the group moved along the arc with the sun
+    expect(time.parentElement?.getAttribute("transform")).toContain(
+      "translate(",
+    );
+    expect(time.parentElement?.querySelector("circle")).not.toBeNull();
+    at("23:30");
+    const night = await mount(
+      makeElement(RSLedSky, makeLed(), { layer: "back" }),
+    );
+    expect(night.querySelector("text.sky_time")?.textContent).toBe("23:30");
+    // Not on the front layer; nothing without the lamp's clock
+    const front = await mount(
+      makeElement(RSLedSky, makeLed(), { layer: "front" }),
+    );
+    expect(front.querySelector("text.sky_time")).toBeNull();
+    const el = new RSLedSky() as any;
+    el.conf = { layer: "back" };
+    el.stateOn = true;
+    el.device = { is_on: () => true, config: {}, entities: {} };
+    expect((await mount(el)).querySelector("text.sky_time")).toBeNull();
+  });
+
   it("back layer: moon at night, greyed when off", async () => {
     at("23:30");
     const dev = makeLed({ device_state: "off", moon_day: "9" });
@@ -1107,6 +1137,73 @@ describe("RSLedBeam", () => {
     expect(is_dark(true, 5, none)).toBe(false);
     expect(is_dark(true, null, lit)).toBe(false);
     expect(is_dark(true, undefined, none)).toBe(true);
+  });
+
+  it("beam_light(): from the colour when a G2 reports no channel", async () => {
+    const none = { white: 0, blue: 0, moon: 0 };
+    // The channels, when the lamp reports them
+    expect(beam_light({ white: 40, blue: 80, moon: 0 }, 60, 15000)).toEqual(
+      P.light_color(40, 80, 0),
+    );
+    // A lamp driven by intensity and colour: they win over its channels
+    expect(
+      beam_light({ white: 40, blue: 80, moon: 0 }, 60, 20000, true),
+    ).toEqual({ rgb: P.kelvin_rgb(20000), alpha: 0.51 });
+    // Lit, no channel reported: its colour temperature and intensity
+    expect(beam_light(none, 60, 15000)).toEqual({
+      rgb: P.kelvin_rgb(15000),
+      alpha: 0.51,
+    });
+    expect(beam_light(none, 250, 9000).alpha).toBe(0.75);
+    // Nothing to draw it from: the pale grey of an unknown light
+    expect(beam_light(none, 60, null)).toEqual(P.light_color(0, 0, 0));
+    expect(beam_light(none, null, 15000)).toEqual(P.light_color(0, 0, 0));
+    expect(beam_light({ white: 0, blue: 0, moon: 50 }, 0, 15000)).toEqual(
+      P.light_color(0, 0, 50),
+    );
+
+    // A G2 whose white/blue sensors are unknown: a coloured beam
+    const dev = makeLed({ intensity: 60, kelvin: 12000 }, true);
+    dev.hass.states["sensor.led_white"].state = "unknown";
+    dev.hass.states["sensor.led_blue"].state = "unknown";
+    expect(dev.kelvin()).toBe(12000);
+    const root = await mount(makeElement(RSLedBeam, dev, { name: "beam" }));
+    const stop = root.querySelector("linearGradient stop:nth-child(2)")!;
+    expect(stop.getAttribute("stop-color")).toBe(
+      P.rgb_css(P.kelvin_rgb(12000)),
+    );
+    expect(stop.getAttribute("stop-opacity")).toBe("0.51");
+    // Its channels read back: the beam still follows the colour slider
+    const lit = makeLed(
+      { intensity: 60, kelvin: 20000, white: 5, blue: 60 },
+      true,
+    );
+    const root2 = await mount(makeElement(RSLedBeam, lit, { name: "beam" }));
+    expect(
+      root2
+        .querySelector("linearGradient stop:nth-child(2)")!
+        .getAttribute("stop-color"),
+    ).toBe(P.rgb_css(P.kelvin_rgb(20000)));
+    // A G1 with the intensity and colour sliders: drawn from them too,
+    // from its channels with the white and blue sliders
+    localStorage.clear();
+    const g1 = makeLed({ white: 80, blue: 20, intensity: 60, kelvin: 20000 });
+    const colour = (root: ShadowRoot) =>
+      root
+        .querySelector("linearGradient stop:nth-child(2)")!
+        .getAttribute("stop-color");
+    expect(g1.white_blue()).toBe(false);
+    expect(
+      colour(await mount(makeElement(RSLedBeam, g1, { name: "beam" }))),
+    ).toBe(P.rgb_css(P.kelvin_rgb(20000)));
+    g1.toggle_white_blue();
+    expect(
+      colour(await mount(makeElement(RSLedBeam, g1, { name: "beam" }))),
+    ).toBe(P.rgb_css(P.light_color(80, 20, 0).rgb));
+    localStorage.clear();
+    // No colour temperature reported
+    expect(makeLed({ kelvin: null }, true).kelvin()).toBeNull();
+    expect(makeLed({ kelvin: 0 }).kelvin()).toBeNull();
   });
 
   it("draws the program, the texts and the now marker", async () => {
@@ -1503,5 +1600,58 @@ describe("RSLed mapping", () => {
     expect(dev.current_hwid()).toBe("a");
     dev.device = { elements: [{ identifiers: ["weird"] }] };
     expect(dev.current_hwid()).toBeNull();
+  });
+
+  it("a G1 grouped with a G2 is not driven by white and blue", () => {
+    localStorage.clear();
+    const lights = (dev: any) =>
+      dev.dialogs.config.content[0].conf.entities.map((e: any) => e.entity);
+    const group = (dev: any, leds: any[]) => {
+      dev.hass.states["sensor.led_linked_leds"] = {
+        entity_id: "sensor.led_linked_leds",
+        state: String(leds.length),
+        attributes: { leds },
+        last_updated: "t",
+      };
+      dev.entities["linked_leds"] = { entity_id: "sensor.led_linked_leds" };
+      dev.update_config();
+    };
+    const dev = makeLed();
+    dev.toggle_white_blue();
+    expect(dev.white_blue()).toBe(true);
+    expect(lights(dev)).toContain("light.white");
+
+    // In a group of G1 only: nothing changes
+    group(dev, [{ hwid: "a" }, { hwid: "b", g2: false }]);
+    expect(dev.grouped_with_g2()).toBe(false);
+    expect(dev.can_white_blue()).toBe(true);
+    expect(dev.white_blue()).toBe(true);
+
+    // A G2 joins: intensity and colour only, as the group is driven
+    group(dev, [{ hwid: "a" }, { hwid: "b", g2: true }]);
+    expect(dev.grouped_with_g2()).toBe(true);
+    expect(dev.can_white_blue()).toBe(false);
+    expect(dev.white_blue()).toBe(false);
+    // Still a G1: its programs stay white/blue ones
+    expect(dev.has_white_blue()).toBe(true);
+    const div = document.createElement("div");
+    render(dev._render("", ""), div);
+    expect(div.querySelector(".rsled_switch")).toBeNull();
+    expect(lights(dev)).not.toContain("light.white");
+    expect(lights(dev)).not.toContain("light.blue");
+    expect(lights(dev)).toContain("light.kelvin_intensity");
+    // The other dialogs are kept
+    expect(dev.dialogs.led_moon).toBeDefined();
+
+    // The G2 leaves: white and blue are back, the browser's choice too
+    group(dev, []);
+    expect(dev.white_blue()).toBe(true);
+    expect(lights(dev)).toContain("light.white");
+    // A G2 itself is not concerned
+    const g2 = makeLed({}, true);
+    group(g2, [{ hwid: "a" }, { hwid: "b", g2: true }]);
+    expect(g2.can_white_blue()).toBe(false);
+    expect(lights(g2)).toContain("sensor.white");
+    localStorage.clear();
   });
 });

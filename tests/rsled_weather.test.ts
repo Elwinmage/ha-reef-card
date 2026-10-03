@@ -154,8 +154,9 @@ describe("RSLedWeatherSettings", () => {
       ["refresh_days", 3],
       ["clouds", false],
     ]);
-    // No map component in the tests: the hint instead
-    expect(root.querySelector(".map_missing")).not.toBeNull();
+    // The topographic map, on the place
+    const map = root.querySelector("rsled-topo-map") as any;
+    expect(map).not.toBeNull();
   });
 
   it("the week of the preview, a day chosen from it", async () => {
@@ -257,21 +258,18 @@ describe("RSLedWeatherSettings", () => {
     expect(changes).toEqual([["location", "3.2000, 73.2000"]]);
   });
 
-  it("a point picked on Home Assistant's map becomes the place", async () => {
-    class FakeSelector extends HTMLElement {}
-    if (!customElements.get("ha-selector"))
-      customElements.define("ha-selector", FakeSelector);
+  it("a point picked on the map becomes the place", async () => {
     const el = await mount();
     const changes = told(el);
-    const selector = el.shadowRoot.querySelector("ha-selector");
-    expect(selector.selector).toEqual({ location: { radius: false } });
-    expect(selector.value).toEqual({ latitude: -17.71, longitude: 178.06 });
+    const selector = el.shadowRoot.querySelector("rsled-topo-map");
+    expect(selector.latitude).toBe(-17.71);
+    expect(selector.longitude).toBe(178.06);
     selector.dispatchEvent(
-      new CustomEvent("value-changed", {
-        detail: { value: { latitude: 7, longitude: 8 } },
+      new CustomEvent("place-picked", {
+        detail: { latitude: 7, longitude: 8 },
       }),
     );
-    selector.dispatchEvent(new CustomEvent("value-changed", {}));
+    selector.dispatchEvent(new CustomEvent("place-picked", {}));
     el.pick({ latitude: "x" });
     expect(changes).toEqual([["location", "7.0000, 8.0000"]]);
   });

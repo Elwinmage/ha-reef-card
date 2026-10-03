@@ -598,6 +598,19 @@ export const style_rswave_schedule = css`
     min-width: 0;
   }
 
+  /* Name of one of the user's waves: typed over to rename it */
+  .lib_edit input.wave_name {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 6px;
+    padding: 2px 6px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--primary-text-color, #222);
+    background: transparent;
+    border: 1px solid var(--divider-color, #ccc);
+    border-radius: 4px;
+  }
   .lib_edit h4 {
     margin: 0;
     font-size: 14px;

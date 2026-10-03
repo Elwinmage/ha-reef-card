@@ -369,7 +369,6 @@
   "led_library_delete_confirm": "Elimina dalla libreria:",
   "led_library_update": "Aggiorna",
   "led_library_new": "Salva come nuovo",
-  "led_weather_map_missing": "Mappa non disponibile qui: digita «lat, lon» o incolla un link di mappa sopra.",
   "led_weather_active": "Modalità meteo GPS: l'integrazione scrive questa settimana dal meteo; una modifica dura fino al prossimo aggiornamento.",
   "led_weather_mode": "Modalità meteo GPS",
   "led_weather_saving": "Salvataggio delle impostazioni…",
@@ -410,5 +409,11 @@
   "tooltip_svc_generic": "esegui {name}",
   "tooltip_svc_toggle": "commuta {name}",
   "tooltip_svc_press": "premi {name}",
-  "tooltip_svc_turn_on": "accendi {name}"
+  "tooltip_svc_turn_on": "accendi {name}",
+  "led_clouds_low": "Leggere",
+  "led_clouds_medium": "Medie",
+  "led_clouds_high": "Dense",
+  "led_library_rename": "Rinomina",
+  "led_library_rename_failed": "Rinomina non riuscita",
+  "wave_rename": "Rinomina l'onda (salvata con Aggiorna)"
 }

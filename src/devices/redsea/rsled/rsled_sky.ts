@@ -114,8 +114,21 @@ export class RSLedSky extends RSLedElement {
         stroke="${color}" stroke-width="3.5" stroke-linecap="round"></path>
       <g transform="translate(${at.replace(" ", ",")})">
         ${day ? this._sun(g, on) : this._moon(g, on)}
+        ${this._time()}
       </g>
     `;
+  }
+
+  /**
+   * The current time, written in the sun or the moon it travels with (the
+   * time of the tank, Home Assistant's); nothing when the lamp does not
+   * tell it.
+   */
+  private _time() {
+    const minute = Number(this.led?.now?.()?.minute);
+    if (!Number.isFinite(minute)) return "";
+    return svg`<text class="sky_time" text-anchor="middle"
+      dominant-baseline="central">${format_minutes(minute)}</text>`;
   }
 
   private _sun(g: typeof SKY_DEFAULTS, on: boolean) {

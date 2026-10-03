@@ -29,7 +29,9 @@ import {
 } from "./rsled_chart";
 import { day_program, WeatherSettings } from "./rsled_weather";
 import {
+  CLOUD_LEVELS,
   CURVE_COLORS_DEFAULT,
+  CloudProgram,
   DEFAULT_KELVIN,
   DayProgram,
   EditPoint,
@@ -59,7 +61,9 @@ import {
   has_clouds,
   normalize_program,
   preset_name,
+  sun_window,
   wb_to_kelvin_program,
+  with_cloud_durations,
 } from "./rsled_program";
 
 /**
@@ -353,6 +357,30 @@ export class RSLedProgramEditor extends LitElement {
       color: var(--secondary-text-color, #666);
       padding: 0 4px;
     }
+    .clouds_edit {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid var(--divider-color, #aaa);
+      font-size: 11px;
+    }
+    .clouds_edit label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-right: auto;
+    }
+    .clouds_edit input[type="checkbox"] {
+      width: auto;
+    }
+    .clouds_edit input[type="time"],
+    .clouds_edit select {
+      width: auto;
+      font-size: 11px;
+    }
     .add {
       margin-top: 4px;
       width: 100%;
@@ -453,6 +481,9 @@ export class RSLedProgramEditor extends LitElement {
       flex-direction: column;
       gap: 6px;
     }
+    .rename_error {
+      color: var(--error-color, #db4437);
+    }
     .naming_buttons {
       display: flex;
       justify-content: flex-end;
@@ -531,6 +562,8 @@ export class RSLedProgramEditor extends LitElement {
     library_entry: { state: true },
     naming: { state: true },
     deleting: { state: true },
+    renaming: { state: true },
+    rename_error: { state: true },
     writing: { state: true },
   };
 
@@ -564,6 +597,15 @@ export class RSLedProgramEditor extends LitElement {
   naming: string | null = null;
   /** Whether the deletion of the loaded library program is being confirmed */
   deleting: boolean = false;
+  /**
+   * Clouds chosen in the editor (one window a day, as the ReefBeat app):
+   * null once removed, undefined while they are the program's own.
+   */
+  clouds_edit: CloudProgram | null | undefined = undefined;
+  /** New name typed for the loaded library program, null when not asked */
+  renaming: string | null = null;
+  /** Why the last renaming was refused, "" when it was not */
+  rename_error: string = "";
   /** A program being written to the lamp(s): requests sent / to send */
   writing: { done: number; total: number } | null = null;
 
@@ -769,6 +811,15 @@ export class RSLedProgramEditor extends LitElement {
   /** Whether the weather mode switched a G1 to intensity + colour. */
   private _weather_kelvin: boolean = false;
 
+  /**
+   * Whether the program can be edited as white and blue curves: not on a
+   * G1 grouped with a G2 (edited as intensity + colour, saved as its own
+   * white/blue).
+   */
+  white_blue_allowed(): boolean {
+    return this.led?.can_white_blue?.() !== false;
+  }
+
   /** Programs put in the editor so far (see set_mode). */
   private _loaded: number = 0;
 
@@ -805,6 +856,7 @@ export class RSLedProgramEditor extends LitElement {
     // The mode chosen here is the lamp's now: nothing left to save
     if (this.weather_draft === this.lamp_weather()) this.weather_draft = null;
     this._sync_weather();
+    this._follow_write();
     this._tick++;
   }
 
@@ -832,7 +884,11 @@ export class RSLedProgramEditor extends LitElement {
     }
     this.mode = this.format;
     this.dirty = false;
-    if (keep_kelvin) void this.set_mode("kelvin");
+    this.clouds_edit = undefined;
+    // A G1 grouped with a G2 is edited as its group is driven
+    if (keep_kelvin || (this.format === "wb" && !this.white_blue_allowed())) {
+      void this.set_mode("kelvin");
+    }
     if (!format_channels(this.mode).includes(this._channel)) {
       this._channel = format_channels(this.mode)[0];
     }
@@ -915,11 +971,81 @@ export class RSLedProgramEditor extends LitElement {
     this._tick++;
   }
 
-  /** Clouds sent with the program: the library program's, else the day's. */
+  /**
+   * Clouds sent with the program: the ones chosen in the editor, else the
+   * library program's, else the day's.
+   */
   private _clouds(day: number): any {
+    if (this.clouds_edit !== undefined) return this.clouds_edit;
     return this.library_entry
       ? (this.library_entry.clouds ?? null)
       : (this.led?.clouds?.(day) ?? null);
+  }
+
+  // ── Clouds ───────────────────────────────────────────────────────────
+
+  /** Clouds of the edited day, cut to its light: null when none. */
+  clouds(): CloudProgram | null {
+    return fit_clouds(this._clouds(this.day), this.chart_program());
+  }
+
+  /**
+   * Add the clouds (over the whole day of light, medium) or remove them.
+   * @param on: whether the day has clouds
+   */
+  set_clouds(on: boolean): void {
+    const window = sun_window(this.chart_program());
+    if (on && !window) return;
+    this.clouds_edit = on
+      ? { from: window!.rise, to: window!.set, intensity: "Medium" }
+      : null;
+    this._changed();
+  }
+
+  /**
+   * Set the start or the end of the clouds from an "HH:MM" text. They stay
+   * inside the day of light (the lamp refuses them otherwise): a time
+   * leaving nothing of them is not taken.
+   * @param key: "from" or "to"
+   * @param value: the text typed
+   */
+  set_clouds_time(key: "from" | "to", value: string): void {
+    const current = this.clouds();
+    const window = sun_window(this.chart_program());
+    let minutes = parse_time(value);
+    this._tick++;
+    if (!current || !window || minutes === null) return;
+    // A day of light running past midnight: the times after it
+    if (minutes < window.rise && minutes + MINUTES_PER_DAY <= window.set) {
+      minutes += MINUTES_PER_DAY;
+    }
+    minutes = Math.min(window.set, Math.max(window.rise, minutes));
+    const next = {
+      from: Number(current.from),
+      to: Number(current.to),
+      intensity: current.intensity ?? "Medium",
+      [key]: minutes,
+    };
+    if (next.to <= next.from) return;
+    this.clouds_edit = next;
+    this._changed();
+  }
+
+  /**
+   * Set the intensity of the clouds.
+   * @param level: Low, Medium or High
+   */
+  set_clouds_intensity(level: string): void {
+    const current = this.clouds();
+    if (!current || !(CLOUD_LEVELS as readonly string[]).includes(level)) {
+      return;
+    }
+    this.clouds_edit = {
+      from: current.from,
+      to: current.to,
+      intensity: level,
+    };
+    this._changed();
   }
 
   /**
@@ -939,6 +1065,41 @@ export class RSLedProgramEditor extends LitElement {
       clouds: library_clouds(this._clouds(this.day)),
       ...(uid ? { uid } : {}),
     });
+  }
+
+  /**
+   * Rename the loaded user's program (redsea.led_library_rename): in the
+   * library, its curves kept, and on every day named after it of the lamp
+   * and of the lamps of its group (the integration writes them, its
+   * progress shown as for a week being written).
+   */
+  async rename_in_library(): Promise<void> {
+    const entry = this.own_entry();
+    const name = (this.renaming ?? "").trim();
+    if (!entry || !name) return;
+    if (name === entry.name) {
+      this.renaming = null;
+      return;
+    }
+    this.rename_error = "";
+    const res = await this._ask("led_library_rename", {
+      uid: entry.uid,
+      name,
+    });
+    if (!res || res.error) {
+      // Nothing renamed: the box stays, and says why
+      this.rename_error = String(
+        res?.error ?? i18n._("led_library_rename_failed"),
+      );
+      return;
+    }
+    this.renaming = null;
+    await this.fetch_library();
+    this.library_entry = this.library?.find((p) => p.uid === entry.uid) ?? {
+      ...entry,
+      name,
+    };
+    this._tick++;
   }
 
   /** Whether the loaded program is one of the user's (editable) ones. */
@@ -1427,12 +1588,14 @@ export class RSLedProgramEditor extends LitElement {
           );
           continue;
         }
-        // A G1 keeps its clouds apart: only a library program brings new
-        // ones, and the lamp's own are kept unless the new day cuts them.
+        // A G1 keeps its clouds apart: a library program or the editor
+        // brings new ones, the lamp's own are kept unless the new day cuts
+        // them.
         // They go before the program, and come back after it.
         const own = this._clouds(day);
         const change =
           this.library_entry !== null ||
+          this.clouds_edit !== undefined ||
           wanted?.from !== own?.from ||
           wanted?.to !== own?.to;
         if (change && has_clouds(held)) {
@@ -1447,7 +1610,8 @@ export class RSLedProgramEditor extends LitElement {
           request(
             target.device_id,
             `/clouds/${day}`,
-            device_clouds(wanted, day),
+            // With the durations of their intensity, as the app sends them
+            device_clouds(with_cloud_durations(wanted), day),
           );
         }
       }
@@ -1542,8 +1706,61 @@ export class RSLedProgramEditor extends LitElement {
   /** How long "saved" shows before the editor closes (ms). */
   static readonly SAVED_MS = 800;
 
-  /** Settings saved: said, then the editor closes. */
+  /**
+   * How long the integration is given to start writing the lamp(s) once it
+   * saved the mode (ms): the weather week, or the lamp's own week back,
+   * is written in the background.
+   */
+  static WRITE_GRACE_MS = 1500;
+
+  /** Whether a Save waits for the integration to be done with the lamp(s). */
+  private _write_wait: ReturnType<typeof setTimeout> | null | false = false;
+  /** Whether that writing was seen under way. */
+  private _write_seen: boolean = false;
+
+  /**
+   * Days the integration is writing to the lamp(s): the weather week, or
+   * the lamp's own week back (weather_program's "writing"); null when it
+   * writes nothing.
+   */
+  lamp_writing(): { done: number; total: number } | null {
+    const writing =
+      this.led?.get_entity?.("weather_program")?.attributes?.writing;
+    const total = Number(writing?.total);
+    return Number.isFinite(total)
+      ? { done: Number(writing.done) || 0, total }
+      : null;
+  }
+
+  /**
+   * Settings saved: the integration now writes the lamp(s), a request
+   * every few seconds. The editor stays, the progress shown as for a
+   * program it writes itself, and closes once the lamp(s) hold the week.
+   */
   private _saved(): void {
+    this._write_seen = this.lamp_writing() !== null;
+    this._write_wait = setTimeout(() => {
+      this._write_wait = null;
+      // Nothing was written (nothing to write, or done in between)
+      if (this.lamp_writing() === null) this._written();
+    }, RSLedProgramEditor.WRITE_GRACE_MS);
+    this._tick++;
+  }
+
+  /** The states changed while a Save waits for the lamp(s) to be written. */
+  private _follow_write(): void {
+    if (this._write_wait === false) return;
+    if (this.lamp_writing() !== null) {
+      this._write_seen = true;
+    } else if (this._write_seen) {
+      this._written();
+    }
+  }
+
+  /** The lamp(s) hold the week: said, then the editor closes. */
+  private _written(): void {
+    if (this._write_wait) clearTimeout(this._write_wait);
+    this._write_wait = false;
     this.saving = "saved";
     this._tick++;
     setTimeout(() => this.close(), RSLedProgramEditor.SAVED_MS);
@@ -1617,6 +1834,19 @@ export class RSLedProgramEditor extends LitElement {
       </select>
       ${this.own_entry()
         ? html`<button
+            class="icon_btn library_rename"
+            title="${i18n._("led_library_rename")}"
+            @click=${() => {
+              this.rename_error = "";
+              // Only drawn for one of the user's programs
+              this.renaming = this.own_entry()!.name;
+            }}
+          >
+            ✎
+          </button>`
+        : ""}
+      ${this.own_entry()
+        ? html`<button
             class="icon_btn library_delete"
             title="${i18n._("led_library_delete")}"
             @click=${() => {
@@ -1677,6 +1907,48 @@ export class RSLedProgramEditor extends LitElement {
             @click=${() => this.delete_from_library()}
           >
             ${i18n._("led_library_delete")}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /** New name of the loaded library program. */
+  private _render_renaming(): TemplateResult | string {
+    if (this.renaming === null || !this.own_entry()) return "";
+    return html`<div class="naming">
+      <div class="naming_box">
+        <label>
+          ${i18n._("led_library_rename")}
+          <input
+            class="renaming_input"
+            .value=${this.renaming}
+            @input=${(e: Event) => {
+              this.renaming = (e.target as HTMLInputElement).value;
+            }}
+            @keydown=${(e: KeyboardEvent) => {
+              if (e.key === "Enter") void this.rename_in_library();
+            }}
+          />
+        </label>
+        ${this.rename_error
+          ? html`<span class="rename_error">⚠ ${this.rename_error}</span>`
+          : ""}
+        <div class="naming_buttons">
+          <button
+            class="cancel renaming_cancel"
+            @click=${() => {
+              this.renaming = null;
+            }}
+          >
+            ${i18n._("cancel")}
+          </button>
+          <button
+            class="save renaming_confirm"
+            ?disabled=${!this.renaming.trim()}
+            @click=${() => this.rename_in_library()}
+          >
+            ${i18n._("led_library_rename")}
           </button>
         </div>
       </div>
@@ -1763,7 +2035,7 @@ export class RSLedProgramEditor extends LitElement {
               </option>`,
           )}
         </select>
-        ${this.format === "wb"
+        ${this.format === "wb" && this.white_blue_allowed()
           ? html`<div class="mode" title="${i18n._("white_blue_sliders")}">
               <span
                 class="mode_wb ${this.mode === "wb" ? "on" : ""}"
@@ -1802,7 +2074,7 @@ export class RSLedProgramEditor extends LitElement {
                   ${i18n._("led_weather_colours_only")}
                 </div>
                 ${this._render_table()} ${this._render_weather()}`
-            : this._render_table()}
+            : html`${this._render_table()} ${this._render_clouds()}`}
         </div>
         ${this.preview_loading
           ? html`<div class="loading_zone">
@@ -1846,14 +2118,76 @@ export class RSLedProgramEditor extends LitElement {
         </button>
       </div>
       ${this._render_naming()} ${this._render_deleting()}
-      ${this._render_writing()}
+      ${this._render_renaming()} ${this._render_writing()}
+    </div>`;
+  }
+
+  /**
+   * The clouds of the day: one window (inside the day of light) and its
+   * intensity, as in the ReefBeat app. In weather mode the weather sets
+   * them (see the weather settings).
+   */
+  private _render_clouds(): TemplateResult {
+    const clouds = this.clouds();
+    const locked = this.locked();
+    const labels: Record<string, string> = {
+      Low: i18n._("led_clouds_low"),
+      Medium: i18n._("led_clouds_medium"),
+      High: i18n._("led_clouds_high"),
+    };
+    const time = (key: "from" | "to") =>
+      html`<input
+        class="clouds_${key}"
+        type="time"
+        title="${i18n._(key === "from" ? "sched_from" : "sched_to")}"
+        ?disabled=${locked}
+        .value=${format_minutes(Number(clouds?.[key]))}
+        @change=${(e: Event) =>
+          this.set_clouds_time(key, (e.target as HTMLInputElement).value)}
+      />`;
+    return html`<div class="clouds_edit">
+      <label
+        ><input
+          type="checkbox"
+          class="clouds_on"
+          ?disabled=${locked || !sun_window(this.chart_program())}
+          .checked=${clouds !== null}
+          @change=${(e: Event) =>
+            this.set_clouds((e.target as HTMLInputElement).checked)}
+        />
+        ☁ ${i18n._("led_weather_clouds")}</label
+      >
+      ${clouds
+        ? html`${time("from")} – ${time("to")}
+            <select
+              class="clouds_level"
+              ?disabled=${locked}
+              @change=${(e: Event) =>
+                this.set_clouds_intensity(
+                  (e.target as HTMLSelectElement).value,
+                )}
+            >
+              ${CLOUD_LEVELS.map(
+                (level) =>
+                  html`<option
+                    value="${level}"
+                    ?selected=${level === clouds.intensity}
+                  >
+                    ${labels[level]}
+                  </option>`,
+              )}
+            </select>`
+        : ""}
     </div>`;
   }
 
   /** A program being written: its progress, over the editor. */
   private _render_writing(): TemplateResult | string {
-    if (!this.writing) return "";
-    const { done, total } = this.writing;
+    // Written by the editor (a program), or by the integration (the
+    // weather week, the lamp's own week back)
+    const writing = this.writing ?? this.lamp_writing();
+    if (!writing) return "";
+    const { done, total } = writing;
     const pct = total ? Math.round((done / total) * 100) : 0;
     return html`<div class="loading_zone writing">
       <div class="spinner"></div>
@@ -1903,7 +2237,7 @@ export class RSLedProgramEditor extends LitElement {
         yesterday: today,
         ticks: true,
         highlight: this._channel,
-        clouds: this._clouds(this.day),
+        clouds: this.clouds(),
         // Over the points: drawn after them
         labels: false,
       })}

@@ -7,6 +7,7 @@ import { dialogs_device } from "../../device.dialogs";
 import {
   dialogs_rsled,
   dialogs_rsled_g2,
+  dialogs_rsled_kelvin_only,
   dialogs_rsled_virtual_g1,
   dialogs_rsled_virtual_g2,
 } from "./rsled.dialogs";
@@ -243,6 +244,17 @@ export class RSLed extends RSDevice {
   }
 
   /**
+   * Colour temperature currently set, in K, or null when the lamp does not
+   * report it (off, or no kelvin/intensity light).
+   */
+  kelvin(): number | null {
+    const k = Number(
+      this.get_entity("light.kelvin_intensity")?.attributes?.color_temp_kelvin,
+    );
+    return Number.isFinite(k) && k > 0 ? k : null;
+  }
+
+  /**
    * Name of the lamp as Home Assistant shows it: the one the user gave the
    * device, else its own.
    */
@@ -401,7 +413,7 @@ export class RSLed extends RSDevice {
           style="${substyle}"
         />
         <div>${this._render_elements(on)}</div>
-        ${this.has_white_blue() ? this._render_slider_switch() : ""}
+        ${this.can_white_blue() ? this._render_slider_switch() : ""}
       </div>
       ${this._program_editor ?? ""}
     </div>`;
@@ -412,6 +424,40 @@ export class RSLed extends RSDevice {
   /** Whether the lamp can be driven channel by channel (G1 only). */
   has_white_blue(): boolean {
     return true;
+  }
+
+  /**
+   * Whether the lamp is in a group with a G2: such a group is only driven
+   * through intensity and colour (the integration refuses white/blue).
+   */
+  grouped_with_g2(): boolean {
+    return this.linked().some((led) => led?.g2 === true);
+  }
+
+  /**
+   * Whether white and blue can be set by hand: a G1, alone or in a group
+   * of G1 only. A G1 grouped with a G2 keeps its white/blue programs but
+   * is driven as the group is.
+   */
+  can_white_blue(): boolean {
+    return this.has_white_blue() && !this.grouped_with_g2();
+  }
+
+  /** Whether the dialogs without the white/blue lights are loaded. */
+  private _kelvin_only: boolean = false;
+
+  override update_config(): void {
+    // A G1 joining (or leaving) a group with a G2: its config dialog
+    // loses (or gets back) the white and blue lights
+    const kelvin_only = this.has_white_blue() && this.grouped_with_g2();
+    if (kelvin_only !== this._kelvin_only) {
+      this._kelvin_only = kelvin_only;
+      this.load_dialogs([
+        dialogs_device,
+        kelvin_only ? dialogs_rsled_kelvin_only : dialogs_rsled,
+      ]);
+    }
+    super.update_config();
   }
 
   /** Browser storage key of the slider mode of this lamp. */
@@ -425,7 +471,7 @@ export class RSLed extends RSDevice {
    * viewing choice, not a setting of the lamp.
    */
   white_blue(): boolean {
-    if (!this.has_white_blue()) return false;
+    if (!this.can_white_blue()) return false;
     if (this._white_blue === null) {
       try {
         this._white_blue = localStorage.getItem(this._slider_key()) === "1";

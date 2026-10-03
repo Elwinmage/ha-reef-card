@@ -24,6 +24,7 @@ import {
   RSLedLinked,
   RSLedName,
   RSLedWeatherSettings,
+  RSLedTopoMap,
 } from "./redsea/rsled";
 import { RSRun, RSPump, RSReturn, RSSkimmer } from "./redsea/rsrun";
 import { RSAto } from "./redsea/rsato";
@@ -91,6 +92,8 @@ if (!customElements.get("redsea-virtual_led"))
   customElements.define("redsea-virtual_led", RSLedVirtual);
 if (!customElements.get("rsled-linked"))
   customElements.define("rsled-linked", RSLedLinked);
+if (!customElements.get("rsled-topo-map"))
+  customElements.define("rsled-topo-map", RSLedTopoMap);
 if (!customElements.get("rsled-weather-settings"))
   customElements.define("rsled-weather-settings", RSLedWeatherSettings);
 if (!customElements.get("rsled-name"))
@@ -175,6 +178,7 @@ export {
   RSLedLinked,
   RSLedName,
   RSLedWeatherSettings,
+  RSLedTopoMap,
 } from "./redsea/rsled";
 export { RSRun } from "./redsea/rsrun";
 export { RSAto } from "./redsea/rsato";

@@ -132,6 +132,31 @@ export const dialogs_rsled_g2 = {
   },
 };
 
+/** Lights a G1 grouped with a G2 is not driven by. */
+const WHITE_BLUE_LIGHTS = ["light.white", "light.blue"];
+
+/**
+ * A G1 in a group with a G2: the group is only driven through intensity
+ * and colour, the white and blue lights are left out of its config dialog.
+ */
+export const dialogs_rsled_kelvin_only = {
+  ...dialogs_rsled,
+  config: {
+    ...dialogs_rsled.config,
+    content: [
+      {
+        ...dialogs_rsled.config.content[0],
+        conf: {
+          ...dialogs_rsled.config.content[0].conf,
+          entities: dialogs_rsled.config.content[0].conf.entities.filter(
+            (e: any) => !WHITE_BLUE_LIGHTS.includes(e.entity),
+          ),
+        },
+      },
+    ],
+  },
+};
+
 /** Entities of the config dialog a virtual ReefLED does not have. */
 const VIRTUAL_NO_ENTITY = [
   "current_program",

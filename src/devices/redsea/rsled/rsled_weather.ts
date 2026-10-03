@@ -10,7 +10,7 @@
  *
  * The place is typed ("lat, lon", or a map link the integration reads),
  * searched by its name (rs-place-search: the map then goes there) or
- * picked on Home Assistant's own location selector, when there is one. The
+ * picked on a topographic map (OpenStreetMap, see rsled_map.ts). The
  * week of the preview is listed day by day: the sun on the tank (the
  * place's times on hover), the sunshine, the cloud cover and the highest
  * intensity; a day is shown in the editor's chart when clicked (event
@@ -171,7 +171,6 @@ export class RSLedWeatherSettings extends LitElement {
     .unit input {
       flex: 1;
     }
-    .map_missing,
     .place,
     .error {
       color: var(--secondary-text-color, #777);
@@ -253,7 +252,7 @@ export class RSLedWeatherSettings extends LitElement {
 
   /**
    * A point picked on the map becomes the place.
-   * @param value: {latitude, longitude} from the location selector
+   * @param value: {latitude, longitude} from the map
    */
   pick(value: any): void {
     const lat = Number(value?.latitude);
@@ -262,18 +261,17 @@ export class RSLedWeatherSettings extends LitElement {
     this.change("location", `${lat.toFixed(4)}, ${lon.toFixed(4)}`);
   }
 
+  /**
+   * The map: OpenStreetMap with its relief (a topographic layer), the
+   * place marked on it; a click picks another one.
+   */
   private _render_map(): TemplateResult {
-    if (!customElements.get("ha-selector")) {
-      return html`<div class="map_missing">
-        ${i18n._("led_weather_map_missing")}
-      </div>`;
-    }
-    return html`<ha-selector
-      .hass=${this.hass}
-      .selector=${{ location: { radius: false } }}
-      .value=${this.place()}
-      @value-changed=${(e: CustomEvent) => this.pick(e.detail?.value)}
-    ></ha-selector>`;
+    const place = this.place();
+    return html`<rsled-topo-map
+      .latitude=${place.latitude}
+      .longitude=${place.longitude}
+      @place-picked=${(e: CustomEvent) => this.pick(e.detail)}
+    ></rsled-topo-map>`;
   }
 
   /** A number field, told as a number. */

@@ -369,7 +369,6 @@
   "led_library_delete_confirm": "Usuń z biblioteki:",
   "led_library_update": "Aktualizuj",
   "led_library_new": "Zapisz jako nowy",
-  "led_weather_map_missing": "Mapa niedostępna: wpisz „lat, lon” lub wklej link do mapy powyżej.",
   "led_weather_active": "Tryb pogody GPS: integracja zapisuje ten tydzień na podstawie pogody; zmiana obowiązuje do następnego pobrania.",
   "led_weather_mode": "Tryb pogody GPS",
   "led_weather_saving": "Zapisywanie ustawień…",
@@ -410,5 +409,11 @@
   "tooltip_svc_generic": "uruchom {name}",
   "tooltip_svc_toggle": "przełącz {name}",
   "tooltip_svc_press": "naciśnij {name}",
-  "tooltip_svc_turn_on": "włącz {name}"
+  "tooltip_svc_turn_on": "włącz {name}",
+  "led_clouds_low": "Lekkie",
+  "led_clouds_medium": "Średnie",
+  "led_clouds_high": "Gęste",
+  "led_library_rename": "Zmień nazwę",
+  "led_library_rename_failed": "Zmiana nazwy nie powiodła się",
+  "wave_rename": "Zmień nazwę fali (zapis przez Aktualizuj)"
 }
