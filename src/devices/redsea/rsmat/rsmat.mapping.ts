@@ -6,6 +6,7 @@ import {
   COLOR_NEUTRAL_0,
   COLOR_WHITE_60,
 } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 export const config = {
   name: null,
@@ -314,6 +315,14 @@ export const config = {
         right: "6%",
       },
     },
+    // Maintenance tasks of the roller: left of the settings cog (left/right
+    // are swapped with the rest when the mat is mounted on the left)
+    maintenance_tasks: maintenance_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "0%",
+      right: "12%",
+    }),
     remaining_length: {
       name: "remaining_length",
       type: "common-sensor",

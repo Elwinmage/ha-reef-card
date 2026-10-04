@@ -4,13 +4,18 @@
  */
 import { FaceLayout, rsled_config } from "./rsled.common.mapping";
 
-/** G1: square lamp, faces along the lower edge of the vents. */
+/**
+ * G1: square lamp, faces along the lower edge of the vents. The left face
+ * holds six icons, 6.8% apart: they start close to its left edge so the last
+ * one stays on the flat of the face, clear of the front corner.
+ */
 export const G1_FACE: FaceLayout = {
-  device_state: ["6.8%", "44.6%"],
-  maintenance: ["14.9%", "40.6%"],
-  configuration: ["23%", "36.6%"],
-  battery_level: ["31.1%", "32.6%"],
-  wifi_quality: ["39.3%", "28.6%"],
+  device_state: ["5.5%", "45.2%"],
+  maintenance: ["12.3%", "41.9%"],
+  configuration: ["19.1%", "38.5%"],
+  battery_level: ["25.9%", "35.2%"],
+  wifi_quality: ["32.7%", "31.8%"],
+  maintenance_tasks: ["39.5%", "28.5%"],
   identify: ["56%", "27.9%"],
   moon_phase: ["67%", "31.2%"],
   acclimation: ["78%", "34.5%"],

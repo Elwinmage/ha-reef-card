@@ -6,7 +6,7 @@
  *
  *   ┌──────────────────────────────┐
  *   │  messages                    │  last_message / last_alert_message
- *   │   ● ●            ● ●         │  state, maintenance | settings, wifi
+ *   │   ● ●           ● ● ●        │  state, maintenance | settings, tasks, wifi
  *   │  ══[ mode ]══════════════(%) │  LED strip: mode + name, end cap: speed
  *   │  ◣ flow                      │  animated at the pump speed
  *   │  ┌────────────────────────┐  │
@@ -15,6 +15,7 @@
  *   └──────────────────────────────┘
  */
 import { COLOR_ERROR_HEX, COLOR_RS_RGB } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 /** CSS of an overlay covering the whole picture. */
 export const FULL_CANVAS = {
@@ -49,6 +50,8 @@ export const CLIPS = {
   device_state: ["31.7%", "14%"],
   maintenance: ["40%", "15.7%"],
   configuration: ["73.3%", "25%"],
+  // On the right clip, halfway between the settings cog and the wifi
+  maintenance_tasks: ["78.7%", "25.9%"],
   wifi_quality: ["84%", "28.5%"],
 } as const;
 
@@ -136,6 +139,10 @@ export const config = {
       },
       css: icon_at(...CLIPS.configuration),
     },
+    // Maintenance tasks of the pump
+    maintenance_tasks: maintenance_shortcut(
+      icon_at(...CLIPS.maintenance_tasks),
+    ),
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",

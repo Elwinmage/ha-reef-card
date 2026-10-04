@@ -11,6 +11,7 @@ import {
   COLOR_RS_RGBSTR,
   COLOR_WHITE_60,
 } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 /** Device-level widgets, identical on both models. */
 export const elements = {
@@ -274,6 +275,13 @@ export const elements = {
       right: "16%",
     },
   },
+  // Maintenance tasks of the strip: left of the settings cog
+  maintenance_tasks: maintenance_shortcut({
+    flex: "0 0 auto",
+    position: "absolute",
+    top: "2%",
+    right: "28%",
+  }),
   battery_level: {
     name: "battery_level",
     type: "common-sensor",

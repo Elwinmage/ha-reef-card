@@ -60,6 +60,13 @@ export class RSMaintenance extends RSDevice {
    */
   public readonly is_maintenance: boolean = true;
 
+  /**
+   * True when the overview is shown inside a device dialog, restricted to
+   * that device: the dialog already carries the title, and its background
+   * is not the card's.
+   */
+  public embedded: boolean = false;
+
   // Pseudo device: no HA device backs this element.
   device = { model: "MAINTENANCE", name: "", elements: null };
 
@@ -754,12 +761,14 @@ export class RSMaintenance extends RSDevice {
     const sorted = sort_maintenance_items(visible, this._sort);
 
     return html`
-      <div class="maint-root">
+      <div class="maint-root ${this.embedded ? "embedded" : ""}">
         <div class="maint-header">
-          <div class="maint-title">
-            <ha-icon icon="mdi:wrench-clock"></ha-icon>
-            ${i18n._("maintenance_view")}
-          </div>
+          ${this.embedded
+            ? ""
+            : html`<div class="maint-title">
+                <ha-icon icon="mdi:wrench-clock"></ha-icon>
+                ${i18n._("maintenance_view")}
+              </div>`}
           ${this._render_counters(all)}
         </div>
         ${this._render_toolbar(all)} ${this._render_list(sorted, options)}

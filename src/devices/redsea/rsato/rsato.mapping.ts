@@ -4,6 +4,7 @@ import {
   COLOR_ORANGE_HEX,
   COLOR_ERROR_HEX,
 } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 export const config = {
   name: null,
@@ -243,6 +244,14 @@ export const config = {
         left: "93%",
       },
     },
+    // Maintenance tasks of the ATO: under the wifi, on the second row of the
+    // icon block
+    maintenance_tasks: maintenance_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "10%",
+      left: "93%",
+    }),
     auto_fill: {
       name: "auto_fill",
       type: "click-image",

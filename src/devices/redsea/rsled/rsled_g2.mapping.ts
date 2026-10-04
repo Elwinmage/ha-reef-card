@@ -7,13 +7,18 @@
  */
 import { FaceLayout, rsled_config } from "./rsled.common.mapping";
 
-/** G2: rounded lamp, faces on the smooth band under the vents. */
+/**
+ * G2: rounded lamp, faces on the smooth band under the vents. The left face
+ * holds six icons, 6.6% apart: they start close to its left edge so the last
+ * one stays on the flat of the face, clear of the front corner.
+ */
 export const G2_FACE: FaceLayout = {
-  device_state: ["6.8%", "39.2%"],
-  maintenance: ["14.4%", "36.8%"],
-  configuration: ["22%", "34.3%"],
-  battery_level: ["29.6%", "31.8%"],
-  wifi_quality: ["37.2%", "29.4%"],
+  device_state: ["5.5%", "39.6%"],
+  maintenance: ["12.1%", "37.5%"],
+  configuration: ["18.7%", "35.4%"],
+  battery_level: ["25.3%", "33.2%"],
+  wifi_quality: ["31.9%", "31.1%"],
+  maintenance_tasks: ["38.5%", "29%"],
   identify: ["58.4%", "29.4%"],
   moon_phase: ["68.5%", "32.1%"],
   acclimation: ["78.7%", "36.5%"],

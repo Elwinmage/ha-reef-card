@@ -97,6 +97,8 @@ export const LAYOUT: AMLayout = {
     timer_on: [26, ICONS_Y],
     control_0_10v: [36, ICONS_Y],
     configuration: [94, ICONS_Y],
+    // The row is full: under the settings cog, in the right margin
+    maintenance_tasks: [94, ICONS_Y + 7],
   },
   faults: { top: 55, left: 3, width: 94 },
   slider_top: 59.5,

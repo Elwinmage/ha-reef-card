@@ -7,11 +7,12 @@
  */
 import { AMDevice } from "./am_device";
 import { dialogs_am_runner } from "./am.dialogs";
+import { dialogs_maintenance } from "../../device.dialogs";
 
 export class AMRunnerSeries extends AMDevice {
   constructor() {
     super();
-    this.load_dialogs([dialogs_am_runner]);
+    this.load_dialogs([dialogs_maintenance, dialogs_am_runner]);
   }
 
   // check-entities: uses flow

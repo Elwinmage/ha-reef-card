@@ -676,3 +676,92 @@ export function has_maintenance_entities(hass: HassConfig | null): boolean {
   }
   return false;
 }
+
+/**
+ * Worst status among the maintenance tasks of the given devices.
+ *
+ * Same matching rules as `filter_by_devices` (device or root device, by id
+ * or by name, sub-devices by name prefix), but without building the items:
+ * this runs on every hass update to draw the maintenance shortcut of a
+ * device, so it skips the notification/interval/pump indexes.
+ *
+ * Tasks whose alerts are muted, and tasks never reset, count as present but
+ * never raise the status: the shortcut only calls for attention where the
+ * user asked to be told.
+ * @param hass: the hass states object
+ * @param selection: ids and/or names of the devices to look for
+ * @param ratio: the warning window ratio
+ * @return null when they own no task, else "overdue", "warning" or "ok"
+ */
+export function device_maintenance_status(
+  hass: HassConfig | null,
+  selection: string[],
+  ratio: number = MAINTENANCE_WARNING_RATIO,
+): "ok" | "warning" | "overdue" | null {
+  if (!hass?.states || selection.length === 0) {
+    return null;
+  }
+  const wanted = new Set(selection);
+  const registry: Record<string, any> = (hass.entities as any) || {};
+  const devices: Record<string, any> = hass.devices || {};
+  let worst: "ok" | "warning" | null = null;
+
+  for (const entity_id in hass.states) {
+    const state = hass.states[entity_id];
+    if (!is_maintenance_state(state, entity_id)) {
+      continue;
+    }
+    const attrs = state.attributes;
+    const device_id: string = registry[entity_id]?.device_id || "";
+    const device = device_id ? devices[device_id] : undefined;
+    // Same rule as the overview: tasks of a disabled device are not shown
+    if (device?.disabled_by) {
+      continue;
+    }
+    const device_name: string =
+      device?.name_by_user || device?.name || attrs.device_name || "";
+    const root = resolve_root_device(devices, device_id, device_name);
+    if (
+      !wanted.has(device_id) &&
+      !wanted.has(root.id) &&
+      !wanted.has(device_name) &&
+      !wanted.has(root.name) &&
+      !selection.some((name) => device_name.startsWith(name + " "))
+    ) {
+      continue;
+    }
+
+    const status =
+      attrs.notify === false
+        ? "ok"
+        : compute_status(
+            to_number_or_null(attrs.days_left),
+            Math.max(0, to_number(attrs.interval_days, 0)),
+            ratio,
+          );
+    if (status === "overdue") {
+      // Nothing is worse: no need to look further
+      return "overdue";
+    }
+    if (status === "warning") {
+      worst = "warning";
+    } else if (worst === null) {
+      // "ok", or "never": a task never reset has no deadline to miss yet
+      worst = "ok";
+    }
+  }
+  return worst;
+}
+
+/**
+ * Tell whether at least one maintenance task belongs to the given devices.
+ * @param hass: the hass states object
+ * @param selection: ids and/or names of the devices to look for
+ * @return true when one of them owns a maintenance task
+ */
+export function has_device_maintenance(
+  hass: HassConfig | null,
+  selection: string[],
+): boolean {
+  return device_maintenance_status(hass, selection) !== null;
+}

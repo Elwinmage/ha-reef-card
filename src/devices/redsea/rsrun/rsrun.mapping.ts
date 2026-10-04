@@ -1,4 +1,5 @@
 import { COLOR_WHITE_60 } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 export const config = {
   name: null,
@@ -84,6 +85,14 @@ export const config = {
         left: "6%",
       },
     },
+    // Maintenance tasks of the controller and its pumps: third icon of the
+    // top left row, after the maintenance mode switch
+    maintenance_tasks: maintenance_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "0%",
+      left: "12%",
+    }),
     battery_level: {
       name: "battery_level",
       type: "common-sensor",

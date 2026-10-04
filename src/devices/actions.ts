@@ -4,6 +4,7 @@
 
 import * as dose_head_dialog_func_ext from "./redsea/rsdose/dose_head.dialog_func_ext";
 import * as rsrun_pump_dialog_func_ext from "./redsea/rsrun/rsrun_pump.dialog_func_ext";
+import { maintenance_tasks } from "./redsea/maintenance/maintenance.dialog_func_ext";
 import {
   probe_calibration_ec,
   probe_calibration_ph,
@@ -17,6 +18,7 @@ export const actionRegistry: Record<
   rsrun_pump_dialog_func_ext,
   // Only the dialog builders: the module also exports its helpers
   rscontrol_dialog_func_ext: { probe_calibration_ec, probe_calibration_ph },
+  maintenance_dialog_func_ext: { maintenance_tasks },
 };
 
 export function run_action(module: string, fname: string, ...args: any[]) {

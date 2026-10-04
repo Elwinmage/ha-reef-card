@@ -1,3 +1,5 @@
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+
 export const config2 = {
   name: null,
   model: "RSDOSE2",
@@ -112,6 +114,15 @@ export const config2 = {
         left: "23%",
       },
     },
+    // Maintenance tasks of the doser and its heads: under the wifi, in the
+    // same box so both icons line up
+    maintenance_tasks: maintenance_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      width: "5.5%",
+      top: "6%",
+      right: "22%",
+    }),
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",

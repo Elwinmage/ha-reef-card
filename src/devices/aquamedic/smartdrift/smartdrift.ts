@@ -1,5 +1,6 @@
 import { AMDevice } from "../common/am_device";
 import { dialogs_am_drift } from "../common/am.dialogs";
+import { dialogs_maintenance } from "../../device.dialogs";
 import { am_box_styles } from "../common/am_device";
 import { PICTURE, config } from "./smartdrift.mapping";
 
@@ -12,7 +13,7 @@ export class AMSmartDrift extends AMDevice {
   constructor() {
     super();
     this.initial_config = config;
-    this.load_dialogs([dialogs_am_drift]);
+    this.load_dialogs([dialogs_maintenance, dialogs_am_drift]);
   }
 
   device = {

@@ -9,6 +9,7 @@
  * generation. rsled_config() builds a model's mapping from those.
  */
 import { COLOR_ERROR_HEX } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 /** CSS of an overlay covering the whole design space. */
 const FULL_CANVAS = {
@@ -30,6 +31,8 @@ export interface FaceLayout {
   configuration: [string, string];
   battery_level: [string, string];
   wifi_quality: [string, string];
+  /** Maintenance shortcut, last of the left face, after the wifi */
+  maintenance_tasks: [string, string];
   identify: [string, string];
   moon_phase: [string, string];
   acclimation: [string, string];
@@ -132,6 +135,8 @@ export function face_elements(face: FaceLayout) {
       },
       css: icon_at(face.wifi_quality),
     },
+    // Maintenance tasks of the lamp
+    maintenance_tasks: maintenance_shortcut(icon_at(face.maintenance_tasks)),
 
     // ── Right face: ReefLED specific ──────────────────────────────────
     identify: {
@@ -380,6 +385,8 @@ export const off_keep: string[] = [
   "lamp_name",
   "weather",
   "device_state",
+  // Maintenance is mostly done with the lamp switched off
+  "maintenance_tasks",
   "last_message",
   "last_alert_message",
 ];

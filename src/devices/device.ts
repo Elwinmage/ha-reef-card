@@ -18,6 +18,7 @@ import { MyElement } from "../base/element";
 import { SafeEval } from "../utils/SafeEval";
 import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "../utils/constants";
 import { ambiguous_model_of, domain_of, AmbiguousModel } from "../utils/common";
+import { device_maintenance_status } from "../utils/maintenance";
 
 import { dialogs_device } from "./device.dialogs";
 
@@ -639,6 +640,51 @@ export class RSDevice extends LitElement {
     const key = this._power_translation_key();
     if (!this._hass || !this.entities[key]) return false;
     return this._hass.states[this.entities[key].entity_id]?.state !== "off";
+  }
+
+  /**
+   * Devices whose maintenance tasks belong to this card device: the id of
+   * every Home Assistant device behind it, plus its name. Tasks of its
+   * sub-devices (dosing heads, pumps) are reached through their root device,
+   * or through the name when `via_device` is not declared.
+   * @return the ids and names to filter the maintenance tasks on
+   */
+  maintenance_device_ids(): string[] {
+    const selection: string[] = [];
+    for (const el of this.device?.elements ?? []) {
+      if (el?.id) {
+        selection.push(el.id);
+      }
+    }
+    if (this.device?.name) {
+      selection.push(this.device.name);
+    }
+    return selection;
+  }
+
+  /**
+   * Worst status of the maintenance tasks of this device, with the warning
+   * window the user configured for the maintenance overview. Muted tasks
+   * never raise it.
+   * @return null without any task, else "overdue", "warning" or "ok"
+   */
+  maintenance_status(): "ok" | "warning" | "overdue" | null {
+    const ratio = Number((this.user_config as any)?.maintenance?.warning_ratio);
+    return device_maintenance_status(
+      this._hass,
+      this.maintenance_device_ids(),
+      Number.isFinite(ratio) && ratio > 0 && ratio < 1 ? ratio : undefined,
+    );
+  }
+
+  /**
+   * Tell whether this device has maintenance tasks to show. The maintenance
+   * shortcut hides itself otherwise (older integration, device without any
+   * task in the catalogue).
+   * @return true when at least one maintenance task belongs to this device
+   */
+  has_maintenance_tasks(): boolean {
+    return this.maintenance_status() !== null;
   }
 
   /*

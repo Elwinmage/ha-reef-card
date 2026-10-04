@@ -96,6 +96,8 @@ export const LAYOUT: AMLayout = {
     timer_on: picture_point(PICTURE, 74, ICONS_Y),
     control_0_10v: picture_point(PICTURE, 86, ICONS_Y),
     configuration: picture_point(PICTURE, 98, ICONS_Y),
+    // The row is full: under the settings cog, above the speed ring
+    maintenance_tasks: picture_point(PICTURE, 98, ICONS_Y + 10),
   },
   // On the flat of the motor housing. The housing is silver: a light disc
   // carries the figure and a darker track shows the unfilled part.

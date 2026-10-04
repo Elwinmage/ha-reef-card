@@ -46,6 +46,8 @@ export const LAYOUT: AMLayout = {
     timer_on: [72, ICONS_Y],
     control_0_10v: [83, ICONS_Y],
     configuration: [94, ICONS_Y],
+    // The row is full: under the settings cog, clear of the ring
+    maintenance_tasks: [94, ICONS_Y + 8],
   },
   // Level with the reaction chamber, the figure inside
   ring: {

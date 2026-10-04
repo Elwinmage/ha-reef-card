@@ -26,6 +26,7 @@
  * Entities are named by the translation keys of ha-aquamedic-component.
  */
 import { COLOR_AM_HEX, COLOR_AM_RGB } from "../../../utils/colors";
+import { maintenance_shortcut } from "../../redsea/maintenance/maintenance.shortcut";
 
 /** Where the pump picture sits in the box. */
 export interface AMPicture {
@@ -104,6 +105,8 @@ export interface AMLayout {
     timer_on: AMPoint;
     control_0_10v: AMPoint;
     configuration: AMPoint;
+    /** Maintenance shortcut; a view leaving it out does not show it */
+    maintenance_tasks?: AMPoint;
   };
   /** Speed ring: its centre, the width of its element (the ring itself is
    *  0.72 of it) and whether the figure is written inside. A view drawing
@@ -268,6 +271,15 @@ export function common_elements(
       },
       css: centred_at(layout.icons.configuration),
     },
+    // Maintenance tasks of the pump (hidden while it has none)
+    ...(layout.icons.maintenance_tasks
+      ? {
+          maintenance_tasks: maintenance_shortcut(
+            centred_at(layout.icons.maintenance_tasks),
+            COLOR_AM_HEX,
+          ),
+        }
+      : {}),
 
     // ── Faults ───────────────────────────────────────────────────────
     faults: {
