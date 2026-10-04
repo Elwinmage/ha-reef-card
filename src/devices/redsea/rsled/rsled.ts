@@ -22,6 +22,7 @@ import {
   CloudProgram,
   SkyState,
   brightness_pct,
+  estimated_par,
   clouds_state,
   local_time,
   normalize_clouds,
@@ -241,6 +242,27 @@ export class RSLed extends RSDevice {
     const light = this.get_entity("light.kelvin_intensity");
     if (!light || light.state === "unavailable") return null;
     return this.light_pct("kelvin_intensity");
+  }
+
+  /**
+   * Model the PAR of this lamp is told for: its own. A group of lamps of
+   * several models has no single one.
+   */
+  par_model(): string | undefined {
+    return this.device?.elements?.[0]?.model;
+  }
+
+  /**
+   * Estimated PAR at the water surface under the lamp (see
+   * estimated_par()), null when it cannot be told.
+   */
+  par(): number | null {
+    return estimated_par(
+      this.par_model(),
+      this.channel_levels(),
+      this.intensity_pct(),
+      !this.has_white_blue(),
+    );
   }
 
   /**
@@ -739,6 +761,12 @@ export class RSLedVirtual extends RSLed {
         model: led.model,
       }));
     return targets.length ? targets : super.program_targets();
+  }
+
+  /** The model its lamps share; none when they are of several models. */
+  override par_model(): string | undefined {
+    const models = new Set(this.linked().map((led) => led?.model));
+    return models.size === 1 ? [...models][0] : undefined;
   }
 
   /** The first G1 of the group sets the white/blue balance. */

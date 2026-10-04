@@ -415,5 +415,6 @@
   "led_clouds_high": "Densas",
   "led_library_rename": "Renomear",
   "led_library_rename_failed": "Não foi possível renomear",
-  "wave_rename": "Renomear a onda (guardado com Atualizar)"
+  "wave_rename": "Renomear a onda (guardado com Atualizar)",
+  "led_par_hint": "PAR estimado à superfície da água, sob a lâmpada à altura recomendada"
 }

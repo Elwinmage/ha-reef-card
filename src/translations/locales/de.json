@@ -415,5 +415,6 @@
   "led_clouds_high": "Dicht",
   "led_library_rename": "Umbenennen",
   "led_library_rename_failed": "Umbenennen fehlgeschlagen",
-  "wave_rename": "Welle umbenennen (mit Aktualisieren gespeichert)"
+  "wave_rename": "Welle umbenennen (mit Aktualisieren gespeichert)",
+  "led_par_hint": "Geschätzter PAR an der Wasseroberfläche, unter der Leuchte in empfohlener Höhe"
 }

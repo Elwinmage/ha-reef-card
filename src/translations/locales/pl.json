@@ -415,5 +415,6 @@
   "led_clouds_high": "Gęste",
   "led_library_rename": "Zmień nazwę",
   "led_library_rename_failed": "Zmiana nazwy nie powiodła się",
-  "wave_rename": "Zmień nazwę fali (zapis przez Aktualizuj)"
+  "wave_rename": "Zmień nazwę fali (zapis przez Aktualizuj)",
+  "led_par_hint": "Szacowany PAR na powierzchni wody, pod lampą na zalecanej wysokości"
 }

@@ -195,6 +195,10 @@ describe("RSLedVirtual", () => {
     expect(dev.config.elements).toHaveProperty("white_slider");
     expect(dev.program(1)).toEqual(G1);
     expect(dev.g1_model()).toBe("RSLED160");
+    // Lamps of several models: no single PAR
+    expect(dev.par_model()).toBeUndefined();
+    expect(dev.par()).toBeNull();
+    expect(makeVirtual([LED_G1A, LED_G1A]).par_model()).toBe("RSLED160");
     expect(dev.program_targets()).toEqual([
       { device_id: "e1", g2: false, model: "RSLED160" },
       { device_id: "e2", g2: false, model: "RSLED90" },

@@ -415,5 +415,6 @@
   "led_clouds_high": "Denses",
   "led_library_rename": "Renommer",
   "led_library_rename_failed": "Le renommage a échoué",
-  "wave_rename": "Renommer la vague (enregistré avec Mettre à jour)"
+  "wave_rename": "Renommer la vague (enregistré avec Mettre à jour)",
+  "led_par_hint": "PAR estimé à la surface de l'eau, sous la lampe à sa hauteur recommandée"
 }

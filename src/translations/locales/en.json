@@ -415,5 +415,6 @@
   "led_clouds_high": "Heavy",
   "led_library_rename": "Rename",
   "led_library_rename_failed": "Renaming failed",
-  "wave_rename": "Rename the wave (saved with Update)"
+  "wave_rename": "Rename the wave (saved with Update)",
+  "led_par_hint": "Estimated PAR at the water surface, under the lamp at its recommended height"
 }

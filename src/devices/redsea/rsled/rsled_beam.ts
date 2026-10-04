@@ -127,10 +127,21 @@ export class RSLedBeam extends RSLedElement {
     // Unique per instance: several lamps can share a dashboard
     const grad_id = `rsled_beam_${this._uid}`;
 
+    // The strength of the light: its estimated PAR at the water surface
+    // when the model is known, else the share of the lamp's power
+    const reported = intensity !== null && intensity !== undefined;
+    const par = reported ? this.led?.par?.() : null;
+    const percent = reported ? `${i18n._("led_intensity")} ${intensity} %` : "";
     const intensity_txt =
-      intensity === null || intensity === undefined
-        ? ""
-        : `☀ ${i18n._("led_intensity")} ${intensity} %`;
+      typeof par === "number"
+        ? `☀ ≈ ${par} PAR`
+        : percent
+          ? `☀ ${percent}`
+          : "";
+    const intensity_tip =
+      typeof par === "number"
+        ? [i18n._("led_par_hint"), percent].filter((t) => t).join(" · ")
+        : "";
     // Name of the program, and the day it was read from: a program of
     // another day would otherwise go unnoticed
     const name = String(this.led?.program_name?.() ?? "");
@@ -200,7 +211,9 @@ export class RSLedBeam extends RSLedElement {
         y="${g.intensity.y}"
         text-anchor="middle"
       >
-        ${intensity_txt}
+        ${intensity_txt}${intensity_tip
+          ? svg`<title>${intensity_tip}</title>`
+          : ""}
       </text>
       <text
         class="beam_title"

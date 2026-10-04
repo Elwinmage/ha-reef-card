@@ -498,6 +498,60 @@ export function light_color(
 }
 
 /**
+ * PAR (µmol/m²/s) at the water surface, under the centre of a lamp at full
+ * power, hung at the height Red Sea recommends: read from Red Sea's
+ * published figures (G2: specifications; G1: PAR maps). An estimate, to
+ * tell how strong the light is rather than a share of the lamp's power.
+ */
+export const PAR_SURFACE: Record<string, number> = {
+  RSLED50: 550,
+  RSLED90: 570,
+  RSLED160: 600,
+  RSLED60: 500,
+  RSLED115: 500,
+  RSLED170: 550,
+};
+
+/**
+ * Share of a G1's full output each channel gives at 100 %: from the
+ * power the integration measured the intensity compensation with
+ * (white alone 10320, blue alone 13370, close to their sum together).
+ */
+export const G1_CHANNEL_SHARE = {
+  white: 10320 / (10320 + 13370),
+  blue: 13370 / (10320 + 13370),
+};
+
+/**
+ * Estimated PAR at the water surface under a lamp.
+ * @param model: the lamp's model (RSLED160...)
+ * @param levels: its white and blue levels, in % (a G1's output)
+ * @param intensity: its intensity, in % (a G2's output: the same at any
+ *                   colour temperature), null when not reported
+ * @param g2: whether the lamp is driven by intensity and colour
+ * @return the PAR, rounded, or null for an unknown model or without the
+ *         levels to tell it from
+ */
+export function estimated_par(
+  model: string | undefined,
+  levels: { white: number; blue: number },
+  intensity: number | null | undefined,
+  g2: boolean,
+): number | null {
+  const full = PAR_SURFACE[String(model)];
+  if (!full) return null;
+  if (g2) {
+    if (intensity === null || intensity === undefined) return null;
+    return Math.round((full * clamp_pct(intensity)) / 100);
+  }
+  const share =
+    (clamp_pct(levels.white) * G1_CHANNEL_SHARE.white +
+      clamp_pct(levels.blue) * G1_CHANNEL_SHARE.blue) /
+    100;
+  return Math.round(full * share);
+}
+
+/**
  * White/blue balance parameter of each G1 model at a colour temperature, the
  * tables the integration uses (LEDS_CONV). The parameter `wb` runs from 0
  * to 200: at 100 and above white is full and blue is 200 - wb; below 100

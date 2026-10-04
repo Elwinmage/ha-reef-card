@@ -1215,7 +1215,29 @@ describe("RSLedBeam", () => {
     const texts = [...root.querySelectorAll("text")].map((t) =>
       t.textContent?.trim(),
     );
-    expect(texts[0]).toBe("☀ Intensity 90 %");
+    // The strength of the light: its estimated PAR at the surface (white
+    // 80 %, blue 100 % of a ReefLED 160), the intensity in its tooltip
+    const strength = root.querySelector(".beam_text") as SVGTextElement;
+    const shown = [...strength.childNodes]
+      .filter((n) => n.nodeType === Node.TEXT_NODE)
+      .map((n) => n.textContent)
+      .join("")
+      .trim();
+    expect(shown).toBe("☀ ≈ 548 PAR");
+    expect(strength.querySelector("title")?.textContent).toContain(
+      "Intensity 90 %",
+    );
+    expect(strength.querySelector("title")?.textContent).toContain(
+      "Estimated PAR",
+    );
+    // A model without PAR figures: the share of the lamp's power
+    dev.device.elements[0].model = "RSLED999";
+    expect(dev.par()).toBeNull();
+    const other = await mount(makeElement(RSLedBeam, dev, { name: "beam" }));
+    expect(other.querySelector(".beam_text")?.textContent?.trim()).toBe(
+      "☀ Intensity 90 %",
+    );
+    dev.device.elements[0].model = "RSLED160";
     // The name and the day the program was read from
     expect(texts[1]).toBe("Perso · Tuesday");
     expect(root.querySelector("g")?.getAttribute("opacity")).toBe("1");
@@ -1289,6 +1311,43 @@ describe("RSLedBeam", () => {
       String(config2.elements.beam.geometry.lens.cy),
     );
     expect(config.elements.beam.geometry).toBeUndefined();
+  });
+
+  it("estimated_par(): from the channels of a G1, the intensity of a G2", () => {
+    const full = { white: 100, blue: 100 };
+    // Full power: Red Sea's figures at the surface
+    expect(P.estimated_par("RSLED160", full, null, false)).toBe(600);
+    expect(P.estimated_par("RSLED90", full, 100, false)).toBe(570);
+    expect(P.estimated_par("RSLED50", full, 100, false)).toBe(550);
+    expect(P.estimated_par("RSLED170", full, 100, true)).toBe(550);
+    // A G1: each channel gives its share (blue a little more than white)
+    const white = P.estimated_par(
+      "RSLED160",
+      { white: 100, blue: 0 },
+      0,
+      false,
+    );
+    const blue = P.estimated_par("RSLED160", { white: 0, blue: 100 }, 0, false);
+    expect(white).toBe(261);
+    expect(blue).toBe(339);
+    expect(P.estimated_par("RSLED160", { white: 0, blue: 0 }, 50, false)).toBe(
+      0,
+    );
+    // A G2: its intensity, whatever its colour and its channels
+    expect(P.estimated_par("RSLED60", { white: 0, blue: 0 }, 50, true)).toBe(
+      250,
+    );
+    expect(P.estimated_par("RSLED115", full, 250, true)).toBe(500);
+    expect(P.estimated_par("RSLED115", full, null, true)).toBeNull();
+    expect(P.estimated_par("RSLED115", full, undefined, true)).toBeNull();
+    // Unknown models
+    expect(P.estimated_par(undefined, full, 100, false)).toBeNull();
+    expect(P.estimated_par("VIRTUAL", full, 100, true)).toBeNull();
+    // On the lamps
+    expect(makeLed({ white: 50, blue: 50, intensity: 50 }).par()).toBe(300);
+    const g2 = makeLed({ intensity: 40 }, true);
+    g2.device.elements[0].model = "RSLED170";
+    expect(g2.par()).toBe(220);
   });
 
   it("no program: no curve, no marker, no intensity", async () => {
