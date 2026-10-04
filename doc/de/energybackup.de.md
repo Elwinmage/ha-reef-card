@@ -16,20 +16,51 @@ Die Flüsse werden von [Power Flow Card Plus](https://github.com/flixlix/power-f
 
 Die Flüsse ersetzen dieses Feld, sobald die Karte geladen ist. Ihre Konfiguration schreibt die Reef Card: weder `power-flow-card-plus`-YAML noch Template-Sensor noch `config-template-card` sind nötig.
 
-## Was angezeigt wird
+## Die Ansicht
 
-| Knoten       | Zeigt                                                                                       | Gelesen aus                                  |
-| ------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **Netz**     | Vom Ladegerät gelieferte Leistung. Bei einem Ausfall: **Stromausfall** und seine Dauer      | Ladegerätleistung, Netzzustand, Ausfalldauer |
-| **Batterie** | Lade- oder Entladeleistung, Ladezustand                                                     | Batterieleistung, Batterie-SoC               |
-| **Aquarium** | Was die Technik verbraucht (Netz und Batterie zusammen), darunter die verbleibende Laufzeit | Von der Flusskarte berechnet, Laufzeit       |
-| **Pumpen**   | Geschwindigkeit in %, Richtung einer Strömungspumpe, Symbol je nach Geschwindigkeit         | ReefWave, ReefRun-Pumpen, Aqua-Medic-Pumpen  |
+Die Karte ist in 5 Zonen gegliedert:
 
-- Die Ladegerätleistung gibt es nur mit einem Victron-Ladegerät. Ohne sie zeigt der Netzknoten nur, ob das Netz vorhanden ist, und der Aquariumknoten zeigt, was die Batterie liefert: am Netz nichts, da der Batteriemonitor nur den Batteriestrom sieht.
-- Ein Klick auf einen Knoten öffnet die zugehörige Entität.
-- Das Symbol `mdi:wrench-clock` öffnet die Wartungsaufgaben des Geräts (den Batterie-Entladetest), wie in den anderen Ansichten.
+1. Titel und Wartung
+2. Netz
+3. Batterie
+4. Aquarium
+5. Pumpen
+
+<img src="../img/energybackup/energybackup_zones.png"/>
+
+Ein Klick auf einen Knoten öffnet die zugehörige Entität.
+
+## Titel und Wartung
+
+<img src="../img/energybackup/zone_1.png"/>
+
+Der Name des Geräts. Das Symbol `mdi:wrench-clock` öffnet die Wartungsaufgaben des Geräts (den Batterie-Entladetest), wie in den anderen Ansichten.
+
+## Netz
+
+<img src="../img/energybackup/zone_2.png"/>
+
+Vom Ladegerät gelieferte Leistung. Bei einem Ausfall: **Stromausfall** und seine Dauer.
+
+Die Ladegerätleistung gibt es nur mit einem Victron-Ladegerät. Ohne sie zeigt der Netzknoten nur, ob das Netz vorhanden ist, und der Aquariumknoten zeigt, was die Batterie liefert: am Netz nichts, da der Batteriemonitor nur den Batteriestrom sieht.
+
+## Batterie
+
+<img src="../img/energybackup/zone_3.png"/>
+
+Lade- oder Entladeleistung, Ladezustand.
+
+## Aquarium
+
+<img src="../img/energybackup/zone_4.png"/>
+
+Was die Technik verbraucht (Netz und Batterie zusammen), darunter die verbleibende Laufzeit.
 
 ## Pumpen
+
+<img src="../img/energybackup/zone_5.png"/>
+
+Geschwindigkeit in %, Richtung einer Strömungspumpe, Symbol je nach Geschwindigkeit. Jede Pumpe trägt ihren Namen in Home Assistant; bei einer ReefRun-Pumpe den Namen, der der Pumpe selbst gegeben wurde. Der Kanal eines ReefRun, an dem nichts angeschlossen ist, wird weggelassen.
 
 Die Pumpen werden unter den ReefWave, den ReefRun-Pumpen und den Aqua-Medic-Pumpen der Installation gesucht. Standardmäßig zeigt der Fluss die vom Notstromdienst gesteuerten Pumpen (er veröffentlicht ihre Liste: Eine mit `configure.py` hinzugefügte oder entfernte Pumpe folgt nach einem Neustart des Dienstes). Veröffentlicht der Dienst die Liste nicht, werden die ersten noch antwortenden Pumpen angezeigt, Strömungspumpen zuerst. Die Flusskarte zeichnet höchstens vier Pumpen: Bei mehr die anzuzeigenden im Karteneditor anhaken.
 

@@ -16,20 +16,51 @@ Przepływy rysuje [Power Flow Card Plus](https://github.com/flixlix/power-flow-c
 
 Przepływy zastępują ten panel, gdy tylko karta zostanie załadowana. Jej konfigurację zapisuje reef card: nie potrzeba YAML `power-flow-card-plus`, czujnika szablonowego ani `config-template-card`.
 
-## Co jest wyświetlane
+## Widok
 
-| Węzeł        | Pokazuje                                                                       | Odczytane z                                  |
-| ------------ | ------------------------------------------------------------------------------ | -------------------------------------------- |
-| **Sieć**     | Moc dostarczana przez ładowarkę. Podczas awarii: **Awaria** i czas jej trwania | Moc ładowarki, stan sieci, czas awarii       |
-| **Bateria**  | Moc ładowania lub rozładowania, stan naładowania                               | Moc baterii, SoC baterii                     |
-| **Akwarium** | Pobór sprzętu (sieć i bateria razem), a pod nim pozostały czas pracy           | Obliczane przez kartę przepływów, czas pracy |
-| **Pompy**    | Prędkość w %, kierunek pompy falującej, ikona zależna od prędkości             | ReefWave, pompy ReefRun, pompy Aqua Medic    |
+Karta jest podzielona na 5 stref:
 
-- Moc ładowarki istnieje tylko z ładowarką Victron. Bez niej węzeł sieci pokazuje jedynie, czy sieć jest obecna, a węzeł akwarium pokazuje to, co oddaje bateria: nic przy zasilaniu z sieci, bo monitor baterii widzi tylko prąd baterii.
-- Kliknięcie węzła otwiera odpowiadającą mu encję.
-- Ikona `mdi:wrench-clock` otwiera zadania konserwacji urządzenia (test rozładowania baterii), jak w pozostałych widokach.
+1. Tytuł i konserwacja
+2. Sieć
+3. Bateria
+4. Akwarium
+5. Pompy
+
+<img src="../img/energybackup/energybackup_zones.png"/>
+
+Kliknięcie węzła otwiera odpowiadającą mu encję.
+
+## Tytuł i konserwacja
+
+<img src="../img/energybackup/zone_1.png"/>
+
+Nazwa urządzenia. Ikona `mdi:wrench-clock` otwiera zadania konserwacji urządzenia (test rozładowania baterii), jak w pozostałych widokach.
+
+## Sieć
+
+<img src="../img/energybackup/zone_2.png"/>
+
+Moc dostarczana przez ładowarkę. Podczas awarii: **Awaria** i czas jej trwania.
+
+Moc ładowarki istnieje tylko z ładowarką Victron. Bez niej węzeł sieci pokazuje jedynie, czy sieć jest obecna, a węzeł akwarium pokazuje to, co oddaje bateria: nic przy zasilaniu z sieci, bo monitor baterii widzi tylko prąd baterii.
+
+## Bateria
+
+<img src="../img/energybackup/zone_3.png"/>
+
+Moc ładowania lub rozładowania, stan naładowania.
+
+## Akwarium
+
+<img src="../img/energybackup/zone_4.png"/>
+
+Pobór sprzętu (sieć i bateria razem), a pod nim pozostały czas pracy.
 
 ## Pompy
+
+<img src="../img/energybackup/zone_5.png"/>
+
+Prędkość w %, kierunek pompy falującej, ikona zależna od prędkości. Każda pompa nosi swoją nazwę z Home Assistant; w przypadku pompy ReefRun nazwę nadaną samej pompie. Kanał ReefRun, do którego nic nie jest podłączone, jest pomijany.
 
 Pompy są wyszukiwane wśród ReefWave, pomp ReefRun i pomp Aqua Medic w instalacji. Domyślnie przepływ pokazuje te, którymi steruje usługa zasilania awaryjnego (publikuje ich listę: pompa dodana lub usunięta przez `configure.py` pojawia się po restarcie usługi). Gdy usługa nie publikuje listy, pokazywane są pierwsze pompy, które nadal odpowiadają, najpierw pompy falujące. Karta przepływów rysuje najwyżej cztery pompy: przy większej liczbie zaznacz te do pokazania w edytorze karty.
 

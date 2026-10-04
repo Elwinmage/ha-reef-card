@@ -16,20 +16,51 @@ I flussi sono disegnati da [Power Flow Card Plus](https://github.com/flixlix/pow
 
 I flussi sostituiscono quel pannello non appena la card è caricata. La sua configurazione è scritta dalla reef card: non servono YAML `power-flow-card-plus`, sensori template né `config-template-card`.
 
-## Cosa viene mostrato
+## La vista
 
-| Nodo         | Mostra                                                                                  | Letto da                                                      |
-| ------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **Rete**     | Potenza fornita dal caricatore. Durante un blackout: **Blackout** e la sua durata       | Potenza del caricatore, stato della rete, durata del blackout |
-| **Batteria** | Potenza di carica o scarica, stato di carica                                            | Potenza della batteria, SoC della batteria                    |
-| **Acquario** | Ciò che consuma l'attrezzatura (rete e batteria insieme), con l'autonomia residua sotto | Calcolato dalla card dei flussi, autonomia                    |
-| **Pompe**    | Velocità in %, verso di una pompa di movimento, icona che segue la velocità             | ReefWave, pompe ReefRun, pompe Aqua Medic                     |
+La card è divisa in 5 zone:
 
-- La potenza del caricatore esiste solo con un caricatore Victron. Senza, il nodo rete indica solo se la rete è presente, e il nodo acquario mostra ciò che fornisce la batteria: nulla con la rete, perché il monitor della batteria vede solo la corrente della batteria.
-- Un clic su un nodo apre l'entità corrispondente.
-- L'icona `mdi:wrench-clock` apre le attività di manutenzione del dispositivo (il test di scarica della batteria), come nelle altre viste.
+1. Titolo e manutenzione
+2. Rete
+3. Batteria
+4. Acquario
+5. Pompe
+
+<img src="../img/energybackup/energybackup_zones.png"/>
+
+Un clic su un nodo apre l'entità corrispondente.
+
+## Titolo e manutenzione
+
+<img src="../img/energybackup/zone_1.png"/>
+
+Il nome del dispositivo. L'icona `mdi:wrench-clock` apre le attività di manutenzione del dispositivo (il test di scarica della batteria), come nelle altre viste.
+
+## Rete
+
+<img src="../img/energybackup/zone_2.png"/>
+
+Potenza fornita dal caricatore. Durante un blackout: **Blackout** e la sua durata.
+
+La potenza del caricatore esiste solo con un caricatore Victron. Senza, il nodo rete indica solo se la rete è presente, e il nodo acquario mostra ciò che fornisce la batteria: nulla con la rete, perché il monitor della batteria vede solo la corrente della batteria.
+
+## Batteria
+
+<img src="../img/energybackup/zone_3.png"/>
+
+Potenza di carica o scarica, stato di carica.
+
+## Acquario
+
+<img src="../img/energybackup/zone_4.png"/>
+
+Ciò che consuma l'attrezzatura (rete e batteria insieme), con l'autonomia residua sotto.
 
 ## Pompe
+
+<img src="../img/energybackup/zone_5.png"/>
+
+Velocità in %, verso di una pompa di movimento, icona che segue la velocità. Ogni pompa porta il suo nome in Home Assistant; per una pompa ReefRun, il nome dato alla pompa stessa. Il canale di un ReefRun a cui non è collegato nulla non viene mostrato.
 
 Le pompe vengono cercate tra i ReefWave, le pompe ReefRun e le pompe Aqua Medic dell'impianto. Per impostazione predefinita il flusso mostra quelle pilotate dal servizio di backup (ne pubblica l'elenco: una pompa aggiunta o rimossa con `configure.py` segue dopo un riavvio del servizio). Se il servizio non pubblica l'elenco, vengono mostrate le prime pompe che rispondono ancora, prima le pompe di movimento. La card dei flussi disegna al massimo quattro pompe: se sono di più, spuntare quelle da mostrare nell'editor della card.
 

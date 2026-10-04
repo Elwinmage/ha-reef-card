@@ -110,6 +110,15 @@ ZONE_SETS = {
         [(288, 132, 448, 342), (22, 454, 569, 592)],
         (12, 602, 579, 764),  # 4 time-slot program
     ],
+    # 510x427 energy backup render (Power Flow Card Plus, four pumps)
+    "energybackup": [
+        (10, 8, 500, 60),  # 1 title and maintenance shortcut
+        (14, 190, 112, 302),  # 2 mains
+        (140, 296, 240, 414),  # 3 battery
+        (274, 190, 374, 292),  # 4 aquarium
+        # 5 pumps: above and below the aquarium
+        [(270, 68, 500, 172), (270, 298, 500, 414)],
+    ],
 }
 DEFAULT_DEVICE = "rsrun"
 
@@ -120,6 +129,7 @@ ZONE_SIZES = {
     "rsled": (591, 860),
     "rswave": (688, 800),
     "aquamedic": (591, 768),
+    "energybackup": (510, 427),
 }
 
 BADGE_RADIUS = 13

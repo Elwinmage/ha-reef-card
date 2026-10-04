@@ -70,7 +70,7 @@ Projekty ReefTech uzupełniają się: integracje wprowadzają sprzęt do Home As
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/icon.png" width="64" alt="ha-reef-card" /></td>
     <td>🪸<br /><b>ha-reef-card</b><br /><i>(to repozytorium)</i></td>
-    <td>Interaktywny widok graficzny każdego urządzenia na pulpicie i jedyny sposób edycji zaawansowanych harmonogramów. Odczytuje trzy integracje przez wspólny kontrakt <code>reef_role</code>, bez konfiguracji po stronie karty.</td>
+    <td>Interaktywny widok graficzny każdego urządzenia na pulpicie i jedyny sposób edycji zaawansowanych harmonogramów. Odczytuje trzy integracje przez wspólny kontrakt <code>reef_role</code>, bez konfiguracji po stronie karty. Rysuje też przepływy energii z reefbeatEnergyBackup.</td>
     <td>wszystkie trzy integracje</td>
   </tr>
   <tr>
@@ -83,7 +83,7 @@ Projekty ReefTech uzupełniają się: integracje wprowadzają sprzęt do Home As
     <td><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64" alt="reefbeatEnergyBackup" /></td>
     <td>⚡<br /><a href="https://github.com/Elwinmage/reefbeatEnergyBackup"><b>reefbeatEnergyBackup</b></a></td>
     <td>Zasilanie awaryjne na wypadek przerw w zasilaniu. Pakiet 24V LiFePO₄ sterowany przez Raspberry Pi, ze stopniowym obniżaniem prędkości pomp zależnie od stanu naładowania.</td>
-    <td>samodzielnie lub razem z ha-reefbeat-component</td>
+    <td>samodzielnie lub razem z ha-reefbeat-component i ha-reef-card</td>
   </tr>
 </table>
 
@@ -226,7 +226,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/energybackup.pl.md#zasilanie-awaryjne">Zasilanie awaryjne</a></td>
-    <td>Energy Backup System<br />(bateria awaryjna)</td><td>🧪</td>
+    <td>Energy Backup System<br />(bateria awaryjna)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:enhancement" style="text-decoration:none">📆</a>

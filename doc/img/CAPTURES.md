@@ -36,8 +36,17 @@ capture of the whole card, once the rectangles of the device are filled in its
 
 ## energybackup
 
-| File                        | Section              |
-| --------------------------- | -------------------- |
-| `energybackup/overview.png` | Energy backup        |
-| `energybackup/install.png`  | Power Flow Card Plus |
-| `energybackup/editor.png`   | Pumps                |
+`energybackup_zones.png` is drawn with `--device energybackup` over
+`overview.png`.
+
+| File                                  | Section               |
+| ------------------------------------- | --------------------- |
+| `energybackup/overview.png`           | Energy backup         |
+| `energybackup/install.png`            | Power Flow Card Plus  |
+| `energybackup/energybackup_zones.png` | The view              |
+| `energybackup/zone_1.png`             | Title and maintenance |
+| `energybackup/zone_2.png`             | Mains                 |
+| `energybackup/zone_3.png`             | Battery               |
+| `energybackup/zone_4.png`             | Aquarium              |
+| `energybackup/zone_5.png`             | Pumps                 |
+| `energybackup/editor.png`             | Pumps                 |

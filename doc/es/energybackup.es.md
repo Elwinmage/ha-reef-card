@@ -16,20 +16,51 @@ Los flujos los dibuja [Power Flow Card Plus](https://github.com/flixlix/power-fl
 
 Los flujos sustituyen a ese panel en cuanto la tarjeta está cargada. Su configuración la escribe la reef card: no hace falta YAML de `power-flow-card-plus`, ni sensor de plantilla, ni `config-template-card`.
 
-## Qué se muestra
+## La vista
 
-| Nodo        | Muestra                                                                           | Leído de                                                    |
-| ----------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| **Red**     | Potencia entregada por el cargador. Durante un corte: **Corte** y su duración     | Potencia del cargador, estado de la red, duración del corte |
-| **Batería** | Potencia de carga o descarga, estado de carga                                     | Potencia de la batería, SoC de la batería                   |
-| **Acuario** | Lo que consume el equipo (red y batería juntas), con la autonomía restante debajo | Calculado por la tarjeta de flujos, autonomía               |
-| **Bombas**  | Velocidad en %, sentido de una bomba de olas, icono según la velocidad            | ReefWave, bombas ReefRun, bombas Aqua Medic                 |
+La tarjeta se divide en 5 zonas:
 
-- La potencia del cargador solo existe con un cargador Victron. Sin ella, el nodo de red solo indica si hay red, y el nodo acuario muestra lo que entrega la batería: nada con red, ya que el monitor de batería solo ve la corriente de la batería.
-- Un clic en un nodo abre la entidad correspondiente.
-- El icono `mdi:wrench-clock` abre las tareas de mantenimiento del dispositivo (la prueba de descarga de la batería), como en las demás vistas.
+1. Título y mantenimiento
+2. Red
+3. Batería
+4. Acuario
+5. Bombas
+
+<img src="../img/energybackup/energybackup_zones.png"/>
+
+Un clic en un nodo abre la entidad correspondiente.
+
+## Título y mantenimiento
+
+<img src="../img/energybackup/zone_1.png"/>
+
+El nombre del dispositivo. El icono `mdi:wrench-clock` abre las tareas de mantenimiento del dispositivo (la prueba de descarga de la batería), como en las demás vistas.
+
+## Red
+
+<img src="../img/energybackup/zone_2.png"/>
+
+Potencia entregada por el cargador. Durante un corte: **Corte** y su duración.
+
+La potencia del cargador solo existe con un cargador Victron. Sin ella, el nodo de red solo indica si hay red, y el nodo acuario muestra lo que entrega la batería: nada con red, ya que el monitor de batería solo ve la corriente de la batería.
+
+## Batería
+
+<img src="../img/energybackup/zone_3.png"/>
+
+Potencia de carga o descarga, estado de carga.
+
+## Acuario
+
+<img src="../img/energybackup/zone_4.png"/>
+
+Lo que consume el equipo (red y batería juntas), con la autonomía restante debajo.
 
 ## Bombas
+
+<img src="../img/energybackup/zone_5.png"/>
+
+Velocidad en %, sentido de una bomba de olas, icono según la velocidad. Cada bomba lleva su nombre en Home Assistant; para una bomba ReefRun, el nombre dado a la propia bomba. El canal de un ReefRun sin nada conectado no se muestra.
 
 Las bombas se buscan entre los ReefWave, las bombas ReefRun y las bombas Aqua Medic de la instalación. Por defecto el flujo muestra las que controla el servicio de respaldo (publica su lista: una bomba añadida o retirada con `configure.py` se actualiza tras reiniciar el servicio). Si el servicio no publica la lista, se muestran las primeras bombas que aún responden, primero las bombas de olas. La tarjeta de flujos dibuja cuatro bombas como máximo: con más, marque las que mostrar en el editor de la tarjeta.
 

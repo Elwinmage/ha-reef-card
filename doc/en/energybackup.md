@@ -16,20 +16,51 @@ The flows are drawn by [Power Flow Card Plus](https://github.com/flixlix/power-f
 
 The flows replace that panel as soon as the card is loaded. Its configuration is written by the reef card: no `power-flow-card-plus` YAML, no template sensor and no `config-template-card` are needed.
 
-## What is displayed
+## The view
 
-| Node         | Shows                                                                                   | Read from                                   |
-| ------------ | --------------------------------------------------------------------------------------- | ------------------------------------------- |
-| **Mains**    | Power delivered by the charger. During an outage: **Outage** and how long it has lasted | Charger power, mains state, outage duration |
-| **Battery**  | Charge or discharge power, state of charge                                              | Battery power, battery state of charge      |
-| **Aquarium** | What the equipment draws (mains and battery together), with the runtime left under it   | Computed by the flow card, runtime          |
-| **Pumps**    | Speed in %, direction of a wave pump, icon following the speed                          | ReefWave, ReefRun pumps, Aqua Medic pumps   |
+The card is divided into 5 zones:
 
-- The charger power only exists with a Victron charger. Without it the mains node only tells whether the mains is there, and the aquarium node shows what the battery gives: nothing while on mains, since the battery monitor only sees the battery current.
-- A click on a node opens the entity behind it.
-- The `mdi:wrench-clock` icon opens the maintenance tasks of the device (the battery discharge test), as on every other view.
+1. Title and maintenance
+2. Mains
+3. Battery
+4. Aquarium
+5. Pumps
+
+<img src="../img/energybackup/energybackup_zones.png"/>
+
+A click on a node opens the entity behind it.
+
+## Title and maintenance
+
+<img src="../img/energybackup/zone_1.png"/>
+
+The name of the device. The `mdi:wrench-clock` icon opens the maintenance tasks of the device (the battery discharge test), as on every other view.
+
+## Mains
+
+<img src="../img/energybackup/zone_2.png"/>
+
+Power delivered by the charger. During an outage: **Outage** and how long it has lasted.
+
+The charger power only exists with a Victron charger. Without it the mains node only tells whether the mains is there, and the aquarium node shows what the battery gives: nothing while on mains, since the battery monitor only sees the battery current.
+
+## Battery
+
+<img src="../img/energybackup/zone_3.png"/>
+
+Charge or discharge power, state of charge.
+
+## Aquarium
+
+<img src="../img/energybackup/zone_4.png"/>
+
+What the equipment draws (mains and battery together), with the runtime left under it.
 
 ## Pumps
+
+<img src="../img/energybackup/zone_5.png"/>
+
+Speed in %, direction of a wave pump, icon following the speed. Each pump carries its name in Home Assistant; for a ReefRun pump, the name given to the pump itself. The channel of a ReefRun nothing is plugged on is left out.
 
 The pumps are found among the ReefWave, the ReefRun pumps and the Aqua Medic pumps of the installation. By default the flow shows the ones the energy backup service drives (it publishes their list, so a pump added or removed with `configure.py` follows after a restart of the service). When the service does not publish the list, the first pumps that still respond are shown, wave pumps first. The flow card draws four pumps at most: with more, tick the ones to show in the card editor.
 
