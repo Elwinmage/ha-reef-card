@@ -33,3 +33,11 @@ capture of the whole card, once the rectangles of the device are filled in its
 | ------------------------------- | ------------------- |
 | `aquamedic/role_picker.png`     | Aqua Medic          |
 | `aquamedic/schedule_editor.png` | Editing the program |
+
+## energybackup
+
+| File                        | Section              |
+| --------------------------- | -------------------- |
+| `energybackup/overview.png` | Energy backup        |
+| `energybackup/install.png`  | Power Flow Card Plus |
+| `energybackup/editor.png`   | Pumps                |

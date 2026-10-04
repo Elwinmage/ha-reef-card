@@ -416,5 +416,21 @@
   "led_library_rename": "Umbenennen",
   "led_library_rename_failed": "Umbenennen fehlgeschlagen",
   "wave_rename": "Welle umbenennen (mit Aktualisieren gespeichert)",
-  "led_par_hint": "Geschätzter PAR an der Wasseroberfläche, unter der Leuchte in empfohlener Höhe"
+  "led_par_hint": "Geschätzter PAR an der Wasseroberfläche, unter der Leuchte in empfohlener Höhe",
+  "energy_backup_flow_card_missing": "Power Flow Card Plus wird benötigt, um die Energieflüsse darzustellen, und ist nicht installiert.",
+  "energy_backup_flow_card_install": "Mit HACS installieren",
+  "energy_backup_flow_card_page": "Projektseite",
+  "energy_backup_no_entity": "Der Batterieleistungssensor dieses Geräts wurde nicht gefunden.",
+  "energy_backup_battery": "Batterie",
+  "energy_backup_aquarium": "Aquarium",
+  "energy_backup_mains": "Netz",
+  "energy_backup_outage": "Stromausfall",
+  "energy_backup_gyre": "Gyre",
+  "energy_backup_return": "Rückförderung",
+  "energy_backup_skimmer": "Abschäumer",
+  "energy_backup_pump": "Pumpe",
+  "energy_backup_pumps": "Im Fluss angezeigte Pumpen (höchstens vier)",
+  "energy_backup_pumps_hint": "Keine Auswahl: Es werden die vom Notstromdienst gesteuerten Pumpen angezeigt (oder, wenn er sie nicht auflistet, die ersten vier, die antworten).",
+  "energy_backup_pumps_auto": "Zurück zur automatischen Auswahl",
+  "energy_backup_no_pump": "Keine Pumpe für den Fluss gefunden."
 }

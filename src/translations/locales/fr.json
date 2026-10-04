@@ -416,5 +416,21 @@
   "led_library_rename": "Renommer",
   "led_library_rename_failed": "Le renommage a échoué",
   "wave_rename": "Renommer la vague (enregistré avec Mettre à jour)",
-  "led_par_hint": "PAR estimé à la surface de l'eau, sous la lampe à sa hauteur recommandée"
+  "led_par_hint": "PAR estimé à la surface de l'eau, sous la lampe à sa hauteur recommandée",
+  "energy_backup_flow_card_missing": "Power Flow Card Plus est nécessaire pour dessiner les flux d'énergie, et n'est pas installée.",
+  "energy_backup_flow_card_install": "L'installer avec HACS",
+  "energy_backup_flow_card_page": "Page du projet",
+  "energy_backup_no_entity": "Le capteur de puissance batterie de cet appareil est introuvable.",
+  "energy_backup_battery": "Batterie",
+  "energy_backup_aquarium": "Aquarium",
+  "energy_backup_mains": "Secteur",
+  "energy_backup_outage": "Coupure",
+  "energy_backup_gyre": "Gyre",
+  "energy_backup_return": "Remontée",
+  "energy_backup_skimmer": "Écumeur",
+  "energy_backup_pump": "Pompe",
+  "energy_backup_pumps": "Pompes affichées dans le flux (quatre au plus)",
+  "energy_backup_pumps_hint": "Aucun choix : les pompes pilotées par le service de secours sont affichées (ou, s'il ne les liste pas, les quatre premières qui répondent).",
+  "energy_backup_pumps_auto": "Revenir à la sélection automatique",
+  "energy_backup_no_pump": "Aucune pompe à afficher dans le flux."
 }

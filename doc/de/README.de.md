@@ -34,6 +34,8 @@ ergänzt die Wartungsansicht um Geräte, mit denen Home Assistant nicht sprechen
 Sie unterstützt auch die Aqua-Medic-Pumpen von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
 ihre Wartungsaufgaben erscheinen in derselben Ansicht.
 
+Auch die Energieflüsse von [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (Netz, Batterie, Pumpen) haben ihre eigene Ansicht, gezeichnet mit [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
 <!-- ecosystem:start -->
 
 ## Verwandte Projekte
@@ -219,6 +221,18 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
     <td>DC Runner<br />(Abschäumerpumpe)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
+  <tr>
+    <td colspan="5"><b>reefbeatEnergyBackup</b> — über <a href="https://github.com/Elwinmage/reefbeatEnergyBackup">reefbeatEnergyBackup</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/energybackup.de.md#notstromversorgung">Notstromversorgung</a></td>
+    <td>Energy Backup System<br />(Notstrombatterie)</td><td>🧪</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -238,6 +252,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefwave.de.md#reefwave)
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/aquamedic.de.md#aqua-medic)
 - [Wartung](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/maintenance.de.md#wartung)
+- [Notstromversorgung](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/energybackup.de.md#notstromversorgung)
 - [FAQ](#faq)
 
 # Installation

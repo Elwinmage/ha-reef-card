@@ -416,5 +416,21 @@
   "led_library_rename": "Rename",
   "led_library_rename_failed": "Renaming failed",
   "wave_rename": "Rename the wave (saved with Update)",
-  "led_par_hint": "Estimated PAR at the water surface, under the lamp at its recommended height"
+  "led_par_hint": "Estimated PAR at the water surface, under the lamp at its recommended height",
+  "energy_backup_flow_card_missing": "Power Flow Card Plus is needed to draw the power flows, and it is not installed.",
+  "energy_backup_flow_card_install": "Install it with HACS",
+  "energy_backup_flow_card_page": "Project page",
+  "energy_backup_no_entity": "The battery power sensor of this device was not found.",
+  "energy_backup_battery": "Battery",
+  "energy_backup_aquarium": "Aquarium",
+  "energy_backup_mains": "Mains",
+  "energy_backup_outage": "Outage",
+  "energy_backup_gyre": "Gyre",
+  "energy_backup_return": "Return",
+  "energy_backup_skimmer": "Skimmer",
+  "energy_backup_pump": "Pump",
+  "energy_backup_pumps": "Pumps shown in the flow (four at most)",
+  "energy_backup_pumps_hint": "Nothing picked: the pumps driven by the energy backup service are shown (or, when it does not list them, the first four that respond).",
+  "energy_backup_pumps_auto": "Back to the automatic selection",
+  "energy_backup_no_pump": "No pump found to show in the flow."
 }

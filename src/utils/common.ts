@@ -177,6 +177,12 @@ export default class DeviceList {
       const domain = KNOWN_DEVICE_DOMAINS[dev_id[0]];
       if (!domain) continue;
 
+      // A domain shared with unrelated devices (mqtt) only keeps the ones
+      // publishing a known model_id.
+      if (domain.model_ids && !known_model_id(domain.model_ids, dev.model_id)) {
+        continue;
+      }
+
       // Get only main device, not sub or cloud
       const is_sub_device = (domain.sub_device_markers ?? []).some((marker) =>
         dev_id[1].includes(marker),
@@ -231,6 +237,23 @@ export default class DeviceList {
     }
     this.main_devices.sort(this.device_compare);
   }
+}
+
+/**
+ * Tell whether a `model_id` is one a domain declares (see
+ * KnownDeviceDomain.model_ids).
+ * @param model_ids: the `model_ids` table of the domain
+ * @param model_id: the `model_id` of a hass device
+ * @return true when the device is one of ours
+ */
+function known_model_id(
+  model_ids: Record<string, string>,
+  model_id: unknown,
+): model_id is string {
+  return (
+    typeof model_id === "string" &&
+    Object.prototype.hasOwnProperty.call(model_ids, model_id)
+  );
 }
 
 /**
@@ -333,6 +356,8 @@ function find_role_entity_id(
  * @param device: the DeviceInfo of the selected device
  * @param domain: the integration domain (ex: "aquamedic")
  * @param model: the raw model as reported by the integration
+ * A domain that tells its devices apart by `model_id` (see
+ * KnownDeviceDomain.model_ids) resolves to the model declared for it.
  * @return the concrete model to build a tag for; the raw model when the
  *         domain declares no override for it, or the role is not (yet) set
  */
@@ -342,6 +367,14 @@ export function resolve_device_model(
   domain: string | undefined,
   model: string,
 ): string {
+  // A domain telling its devices apart by model_id names their view too
+  const model_ids = domain
+    ? KNOWN_DEVICE_DOMAINS[domain]?.model_ids
+    : undefined;
+  const model_id = device?.elements?.[0]?.model_id;
+  if (model_ids && known_model_id(model_ids, model_id)) {
+    return model_ids[model_id] as string;
+  }
   const found = ambiguous_model_of(hass, device, domain, model);
   if (!found?.role) return model;
   return found.override.role_to_model[found.role] ?? model;

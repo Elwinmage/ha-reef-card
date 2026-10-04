@@ -416,5 +416,21 @@
   "led_library_rename": "Zmień nazwę",
   "led_library_rename_failed": "Zmiana nazwy nie powiodła się",
   "wave_rename": "Zmień nazwę fali (zapis przez Aktualizuj)",
-  "led_par_hint": "Szacowany PAR na powierzchni wody, pod lampą na zalecanej wysokości"
+  "led_par_hint": "Szacowany PAR na powierzchni wody, pod lampą na zalecanej wysokości",
+  "energy_backup_flow_card_missing": "Karta Power Flow Card Plus jest potrzebna do rysowania przepływów energii i nie jest zainstalowana.",
+  "energy_backup_flow_card_install": "Zainstaluj przez HACS",
+  "energy_backup_flow_card_page": "Strona projektu",
+  "energy_backup_no_entity": "Nie znaleziono czujnika mocy baterii tego urządzenia.",
+  "energy_backup_battery": "Bateria",
+  "energy_backup_aquarium": "Akwarium",
+  "energy_backup_mains": "Sieć",
+  "energy_backup_outage": "Awaria",
+  "energy_backup_gyre": "Gyre",
+  "energy_backup_return": "Powrót",
+  "energy_backup_skimmer": "Odpieniacz",
+  "energy_backup_pump": "Pompa",
+  "energy_backup_pumps": "Pompy pokazane w przepływie (najwyżej cztery)",
+  "energy_backup_pumps_hint": "Brak wyboru: pokazywane są pompy sterowane przez usługę zasilania awaryjnego (lub, gdy ich nie podaje, cztery pierwsze, które odpowiadają).",
+  "energy_backup_pumps_auto": "Wróć do wyboru automatycznego",
+  "energy_backup_no_pump": "Nie znaleziono pompy do pokazania w przepływie."
 }

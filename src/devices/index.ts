@@ -52,6 +52,7 @@ import { AMCapRing, AMFaults, AMFlow, AMSchedule } from "./aquamedic/common";
 import { AMSmartDrift } from "./aquamedic/smartdrift";
 import { AMDCRunner } from "./aquamedic/dcrunner";
 import { AMDCSkimmer } from "./aquamedic/dcskimmer";
+import { EnergyBackup } from "./reefbeat/energybackup";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -158,6 +159,8 @@ if (!customElements.get("aquamedic-dcrunner"))
   customElements.define("aquamedic-dcrunner", AMDCRunner);
 if (!customElements.get("aquamedic-dcskimmer"))
   customElements.define("aquamedic-dcskimmer", AMDCSkimmer);
+if (!customElements.get("reefbeat-energybackup"))
+  customElements.define("reefbeat-energybackup", EnergyBackup);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -206,3 +209,4 @@ export { AMCapRing, AMFaults, AMFlow, AMSchedule } from "./aquamedic/common";
 export { AMSmartDrift } from "./aquamedic/smartdrift";
 export { AMDCRunner } from "./aquamedic/dcrunner";
 export { AMDCSkimmer } from "./aquamedic/dcskimmer";
+export { EnergyBackup } from "./reefbeat/energybackup";

@@ -34,6 +34,8 @@ adds the equipment Home Assistant cannot talk to to the maintenance view.
 It also supports the Aqua Medic pumps of [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
 their maintenance tasks show up in that same view.
 
+The power flows of [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (mains, battery, pumps) get their own view too, drawn with [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
 <!-- ecosystem:start -->
 
 ## Related projects
@@ -226,6 +228,18 @@ All of them are documented together on the [ReefTech project page](https://elwin
     <td>DC Runner<br />(skimmer pump)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
+  <tr>
+    <td colspan="5"><b>reefbeatEnergyBackup</b> — through <a href="https://github.com/Elwinmage/reefbeatEnergyBackup">reefbeatEnergyBackup</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/energybackup.md#energy-backup">Energy backup</a></td>
+    <td>Energy Backup System<br />(battery backup)</td><td>🧪</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -245,6 +259,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefwave.md#reefwave)
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/aquamedic.md#aqua-medic)
 - [Maintenance](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/maintenance.md#maintenance)
+- [Energy backup](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/energybackup.md#energy-backup)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation

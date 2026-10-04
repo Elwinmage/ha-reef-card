@@ -34,6 +34,8 @@ widoku konserwacji sprzęt, z którym Home Assistant nie potrafi się porozumie�
 Obsługuje także pompy Aqua Medic z [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
 ich zadania konserwacyjne pojawiają się w tym samym widoku.
 
+Przepływy energii z [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (sieć, bateria, pompy) także mają swój widok, rysowany przez [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
 <!-- ecosystem:start -->
 
 ## Powiązane projekty
@@ -219,6 +221,18 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
     <td>DC Runner<br />(pompa odpieniacza)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
   </tr>
+  <tr>
+    <td colspan="5"><b>reefbeatEnergyBackup</b> — przez <a href="https://github.com/Elwinmage/reefbeatEnergyBackup">reefbeatEnergyBackup</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/energybackup.pl.md#zasilanie-awaryjne">Zasilanie awaryjne</a></td>
+    <td>Energy Backup System<br />(bateria awaryjna)</td><td>🧪</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -238,6 +252,7 @@ Wszystkie są udokumentowane razem na [stronie projektu ReefTech](https://elwinm
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/reefwave.pl.md#reefwave)
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/aquamedic.pl.md#aqua-medic)
 - [Konserwacja](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/maintenance.pl.md#konserwacja)
+- [Zasilanie awaryjne](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pl/energybackup.pl.md#zasilanie-awaryjne)
 - [FAQ](#faq)
 
 # Instalacja

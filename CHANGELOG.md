@@ -2,6 +2,31 @@
 
 ## MODIFICATIONS
 
+### Energy backup (reefbeatEnergyBackup)
+
+- New view for the [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup)
+  service: its device is detected among the MQTT devices through the
+  `model_id` it publishes, and offered in the device selector like any
+  other device.
+- The view draws the power flows (mains, battery, aquarium and up to four
+  pumps) with [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus),
+  which it embeds and configures by itself: sensors are found by their
+  `reef_role` (or by their entity id on a service that does not publish it
+  yet), pumps among the ReefWave, ReefRun and Aqua Medic devices. No
+  template sensor nor `config-template-card` is needed.
+- When Power Flow Card Plus is not installed, the view shows a link opening
+  it in HACS instead, and draws the flows as soon as the card is loaded.
+- Pumps shown by default: the ones the service drives, read from the
+  `controllers` attribute of its pump intensity sensor, so a pump added or
+  removed on the service side follows. A service that does not publish the
+  list gets the first pumps that still report a speed: a device left in
+  Home Assistant after its hardware died no longer takes a slot.
+- The channel of a ReefRun nothing is plugged on (`missing_pump`, or a
+  type still `unknown`) is left out of the flow.
+- The card editor picks the pumps shown in the flow (`pumps`, four at most).
+- `KNOWN_DEVICE_DOMAINS` gains `model_ids`, for a domain shared with
+  unrelated devices (`mqtt`).
+
 ### Configuration survives a device rename
 
 - The options of a device are stored under its stable identifier (the id

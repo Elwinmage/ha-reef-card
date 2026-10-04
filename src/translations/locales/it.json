@@ -416,5 +416,21 @@
   "led_library_rename": "Rinomina",
   "led_library_rename_failed": "Rinomina non riuscita",
   "wave_rename": "Rinomina l'onda (salvata con Aggiorna)",
-  "led_par_hint": "PAR stimato alla superficie dell'acqua, sotto la lampada all'altezza consigliata"
+  "led_par_hint": "PAR stimato alla superficie dell'acqua, sotto la lampada all'altezza consigliata",
+  "energy_backup_flow_card_missing": "Power Flow Card Plus è necessaria per disegnare i flussi di energia e non è installata.",
+  "energy_backup_flow_card_install": "Installarla con HACS",
+  "energy_backup_flow_card_page": "Pagina del progetto",
+  "energy_backup_no_entity": "Il sensore di potenza della batteria di questo dispositivo non è stato trovato.",
+  "energy_backup_battery": "Batteria",
+  "energy_backup_aquarium": "Acquario",
+  "energy_backup_mains": "Rete",
+  "energy_backup_outage": "Blackout",
+  "energy_backup_gyre": "Gyre",
+  "energy_backup_return": "Risalita",
+  "energy_backup_skimmer": "Schiumatoio",
+  "energy_backup_pump": "Pompa",
+  "energy_backup_pumps": "Pompe mostrate nel flusso (quattro al massimo)",
+  "energy_backup_pumps_hint": "Nessuna scelta: vengono mostrate le pompe pilotate dal servizio di backup (o, se non le elenca, le prime quattro che rispondono).",
+  "energy_backup_pumps_auto": "Torna alla selezione automatica",
+  "energy_backup_no_pump": "Nessuna pompa da mostrare nel flusso."
 }
