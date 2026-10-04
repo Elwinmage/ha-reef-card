@@ -25,6 +25,36 @@ import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "./constants";
 //----------------------------------------------------------------------------//
 
 /**
+ * Find the selectable device a card configuration designates.
+ *
+ * The `device` option holds the stable id of the device (see
+ * DeviceInfo.uid) since the editor writes it; older configurations hold
+ * its display name, and a hand written one may hold its selector key.
+ * The stable id wins, so renaming a device after another one cannot
+ * hijack a configuration.
+ * @param main_devices: the selectable devices (DeviceList.main_devices)
+ * @param selector: the value of the `device` option
+ * @return the matching entry, or undefined
+ */
+export function find_main_device(
+  main_devices: MainDevice[] | null | undefined,
+  selector: unknown,
+): MainDevice | undefined {
+  if (
+    !Array.isArray(main_devices) ||
+    typeof selector !== "string" ||
+    selector.length === 0
+  ) {
+    return undefined;
+  }
+  return (
+    main_devices.find((d) => d.uid === selector) ??
+    main_devices.find((d) => d.value === selector) ??
+    main_devices.find((d) => d.text === selector)
+  );
+}
+
+/**
  * Auto-detect Reefbeat devices created with ha-reefbeat-component and store them in a list.
  * Works also on disabled devices.
  */
@@ -75,6 +105,26 @@ export default class DeviceList {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Find the selectable device a card configuration designates
+   * (see find_main_device()).
+   * @param selector: the value of the `device` option
+   * @return the matching entry of main_devices, or undefined
+   */
+  find_main_device(selector: unknown): MainDevice | undefined {
+    return find_main_device(this.main_devices, selector);
+  }
+
+  /**
+   * Get the hass device a card configuration designates.
+   * @param selector: the value of the `device` option
+   * @return an hass device or undefined if not found
+   */
+  get_by_selector(selector: unknown): DeviceInfo | undefined {
+    const main = this.find_main_device(selector);
+    return main ? this.devices[main.value] : undefined;
   }
 
   /**
@@ -144,10 +194,16 @@ export default class DeviceList {
         ? dev.primary_config_entry
         : dev.id;
 
+      // What the integration registers the device under: its hardware id
+      // (Red Sea) or device id (Aqua Medic). A sub-device carries its own,
+      // derived from its parent's, so only a main device gives the uid.
+      const uid = is_sub_device ? undefined : String(dev_id[1]);
+
       if (!is_sub_device && !is_excluded_model) {
         this.main_devices.push({
           value: key,
           text: dev.name,
+          uid,
         });
       }
 
@@ -155,6 +211,7 @@ export default class DeviceList {
         this.devices[key] = {
           name: dev.name,
           key,
+          uid,
           elements: [dev],
         };
       } else {
@@ -164,6 +221,10 @@ export default class DeviceList {
           const device = this.devices[key];
           if (device) {
             device.name = dev.name;
+            // A sub-device may be listed before its main device
+            if (uid) {
+              device.uid = uid;
+            }
           }
         }
       }

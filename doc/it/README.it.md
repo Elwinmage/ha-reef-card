@@ -260,6 +260,8 @@ Senza il parametro `device`, la card rileva automaticamente tutti i dispositivi 
 
 Per rimuovere la selezione del dispositivo e forzarne uno specifico, impostate il parametro `device` con il nome del vostro dispositivo.
 
+L'editor della card vi salva l'identificativo stabile del dispositivo (il suo identificativo hardware) e conserva le opzioni di ogni dispositivo sotto lo stesso identificativo: rinominare un dispositivo in Home Assistant non fa perdere nulla. Una configurazione scritta con il nome del dispositivo continua a funzionare, e passa all'identificativo alla prossima modifica dall'editor.
+
 <table>
   <tr>
 <td><img src="../img/card_rsdose4_config_2.png"/></td>

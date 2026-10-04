@@ -251,11 +251,12 @@ As opções são guardadas sob o modelo tal como o Home Assistant o reporta:
 
 ```yaml
 type: custom:reef-card
-device: MY-RSPOWER
+device: "210987654321" # identificador estável do dispositivo (o nome também funciona)
 conf:
   RSPOWER6:
     devices:
-      MY-RSPOWER:
+      "210987654321":
+        name: MY-RSPOWER # apenas etiqueta
         compact_probes: false
         sockets:
           socket_1:

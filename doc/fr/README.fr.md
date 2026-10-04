@@ -260,6 +260,8 @@ Sans paramètre `device`, la carte détecte automatiquement tous les appareils R
 
 Pour supprimer la sélection d'appareil et forcer celui de votre choix, définissez le paramètre `device` avec le nom de votre appareil.
 
+L'éditeur de la carte y enregistre l'identifiant stable de l'appareil (son identifiant matériel) et range les options de chaque appareil sous ce même identifiant : renommer un appareil dans Home Assistant ne fait donc rien perdre. Une configuration écrite avec le nom de l'appareil continue de fonctionner, et passe à l'identifiant à la prochaine modification depuis l'éditeur.
+
 <table>
   <tr>
 <td><img src="../img/card_rsdose4_config_2.png"/></td>

@@ -11,7 +11,11 @@ import { property } from "lit/decorators.js";
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n";
-import DeviceList, { domain_of, resolve_device_model } from "./utils/common";
+import DeviceList, {
+  domain_of,
+  find_main_device,
+  resolve_device_model,
+} from "./utils/common";
 import { has_maintenance_entities } from "./utils/maintenance";
 import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
@@ -127,8 +131,7 @@ export class ReefCardEditor extends LitElement {
                   (option) => html`
                     <option
                       value="${option.value}"
-                      ?selected=${this._config.device === option.text ||
-                      this._config.device === option.value}
+                      ?selected=${this._is_selected(option)}
                     >
                       ${option.text}
                     </option>
@@ -143,6 +146,26 @@ export class ReefCardEditor extends LitElement {
     }
     //If not config, display nothing
     return html``;
+  }
+
+  /**
+   * Tell whether an entry of the device selector is the configured one.
+   * The `device` option holds a stable id, a display name (older
+   * configurations) or a selector key: the stable id wins, as in the card.
+   * @param option: an entry of the selector
+   * @return true when the card is configured on it
+   */
+  private _is_selected(option: SelectDevice): boolean {
+    const configured = this._config?.device;
+    if (!configured) {
+      return false;
+    }
+    const main = find_main_device(this.select_devices, configured);
+    if (main) {
+      return main.value === option.value;
+    }
+    // Not a device: the maintenance overview, or nothing known
+    return configured === option.value || configured === option.text;
   }
 
   /**
@@ -167,7 +190,10 @@ export class ReefCardEditor extends LitElement {
         this.current_device = maint;
         return html`${maint}`;
       }
-      const device = this.devices_list.get_by_name(this._config.device);
+      const main = find_main_device(this.select_devices, this._config.device);
+      const device = main
+        ? this.devices_list?.devices?.[main.value]
+        : undefined;
       if (!device) {
         return html``;
       }
@@ -231,7 +257,11 @@ export class ReefCardEditor extends LitElement {
       // Store the language independent id, not the translated label.
       newConfig.device = MAINTENANCE_DEVICE_ID;
     } else {
-      val = elt.options[elt.selectedIndex].text;
+      // The stable id of the device rather than its display name, so the
+      // card keeps showing it once renamed in Home Assistant. A device
+      // without one keeps being designated by its name.
+      const picked = find_main_device(this.select_devices, elt.value);
+      val = picked?.uid || elt.options[elt.selectedIndex].text;
       newConfig.device = val;
     }
     // Send config-changed mesage to force re-render

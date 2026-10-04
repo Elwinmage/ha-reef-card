@@ -811,9 +811,10 @@ export class RSMaintenance extends RSDevice {
 
   /**
    * Add/remove a device from the filter and persist the new list.
-   * The readable name is stored rather than the HA device id, so the YAML
-   * configuration stays understandable (the id is used as a fallback for
-   * unnamed devices).
+   * The Home Assistant device id is stored rather than the name, so the
+   * filter survives a rename (the name is the fallback for a task whose
+   * device is missing from the registry). Names written by hand or by an
+   * older version keep matching.
    * @param ref: the device toggled by the user
    * @param checked: the new state of the checkbox
    */
@@ -826,7 +827,7 @@ export class RSMaintenance extends RSDevice {
       (name) => name !== ref.id && name !== ref.name,
     );
     if (checked) {
-      next.push(ref.name || ref.id);
+      next.push(ref.id || ref.name);
     }
     this._update_option("devices", next);
   }

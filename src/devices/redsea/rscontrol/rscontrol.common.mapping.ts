@@ -441,8 +441,8 @@ export const widgets = {
   maintenance_tasks: maintenance_shortcut({
     flex: "0 0 auto",
     position: "absolute",
-    top: "6.8%",
-    right: "18%",
+    top: "1.8%",
+    right: "7%",
   }),
   buzzer: {
     name: "buzzer_active",

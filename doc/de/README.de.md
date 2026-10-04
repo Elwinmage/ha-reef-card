@@ -260,6 +260,8 @@ Ohne den Parameter `device` erkennt die Karte automatisch alle ReefBeat-Geräte 
 
 Um die Geräteauswahl zu entfernen und ein bestimmtes Gerät zu erzwingen, setzen Sie den Parameter `device` auf den Namen Ihres Geräts.
 
+Der Karteneditor speichert dort die stabile Kennung des Geräts (seine Hardware-ID) und legt die Optionen jedes Geräts unter derselben Kennung ab: Beim Umbenennen eines Geräts in Home Assistant geht also nichts verloren. Eine mit dem Gerätenamen geschriebene Konfiguration funktioniert weiterhin und wird bei der nächsten Änderung im Editor auf die Kennung umgestellt.
+
 <table>
   <tr>
 <td><img src="../img/card_rsdose4_config_2.png"/></td>

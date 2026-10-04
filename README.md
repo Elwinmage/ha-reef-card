@@ -267,6 +267,8 @@ Without the `device` parameter, the card automatically detects all ReefBeat devi
 
 To remove device selection and force a specific one, set the `device` parameter to the name of your device.
 
+The card editor stores the stable identifier of the device there (its hardware id), and keeps the options of each device under that same identifier, so renaming a device in Home Assistant loses nothing. A configuration written with the device name keeps working, and is moved to the identifier the next time it is changed from the editor.
+
 <table>
   <tr>
 <td><img src="doc/img/card_rsdose4_config_2.png"/></td>

@@ -108,7 +108,6 @@ describe("ReefCard maintenance selection", () => {
     const card = makeCard();
     card.user_config = { device: MAINTENANCE_DEVICE_ID };
     card._set_current_device = vi.fn();
-    card._set_current_device_from_name = vi.fn();
     card.current_device = { hass: null };
     card.first_init = false;
     card.re_render = true;
@@ -116,7 +115,8 @@ describe("ReefCard maintenance selection", () => {
     expect(card._set_current_device).toHaveBeenCalledWith(
       MAINTENANCE_DEVICE_ID,
     );
-    expect(card._set_current_device_from_name).not.toHaveBeenCalled();
+    // Called once, for the maintenance overview only: never as a device
+    expect(card._set_current_device).toHaveBeenCalledTimes(1);
   });
 
   it("marks the maintenance option as selected", () => {

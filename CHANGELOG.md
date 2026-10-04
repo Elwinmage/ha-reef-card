@@ -2,6 +2,29 @@
 
 ## MODIFICATIONS
 
+### Configuration survives a device rename
+
+- The options of a device are stored under its stable identifier (the id
+  its integration registers it with: the hardware id for Red Sea) instead
+  of its display name: `conf.<model>.devices.<id>`, with the name kept as a
+  `name` label. Renaming a device in Home Assistant no longer drops its
+  options, its ReefDose head colours or its ReefControl-Power socket links.
+- The `device` option of the card holds the same identifier when picked
+  from the editor.
+- Existing configurations keep working: options stored under a device name
+  are still read, and are moved to the identifier (together with a `device`
+  option naming that device) the next time the device is changed from the
+  editor.
+- The device filter of the maintenance overview stores Home Assistant
+  device ids; names already in a configuration keep matching.
+
+### Maintenance shortcut
+
+- Every device view carries a `mdi:wrench-clock` icon opening the
+  maintenance tasks of that device and its sub-devices. It turns orange when
+  a task is due soon, red and blinking when one is overdue, and hides on a
+  device without any task.
+
 ### AQUA MEDIC (views)
 
 - New views for the pumps of ha-aquamedic-component, replacing the

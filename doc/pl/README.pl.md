@@ -260,6 +260,8 @@ Bez parametru `device` karta automatycznie wykrywa wszystkie urządzenia ReefBea
 
 Aby usunąć wybór urządzenia i wymusić konkretne, ustaw parametr `device` na nazwę swojego urządzenia.
 
+Edytor karty zapisuje tam stały identyfikator urządzenia (jego identyfikator sprzętowy) i przechowuje opcje każdego urządzenia pod tym samym identyfikatorem: zmiana nazwy urządzenia w Home Assistant niczego nie usuwa. Konfiguracja zapisana z nazwą urządzenia nadal działa i przechodzi na identyfikator przy najbliższej zmianie w edytorze.
+
 <table>
   <tr>
 <td><img src="../img/card_rsdose4_config_2.png"/></td>

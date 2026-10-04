@@ -231,30 +231,16 @@ export class RSDose extends RSDevice {
     if (field === "color") {
       i_val = hexToRgb(i_val);
     }
-    const newVal = {
-      conf: {
-        [this.config.model]: {
-          devices: {
-            [this.device.name]: { heads: { [head]: { [field]: i_val } } },
-          },
-        },
-      },
-    };
-    let newConfig = JSON.parse(JSON.stringify(this.user_config));
-
-    try {
-      newConfig.conf[this.config.model].devices[this.device.name].heads[
-        changedEvent.target.head
-      ][field] = i_val;
-    } catch {
-      newConfig = merge(newConfig, newVal);
+    const target = this.writable_device_config();
+    if (!target) {
+      return;
     }
-    const messageEvent = new CustomEvent("config-changed", {
-      detail: { config: newConfig },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(messageEvent);
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    const entry = target.entry;
+    if (!is_map(entry.heads)) entry.heads = {};
+    if (!is_map(entry.heads[head])) entry.heads[head] = {};
+    entry.heads[head][field] = i_val;
+    this.fire_config_changed(target.config);
   } // end of function handleChangedEvent
 
   override renderEditor(): TemplateResult {

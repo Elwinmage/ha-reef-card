@@ -547,6 +547,105 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Key this device's options are stored under in the card configuration
+   * (conf > model > devices > key).
+   *
+   * The stable id of the device (see DeviceInfo.uid), so renaming it in
+   * Home Assistant keeps its options. A device without one (built by hand,
+   * not through DeviceList) falls back to its name, as before.
+   * @return the key, or "" when the device is unknown
+   */
+  config_device_key(): string {
+    return this.device?.uid || this.device?.name || "";
+  }
+
+  /**
+   * Read this device's options from the `devices` map of its model.
+   *
+   * Looked up under its stable id first; a configuration written before
+   * that id was used still holds them under the device name, and stays
+   * readable until the editor rewrites it (see writable_device_config()).
+   * @param devices: the `devices` map of the model, when there is one
+   * @return the options to merge, or null when the device has none
+   */
+  private device_config_entry(devices: any): any {
+    if (!devices || typeof devices !== "object" || !this.device) {
+      return null;
+    }
+    const uid = this.device.uid;
+    if (uid && devices[uid] && typeof devices[uid] === "object") {
+      // `name` only labels the entry for whoever reads the YAML: it is not
+      // an option of the device, and must not reach its mapping.
+      const { name: _label, ...options } = devices[uid];
+      return options;
+    }
+    const name = this.device.name;
+    if (name && devices[name] && typeof devices[name] === "object") {
+      return devices[name];
+    }
+    return null;
+  }
+
+  /**
+   * Copy of the card configuration ready to receive an option of this
+   * device, with the entry to write it in.
+   *
+   * Every device-level write goes through here, so they all agree on where
+   * the options live. The entry is stored under the stable id of the
+   * device; options still stored under its name are moved there on the
+   * way, and so is a `device` option pinning the card by name. The entry
+   * keeps the name as a label, refreshed on each write, so the YAML stays
+   * readable.
+   * @return the configuration and the device entry inside it, or null when
+   *         the device or its model is unknown
+   */
+  writable_device_config(): { config: any; entry: any } | null {
+    const model = this.config_model();
+    const key = this.config_device_key();
+    if (!model || !key) {
+      return null;
+    }
+    const config = JSON.parse(JSON.stringify(this.user_config ?? {}));
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    if (!is_map(config.conf)) config.conf = {};
+    if (!is_map(config.conf[model])) config.conf[model] = {};
+    if (!is_map(config.conf[model].devices)) config.conf[model].devices = {};
+    const devices = config.conf[model].devices;
+
+    const name = this.device?.name;
+    if (name && name !== key) {
+      // Options written before the stable id was used: move them over
+      if (!is_map(devices[key]) && is_map(devices[name])) {
+        devices[key] = devices[name];
+        delete devices[name];
+      }
+      // A card pinned to this device by its name follows it too
+      if (config.device === name) {
+        config.device = key;
+      }
+    }
+    if (!is_map(devices[key])) devices[key] = {};
+    if (name && name !== key) {
+      devices[key].name = name;
+    }
+    return { config, entry: devices[key] };
+  }
+
+  /**
+   * Tell the editor the card configuration changed.
+   * @param config: the new card configuration
+   */
+  protected fire_config_changed(config: any): void {
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  /**
    * Merge basic device onfiguraiton with user configuration for final configuration
    */
   update_config(): void {
@@ -564,14 +663,9 @@ export class RSDevice extends LitElement {
         }
 
         // Apply device-specific configuration
-        if (
-          "devices" in device_conf &&
-          this.device.name in device_conf.devices
-        ) {
-          this.config = merge(
-            this.config,
-            this.user_config.conf[model].devices[this.device.name],
-          );
+        const entry = this.device_config_entry(device_conf.devices);
+        if (entry) {
+          this.config = merge(this.config, entry);
         }
       }
     }
@@ -1089,29 +1183,12 @@ export class RSDevice extends LitElement {
    * @param value: the value to store
    */
   set_config_value(key: string, value: unknown): void {
-    const model = this.config_model();
-    const newVal = {
-      conf: {
-        [model]: {
-          devices: {
-            [this.device.name]: { [key]: value },
-          },
-        },
-      },
-    };
-    let newConfig = JSON.parse(JSON.stringify(this.user_config));
-    try {
-      newConfig.conf[model].devices[this.device.name][key] = value;
-    } catch {
-      newConfig = merge(newConfig, newVal);
+    const target = this.writable_device_config();
+    if (!target) {
+      return;
     }
-    this.dispatchEvent(
-      new CustomEvent("config-changed", {
-        detail: { config: newConfig },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    target.entry[key] = value;
+    this.fire_config_changed(target.config);
   }
 
   /**
@@ -1198,33 +1275,17 @@ export class RSDevice extends LitElement {
   }
 
   handleChangedDeviceEvent(changedEvent) {
-    const value = changedEvent.currentTarget.checked;
-    const model = this.config_model();
-    const newVal = {
-      conf: {
-        [model]: {
-          devices: {
-            [this.device.name]: {
-              elements: { [changedEvent.target.id]: { disabled_if: value } },
-            },
-          },
-        },
-      },
-    };
-    let newConfig = JSON.parse(JSON.stringify(this.user_config));
-    try {
-      newConfig.conf[model].devices[this.device.name].elements[
-        changedEvent.target.id
-      ].disabled_if = value;
-    } catch {
-      newConfig = merge(newConfig, newVal);
+    const target = this.writable_device_config();
+    if (!target) {
+      return;
     }
-    const messageEvent = new CustomEvent("config-changed", {
-      detail: { config: newConfig },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(messageEvent);
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    const entry = target.entry;
+    if (!is_map(entry.elements)) entry.elements = {};
+    const id = changedEvent.target.id;
+    if (!is_map(entry.elements[id])) entry.elements[id] = {};
+    entry.elements[id].disabled_if = changedEvent.currentTarget.checked;
+    this.fire_config_changed(target.config);
   }
 }
 
