@@ -86,6 +86,9 @@ export class RSDevice extends LitElement {
   // re-render — nothing else watches that entity's state.
   private _last_ambiguous_role?: string;
 
+  // Pictures _render_disabled_roles() draws, see _role_pictures().
+  private _role_pictures_cache: string[] | null = null;
+
   // Animations too: a device can put a class such as `blink-alert` on its own
   // background picture, and those keyframes live in MyElement's stylesheet,
   // which does not reach the device's shadow root.
@@ -216,6 +219,15 @@ export class RSDevice extends LitElement {
         !ambiguous.role ||
         !ambiguous.override.role_to_model[ambiguous.role]
       ) {
+        // Disabled in Home Assistant with a role the registry does not
+        // carry either: there is nothing to pick — the role entity is
+        // disabled too — so say why, over every picture it could be.
+        if (this.is_disabled()) {
+          return this._render_disabled_roles(
+            ambiguous.domain,
+            ambiguous.override,
+          );
+        }
         return this._render_role_picker(
           ambiguous.override,
           ambiguous.entity_id,
@@ -392,6 +404,63 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Background picture of each concrete device an ambiguous model can turn
+   * out to be, read from the view registered for it. Looked up once: the
+   * views of a model do not change.
+   * @param domain: the integration domain (ex: "aquamedic")
+   * @param override: the domain's ModelOverride for this raw model
+   * @return one picture per distinct model that has a view and a picture
+   */
+  private _role_pictures(domain: string, override: ModelOverride): string[] {
+    if (this._role_pictures_cache === null) {
+      const pictures: string[] = [];
+      for (const model of new Set(Object.values(override.role_to_model))) {
+        const Element = customElements.get(
+          RSDevice.tag_for_model(domain, model),
+        ) as (new () => RSDevice) | undefined;
+        const picture = Element
+          ? new Element().initial_config?.background_img
+          : undefined;
+        if (picture) {
+          pictures.push(String(picture));
+        }
+      }
+      this._role_pictures_cache = pictures;
+    }
+    return this._role_pictures_cache;
+  }
+
+  /**
+   * Render a device that is disabled in Home Assistant and whose role is
+   * not known: the "disabled" banner, over the greyed pictures of every
+   * device it could be, side by side.
+   *
+   * The role normally survives the disabling through the device registry
+   * (see utils/common role_of()), and the device then draws its own
+   * picture. This is what is left for a device disabled before its role
+   * was ever declared, or one registered by a version of the integration
+   * that did not record it yet.
+   * @param domain: the integration domain (ex: "aquamedic")
+   * @param override: the domain's ModelOverride for this raw model
+   * @return the template of the disabled view
+   */
+  private _render_disabled_roles(
+    domain: string,
+    override: ModelOverride,
+  ): TemplateResult {
+    return html`
+      <div class="device_bg">
+        <div class="device_roles_disabled">
+          ${this._role_pictures(domain, override).map(
+            (picture) => html`<img alt="" src="${picture}" />`,
+          )}
+        </div>
+        <p class="disabled_in_ha">${i18n._("disabledInHa")}</p>
+      </div>
+    `;
+  }
+
+  /**
    * Persist the role picked from _render_role_picker() by calling the role
    * entity's select service directly — this device has no other way to
    * reach it, since it carries no `set_config_value()`-style user config.
@@ -421,6 +490,12 @@ export class RSDevice extends LitElement {
         if (fresh && fresh.disabled_by !== el.disabled_by) {
           el.disabled_by = fresh.disabled_by;
           re_render = true;
+        }
+        // The role of an ambiguous model is read from the registry when
+        // its entity is gone (see utils/common role_of()): keep it fresh
+        // too. The role check below turns a change into a re-render.
+        if (fresh && fresh.model_id !== el.model_id) {
+          el.model_id = fresh.model_id;
         }
       }
     }

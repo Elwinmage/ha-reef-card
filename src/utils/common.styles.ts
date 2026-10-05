@@ -42,6 +42,24 @@ export default css`
     filter: grayscale(80%);
   }
 
+  /* Disabled device whose role is unknown: every picture it could be */
+  .device_roles_disabled {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    height: 100%;
+  }
+
+  .device_roles_disabled img {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 46%;
+    max-height: 90%;
+    object-fit: contain;
+    filter: grayscale(80%);
+  }
+
   .disabled_in_ha {
     color: white;
     text-align: center;

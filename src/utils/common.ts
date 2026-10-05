@@ -279,14 +279,20 @@ export interface AmbiguousModel {
   override: ModelOverride;
   /** entity_id of the role entity, when one is found on this device */
   entity_id?: string;
-  /** current state of the role entity, when found */
+  /**
+   * current state of the role entity, when found; for a device without a
+   * usable one (disabled in Home Assistant), the role recorded as the
+   * `model_id` of its registry entry
+   */
   role?: string;
 }
 
 /**
  * Looks up whether a device's model is ambiguous for its domain (see
  * KNOWN_DEVICE_DOMAINS model_overrides) and, when it is, finds the role
- * entity and its current state. Shared by resolve_device_model() — which
+ * entity and its current state — or, for a device disabled in Home
+ * Assistant, the role its registry entry still carries (see role_of()).
+ * Shared by resolve_device_model() — which
  * only needs the resolved model — and RSDevice's own render(), which also
  * needs the entity_id to build a role picker and delegate rendering.
  * @param hass: the hass config object, to read entities/states from
@@ -315,8 +321,34 @@ export function ambiguous_model_of(
       override.role_translation_key,
     );
   }
-  const role = entity_id ? hass?.states?.[entity_id]?.state : undefined;
+  const state = entity_id ? hass?.states?.[entity_id]?.state : undefined;
+  const role = role_of(override, state, device.elements?.[0]?.model_id);
   return { domain, raw_model: model, override, entity_id, role };
+}
+
+/**
+ * The role of an ambiguous model: what its role entity says, or else what
+ * the integration recorded in the device registry.
+ *
+ * A device disabled in Home Assistant has no entity left for the frontend:
+ * its role entity carries no state and is not even listed. Its registry
+ * entry stays visible though, and the integration publishes the role there
+ * as `model_id` (see ha-aquamedic-component entity.py resolve_model_id()),
+ * so the card still knows which device it is drawing.
+ * @param override: the domain's ModelOverride for the raw model
+ * @param state: current state of the role entity, when one is found
+ * @param model_id: `model_id` of the device in the registry
+ * @return the role entity's state when it names a known role; else the
+ *         `model_id` when that one does; else the state as it is
+ */
+function role_of(
+  override: ModelOverride,
+  state: string | undefined,
+  model_id: string | undefined,
+): string | undefined {
+  if (state && override.role_to_model[state]) return state;
+  if (model_id && override.role_to_model[model_id]) return model_id;
+  return state;
 }
 
 /**

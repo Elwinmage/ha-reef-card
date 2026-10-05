@@ -94,6 +94,12 @@
 - `check_entities.py` now covers ha-aquamedic-component: a second extractor
   follows the product key tests of its platforms, and the three views are
   checked like the Red Sea ones (`--device=smartdrift|dcrunner|dcskimmer`).
+- A DC Runner or DC Skimmer disabled in Home Assistant now shows the
+  "disabled" banner over its own greyed picture, instead of the pump role
+  picker: a disabled device has no entity left, so the role is read back
+  from the `model_id` ha-aquamedic-component records in the device registry
+  (needs the matching version of the integration). When the registry holds
+  no role either, the banner is drawn over both pictures, side by side.
 
 ### RSWAVE (view, in progress)
 

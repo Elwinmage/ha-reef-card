@@ -86,6 +86,12 @@ export const POWER_FLOW_CARD_HACS_URL =
  * and the skimmer — same firmware, same Gizwits product key, API cannot
  * tell them apart — so the user declares which one through a `pump_role`
  * select entity, and the card reads it back to pick the right display.
+ *
+ * The integration also records that role as the `model_id` of the device
+ * in the registry: an entity has no state once its device is disabled in
+ * Home Assistant, the registry entry is still there. The card falls back
+ * on it (see utils/common role_of()), so `role_to_model` keys are matched
+ * against both.
  */
 export interface ModelOverride {
   /** `translation_key` of the entity carrying the role (ex: "pump_role") */
