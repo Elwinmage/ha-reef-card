@@ -36,7 +36,8 @@ export const WAVE_TYPE_COLORS: Record<string, string> = {
   nw: "150,150,150",
   ra: "155,89,182",
   re: "52,152,219",
-  st: "26,188,156",
+  // Orange: away from uniform's green and surface's yellow
+  st: "230,126,34",
   su: "241,196,15",
   un: "46,204,113",
 };
