@@ -1044,6 +1044,10 @@ describe("RSLedProgramEditor", () => {
     expect(data.access_path).toBe("/auto/1");
     expect(data.method).toBe("post");
     expect(data.data.white.points[0]).toEqual({ t: 120, i: 80 });
+    // Read back lightly after a settle delay; the last request (/auto/apply,
+    // above) with the integration's defaults: in full, its programs shown
+    expect(data.refresh).toBe("data");
+    expect(data.wait).toBe(RSLedProgramEditor.SETTLE_S);
     expect(closed).toHaveBeenCalledTimes(1);
 
     const box = ed.shadowRoot.querySelector("input.all_days");

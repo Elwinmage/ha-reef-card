@@ -148,6 +148,10 @@ interface WriteRequest {
   access_path: string;
   method: string;
   data: any;
+  /** What the integration re-reads after it (its default: "config") */
+  refresh?: string;
+  /** Seconds the integration lets the lamp settle first (its default: 2) */
+  wait?: number;
 }
 
 /**
@@ -610,11 +614,19 @@ export class RSLedProgramEditor extends LitElement {
   writing: { done: number; total: number } | null = null;
 
   /**
-   * Pause between two requests written to a lamp (ms): a ReefLED takes time
-   * to handle a command, and answers late (or not at all) to one sent too
-   * soon.
+   * Extra pause between two requests (ms). redsea.request already answers
+   * once the lamp answered, let it settle (SETTLE_S) and was read back: a
+   * ReefLED takes time to handle a command, and answers late (or not at all)
+   * to one sent too soon.
    */
-  static WRITE_DELAY_MS = 2000;
+  static WRITE_DELAY_MS = 0;
+
+  /**
+   * Seconds a lamp is left to settle after each request but its last one
+   * (/auto/apply), read back lightly (its data only); the last one is read
+   * back in full (its programs), after the integration's default delay.
+   */
+  static SETTLE_S = 1;
 
   /**
    * Load a day program into the editor.
@@ -1559,7 +1571,14 @@ export class RSLedProgramEditor extends LitElement {
       data: any,
       method: string = "post",
     ) => {
-      ops.push({ device_id, access_path, method, data });
+      ops.push({
+        device_id,
+        access_path,
+        method,
+        data,
+        refresh: "data",
+        wait: RSLedProgramEditor.SETTLE_S,
+      });
     };
     for (const target of targets) {
       const prog = await this.program_for(target);
@@ -1616,14 +1635,22 @@ export class RSLedProgramEditor extends LitElement {
         }
       }
       // The lamp only runs the new program once asked to (as the app does)
-      request(target.device_id, "/auto/apply", {});
+      // Its last request: read back in full once the lamp settled, so its
+      // programs show the new one (the integration's defaults)
+      ops.push({
+        device_id: target.device_id,
+        access_path: "/auto/apply",
+        method: "post",
+        data: {},
+      });
     }
     await this._send(hass, ops);
     this.close();
   }
 
   /**
-   * Send the requests one after the other, paced (WRITE_DELAY_MS), the
+   * Send the requests one after the other (each answers once the lamp
+   * settled, see SETTLE_S; WRITE_DELAY_MS more between them), the
    * progress shown meanwhile (see writing).
    * @param hass: Home Assistant
    * @param ops: the requests (redsea.request data)

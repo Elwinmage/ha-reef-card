@@ -591,8 +591,20 @@ export class RSLed extends RSDevice {
 
   // ── Program editor ────────────────────────────────────────────────────
 
-  /** Lamps the edited program is written to: this one. */
+  /**
+   * Lamps the edited program is written to: each lamp of the group, in its
+   * own format, when the lamp is in one (a group is driven as one lamp,
+   * from any of its lamps as from its virtual LED); this one otherwise.
+   */
   program_targets(): ProgramTarget[] {
+    const group = this.linked()
+      .filter((led) => typeof led?.entry_id === "string" && led.entry_id)
+      .map((led) => ({
+        device_id: led.entry_id as string,
+        g2: led.g2 === true,
+        model: led.model,
+      }));
+    if (group.length) return group;
     const el = this.device?.elements?.[0];
     const device_id = el?.primary_config_entry;
     return device_id
@@ -749,18 +761,6 @@ export class RSLedVirtual extends RSLed {
     return this.is_g2() && !source_g2
       ? wb_to_kelvin_program(prog, source?.model)
       : prog;
-  }
-
-  /** Each lamp of the group, in its own format. */
-  override program_targets(): ProgramTarget[] {
-    const targets = this.linked()
-      .filter((led) => typeof led?.entry_id === "string" && led.entry_id)
-      .map((led) => ({
-        device_id: led.entry_id as string,
-        g2: led.g2 === true,
-        model: led.model,
-      }));
-    return targets.length ? targets : super.program_targets();
   }
 
   /** The model its lamps share; none when they are of several models. */

@@ -293,6 +293,19 @@ describe("RSLedVirtual", () => {
     dev.device = { elements: [{}] };
     expect(dev.program_targets()).toEqual([]);
   });
+
+  it("a lamp of a group writes its program to each lamp of the group", () => {
+    const dev = new RSLed160() as any;
+    dev.device = {
+      elements: [{ model: "RSLED160", primary_config_entry: "e1" }],
+    };
+    // The group's lamps, as the integration lists them on each of them
+    dev.linked = () => [LED_G1A, LED_G2, { ...LED_G1B, entry_id: null }];
+    expect(dev.program_targets()).toEqual([
+      { device_id: "e1", g2: false, model: "RSLED160" },
+      { device_id: LED_G2.entry_id, g2: true, model: LED_G2.model },
+    ]);
+  });
 });
 
 describe("RSLedLinked", () => {
