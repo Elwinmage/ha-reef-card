@@ -1176,6 +1176,74 @@ describe("RSWaveSpeed arrows and pump settings", () => {
     expect(root.querySelector(".overlay")).toBeNull();
   });
 
+  it("shows the settings saved at once, until Home Assistant has them", async () => {
+    const ctx = makeDevice();
+    // What Home Assistant reports for the current wave
+    let now = { type: "st", direction: "alt", fti: 40, rti: 60 };
+    const dev = {
+      ...ctx.device,
+      is_on: () => true,
+      current_wave: () => now,
+      speed: () => now.fti,
+      direction: () => now.direction,
+    };
+    const el = makeElement(StubSpeed, dev, { target: 100 });
+    const root = await mount(el);
+    const text = () => root.querySelector(".speed_text")!.textContent!.trim();
+    expect(text()).toBe("40%");
+    el.openSettings();
+    el._dir = "rw";
+    el._fti = 80;
+    el._rti = 70;
+    const saving = el.save();
+    // Closed and shown before the integration answers
+    await el.updateComplete;
+    expect(root.querySelector(".overlay")).toBeNull();
+    expect(text()).toBe("80%");
+    expect(root.querySelector("path.arrow_rw")).not.toBeNull();
+    expect(root.querySelector("path.arrow_fw")).toBeNull();
+    await saving;
+    // Home Assistant still reports the old values: kept
+    el.hass = { states: {} };
+    await el.updateComplete;
+    expect(text()).toBe("80%");
+    // It reports them: Home Assistant's values from now on
+    now = { type: "st", direction: "rw", fti: 80, rti: 70 };
+    el.hass = { states: {} };
+    await el.updateComplete;
+    expect(el._pending).toBeNull();
+    now = { type: "st", direction: "fw", fti: 30, rti: 70 };
+    el.hass = { states: {} };
+    await el.updateComplete;
+    expect(text()).toBe("30%");
+
+    // Never reported: dropped after PENDING_MS
+    el.openSettings();
+    el._fti = 90;
+    await el.save();
+    expect(el.getValue()).toBe(90);
+    el._pending.until = Date.now() - 1;
+    expect(el.getValue()).toBe(30);
+    expect(el._pending).toBeNull();
+    // No wave run now: no type, the saved intensity shown
+    const bare = makeElement(StubSpeed, { ...ctx.device, ...ring("fw") }, {});
+    bare._pending = {
+      direction: "fw",
+      fti: 55,
+      rti: 0,
+      until: Date.now() + 1e5,
+    };
+    expect(bare.getValue()).toBe(55);
+    expect(bare.flow()).toBe("fw");
+    bare._pending = {
+      direction: "fw",
+      fti: 0,
+      rti: 0,
+      until: Date.now() + 1e5,
+    };
+    expect(bare.flow()).toBe("");
+  });
+
   it("refusal, no program, closing", async () => {
     const ctx = makeDevice({ fail: { wave_pump_set: "Offline" } });
     const el = makeElement(
@@ -1190,6 +1258,9 @@ describe("RSWaveSpeed arrows and pump settings", () => {
     await el.updateComplete;
     await el.save();
     await el.updateComplete;
+    // Refused: opened again with the message, nothing shown as saved
+    expect(el._open).toBe(true);
+    expect(el._pending).toBeNull();
     expect(root.querySelector(".error")!.textContent).toContain("Offline");
     // Backdrop / panel clicks
     const stop = () => {};

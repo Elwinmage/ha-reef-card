@@ -34,7 +34,7 @@ import { ProgressCircle } from "../../../base/progress_circle";
 import { OFF_COLOR } from "../../../utils/constants";
 import { RSWAVE_CANVAS } from "./rswave_element";
 import { style_rswave_overlay, style_rswave_schedule } from "./rswave.styles";
-import { WaveInterval, current_index } from "./rswave_program";
+import { WaveInterval, current_index, wave_speed } from "./rswave_program";
 import { ask } from "./rswave_api";
 import { direction_label, type_cell } from "./rswave_schedule";
 import i18n from "../../../translations/myi18n";
@@ -127,6 +127,20 @@ export class RSWaveSpeed extends ProgressCircle {
 
   private _lastSpeed: number | null = null;
 
+  /** How long settings saved are shown before Home Assistant has them (ms). */
+  static PENDING_MS = 5 * 60 * 1000;
+
+  /**
+   * Settings saved, shown at once (optimistic) until Home Assistant reports
+   * them: the pump gets them once the cloud pushed its program.
+   */
+  protected _pending: {
+    direction: string;
+    fti: number;
+    rti: number;
+    until: number;
+  } | null = null;
+
   /** Settings open */
   @state() protected _open = false;
   @state() protected _dir = "fw";
@@ -139,9 +153,34 @@ export class RSWaveSpeed extends ProgressCircle {
     return { ...SPEED_DEFAULTS, ...((this.conf as any)?.geometry ?? {}) };
   }
 
-  /** Speed of the pump, from the device. */
+  /** Speed of the pump, from the device (or the settings just saved). */
   protected override getValue(): number {
+    const pending = this.pending();
+    if (pending) {
+      const type = (this.device as any)?.current_wave?.()?.type ?? "";
+      return wave_speed({ ...pending, type });
+    }
     return Number((this.device as any)?.speed?.() ?? 0) || 0;
+  }
+
+  /**
+   * The settings just saved, while Home Assistant does not report them yet;
+   * dropped once it does, or after PENDING_MS.
+   */
+  protected pending(): RSWaveSpeed["_pending"] {
+    const p = this._pending;
+    if (!p) return null;
+    const now: any = (this.device as any)?.current_wave?.();
+    const reported =
+      now &&
+      now.direction === p.direction &&
+      Number(now.fti) === p.fti &&
+      Number(now.rti) === p.rti;
+    if (reported || Date.now() > p.until) {
+      this._pending = null;
+      return null;
+    }
+    return p;
   }
 
   /** The target is the full scale (100 %): no entity needed. */
@@ -162,6 +201,8 @@ export class RSWaveSpeed extends ProgressCircle {
 
   /** Direction of the flow now ("" when stopped). */
   protected flow(): string {
+    const pending = this.pending();
+    if (pending) return this.getValue() > 0 ? pending.direction : "";
     return String((this.device as any)?.direction?.() ?? "");
   }
 
@@ -194,21 +235,29 @@ export class RSWaveSpeed extends ProgressCircle {
     if (e.target === e.currentTarget) this.closeSettings();
   }
 
-  /** Write the settings of this pump, then close. */
+  /**
+   * Write the settings of this pump. Optimistic: shown and closed at once
+   * (the integration takes a few seconds, the pump longer); a refusal opens
+   * the settings again with its message.
+   */
   async save(): Promise<void> {
-    this._busy = true;
-    this._error = "";
-    const res = await ask(this.device, "wave_pump_set", {
+    const settings = {
       direction: this._dir,
       fti: Number(this._fti),
       rti: Number(this._rti),
-    });
+    };
+    this._pending = { ...settings, until: Date.now() + RSWaveSpeed.PENDING_MS };
+    this._busy = true;
+    this._error = "";
+    this.closeSettings();
+    const res = await ask(this.device, "wave_pump_set", settings);
     this._busy = false;
-    if (res.ok) {
-      this.closeSettings();
-    } else {
+    if (!res.ok) {
+      this._pending = null;
       this._error = res.error as string;
+      this._open = true;
     }
+    this.requestUpdate();
   }
 
   /**
@@ -291,7 +340,7 @@ export class RSWaveSpeed extends ProgressCircle {
             ?disabled=${this._busy || !moving}
             @click=${() => this.save()}
           >
-            ${this._busy ? i18n._("wave_saving") : i18n._("wave_save")}
+            ${i18n._("wave_save")}
           </button>
         </div>
       </div>
