@@ -318,29 +318,51 @@ export function check_draft(
   if (slots.some((s) => !uids.has(s.wave_uid))) return "wave_err_no_wave";
   const starts = slots.map((s) => s.st);
   if (new Set(starts).size !== starts.length) return "wave_err_same_start";
+  const ends = [...starts.slice(1), MINUTES_PER_DAY];
+  if (starts.some((st, i) => ends[i] - st < SLOT_GAP)) {
+    return "wave_err_too_short";
+  }
   return null;
 }
 
 /**
- * A new slot: in the middle of the longest interval of the day, on a
- * quarter of an hour, with the wave and direction of the slot it splits.
+ * Shortest slot, in minutes (the last one up to midnight): the cloud takes
+ * a shorter one, but the pump silently leaves it out of its program. Also
+ * the start of a slot added after the last one.
+ */
+export const SLOT_GAP = 15;
+
+/**
+ * A new slot, at the end of the day: SLOT_GAP minutes after the start of
+ * the last slot, with its wave and direction, and SLOT_GAP minutes of its
+ * own before midnight.
  * @param slots: the draft, sorted by start
- * @return the slot, null when the day has no room left
+ * @return the slot, null when the last slot starts too close to midnight
+ *         (see make_room())
  */
 export function next_slot(slots: DraftSlot[]): DraftSlot | null {
-  let best: { from: number; to: number; slot: DraftSlot } | null = null;
-  slots.forEach((s, i) => {
-    const to = i + 1 < slots.length ? slots[i + 1].st : MINUTES_PER_DAY;
-    if (!best || to - s.st > best.to - best.from) {
-      best = { from: s.st, to, slot: s };
-    }
-  });
-  if (!best) return null;
-  const b = best as { from: number; to: number; slot: DraftSlot };
-  let st = Math.round((b.from + b.to) / 2 / 15) * 15;
-  if (st <= b.from || st >= b.to) st = b.from + Math.floor((b.to - b.from) / 2);
-  if (st <= b.from) return null;
-  return { st, wave_uid: b.slot.wave_uid, direction: b.slot.direction };
+  const last = slots[slots.length - 1];
+  if (!last) return null;
+  const st = last.st + SLOT_GAP;
+  if (st + SLOT_GAP > MINUTES_PER_DAY) return null;
+  return { st, wave_uid: last.wave_uid, direction: last.direction };
+}
+
+/**
+ * Move the last slots earlier, SLOT_GAP minutes apart, so that next_slot()
+ * has room at the end of the day. The first slot, at midnight, never moves.
+ * @param slots: the draft, sorted by start
+ * @return the draft moved, null when the day is too full for it
+ */
+export function make_room(slots: DraftSlot[]): DraftSlot[] | null {
+  const out = slots.map((s) => ({ ...s }));
+  let latest = MINUTES_PER_DAY - 2 * SLOT_GAP;
+  for (let i = out.length - 1; i > 0 && out[i].st > latest; i--) {
+    out[i].st = latest;
+    latest -= SLOT_GAP;
+  }
+  const sorted = out.every((s, i) => i === 0 || s.st > out[i - 1].st);
+  return out.length && sorted ? out : null;
 }
 
 /**
@@ -360,6 +382,9 @@ export function wave_settings(wave: EditorWave): Record<string, unknown> {
   }
   return out;
 }
+
+/** Longest wave name the ReefBeat cloud takes (a longer one is refused). */
+export const WAVE_NAME_MAX = 15;
 
 /**
  * Default value of a shape field a wave switching type gains (the Red Sea

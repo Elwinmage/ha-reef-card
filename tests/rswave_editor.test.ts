@@ -123,6 +123,8 @@ interface Answer {
   fail?: Record<string, string>;
   /** The save answers without a uid */
   noUid?: boolean;
+  /** The save answers another uid (a wave replaced) */
+  savedUid?: string;
   /** Grouped in the app (absent: not given) */
   grouped?: boolean;
 }
@@ -150,6 +152,7 @@ function makeDevice(answer: Answer = {}) {
     }
     if (msg.service === "wave_library_save") {
       if (answer.noUid) return { response: {} };
+      if (answer.savedUid) return { response: { uid: answer.savedUid } };
       return { response: { uid: msg.service_data.uid ?? "new-uid" } };
     }
     return { response: { saved: true, deleted: true } };
@@ -326,30 +329,53 @@ describe("rswave_program editing helpers", () => {
       P.check_draft([{ st: 0, wave_uid: "x", direction: "fw" }], WAVES),
     ).toBe("wave_err_no_wave");
     expect(P.check_draft([...ok, ...ok], WAVES)).toBe("wave_err_same_start");
+    // A slot shorter than SLOT_GAP, the last one up to midnight included:
+    // the pump would leave it out
+    const slot = (st: number) => ({ st, wave_uid: "nuit", direction: "fw" });
+    expect(P.check_draft([slot(0), slot(1350), slot(1360)], WAVES)).toBe(
+      "wave_err_too_short",
+    );
+    expect(P.check_draft([slot(0), slot(1426)], WAVES)).toBe(
+      "wave_err_too_short",
+    );
+    expect(P.check_draft([slot(0), slot(1410), slot(1425)], WAVES)).toBeNull();
   });
 
-  it("next_slot() splits the longest interval on a quarter hour", () => {
+  it("next_slot() adds after the last slot, SLOT_GAP after its start", () => {
+    const slot = (st: number, wave_uid = "a") => ({
+      st,
+      wave_uid,
+      direction: "fw",
+    });
     expect(
       P.next_slot([
         { st: 0, wave_uid: "a", direction: "fw" },
         { st: 600, wave_uid: "b", direction: "alt" },
       ]),
-    ).toEqual({ st: 1020, wave_uid: "b", direction: "alt" });
+    ).toEqual({ st: 615, wave_uid: "b", direction: "alt" });
     expect(P.next_slot([])).toBeNull();
-    // A tiny day left: half way, off the quarter grid
-    const tight = Array.from({ length: 1438 }, (_, i) => ({
-      st: i,
-      wave_uid: "a",
-      direction: "fw",
-    }));
-    expect(P.next_slot(tight)!.st).toBe(1438);
-    // Not a minute left
-    const full = Array.from({ length: 1440 }, (_, i) => ({
-      st: i,
-      wave_uid: "a",
-      direction: "fw",
-    }));
-    expect(P.next_slot(full)).toBeNull();
+    // The new slot keeps SLOT_GAP minutes of its own before midnight
+    expect(P.next_slot([slot(0), slot(1410)])!.st).toBe(1425);
+    expect(P.next_slot([slot(0), slot(1411)])).toBeNull();
+  });
+
+  it("make_room() moves the last slots earlier, SLOT_GAP apart", () => {
+    const slot = (st: number) => ({ st, wave_uid: "a", direction: "fw" });
+    const starts = (slots: any[] | null) => slots?.map((s) => s.st);
+    expect(starts(P.make_room([slot(0), slot(600), slot(1435)]))).toEqual([
+      0, 600, 1410,
+    ]);
+    // Those too close to the moved ones follow
+    expect(
+      starts(P.make_room([slot(0), slot(1395), slot(1405), slot(1435)])),
+    ).toEqual([0, 1380, 1395, 1410]);
+    // Then next_slot() has room
+    const moved = P.make_room([slot(0), slot(1435)])!;
+    expect(P.next_slot(moved)!.st).toBe(1425);
+    // The first slot never moves: a day too full has no room
+    const full = Array.from({ length: 96 }, (_, i) => slot(i * 15));
+    expect(P.make_room(full)).toBeNull();
+    expect(P.make_room([])).toBeNull();
   });
 
   it("wave_settings() keeps the type's fields", () => {
@@ -492,6 +518,32 @@ describe("RSWaveSchedule editor", () => {
     change(rows()[1].querySelector("input.start")!, "junk");
     await el.updateComplete;
     expect(el._slots[1].st).toBe(480);
+    // The refused value does not stay in the field
+    expect((rows()[1].querySelector("input.start") as any).value).toBe("08:00");
+    expect(el._error).toBe("");
+
+    // Each slot lasts SLOT_GAP minutes at least: a start too close to
+    // another one, or to midnight, is refused at once
+    for (const bad of ["00:10", "23:50"]) {
+      change(rows()[1].querySelector("input.start")!, bad);
+      await el.updateComplete;
+      expect(el._slots[1].st).toBe(480);
+      expect((rows()[1].querySelector("input.start") as any).value).toBe(
+        "08:00",
+      );
+      expect(el._error).not.toBe("");
+      expect(root.querySelector(".error")).not.toBeNull();
+    }
+    // Exactly SLOT_GAP: taken, the message gone
+    change(rows()[1].querySelector("input.start")!, "00:15");
+    await el.updateComplete;
+    expect(el._slots[1].st).toBe(15);
+    expect(el._error).toBe("");
+    change(rows()[1].querySelector("input.start")!, "08:00");
+    await el.updateComplete;
+    expect([...rows()].some((r) => r.classList.contains("too_short"))).toBe(
+      false,
+    );
 
     // No wave: forward only, direction locked
     change(rows()[1].querySelector("select.wave")!, "nw");
@@ -511,10 +563,10 @@ describe("RSWaveSchedule editor", () => {
       direction: "rw",
     });
 
-    // Add: in the middle of the longest interval
+    // Add: at the end, SLOT_GAP after the start of the last slot
     (root.querySelector(".btn_add") as HTMLElement).click();
     await el.updateComplete;
-    expect(el._slots.map((s: any) => s.st)).toEqual([0, 480, 960]);
+    expect(el._slots.map((s: any) => s.st)).toEqual([0, 480, 495]);
     // Remove it; the first one stays
     (rows()[2].querySelector("button.remove") as HTMLElement).click();
     el.remove_slot(0);
@@ -536,6 +588,72 @@ describe("RSWaveSchedule editor", () => {
     el.add_slot.call({
       _slots: Array.from({ length: 1440 }, (_, i) => ({ st: i })),
     });
+  });
+
+  it("marks a slot shorter than SLOT_GAP read from the pump", async () => {
+    const { el, root } = await openEditor();
+    el._slots = [
+      { st: 0, wave_uid: "nuit", direction: "fw" },
+      { st: 1350, wave_uid: "nuit", direction: "fw" },
+      { st: 1360, wave_uid: "rsstep", direction: "alt" },
+    ];
+    await el.updateComplete;
+    const rows = [...root.querySelectorAll("tbody tr")];
+    expect(rows.map((r) => r.classList.contains("too_short"))).toEqual([
+      false,
+      true,
+      false,
+    ]);
+    expect(rows[1].getAttribute("title")).not.toBe("");
+    // And its save is refused
+    (root.querySelector(".btn_save") as HTMLElement).click();
+    await settle(el);
+    expect(el._error).not.toBe("");
+  });
+
+  it("asks to move the last slot when it starts too close to midnight", async () => {
+    const { el, root } = await openEditor();
+    el._slots = [
+      { st: 0, wave_uid: "nuit", direction: "fw" },
+      { st: 1435, wave_uid: "rsstep", direction: "alt" },
+    ];
+    await el.updateComplete;
+    const add = root.querySelector(".btn_add") as HTMLButtonElement;
+    expect(add.disabled).toBe(false);
+    add.click();
+    await el.updateComplete;
+    // Nothing added yet: the question is asked
+    expect(el._slots).toHaveLength(2);
+    expect(root.querySelector(".room_ask .error")).not.toBeNull();
+    // Cancelled: nothing changes
+    (root.querySelector(".room_cancel") as HTMLElement).click();
+    await el.updateComplete;
+    expect(root.querySelector(".room_ask")).toBeNull();
+    expect(el._slots.map((s: any) => s.st)).toEqual([0, 1435]);
+    // Accepted: moved earlier, then the slot added after it
+    add.click();
+    await el.updateComplete;
+    (root.querySelector(".room_confirm") as HTMLElement).click();
+    await el.updateComplete;
+    expect(root.querySelector(".room_ask")).toBeNull();
+    expect(el._slots).toEqual([
+      { st: 0, wave_uid: "nuit", direction: "fw" },
+      { st: 1410, wave_uid: "rsstep", direction: "alt" },
+      { st: 1425, wave_uid: "rsstep", direction: "alt" },
+    ]);
+    // A day too full: the button is disabled, nothing asked
+    el._slots = Array.from({ length: 96 }, (_, i) => ({
+      st: i * 15,
+      wave_uid: "nuit",
+      direction: "fw",
+    }));
+    await el.updateComplete;
+    expect(add.disabled).toBe(true);
+    el.add_slot();
+    el.confirm_room();
+    await el.updateComplete;
+    expect(el._room_ask).toBe(false);
+    expect(el._slots).toHaveLength(96);
   });
 
   it("saves the draft and closes, or shows the refusal", async () => {
@@ -748,6 +866,25 @@ describe("RSWaveLibrary", () => {
     expect(el._wave.uid).toBe("nuit");
   });
 
+  it("follows the wave replaced when its type changes", async () => {
+    const waves = WAVES.map((w) =>
+      w.uid === "nuit" ? { ...w, uid: "nuit-su", type: "su" as const } : w,
+    );
+    const { el, root, calls } = await openLibrary({
+      savedUid: "nuit-su",
+      waves,
+    });
+    el._wave = { ...waves.find((w) => w.uid === "nuit-su")!, uid: "nuit" };
+    await el.updateComplete;
+    (root.querySelector(".btn_save.update") as HTMLElement).click();
+    await settle(el);
+    const save = calls.find((c) => c.service === "wave_library_save");
+    expect(save.service_data.uid).toBe("nuit");
+    // Read again, the new wave selected
+    expect(el._wave.uid).toBe("nuit-su");
+    expect(el._wave.type).toBe("su");
+  });
+
   it("renames a user wave: its name typed over, saved with update", async () => {
     const { el, root, calls } = await openLibrary();
     // A Red Sea wave keeps its title
@@ -759,6 +896,8 @@ describe("RSWaveLibrary", () => {
     await el.updateComplete;
     const name = root.querySelector(".wave_name") as HTMLInputElement;
     expect(name.value).toBe("nuit");
+    // No longer than the cloud takes
+    expect(name.maxLength).toBe(P.WAVE_NAME_MAX);
     expect(root.querySelector(".lib_edit h4")).toBeNull();
     // A wave needs a name
     name.value = "  ";
@@ -790,6 +929,7 @@ describe("RSWaveLibrary", () => {
     await settle(el);
     expect(el._error).not.toBe("");
     const name = root.querySelector("input.new_name") as HTMLInputElement;
+    expect(name.maxLength).toBe(P.WAVE_NAME_MAX);
     name.value = " Storm ";
     name.dispatchEvent(new Event("input"));
     (root.querySelector(".btn_save.create") as HTMLElement).click();
@@ -1153,6 +1293,17 @@ describe("Wave zone and preview", () => {
     expect(el._focus).toBe("rsstep");
     const lib = root.querySelector(".wave_zone rswave-library") as any;
     expect(lib).not.toBeNull();
+    // Save and cancel belong to the program: under its table, before the
+    // waves of the library
+    const footer = root.querySelector(".panel_footer")!;
+    const zone = root.querySelector(".wave_zone")!;
+    expect(
+      footer.compareDocumentPosition(zone) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      root.querySelector("table")!.compareDocumentPosition(footer) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     await settle(lib);
     expect(lib._wave.uid).toBe("rsstep");
     // The pencil of a row shows its wave

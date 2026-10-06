@@ -30,6 +30,7 @@ import {
   EditorWave,
   WAVE_FIELD_DEFAULTS,
   WAVE_FIELD_LIMITS,
+  WAVE_NAME_MAX,
   WAVE_TYPE_FIELDS,
   type_color,
   wave_settings,
@@ -259,6 +260,11 @@ export class RSWaveLibrary extends RSWaveElement {
       settings: wave_settings(w),
     });
     if (!res) return;
+    // A new type makes a new wave in the cloud (it keeps the type of a
+    // wave): the one answered is kept selected
+    if (typeof res.uid === "string" && res.uid && res.uid !== w.uid) {
+      this._wave = { ...w, uid: res.uid };
+    }
     this.changed();
     await this.load();
   }
@@ -381,6 +387,7 @@ export class RSWaveLibrary extends RSWaveElement {
         : html`<input
             type="text"
             class="wave_name"
+            maxlength=${WAVE_NAME_MAX}
             title="${i18n._("wave_rename")}"
             .value=${w.name}
             @input=${(e: Event) => this.set_name(e)}
@@ -414,6 +421,7 @@ export class RSWaveLibrary extends RSWaveElement {
             <input
               type="text"
               class="new_name"
+              maxlength=${WAVE_NAME_MAX}
               placeholder="${i18n._("wave_field_name")}"
               .value=${this._name}
               @input=${(e: Event) =>

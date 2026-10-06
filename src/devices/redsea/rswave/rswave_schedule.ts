@@ -24,12 +24,14 @@ import { style_rswave_schedule } from "./rswave.styles";
 import {
   DraftSlot,
   MINUTES_PER_DAY,
+  SLOT_GAP,
   WAVE_TYPES,
   WaveInterval,
   check_draft,
   current_index,
   draft_intervals,
   hhmm,
+  make_room,
   next_slot,
   parse_hhmm,
   slots_of,
@@ -262,6 +264,8 @@ export class RSWaveSchedule extends RSWaveElement {
   @state() protected _error = "";
   /** A call is running */
   @state() protected _busy = false;
+  /** A slot asked while the last one starts too close to midnight */
+  @state() protected _room_ask = false;
   /** Wave shown in the wave zone under the table */
   @state() protected _focus = "";
   /** Pump of the group being dragged, pump hovered by the drag */
@@ -288,6 +292,7 @@ export class RSWaveSchedule extends RSWaveElement {
     this._library = null;
     this._error = "";
     this._busy = false;
+    this._room_ask = false;
     this._open = true;
     void this.load_library();
   }
@@ -347,11 +352,29 @@ export class RSWaveSchedule extends RSWaveElement {
     this._error = "";
   }
 
+  /**
+   * A start typed. Refused, the old one shown again: an unreadable one,
+   * midnight (the first slot's), or one leaving a slot shorter than
+   * SLOT_GAP minutes (the pump would silently leave it out).
+   */
   protected on_start(index: number, e: Event): void {
-    const st = parse_hhmm((e.target as HTMLInputElement).value);
+    const input = e.target as HTMLInputElement;
+    const st = parse_hhmm(input.value);
+    // The binding does not write back a value it already holds
+    const back = () => {
+      input.value = hhmm(this._slots[index].st);
+    };
     if (st === null || st === 0) {
-      // Midnight belongs to the first slot: put the old value back
-      this.requestUpdate();
+      back();
+      return;
+    }
+    const others = this._slots.filter((_s, i) => i !== index);
+    if (
+      st > MINUTES_PER_DAY - SLOT_GAP ||
+      others.some((s) => Math.abs(s.st - st) < SLOT_GAP)
+    ) {
+      back();
+      this._error = i18n._("wave_err_too_short");
       return;
     }
     this.set_slot(index, { st });
@@ -371,11 +394,26 @@ export class RSWaveSchedule extends RSWaveElement {
     this.set_slot(index, { direction: (e.target as HTMLSelectElement).value });
   }
 
+  /**
+   * Add a slot at the end of the day (see next_slot()). When the last slot
+   * starts too close to midnight, ask first whether to move it earlier.
+   */
   protected add_slot(): void {
     const slot = next_slot(this._slots);
     if (slot) {
-      this._slots = [...this._slots, slot].sort((a, b) => a.st - b.st);
+      this._slots = [...this._slots, slot];
+    } else if (make_room(this._slots)) {
+      this._room_ask = true;
     }
+  }
+
+  /** Move the last slots earlier (see make_room()), then add the slot. */
+  protected confirm_room(): void {
+    this._room_ask = false;
+    const moved = make_room(this._slots);
+    if (!moved) return;
+    this._slots = moved;
+    this.add_slot();
   }
 
   protected remove_slot(index: number): void {
@@ -593,7 +631,12 @@ export class RSWaveSchedule extends RSWaveElement {
     const waves = this.waves();
     const wave = waves.find((w) => w.uid === slot.wave_uid);
     const moving = wave !== undefined && wave.type !== "nw";
-    return html`<tr class="${current ? "current" : ""}">
+    // Shorter than the pump takes (e.g. a program read from it)
+    const short = end - slot.st < SLOT_GAP;
+    return html`<tr
+      class="${current ? "current" : ""} ${short ? "too_short" : ""}"
+      title="${short ? i18n._("wave_err_too_short") : ""}"
+    >
       <td>
         <input
           type="time"
@@ -717,11 +760,48 @@ export class RSWaveSchedule extends RSWaveElement {
                 </table>
                 <button
                   class="btn_add"
-                  ?disabled=${next_slot(slots) === null}
+                  ?disabled=${next_slot(slots) === null &&
+                  make_room(slots) === null}
                   @click=${() => this.add_slot()}
                 >
                   ${i18n._("wave_add_slot")}
-                </button>`}
+                </button>
+                ${this._room_ask
+                  ? html`<div class="room_ask">
+                      <p class="error">${i18n._("wave_slot_no_room")}</p>
+                      <div class="lib_actions">
+                        <button
+                          class="btn_cancel room_cancel"
+                          @click=${() => {
+                            this._room_ask = false;
+                          }}
+                        >
+                          ${i18n._("cancel")}
+                        </button>
+                        <button
+                          class="btn_save room_confirm"
+                          @click=${() => this.confirm_room()}
+                        >
+                          ${i18n._("wave_slot_shift")}
+                        </button>
+                      </div>
+                    </div>`
+                  : nothing}`}
+        </div>
+        <!-- Save and cancel belong to the program: right under its table,
+             before the waves of the library -->
+        ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
+        <div class="panel_footer">
+          <button class="btn_cancel" @click=${this._onClose}>
+            ${i18n._("wave_cancel")}
+          </button>
+          <button
+            class="btn_save"
+            ?disabled=${blocked}
+            @click=${() => this.save()}
+          >
+            ${this._busy ? i18n._("wave_saving") : i18n._("wave_save")}
+          </button>
         </div>
         ${loading || !this._library?.linked
           ? nothing
@@ -738,19 +818,6 @@ export class RSWaveSchedule extends RSWaveElement {
                   this.on_library_changed(e)}
               ></rswave-library>
             </div>`}
-        ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
-        <div class="panel_footer">
-          <button class="btn_cancel" @click=${this._onClose}>
-            ${i18n._("wave_cancel")}
-          </button>
-          <button
-            class="btn_save"
-            ?disabled=${blocked}
-            @click=${() => this.save()}
-          >
-            ${this._busy ? i18n._("wave_saving") : i18n._("wave_save")}
-          </button>
-        </div>
       </div>
     </div>`;
   }

@@ -434,6 +434,13 @@ export const style_rswave_schedule = css`
     background: rgba(219, 68, 55, 0.1);
   }
 
+  .room_ask {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
   input,
   select {
     font: inherit;
@@ -456,6 +463,12 @@ export const style_rswave_schedule = css`
   td.end {
     opacity: 0.7;
     font-variant-numeric: tabular-nums;
+  }
+
+  tr.too_short td.end,
+  tr.too_short input.start {
+    color: var(--error-color, #db4437);
+    font-weight: 600;
   }
 
   select.wave {
