@@ -4,7 +4,7 @@
 
 ReefWave with ha-reef-card in action:
 
-[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Watch the video](https://img.youtube.com/vi/sYVeE0zV3eo/0.jpg)](https://www.youtube.com/watch?v=sYVeE0zV3eo)
 
 ReefWave **RSWAVE25** and **RSWAVE45** are supported.
 

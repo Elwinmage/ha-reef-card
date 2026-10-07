@@ -4,7 +4,7 @@
 
 ReefLed con ha-reef-card en acción:
 
-[![Ver el video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Ver el video](https://img.youtube.com/vi/pA49z8QjTN4/0.jpg)](https://www.youtube.com/watch?v=pA49z8QjTN4)
 
 Las ReefLed **G1** (RSLED50, RSLED90, RSLED160) y **G2** (RSLED60, RSLED115,
 RSLED170) están soportadas, y también los [LED virtuales](#led-virtual).

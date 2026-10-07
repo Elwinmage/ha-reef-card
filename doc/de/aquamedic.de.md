@@ -4,7 +4,7 @@
 
 Aqua Medic mit ha-reef-card in Aktion:
 
-[![Video ansehen](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Video ansehen](https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg)](https://www.youtube.com/watch?v=9Gh4YE6Ck9g)
 
 Ansichten für die Pumpen von [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component):
 

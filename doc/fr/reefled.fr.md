@@ -4,7 +4,7 @@
 
 ReefLed avec ha-reef-card en action :
 
-[![Regarder la vidéo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Regarder la vidéo](https://img.youtube.com/vi/pA49z8QjTN4/0.jpg)](https://www.youtube.com/watch?v=pA49z8QjTN4)
 
 Les ReefLed **G1** (RSLED50, RSLED90, RSLED160) et **G2** (RSLED60, RSLED115,
 RSLED170) sont prises en charge, ainsi que les [LED virtuelles](#led-virtuelle).

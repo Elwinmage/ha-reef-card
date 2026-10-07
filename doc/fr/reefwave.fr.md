@@ -4,7 +4,7 @@
 
 ReefWave avec ha-reef-card en action :
 
-[![Regarder la vidéo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Regarder la vidéo](https://img.youtube.com/vi/sYVeE0zV3eo/0.jpg)](https://www.youtube.com/watch?v=sYVeE0zV3eo)
 
 Les ReefWave **RSWAVE25** et **RSWAVE45** sont prises en charge.
 
