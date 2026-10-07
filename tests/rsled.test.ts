@@ -1197,6 +1197,11 @@ describe("RSLedBeam", () => {
     expect(is_dark(true, 5, none)).toBe(false);
     expect(is_dark(true, null, lit)).toBe(false);
     expect(is_dark(true, undefined, none)).toBe(true);
+    // The moon alone lights the lamp, not with the lamp off
+    expect(is_dark(true, 0, { white: 0, blue: 0, moon: 20 })).toBe(false);
+    expect(is_dark(true, null, { white: 0, blue: 0, moon: 20 })).toBe(false);
+    expect(is_dark(false, 0, { white: 0, blue: 0, moon: 20 })).toBe(true);
+    expect(is_dark(true, 0, { white: 0, blue: 0, moon: 0 })).toBe(true);
   });
 
   it("beam_light(): from the colour when a G2 reports no channel", async () => {
@@ -1220,6 +1225,10 @@ describe("RSLedBeam", () => {
     expect(beam_light(none, null, 15000)).toEqual(P.light_color(0, 0, 0));
     expect(beam_light({ white: 0, blue: 0, moon: 50 }, 0, 15000)).toEqual(
       P.light_color(0, 0, 50),
+    );
+    // 0 % intensity: the moon's light, whatever white and blue were read
+    expect(beam_light({ white: 30, blue: 60, moon: 20 }, 0, 15000)).toEqual(
+      P.light_color(0, 0, 20),
     );
 
     // A G2 whose white/blue sensors are unknown: a coloured beam
@@ -1347,9 +1356,9 @@ describe("RSLedBeam", () => {
     );
   });
 
-  it("no beam at 0 % intensity, even with the moon lit", async () => {
+  it("no beam with nothing lit; the moon alone lights it", async () => {
     at("15:00");
-    const dark = makeLed({ moon: 30, intensity: 0 });
+    const dark = makeLed({ moon: 0, intensity: 0 });
     const root = await mount(makeElement(RSLedBeam, dark, {}));
     const lens = root.querySelector(".lens_off")!;
     expect(lens.getAttribute("cx")).toBe(String(BEAM_DEFAULTS.lens.cx));
@@ -1362,6 +1371,16 @@ describe("RSLedBeam", () => {
     );
     expect(lit.querySelector(".lens_off")).toBeNull();
     expect(lit.querySelector(".beam_pool")).not.toBeNull();
+    // 0 % intensity, the moon at 30 %: the moon's beam
+    const moon = await mount(
+      makeElement(RSLedBeam, makeLed({ moon: 30, intensity: 0 }), {}),
+    );
+    expect(moon.querySelector(".lens_off")).toBeNull();
+    expect(moon.querySelector(".beam_pool")).not.toBeNull();
+    const stop = moon.querySelector("linearGradient stop:nth-child(2)")!;
+    expect(stop.getAttribute("stop-color")).toBe(
+      P.rgb_css(P.light_color(0, 0, 30).rgb),
+    );
   });
 
   it("the G2 lens, from the model's geometry", async () => {

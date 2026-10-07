@@ -2,8 +2,10 @@
  * ReefLED beam: the cone of light under the lamp.
  *
  * Its colour and opacity follow the light currently produced (white, blue
- * and moon channels). At 0 % intensity (or with the lamp off) there is no
- * beam, even with the moon lit, and the lens of the picture is greyed out.
+ * and moon channels). The moon is independent of the intensity: at 0 %
+ * intensity with the moon lit, the beam is the moon's. With the lamp off,
+ * or nothing lit, there is no beam and the lens of the picture is greyed
+ * out.
  * Inside it: the current intensity, the name of today's program and a
  * chart of that program over the day, with a red marker at the current
  * time, written under the chart. In weather mode the time of the weather's
@@ -50,8 +52,8 @@ export const BEAM_DEFAULTS = {
 };
 
 /**
- * Whether the lamp produces no daylight: off, or at 0 % intensity. The moon
- * alone does not make a beam.
+ * Whether the lamp produces no light: off, or at 0 % intensity with its
+ * moon off. The moon has its own level: lit alone, it makes a beam.
  * @param on: whether the lamp is on
  * @param intensity: overall intensity in %, null when not reported
  * @param levels: level of each channel, in %, used without intensity
@@ -59,10 +61,10 @@ export const BEAM_DEFAULTS = {
 export function is_dark(
   on: boolean,
   intensity: number | null | undefined,
-  levels: { white: number; blue: number },
+  levels: { white: number; blue: number; moon?: number },
 ): boolean {
   const main = intensity ?? Math.max(levels.white, levels.blue);
-  return !on || main <= 0;
+  return !on || (main <= 0 && !(Number(levels.moon) > 0));
 }
 
 /**
@@ -85,6 +87,11 @@ export function beam_light(
   by_colour: boolean = false,
 ): { rgb: RGB; alpha: number } {
   const power = Number(intensity ?? 0);
+  // At 0 % intensity only the moon is lit, whatever white and blue were
+  // last read back
+  if (intensity !== null && intensity !== undefined && power <= 0) {
+    return light_color(0, 0, levels.moon);
+  }
   const no_mix = levels.white <= 0 && levels.blue <= 0;
   if (power > 0 && kelvin && (by_colour || no_mix)) {
     return {
