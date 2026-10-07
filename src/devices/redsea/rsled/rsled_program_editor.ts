@@ -2045,7 +2045,9 @@ export class RSLedProgramEditor extends LitElement {
     const channels = format_channels(this.mode);
     return html`<div class="panel" @click=${(e: Event) => e.stopPropagation()}>
       <div class="header">
-        <span class="title">${i18n._("led_program")}</span>
+        <span class="title"
+          >${i18n._("led_program")} ${this.led?.display_name?.() ?? ""}</span
+        >
         <select
           class="day"
           @change=${(e: Event) =>

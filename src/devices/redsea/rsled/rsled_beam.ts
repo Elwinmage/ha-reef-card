@@ -29,7 +29,9 @@ import {
   format_minutes,
   kelvin_rgb,
   light_color,
+  program_format,
   rgb_css,
+  wb_to_kelvin_program,
 } from "./rsled_program";
 import { chart_scale, program_chart } from "./rsled_chart";
 
@@ -272,6 +274,11 @@ export class RSLedBeam extends RSLedElement {
           yesterday,
           ticks: true,
           clouds: this.led?.clouds?.(this.led?.today?.()) ?? null,
+          // A G1 program: its colour zones, as the editor shows them
+          kelvin:
+            program_format(today) === "wb"
+              ? wb_to_kelvin_program(today, this.led?.g1_model?.())
+              : null,
         })}
       </g>
       ${

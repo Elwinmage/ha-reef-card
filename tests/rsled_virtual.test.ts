@@ -294,6 +294,25 @@ describe("RSLedVirtual", () => {
     expect(dev.program_targets()).toEqual([]);
   });
 
+  it("a G1 grouped with a G2 shows its program in kelvin, as its group", () => {
+    const dev = new RSLed160() as any;
+    dev.device = {
+      elements: [{ model: "RSLED160", primary_config_entry: "e1" }],
+    };
+    dev.has_white_blue = () => true;
+    dev.get_entity = () => ({ attributes: { data: G1 } });
+    // With a G2: one intensity curve and its colours
+    dev.linked = () => [LED_G1A, LED_G2];
+    const mixed = dev.program(1);
+    expect(P.program_format(mixed)).toBe("kelvin");
+    expect(mixed.white).toBeUndefined();
+    // Alone, or with G1 only: its white/blue
+    dev.linked = () => [LED_G1A, LED_G1B];
+    expect(P.program_format(dev.program(1))).toBe("wb");
+    dev.linked = () => [];
+    expect(dev.program(1)).toEqual(G1);
+  });
+
   it("a lamp of a group writes its program to each lamp of the group", () => {
     const dev = new RSLed160() as any;
     dev.device = {

@@ -50,6 +50,11 @@ export interface ChartOptions {
    * caller draws them itself, over what it adds (the editor's handles).
    */
   labels?: boolean;
+  /**
+   * Program whose colour zones label the chart, when not the one drawn:
+   * a G1's (white/blue) in kelvin, its zones shown over its curves.
+   */
+  kelvin?: DayProgram | null;
 }
 
 /**
@@ -289,7 +294,7 @@ export function program_chart(
     <line class="chart_axis" x1="${x}" y1="${y + h}" x2="${x + w}"
       y2="${y + h}"></line>
     ${ticks}
-    ${opts.labels === false ? "" : kelvin_labels(box, opts.today)}
+    ${opts.labels === false ? "" : kelvin_labels(box, opts.kelvin ?? opts.today)}
   `;
 }
 

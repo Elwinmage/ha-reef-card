@@ -1212,6 +1212,9 @@ describe("RSLedBeam", () => {
     const root = await mount(makeElement(RSLedBeam, dev, { name: "beam" }));
     expect(root.querySelectorAll(".chart_curve").length).toBe(3);
     expect(root.querySelector(".now_marker")).not.toBeNull();
+    // A G1 program: its white/blue curves, labelled with its colour zones
+    // as the editor shows them
+    expect(root.querySelector(".kelvin_labels .kelvin_label")).not.toBeNull();
     const texts = [...root.querySelectorAll("text")].map((t) =>
       t.textContent?.trim(),
     );

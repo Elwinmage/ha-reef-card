@@ -1023,6 +1023,18 @@ describe("RSLedProgramEditor", () => {
     expect(ed.points.white[1].m).toBe(780);
   });
 
+  it("names the lamp in its title", async () => {
+    const ed = await mountEditor({ ...makeLed(), display_name: () => "Left" });
+    expect(
+      ed.shadowRoot.querySelector(".header .title").textContent.trim(),
+    ).toMatch(/Left$/);
+    // A lamp without a name: the title alone
+    const bare = await mountEditor(makeLed());
+    expect(
+      bare.shadowRoot.querySelector(".header .title").textContent.trim(),
+    ).toBe("Program");
+  });
+
   it("saves the day, or every day, through redsea.request", async () => {
     const led = makeLed();
     const ed = await mountEditor(led);

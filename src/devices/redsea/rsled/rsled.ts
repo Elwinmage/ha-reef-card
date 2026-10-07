@@ -117,12 +117,17 @@ export class RSLed extends RSDevice {
   }
 
   /**
-   * Program of a weekday, from the `data` attribute of its entity.
+   * Program of a weekday, from the `data` attribute of its entity. A G1
+   * grouped with a G2 is driven in kelvin, as its group: its program is
+   * shown and edited so (one intensity curve and its colours).
    * @param weekday: 1 (Monday) .. 7 (Sunday)
    */
   program(weekday: number): DayProgram | null {
     const data = this.get_entity(this.program_key(weekday))?.attributes?.data;
-    return normalize_program(data, weekday, !this.has_white_blue());
+    const prog = normalize_program(data, weekday, !this.has_white_blue());
+    return this.has_white_blue() && this.grouped_with_g2()
+      ? wb_to_kelvin_program(prog, this.g1_model())
+      : prog;
   }
 
   /**
