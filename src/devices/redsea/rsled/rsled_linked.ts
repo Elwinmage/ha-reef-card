@@ -1,0 +1,171 @@
+/**
+ * Lamps of a group: a vertical list of thumbnails, bottom right of the view,
+ * in the group order (top to bottom). Tapping one shows that lamp's own
+ * card. On a lamp of the group, the lamp itself is circled in red and cannot
+ * be tapped.
+ *
+ * The list comes from the `leds` attribute of the `linked_leds` sensor of
+ * the virtual lamp, or of a lamp of the group: [{hwid, name, model, g2,
+ * offset, entry_id}, …] (empty for a lamp alone: nothing is shown).
+ *
+ * A staggered group (one lamp at least starting late) shows each lamp's
+ * sunrise offset under its name: +0 min, +5 min…
+ *
+ * Example mapping:
+ *   linked: { name: "linked_leds", type: "rsled-linked", stateObj: null,
+ *             css: {...bottom right...} }
+ */
+import { css, html, TemplateResult } from "lit";
+
+import { RSLedElement } from "./rsled_element";
+
+/** One lamp linked to a virtual ReefLED, as the integration describes it. */
+export interface LinkedLed {
+  /** Hardware id: what the card navigates to */
+  hwid: string;
+  name: string;
+  model?: string;
+  /** Whether the lamp is a G2 (kelvin/intensity only) */
+  g2?: boolean;
+  /** Config entry of the lamp: the device_id of redsea services */
+  entry_id?: string | null;
+  /** Minutes its day starts late (staggered sunrise); null without /offset */
+  offset?: number | null;
+}
+
+/**
+ * Sunrise offset of a lamp, as shown under its name ("" when unknown).
+ * @param lamp: the lamp
+ */
+export function offset_label(lamp: LinkedLed): string {
+  const offset = lamp.offset;
+  return typeof offset === "number" && Number.isFinite(offset)
+    ? `+${Math.round(offset)} min`
+    : "";
+}
+
+/** Thumbnail of each generation. */
+export const LINKED_THUMBS = {
+  g1: new URL("../../../img/redsea/RSLED/rsled_g1_thumb.png", import.meta.url),
+  g2: new URL("../../../img/redsea/RSLED/rsled_g2_thumb.png", import.meta.url),
+};
+
+export class RSLedLinked extends RSLedElement {
+  static override styles = css`
+    :host {
+      display: block;
+    }
+    .linked {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      max-height: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .linked::-webkit-scrollbar {
+      display: none;
+    }
+    .lamp {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 2px 0;
+      transition: background 0.2s;
+    }
+    .lamp:hover {
+      background: rgba(127, 127, 127, 0.15);
+    }
+    .lamp.current {
+      cursor: default;
+      outline: 2px solid var(--error-color, #db4437);
+      outline-offset: -2px;
+    }
+    .lamp.current:hover {
+      background: none;
+    }
+    .lamp img {
+      width: 82%;
+      height: auto;
+      display: block;
+    }
+    .lamp .offset {
+      color: #c99a10;
+      font-weight: 600;
+    }
+    .lamp span {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--rs-label-font, 10px);
+      color: var(--secondary-text-color, #777);
+    }
+  `;
+
+  /** The lamps listed, from the device. */
+  lamps(): LinkedLed[] {
+    return this.led?.linked?.() ?? [];
+  }
+
+  /** Hardware id of the lamp whose card this is (none on a virtual LED). */
+  current(): string | null {
+    return this.led?.current_hwid?.() ?? null;
+  }
+
+  /** Re-render only when the list changes. */
+  protected override signature(): string {
+    return JSON.stringify(this.lamps()) + "|" + this.current();
+  }
+
+  /**
+   * Show the card of a linked lamp.
+   * @param lamp: the lamp tapped
+   */
+  show(lamp: LinkedLed): void {
+    if (!lamp?.hwid) return;
+    this.dispatchEvent(
+      new CustomEvent("show-device", {
+        bubbles: true,
+        composed: true,
+        detail: { hwid: String(lamp.hwid) },
+      }),
+    );
+  }
+
+  protected override _render(_style?: string): TemplateResult {
+    const lamps = this.lamps();
+    if (!lamps.length) return html``;
+    const current = this.current();
+    // Offsets are shown for a staggered group only
+    const staggered = lamps.some((l) => (l.offset ?? 0) > 0);
+    return html`<div class="linked">
+      ${lamps.map(
+        (lamp) =>
+          html`<div
+            class="lamp ${lamp.hwid === current ? "current" : ""}"
+            title="${lamp.name}${lamp.model ? ` (${lamp.model})` : ""}"
+            @click=${(ev: Event) => {
+              ev.stopPropagation();
+              // This lamp's own card is the one shown
+              if (lamp.hwid !== current) this.show(lamp);
+            }}
+          >
+            <img
+              alt="${lamp.name}"
+              src="${lamp.g2 ? LINKED_THUMBS.g2 : LINKED_THUMBS.g1}"
+            />
+            <span>${lamp.name}</span>
+            ${staggered && offset_label(lamp)
+              ? html`<span class="offset">${offset_label(lamp)}</span>`
+              : ""}
+          </div>`,
+      )}
+    </div>`;
+  }
+}

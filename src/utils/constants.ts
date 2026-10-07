@@ -51,6 +51,33 @@ export const MAINTENANCE_INTERVAL_INFIX = "_interval_";
  */
 export const MAINTENANCE_WARNING_RATIO = 0.2;
 
+// ─── Energy backup ────────────────────────────────────────────────────────────
+
+/**
+ * `model_id` published by reefbeatEnergyBackup for its Home Assistant device
+ * (see MODEL_ID in its device_info.py). It never changes, whatever the
+ * battery or the display name.
+ */
+export const ENERGY_BACKUP_MODEL_ID = "reefbeat-energy-backup";
+
+/**
+ * Model the energy backup view is registered under: its custom element tag
+ * derives from it ("reefbeat-energybackup"), and so does the key of its
+ * options in the card configuration.
+ */
+export const ENERGY_BACKUP_MODEL = "ENERGYBACKUP";
+
+/** Custom element of Power Flow Card Plus, which draws the power flows. */
+export const POWER_FLOW_CARD_TAG = "power-flow-card-plus";
+
+/** Project page of Power Flow Card Plus. */
+export const POWER_FLOW_CARD_URL =
+  "https://github.com/flixlix/power-flow-card-plus";
+
+/** Link opening Power Flow Card Plus in the HACS of the user. */
+export const POWER_FLOW_CARD_HACS_URL =
+  "https://my.home-assistant.io/redirect/hacs_repository/?owner=flixlix&repository=power-flow-card-plus&category=plugin";
+
 // ─── Device domains ───────────────────────────────────────────────────────────
 
 /**
@@ -59,6 +86,12 @@ export const MAINTENANCE_WARNING_RATIO = 0.2;
  * and the skimmer — same firmware, same Gizwits product key, API cannot
  * tell them apart — so the user declares which one through a `pump_role`
  * select entity, and the card reads it back to pick the right display.
+ *
+ * The integration also records that role as the `model_id` of the device
+ * in the registry: an entity has no state once its device is disabled in
+ * Home Assistant, the registry entry is still there. The card falls back
+ * on it (see utils/common role_of()), so `role_to_model` keys are matched
+ * against both.
  */
 export interface ModelOverride {
   /** `translation_key` of the entity carrying the role (ex: "pump_role") */
@@ -101,14 +134,22 @@ export interface KnownDeviceDomain {
    * (Red Sea's convention) when a domain does not declare its own.
    */
   power_translation_key?: string;
+  /**
+   * `model_id` of the devices to keep, mapped to the model their view is
+   * registered under. A domain shared with unrelated devices needs this:
+   * `mqtt` covers every MQTT device of the installation, and only the ones
+   * publishing a known `model_id` are ours. When declared, a device whose
+   * `model_id` is not listed is ignored, and the mapped model replaces the
+   * free-text `model`, which a publisher may reword at any time.
+   */
+  model_ids?: Record<string, string>;
 }
 
 /**
  * Registry of integrations this card knows how to list devices for.
  *
- * Adding a new manufacturer (or a new virtual integration, ex: the
- * reefbeatEnergyBackup MQTT service) is a one line addition here — nothing
- * else in the card needs to know the domain name, since `DeviceList` and
+ * Adding a new manufacturer is a one line addition here — nothing else in
+ * the card needs to know the domain name, since `DeviceList` and
  * `RSDevice.tag_for_model()` both read it from this table.
  */
 export const KNOWN_DEVICE_DOMAINS: Record<string, KnownDeviceDomain> = {
@@ -131,6 +172,15 @@ export const KNOWN_DEVICE_DOMAINS: Record<string, KnownDeviceDomain> = {
           skimmer: "DC Skimmer",
         },
       },
+    },
+  },
+  // reefbeatEnergyBackup publishes its entities over MQTT discovery, so its
+  // device belongs to the `mqtt` domain along with every other MQTT device:
+  // the stable `model_id` it publishes (see device_info.py) tells it apart.
+  mqtt: {
+    tag_prefix: "reefbeat",
+    model_ids: {
+      [ENERGY_BACKUP_MODEL_ID]: ENERGY_BACKUP_MODEL,
     },
   },
 };

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ReefLed - a day in a minute</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #f4f5f7;
+        color: #222;
+        font-family: Roboto, "Segoe UI", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      #controls {
+        width: min(591px, 100%);
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        gap: 8px 10px;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        font-size: 14px;
+      }
+      #controls button,
+      #controls select {
+        font: inherit;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid #c8ccd2;
+        background: #fff;
+        cursor: pointer;
+      }
+      #controls #play {
+        min-width: 72px;
+        background: #c55b5a;
+        border-color: #c55b5a;
+        color: #fff;
+      }
+      #clock {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: 18px;
+      }
+      #time {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+      #models {
+        justify-self: end;
+      }
+      #models a {
+        color: #c55b5a;
+        text-decoration: none;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      #models a.on {
+        background: #c55b5a;
+        color: #fff;
+      }
+      #host {
+        width: min(591px, 100%);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <button id="play">Pause</button>
+      <select id="speed" title="Length of the day">
+        <option value="30">a day in 30 s</option>
+        <option value="60" selected>a day in 1 min</option>
+        <option value="120">a day in 2 min</option>
+        <option value="300">a day in 5 min</option>
+      </select>
+      <span id="clock">00:00</span>
+      <span id="models">
+        <a id="g1" href="?model=g1">G1</a>
+        <a id="g2" href="?model=g2">G2</a>
+      </span>
+      <input id="time" type="range" min="0" max="1439" step="1" value="0" />
+    </div>
+    <div id="host"></div>
+    <script type="module" src="./dist/rsled_demo.js"></script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 /**
  * Tests for the ambiguous-model handling in RSDevice.render():
  *   - AMDCRunner shows a role picker while Aqua Medic's pump_role select
- *     entity is unset ("unknown"), instead of its own "in development" view.
+ *     entity is unset ("unknown"), instead of its own view.
  *   - Picking a role calls the select service on that entity.
  *   - Once the role resolves to a different concrete device (DC Skimmer),
  *     rendering is delegated to it automatically, with no re-selection of
@@ -16,11 +16,10 @@ import { RSDevice } from "../src/devices/device";
 import { AMDCSkimmer } from "../src/devices/aquamedic/dcskimmer/dcskimmer";
 // Registers aquamedic-dcrunner, aquamedic-dcskimmer and the other tags.
 import "../src/devices/index";
-import i18n from "../src/translations/myi18n";
 
-// The still-unimplemented "in development" banner every stub device falls
-// back to when its model is not ambiguous / already resolved to itself.
-const DEV_PLANNED_TEXT = i18n._("dev_planned");
+// Marker of the device's own view: the picture every Aqua Medic view draws
+// once its model is not ambiguous / already resolved to itself.
+const OWN_VIEW_MARKER = "am-dcrunner.png";
 
 //----------------------------------------------------------------------------//
 //   Helpers
@@ -105,7 +104,7 @@ describe("ambiguous model — role picker", () => {
     const device = makeDCRunner("unknown");
     const result = markup(device.render());
     expect(result).toContain('id="pump_role_select"');
-    expect(result).not.toContain(DEV_PLANNED_TEXT);
+    expect(result).not.toContain(OWN_VIEW_MARKER);
   });
 
   it("also shows the picker when no role entity exists yet", () => {
@@ -139,17 +138,25 @@ describe("ambiguous model — role picker", () => {
 });
 
 describe("ambiguous model — resolved view", () => {
-  it("renders its own (in development) view once the role matches it", () => {
+  it("renders its own view once the role matches it", () => {
     const device = makeDCRunner("return");
     const result = markup(device.render());
     expect(result).not.toContain('id="pump_role_select"');
-    expect(result).toContain(DEV_PLANNED_TEXT);
+    expect(result).toContain(OWN_VIEW_MARKER);
   });
 
   it("delegates to AMDCSkimmer once the role says skimmer", () => {
     const device = makeDCRunner("skimmer");
     const result = device.render();
     expect(result.values[0]).toBeInstanceOf(AMDCSkimmer);
+  });
+
+  it("keeps the delegate up to date between two renders", () => {
+    const device = makeDCRunner("skimmer");
+    const delegate = device.render().values[0];
+    const next = makeHass("skimmer");
+    device.hass = next;
+    expect(delegate.hass).toBe(next);
   });
 
   it("reuses the same delegate instance across renders", () => {
@@ -164,7 +171,7 @@ describe("ambiguous model — resolved view", () => {
     device.render();
     device._hass = makeHass("return");
     const result = markup(device.render());
-    expect(result).toContain(DEV_PLANNED_TEXT);
+    expect(result).toContain(OWN_VIEW_MARKER);
   });
 });
 
@@ -292,9 +299,9 @@ describe("ambiguous model — delegate with no registered tag", () => {
       const result = markup(device.render());
       // "testdomain-nonexistentmodel" is registered nowhere: create_device()
       // returns null, and _render_delegate() falls through rather than
-      // returning it — this instance's own (unimplemented) view shows
+      // returning it — this instance's own view shows
       // instead of a blank card.
-      expect(result).toContain(DEV_PLANNED_TEXT);
+      expect(result).toContain(OWN_VIEW_MARKER);
     } finally {
       delete KNOWN_DEVICE_DOMAINS["testdomain"];
     }

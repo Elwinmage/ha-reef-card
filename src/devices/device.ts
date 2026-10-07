@@ -18,6 +18,7 @@ import { MyElement } from "../base/element";
 import { SafeEval } from "../utils/SafeEval";
 import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "../utils/constants";
 import { ambiguous_model_of, domain_of, AmbiguousModel } from "../utils/common";
+import { device_maintenance_status } from "../utils/maintenance";
 
 import { dialogs_device } from "./device.dialogs";
 
@@ -84,6 +85,9 @@ export class RSDevice extends LitElement {
   // tell a role change apart from any other hass update and schedule a
   // re-render — nothing else watches that entity's state.
   private _last_ambiguous_role?: string;
+
+  // Pictures _render_disabled_roles() draws, see _role_pictures().
+  private _role_pictures_cache: string[] | null = null;
 
   // Animations too: a device can put a class such as `blink-alert` on its own
   // background picture, and those keyframes live in MyElement's stylesheet,
@@ -215,6 +219,15 @@ export class RSDevice extends LitElement {
         !ambiguous.role ||
         !ambiguous.override.role_to_model[ambiguous.role]
       ) {
+        // Disabled in Home Assistant with a role the registry does not
+        // carry either: there is nothing to pick — the role entity is
+        // disabled too — so say why, over every picture it could be.
+        if (this.is_disabled()) {
+          return this._render_disabled_roles(
+            ambiguous.domain,
+            ambiguous.override,
+          );
+        }
         return this._render_role_picker(
           ambiguous.override,
           ambiguous.entity_id,
@@ -391,6 +404,63 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Background picture of each concrete device an ambiguous model can turn
+   * out to be, read from the view registered for it. Looked up once: the
+   * views of a model do not change.
+   * @param domain: the integration domain (ex: "aquamedic")
+   * @param override: the domain's ModelOverride for this raw model
+   * @return one picture per distinct model that has a view and a picture
+   */
+  private _role_pictures(domain: string, override: ModelOverride): string[] {
+    if (this._role_pictures_cache === null) {
+      const pictures: string[] = [];
+      for (const model of new Set(Object.values(override.role_to_model))) {
+        const Element = customElements.get(
+          RSDevice.tag_for_model(domain, model),
+        ) as (new () => RSDevice) | undefined;
+        const picture = Element
+          ? new Element().initial_config?.background_img
+          : undefined;
+        if (picture) {
+          pictures.push(String(picture));
+        }
+      }
+      this._role_pictures_cache = pictures;
+    }
+    return this._role_pictures_cache;
+  }
+
+  /**
+   * Render a device that is disabled in Home Assistant and whose role is
+   * not known: the "disabled" banner, over the greyed pictures of every
+   * device it could be, side by side.
+   *
+   * The role normally survives the disabling through the device registry
+   * (see utils/common role_of()), and the device then draws its own
+   * picture. This is what is left for a device disabled before its role
+   * was ever declared, or one registered by a version of the integration
+   * that did not record it yet.
+   * @param domain: the integration domain (ex: "aquamedic")
+   * @param override: the domain's ModelOverride for this raw model
+   * @return the template of the disabled view
+   */
+  private _render_disabled_roles(
+    domain: string,
+    override: ModelOverride,
+  ): TemplateResult {
+    return html`
+      <div class="device_bg">
+        <div class="device_roles_disabled">
+          ${this._role_pictures(domain, override).map(
+            (picture) => html`<img alt="" src="${picture}" />`,
+          )}
+        </div>
+        <p class="disabled_in_ha">${i18n._("disabledInHa")}</p>
+      </div>
+    `;
+  }
+
+  /**
    * Persist the role picked from _render_role_picker() by calling the role
    * entity's select service directly — this device has no other way to
    * reach it, since it carries no `set_config_value()`-style user config.
@@ -421,6 +491,12 @@ export class RSDevice extends LitElement {
           el.disabled_by = fresh.disabled_by;
           re_render = true;
         }
+        // The role of an ambiguous model is read from the registry when
+        // its entity is gone (see utils/common role_of()): keep it fresh
+        // too. The role check below turns a change into a re-render.
+        if (fresh && fresh.model_id !== el.model_id) {
+          el.model_id = fresh.model_id;
+        }
       }
     }
 
@@ -432,6 +508,13 @@ export class RSDevice extends LitElement {
     if (ambiguous && ambiguous.role !== this._last_ambiguous_role) {
       this._last_ambiguous_role = ambiguous.role;
       re_render = true;
+    }
+
+    // A delegate (see _render_delegate()) is the device actually on screen:
+    // it has to follow the states too, or its elements freeze on the values
+    // they had when the role was picked.
+    if (this._delegate) {
+      this._delegate.hass = obj;
     }
 
     for (const element in this._elements) {
@@ -539,6 +622,105 @@ export class RSDevice extends LitElement {
   }
 
   /**
+   * Key this device's options are stored under in the card configuration
+   * (conf > model > devices > key).
+   *
+   * The stable id of the device (see DeviceInfo.uid), so renaming it in
+   * Home Assistant keeps its options. A device without one (built by hand,
+   * not through DeviceList) falls back to its name, as before.
+   * @return the key, or "" when the device is unknown
+   */
+  config_device_key(): string {
+    return this.device?.uid || this.device?.name || "";
+  }
+
+  /**
+   * Read this device's options from the `devices` map of its model.
+   *
+   * Looked up under its stable id first; a configuration written before
+   * that id was used still holds them under the device name, and stays
+   * readable until the editor rewrites it (see writable_device_config()).
+   * @param devices: the `devices` map of the model, when there is one
+   * @return the options to merge, or null when the device has none
+   */
+  private device_config_entry(devices: any): any {
+    if (!devices || typeof devices !== "object" || !this.device) {
+      return null;
+    }
+    const uid = this.device.uid;
+    if (uid && devices[uid] && typeof devices[uid] === "object") {
+      // `name` only labels the entry for whoever reads the YAML: it is not
+      // an option of the device, and must not reach its mapping.
+      const { name: _label, ...options } = devices[uid];
+      return options;
+    }
+    const name = this.device.name;
+    if (name && devices[name] && typeof devices[name] === "object") {
+      return devices[name];
+    }
+    return null;
+  }
+
+  /**
+   * Copy of the card configuration ready to receive an option of this
+   * device, with the entry to write it in.
+   *
+   * Every device-level write goes through here, so they all agree on where
+   * the options live. The entry is stored under the stable id of the
+   * device; options still stored under its name are moved there on the
+   * way, and so is a `device` option pinning the card by name. The entry
+   * keeps the name as a label, refreshed on each write, so the YAML stays
+   * readable.
+   * @return the configuration and the device entry inside it, or null when
+   *         the device or its model is unknown
+   */
+  writable_device_config(): { config: any; entry: any } | null {
+    const model = this.config_model();
+    const key = this.config_device_key();
+    if (!model || !key) {
+      return null;
+    }
+    const config = JSON.parse(JSON.stringify(this.user_config ?? {}));
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    if (!is_map(config.conf)) config.conf = {};
+    if (!is_map(config.conf[model])) config.conf[model] = {};
+    if (!is_map(config.conf[model].devices)) config.conf[model].devices = {};
+    const devices = config.conf[model].devices;
+
+    const name = this.device?.name;
+    if (name && name !== key) {
+      // Options written before the stable id was used: move them over
+      if (!is_map(devices[key]) && is_map(devices[name])) {
+        devices[key] = devices[name];
+        delete devices[name];
+      }
+      // A card pinned to this device by its name follows it too
+      if (config.device === name) {
+        config.device = key;
+      }
+    }
+    if (!is_map(devices[key])) devices[key] = {};
+    if (name && name !== key) {
+      devices[key].name = name;
+    }
+    return { config, entry: devices[key] };
+  }
+
+  /**
+   * Tell the editor the card configuration changed.
+   * @param config: the new card configuration
+   */
+  protected fire_config_changed(config: any): void {
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  /**
    * Merge basic device onfiguraiton with user configuration for final configuration
    */
   update_config(): void {
@@ -556,14 +738,9 @@ export class RSDevice extends LitElement {
         }
 
         // Apply device-specific configuration
-        if (
-          "devices" in device_conf &&
-          this.device.name in device_conf.devices
-        ) {
-          this.config = merge(
-            this.config,
-            this.user_config.conf[model].devices[this.device.name],
-          );
+        const entry = this.device_config_entry(device_conf.devices);
+        if (entry) {
+          this.config = merge(this.config, entry);
         }
       }
     }
@@ -632,6 +809,51 @@ export class RSDevice extends LitElement {
     const key = this._power_translation_key();
     if (!this._hass || !this.entities[key]) return false;
     return this._hass.states[this.entities[key].entity_id]?.state !== "off";
+  }
+
+  /**
+   * Devices whose maintenance tasks belong to this card device: the id of
+   * every Home Assistant device behind it, plus its name. Tasks of its
+   * sub-devices (dosing heads, pumps) are reached through their root device,
+   * or through the name when `via_device` is not declared.
+   * @return the ids and names to filter the maintenance tasks on
+   */
+  maintenance_device_ids(): string[] {
+    const selection: string[] = [];
+    for (const el of this.device?.elements ?? []) {
+      if (el?.id) {
+        selection.push(el.id);
+      }
+    }
+    if (this.device?.name) {
+      selection.push(this.device.name);
+    }
+    return selection;
+  }
+
+  /**
+   * Worst status of the maintenance tasks of this device, with the warning
+   * window the user configured for the maintenance overview. Muted tasks
+   * never raise it.
+   * @return null without any task, else "overdue", "warning" or "ok"
+   */
+  maintenance_status(): "ok" | "warning" | "overdue" | null {
+    const ratio = Number((this.user_config as any)?.maintenance?.warning_ratio);
+    return device_maintenance_status(
+      this._hass,
+      this.maintenance_device_ids(),
+      Number.isFinite(ratio) && ratio > 0 && ratio < 1 ? ratio : undefined,
+    );
+  }
+
+  /**
+   * Tell whether this device has maintenance tasks to show. The maintenance
+   * shortcut hides itself otherwise (older integration, device without any
+   * task in the catalogue).
+   * @return true when at least one maintenance task belongs to this device
+   */
+  has_maintenance_tasks(): boolean {
+    return this.maintenance_status() !== null;
   }
 
   /*
@@ -1036,29 +1258,12 @@ export class RSDevice extends LitElement {
    * @param value: the value to store
    */
   set_config_value(key: string, value: unknown): void {
-    const model = this.config_model();
-    const newVal = {
-      conf: {
-        [model]: {
-          devices: {
-            [this.device.name]: { [key]: value },
-          },
-        },
-      },
-    };
-    let newConfig = JSON.parse(JSON.stringify(this.user_config));
-    try {
-      newConfig.conf[model].devices[this.device.name][key] = value;
-    } catch {
-      newConfig = merge(newConfig, newVal);
+    const target = this.writable_device_config();
+    if (!target) {
+      return;
     }
-    this.dispatchEvent(
-      new CustomEvent("config-changed", {
-        detail: { config: newConfig },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    target.entry[key] = value;
+    this.fire_config_changed(target.config);
   }
 
   /**
@@ -1145,33 +1350,17 @@ export class RSDevice extends LitElement {
   }
 
   handleChangedDeviceEvent(changedEvent) {
-    const value = changedEvent.currentTarget.checked;
-    const model = this.config_model();
-    const newVal = {
-      conf: {
-        [model]: {
-          devices: {
-            [this.device.name]: {
-              elements: { [changedEvent.target.id]: { disabled_if: value } },
-            },
-          },
-        },
-      },
-    };
-    let newConfig = JSON.parse(JSON.stringify(this.user_config));
-    try {
-      newConfig.conf[model].devices[this.device.name].elements[
-        changedEvent.target.id
-      ].disabled_if = value;
-    } catch {
-      newConfig = merge(newConfig, newVal);
+    const target = this.writable_device_config();
+    if (!target) {
+      return;
     }
-    const messageEvent = new CustomEvent("config-changed", {
-      detail: { config: newConfig },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(messageEvent);
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    const entry = target.entry;
+    if (!is_map(entry.elements)) entry.elements = {};
+    const id = changedEvent.target.id;
+    if (!is_map(entry.elements[id])) entry.elements[id] = {};
+    entry.elements[id].disabled_if = changedEvent.currentTarget.checked;
+    this.fire_config_changed(target.config);
   }
 }
 

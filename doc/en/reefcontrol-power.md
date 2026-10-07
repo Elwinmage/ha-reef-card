@@ -249,11 +249,12 @@ The options are stored under the model as Home Assistant reports it:
 
 ```yaml
 type: custom:reef-card
-device: MY-RSPOWER
+device: "210987654321" # stable id of the device (its name works too)
 conf:
   RSPOWER6:
     devices:
-      MY-RSPOWER:
+      "210987654321":
+        name: MY-RSPOWER # label only
         compact_probes: false
         sockets:
           socket_1:

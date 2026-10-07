@@ -9,6 +9,8 @@ import type { HassEntity } from "./homeassistant";
 export interface MainDevice {
   value: string;
   text: string;
+  /** Stable id of the device (see DeviceInfo.uid) */
+  uid?: string;
 }
 
 export interface DeviceInfo {
@@ -21,12 +23,22 @@ export interface DeviceInfo {
    * KNOWN_DEVICE_DOMAINS.group_by_config_entry.
    */
   key?: string;
+  /**
+   * Stable identity of the device: the id its integration registers it
+   * under (the hardware id for Red Sea, the device id for Aqua Medic).
+   * Unlike `name` it survives a rename in Home Assistant, and unlike `key`
+   * it survives removing and adding the integration again, so this is what
+   * the card configuration is stored under.
+   */
+  uid?: string;
   elements: import("./homeassistant").HassDevice[];
 }
 
 export interface SelectDevice {
   value: string;
   text: string;
+  /** Stable id of the device (see DeviceInfo.uid) */
+  uid?: string;
 }
 
 export interface UserConfig {

@@ -260,6 +260,29 @@ describe("ReefCard — render() re_render=true", () => {
     card.render();
     expect(card._set_current_device).toHaveBeenCalledWith("cfg-001");
   });
+
+  it("follows a pinned device by its stable id once renamed", () => {
+    const card = makeReadyCard();
+    card.re_render = true;
+    card.user_config = { device: "hw-123456" };
+    card.select_devices = [
+      { value: "cfg-000", text: "Other", uid: "hw-000000" },
+      { value: "cfg-001", text: "Renamed pump", uid: "hw-123456" },
+    ];
+    card._set_current_device = vi.fn();
+    card.render();
+    expect(card._set_current_device).toHaveBeenCalledWith("cfg-001");
+  });
+
+  it("leaves the current device alone when the pinned one is unknown", () => {
+    const card = makeReadyCard();
+    card.re_render = true;
+    card.user_config = { device: "Ghost" };
+    card.select_devices = [{ value: "cfg-001", text: "MyPump" }];
+    card._set_current_device = vi.fn();
+    expect(() => card.render()).not.toThrow();
+    expect(card._set_current_device).not.toHaveBeenCalled();
+  });
 });
 describe("ReefCard — _set_current_device()", () => {
   it("sets current_device to no_device when id is 'unselected'", () => {
@@ -584,7 +607,7 @@ describe("ReefCardEditor — device_conf()", () => {
     expect(() => editor.render()).not.toThrow();
   });
 
-  it("returns empty template when get_by_name returns undefined", () => {
+  it("returns empty template when the configured device is unknown", () => {
     const editor = makeEditor();
     editor._hass = makeHass();
     editor._config = { device: "Ghost" };
@@ -604,15 +627,14 @@ describe("ReefCardEditor — device_conf()", () => {
     editor._hass = makeHass();
     editor._config = { device: "Pump" };
     editor.first_init = false;
-    editor.select_devices = [];
+    editor.select_devices = [{ value: "cfg-001", text: "Pump" }];
     const deviceNoModel = {
       name: "Pump",
       elements: [{ primary_config_entry: "cfg-001" }],
     };
     editor.devices_list = {
       main_devices: [],
-      devices: {},
-      get_by_name: () => deviceNoModel,
+      devices: { "cfg-001": deviceNoModel },
     };
     editor.requestUpdate = vi.fn();
     expect(() => editor.render()).not.toThrow();
@@ -625,11 +647,10 @@ describe("ReefCardEditor — device_conf()", () => {
     editor._hass = makeHass();
     editor._config = { device: "Pump" };
     editor.first_init = false;
-    editor.select_devices = [];
+    editor.select_devices = [{ value: "cfg-001", text: "Pump" }];
     editor.devices_list = {
       main_devices: [],
-      devices: {},
-      get_by_name: () => deviceInfo,
+      devices: { "cfg-001": deviceInfo },
     };
     editor.requestUpdate = vi.fn();
 
@@ -651,11 +672,10 @@ describe("ReefCardEditor — device_conf()", () => {
     editor._hass = makeHass();
     editor._config = { device: "Pump" };
     editor.first_init = false;
-    editor.select_devices = [];
+    editor.select_devices = [{ value: "cfg-001", text: "Pump" }];
     editor.devices_list = {
       main_devices: [],
-      devices: {},
-      get_by_name: () => deviceInfo,
+      devices: { "cfg-001": deviceInfo },
     };
     editor.requestUpdate = vi.fn();
 
@@ -720,7 +740,25 @@ describe("ReefCardEditor — handleChangedEvent()", () => {
     expect(events[0].detail.config.device).toBeUndefined();
   });
 
-  it("sets config.device to option.text and dispatches config-changed when selectedIndex>0", () => {
+  it("sets config.device to the stable id of the picked device", () => {
+    const select = document.createElement("select");
+    select.innerHTML = `<option value="unselected">--</option><option value="cfg-1">MyPump</option>`;
+    select.selectedIndex = 1;
+    const fakeSR = { getElementById: (_id: string) => select };
+    const editor = makeEditorWithShadowRoot(fakeSR, { device: "" });
+    editor.select_devices = [
+      { value: "cfg-1", text: "MyPump", uid: "hw-123456" },
+    ];
+
+    const events: CustomEvent[] = [];
+    editor.addEventListener("config-changed", (e: Event) =>
+      events.push(e as CustomEvent),
+    );
+    (editor as any).handleChangedEvent(new Event("change"));
+    expect(events[0].detail.config.device).toBe("hw-123456");
+  });
+
+  it("sets config.device to option.text for a device without a stable id", () => {
     const select = document.createElement("select");
     select.innerHTML = `<option value="unselected">--</option><option value="cfg-1">MyPump</option>`;
     select.selectedIndex = 1;

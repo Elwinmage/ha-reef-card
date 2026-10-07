@@ -473,8 +473,31 @@ describe("RSMaintenance device filter", () => {
 
     expect(config).toEqual({
       device: "__maintenance__",
-      maintenance: { devices: ["SIMU-RSDOSE4 Head 1"] },
+      // The HA device id, so the filter survives a rename
+      maintenance: { devices: ["dev_head1"] },
     });
+    document.body.removeChild(elt);
+  });
+
+  it("stores the name of a device missing from the registry", async () => {
+    elt.setConfig({ device: "__maintenance__" });
+    elt.isEditorMode = true;
+    document.body.appendChild(elt);
+    await elt.updateComplete;
+
+    let config: any = null;
+    elt.addEventListener("config-changed", (e: any) => {
+      config = e.detail.config;
+    });
+
+    // First box: Ghost, whose task has no device in the registry
+    const box = elt.shadowRoot.querySelectorAll(
+      ".maint-device-option input",
+    )[0];
+    box.checked = true;
+    box.dispatchEvent(new Event("change"));
+
+    expect(config.maintenance.devices).toEqual(["Ghost"]);
     document.body.removeChild(elt);
   });
 

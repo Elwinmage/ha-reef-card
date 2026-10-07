@@ -28,6 +28,21 @@ export default css`
     font-size: 14px;
   }
 
+  /* Inside a device dialog: the dialog is always white, whatever the theme,
+     so the list brings its own card background to stay readable. */
+  .maint-root.embedded {
+    min-width: 300px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 8px 10px 12px 10px;
+    border-radius: 12px;
+    background: var(--card-background-color, #1c1c1c);
+  }
+
+  .maint-root.embedded .maint-header {
+    justify-content: flex-end;
+  }
+
   /* ── Header ─────────────────────────────────────────────────────────── */
 
   .maint-header {

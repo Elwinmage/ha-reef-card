@@ -56,7 +56,8 @@ export class ClickImage extends MyElement {
       if (icon === "state") {
         const obj = this.get_entity(this.conf.name);
         if (obj.state === "off") {
-          iconColor = "#666666";
+          // A dark picture needs a lighter "off" colour to stay visible
+          iconColor = (this.conf as any)?.off_color || "#666666";
         }
         return html`
           <ha-state-icon

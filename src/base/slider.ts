@@ -63,6 +63,20 @@ export class Slider extends MyElement {
   /** Whether the user is currently dragging */
   private _dragging = false;
 
+  /**
+   * Value just committed, shown until the entity reports it.
+   *
+   * Without it the thumb jumps back to the old value between the release
+   * and the state update coming back from Home Assistant, then forward
+   * again: the slider is optimistic instead. The hold is bounded, so a
+   * value the device refused does not stay on screen.
+   */
+  private _pending: number | null = null;
+  private _pendingTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** How long a committed value is held without confirmation, in ms. */
+  static readonly PENDING_HOLD_MS = 5000;
+
   constructor() {
     super();
   }
@@ -79,7 +93,11 @@ export class Slider extends MyElement {
     const attrs = this.stateObj.attributes ?? {};
     const min = this.conf.min ?? attrs.min ?? 0;
     const max = this.conf.max ?? attrs.max ?? 100;
-    const value = this._displayValue ?? (Number(this.stateObj.state) || 0);
+    const reported = Number(this.stateObj.state) || 0;
+    if (this._pending !== null && reported === this._pending) {
+      this._clearPending();
+    }
+    const value = this._displayValue ?? this._pending ?? reported;
     const unit = this.conf.unit ?? attrs.unit_of_measurement ?? "";
     const pct = ((value - min) / (max - min)) * 100;
 
@@ -172,6 +190,14 @@ export class Slider extends MyElement {
     const value = this._displayValue;
     this._displayValue = null;
 
+    // Keep showing the new value until the entity catches up
+    this._clearPending();
+    this._pending = value;
+    this._pendingTimer = setTimeout(() => {
+      this._clearPending();
+      this.requestUpdate();
+    }, Slider.PENDING_HOLD_MS);
+
     if (this._debounce) clearTimeout(this._debounce);
     this._debounce = setTimeout(() => {
       this._hass?.callService("number", "set_value", {
@@ -179,5 +205,19 @@ export class Slider extends MyElement {
         value,
       });
     }, 150);
+  }
+
+  /** Forget the committed value: the entity is the truth again. */
+  private _clearPending(): void {
+    this._pending = null;
+    if (this._pendingTimer) {
+      clearTimeout(this._pendingTimer);
+      this._pendingTimer = null;
+    }
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._clearPending();
   }
 }

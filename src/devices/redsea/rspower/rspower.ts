@@ -545,7 +545,7 @@ export class RSPower extends RSDevice {
   }
 
   /**
-   * Persist a socket's colour under conf[model].devices[name].sockets.socket_N.
+   * Persist a socket's colour under conf[model].devices[key].sockets.socket_N.
    * @param socket: the 1-based socket number
    * @param event: the colour input change event
    */
@@ -555,31 +555,34 @@ export class RSPower extends RSDevice {
     if (rgb === null) {
       return;
     }
-    const model = this.config_model();
-    const device_name = this.device?.name;
-    if (!model || !device_name) {
+    const target = this._writable_socket_config(socket);
+    if (!target) {
       return;
     }
-    let new_config = JSON.parse(JSON.stringify(this.user_config ?? {}));
-    new_config = merge(new_config, {
-      conf: {
-        [model]: {
-          devices: {
-            [device_name]: { sockets: { ["socket_" + socket]: {} } },
-          },
-        },
-      },
-    });
-    new_config.conf[model].devices[device_name].sockets[
-      "socket_" + socket
-    ].color = rgb;
-    this.dispatchEvent(
-      new CustomEvent("config-changed", {
-        detail: { config: new_config },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    target.socket_conf.color = rgb;
+    this.fire_config_changed(target.config);
+  }
+
+  /**
+   * Copy of the card configuration ready to receive an option of a socket,
+   * with the socket entry to write it in (see writable_device_config()).
+   * @param socket: the 1-based socket number
+   * @return the configuration and the socket entry inside it, or null when
+   *         the strip is unknown
+   */
+  private _writable_socket_config(
+    socket: number,
+  ): { config: any; socket_conf: any } | null {
+    const target = this.writable_device_config();
+    if (!target) {
+      return null;
+    }
+    const is_map = (value: any) => value !== null && typeof value === "object";
+    const entry = target.entry;
+    if (!is_map(entry.sockets)) entry.sockets = {};
+    const key = "socket_" + socket;
+    if (!is_map(entry.sockets[key])) entry.sockets[key] = {};
+    return { config: target.config, socket_conf: entry.sockets[key] };
   }
 
   // ── Pending schedules ─────────────────────────────────────────────────
@@ -967,25 +970,11 @@ export class RSPower extends RSDevice {
    */
   private _handle_socket_link_change(socket: number, event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    const model = this.config_model();
-    const device_name = this.device?.name;
-    if (!model || !device_name) {
+    const target = this._writable_socket_config(socket);
+    if (!target) {
       return;
     }
-
-    let new_config = JSON.parse(JSON.stringify(this.user_config ?? {}));
-    new_config = merge(new_config, {
-      conf: {
-        [model]: {
-          devices: {
-            [device_name]: { sockets: { ["socket_" + socket]: {} } },
-          },
-        },
-      },
-    });
-
-    const socket_conf =
-      new_config.conf[model].devices[device_name].sockets["socket_" + socket];
+    const socket_conf = target.socket_conf;
     if (value) {
       socket_conf.linked_device = value;
       // A ReefRun pump is pictured by its job, which is readable now but not
@@ -1020,13 +1009,7 @@ export class RSPower extends RSDevice {
       delete socket_conf.linked_model;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("config-changed", {
-        detail: { config: new_config },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.fire_config_changed(target.config);
   }
 }
 

@@ -5,6 +5,10 @@ export const COLOR_RS_RGB = "197,91,90";
 export const COLOR_RS_HEX = "#c55b5a";
 export const COLOR_RS_RGBSTR = "rgb(197,91,90)";
 
+// AQUA MEDIC accent: the magenta of the impellers on the product pictures
+export const COLOR_AM_RGB = "200,30,125";
+export const COLOR_AM_HEX = "#c81e7d";
+
 // Error / alert color (bright red)
 export const COLOR_ERROR_HEX = "#ec2330";
 

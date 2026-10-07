@@ -25,6 +25,36 @@ import { KNOWN_DEVICE_DOMAINS, ModelOverride } from "./constants";
 //----------------------------------------------------------------------------//
 
 /**
+ * Find the selectable device a card configuration designates.
+ *
+ * The `device` option holds the stable id of the device (see
+ * DeviceInfo.uid) since the editor writes it; older configurations hold
+ * its display name, and a hand written one may hold its selector key.
+ * The stable id wins, so renaming a device after another one cannot
+ * hijack a configuration.
+ * @param main_devices: the selectable devices (DeviceList.main_devices)
+ * @param selector: the value of the `device` option
+ * @return the matching entry, or undefined
+ */
+export function find_main_device(
+  main_devices: MainDevice[] | null | undefined,
+  selector: unknown,
+): MainDevice | undefined {
+  if (
+    !Array.isArray(main_devices) ||
+    typeof selector !== "string" ||
+    selector.length === 0
+  ) {
+    return undefined;
+  }
+  return (
+    main_devices.find((d) => d.uid === selector) ??
+    main_devices.find((d) => d.value === selector) ??
+    main_devices.find((d) => d.text === selector)
+  );
+}
+
+/**
  * Auto-detect Reefbeat devices created with ha-reefbeat-component and store them in a list.
  * Works also on disabled devices.
  */
@@ -78,6 +108,26 @@ export default class DeviceList {
   }
 
   /**
+   * Find the selectable device a card configuration designates
+   * (see find_main_device()).
+   * @param selector: the value of the `device` option
+   * @return the matching entry of main_devices, or undefined
+   */
+  find_main_device(selector: unknown): MainDevice | undefined {
+    return find_main_device(this.main_devices, selector);
+  }
+
+  /**
+   * Get the hass device a card configuration designates.
+   * @param selector: the value of the `device` option
+   * @return an hass device or undefined if not found
+   */
+  get_by_selector(selector: unknown): DeviceInfo | undefined {
+    const main = this.find_main_device(selector);
+    return main ? this.devices[main.value] : undefined;
+  }
+
+  /**
    * Find the config entry of the device carrying a given hardware id.   *
    * Devices name each other by hardware id on the wire, and the integration
    * stores that id as `model_id` (and as the second half of its `redsea`
@@ -127,6 +177,12 @@ export default class DeviceList {
       const domain = KNOWN_DEVICE_DOMAINS[dev_id[0]];
       if (!domain) continue;
 
+      // A domain shared with unrelated devices (mqtt) only keeps the ones
+      // publishing a known model_id.
+      if (domain.model_ids && !known_model_id(domain.model_ids, dev.model_id)) {
+        continue;
+      }
+
       // Get only main device, not sub or cloud
       const is_sub_device = (domain.sub_device_markers ?? []).some((marker) =>
         dev_id[1].includes(marker),
@@ -144,10 +200,16 @@ export default class DeviceList {
         ? dev.primary_config_entry
         : dev.id;
 
+      // What the integration registers the device under: its hardware id
+      // (Red Sea) or device id (Aqua Medic). A sub-device carries its own,
+      // derived from its parent's, so only a main device gives the uid.
+      const uid = is_sub_device ? undefined : String(dev_id[1]);
+
       if (!is_sub_device && !is_excluded_model) {
         this.main_devices.push({
           value: key,
           text: dev.name,
+          uid,
         });
       }
 
@@ -155,6 +217,7 @@ export default class DeviceList {
         this.devices[key] = {
           name: dev.name,
           key,
+          uid,
           elements: [dev],
         };
       } else {
@@ -164,12 +227,33 @@ export default class DeviceList {
           const device = this.devices[key];
           if (device) {
             device.name = dev.name;
+            // A sub-device may be listed before its main device
+            if (uid) {
+              device.uid = uid;
+            }
           }
         }
       }
     }
     this.main_devices.sort(this.device_compare);
   }
+}
+
+/**
+ * Tell whether a `model_id` is one a domain declares (see
+ * KnownDeviceDomain.model_ids).
+ * @param model_ids: the `model_ids` table of the domain
+ * @param model_id: the `model_id` of a hass device
+ * @return true when the device is one of ours
+ */
+function known_model_id(
+  model_ids: Record<string, string>,
+  model_id: unknown,
+): model_id is string {
+  return (
+    typeof model_id === "string" &&
+    Object.prototype.hasOwnProperty.call(model_ids, model_id)
+  );
 }
 
 /**
@@ -195,14 +279,20 @@ export interface AmbiguousModel {
   override: ModelOverride;
   /** entity_id of the role entity, when one is found on this device */
   entity_id?: string;
-  /** current state of the role entity, when found */
+  /**
+   * current state of the role entity, when found; for a device without a
+   * usable one (disabled in Home Assistant), the role recorded as the
+   * `model_id` of its registry entry
+   */
   role?: string;
 }
 
 /**
  * Looks up whether a device's model is ambiguous for its domain (see
  * KNOWN_DEVICE_DOMAINS model_overrides) and, when it is, finds the role
- * entity and its current state. Shared by resolve_device_model() — which
+ * entity and its current state — or, for a device disabled in Home
+ * Assistant, the role its registry entry still carries (see role_of()).
+ * Shared by resolve_device_model() — which
  * only needs the resolved model — and RSDevice's own render(), which also
  * needs the entity_id to build a role picker and delegate rendering.
  * @param hass: the hass config object, to read entities/states from
@@ -231,8 +321,34 @@ export function ambiguous_model_of(
       override.role_translation_key,
     );
   }
-  const role = entity_id ? hass?.states?.[entity_id]?.state : undefined;
+  const state = entity_id ? hass?.states?.[entity_id]?.state : undefined;
+  const role = role_of(override, state, device.elements?.[0]?.model_id);
   return { domain, raw_model: model, override, entity_id, role };
+}
+
+/**
+ * The role of an ambiguous model: what its role entity says, or else what
+ * the integration recorded in the device registry.
+ *
+ * A device disabled in Home Assistant has no entity left for the frontend:
+ * its role entity carries no state and is not even listed. Its registry
+ * entry stays visible though, and the integration publishes the role there
+ * as `model_id` (see ha-aquamedic-component entity.py resolve_model_id()),
+ * so the card still knows which device it is drawing.
+ * @param override: the domain's ModelOverride for the raw model
+ * @param state: current state of the role entity, when one is found
+ * @param model_id: `model_id` of the device in the registry
+ * @return the role entity's state when it names a known role; else the
+ *         `model_id` when that one does; else the state as it is
+ */
+function role_of(
+  override: ModelOverride,
+  state: string | undefined,
+  model_id: string | undefined,
+): string | undefined {
+  if (state && override.role_to_model[state]) return state;
+  if (model_id && override.role_to_model[model_id]) return model_id;
+  return state;
 }
 
 /**
@@ -272,6 +388,8 @@ function find_role_entity_id(
  * @param device: the DeviceInfo of the selected device
  * @param domain: the integration domain (ex: "aquamedic")
  * @param model: the raw model as reported by the integration
+ * A domain that tells its devices apart by `model_id` (see
+ * KnownDeviceDomain.model_ids) resolves to the model declared for it.
  * @return the concrete model to build a tag for; the raw model when the
  *         domain declares no override for it, or the role is not (yet) set
  */
@@ -281,6 +399,14 @@ export function resolve_device_model(
   domain: string | undefined,
   model: string,
 ): string {
+  // A domain telling its devices apart by model_id names their view too
+  const model_ids = domain
+    ? KNOWN_DEVICE_DOMAINS[domain]?.model_ids
+    : undefined;
+  const model_id = device?.elements?.[0]?.model_id;
+  if (model_ids && known_model_id(model_ids, model_id)) {
+    return model_ids[model_id] as string;
+  }
   const found = ambiguous_model_of(hass, device, domain, model);
   if (!found?.role) return model;
   return found.override.role_to_model[found.role] ?? model;

@@ -31,8 +31,38 @@ Combinado com [ha-reefbeat-component](https://github.com/Elwinmage/ha-reefbeat-c
 dispositivos Redsea (ReefBeat), e o [ha-reef-maintenance-component](https://github.com/Elwinmage/ha-reef-maintenance-component)
 acrescenta à vista de manutenção o equipamento com que o Home Assistant não consegue comunicar.
 
-O suporte para os dispositivos Aqua Medic do [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component)
-está a caminho; as suas tarefas de manutenção já aparecem nessa mesma vista.
+Suporta também as bombas Aqua Medic do [ha-aquamedic-component](https://github.com/Elwinmage/ha-aquamedic-component);
+as suas tarefas de manutenção aparecem nessa mesma vista.
+
+Os fluxos de energia do [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (rede, bateria, bombas) também têm a sua vista, desenhada com o [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
+<!-- generated:demo-videos:start -->
+
+## 🎬 Vídeos de demonstração
+
+<table>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=Qee5LH0T9wQ"><img src="https://img.youtube.com/vi/Qee5LH0T9wQ/0.jpg" alt="Demo ReefDose" width="300"/></a><br/><em>Demo ReefDose</em></td>
+<td><a href="https://www.youtube.com/watch?v=yyNyUSitb1E"><img src="https://img.youtube.com/vi/yyNyUSitb1E/0.jpg" alt="Demo ReefMat" width="300"/></a><br/><em>Demo ReefMat</em></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=Xxv38OPqiGI"><img src="https://img.youtube.com/vi/Xxv38OPqiGI/0.jpg" alt="Demo ReefRun" width="300"/></a><br/><em>Demo ReefRun</em></td>
+<td><a href="https://www.youtube.com/watch?v=Ko46fHonOP4"><img src="https://img.youtube.com/vi/Ko46fHonOP4/0.jpg" alt="Demo Manutenção" width="300"/></a><br/><em>Demo Manutenção</em></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=2R0DHp2eqT4"><img src="https://img.youtube.com/vi/2R0DHp2eqT4/0.jpg" alt="Demo ReefATO+" width="300"/></a><br/><em>Demo ReefATO+</em></td>
+<td><a href="https://www.youtube.com/watch?v=voFobfc7Slk"><img src="https://img.youtube.com/vi/voFobfc7Slk/0.jpg" alt="Demo ReefControl & ReefControl-Power" width="300"/></a><br/><em>Demo ReefControl & ReefControl-Power</em></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=pA49z8QjTN4"><img src="https://img.youtube.com/vi/pA49z8QjTN4/0.jpg" alt="Demo ReefLed" width="300"/></a><br/><em>Demo ReefLed</em></td>
+<td><a href="https://www.youtube.com/watch?v=sYVeE0zV3eo"><img src="https://img.youtube.com/vi/sYVeE0zV3eo/0.jpg" alt="Demo ReefWave" width="300"/></a><br/><em>Demo ReefWave</em></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Demo Aqua Medic" width="300"/></a><br/><em>Demo Aqua Medic</em></td>
+</tr>
+</table>
+
+<!-- generated:demo-videos:end -->
 
 <!-- ecosystem:start -->
 
@@ -68,7 +98,7 @@ Os projetos ReefTech encaixam-se entre si: as integrações trazem o seu equipam
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/icon.png" width="64" alt="ha-reef-card" /></td>
     <td>🪸<br /><b>ha-reef-card</b><br /><i>(este repositório)</i></td>
-    <td>Vista gráfica interativa de cada aparelho no seu painel, e a única forma de editar os programas avançados. Lê as três integrações através do contrato <code>reef_role</code> comum, sem configuração do lado do cartão.</td>
+    <td>Vista gráfica interativa de cada aparelho no seu painel, e a única forma de editar os programas avançados. Lê as três integrações através do contrato <code>reef_role</code> comum, sem configuração do lado do cartão. Desenha também os fluxos de energia do reefbeatEnergyBackup.</td>
     <td>as três integrações</td>
   </tr>
   <tr>
@@ -81,7 +111,7 @@ Os projetos ReefTech encaixam-se entre si: as integrações trazem o seu equipam
     <td><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64" alt="reefbeatEnergyBackup" /></td>
     <td>⚡<br /><a href="https://github.com/Elwinmage/reefbeatEnergyBackup"><b>reefbeatEnergyBackup</b></a></td>
     <td>Backup por bateria em caso de corte. Um pack 24V LiFePO₄ comandado por um Raspberry Pi, com degradação progressiva da velocidade das bombas conforme o estado de carga.</td>
-    <td>sozinho, ou a par do ha-reefbeat-component</td>
+    <td>sozinho, ou a par do ha-reefbeat-component e do ha-reef-card</td>
   </tr>
 </table>
 
@@ -151,7 +181,7 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
   <tr>
     <td rowspan="2"> <a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/reefled.pt.md#reefled">ReefLed</a></td>
     <td>G1</td>
-    <td>🚧</td>
+    <td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g1.png"/></td>
 <td rowspan="2">   
     <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rsled,all label:enhancement" style="text-decoration:none">📆</a>
@@ -160,7 +190,7 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
   </tr>
   <tr>
     <td>G2</td>
-    <td>🚧</td>
+    <td>🧪</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/rsled_g2.png"/></td>
   </tr>
   <tr>
@@ -192,7 +222,7 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
   </tr>
   <tr>
     <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/reefwave.pt.md#reefwave">ReefWave</a></td>
-    <td>RSWAVE</td><td>❌</td>
+    <td>RSWAVE25<br />RSWAVE45</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reefbeat-component/main/doc/img/RSWAVE.png"/></td>
     <td>
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:rswave,all label:enhancement" style="text-decoration:none">📆</a>
@@ -203,8 +233,8 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
     <td colspan="5"><b>Aqua Medic</b> — através de <a href="https://github.com/Elwinmage/ha-aquamedic-component">ha-aquamedic-component</a></td>
   </tr>
   <tr>
-    <td rowspan="3">Aqua Medic</td>
-    <td>EcoDrift / SmartDrift x.1 / x.3<br />(bomba de circulação)</td><td>❌</td>
+    <td rowspan="3"><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/aquamedic.pt.md#aqua-medic">Aqua Medic</a></td>
+    <td>EcoDrift / SmartDrift x.1 / x.3<br />(bomba de circulação)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/drift.png" width="120"/></td>
     <td rowspan="3">
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquamedic,all label:enhancement" style="text-decoration:none">📆</a>
@@ -212,17 +242,29 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
     </td>
   </tr>
   <tr>
-    <td>DC Runner<br />(bomba de retorno)</td><td>❌</td>
+    <td>DC Runner<br />(bomba de retorno)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/runner.png" width="120"/></td>
   </tr>
   <tr>
-    <td>DC Runner<br />(bomba do escumador)</td><td>❌</td>
+    <td>DC Runner<br />(bomba do escumador)</td><td>✅</td>
     <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-aquamedic-component/main/doc/img/skimmer.png" width="120"/></td>
+  </tr>
+  <tr>
+    <td colspan="5"><b>reefbeatEnergyBackup</b> — através de <a href="https://github.com/Elwinmage/reefbeatEnergyBackup">reefbeatEnergyBackup</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/energybackup.pt.md#energia-de-reserva">Energia de reserva</a></td>
+    <td>Energy Backup System<br />(bateria de reserva)</td><td>✅</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/reefbeatEnergyBackup/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
   </tr>
 </table>
 
 > [!NOTE]
-> A bomba de retorno DC Runner e a bomba do escumador são o mesmo hardware com cabeças diferentes: mesmo firmware, mesma chave de produto Gizwits, entidades idênticas. A integração distingue-as através do seletor **Função da bomba**, e o cartão seguirá essa função.
+> A bomba de retorno DC Runner e a bomba do escumador são o mesmo hardware com cabeças diferentes: mesmo firmware, mesma chave de produto Gizwits, entidades idênticas. A integração distingue-as através do seletor **Função da bomba**, e o cartão segue essa função.
 
 # Índice
 
@@ -236,7 +278,9 @@ Estão todos documentados em conjunto na [página do projeto ReefTech](https://e
 - [ReefMat](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/reefmat.pt.md#reefmat)
 - [ReefRun](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/reefrun.pt.md#reefrun)
 - [ReefWave](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/reefwave.pt.md#reefwave)
+- [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/aquamedic.pt.md#aqua-medic)
 - [Manutenção](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/maintenance.pt.md#manutenção)
+- [Energia de reserva](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/pt/energybackup.pt.md#energia-de-reserva)
 - [FAQ](#faq)
 
 # Instalação
@@ -250,7 +294,7 @@ Clique aqui para aceder diretamente ao repositório no HACS e clique em "Descarr
 Ou pesquise «reef-card» no HACS.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/hacs_search.png" alt="Image">
+<img src="../img/hacs_search.png" alt="Image">
 </p>
 
 # Configuração
@@ -259,10 +303,12 @@ Sem o parâmetro `device`, o cartão deteta automaticamente todos os dispositivo
 
 Para remover a seleção de dispositivo e forçar um específico, defina o parâmetro `device` com o nome do seu dispositivo.
 
+O editor do cartão guarda aí o identificador estável do dispositivo (o seu identificador de hardware) e mantém as opções de cada dispositivo sob esse mesmo identificador: mudar o nome de um dispositivo no Home Assistant não faz perder nada. Uma configuração escrita com o nome do dispositivo continua a funcionar, e passa para o identificador na próxima alteração a partir do editor.
+
 <table>
   <tr>
-<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config_2.png"/></td>
-<td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/doc/img/card_rsdose4_config.png"/></td>
+<td><img src="../img/card_rsdose4_config_2.png"/></td>
+<td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
 

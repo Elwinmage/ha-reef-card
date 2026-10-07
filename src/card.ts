@@ -11,7 +11,11 @@ import { property, state } from "lit/decorators.js";
 import type { SelectDevice, UserConfig, HassConfig } from "./types/index";
 
 import i18n from "./translations/myi18n.js";
-import DeviceList, { domain_of, resolve_device_model } from "./utils/common";
+import DeviceList, {
+  domain_of,
+  find_main_device,
+  resolve_device_model,
+} from "./utils/common";
 import { has_maintenance_entities } from "./utils/maintenance";
 import { MAINTENANCE_DEVICE_ID, MAINTENANCE_TAG } from "./utils/constants";
 
@@ -269,9 +273,15 @@ export class ReefCard extends LitElement {
       if (ReefCard.is_maintenance_selector(this.user_config.device)) {
         this._set_current_device(MAINTENANCE_DEVICE_ID);
       } else {
-        this.select_devices.map((dev) =>
-          this._set_current_device_from_name(dev, this.user_config.device),
+        // The stable id of the device since the editor writes it, its
+        // display name in an older configuration.
+        const pinned = find_main_device(
+          this.select_devices,
+          this.user_config.device,
         );
+        if (pinned) {
+          this._set_current_device(pinned.value);
+        }
       }
       this.current_device.hass = this._hass;
       return html` ${this.messages} ${this.current_device} `;
@@ -340,18 +350,6 @@ export class ReefCard extends LitElement {
       name.toLowerCase() === "maintenance" ||
       name === i18n._("maintenance_view")
     );
-  }
-
-  /**
-   * Set the device  to display according to it's name
-   * this method is called be a loop on all redsea devices
-   * @param dev: the hass device object
-   * @param name: the name of the device in hass
-   */
-  private _set_current_device_from_name(dev: SelectDevice, name: string): void {
-    if (dev["text"] === name) {
-      this._set_current_device(dev["value"]);
-    }
   }
 
   /**

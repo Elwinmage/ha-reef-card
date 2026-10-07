@@ -60,6 +60,13 @@ export class RSMaintenance extends RSDevice {
    */
   public readonly is_maintenance: boolean = true;
 
+  /**
+   * True when the overview is shown inside a device dialog, restricted to
+   * that device: the dialog already carries the title, and its background
+   * is not the card's.
+   */
+  public embedded: boolean = false;
+
   // Pseudo device: no HA device backs this element.
   device = { model: "MAINTENANCE", name: "", elements: null };
 
@@ -754,12 +761,14 @@ export class RSMaintenance extends RSDevice {
     const sorted = sort_maintenance_items(visible, this._sort);
 
     return html`
-      <div class="maint-root">
+      <div class="maint-root ${this.embedded ? "embedded" : ""}">
         <div class="maint-header">
-          <div class="maint-title">
-            <ha-icon icon="mdi:wrench-clock"></ha-icon>
-            ${i18n._("maintenance_view")}
-          </div>
+          ${this.embedded
+            ? ""
+            : html`<div class="maint-title">
+                <ha-icon icon="mdi:wrench-clock"></ha-icon>
+                ${i18n._("maintenance_view")}
+              </div>`}
           ${this._render_counters(all)}
         </div>
         ${this._render_toolbar(all)} ${this._render_list(sorted, options)}
@@ -802,9 +811,10 @@ export class RSMaintenance extends RSDevice {
 
   /**
    * Add/remove a device from the filter and persist the new list.
-   * The readable name is stored rather than the HA device id, so the YAML
-   * configuration stays understandable (the id is used as a fallback for
-   * unnamed devices).
+   * The Home Assistant device id is stored rather than the name, so the
+   * filter survives a rename (the name is the fallback for a task whose
+   * device is missing from the registry). Names written by hand or by an
+   * older version keep matching.
    * @param ref: the device toggled by the user
    * @param checked: the new state of the checkbox
    */
@@ -817,7 +827,7 @@ export class RSMaintenance extends RSDevice {
       (name) => name !== ref.id && name !== ref.name,
     );
     if (checked) {
-      next.push(ref.name || ref.id);
+      next.push(ref.id || ref.name);
     }
     this._update_option("devices", next);
   }

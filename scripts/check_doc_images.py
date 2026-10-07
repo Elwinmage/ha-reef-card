@@ -23,6 +23,16 @@ Problems reported, each with the file and the line of the reference:
             image is broken online even though the file exists locally
   HTTP nnn  a remote image answered with an error (--check-remote only)
 
+A capture that is still to be taken is not a problem: the images listed in
+`doc/img/CAPTURES.md` (their path under `doc/img/`, between backquotes) are
+reported as PENDING while their file is missing, without failing the check.
+Pass --strict to count them as problems, before a release for instance.
+
+The same image is usually referenced several times, by the README and by each
+of its translations. After the per-file report, the missing files are listed
+once each, with the number of references pointing to them: this is the list of
+files to actually create.
+
 A GitHub URL whose ref is not the default branch (`main`) is checked the same
 way, against the working tree: what matters here is the path.
 
@@ -41,6 +51,7 @@ into a pre-commit hook or a CI job.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -50,10 +61,14 @@ from urllib.parse import unquote, urlsplit
 
 # Markdown ![alt](path "title") and HTML <img src="path">
 MD_IMAGE = re.compile(r"!\[[^\]]*\]\(\s*<?([^)\s>]+)")
-HTML_IMAGE = re.compile(r"<img[^>]+?src\s*=\s*[\"']([^\"']+)[\"']", re.I)
+HTML_IMAGE = re.compile(r"<img[^>]+?src\s*=\s*[\"']([^\"']+)[\"']", re.IGNORECASE)
 
 # Folders never scanned for markdown: dependencies and build output
 SKIP_DIRS = {".git", "node_modules", "dist", "build", ".venv", "venv", "__pycache__"}
+
+# Captures to come: `<path under doc/img>.png` entries of this file
+PENDING_FILE = Path("doc") / "img" / "CAPTURES.md"
+PENDING_ENTRY = re.compile(r"`([^`\s]+\.(?:png|jpe?g|gif|webp|svg))`", re.IGNORECASE)
 
 RESET, RED, YELLOW, GREEN, DIM = (
     "\033[0m",
@@ -130,6 +145,16 @@ def parse_github_url(url: str) -> tuple[str, str, str] | None:
     return owner, repo, "/".join(rest)
 
 
+def pending_captures(root: Path) -> set[Path]:
+    """Images announced in doc/img/CAPTURES.md, as resolved paths."""
+    manifest = root / PENDING_FILE
+    if not manifest.is_file():
+        return set()
+    base = manifest.parent.resolve()
+    text = manifest.read_text(encoding="utf-8")
+    return {base / match.group(1) for match in PENDING_ENTRY.finditer(text)}
+
+
 def iter_references(path: Path):
     """Yield (line_number, reference) for every image of a markdown file."""
     with path.open(encoding="utf-8") as handle:
@@ -160,10 +185,31 @@ def default_targets(root: Path) -> list[Path]:
 
 
 def check(
-    path: Path, repo: Repo, check_remote: bool, stats: dict[str, int]
+    path: Path,
+    repo: Repo,
+    check_remote: bool,
+    stats: dict[str, int],
+    pending: set[Path] | None = None,
+    absent: dict[Path, list] | None = None,
 ) -> list[tuple[int, str, str]]:
-    """Return the problems of one file as (line, kind, reference)."""
+    """Return the problems of one file as (line, kind, reference).
+
+    @param pending: captures still to be taken: missing, they are PENDING
+    @param absent: filled with the files that do not exist, keyed by their
+                   resolved path so that a file referenced from several
+                   documents appears once: path -> [kind, reference count]
+    """
     problems: list[tuple[int, str, str]] = []
+    pending = pending or set()
+
+    def missing(file: Path, kind: str = "MISSING") -> str:
+        file = file.resolve()
+        if kind == "MISSING" and file in pending:
+            kind = "PENDING"
+        if absent is not None:
+            absent.setdefault(file, [kind, 0])[1] += 1
+        return kind
+
     for line, ref in iter_references(path):
         target = ref.split("#", 1)[0].split("?", 1)[0]
         if not target or target.startswith("data:"):
@@ -180,13 +226,13 @@ def check(
             if repo.is_self(owner, name):
                 stats["self"] += 1
                 if not (repo.root / rel).exists():
-                    problems.append((line, "MISSING", ref))
+                    problems.append((line, missing(repo.root / rel), ref))
                 continue
             sibling = repo.root.resolve().parent / name
             if sibling.is_dir():
                 stats["sibling"] += 1
                 if not (sibling / rel).exists():
-                    problems.append((line, "SIBLING", ref))
+                    problems.append((line, missing(sibling / rel, "SIBLING"), ref))
                 continue
             # No checkout to look into: only the network can tell
             stats["remote"] += 1
@@ -200,7 +246,8 @@ def check(
             continue
         stats["relative"] += 1
         if not (path.parent / unquote(target)).exists():
-            problems.append((line, "MISSING", ref))
+            file = path.parent / unquote(target)
+            problems.append((line, missing(file), ref))
     return problems
 
 
@@ -245,6 +292,28 @@ def display(path: Path) -> str:
         return str(path)
 
 
+def print_absent(absent: dict[Path, list]) -> None:
+    """List every missing file once, whatever the number of references."""
+    groups = (
+        ("MISSING", RED, "missing image(s)"),
+        ("SIBLING", RED, "missing image(s) in a sibling checkout"),
+        ("PENDING", YELLOW, "capture(s) still to be taken"),
+    )
+    for kind, color, title in groups:
+        # relpath, unlike display(), also reaches a sibling checkout (../repo/...)
+        files = sorted(
+            (os.path.relpath(file), count)
+            for file, (found, count) in absent.items()
+            if found == kind
+        )
+        if not files:
+            continue
+        print(f"{color}{len(files)} {title}:{RESET}")
+        for file, count in files:
+            print(f"   {file} {DIM}({count} reference(s)){RESET}")
+        print()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -266,6 +335,11 @@ def main() -> int:
     parser.add_argument(
         "--verbose", action="store_true", help="list clean files and a breakdown"
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="count the captures still to be taken (CAPTURES.md) as problems",
+    )
     args = parser.parse_args()
 
     root, targets = resolve_targets(args.paths)
@@ -273,19 +347,25 @@ def main() -> int:
     print(f"{DIM}repository {repo.owner}/{repo.name} at {display(root)}{RESET}")
 
     stats = {"relative": 0, "self": 0, "sibling": 0, "remote": 0}
+    pending = set() if args.strict else pending_captures(root)
+    absent: dict[Path, list] = {}
     total = 0
+    waiting = 0
     for path in targets:
         if not path.exists():
             print(f"{RED}no such file: {path}{RESET}")
             total += 1
             continue
-        problems = check(path, repo, args.check_remote, stats)
+        problems = check(path, repo, args.check_remote, stats, pending, absent)
         if not problems:
             if args.verbose:
                 print(f"{GREEN}✓{RESET} {display(path)}")
             continue
-        total += len(problems)
-        print(f"{RED}✗{RESET} {display(path)} {DIM}({len(problems)}){RESET}")
+        late = sum(1 for _, kind, _ in problems if kind == "PENDING")
+        waiting += late
+        total += len(problems) - late
+        mark = f"{YELLOW}…{RESET}" if late == len(problems) else f"{RED}✗{RESET}"
+        print(f"{mark} {display(path)} {DIM}({len(problems)}){RESET}")
         width = max(len(kind) for _, kind, _ in problems)
         for line, kind, ref in problems:
             color = RED if kind in ("MISSING", "SIBLING") else YELLOW
@@ -293,6 +373,7 @@ def main() -> int:
             print(f"   {display(path)}:{line}: {color}{kind:<{width}}{RESET}  {ref}")
 
     print()
+    print_absent(absent)
     if args.verbose or stats["remote"]:
         remote = "probed" if args.check_remote else "skipped, use --check-remote"
         print(
@@ -301,10 +382,16 @@ def main() -> int:
             f"{stats['sibling']} to a sibling checkout, "
             f"{stats['remote']} other URL(s) ({remote}){RESET}"
         )
+    if waiting:
+        print(
+            f"{YELLOW}{waiting} reference(s) to captures still to be taken "
+            f"({PENDING_FILE}){RESET}"
+        )
     if total:
         print(f"{RED}{total} problem(s) found{RESET}")
         return 1
-    print(f"{GREEN}all images resolve{RESET}")
+    done = "all other images resolve" if waiting else "all images resolve"
+    print(f"{GREEN}{done}{RESET}")
     return 0
 
 

@@ -19,6 +19,7 @@ import {
   COLOR_LEVEL_DESIRED_HEX,
   COLOR_RS_RGBSTR,
 } from "../../../utils/colors";
+import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
 
 /** Full-canvas overlay, never catching clicks aimed at what lies below. */
 const OVERLAY_CSS = {
@@ -436,6 +437,13 @@ export const widgets = {
     },
   },
   // Hub-wide buzzer, on the hub's status LED. Opens its settings.
+  // Maintenance tasks of the hub: under the settings cog, level with the mode
+  maintenance_tasks: maintenance_shortcut({
+    flex: "0 0 auto",
+    position: "absolute",
+    top: "1.8%",
+    right: "7%",
+  }),
   buzzer: {
     name: "buzzer_active",
     type: "click-image",

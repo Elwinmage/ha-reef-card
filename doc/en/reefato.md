@@ -295,11 +295,12 @@ The options are stored under the model as Home Assistant reports it:
 
 ```yaml
 type: custom:reef-card
-device: MY-RSATO
+device: "123456789012" # stable id of the device (its name works too)
 conf:
   RSATO+:
     devices:
-      MY-RSATO:
+      "123456789012":
+        name: MY-RSATO # label only
         infinite_tank: true
         external_usage: true
         external_usage_entity: sensor.rodi_flow_meter

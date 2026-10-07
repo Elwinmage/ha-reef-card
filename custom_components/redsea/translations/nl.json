@@ -1,0 +1,2047 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Apparaat al geconfigureerd",
+      "cannot_create": "Kan ReefBeat-apparaat niet aanmaken met de opgegeven parameters"
+    },
+    "error": {
+      "auth_failed": "Authenticatie mislukt, controleer je gegevens",
+      "nothing_detected": "Geen apparaat gedetecteerd"
+    },
+    "flow_title": "ReefBeat configuratie",
+    "step": {
+      "user": {
+        "data": {
+          "add_type": "Kies je toevoegmethode",
+          "cloud_server": "Cloudserver (adres van de simulator)",
+          "disable_supplements": "Supplementen uitschakelen",
+          "hw_model": "Hardware Model",
+          "ip_address": "IP of subnet adres (bijv: 10.0.1.0/255.255.255.0)",
+          "platform": "Platform",
+          "scan_interval": "Scan-interval",
+          "virtual_led": "Nieuwe virtuele LED-controller"
+        },
+        "title": "Nieuw apparaat toevoegen"
+      },
+      "select_devices": {
+        "data": {
+          "ip_address": "Toe te voegen apparaten"
+        },
+        "description": "Alle op het netwerk gevonden apparaten zijn vooraf aangevinkt. Vink apparaten uit die u niet wilt toevoegen en bevestig — alle overige apparaten worden in één keer toegevoegd.",
+        "title": "Gedetecteerde apparaten toevoegen"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ato_sensor_connected": {
+        "name": "Temperatuursensor verbonden"
+      },
+      "battery_level": {
+        "name": "Batterijniveau"
+      },
+      "bundled_heads": {
+        "name": "Gebundelde koppen"
+      },
+      "buzzer_active": {
+        "name": "Buzzer active"
+      },
+      "buzzer_dismissed": {
+        "name": "Buzzer dismissed"
+      },
+      "buzzer_on": {
+        "name": "Zoemer actief"
+      },
+      "cable_connected": {
+        "name": "Cable connected"
+      },
+      "check_sensor": {
+        "name": "Sensor controleren"
+      },
+      "cloud_state": {
+        "name": "Cloud verbindingsstatus"
+      },
+      "connected": {
+        "name": "Leksensor verbonden"
+      },
+      "constant_speed": {
+        "name": "Constante snelheid"
+      },
+      "control_link_up": {
+        "name": "Control hub link"
+      },
+      "ec_sensor_connected": {
+        "name": "EC-sensor verbonden"
+      },
+      "is_calibrated": {
+        "name": "Sensor gekalibreerd"
+      },
+      "is_ec_sensor_connected": {
+        "name": "Is EC-sensor verbonden"
+      },
+      "is_internet_connected": {
+        "name": "Internet connected"
+      },
+      "is_pump_on": {
+        "name": "Staat de pomp aan?"
+      },
+      "is_sensor_error": {
+        "name": "Is sensor in foutstatus?"
+      },
+      "is_temp_enabled": {
+        "name": "Is temperatuur ingeschakeld"
+      },
+      "leak_detector": {
+        "name": "Leak detector"
+      },
+      "missing_pump": {
+        "name": "Pomp ontbreekt"
+      },
+      "missing_sensor": {
+        "name": "Sensor ontbreekt"
+      },
+      "power_link_up": {
+        "name": "Power center link"
+      },
+      "probe_leak_detected": {
+        "name": "{probe} lekkage"
+      },
+      "recalibration_required": {
+        "name": "Kalibratie"
+      },
+      "reconnect_pump": {
+        "name": "Pomp opnieuw verbinden"
+      },
+      "sensor_controlled": {
+        "name": "Aangestuurd door sensor"
+      },
+      "status": {
+        "name": "Status"
+      },
+      "temperature_log_enabled": {
+        "name": "Temperatuurregistratie"
+      },
+      "unclean_sensor": {
+        "name": "Sensor status"
+      },
+      "water_level": {
+        "name": "Waterniveau"
+      },
+      "control_paired": {
+        "name": "Control gekoppeld"
+      },
+      "control_internet_connected": {
+        "name": "Control internet"
+      },
+      "temperature_coherent": {
+        "name": "Temperatuurcoherentie"
+      }
+    },
+    "button": {
+      "advance": {
+        "name": "Vooruit"
+      },
+      "delete_emergency": {
+        "name": "Noodmelding verwijderen"
+      },
+      "delete_pump": {
+        "name": "Pomp verwijderen"
+      },
+      "delete_supplement": {
+        "name": "Supplement verwijderen"
+      },
+      "detect_pump": {
+        "name": "Pomp detecteren en toevoegen"
+      },
+      "ec_calibration_cup": {
+        "name": "EC-kalibratie Volle beker"
+      },
+      "ec_calibration_end": {
+        "name": "EC-kalibratie Beëindigen"
+      },
+      "ec_calibration_skim": {
+        "name": "EC-kalibratie Overschuimen"
+      },
+      "ec_calibration_start": {
+        "name": "EC-kalibratie Starten"
+      },
+      "end_calibration": {
+        "name": "Stop en sla kalibratie op"
+      },
+      "fetch_config": {
+        "name": "Configuratie ophalen"
+      },
+      "fetch_data": {
+        "name": "Gegevens ophalen"
+      },
+      "fill": {
+        "name": "Vullen"
+      },
+      "firmware_update": {
+        "name": "Forceer firmware update"
+      },
+      "led_identify": {
+        "name": "Identificeren"
+      },
+      "get_temperature": {
+        "name": "Temperatuur ophalen"
+      },
+      "probe_get_value": {
+        "name": "{probe} nu uitlezen"
+      },
+      "maint_ato_ec_sensor": {
+        "name": "EC-sensor reinigen"
+      },
+      "maint_ato_return_pump": {
+        "name": "Opvoerpomp reinigen"
+      },
+      "maint_control_probe_calibration_orp": {
+        "name": "Sonde {probe} controleren"
+      },
+      "maint_control_probe_calibration_ph": {
+        "name": "Sonde {probe} kalibreren"
+      },
+      "maint_control_probe_calibration_ec": {
+        "name": "Sonde {probe} kalibreren"
+      },
+      "maint_control_probe_clean": {
+        "name": "Sonde {probe} reinigen"
+      },
+      "maint_control_probe_replace": {
+        "name": "Sonde {probe} vervangen"
+      },
+      "maint_dose_heads_calibration": {
+        "name": "Doseerkop kalibreren"
+      },
+      "maint_dose_heads_replace": {
+        "name": "Doseerkop en slangen vervangen"
+      },
+      "maint_led_fan": {
+        "name": "Stof verwijderen van ventilator en roosters"
+      },
+      "maint_led_lens": {
+        "name": "Lens reinigen"
+      },
+      "maint_mat_carbon_replace": {
+        "name": "Actieve kool vervangen"
+      },
+      "maint_run_pump_motor": {
+        "name": "Motor en rotor reinigen"
+      },
+      "maint_run_pump_strainer": {
+        "name": "Aanzuigzeef reinigen"
+      },
+      "maint_run_skim_fullcup_calibration": {
+        "name": "Fullcup-sensor kalibreren"
+      },
+      "maint_run_skim_overskimming_calibration": {
+        "name": "Overskimming-sensor kalibreren"
+      },
+      "maint_run_skim_rotor": {
+        "name": "Rotor van eiwitafschuimerpomp reinigen"
+      },
+      "maint_run_skim_venturi": {
+        "name": "Venturi en luchtslang reinigen"
+      },
+      "maint_wave_rotor_cages": {
+        "name": "Rotorkooien reinigen"
+      },
+      "manual_head": {
+        "name": "Handmatige dosering"
+      },
+      "new_roll": {
+        "name": "Nieuwe rol"
+      },
+      "port_delete": {
+        "name": "Poort {port} verwijderen"
+      },
+      "preview_save": {
+        "name": "Voorvertoning opslaan"
+      },
+      "preview_set_from_current": {
+        "name": "Stel voorvertoning in van huidig"
+      },
+      "preview_start": {
+        "name": "Start voorvertoning"
+      },
+      "preview_stop": {
+        "name": "Stop voorvertoning"
+      },
+      "reset": {
+        "name": "Opnieuw opstarten"
+      },
+      "resume": {
+        "name": "Hervatten"
+      },
+      "set_calibration_value": {
+        "name": "Stel kalibratievolume in"
+      },
+      "set_supplement": {
+        "name": "Stel nieuw supplement in"
+      },
+      "set_supplement_name": {
+        "name": "Stel nieuwe supplementnaam in"
+      },
+      "start_calibration": {
+        "name": "Start kalibratie"
+      },
+      "start_priming": {
+        "name": "Start voorbereiden (priming)"
+      },
+      "stop_fill": {
+        "name": "Stop vullen"
+      },
+      "stop_priming": {
+        "name": "Stop voorbereiden (priming)"
+      },
+      "test_calibration": {
+        "name": "Test nieuwe kalibratie"
+      },
+      "socket_0_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_1_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_2_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_3_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_4_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_5_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_6_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_7_delete": {
+        "name": "Stopcontact {socket} verwijderen"
+      },
+      "socket_0_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_1_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_2_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_3_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_4_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_5_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_6_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "socket_7_unsubscribe": {
+        "name": "Stopcontact {socket} afmelden"
+      },
+      "install_temperature": {
+        "name": "Temperatuursonde toevoegen"
+      },
+      "remove_temperature": {
+        "name": "Temperatuursonde verwijderen"
+      },
+      "pair_power": {
+        "name": "Power Center koppelen"
+      },
+      "unpair_power": {
+        "name": "Power Center ontkoppelen"
+      },
+      "unpair_control": {
+        "name": "Besturingshub ontkoppelen"
+      }
+    },
+    "light": {
+      "blue": {
+        "name": "Blauw"
+      },
+      "kelvin_intensity": {
+        "name": "Kelvin"
+      },
+      "moon": {
+        "name": "Maan"
+      },
+      "white": {
+        "name": "Wit"
+      }
+    },
+    "number": {
+      "acclimation_duration": {
+        "name": "Acclimatisatie duur"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Acclimatisatie start intensiteit factor"
+      },
+      "ato_tank_volume": {
+        "name": "ATO-reservoirvolume"
+      },
+      "ato_volume_left": {
+        "name": "ATO volume over"
+      },
+      "calibration_dose_value": {
+        "name": "Dosering van kalibratie"
+      },
+      "container_volume": {
+        "name": "Container volume"
+      },
+      "custom_advance_value": {
+        "name": "Waarde vooruit"
+      },
+      "daily_dose": {
+        "name": "Dagelijkse dosering bijwerken"
+      },
+      "dosing_waiting_period": {
+        "name": "Doseer wachttijd"
+      },
+      "maint_ato_ec_sensor_interval_weeks": {
+        "name": "EC-sensor reinigen (weken)"
+      },
+      "maint_ato_return_pump_interval_months": {
+        "name": "Opvoerpomp reinigen (maanden)"
+      },
+      "maint_control_probe_calibration_orp_interval_months": {
+        "name": "Sonde {probe} controleren (maanden)"
+      },
+      "maint_control_probe_calibration_ph_interval_months": {
+        "name": "Sonde {probe} kalibreren (maanden)"
+      },
+      "maint_control_probe_calibration_ec_interval_months": {
+        "name": "Sonde {probe} kalibreren (maanden)"
+      },
+      "maint_control_probe_clean_interval_weeks": {
+        "name": "Sonde {probe} reinigen (weken)"
+      },
+      "maint_control_probe_replace_interval_months": {
+        "name": "Sonde {probe} vervangen (maanden)"
+      },
+      "maint_dose_heads_calibration_interval_days": {
+        "name": "Doseerkop kalibreren (dagen)"
+      },
+      "maint_dose_heads_replace_interval_months": {
+        "name": "Doseerkop en slangen vervangen (maanden)"
+      },
+      "maint_led_fan_interval_months": {
+        "name": "Stof verwijderen van ventilator en roosters (maanden)"
+      },
+      "maint_led_lens_interval_weeks": {
+        "name": "Lens reinigen (weken)"
+      },
+      "maint_mat_carbon_replace_interval_weeks": {
+        "name": "Actieve kool vervangen (weken)"
+      },
+      "maint_run_pump_motor_interval_months": {
+        "name": "Motor en rotor reinigen (maanden)"
+      },
+      "maint_run_pump_strainer_interval_weeks": {
+        "name": "Aanzuigzeef reinigen (weken)"
+      },
+      "maint_run_skim_fullcup_calibration_interval_weeks": {
+        "name": "Fullcup-sensor kalibreren (weken)"
+      },
+      "maint_run_skim_overskimming_calibration_interval_weeks": {
+        "name": "Overskimming-sensor kalibreren (weken)"
+      },
+      "maint_run_skim_rotor_interval_months": {
+        "name": "Rotor van eiwitafschuimerpomp reinigen (maanden)"
+      },
+      "maint_run_skim_venturi_interval_weeks": {
+        "name": "Venturi en luchtslang reinigen (weken)"
+      },
+      "maint_wave_rotor_cages_interval_months": {
+        "name": "Rotorkooien reinigen (maanden)"
+      },
+      "manual_duration": {
+        "name": "Handmatige duur"
+      },
+      "manual_head_volume": {
+        "name": "Handmatig volume"
+      },
+      "moon_day": {
+        "name": "Maandag"
+      },
+      "overskimming_threshold": {
+        "name": "Drempelwaarde over-skimming"
+      },
+      "preview_speed": {
+        "name": "Snelheid voorvertoning"
+      },
+      "save_initial_container_volume": {
+        "name": "Initieel container volume"
+      },
+      "schedule_length": {
+        "name": "Lengte schema"
+      },
+      "shortcut_off_delay": {
+        "name": "Sneltoets UIT vertraging"
+      },
+      "speed": {
+        "name": "Snelheid"
+      },
+      "started_roll_diameter": {
+        "name": "Rol diameter"
+      },
+      "stock_alert_days": {
+        "name": "Voorraad alarm dagen"
+      },
+      "wave_backward_intensity": {
+        "name": "Voorvertoning achterwaartse intensiteit"
+      },
+      "wave_backward_time": {
+        "name": "Voorvertoning achterwaartse tijd"
+      },
+      "wave_forward_intensity": {
+        "name": "Voorvertoning voorwaartse intensiteit"
+      },
+      "wave_forward_time": {
+        "name": "Voorvertoning voorwaartse tijd"
+      },
+      "wave_preview_duration": {
+        "name": "Voorvertoning duur"
+      },
+      "wave_preview_step": {
+        "name": "Voorvertoning stap"
+      },
+      "wave_preview_wave_duration": {
+        "name": "Voorvertoning golfduur"
+      },
+      "temperature_coherence_threshold": {
+        "name": "Drempel temperatuurcoherentie"
+      },
+      "probe_orp_calibration": {
+        "name": "{probe} kalibreren (waarde van de oplossing)"
+      },
+      "probe_temperature_calibration": {
+        "name": "{probe} kalibreren (werkelijke temperatuur)"
+      },
+      "probe_temp_calibration": {
+        "name": "Temperatuur van {probe} kalibreren (werkelijke temperatuur)"
+      },
+      "temperature_calibration": {
+        "name": "Temperatuur kalibreren (werkelijke temperatuur)"
+      },
+      "temperature_desired_range_low": {
+        "name": "Gewenst temperatuurbereik (laag)"
+      },
+      "temperature_desired_range_high": {
+        "name": "Gewenst temperatuurbereik (hoog)"
+      },
+      "temperature_acceptable_range_low": {
+        "name": "Acceptabel temperatuurbereik (laag)"
+      },
+      "temperature_acceptable_range_high": {
+        "name": "Acceptabel temperatuurbereik (hoog)"
+      },
+      "probe_acceptable_range_low": {
+        "name": "Acceptabel bereik {probe} (min)"
+      },
+      "probe_desired_range_low": {
+        "name": "Gewenst bereik {probe} (min)"
+      },
+      "probe_desired_range_high": {
+        "name": "Gewenst bereik {probe} (max)"
+      },
+      "probe_acceptable_range_high": {
+        "name": "Acceptabel bereik {probe} (max)"
+      },
+      "probe_temp_acceptable_range_low": {
+        "name": "Acceptabel temperatuurbereik {probe} (min)"
+      },
+      "probe_temp_desired_range_low": {
+        "name": "Gewenst temperatuurbereik {probe} (min)"
+      },
+      "probe_temp_desired_range_high": {
+        "name": "Gewenst temperatuurbereik {probe} (max)"
+      },
+      "probe_temp_acceptable_range_high": {
+        "name": "Acceptabel temperatuurbereik {probe} (max)"
+      },
+      "leak_buzzer_frequency": {
+        "name": "Frequentie lekzoemer"
+      },
+      "leak_buzzer_duty_cycle": {
+        "name": "Duty cycle lekzoemer"
+      },
+      "danger_buzzer_frequency": {
+        "name": "Frequentie gevaarzoemer"
+      },
+      "danger_buzzer_duty_cycle": {
+        "name": "Duty cycle gevaarzoemer"
+      },
+      "danger_debounce_seconds": {
+        "name": "Ontdender gevaar"
+      },
+      "weather_min_intensity": {
+        "name": "Minimale weerintensiteit"
+      },
+      "weather_max_intensity": {
+        "name": "Maximale weerintensiteit"
+      },
+      "weather_refresh_days": {
+        "name": "Weer vernieuwen (dagen)"
+      },
+      "sunrise_offset": {
+        "name": "Verschuiving zonsopgang"
+      },
+      "staggered_delay": {
+        "name": "Vertraging verschoven zonsopgang"
+      }
+    },
+    "select": {
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "auto": "Auto",
+          "end_of_roll": "Einde rol",
+          "manual": "Handmatig",
+          "timer": "Timer",
+          "other": "Overig",
+          "off": "Uit"
+        }
+      },
+      "model": {
+        "name": "Model"
+      },
+      "position": {
+        "name": "Positie",
+        "state": {
+          "left": "Links",
+          "right": "Rechts"
+        }
+      },
+      "preview_wave_direction": {
+        "name": "Voorvertoning golfrichting",
+        "state": {
+          "alt": "Afwisselend",
+          "fw": "Voorwaarts",
+          "rw": "Achterwaarts"
+        }
+      },
+      "preview_wave_type": {
+        "name": "Voorvertoning golftype",
+        "state": {
+          "nw": "Geen golf",
+          "ra": "Willekeurig",
+          "re": "Regelmatig",
+          "st": "Stap",
+          "su": "Oppervlakte",
+          "un": "Uniform"
+        }
+      },
+      "supplements": {
+        "name": "Supplementen",
+        "state": {
+          "other": "Overig"
+        }
+      },
+      "temperature_fusion_method": {
+        "name": "Temperatuurfusiemethode",
+        "state": {
+          "median": "Mediaan",
+          "mean": "Gemiddelde",
+          "min": "Minimum",
+          "max": "Maximum"
+        }
+      },
+      "probe_ec_unit": {
+        "name": "Eenheid {probe}",
+        "state": {
+          "ec": "Geleidbaarheid (mS/cm)",
+          "ppt": "Saliniteit (ppt)",
+          "sg": "Dichtheid (SG)"
+        }
+      },
+      "weather_period": {
+        "name": "Weerperiode",
+        "state": {
+          "next_week": "Volgende week (voorspelling)",
+          "last_week": "Vorige week (gemeten)"
+        }
+      },
+      "weather_anchor": {
+        "name": "Weerdag in het aquarium",
+        "state": {
+          "place": "Tijd van de plaats",
+          "sunrise": "Uitgelijnd op zonsopgang",
+          "sunset": "Uitgelijnd op zonsondergang",
+          "both": "Uitgerekt tussen op- en ondergang"
+        }
+      }
+    },
+    "sensor": {
+      "acclimation_current_intensity_factor": {
+        "name": "Huidige acclimatisatie-intensiteitsfactor"
+      },
+      "acclimation_duration": {
+        "name": "Acclimatisatie duur"
+      },
+      "acclimation_remaining_days": {
+        "name": "Resterende acclimatisatiedagen"
+      },
+      "acclimation_start_intensity_factor": {
+        "name": "Acclimatisatie start intensiteit factor"
+      },
+      "current_program": {
+        "name": "Huidig programma"
+      },
+      "linked_leds": {
+        "name": "Gekoppelde leds"
+      },
+      "ato_sensor_code": {
+        "name": "Code temperatuursensor"
+      },
+      "ato_sensor_last_adjustment_date": {
+        "name": "Afstellingsdatum sensor"
+      },
+      "ato_sensor_last_installation_date": {
+        "name": "Installatiedatum sensor"
+      },
+      "auto_1": {
+        "name": "Zondag"
+      },
+      "auto_2": {
+        "name": "Maandag"
+      },
+      "auto_3": {
+        "name": "Dinsdag"
+      },
+      "auto_4": {
+        "name": "Woensdag"
+      },
+      "auto_5": {
+        "name": "Donderdag"
+      },
+      "auto_6": {
+        "name": "Vrijdag"
+      },
+      "auto_7": {
+        "name": "Zaterdag"
+      },
+      "auto_dosed_today": {
+        "name": "Vandaag automatisch gedoseerd"
+      },
+      "backup_email": {
+        "name": "Back-up e-mail"
+      },
+      "battery_level": {
+        "name": "Battery level"
+      },
+      "blue": {
+        "name": "Blauw"
+      },
+      "buzzer_cause": {
+        "name": "Buzzer cause"
+      },
+      "cloud_account": {
+        "name": "Gekoppeld aan account",
+        "state": {
+          "none": "Geen"
+        }
+      },
+      "connected_control": {
+        "name": "Paired control hub"
+      },
+      "connected_power": {
+        "name": "Paired power center"
+      },
+      "connected_power_state": {
+        "name": "Paired power center state"
+      },
+      "control_mode": {
+        "name": "Mode",
+        "state": {
+          "auto": "Automatisch",
+          "off": "Uit",
+          "setup": "Instellen",
+          "feeding": "Voeding",
+          "maintenance": "Onderhoud"
+        }
+      },
+      "country": {
+        "name": "Land"
+      },
+      "cup_last_calibration": {
+        "name": "Laatste beker-kalibratie"
+      },
+      "current_level": {
+        "name": "Huidig niveau",
+        "state": {
+          "above": "Boven",
+          "acceptable": "Acceptabel",
+          "below": "Onder",
+          "desired": "Gewenst",
+          "desired_level_1": "Gewenst niveau 1",
+          "desired_level_2": "Gewenst niveau 2"
+        }
+      },
+      "current_read": {
+        "name": "Temperatuur"
+      },
+      "daily_average_usage": {
+        "name": "Gemiddeld dagelijks verbruik"
+      },
+      "daily_dose": {
+        "name": "Dagelijkse dosering"
+      },
+      "daily_doses": {
+        "name": "Dagelijkse doseringen"
+      },
+      "daily_fills_average": {
+        "name": "Gemiddelde dagelijkse vullingen"
+      },
+      "daily_volume_average": {
+        "name": "Gemiddeld dagelijks volume"
+      },
+      "days_till_empty": {
+        "name": "Dagen tot leeg"
+      },
+      "days_till_end_of_roll": {
+        "name": "Dagen tot einde rol"
+      },
+      "doses_today": {
+        "name": "Doseringen vandaag"
+      },
+      "dosing_queue": {
+        "name": "Doseerwachtrij",
+        "state": {
+          "empty": "Leeg"
+        }
+      },
+      "email": {
+        "name": "E-mail"
+      },
+      "fan": {
+        "name": "Ventilator"
+      },
+      "first_name": {
+        "name": "Voornaam"
+      },
+      "flow_rate": {
+        "name": "Debiet"
+      },
+      "head_state": {
+        "name": "Status"
+      },
+      "ip": {
+        "name": "IP-adres"
+      },
+      "language": {
+        "name": "Taal"
+      },
+      "last_alert_message": {
+        "name": "Laatste alarmbericht"
+      },
+      "last_calibration": {
+        "name": "Laatste kalibratie"
+      },
+      "last_fill_date": {
+        "name": "Laatste vulling"
+      },
+      "last_message": {
+        "name": "Laatste bericht"
+      },
+      "last_name": {
+        "name": "Achternaam"
+      },
+      "last_pump_on_cause": {
+        "name": "Oorzaak laatste start"
+      },
+      "leak_sensor_current_read": {
+        "name": "Huidige uitlezing lekkagesensor"
+      },
+      "leak_sensor_status": {
+        "name": "Status leksensor",
+        "state": {
+          "dry": "Droog",
+          "aquarium_water_leak": "Aquariumwaterlek",
+          "rodi_water_leak": "RO/DI-waterlek"
+        }
+      },
+      "led_program": {
+        "name": "LED programma"
+      },
+      "manual_dosed_today": {
+        "name": "Vandaag handmatig gedoseerd"
+      },
+      "max_sockets": {
+        "name": "Max sockets"
+      },
+      "mobile_number": {
+        "name": "Mobiel nummer"
+      },
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "auto": "Auto",
+          "blockage": "Blokkade",
+          "calibration": "Kalibratie",
+          "controller": "Controller",
+          "emergency": "Noodgeval",
+          "empty": "Leeg",
+          "end_of_roll": "Einde rol",
+          "feeding": "Voeren",
+          "high_water": "Hoog waterniveau",
+          "leak": "Lek",
+          "maintenance": "Onderhoud",
+          "malfunction": "Storing",
+          "manual": "Handmatig",
+          "mat_error": "Materiaal fout",
+          "missing_pump": "Pomp ontbreekt",
+          "missing_sensor": "Sensor ontbreekt",
+          "no_ec_sensor": "Geen EC-sensor",
+          "off": "Uit",
+          "overheating": "Oververhitting",
+          "partial_auto": "Semi-automatisch",
+          "preview": "Voorvertoning",
+          "priming": "Voorbereiden (priming)",
+          "pump_timeout": "Pomp time-out",
+          "setup": "Installatie",
+          "setup_error_high": "Installatiefout: te hoog",
+          "setup_error_torn": "Installatiefout: gescheurd",
+          "shortcut_off_delay": "Sneltoets uit-vertraging",
+          "stalled": "Vastgelopen",
+          "timer": "Timer",
+          "torn_mat": "Gescheurd materiaal",
+          "user_test": "Gebruikerstest",
+          "no_roll": "Geen rol"
+        }
+      },
+      "model": {
+        "name": "Model"
+      },
+      "model_type": {
+        "name": "Model region"
+      },
+      "moon_intensity": {
+        "name": "Maanfase intensiteit"
+      },
+      "name": {
+        "name": "Naam"
+      },
+      "next_full_moon": {
+        "name": "Volgende volle maan"
+      },
+      "next_new_moon": {
+        "name": "Volgende nieuwe maan"
+      },
+      "port_consumption": {
+        "name": "Port {port} consumption"
+      },
+      "port_mode": {
+        "name": "Port {port} mode"
+      },
+      "port_name": {
+        "name": "Port {port} name"
+      },
+      "port_state": {
+        "name": "Port {port} state"
+      },
+      "port_type": {
+        "name": "Port {port} type"
+      },
+      "power_temperature": {
+        "name": "Temperature"
+      },
+      "prev_pump_state": {
+        "name": "Vorige pompstatus"
+      },
+      "probe_ec": {
+        "name": "{probe} conductivity"
+      },
+      "probe_leak_status": {
+        "name": "{probe} lekbron",
+        "state": {
+          "dry": "Droog",
+          "aquarium_water_leak": "Aquariumwater",
+          "rodi_water_leak": "Osmosewater"
+        }
+      },
+      "probe_leak_conductivity": {
+        "name": "{probe} geleidbaarheid van het lek"
+      },
+      "probe_ec_value": {
+        "name": "{probe} value"
+      },
+      "probe_last_adjustment": {
+        "name": "{probe} last calibration"
+      },
+      "probe_last_installation": {
+        "name": "{probe} last installation"
+      },
+      "probe_level": {
+        "name": "{probe} level",
+        "state": {
+          "desired": "Optimaal",
+          "acceptable": "Acceptabel",
+          "danger": "Gevaar",
+          "sensor_data_error": "Sensorfout"
+        }
+      },
+      "probe_measurement_unit": {
+        "name": "{probe} display unit"
+      },
+      "probe_name": {
+        "name": "{probe} name"
+      },
+      "probe_orp_value": {
+        "name": "{probe} ORP"
+      },
+      "probe_ph_value": {
+        "name": "{probe} pH"
+      },
+      "probe_ppt": {
+        "name": "{probe} salinity"
+      },
+      "probe_sg": {
+        "name": "{probe} specific gravity"
+      },
+      "probe_status": {
+        "name": "{probe} status"
+      },
+      "probe_temp_level": {
+        "name": "{probe} temperature level",
+        "state": {
+          "desired": "Optimaal",
+          "acceptable": "Acceptabel",
+          "danger": "Gevaar",
+          "sensor_data_error": "Sensorfout"
+        }
+      },
+      "probe_temperature": {
+        "name": "{probe} temperature"
+      },
+      "probe_value": {
+        "name": "{probe} value"
+      },
+      "probe_water_level": {
+        "name": "{probe} waterniveau",
+        "state": {
+          "above": "Boven",
+          "below": "Onder",
+          "desired_level_1": "Gewenst niveau (sensor 1)",
+          "desired_level_2": "Gewenst niveau (sensor 2)",
+          "error": "Sensorfout"
+        }
+      },
+      "pump_blockage_threshold": {
+        "name": "Drempel blokkade"
+      },
+      "pump_consumption": {
+        "name": "Pompverbruik"
+      },
+      "pump_empty_threshold": {
+        "name": "Drempel pomp droog"
+      },
+      "pump_soft_blockage_threshold": {
+        "name": "Drempel gedeeltelijke blokkade"
+      },
+      "pump_speed": {
+        "name": "Pompsnelheid"
+      },
+      "pump_state": {
+        "name": "Pomp status",
+        "state": {
+          "malfunction": "Storing",
+          "pump_on": "Aan",
+          "off": "Uit"
+        }
+      },
+      "remaining_days": {
+        "name": "Resterende dagen"
+      },
+      "remaining_length": {
+        "name": "Resterende lengte"
+      },
+      "s1_average": {
+        "name": "Gemiddelde niveausensor S1"
+      },
+      "s2_average": {
+        "name": "Gemiddelde niveausensor S2"
+      },
+      "schedule_head": {
+        "name": "Doseerkop schema",
+        "state": {
+          "custom": "Aangepast",
+          "daily": "Dagelijks",
+          "hourly": "Per uur",
+          "single": "Eenmalig"
+        }
+      },
+      "skim_last_calibration": {
+        "name": "Laatste afschuim-kalibratie"
+      },
+      "state": {
+        "name": "Staat",
+        "state": {
+          "calibration": "Kalibratie",
+          "dry-run": "Testdraaien",
+          "emergency": "Noodgeval",
+          "feeding": "Voeren",
+          "full-cup": "Beker vol",
+          "locked-rotor": "Geblokkeerde rotor",
+          "maintenance": "Onderhoud",
+          "not-connected": "Niet verbonden",
+          "operational": "Operationeel",
+          "over-skimming": "Over-skimming",
+          "preview": "Voorvertoning",
+          "shortcut-off-delay": "Sneltoets uit-vertraging",
+          "wrong-pump": "Verkeerde pomp"
+        }
+      },
+      "supplement": {
+        "name": "Supplement"
+      },
+      "supplement_program": {
+        "name": "Supplement"
+      },
+      "temperature": {
+        "name": "Temperatuur"
+      },
+      "temperature_probe_status": {
+        "name": "Status temperatuursensor",
+        "state": {
+          "connected": "Verbonden",
+          "disconnected": "Niet verbonden"
+        }
+      },
+      "today_fills": {
+        "name": "Vullingen vandaag"
+      },
+      "today_usage": {
+        "name": "Verbruik vandaag"
+      },
+      "today_volume_usage": {
+        "name": "Volumeverbruik vandaag"
+      },
+      "todays_moon_day": {
+        "name": "Maanstand van vandaag"
+      },
+      "total_fills": {
+        "name": "Totaal aantal vullingen"
+      },
+      "total_usage": {
+        "name": "Totaal verbruik"
+      },
+      "total_volume_usage": {
+        "name": "Verbruik sinds bijvullen"
+      },
+      "type": {
+        "name": "Type",
+        "state": {
+          "return": "Opvoer",
+          "skimmer": "Afschuimer",
+          "unknown": "Onbekend"
+        }
+      },
+      "volume_left": {
+        "name": "Volume over"
+      },
+      "water_level": {
+        "name": "Waterniveau",
+        "state": {
+          "above": "Boven",
+          "acceptable": "Acceptabel",
+          "below": "Onder",
+          "danger": "Gevaar",
+          "desired": "Gewenst",
+          "desired_level_1": "Gewenst niveau 1",
+          "desired_level_2": "Gewenst niveau 2"
+        }
+      },
+      "wave_backward_intensity": {
+        "name": "Achterwaartse intensiteit"
+      },
+      "wave_backward_time": {
+        "name": "Achterwaartse tijd"
+      },
+      "wave_direction": {
+        "name": "Golfrichting",
+        "state": {
+          "alt": "Afwisselend",
+          "fw": "Voorwaarts",
+          "rw": "Achterwaarts"
+        }
+      },
+      "wave_forward_intensity": {
+        "name": "Voorwaartse intensiteit",
+        "state": {
+          "alt": "Afwisselend",
+          "fw": "Voorwaarts",
+          "rw": "Achterwaarts"
+        }
+      },
+      "wave_forward_time": {
+        "name": "Voorwaartse tijd"
+      },
+      "wave_program": {
+        "name": "Golf programma"
+      },
+      "wave_step": {
+        "name": "Stappen"
+      },
+      "wave_type": {
+        "name": "Golf type",
+        "state": {
+          "nw": "Geen golf",
+          "ra": "Willekeurig",
+          "re": "Regelmatig",
+          "st": "Stap",
+          "su": "Oppervlakte",
+          "un": "Uniform"
+        }
+      },
+      "white": {
+        "name": "Wit"
+      },
+      "wifi_quality": {
+        "name": "WIFI signaalkwaliteit",
+        "state": {
+          "poor": "Slecht",
+          "low": "Laag",
+          "medium": "Gemiddeld",
+          "good": "Goed",
+          "excellent": "Uitstekend"
+        }
+      },
+      "wifi_signal": {
+        "name": "WIFI signaalsterkte"
+      },
+      "wifi_ssid": {
+        "name": "WIFI SSID"
+      },
+      "zip_code": {
+        "name": "Postcode"
+      },
+      "socket_0_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_1_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_2_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_3_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_4_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_5_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_6_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_7_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_0_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_1_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_2_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_3_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_4_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_5_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_6_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_7_state": {
+        "name": "Stopcontact {socket} status"
+      },
+      "socket_0_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_1_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_2_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_3_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_4_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_5_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_6_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_7_mode": {
+        "name": "Stopcontact {socket} modus",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "schedule": "Schedule",
+          "sensor": "Sensor",
+          "setup": "Setup"
+        }
+      },
+      "socket_0_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_1_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_2_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_3_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_4_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_5_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_6_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_7_prev_mode": {
+        "name": "Stopcontact {socket} vorige modus"
+      },
+      "socket_0_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_1_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_2_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_3_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_4_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_5_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_6_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "socket_7_consumption": {
+        "name": "Stopcontact {socket} verbruik"
+      },
+      "total_consumption": {
+        "name": "Totaal verbruik"
+      },
+      "connected_control_type": {
+        "name": "Type verbonden control"
+      },
+      "connected_control_status": {
+        "name": "Status verbonden control"
+      },
+      "temperature_fusion": {
+        "name": "Samengevoegde temperatuur"
+      },
+      "temperature_spread": {
+        "name": "Temperatuurspreiding"
+      },
+      "temperature_anomaly_source": {
+        "name": "Bron temperatuuranomalie",
+        "state": {
+          "ok": "OK",
+          "unknown": "Onbekend",
+          "maintenance": "Onderhoud"
+        }
+      },
+      "probe_uid": {
+        "name": "UID van {probe}"
+      },
+      "weather_program": {
+        "name": "Weerprogramma",
+        "state": {
+          "ok": "OK",
+          "error": "Fout"
+        }
+      }
+    },
+    "switch": {
+      "acclimation": {
+        "name": "Acclimatisatie"
+      },
+      "auto_advance": {
+        "name": "Automatisch vooruit"
+      },
+      "auto_fill": {
+        "name": "Automatisch vullen"
+      },
+      "buzzer_enabled": {
+        "name": "Buzzer ingeschakeld"
+      },
+      "cloud_connect": {
+        "name": "Verbinden met cloud"
+      },
+      "device_state": {
+        "name": "Apparaat status"
+      },
+      "dose_compensation": {
+        "name": "Doseringcompensatie"
+      },
+      "enabled": {
+        "name": "Leksensor ingeschakeld"
+      },
+      "fullcup_enabled": {
+        "name": "Beker vol detectie"
+      },
+      "maint_ato_ec_sensor_notify": {
+        "name": "EC-sensor reinigen (meldingen)"
+      },
+      "maint_ato_return_pump_notify": {
+        "name": "Opvoerpomp reinigen (meldingen)"
+      },
+      "maint_control_probe_calibration_orp_notify": {
+        "name": "Sonde {probe} controleren (meldingen)"
+      },
+      "maint_control_probe_calibration_ph_notify": {
+        "name": "Sonde {probe} kalibreren (meldingen)"
+      },
+      "maint_control_probe_calibration_ec_notify": {
+        "name": "Sonde {probe} kalibreren (meldingen)"
+      },
+      "maint_control_probe_clean_notify": {
+        "name": "Sonde {probe} reinigen (meldingen)"
+      },
+      "maint_control_probe_replace_notify": {
+        "name": "Sonde {probe} vervangen (meldingen)"
+      },
+      "maint_dose_heads_calibration_notify": {
+        "name": "Doseerkop kalibreren (meldingen)"
+      },
+      "maint_dose_heads_replace_notify": {
+        "name": "Doseerkop en slangen vervangen (meldingen)"
+      },
+      "maint_led_fan_notify": {
+        "name": "Stof verwijderen van ventilator en roosters (meldingen)"
+      },
+      "maint_led_lens_notify": {
+        "name": "Lens reinigen (meldingen)"
+      },
+      "maint_mat_carbon_replace_notify": {
+        "name": "Actieve kool vervangen (meldingen)"
+      },
+      "maint_run_pump_motor_notify": {
+        "name": "Motor en rotor reinigen (meldingen)"
+      },
+      "maint_run_pump_strainer_notify": {
+        "name": "Aanzuigzeef reinigen (meldingen)"
+      },
+      "maint_run_skim_fullcup_calibration_notify": {
+        "name": "Fullcup-sensor kalibreren (meldingen)"
+      },
+      "maint_run_skim_overskimming_calibration_notify": {
+        "name": "Overskimming-sensor kalibreren (meldingen)"
+      },
+      "maint_run_skim_rotor_notify": {
+        "name": "Rotor van eiwitafschuimerpomp reinigen (meldingen)"
+      },
+      "maint_run_skim_venturi_notify": {
+        "name": "Venturi en luchtslang reinigen (meldingen)"
+      },
+      "maint_wave_rotor_cages_notify": {
+        "name": "Rotorkooien reinigen (meldingen)"
+      },
+      "maintenance": {
+        "name": "Onderhoud"
+      },
+      "moon_phase": {
+        "name": "Maanfase"
+      },
+      "overskimming_enabled": {
+        "name": "Over-skimming"
+      },
+      "port_on_off": {
+        "name": "Poort {port}"
+      },
+      "schedule_enabled": {
+        "name": "Schema ingeschakeld"
+      },
+      "scheduled_advance": {
+        "name": "Gepland vooruit"
+      },
+      "sensor_controlled_switch": {
+        "name": "Sondegestuurd"
+      },
+      "shortcut_emergency": {
+        "name": "Sneltoets noodgeval"
+      },
+      "shortcut_feeding": {
+        "name": "Sneltoets voeren"
+      },
+      "shortcut_maintenance": {
+        "name": "Sneltoets onderhoud"
+      },
+      "slm": {
+        "name": "Volumecontroller"
+      },
+      "use_cloud_api": {
+        "name": "Gebruik cloud-API"
+      },
+      "socket_0_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_1_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_2_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_3_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_4_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_5_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_6_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "socket_7_on_off": {
+        "name": "Stopcontact {socket} schakelaar"
+      },
+      "probe_maintenance": {
+        "name": "Onderhoud {probe}"
+      },
+      "probe_buzzer": {
+        "name": "{probe} zoemer"
+      },
+      "probe_enabled": {
+        "name": "{probe} ingeschakeld"
+      },
+      "probe_notify": {
+        "name": "{probe} meldingen"
+      },
+      "temperature_notifications_enabled": {
+        "name": "Temperatuurmeldingen ingeschakeld"
+      },
+      "temperature_log_enabled": {
+        "name": "Temperatuurlogboek ingeschakeld"
+      },
+      "leak_buzzer_enabled": {
+        "name": "Lekzoemer"
+      },
+      "danger_buzzer_enabled": {
+        "name": "Gevaarzoemer"
+      },
+      "leak_detector_enabled": {
+        "name": "Lekdetector"
+      },
+      "weather_sync": {
+        "name": "GPS-weermodus"
+      },
+      "weather_clouds": {
+        "name": "Weerwolken"
+      },
+      "staggered_sunrise": {
+        "name": "Verschoven zonsopgang"
+      }
+    },
+    "text": {
+      "new_supplement_brand_name": {
+        "name": "Merknaam"
+      },
+      "new_supplement_display_name": {
+        "name": "Weergavenaam supplement"
+      },
+      "new_supplement_name": {
+        "name": "Supplement naam"
+      },
+      "new_supplement_short_name": {
+        "name": "Korte naam supplement"
+      },
+      "port_name": {
+        "name": "Poort {port} naam"
+      },
+      "pump_name": {
+        "name": "Pompnaam"
+      },
+      "socket_0_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_1_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_2_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_3_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_4_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_5_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_6_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "socket_7_name": {
+        "name": "Stopcontact {socket} naam"
+      },
+      "temperature_probe_name": {
+        "name": "Naam van de temperatuursonde"
+      },
+      "weather_location": {
+        "name": "Weerlocatie"
+      }
+    },
+    "time": {
+      "schedule_time": {
+        "name": "Schema tijd"
+      },
+      "weather_sunrise": {
+        "name": "Weer zonsopgang"
+      },
+      "weather_sunset": {
+        "name": "Weer zonsondergang"
+      }
+    },
+    "update": {
+      "firmware_update": {
+        "name": "Firmware update"
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "wifi_change_success": "Wi-Fi-netwerk succesvol gewijzigd. Apparaat bereikbaar op {new_ip}.",
+      "wifi_change_failed_connect": "Kan de nieuwe Wi-Fi-inloggegevens niet naar het apparaat sturen.",
+      "wifi_change_failed_reset": "Kan het apparaat niet herstarten na het versturen van de nieuwe Wi-Fi-inloggegevens.",
+      "wifi_change_failed_rediscover": "Het apparaat is opnieuw opgestart maar niet gevonden op het netwerk. Controleer of het {ssid} heeft bereikt en configureer indien nodig het IP-adres opnieuw.",
+      "wifi_change_failed_unknown": "Onverwachte fout bij het wijzigen van het Wi-Fi-netwerk.",
+      "no_probes": "Deze hub heeft geen sondes om te verwijderen."
+    },
+    "error": {
+      "auth_failed": "Verificatie mislukt, controleer je gegevens",
+      "wifi_scan_failed": "Kan het apparaat niet raadplegen voor beschikbare Wi-Fi-netwerken.",
+      "wifi_no_networks": "Het apparaat meldt geen beschikbare Wi-Fi-netwerken.",
+      "wifi_no_ssid": "Kies een netwerk voordat je verzendt.",
+      "wifi_bad_cidr": "Geen geldige IPv4-CIDR (verwacht bv. 10.0.0.0/24).",
+      "wifi_manual_not_found": "Apparaat niet gevonden op dat subnet. Probeer een andere CIDR of laat het veld leeg om op te geven.",
+      "no_probe_detected": "Geen nieuwe sonde van het gekozen type gedetecteerd. Zet hem in koppelmodus en probeer opnieuw.",
+      "group_min_members": "Kies minstens twee LED's.",
+      "group_duplicate_position": "Elke LED moet precies één positie krijgen."
+    },
+    "progress": {
+      "applying": "Nieuwe Wi-Fi-inloggegevens toepassen en het apparaat op het netwerk lokaliseren..."
+    },
+    "step": {
+      "init": {
+        "data": {
+          "live_config_update": "Live-configuratie-update",
+          "disable_supplements": "Supplementen uitschakelen",
+          "not_virtual": "Niet configureerbaar",
+          "slaves": "LED"
+        },
+        "menu_options": {
+          "settings": "Apparaatinstellingen",
+          "wifi_scan": "Wi-Fi-netwerk wijzigen",
+          "add_probe": "Sonde toevoegen",
+          "del_probe": "Sonde verwijderen",
+          "change_probe": "Sonde vervangen"
+        },
+        "title": "Configuratie"
+      },
+      "settings": {
+        "data": {
+          "live_config_update": "Live-configuratie-update",
+          "disable_supplements": "Supplementen uitschakelen",
+          "intensity_compensation": "Intensiteitscompensatie",
+          "scan_interval": "Verversingsinterval",
+          "not_virtual": "Niet configureerbaar",
+          "slaves": "LED"
+        },
+        "title": "Apparaatinstellingen"
+      },
+      "wifi_scan": {
+        "data": {
+          "wifi_ssid": "Wi-Fi-netwerk",
+          "wifi_password": "Wachtwoord",
+          "wifi_rescan": "Netwerken opnieuw scannen"
+        },
+        "description": "Zichtbaar vanaf het apparaat op {ip}: {count} netwerken. Kies er een en voer het wachtwoord in, of vink 'Netwerken opnieuw scannen' aan en verzend om de lijst te vernieuwen.",
+        "title": "Wi-Fi-netwerk wijzigen"
+      },
+      "wifi_apply": {
+        "title": "Wi-Fi-netwerk wordt gewijzigd"
+      },
+      "wifi_manual_subnet": {
+        "data": {
+          "wifi_manual_subnet": "Subnet-CIDR"
+        },
+        "description": "Het apparaat heeft zich bij {ssid} aangemeld maar is niet gevonden op een van de subnetten waar Home Assistant direct op is aangesloten (geprobeerd: {tried_subnets}). Als je weet op welk netwerk het apparaat is beland en Home Assistant het via een router kan bereiken, voer hier de CIDR in (bv. 10.0.0.0/24). Laat het veld leeg en verzend om op te geven.",
+        "title": "Apparaat op een ander subnet zoeken"
+      },
+      "add_probe": {
+        "title": "Sonde toevoegen",
+        "description": "Zet de sonde in koppelmodus, kies het type en bevestig om te scannen.",
+        "data": {
+          "probe_type": "Sondetype"
+        }
+      },
+      "del_probe": {
+        "title": "Sonde verwijderen",
+        "description": "Selecteer de te verwijderen sonde(s).",
+        "data": {
+          "probes": "Sondes"
+        }
+      },
+      "change_probe": {
+        "title": "Sonde vervangen",
+        "description": "Kies de te vervangen sonde, zet een nieuwe sonde van hetzelfde type in koppelmodus en bevestig. De nieuwe sonde erft de geschiedenis van de oude.",
+        "data": {
+          "old_probe": "Te vervangen sonde"
+        }
+      },
+      "del_probe_confirm": {
+        "title": "Verwijderen bevestigen",
+        "description": "Dit verwijdert de gekozen sonde(s) en al hun entiteiten en geschiedenis permanent: {probes}.\n\nBevestig om door te gaan, of sluit dit venster om te annuleren."
+      },
+      "group_members": {
+        "title": "LED's van de groep",
+        "description": "Kies de ReefLED's die deze virtuele LED samen aanstuurt (minstens twee). Een LED kan maar in één groep zitten.",
+        "data": {
+          "members": "LED's"
+        }
+      },
+      "group_order": {
+        "title": "Volgorde van de LED's",
+        "description": "Volgorde van de LED's in de groep, zoals in de ReefBeat-app: de verschoven zonsopgang begint met de eerste.",
+        "data": {
+          "position_1": "Positie 1",
+          "position_2": "Positie 2",
+          "position_3": "Positie 3",
+          "position_4": "Positie 4",
+          "position_5": "Positie 5",
+          "position_6": "Positie 6",
+          "position_7": "Positie 7",
+          "position_8": "Positie 8",
+          "position_9": "Positie 9",
+          "position_10": "Positie 10"
+        }
+      }
+    }
+  },
+  "selector": {
+    "add_type": {
+      "options": {
+        "cloud_api": "Cloud account",
+        "local_detect": "Lokale detectie",
+        "manual_mode": "Handmatige modus",
+        "virtual_led": "Virtuele Led"
+      }
+    },
+    "ip_address": {
+      "options": {
+        "virtual_led": "Virtuele LED toevoegen"
+      }
+    }
+  },
+  "title": "ReefBeat",
+  "services": {
+    "reset_maintenance": {
+      "name": "Onderhoud resetten",
+      "description": "Een onderhoudstaak markeren als zojuist uitgevoerd voor een apparaat of subapparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Doelapparaat (of subapparaat, bv. RSDOSE-kop, RSRUN-pomp)."
+        },
+        "task_key": {
+          "name": "Taak-id",
+          "description": "Stabiele identifier van de onderhoudstaak (bv. 'ato_ec_sensor', 'run_skim_venturi', 'led_lens')."
+        }
+      }
+    },
+    "get_control_probes": {
+      "name": "Besturingssondes ophalen",
+      "description": "Geeft de sondes (identiteit en actuele waarden) van een gekoppelde RSCONTROL-hub terug, op basis van de hardware-ID.",
+      "fields": {
+        "hwid": {
+          "name": "Hardware-ID van de hub",
+          "description": "De hardware-ID (hwid) van de RSCONTROL-hub, zoals gerapporteerd in de connected_device.hwid van een gekoppelde RSPower."
+        }
+      }
+    },
+    "probe_calibration": {
+      "name": "Sondekalibratie",
+      "description": "Voert een stap uit van de kalibratie van een pH- of EC-sonde van de RSCONTROL: starten, punt, status of stoppen.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De RSCONTROL-hub (configuratie-item)."
+        },
+        "probe_type": {
+          "name": "Sondetype",
+          "description": "Type van de te kalibreren sonde."
+        },
+        "probe_uid": {
+          "name": "Sonde-uid",
+          "description": "Uid van de sonde, zoals de hub die meldt."
+        },
+        "action": {
+          "name": "Stap",
+          "description": "Kalibratiestap."
+        },
+        "point": {
+          "name": "Punt",
+          "description": "Kalibratiepunt (stap \"point\")."
+        },
+        "solution_value": {
+          "name": "Waarde van de oplossing",
+          "description": "Waarde van de kalibratieoplossing (pH, of mS/cm voor EC)."
+        },
+        "solution_rated_temp": {
+          "name": "Referentietemperatuur van de oplossing",
+          "description": "Temperatuur waarbij de waarde van de oplossing geldt, in °C (alleen pH)."
+        }
+      }
+    },
+    "led_convert": {
+      "name": "ReefLED-kleuren omrekenen",
+      "description": "Rekent punten van een G1-ReefLED om tussen wit/blauw en kelvin/intensiteit, met de tabel van het model en de intensiteitscompensatie.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de G1-ReefLED."
+        },
+        "points": {
+          "name": "Punten",
+          "description": "Lijst met punten, elk (kelvin, intensity) of (white, blue)."
+        }
+      }
+    },
+    "led_library": {
+      "name": "ReefLED-bibliotheek weergeven",
+      "description": "Lichtprogramma's uit de cloudbibliotheek van het aquarium van de ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        }
+      }
+    },
+    "led_library_save": {
+      "name": "ReefLED-programma in de bibliotheek opslaan",
+      "description": "Voegt een lichtprogramma toe aan de cloudbibliotheek van de ReefLED, of wijzigt er een.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Naam van het programma in de bibliotheek."
+        },
+        "program": {
+          "name": "Programma",
+          "description": "Dagprogramma in het formaat van de lamp, op de tijdlijn van één dag."
+        },
+        "clouds": {
+          "name": "Wolken",
+          "description": "Wolken van het programma (from, to, intensity), indien aanwezig."
+        },
+        "uid": {
+          "name": "Programma-ID",
+          "description": "Het bibliotheekprogramma om te wijzigen; leeg laten om een nieuw toe te voegen. Red Sea-programma's kunnen niet worden gewijzigd."
+        }
+      }
+    },
+    "led_library_delete": {
+      "name": "ReefLED-bibliotheekprogramma verwijderen",
+      "description": "Verwijdert een programma van de gebruiker uit de cloudbibliotheek van de ReefLED.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        },
+        "uid": {
+          "name": "Programma-ID",
+          "description": "Het te verwijderen programma (geen Red Sea-programma)."
+        }
+      }
+    },
+    "led_weather_apply": {
+      "name": "ReefLED-weer vernieuwen",
+      "description": "Haalt het weer opnieuw op en stuurt de week naar een ReefLED in GPS-weermodus.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        }
+      }
+    },
+    "led_weather_preview": {
+      "name": "Voorbeeld van de weerweek",
+      "description": "Maakt de week die het weer nu zou geven en geeft die terug met de eigen week van de lamp, zonder iets te schrijven.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        },
+        "settings": {
+          "name": "Instellingen",
+          "description": "Weerinstellingen in bewerking, boven de opgeslagen."
+        }
+      }
+    },
+    "led_weather_save": {
+      "name": "Weerprogramma opslaan",
+      "description": "Slaat de weerinstellingen en -modus op en schrijft de lamp één keer: de weerweek of de eigen week terug.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat-ID",
+          "description": "De configuratie-invoer van de ReefLED (of virtuele LED)."
+        },
+        "settings": {
+          "name": "Instellingen",
+          "description": "Weerinstellingen in bewerking, boven de opgeslagen."
+        },
+        "enabled": {
+          "name": "Weermodus",
+          "description": "Of de lamp het weer volgt."
+        },
+        "wait": {
+          "name": "Wachten op de lamp",
+          "description": "Antwoorden zodra de lamp is geschreven (standaard wordt de week opgeslagen en getoond, en daarna op de achtergrond geschreven)."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "group_member_unavailable": {
+      "message": "{group}: actie geweigerd, deze LED's zijn niet beschikbaar: {members}. Er is niets verzonden, de groep blijft synchroon."
+    },
+    "group_channel_unavailable": {
+      "message": "{group} bevat G1- en G2-lampen: wit en blauw kunnen niet voor de hele groep worden ingesteld. Gebruik kleurtemperatuur en intensiteit."
+    }
+  },
+  "issues": {
+    "group_no_cloud": {
+      "title": "{group}: geen ReefBeat-cloudaccount",
+      "description": "De LED's van {group} zouden ook in de ReefBeat-app gegroepeerd kunnen worden, maar er is geen ReefBeat-cloudaccount ingesteld dat ze vermeldt. Zonder dat bestaat de groep alleen in Home Assistant: de app ziet haar niet en kan haar LED's afzonderlijk aansturen.\n\nOm de groep met de app te delen, voeg je ReefBeat-cloudaccount toe (Instellingen > Apparaten en diensten > Integratie toevoegen > Red Sea > Cloud API): dit probleem verdwijnt dan vanzelf. Of houd de groep alleen in Home Assistant.",
+      "fix_flow": {
+        "step": {
+          "keep_local": {
+            "title": "Groep alleen in Home Assistant houden",
+            "description": "De groep wordt niet naar de ReefBeat-cloud geschreven. Je kunt het cloudaccount later nog toevoegen."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "De groep is niet geladen: probeer het opnieuw zodra ze dat is."
+        }
+      }
+    },
+    "group_mixed_models": {
+      "title": "{group}: LED's gegroepeerd in de ReefBeat-app",
+      "description": "{group} bevat LED's van meerdere modellen, die de ReefBeat-app niet samen kan groeperen: de app groepeert alleen LED's van één model. Deze LED's zijn nog gegroepeerd in de app, die ze los van de andere zou aansturen: {leds}.\n\nHef hun groepering op in de ReefBeat-app: de groep bestaat dan alleen in Home Assistant (haar volgorde is globaal).",
+      "fix_flow": {
+        "step": {
+          "ungroup": {
+            "title": "Groepering opheffen in de ReefBeat-app",
+            "description": "De groepering van deze LED's wordt opgeheven in de ReefBeat-cloud (de app toont ze apart). Home Assistant blijft ze samen aansturen."
+          }
+        },
+        "abort": {
+          "group_not_loaded": "De groep is niet geladen: probeer het opnieuw zodra ze dat is."
+        }
+      }
+    },
+    "group_conflict": {
+      "title": "{group}: gewijzigd in Home Assistant en in de ReefBeat-app",
+      "description": "De LED's, hun volgorde of de verschoven zonsopgang van {group} zijn sinds de laatste synchronisatie zowel in Home Assistant als in de ReefBeat-app gewijzigd. Kies de groep die behouden blijft.",
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Welke groep behouden?",
+            "menu_options": {
+              "keep_home_assistant": "Die van Home Assistant (naar de ReefBeat-cloud geschreven)",
+              "keep_reefbeat": "Die van de ReefBeat-app (overgenomen door Home Assistant)"
+            }
+          }
+        },
+        "abort": {
+          "group_not_loaded": "De groep is niet geladen: probeer het opnieuw zodra ze dat is."
+        }
+      }
+    }
+  }
+}
