@@ -49,6 +49,8 @@ import {
   kelvin_points_to_white_blue,
   white_blue_samples,
   kelvin_rgb,
+  g2_kelvin,
+  g2_kelvin_step,
   parse_time,
   place_time,
   program_format,
@@ -1384,6 +1386,19 @@ export class RSLedProgramEditor extends LitElement {
     this._changed();
   }
 
+  /** Whether colour temperatures are set on a G2's scale. */
+  g2_scale(): boolean {
+    return this.led?.kelvin_g2_scale?.() === true;
+  }
+
+  /**
+   * Step of the colour temperature input of a point.
+   * @param k: its colour temperature
+   */
+  kelvin_step(k: number): number {
+    return this.g2_scale() ? g2_kelvin_step(k) : 100;
+  }
+
   /**
    * Set the colour temperature of a point.
    * @param n: index of the point
@@ -1395,7 +1410,9 @@ export class RSLedProgramEditor extends LitElement {
     if (!pts[n] || !Number.isFinite(v)) return;
     const min = this.led?.kelvin_range?.().min ?? 8000;
     const max = this.led?.kelvin_range?.().max ?? 23000;
-    pts[n].k = Math.max(min, Math.min(max, Math.round(v / 100) * 100));
+    // A G2, or a lamp grouped with one: the G2's steps
+    const k = this.g2_scale() ? g2_kelvin(v) : Math.round(v / 100) * 100;
+    pts[n].k = Math.max(min, Math.min(max, k));
     this._changed();
     if (this.weather_on()) this._weather_colors();
   }
@@ -2319,7 +2336,7 @@ export class RSLedProgramEditor extends LitElement {
                 <input
                   class="kelvin"
                   type="number"
-                  step="100"
+                  step=${this.kelvin_step(p.k ?? DEFAULT_KELVIN)}
                   ?disabled=${k_locked}
                   .value=${String(p.k ?? DEFAULT_KELVIN)}
                   style="border-color:${rgb_css(

@@ -53,6 +53,24 @@ export interface CloudProgram {
   no_cloud_duration?: number;
 }
 
+/**
+ * Step of a G2's colour temperature at a value: 200 K under 10000 K, 500 K
+ * above.
+ * @param k: the colour temperature
+ */
+export function g2_kelvin_step(k: number): number {
+  return k < 10000 ? 200 : 500;
+}
+
+/**
+ * A colour temperature on a G2's scale.
+ * @param k: the colour temperature
+ */
+export function g2_kelvin(k: number): number {
+  const step = g2_kelvin_step(k);
+  return Math.round(k / step) * step;
+}
+
 export type Channel = "white" | "blue" | "moon";
 
 /** Every channel a day program may hold, in drawing order. */

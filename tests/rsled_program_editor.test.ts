@@ -964,6 +964,25 @@ describe("RSLedProgramEditor", () => {
     expect(ed.points.intensity[2].k).toBe(8000);
   });
 
+  it("kelvin table: the G2's steps on a G2 or a group holding one", async () => {
+    const led: any = { ...makeLed({ 1: G2 }), kelvin_g2_scale: () => false };
+    const ed = await mountEditor(led, 1, "kelvin");
+    ed.set_kelvin(2, 15300);
+    expect(ed.points.intensity[2].k).toBe(15300);
+    expect(ed.kelvin_step(15300)).toBe(100);
+    led.kelvin_g2_scale = () => true;
+    ed.set_kelvin(2, 15300);
+    expect(ed.points.intensity[2].k).toBe(15500);
+    ed.set_kelvin(2, 9850);
+    expect(ed.points.intensity[2].k).toBe(9800);
+    expect(ed.kelvin_step(9800)).toBe(200);
+    expect(ed.kelvin_step(15500)).toBe(500);
+    ed.requestUpdate();
+    await ed.updateComplete;
+    const k = ed.shadowRoot.querySelectorAll("input.kelvin")[2];
+    expect(k.getAttribute("step")).toBe("200");
+  });
+
   it("adds and removes points", async () => {
     const ed = await mountEditor(makeLed());
     const root = ed.shadowRoot;

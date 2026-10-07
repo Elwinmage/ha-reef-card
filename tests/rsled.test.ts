@@ -20,6 +20,7 @@ import {
 } from "../src/devices/redsea/rsled/rsled_beam";
 import {
   RSLedSlider,
+  g2_kelvin,
   KELVIN_MIN,
   KELVIN_MAX,
 } from "../src/devices/redsea/rsled/rsled_slider";
@@ -176,6 +177,17 @@ function makeLed(opts: Opts = {}, g2 = false): any {
   dev.hass = hass;
   dev._populate_entities();
   return dev;
+}
+
+/** Put a lamp in a group: its `linked_leds` list. */
+function group_of(dev: any, leds: any[]): void {
+  dev.hass.states["sensor.led_linked_leds"] = {
+    entity_id: "sensor.led_linked_leds",
+    state: String(leds.length),
+    attributes: { leds },
+    last_updated: "t",
+  };
+  dev.entities["linked_leds"] = { entity_id: "sensor.led_linked_leds" };
 }
 
 /** Fix the clock at a UTC time of Tuesday 2026-01-13. */
@@ -844,6 +856,23 @@ describe("RSLed device helpers", () => {
     const g2 = makeLed({}, true);
     delete g2.entities["light.kelvin_intensity"];
     expect(g2.kelvin_range()).toEqual({ min: 8000, max: 23000 });
+  });
+
+  it("kelvin_range() and the G2 scale follow the group", () => {
+    const g2 = makeLed({}, true);
+    g2.hass.states[
+      "light.led_kelvin_intensity"
+    ].attributes.min_color_temp_kelvin = 8000;
+    expect(g2.kelvin_range()).toEqual({ min: 8000, max: 23000 });
+    expect(g2.kelvin_g2_scale()).toBe(true);
+    // A G2 grouped with a G1: the G1's bounds
+    group_of(g2, [{ g2: false }, { g2: true }]);
+    expect(g2.kelvin_range()).toEqual({ min: 9000, max: 23000 });
+    // A G1: its own steps, the G2's once grouped with one
+    const g1 = makeLed();
+    expect(g1.kelvin_g2_scale()).toBe(false);
+    group_of(g1, [{ g2: false }, { g2: true }]);
+    expect(g1.kelvin_g2_scale()).toBe(true);
   });
 
   it("channel levels: lights on a G1, sensors on a G2", () => {
@@ -1520,6 +1549,26 @@ describe("RSLedSlider", () => {
     expect(el.value_at(200, rect)).toBe(16000);
     expect(el.value_at(0, rect)).toBe(23000);
     expect(el.value_at(10, { top: 0, height: 0 })).toBe(9000);
+  });
+
+  it("value_at(): the G2's steps on a G2 or a group holding one", () => {
+    expect(g2_kelvin(9850)).toBe(9800);
+    expect(g2_kelvin(15300)).toBe(15500);
+    const dev = makeLed();
+    const el = makeElement(
+      RSLedSlider,
+      dev,
+      { attribute: "color_temp_kelvin", step: 100 },
+      light(dev),
+    );
+    // 140 px of 200 from the bottom: 9000 + 0.7 * 14000 = 18800
+    const rect = { top: 100, height: 200 };
+    expect(el.value_at(160, rect)).toBe(18800);
+    group_of(dev, [{ g2: false }, { g2: true }]);
+    expect(el.value_at(160, rect)).toBe(19000);
+    // Under 10000 K: 200 K steps, within the bounds
+    expect(el.value_at(296, rect)).toBe(9200);
+    expect(el.value_at(300, rect)).toBe(9000);
   });
 
   it("follows attribute changes but not while dragging", () => {

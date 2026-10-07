@@ -642,15 +642,29 @@ export class RSLed extends RSDevice {
 
   private _program_editor: RSLedProgramEditor | null = null;
 
-  /** Bounds of the colour temperature of this lamp. */
+  /**
+   * Bounds of the colour temperature of this lamp: within those of every
+   * lamp of its group (a G1 does not go under 9000 K).
+   */
   kelvin_range(): { min: number; max: number } {
     const attrs = this.get_entity("light.kelvin_intensity")?.attributes ?? {};
+    const with_g1 =
+      this.has_white_blue() || this.linked().some((led) => led?.g2 !== true);
     return {
-      min: Number(
-        attrs.min_color_temp_kelvin ?? (this.has_white_blue() ? 9000 : 8000),
+      min: Math.max(
+        Number(attrs.min_color_temp_kelvin ?? (with_g1 ? 9000 : 8000)),
+        with_g1 ? 9000 : 8000,
       ),
       max: Number(attrs.max_color_temp_kelvin ?? 23000),
     };
+  }
+
+  /**
+   * Whether the colour temperature is set on a G2's scale (200 K steps
+   * under 10000 K, 500 K above): a G2, or a lamp grouped with one.
+   */
+  kelvin_g2_scale(): boolean {
+    return !this.has_white_blue() || this.grouped_with_g2();
   }
 
   /**

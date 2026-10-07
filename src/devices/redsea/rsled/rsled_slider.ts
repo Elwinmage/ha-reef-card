@@ -28,9 +28,12 @@ import {
   CHANNEL_RGB,
   Channel,
   brightness_pct,
+  g2_kelvin,
   kelvin_rgb,
   rgb_css,
 } from "./rsled_program";
+
+export { g2_kelvin };
 
 /** G1 colour temperature bounds, used when the entity does not give any. */
 export const KELVIN_MIN = 9000;
@@ -54,9 +57,15 @@ export class RSLedSlider extends MyElement {
     const attrs = this.stateObj?.attributes ?? {};
     const conf: any = this.conf ?? {};
     if (this._is_kelvin) {
+      // The lamp's bounds: those of every lamp of its group
+      const lamp = (this.device as any)?.kelvin_range?.() ?? {};
       return {
-        min: Number(conf.min ?? attrs.min_color_temp_kelvin ?? KELVIN_MIN),
-        max: Number(conf.max ?? attrs.max_color_temp_kelvin ?? KELVIN_MAX),
+        min: Number(
+          conf.min ?? lamp.min ?? attrs.min_color_temp_kelvin ?? KELVIN_MIN,
+        ),
+        max: Number(
+          conf.max ?? lamp.max ?? attrs.max_color_temp_kelvin ?? KELVIN_MAX,
+        ),
         step: Number(conf.step ?? 100),
       };
     }
@@ -168,7 +177,11 @@ export class RSLedSlider extends MyElement {
         ? 1 - Math.max(0, Math.min(1, (client_y - rect.top) / rect.height))
         : 0;
     const raw = min + ratio * (max - min);
-    const snapped = Math.round(raw / step) * step;
+    // A G2, or a lamp grouped with one: the G2's steps
+    const snapped =
+      this._is_kelvin && (this.device as any)?.kelvin_g2_scale?.()
+        ? g2_kelvin(raw)
+        : Math.round(raw / step) * step;
     return Math.max(min, Math.min(max, snapped));
   }
 
