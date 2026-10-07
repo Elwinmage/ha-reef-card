@@ -181,6 +181,19 @@ export class RSLed extends RSDevice {
     return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
   }
 
+  /**
+   * Intensity factor of a running acclimation, applied by the lamp to its
+   * program.
+   * @return the factor (0.75 for 75 %), or null when no acclimation runs
+   */
+  acclimation_factor(): number | null {
+    if (this.get_entity("acclimation")?.state !== "on") return null;
+    const value = Number(
+      this.get_entity("acclimation_current_intensity_factor")?.state,
+    );
+    return Number.isFinite(value) && value >= 0 ? value / 100 : null;
+  }
+
   /** Clouds programmed for today, and whether they are passing now. */
   clouds_state(): { count: number; active: boolean } {
     // The lamp plays its program `offset` minutes late
@@ -357,6 +370,11 @@ export class RSLed extends RSDevice {
     "todays_moon_day",
     "current_program",
     "device_state",
+    // Sunrise offset, shown under the sky
+    "number.sunrise_offset",
+    // Acclimation: the beam's curves scaled by its intensity factor
+    "acclimation",
+    "acclimation_current_intensity_factor",
   ];
 
   /**

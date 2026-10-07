@@ -55,6 +55,40 @@ export interface ChartOptions {
    * a G1's (white/blue) in kelvin, its zones shown over its curves.
    */
   kelvin?: DayProgram | null;
+  /**
+   * Intensity factor of a running acclimation (0.75 for 75 %): the nominal
+   * curves are drawn dashed, the scaled ones solid. The moon is not scaled.
+   */
+  factor?: number | null;
+}
+
+/** Channels an acclimation scales: all but the moon. */
+const SCALED_CHANNELS: ProgramChannel[] = ["white", "blue", "intensity"];
+
+/**
+ * A day program with its intensities scaled, as an acclimation does.
+ * @param prog: the program
+ * @param factor: the intensity factor (0.75 for 75 %)
+ * @return a copy, every point but the moon's multiplied by factor
+ */
+export function scale_program(
+  prog: DayProgram | null | undefined,
+  factor: number,
+): DayProgram | null {
+  if (!prog) return null;
+  const out: DayProgram = { ...prog };
+  for (const ch of SCALED_CHANNELS) {
+    const channel = (prog as any)[ch];
+    if (!channel?.points) continue;
+    (out as any)[ch] = {
+      ...channel,
+      points: channel.points.map((p: any) => ({
+        ...p,
+        i: Number(p.i) * factor,
+      })),
+    };
+  }
+  return out;
 }
 
 /**
@@ -237,34 +271,35 @@ export function program_chart(
 ): SVGTemplateResult {
   const { x, y, w, h } = box;
   const { px, py } = chart_scale(box);
-  const format = program_format(opts.today) ?? "wb";
   const highlight = opts.highlight ?? null;
   const width = (ch: ProgramChannel) =>
     highlight === null ? 2.5 : highlight === ch ? 3.5 : 1.5;
   const opacity = (ch: ProgramChannel) =>
     highlight === null || highlight === ch ? 1 : 0.35;
 
-  // Simple curves: every channel of a G1, the moon of a G2
-  const simple = format_channels(format)
-    .filter((ch) => ch !== "intensity")
-    .reverse()
-    .map((ch) => {
-      const pts = day_curve(
-        (opts.today as any)?.[ch],
-        (opts.yesterday as any)?.[ch],
-        10,
-      );
-      if (!pts.some(([, v]) => v > 0)) return svg``;
-      const d = pts
-        .map(
-          ([m, v], k) =>
-            `${k ? "L" : "M"} ${px(m).toFixed(1)} ${py(v).toFixed(1)}`,
-        )
-        .join(" ");
-      return svg`<path class="chart_curve curve_${ch}" d="${d}"
-        stroke="${CURVE_COLORS_DEFAULT[ch as keyof typeof CURVE_COLORS_DEFAULT]}"
-        stroke-width="${width(ch)}" opacity="${opacity(ch)}"></path>`;
-    });
+  const factor = opts.factor;
+  const scaled = factor !== null && factor !== undefined;
+  // A running acclimation: the nominal curves dashed and faded, under the
+  // scaled ones (and the moon, which it does not scale)
+  const nominal = scaled
+    ? svg`<g class="nominal_curves" stroke-dasharray="5 4" opacity="0.55">
+        ${program_curves(box, opts, width, opacity, false)}
+      </g>`
+    : "";
+  const curves = program_curves(
+    box,
+    scaled
+      ? {
+          ...opts,
+          id: `${opts.id}_f`,
+          today: scale_program(opts.today, factor),
+          yesterday: scale_program(opts.yesterday, factor),
+        }
+      : opts,
+    width,
+    opacity,
+    true,
+  );
 
   const ticks = opts.ticks
     ? [0, 6, 12, 18, 24].map(
@@ -288,13 +323,58 @@ export function program_chart(
     <!-- A channel running past midnight is drawn back at the start of the
          chart (as "yesterday"): what goes beyond 24h is cut -->
     <g clip-path="url(#${opts.id}_clip)">
-          ${format === "kelvin" ? kelvin_curve(box, opts, width("intensity"), opacity("intensity")) : ""}
-    ${simple}
+    ${nominal}
+    ${curves}
     </g>
     <line class="chart_axis" x1="${x}" y1="${y + h}" x2="${x + w}"
       y2="${y + h}"></line>
     ${ticks}
     ${opts.labels === false ? "" : kelvin_labels(box, opts.kelvin ?? opts.today)}
+  `;
+}
+
+/**
+ * Curves of a day program: the G2 intensity curve, then the simple ones.
+ * @param box: the chart box
+ * @param opts: what to draw
+ * @param width: stroke width of a channel
+ * @param opacity: opacity of a channel
+ * @param moon: whether the moon is drawn
+ */
+function program_curves(
+  box: ChartBox,
+  opts: ChartOptions,
+  width: (ch: ProgramChannel) => number,
+  opacity: (ch: ProgramChannel) => number,
+  moon: boolean,
+): SVGTemplateResult {
+  const { px, py } = chart_scale(box);
+  const format = program_format(opts.today) ?? "wb";
+  // Simple curves: every channel of a G1, the moon of a G2
+  const simple = format_channels(format)
+    .filter((ch) => ch !== "intensity" && (moon || ch !== "moon"))
+    .reverse()
+    .map((ch) => {
+      const pts = day_curve(
+        (opts.today as any)?.[ch],
+        (opts.yesterday as any)?.[ch],
+        10,
+      );
+      if (!pts.some(([, v]) => v > 0)) return svg``;
+      const d = pts
+        .map(
+          ([m, v], k) =>
+            `${k ? "L" : "M"} ${px(m).toFixed(1)} ${py(v).toFixed(1)}`,
+        )
+        .join(" ");
+      return svg`<path class="chart_curve curve_${ch}" d="${d}"
+        stroke="${CURVE_COLORS_DEFAULT[ch as keyof typeof CURVE_COLORS_DEFAULT]}"
+        stroke-width="${width(ch)}" opacity="${opacity(ch)}"></path>`;
+    });
+
+  return svg`
+    ${format === "kelvin" ? kelvin_curve(box, opts, width("intensity"), opacity("intensity")) : ""}
+    ${simple}
   `;
 }
 

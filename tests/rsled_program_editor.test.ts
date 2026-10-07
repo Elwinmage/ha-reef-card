@@ -23,6 +23,7 @@ import {
   LABEL_CHAR,
   label_rows,
   program_chart,
+  scale_program,
 } from "../src/devices/redsea/rsled/rsled_chart";
 import {
   DEFAULT_POINTS,
@@ -668,6 +669,51 @@ describe("rsled_chart", () => {
     expect(
       el.querySelector("g[clip-path]")?.querySelectorAll(".chart_curve").length,
     ).toBeGreaterThan(0);
+  });
+
+  it("scale_program() scales every channel but the moon", () => {
+    const g1 = scale_program(G1, 0.75)!;
+    expect(g1.white!.points!.map((p) => p.i)).toEqual([75, 75]);
+    expect(g1.moon).toBe(G1.moon);
+    // The program itself is left as it is
+    expect(G1.white!.points![0].i).toBe(100);
+    const g2 = scale_program(G2, 0.5)!;
+    expect(g2.intensity!.points![0]).toEqual({ t: 60, i: 20, k: 12000 });
+    expect(scale_program({ white: { rise: 0, set: 1 } }, 0.5)).toEqual({
+      white: { rise: 0, set: 1 },
+    });
+    expect(scale_program(null, 0.5)).toBeNull();
+  });
+
+  it("acclimation: nominal curves dashed, scaled ones solid", () => {
+    const g1 = draw(program_chart(box, { id: "a", today: G1, factor: 0.75 }));
+    const nominal = g1.querySelector(".nominal_curves")!;
+    expect(nominal.getAttribute("stroke-dasharray")).toBe("5 4");
+    // White and blue dashed, the moon not scaled: drawn once
+    expect(nominal.querySelectorAll(".chart_curve").length).toBe(2);
+    expect(nominal.querySelector(".curve_moon")).toBeNull();
+    expect(g1.querySelectorAll(".curve_moon").length).toBe(1);
+    expect(g1.querySelectorAll(".chart_curve").length).toBe(5);
+    // The scaled white curve peaks at 75 %: y = 25
+    const solid = [...g1.querySelectorAll(".curve_white")].find(
+      (c) => !nominal.contains(c),
+    )!;
+    expect(solid.getAttribute("d")).toContain(" 25.0");
+    expect(nominal.querySelector(".curve_white")!.getAttribute("d")).toContain(
+      " 0.0",
+    );
+    // G2: the kelvin curve twice, gradient ids kept apart
+    const g2 = draw(program_chart(box, { id: "b", today: G2, factor: 0.5 }));
+    const ids = [...g2.querySelectorAll("linearGradient")].map((l) => l.id);
+    expect(ids.length).toBe(12);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(
+      g2.querySelector(".nominal_curves")!.querySelectorAll(".curve_intensity")
+        .length,
+    ).toBe(6);
+    // No acclimation: no dashed curves
+    const off = draw(program_chart(box, { id: "c", today: G1, factor: null }));
+    expect(off.querySelector(".nominal_curves")).toBeNull();
   });
 
   it("an empty program draws only the grid", () => {

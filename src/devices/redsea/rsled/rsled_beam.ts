@@ -279,6 +279,8 @@ export class RSLedBeam extends RSLedElement {
             program_format(today) === "wb"
               ? wb_to_kelvin_program(today, this.led?.g1_model?.())
               : null,
+          // A running acclimation: the nominal curves dashed, scaled solid
+          factor: this.led?.acclimation_factor?.() ?? null,
         })}
       </g>
       ${

@@ -659,6 +659,37 @@ describe("RSLed device helpers", () => {
     expect(makeLed({ moon_day: "unknown" }).moon_day()).toBe(15);
   });
 
+  it("acclimation_factor(): the running acclimation's intensity factor", () => {
+    const dev = makeLed();
+    // Switch on, factor unknown
+    expect(dev.acclimation_factor()).toBeNull();
+    const id = "sensor.led_acclimation_current_intensity_factor";
+    dev.hass.states[id] = { entity_id: id, state: "75", attributes: {} };
+    dev.entities["acclimation_current_intensity_factor"] = { entity_id: id };
+    expect(dev.acclimation_factor()).toBe(0.75);
+    dev.hass.states[id].state = "unavailable";
+    expect(dev.acclimation_factor()).toBeNull();
+    dev.hass.states[id].state = "75";
+    dev.hass.states["switch.led_acclimation"].state = "off";
+    expect(dev.acclimation_factor()).toBeNull();
+  });
+
+  it("state_signature() follows the offset and the acclimation", () => {
+    const dev = makeLed();
+    const id = "number.led_sunrise_offset";
+    dev.hass.states[id] = { entity_id: id, state: "0", attributes: {} };
+    dev.entities["number.sunrise_offset"] = { entity_id: id };
+    const before = dev.state_signature();
+    dev.hass.states[id] = { ...dev.hass.states[id], state: "30" };
+    const offset = dev.state_signature();
+    expect(offset).not.toBe(before);
+    dev.hass.states["switch.led_acclimation"] = {
+      ...dev.hass.states["switch.led_acclimation"],
+      state: "off",
+    };
+    expect(dev.state_signature()).not.toBe(offset);
+  });
+
   it("state_signature() changes with the watched entities", () => {
     const dev = makeLed({ intensity: 50 });
     const before = dev.state_signature();
