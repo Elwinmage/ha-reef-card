@@ -272,12 +272,17 @@ describe("rswave_program", () => {
     expect(W.current_index(late, 100)).toBe(0);
   });
 
-  it("wave_speed() is the forward intensity, whatever the direction", () => {
+  it("wave_speed() is the intensity of the direction", () => {
     const w = { type: "re", direction: "fw", fti: 30, rti: 70 };
+    // Forward: the reverse intensity, kept for later, does not count
     expect(W.wave_speed(w)).toBe(30);
-    expect(W.wave_speed({ ...w, direction: "rw" })).toBe(30);
+    // Reverse: only the reverse intensity
+    expect(W.wave_speed({ ...w, direction: "rw" })).toBe(70);
+    expect(W.wave_speed({ ...w, direction: "rw", rti: 0 })).toBe(0);
+    // Alternate: the forward intensity, as the ReefBeat app shows it
     expect(W.wave_speed({ ...w, direction: "alt" })).toBe(30);
     expect(W.wave_speed({ ...w, type: "nw" })).toBe(0);
+    expect(W.wave_speed({ ...w, type: "nw", direction: "rw" })).toBe(0);
   });
 
   it("type_color(), hhmm() and flow_duration()", () => {
@@ -348,6 +353,18 @@ describe("RSWave device", () => {
     expect(dev.speed()).toBe(50);
     expect(dev.direction()).toBe("alt");
 
+    // Backward: the reverse intensity, whatever the forward one
+    const back = makeWave({ fti: "80", rti: "35", direction: "rw" });
+    expect(back.speed()).toBe(35);
+    expect(back.direction()).toBe("rw");
+    const ahead = makeWave({ fti: "45", rti: "90", direction: "fw" });
+    expect(ahead.speed()).toBe(45);
+    expect(ahead.direction()).toBe("fw");
+    // Backward at a reverse intensity of zero: stopped, no arrow
+    const idle = makeWave({ fti: "80", rti: "0", direction: "rw" });
+    expect(idle.speed()).toBe(0);
+    expect(idle.direction()).toBe("");
+
     const nw = makeWave({ type: "nw" });
     expect(nw.speed()).toBe(0);
     expect(nw.direction()).toBe("");
@@ -384,7 +401,8 @@ describe("RSWave device", () => {
       fti: 30,
       rti: 70,
     });
-    expect(dev.speed()).toBe(30);
+    // The preview runs backward: its reverse intensity
+    expect(dev.speed()).toBe(70);
     // Without the preview entities
     const bare = makeWave({ mode: "preview" });
     expect(bare.current_wave()).toEqual({

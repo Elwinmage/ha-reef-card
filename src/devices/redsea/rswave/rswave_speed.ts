@@ -2,9 +2,10 @@
  * ReefWave speed: a progress ring drawn on the end cap of the pump.
  *
  * A plain progress circle shows the state of one entity. The speed of a
- * wave pump is not one entity: it is the forward intensity of the current
- * wave, of the preview settings while previewing, and 0 whenever the pump
- * does not run (off, feeding, maintenance, no wave). The device computes
+ * wave pump is not one entity: it is the intensity of the direction of the
+ * current wave (reverse when it runs backward, forward otherwise, see
+ * wave_speed), of the preview settings while previewing, and 0 whenever the
+ * pump does not run (off, feeding, maintenance, no wave). The device computes
  * it (RSWave.speed()); this element only draws it, out of 100 %.
  *
  * The end cap is seen in perspective: the ring is an ellipse fitted on it

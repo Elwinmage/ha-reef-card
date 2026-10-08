@@ -28,6 +28,7 @@ import {
   pump_speed,
   resolve_backup_topology,
   select_backup_pumps,
+  wave_speed_entity,
   type BackupPump,
 } from "../src/utils/energy_backup";
 
@@ -184,6 +185,37 @@ function makeHass(o: Scenario = {}): any {
     callService: vi.fn(),
     locale: { language: "en" },
   };
+}
+
+/**
+ * The installation of makeHass(), its ReefWave "Wave B" (w1) holding both
+ * intensities and reporting its direction.
+ * @param direction: state of its wave_direction sensor (fw, rw, alt...)
+ * @param forward: its forward intensity
+ * @param backward: its reverse intensity
+ */
+function waveHass(direction: string, forward = "60", backward = "35"): any {
+  const hass = makeHass();
+  hass.states["sensor.w1_f"].state = forward;
+  hass.states["sensor.w1_b"].state = backward;
+  hass.entities["sensor.w1_dir"] = {
+    entity_id: "sensor.w1_dir",
+    device_id: "w1",
+    translation_key: "wave_direction",
+  };
+  hass.states["sensor.w1_dir"] = {
+    entity_id: "sensor.w1_dir",
+    state: direction,
+    attributes: {},
+  };
+  return hass;
+}
+
+/** The pump w1 of an installation. */
+function wave_of(hass: any): BackupPump {
+  return resolve_backup_topology(hass, [EB]).pumps.find(
+    (p) => p.id === "w1",
+  ) as BackupPump;
 }
 
 /** The card device, as DeviceList builds it. */
@@ -472,6 +504,83 @@ describe("energy backup pump readings", () => {
     delete h.states["number.p2_speed"];
     expect(pump_speed(h, p2)).toBe(0);
     expect(pump_speed({} as any, p2)).toBe(0);
+  });
+
+  it("finds the direction sensor of a wave pump", () => {
+    expect(wave_of(waveHass("fw")).direction_entity).toBe("sensor.w1_dir");
+    // None reported: the speed falls back to the intensities
+    expect(w1.direction_entity).toBeUndefined();
+    expect(p1.direction_entity).toBeUndefined();
+  });
+
+  it("runs a wave pump at the intensity of its direction", () => {
+    // Forward: the reverse intensity, kept for later, does not count
+    let h = waveHass("fw", "40", "90");
+    expect(wave_speed_entity(h, wave_of(h))).toBe("sensor.w1_f");
+    expect(pump_speed(h, wave_of(h))).toBe(40);
+    // Reverse: only the reverse intensity
+    h = waveHass("rw", "90", "35");
+    expect(wave_speed_entity(h, wave_of(h))).toBe("sensor.w1_b");
+    expect(pump_speed(h, wave_of(h))).toBe(35);
+    // Alternate: the forward intensity, as the ReefBeat app shows it
+    h = waveHass("alt", "45", "80");
+    expect(wave_speed_entity(h, wave_of(h))).toBe("sensor.w1_f");
+    expect(pump_speed(h, wave_of(h))).toBe(45);
+  });
+
+  it("reads zero when the intensity of the direction is not there", () => {
+    // Running backward, at a reverse intensity of zero
+    let h = waveHass("rw", "70", "0");
+    expect(pump_speed(h, wave_of(h))).toBe(0);
+    h = waveHass("rw", "70", "unavailable");
+    expect(pump_speed(h, wave_of(h))).toBe(0);
+    // A pump without the reverse intensity sensor
+    h = waveHass("rw", "70");
+    const pump = { ...wave_of(h), backward_entity: undefined };
+    expect(wave_speed_entity(h, pump)).toBeUndefined();
+    expect(pump_speed(h, pump)).toBe(0);
+    // A negative reading is no speed
+    h = waveHass("fw", "-5");
+    expect(pump_speed(h, wave_of(h))).toBe(0);
+  });
+
+  it("stops a wave pump on its switch whatever its direction", () => {
+    const h = waveHass("rw", "70", "50");
+    h.states["switch.w1_state"].state = "off";
+    expect(pump_speed(h, wave_of(h))).toBe(0);
+  });
+
+  it("falls back to the highest intensity without a known direction", () => {
+    for (const direction of ["unknown", "unavailable", "", "other"]) {
+      const h = waveHass(direction, "40", "75");
+      expect(wave_speed_entity(h, wave_of(h))).toBeNull();
+      expect(pump_speed(h, wave_of(h))).toBe(75);
+    }
+    // Direction sensor registered but without a state yet
+    const h = waveHass("fw", "40", "75");
+    delete h.states["sensor.w1_dir"];
+    expect(pump_speed(h, wave_of(h))).toBe(75);
+    // No direction sensor at all
+    expect(wave_speed_entity(hass, w1)).toBeNull();
+  });
+
+  it("writes a direction template following the direction sensor", () => {
+    const template = pump_direction_template(wave_of(waveHass("fw")));
+    expect(template).toContain("{% set d = states('sensor.w1_dir') %}");
+    // Each direction shows its arrow while its own intensity runs
+    expect(template).toContain("{% if d == 'rw' %}{% if r > 0 %}←{% endif %}");
+    expect(template).toContain(
+      "{% elif d == 'fw' %}{% if f > 0 %}→{% endif %}",
+    );
+    expect(template).toContain(
+      "{% elif d == 'alt' %}{% if f > 0 %}⇄{% endif %}",
+    );
+    // An unknown direction falls back to the intensities
+    expect(template).toContain(
+      "{% else %}{% if f > 0 and r > 0 %}⇄{% elif f > 0 %}→{% elif r > 0 %}←{% endif %}{% endif %}",
+    );
+    // Without the sensor, only the intensities tell it
+    expect(pump_direction_template(w1)).not.toContain("set d =");
   });
 
   it("writes a direction template for a wave pump only", () => {
@@ -835,6 +944,23 @@ describe("energy backup power flow", () => {
         "sensor.p1_type",
       ]),
     );
+  });
+
+  it("feeds a wave pump node from the intensity of its direction", () => {
+    const hass = waveHass("rw", "80", "30");
+    const flow = build_power_flow(
+      hass,
+      deviceInfo(hass),
+      resolve_backup_topology(hass, [EB]),
+    );
+    const gyre = flow.config!["entities"].individual[1];
+    expect(gyre.name).toBe("Wave B");
+    // 30 (reverse), not 80 (the highest)
+    expect(flow.states[gyre.entity].state).toBe("30");
+    expect(gyre.icon).toBe("redsea:gyre-min");
+    expect(gyre.secondary_info.template).toContain("sensor.w1_dir");
+    // A change of direction updates the speed
+    expect(flow.watched).toContain("sensor.w1_dir");
   });
 
   it("keeps to the picked pumps", () => {

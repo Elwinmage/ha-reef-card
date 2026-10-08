@@ -1184,7 +1184,7 @@ describe("RSWaveSpeed arrows and pump settings", () => {
       ...ctx.device,
       is_on: () => true,
       current_wave: () => now,
-      speed: () => now.fti,
+      speed: () => (now.direction === "rw" ? now.rti : now.fti),
       direction: () => now.direction,
     };
     const el = makeElement(StubSpeed, dev, { target: 100 });
@@ -1196,17 +1196,18 @@ describe("RSWaveSpeed arrows and pump settings", () => {
     el._fti = 80;
     el._rti = 70;
     const saving = el.save();
-    // Closed and shown before the integration answers
+    // Closed and shown before the integration answers: backward, so the
+    // reverse intensity (70), not the forward one (80)
     await el.updateComplete;
     expect(root.querySelector(".overlay")).toBeNull();
-    expect(text()).toBe("80%");
+    expect(text()).toBe("70%");
     expect(root.querySelector("path.arrow_rw")).not.toBeNull();
     expect(root.querySelector("path.arrow_fw")).toBeNull();
     await saving;
     // Home Assistant still reports the old values: kept
     el.hass = { states: {} };
     await el.updateComplete;
-    expect(text()).toBe("80%");
+    expect(text()).toBe("70%");
     // It reports them: Home Assistant's values from now on
     now = { type: "st", direction: "rw", fti: 80, rti: 70 };
     el.hass = { states: {} };
@@ -1242,6 +1243,24 @@ describe("RSWaveSpeed arrows and pump settings", () => {
       until: Date.now() + 1e5,
     };
     expect(bare.flow()).toBe("");
+    // Saved backward without a reverse intensity: stopped, no arrow
+    bare._pending = {
+      direction: "rw",
+      fti: 60,
+      rti: 0,
+      until: Date.now() + 1e5,
+    };
+    expect(bare.getValue()).toBe(0);
+    expect(bare.flow()).toBe("");
+    // Saved alternate: the forward intensity, both arrows
+    bare._pending = {
+      direction: "alt",
+      fti: 40,
+      rti: 65,
+      until: Date.now() + 1e5,
+    };
+    expect(bare.getValue()).toBe(40);
+    expect(bare.flow()).toBe("alt");
   });
 
   it("refusal, no program, closing", async () => {

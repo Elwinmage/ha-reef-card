@@ -15,8 +15,9 @@
  * PowerFlow.states):
  *
  *   - the speed of a pump is not always one entity: a wave pump runs at the
- *     highest of its forward and reverse intensities, and any pump is
- *     stopped by its switch whatever speed it is set to;
+ *     intensity of its direction (forward, or reverse when it runs
+ *     backward), and any pump is stopped by its switch whatever speed it
+ *     is set to;
  *   - the mains node needs a power entity, which only exists when a charger
  *     reports its telemetry.
  */
@@ -105,11 +106,16 @@ export interface BackupPump {
   kind: BackupPumpKind;
   /** Sensor holding "return" or "skimmer" (ReefRun pump), when there is one */
   type_entity?: string;
-  /** Entities holding a speed, in %: the pump runs at the highest of them */
+  /**
+   * Entities holding a speed, in %: the pump runs at the highest of them,
+   * except a wave pump, which runs at the one of its direction
+   */
   speed_entities: string[];
-  /** Forward and reverse intensities of a wave pump, to tell its direction */
+  /** Forward and reverse intensities of a wave pump */
   forward_entity?: string;
   backward_entity?: string;
+  /** Direction of a wave pump: fw, rw or alt (alternate) */
+  direction_entity?: string;
   /** Switches that stop the pump when off */
   power_entities: string[];
   /**
@@ -302,6 +308,7 @@ function redsea_pump(
       speed_entities: speeds,
       forward_entity: forward,
       backward_entity: backward,
+      direction_entity: entity_by_key(hass, own, "wave_direction", "sensor"),
       power_entities: power ? [power] : [],
       hwid,
       owner_name: dev.name,
@@ -499,8 +506,37 @@ export function pump_kind(hass: HassConfig, pump: BackupPump): BackupPumpKind {
 }
 
 /**
- * Speed of a pump: the highest of its speed entities, zero once one of its
- * switches is off.
+ * Intensity entity a wave pump runs at, from its direction: the reverse one
+ * when it runs backward, the forward one otherwise (forward, and alternate,
+ * whose speed is the forward one, as the ReefBeat app shows it). The other
+ * intensity is kept by the pump for when the direction changes: it does
+ * not drive it now.
+ * @param hass: the hass object
+ * @param pump: the pump
+ * @return the entity (undefined when the pump lacks it), or null when the
+ *         direction is not known (no direction sensor, or no state yet)
+ */
+export function wave_speed_entity(
+  hass: HassConfig,
+  pump: BackupPump,
+): string | undefined | null {
+  if (!pump.direction_entity) {
+    return null;
+  }
+  const direction = hass.states?.[pump.direction_entity]?.state;
+  if (direction === "rw") {
+    return pump.backward_entity;
+  }
+  if (direction === "fw" || direction === "alt") {
+    return pump.forward_entity;
+  }
+  return null;
+}
+
+/**
+ * Speed of a pump, zero once one of its switches is off: the intensity of
+ * its direction for a wave pump (see wave_speed_entity), the highest of its
+ * speed entities otherwise, or when the direction is not known.
  * @param hass: the hass object
  * @param pump: the pump
  * @return the speed, in %
@@ -511,6 +547,10 @@ export function pump_speed(hass: HassConfig, pump: BackupPump): number {
   );
   if (stopped) {
     return 0;
+  }
+  const wave = wave_speed_entity(hass, pump);
+  if (wave !== null) {
+    return Math.round(Math.max(0, numeric_state(hass, wave) ?? 0));
   }
   const speed = Math.max(
     0,
@@ -525,6 +565,11 @@ export function pump_speed(hass: HassConfig, pump: BackupPump): number {
  * Template telling the direction of a wave pump: an arrow, or nothing for a
  * pump that has no direction or is stopped.
  *
+ * The direction sensor tells it (→ forward, ← reverse, ⇄ alternate), the
+ * pump running when the intensity of that direction is above zero (see
+ * wave_speed_entity). Without that sensor (or before it has a state), the
+ * intensities tell it: both above zero read as alternate.
+ *
  * It has to be a template rendered by Home Assistant: the flow card only
  * shows a secondary entity whose state is a number, and it subscribes to a
  * template once, so the text cannot be rewritten on each state update.
@@ -537,10 +582,21 @@ export function pump_direction_template(pump: BackupPump): string | null {
   }
   const read = (entity_id: string | undefined) =>
     entity_id ? `states('${entity_id}') | float(0)` : "0";
-  return (
+  const guess =
+    "{% if f > 0 and r > 0 %}⇄{% elif f > 0 %}→{% elif r > 0 %}←{% endif %}";
+  const intensities =
     `{% set f = ${read(pump.forward_entity)} %}` +
-    `{% set r = ${read(pump.backward_entity)} %}` +
-    "{% if f > 0 and r > 0 %}⇄{% elif f > 0 %}→{% elif r > 0 %}←{% endif %}"
+    `{% set r = ${read(pump.backward_entity)} %}`;
+  if (!pump.direction_entity) {
+    return intensities + guess;
+  }
+  return (
+    intensities +
+    `{% set d = states('${pump.direction_entity}') %}` +
+    "{% if d == 'rw' %}{% if r > 0 %}←{% endif %}" +
+    "{% elif d == 'fw' %}{% if f > 0 %}→{% endif %}" +
+    "{% elif d == 'alt' %}{% if f > 0 %}⇄{% endif %}" +
+    `{% else %}${guess}{% endif %}`
   );
 }
 
@@ -961,6 +1017,9 @@ export function build_power_flow(
     );
     flow.aliases[entity_id] = pump.speed_entities[0] as string;
     flow.watched.push(...pump.speed_entities, ...pump.power_entities);
+    if (pump.direction_entity) {
+      flow.watched.push(pump.direction_entity);
+    }
 
     const node: Record<string, any> = {
       entity: entity_id,
