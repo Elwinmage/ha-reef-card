@@ -142,9 +142,11 @@ export function current_index(
 }
 
 /**
- * Speed a wave drives the pump at, in %: its forward intensity, whatever
- * its direction (the direction only drives the flow animation). No wave
- * is 0.
+ * Speed a wave drives the pump at, in %: the intensity of its direction,
+ * the reverse one when it runs backward, the forward one otherwise
+ * (forward, and alternate, whose speed is the forward one, as the ReefBeat
+ * app shows it). The other intensity is kept for when the direction
+ * changes: it does not drive the pump now. No wave is 0.
  * @param wave: type, direction and intensities
  */
 export function wave_speed(wave: {
@@ -154,7 +156,7 @@ export function wave_speed(wave: {
   rti: number;
 }): number {
   if (wave.type === "nw") return 0;
-  return pct(wave.fti);
+  return pct(wave.direction === "rw" ? wave.rti : wave.fti);
 }
 
 /**
