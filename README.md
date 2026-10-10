@@ -98,8 +98,20 @@ The ReefTech projects fit together: the integrations bring your equipment into H
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-card/main/icon.png" width="64" alt="ha-reef-card" /></td>
     <td>🪸<br /><b>ha-reef-card</b><br /><i>(this repository)</i></td>
-    <td>Interactive graphical view of each device on your dashboard, and the only way to edit advanced schedules. Reads the three integrations above through the shared <code>reef_role</code> contract, with no card-side configuration. Also draws the power flows of reefbeatEnergyBackup.</td>
-    <td>all three integrations</td>
+    <td>Interactive graphical view of each device on your dashboard, and the only way to edit advanced schedules. Reads the three integrations above through the shared <code>reef_role</code> contract, with no card-side configuration. Also draws the power flows of reefbeatEnergyBackup. Its aquarium card brings your tank to life with ha-reeftank-component.</td>
+    <td>all three integrations, and ha-reeftank-component for the aquarium</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reeftank-component/main/icon.png" width="64" alt="ha-reeftank-component" /></td>
+    <td>🐟<br /><a href="https://github.com/Elwinmage/ha-reeftank-component"><b>ha-reeftank-component</b></a></td>
+    <td>A living picture of your tank on the dashboard: your photo, lit by your real lamps, with animated fish and corals, and your devices and entities on it. Stores the aquariums and their livestock, records the feedings.</td>
+    <td>ha-reef-card</td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Elwinmage/reeftank-catalog/main/icon.png" width="64" alt="reeftank-catalog" /></td>
+    <td>🐡<br /><a href="https://github.com/Elwinmage/reeftank-catalog"><b>reeftank-catalog</b></a></td>
+    <td>Fish, corals and textures of the aquarium card, downloaded and kept up to date by ha-reeftank-component.</td>
+    <td>ha-reeftank-component</td>
   </tr>
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-blueprints/main/icon.png" width="64" alt="ha-reef-blueprints" /></td>
@@ -333,7 +345,12 @@ view: front # optional: the view to start on
 - **Create and edit** an aquarium from the card editor: _New aquarium_ or _Edit the scene_ opens a full-screen editor (pictures, water outline, decor, clickable zones, devices and entities dragged from a tree, lamps, livestock, feeding sources). With a ReefBeat cloud account, the aquarium of the cloud pre-fills dimensions, lamps, feeding shortcuts, and filters the Red Sea devices.
 - **Render levels**: `static` (picture, devices, entities, clickable zones), `light` (plus the colour of the lamps on the water), `full` (plus fish, corals and the feeding animation).
 - A tap on a device opens its view of this card; on an entity, its usual action.
+- **Sand and rocks**: trace the sand line against the front glass (and the back wall when the picture shows the top of the sand) and outline the rocks with their depth: fish keep above the sand, swim behind the rocks, and sand dwellers crawl on it.
+- **Drawn decor**: when the photo of the water is not usable, a water can be drawn instead (water, sand, rock textures of the catalog), the rest of the picture kept.
+- **Behaviour**: shoals, open-water cruisers, sand dwellers, fish living around a home, gobies peeking out of their burrow; at night fish hide or rest, under a veil that keeps the tank readable.
 - **Species**: fish and corals come from the [ReefTank catalog](https://github.com/Elwinmage/reeftank-catalog), downloaded and kept up to date by the integration. The editor lists them with a thumbnail; a name that is not in the catalog swims as a generic fish.
+
+The full guide (scene editor, entities, services, catalog) is in the [ReefTank README](https://github.com/Elwinmage/ha-reeftank-component).
 
 # FAQ
 
