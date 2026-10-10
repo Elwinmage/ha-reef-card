@@ -319,6 +319,22 @@ The card editor stores the stable identifier of the device there (its hardware i
     </tr>
 </table>
 
+## Aquarium view
+
+A second card, `custom:reef-aquarium-card`, shows a picture of your tank with its devices and entities on it, the water lit by your lamps and, if you wish, fish and corals alive in it. It needs the [ReefTank integration](https://github.com/Elwinmage/ha-reeftank-component), which stores the aquariums and their pictures.
+
+```yaml
+type: custom:reef-aquarium-card
+aquarium: a1b2 # chosen in the card editor
+render: static # optional: static, light or full; can only lower the aquarium's level
+view: front # optional: the view to start on
+```
+
+- **Create and edit** an aquarium from the card editor: _New aquarium_ or _Edit the scene_ opens a full-screen editor (pictures, water outline, decor, clickable zones, devices and entities dragged from a tree, lamps, livestock, feeding sources). With a ReefBeat cloud account, the aquarium of the cloud pre-fills dimensions, lamps, feeding shortcuts, and filters the Red Sea devices.
+- **Render levels**: `static` (picture, devices, entities, clickable zones), `light` (plus the colour of the lamps on the water), `full` (plus fish, corals and the feeding animation).
+- A tap on a device opens its view of this card; on an entity, its usual action.
+- **Species**: fish and corals come from the [ReefTank catalog](https://github.com/Elwinmage/reeftank-catalog), downloaded and kept up to date by the integration. The editor lists them with a thumbnail; a name that is not in the catalog swims as a generic fish.
+
 # FAQ
 
 ---

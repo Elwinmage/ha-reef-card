@@ -5,6 +5,7 @@ import { ReefCard } from "./card";
 import { ReefCardEditor } from "./editor";
 
 import "./devices/index";
+import "./aquarium/index";
 
 customElements.define("reef-card", ReefCard);
 customElements.define("reef-card-editor", ReefCardEditor);
@@ -41,4 +42,13 @@ window.customCards.push({
    * If true, Home Assistant will render a small preview of your card
    */
   preview: true,
+});
+
+window.customCards.push({
+  type: "reef-aquarium-card",
+  name: "Reef Aquarium Card",
+  description:
+    "A living picture of your aquarium: its devices and entities, the water lit by your lamps, fish and corals (needs the reeftank integration).",
+  documentationURL: "https://github.com/Elwinmage/ha-reef-card",
+  preview: false,
 });

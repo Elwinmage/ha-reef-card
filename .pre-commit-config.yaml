@@ -17,7 +17,7 @@ repos:
         language: system
 
   - repo: https://github.com/Elwinmage/create_ha_project
-    rev: v1.0.1
+    rev: v1.0.2
     hooks:
       - id: check-mdi
 
