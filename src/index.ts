@@ -50,5 +50,6 @@ window.customCards.push({
   description:
     "A living picture of your aquarium: its devices and entities, the water lit by your lamps, fish and corals (needs the reeftank integration).",
   documentationURL: "https://github.com/Elwinmage/ha-reef-card",
-  preview: false,
+  // Rendered with its stub configuration (no aquarium): shows its picture
+  preview: true,
 });

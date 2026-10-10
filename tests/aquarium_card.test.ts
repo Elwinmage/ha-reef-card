@@ -210,6 +210,10 @@ describe("card", () => {
     const h2 = make_hass({}).hass;
     card = await mount({}, h2);
     expect(card.shadowRoot.textContent).toContain("No aquarium chosen");
+    // the card's picture, as in the card picker
+    expect(
+      card.shadowRoot.querySelector("img.preview").getAttribute("src"),
+    ).toContain("preview-reeftank");
     const h3 = make_hass({}).hass;
     h3.connection.subscribeMessage = vi.fn(async () =>
       Promise.reject({ code: "not_found", message: "" }),

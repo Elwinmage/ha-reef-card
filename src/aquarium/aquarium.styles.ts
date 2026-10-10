@@ -24,9 +24,6 @@ export default css`
     object-fit: fill;
     display: block;
   }
-  .stage img.bg.hidden {
-    visibility: hidden;
-  }
   .stage canvas {
     position: absolute;
     inset: 0;
@@ -147,6 +144,12 @@ export default css`
     padding: 4px 12px;
     cursor: pointer;
     font-size: 0.95em;
+  }
+  img.preview {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
   }
   .message {
     padding: 24px 16px;

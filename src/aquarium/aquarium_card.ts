@@ -51,6 +51,10 @@ import {
 import DeviceList from "../utils/common";
 import i18n from "../translations/myi18n";
 import style_aquarium from "./aquarium.styles";
+
+/** Picture of the card, shown until an aquarium is chosen. */
+const PREVIEW_IMG = new URL("../img/preview-reeftank.webp", import.meta.url)
+  .href;
 import type { MyElement } from "../base/element";
 
 export interface AquariumCardConfig {
@@ -611,6 +615,13 @@ export class ReefAquariumCard extends LitElement {
   }
 
   override render(): TemplateResult {
+    // No aquarium chosen yet (the card picker's preview, a new card): its
+    // picture, and what to do
+    if (!this._config.aquarium)
+      return html`<ha-card>
+        <img class="preview" src="${PREVIEW_IMG}" alt="" />
+        ${this._message("no_aquarium")}
+      </ha-card>`;
     if (this._error)
       return html`<ha-card>${this._message(this._error)}</ha-card>`;
     const payload = this._payload;
