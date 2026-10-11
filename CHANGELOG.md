@@ -2,6 +2,47 @@
 
 ## MODIFICATIONS
 
+### Aquarium view (new card: `custom:reef-aquarium-card`)
+
+- A picture of the tank with devices and entities placed on it; needs the
+  new [ReefTank integration](https://github.com/Elwinmage/ha-reeftank-component).
+- Three render levels: `static`, `light` (water tinted by the lamps, with the
+  ReefLED beam colour model) and `full` (fish and corals). A card can lower
+  the aquarium's level (`render:`), and `prefers-reduced-motion` lowers
+  `full` to `light`.
+- Fish: sprite atlases, boids-like behaviours per species (shoal, cruiser,
+  benthic, hover), night modes (hide behind the decor, hover, rest on the
+  bottom), drift with the pumps' flow, rush to the feeding points when the
+  aquarium's feeding event fires.
+- Fish clips from generated videos: a turn drawn by its clip keeps one way
+  all along (played as is or mirrored) and lasts as long as the clip, the
+  idle clip plays at its own rate (with hysteresis), ping-pong clips, the
+  frame scaled by `length_frac`, and a 0.15 s cross-fade when a fish changes
+  clip (the new frame stays opaque).
+- Depth haze tints far fish instead of making them see-through.
+- Species catalog downloaded by the integration: the editor shows a
+  thumbnail for every species (in the inventory and in a searchable species
+  picker), says why the catalog is empty (downloading, or no access to
+  GitHub), and the card and the editor reload the catalog when a release is
+  installed. A species missing from the catalog swims as a generic fish.
+- No tilt jump at the end of a turn clip: the pitch follows the way the fish
+  looks on screen all through the turn.
+- New ids always start with a letter: an all-digit id was an integer key,
+  which JavaScript orders first (views could change order).
+- Corals: recoloured from an indexed palette (shade + mask atlases),
+  opening and closing with the light, fluorescent colours glowing under
+  actinic light.
+- Decor cut out of the photo at three depths: fish swim behind it.
+- Clickable zones switching between views; a tap on a device opens its view
+  of the card (or its Home Assistant page).
+- Full-screen scene editor (a modal of its own, usable from the card
+  editor dialog): picture upload, water outline (4 corners),
+  decor (polygon, lasso), clickable zones, device tree by floor and area
+  like the automation target picker (the aquarium's area first, a switch
+  shows every area) with drag and drop, lamps and flow,
+  livestock inventory and corals, feeding sources, undo.
+- `scripts/check_translations.py` knows the dynamic keys of the view.
+
 ### Energy backup (reefbeatEnergyBackup)
 
 - New view for the [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup)
