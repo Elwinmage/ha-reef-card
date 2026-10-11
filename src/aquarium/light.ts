@@ -210,14 +210,25 @@ export function relative_tint(
 }
 
 /**
- * Darkness of the veil over the water for a lamp power: up to 0.55 with the
- * lamps off, so that the tank stays readable at night (moonlight).
+ * Darkness of the veil over the water for a lamp power: up to `max` with the
+ * lamps off. The default keeps the tank readable at night (moonlight); each
+ * aquarium can set its own (`render.night_darkness`).
  */
 export const MAX_DARKNESS = 0.55;
+/** Highest night darkness an aquarium may ask for: never a black tank. */
+export const NIGHT_DARKNESS_LIMIT = 0.95;
 
-export function darkness(power: number): number {
+/** A night darkness clamped to what the veil accepts, the default if unset. */
+export function night_darkness(value: unknown): number {
+  const n = Number(value);
+  if (value === undefined || value === null || !Number.isFinite(n))
+    return MAX_DARKNESS;
+  return Math.max(0, Math.min(NIGHT_DARKNESS_LIMIT, n));
+}
+
+export function darkness(power: number, max: number = MAX_DARKNESS): number {
   const p = Math.max(0, Math.min(1, power));
-  return Number((MAX_DARKNESS * Math.pow(1 - p, 1.6)).toFixed(3));
+  return Number((max * Math.pow(1 - p, 1.6)).toFixed(3));
 }
 
 /** CSS backgrounds of the light layers of a water region. */
@@ -236,6 +247,7 @@ export interface TintLayers {
 export function tint_layers(
   light: WaterLight,
   photo: "white" | "blue",
+  max_darkness: number = MAX_DARKNESS,
 ): TintLayers | null {
   if (light.none) return null;
   const lamps = light.lamps.length
@@ -253,8 +265,9 @@ export function tint_layers(
     );
     return `rgb(${c.join(",")})`;
   })})`;
-  const veil = `linear-gradient(to right, ${stops((l) => `rgba(0,6,20,${darkness(l.power)})`)})`;
-  const night = light.dark ? 0.08 : 0;
+  const veil = `linear-gradient(to right, ${stops((l) => `rgba(0,6,20,${darkness(l.power, max_darkness)})`)})`;
+  // The bottom gets a little darker at night, in proportion to the veil
+  const night = light.dark ? (0.08 * max_darkness) / MAX_DARKNESS : 0;
   const depth = `linear-gradient(to bottom, rgba(0,10,40,${night.toFixed(2)}) 0%, rgba(0,10,40,${(0.22 + night).toFixed(2)}) 100%)`;
   return { tint, veil, depth };
 }

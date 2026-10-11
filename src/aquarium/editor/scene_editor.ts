@@ -46,6 +46,7 @@ import { RENDER_LEVELS } from "../types";
 import { ApiError, ReefTankApi, image_url, IMAGES_URL } from "../api";
 import {
   WaterProjection,
+  clip_path,
   rect_quad,
   sand_profile,
   simplify,
@@ -63,7 +64,7 @@ import {
   type TreeEntity,
   type TreeFloor,
 } from "../tree";
-import { device_entities } from "../light";
+import { device_entities, night_darkness, tint_layers } from "../light";
 import { Backdrop, drawn_region } from "../backdrop";
 import { device_name, device_thumbnail } from "../elements";
 import { coral_palette, rgb_hex } from "../sprites";
@@ -281,6 +282,10 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _home_line: string | null = null;
   /** The drawn decor shown over the photo. */
   @state() private _preview = false;
+  /** The picture shown as at night, lamps off, to judge the darkness. */
+  @state() private _night_preview = false;
+  /** Night darkness while its slider moves, not yet in the document. */
+  @state() private _night_live: number | null = null;
   /** Sand line edited by the sand tool: front glass or back wall. */
   @state() private _sand_line: ops.SandLine = "sand";
   /** Species picker opened (fish or coral), with its search text. */
@@ -933,6 +938,87 @@ export class ReefAquariumSceneEditor extends LitElement {
     ></div>`;
   }
 
+  /**
+   * Darkness of the water with the lamps off, as a percentage: how much the
+   * tank darkens at night (0 % = as by day).
+   */
+  private _render_night_darkness(doc: AquariumDocument): TemplateResult {
+    const pct = Math.round(this._night_value(doc) * 100);
+    return html`<label class="field"
+        >${i18n._("aq_night_darkness")} (${pct} %)
+        <input
+          type="range"
+          min="0"
+          max="95"
+          step="5"
+          .value=${String(pct)}
+          @input=${(e: Event) => {
+            // Live on the picture while the slider moves; saved on release
+            this._night_live = night_darkness(
+              Number((e.target as HTMLInputElement).value) / 100,
+            );
+            this._night_preview = true;
+          }}
+          @change=${(e: Event) => {
+            this._night_live = null;
+            this.change({
+              ...structuredClone(doc),
+              render: {
+                ...doc.render,
+                night_darkness: night_darkness(
+                  Number((e.target as HTMLInputElement).value) / 100,
+                ),
+              },
+            });
+          }}
+        />
+      </label>
+      <label class="check"
+        ><input
+          type="checkbox"
+          .checked=${this._night_preview}
+          @change=${(e: Event) =>
+            (this._night_preview = (e.target as HTMLInputElement).checked)}
+        />${i18n._("aq_night_preview")}</label
+      >
+      <span class="hint">${i18n._("aq_night_darkness_hint")}</span>`;
+  }
+
+  /** Night darkness shown: the slider's while it moves, else the saved one. */
+  private _night_value(doc: AquariumDocument): number {
+    return this._night_live ?? night_darkness(doc.render.night_darkness);
+  }
+
+  /**
+   * The water of each outlined region as the card shows it at night with
+   * the lamps off: same layers, same darkness.
+   */
+  private _render_night(view: View): TemplateResult[] {
+    const doc = this._doc!;
+    const layers = tint_layers(
+      { lamps: [], dark: true, none: false },
+      doc.photo_light ?? "white",
+      this._night_value(doc),
+    )!;
+    return view.regions
+      .filter((r) => WaterProjection.valid(r.quad))
+      .map((r) => {
+        const clip = clip_path(r.quad);
+        return html`<div
+            class="water tint"
+            style="clip-path:${clip};background:${layers.tint}"
+          ></div>
+          <div
+            class="water veil"
+            style="clip-path:${clip};background:${layers.veil}"
+          ></div>
+          <div
+            class="water depth"
+            style="clip-path:${clip};background:${layers.depth}"
+          ></div>`;
+      });
+  }
+
   private _render_stage(): TemplateResult {
     const view = this._view;
     if (!view)
@@ -945,7 +1031,7 @@ export class ReefAquariumSceneEditor extends LitElement {
     return html`<div class="stage-wrap">
       <div
         class="stage tool-${this._tool}"
-        style="aspect-ratio:${this._aspect}"
+        style="aspect-ratio:${this._aspect};--ratio:${this._aspect}"
         @pointerdown=${this._stage_down}
         @pointermove=${this._stage_move}
         @pointerup=${this._stage_up}
@@ -964,6 +1050,9 @@ export class ReefAquariumSceneEditor extends LitElement {
             />`
           : html`<div class="noimage">${i18n._("aq_upload_hint")}</div>`}
         ${this._preview ? html`<canvas class="backdrop"></canvas>` : nothing}
+        ${tab === "aquarium" && this._night_preview
+          ? this._render_night(view)
+          : nothing}
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
           ${view.regions.map(
             (r) =>
@@ -1388,6 +1477,7 @@ export class ReefAquariumSceneEditor extends LitElement {
               })}
           />
         </label>
+        ${this._render_night_darkness(doc)}
         <label class="field"
           >${i18n._("aq_photo_light")}
           <select

@@ -20,6 +20,7 @@ import type {
   View,
   Water,
 } from "../types";
+import { MAX_DARKNESS } from "../light";
 
 /** Depth presets of the decor and corals. */
 export const DEPTHS = { front: 0.2, middle: 0.5, back: 0.8 } as const;
@@ -78,7 +79,12 @@ export function new_document(name: string): AquariumDocument {
     preset: null,
     dimensions_cm: null,
     photo_light: "white",
-    render: { level: "full", max_fish: 30, caustics: false },
+    render: {
+      level: "full",
+      max_fish: 30,
+      caustics: false,
+      night_darkness: MAX_DARKNESS,
+    },
     waters: { main: empty_water() },
     feeding: { sources: [], dedup_s: 120, duration_s: 45 },
     views: {},

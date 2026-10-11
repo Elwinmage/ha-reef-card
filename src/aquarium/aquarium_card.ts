@@ -38,7 +38,12 @@ import type {
 import { RENDER_LEVELS } from "./types";
 import { ReefTankApi, image_url } from "./api";
 import { WaterProjection, clip_path, svg_points } from "./geometry";
-import { tint_layers, water_light, type WaterLight } from "./light";
+import {
+  night_darkness,
+  tint_layers,
+  water_light,
+  type WaterLight,
+} from "./light";
 import { AquariumScene } from "./scene";
 import { Backdrop, drawn } from "./backdrop";
 import {
@@ -538,7 +543,11 @@ export class ReefAquariumCard extends LitElement {
       .map((region) => {
         const light = this._lights[region.water];
         const layers = light
-          ? tint_layers(light, doc.photo_light ?? "white")
+          ? tint_layers(
+              light,
+              doc.photo_light ?? "white",
+              night_darkness(doc.render?.night_darkness),
+            )
           : null;
         if (!layers) return html``;
         // One clipped layer each: a clip-path isolates its content, so a

@@ -459,17 +459,24 @@ export default css`
     overflow: auto;
     padding: 12px;
   }
+  /*
+   * The picture keeps its proportions: the wrap fills the free space and is
+   * a size container, the stage takes the largest box of the picture's ratio
+   * that fits in it. (A width of 100% capped by a max-height used to stretch
+   * the picture horizontally on wide screens.)
+   */
   .stage-wrap {
-    margin: auto;
-    width: 100%;
-    max-height: 100%;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     display: flex;
+    container-type: size;
   }
   .stage {
     position: relative;
     margin: auto;
-    width: 100%;
-    max-height: calc(100vh - 140px);
+    width: min(100cqw, calc(100cqh * var(--ratio, 1.7778)));
+    flex: none;
     background: #0b1622;
     touch-action: none;
     user-select: none;
@@ -510,6 +517,15 @@ export default css`
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+  /* Night preview: the light layers of the card */
+  .stage > .water {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .stage > .water.tint {
+    mix-blend-mode: multiply;
   }
   .stage > svg {
     position: absolute;

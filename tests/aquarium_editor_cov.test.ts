@@ -1124,6 +1124,58 @@ describe("scene editor: aquarium panel", () => {
     await editor.updateComplete;
     fire(light, "blue");
     expect(editor.doc.photo_light).toBe("blue");
+    await editor.updateComplete;
+    // Night darkness: a percentage, stored as a share
+    const night = () =>
+      fieldset(root, "Rendering").querySelector('input[type="range"]') as any;
+    expect(night().value).toBe("55");
+    fire(night(), "80");
+    expect(editor.doc.render.night_darkness).toBe(0.8);
+    await editor.updateComplete;
+    expect(night().closest("label").textContent).toContain("(80 %)");
+    fire(night(), "0");
+    expect(editor.doc.render.night_darkness).toBe(0);
+  });
+
+  it("shows the night darkness live on the picture", async () => {
+    const { doc } = existing_doc();
+    delete (doc as any).photo_light;
+    const editor = await open_on(doc, "aquarium");
+    const root = editor.shadowRoot;
+    const stage = () => root.querySelector(".stage");
+    const night = () =>
+      fieldset(root, "Rendering").querySelector('input[type="range"]') as any;
+    const preview = () =>
+      [
+        ...fieldset(root, "Rendering").querySelectorAll("label.check input"),
+      ].pop() as any;
+    expect(stage().querySelector(".water")).toBeNull();
+    // Moving the slider: the picture goes to night, nothing saved yet
+    fire(night(), "90", "input");
+    await editor.updateComplete;
+    expect(editor.doc.render.night_darkness).toBe(0.55);
+    expect(preview().checked).toBe(true);
+    const veil = () => stage().querySelector(".water.veil") as HTMLElement;
+    expect(veil().getAttribute("style")).toContain("rgba(0,6,20,0.9)");
+    expect(stage().querySelectorAll(".water")).toHaveLength(3);
+    expect(night().closest("label").textContent).toContain("(90 %)");
+    // Released: saved, the picture keeps the night
+    fire(night(), "90");
+    await editor.updateComplete;
+    expect(editor.doc.render.night_darkness).toBe(0.9);
+    expect(veil().getAttribute("style")).toContain("rgba(0,6,20,0.9)");
+    // Only on the Aquarium tab
+    editor._tab = "views";
+    await editor.updateComplete;
+    expect(stage().querySelector(".water")).toBeNull();
+    editor._tab = "aquarium";
+    await editor.updateComplete;
+    fire(preview(), false, "change", "checked");
+    await editor.updateComplete;
+    expect(stage().querySelector(".water")).toBeNull();
+    fire(preview(), true, "change", "checked");
+    await editor.updateComplete;
+    expect(veil()).not.toBeNull();
   });
 
   it("links a cloud aquarium and applies a preset", async () => {

@@ -138,7 +138,13 @@ export interface AquariumDocument {
   preset?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
   photo_light: "white" | "blue";
-  render: { level: RenderLevel; max_fish: number; caustics: boolean };
+  render: {
+    level: RenderLevel;
+    max_fish: number;
+    caustics: boolean;
+    /** Darkness of the water with the lamps off, 0..0.95 (default 0.55). */
+    night_darkness?: number;
+  };
   waters: Record<string, Water>;
   feeding: { sources: FeedSource[]; dedup_s: number; duration_s: number };
   views: Record<string, View>;

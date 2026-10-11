@@ -4,6 +4,8 @@ import {
   device_entities,
   entity_reading,
   lamp_reading,
+  MAX_DARKNESS,
+  night_darkness,
   reefled_reading,
   relative_tint,
   tint_layers,
@@ -203,5 +205,27 @@ describe("water light", () => {
     expect(darkness(1)).toBe(0);
     expect(darkness(0)).toBe(0.55);
     expect(darkness(5)).toBe(0);
+    // The aquarium's own night darkness
+    expect(darkness(0, 0.8)).toBe(0.8);
+    expect(darkness(0, 0)).toBe(0);
+  });
+
+  it("clamps the night darkness of an aquarium", () => {
+    expect(night_darkness(undefined)).toBe(MAX_DARKNESS);
+    expect(night_darkness(null)).toBe(MAX_DARKNESS);
+    expect(night_darkness("abc")).toBe(MAX_DARKNESS);
+    expect(night_darkness(0.3)).toBe(0.3);
+    expect(night_darkness(-1)).toBe(0);
+    expect(night_darkness(2)).toBe(0.95);
+  });
+
+  it("darkens the veil and the bottom as the aquarium asks", () => {
+    const dark = { lamps: [], dark: true, none: false };
+    const deep = tint_layers(dark, "white", 0.9)!;
+    expect(deep.veil).toContain("rgba(0,6,20,0.9)");
+    expect(deep.depth).toContain("0.13");
+    const clear = tint_layers(dark, "white", 0)!;
+    expect(clear.veil).toContain("rgba(0,6,20,0)");
+    expect(clear.depth).toContain("rgba(0,10,40,0.00) 0%");
   });
 });
