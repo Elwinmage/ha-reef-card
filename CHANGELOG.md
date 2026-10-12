@@ -2,6 +2,36 @@
 
 ## MODIFICATIONS
 
+### RSDOSE: dose regulation dialogs
+
+- The head configuration holds the regulation mode (needs the redsea
+  integration's dose regulation entities). In assisted mode an "Assisted
+  dosing" button opens its dialog (test results chart, record a result,
+  proposed dose to apply or dismiss, settings).
+- Brine mode: the head is driven by Home Assistant alone with manual doses,
+  so its configuration shows the brine (salinity chart, state, alarm,
+  planned brine, refractometer check, settings) instead of the schedule.
+  The dialog switches as soon as the mode changes.
+- Brine mode on the main view: the ring and the middle label show the brine
+  dosed today against the brine planned for the day, the bottom label the
+  salinity instead of the number of doses, the container its level without
+  the days left. The head stays coloured with its schedule off.
+- A chart with nothing recorded yet is hidden rather than drawn as a blank
+  panel (`hide_empty` option of `history-chart`).
+- Dialogs: any item of a dialog's content can take a `disabled_if`; the
+  dialog is rebuilt when an item shows or hides. Elements: new
+  `remove_if_disabled` option, taking a disabled element out of the layout
+  (two elements can then share one place, one at a time).
+- "DIY - Brine" supplement, with its own bottle picture: the only supplement
+  regulated on the salinity.
+
+### Aquarium editor: water volume
+
+- New "Net water volume (L)" field under the dimensions, pre-filled from the
+  ReefBeat cloud aquarium (net volume, else gross, converted from gallons).
+  Saved as `water_volume_l` (needs reeftank with the water volume); the
+  ReefDose dose regulation reads it.
+
 ### Aquarium view (new card: `custom:reef-aquarium-card`)
 
 - A picture of the tank with devices and entities placed on it; needs the

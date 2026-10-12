@@ -609,5 +609,8 @@
   "aq_water_main": "Zbiornik główny",
   "aq_water_outline": "Obrys wody",
   "aq_water_sump": "Sump",
-  "aq_missing_entity": "Ta encja już nie istnieje"
+  "aq_missing_entity": "Ta encja już nie istnieje",
+  "regulation_assisted": "Dozowanie wspomagane",
+  "aq_water_volume": "Objętość wody netto (L)",
+  "aq_water_volume_hint": "Zbiornik i sump, bez skał i piasku. Używana przez regulację dozowania ReefDose."
 }

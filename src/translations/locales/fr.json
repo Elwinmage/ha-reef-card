@@ -609,5 +609,8 @@
   "aq_water_main": "Bac principal",
   "aq_water_outline": "Contour de l'eau",
   "aq_water_sump": "Décante",
-  "aq_missing_entity": "Cette entité n'existe plus"
+  "aq_missing_entity": "Cette entité n'existe plus",
+  "regulation_assisted": "Dosage assisté",
+  "aq_water_volume": "Volume d'eau net (L)",
+  "aq_water_volume_hint": "Bac et décantation, sans pierres ni sable. Utilisé par la régulation du dosage de la ReefDose."
 }

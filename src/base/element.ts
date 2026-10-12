@@ -483,8 +483,19 @@ export class MyElement extends LitElement {
       _value = this.stateObj.state;
     }
 
-    if (this.evaluateCondition(this.conf?.disabled_if)) {
-      if (this.conf?.no_br_if_disabled) {
+    const disabled = this.evaluateCondition(this.conf?.disabled_if);
+    // Taken out of the layout altogether, not only emptied: in a grid an
+    // empty element still holds a cell. Lets two elements share a place,
+    // one shown at a time.
+    if (this.conf?.remove_if_disabled) {
+      if (disabled) {
+        this.style.display = "none";
+      } else if (this.style.display === "none") {
+        this.style.removeProperty("display");
+      }
+    }
+    if (disabled) {
+      if (this.conf?.no_br_if_disabled || this.conf?.remove_if_disabled) {
         return html``;
       }
       return html`<br />`;

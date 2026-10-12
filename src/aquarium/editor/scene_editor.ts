@@ -1431,6 +1431,25 @@ export class ReefAquariumSceneEditor extends LitElement {
               /></label>`,
           )}
         </div>
+        <label class="field"
+          >${i18n._("aq_water_volume")}
+          <input
+            type="number"
+            min="1"
+            step="1"
+            .value=${typeof doc.water_volume_l === "number"
+              ? String(doc.water_volume_l)
+              : ""}
+            @change=${(e: Event) => {
+              const value = Number((e.target as HTMLInputElement).value);
+              this.change({
+                ...structuredClone(doc),
+                water_volume_l: value >= 1 ? value : null,
+              });
+            }}
+          />
+          <span class="hint">${i18n._("aq_water_volume_hint")}</span>
+        </label>
       </fieldset>
       <fieldset>
         <legend>${i18n._("aq_rendering")}</legend>
@@ -1510,6 +1529,8 @@ export class ReefAquariumSceneEditor extends LitElement {
     const next = structuredClone(doc);
     next.cloud = filled.cloud;
     if (!next.dimensions_cm) next.dimensions_cm = filled.dimensions_cm;
+    if (typeof next.water_volume_l !== "number")
+      next.water_volume_l = filled.water_volume_l;
     if (
       this._is_new &&
       (!next.name || next.name === i18n._("aq_new_aquarium_name"))

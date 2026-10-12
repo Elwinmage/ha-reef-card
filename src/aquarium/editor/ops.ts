@@ -135,6 +135,25 @@ export function match_preset(
   return null;
 }
 
+/** Litres in a US gallon. */
+const LITRES_PER_GALLON = 3.78541;
+
+/**
+ * Water volume of a cloud aquarium in litres: the net volume, else the
+ * gross one, converted when the account counts in gallons.
+ * @return the volume, or null when the cloud gives none
+ */
+export function cloud_volume_l(cloud: CloudAquarium): number | null {
+  const volume = [cloud.net_water_volume, cloud.water_volume].find(
+    (v): v is number => typeof v === "number" && v > 0,
+  );
+  if (volume === undefined) return null;
+  const unit = (cloud.measuring_unit ?? "").toLowerCase();
+  return Math.round(
+    unit.includes("gallon") ? volume * LITRES_PER_GALLON : volume,
+  );
+}
+
 /**
  * A document pre-filled from a cloud aquarium.
  * @param is_lamp: tells which of its devices are lamps
@@ -146,6 +165,7 @@ export function from_cloud(
   const doc = new_document(cloud.name);
   doc.cloud = { provider: cloud.provider, uid: cloud.uid };
   doc.dimensions_cm = cloud.dimensions_cm ?? null;
+  doc.water_volume_l = cloud_volume_l(cloud);
   const lamps = cloud.device_ids.filter(is_lamp);
   doc.waters.main.lights = lamps.map((device_id, i) => ({
     device_id,

@@ -171,6 +171,14 @@ Here is the list of supported images for supplements, grouped by brand. If yours
 </details>
 
 <details>
+<summary><b>DIY &nbsp; <sup>1/1 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Brine</td><td><img style='width:20%;' src='../../public/img/supplements/b99739a8-bced-420e-bbdb-86ccd14524fd.supplement.png'/></td></tr>
+</table>
+</details>
+
+<details>
 <summary><b>ESV &nbsp; <sup>0/5 🖼️</sup></b></summary>
 
 <table>

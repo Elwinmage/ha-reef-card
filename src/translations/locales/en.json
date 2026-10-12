@@ -609,5 +609,8 @@
   "aq_water_main": "Main tank",
   "aq_water_outline": "Water outline",
   "aq_water_sump": "Sump",
-  "aq_missing_entity": "This entity no longer exists"
+  "aq_missing_entity": "This entity no longer exists",
+  "regulation_assisted": "Assisted dosing",
+  "aq_water_volume": "Net water volume (L)",
+  "aq_water_volume_hint": "Tank and sump, without rock and sand. Used by the dose regulation of the ReefDose."
 }

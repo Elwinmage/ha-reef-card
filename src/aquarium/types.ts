@@ -137,6 +137,8 @@ export interface AquariumDocument {
   cloud?: { provider: string; uid: string } | null;
   preset?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
+  /** Net water volume (L): tank and sump, without rock and sand. */
+  water_volume_l?: number | null;
   photo_light: "white" | "blue";
   render: {
     level: RenderLevel;
@@ -185,6 +187,10 @@ export interface CloudAquarium {
   system_series?: string | null;
   system_type?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
+  /** Volumes in the account's unit (`measuring_unit`: litres or gallons). */
+  water_volume?: number | null;
+  net_water_volume?: number | null;
+  measuring_unit?: string | null;
   device_ids: string[];
   feeding_entities: string[];
 }

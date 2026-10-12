@@ -604,3 +604,42 @@ describe("backdrop edge cases", () => {
     });
   });
 });
+
+describe("water volume of a cloud aquarium", () => {
+  const cloud = {
+    provider: "redsea",
+    account: "me",
+    uid: "u",
+    name: "R",
+    device_ids: [],
+    feeding_entities: [],
+  } as any;
+
+  it("prefers the net volume, in litres", () => {
+    expect(
+      ops.cloud_volume_l({
+        ...cloud,
+        net_water_volume: 330,
+        water_volume: 400,
+      }),
+    ).toBe(330);
+    expect(ops.cloud_volume_l({ ...cloud, water_volume: 400 })).toBe(400);
+    expect(
+      ops.cloud_volume_l({
+        ...cloud,
+        net_water_volume: 100,
+        measuring_unit: "gallons",
+      }),
+    ).toBe(379);
+    expect(
+      ops.cloud_volume_l({ ...cloud, net_water_volume: 0, water_volume: null }),
+    ).toBeNull();
+  });
+
+  it("pre-fills the document", () => {
+    expect(ops.from_cloud(cloud).water_volume_l).toBeNull();
+    expect(
+      ops.from_cloud({ ...cloud, net_water_volume: 425 }).water_volume_l,
+    ).toBe(425);
+  });
+});

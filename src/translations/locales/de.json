@@ -609,5 +609,8 @@
   "aq_water_main": "Hauptbecken",
   "aq_water_outline": "Wasserumriss",
   "aq_water_sump": "Technikbecken",
-  "aq_missing_entity": "Diese Entität existiert nicht mehr"
+  "aq_missing_entity": "Diese Entität existiert nicht mehr",
+  "regulation_assisted": "Assistierte Dosierung",
+  "aq_water_volume": "Netto-Wasservolumen (L)",
+  "aq_water_volume_hint": "Becken und Technikbecken, ohne Gestein und Sand. Von der Dosierregelung der ReefDose genutzt."
 }

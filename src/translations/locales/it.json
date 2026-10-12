@@ -609,5 +609,8 @@
   "aq_water_main": "Vasca principale",
   "aq_water_outline": "Contorno dell'acqua",
   "aq_water_sump": "Sump",
-  "aq_missing_entity": "Questa entità non esiste più"
+  "aq_missing_entity": "Questa entità non esiste più",
+  "regulation_assisted": "Dosaggio assistito",
+  "aq_water_volume": "Volume d'acqua netto (L)",
+  "aq_water_volume_hint": "Vasca e sump, senza rocce né sabbia. Usato dalla regolazione del dosaggio della ReefDose."
 }

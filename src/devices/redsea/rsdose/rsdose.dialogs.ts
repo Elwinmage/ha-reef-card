@@ -1,3 +1,10 @@
+import {
+  brine_content,
+  dialogs_regulation,
+  regulation_content,
+  schedule_content,
+} from "./regulation.dialogs";
+
 export const dialogs_rsdose = {
   config: {
     name: "config",
@@ -86,15 +93,14 @@ export const dialogs_rsdose = {
             { entity: "dose_compensation", name: { type: "entity" } },
             { entity: "last_calibration", name: { type: "entity" } },
             { entity: "recalibration_required", name: { type: "entity" } },
-            { entity: "schedule_enabled", name: { type: "entity" } },
           ],
         },
       },
-
-      {
-        view: "extend",
-        extend: "dose_head_dialog_func_ext",
-      },
+      // Dose regulation of the head: the schedule, or the brine in brine
+      // mode where Home Assistant drives the head with manual doses
+      ...regulation_content,
+      ...schedule_content,
+      ...brine_content,
     ],
   },
   head_calibration: {
@@ -577,4 +583,6 @@ export const dialogs_rsdose = {
       },
     },
   },
+  // Dose regulation of a head (regulation.dialogs.ts)
+  ...dialogs_regulation,
 };

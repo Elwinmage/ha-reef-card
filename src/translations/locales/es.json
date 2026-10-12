@@ -609,5 +609,8 @@
   "aq_water_main": "Acuario principal",
   "aq_water_outline": "Contorno del agua",
   "aq_water_sump": "Sump",
-  "aq_missing_entity": "Esta entidad ya no existe"
+  "aq_missing_entity": "Esta entidad ya no existe",
+  "regulation_assisted": "Dosificación asistida",
+  "aq_water_volume": "Volumen de agua neto (L)",
+  "aq_water_volume_hint": "Acuario y sump, sin rocas ni arena. Lo usa la regulación de dosificación de la ReefDose."
 }

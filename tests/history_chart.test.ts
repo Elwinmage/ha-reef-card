@@ -1622,3 +1622,28 @@ describe("HistoryChart zones", () => {
     expect(HistoryChart.format_tick(26.6, 1)).toBe("27");
   });
 });
+
+//----------------------------------------------------------------------------//
+//   hide_empty
+//----------------------------------------------------------------------------//
+
+describe("HistoryChart hide_empty", () => {
+  const point = { t: 1, v: 2 };
+
+  it("hides the chart while nothing can be drawn", () => {
+    const el = makeChart({ hide_empty: true });
+    el.series = [];
+    el.updated();
+    expect(el.style.display).toBe("none");
+    el.series = [{ entity_id: "sensor.usage", points: [point] }];
+    el.updated();
+    expect(el.style.display).toBe("");
+  });
+
+  it("keeps the blank panel by default", () => {
+    const el = makeChart();
+    el.series = [];
+    el.updated();
+    expect(el.style.display).toBe("");
+  });
+});

@@ -50,6 +50,8 @@ export class Dialog extends LitElement {
   protected extends_to_re_render: any[] = [];
   // Entity cards of the open dialog, with the entity ids they were built on
   protected live_contents: { content: any; conf: any; ids: string }[] = [];
+  // Which items of the open dialog's content are shown, one flag per item
+  protected shown: string = "";
   protected to_render: any = null;
   protected overload_quit: any = null;
   protected evalCtx: SafeEvalContext;
@@ -145,6 +147,13 @@ export class Dialog extends LitElement {
         elt.hass = obj;
       }
     }
+    // An item shown or hidden after an entity (the mode of a dose head
+    // switching between schedule and brine, say): the dialog is rebuilt
+    if (this.to_render && this.elt && this._visibility() !== this.shown) {
+      this.evalCtx = null;
+      this._fill_content();
+      return;
+    }
     this._refresh_live_contents();
     if (this.to_render && this.extends_to_re_render) {
       for (const _elt of this.extends_to_re_render) {
@@ -211,6 +220,41 @@ export class Dialog extends LitElement {
         }
       }
     }
+  }
+
+  /**
+   * Whether an item of the dialog's content is hidden by its `disabled_if`.
+   *
+   * Common buttons hide themselves with the `disabled_if` of their own
+   * configuration; this one, next to `view`, applies to any item, cards and
+   * extensions included. Evaluated against the current states, not the
+   * context cached for the title.
+   * @param content_conf: an item of the dialog's content
+   * @return true when the item is not to be shown
+   */
+  _hidden(content_conf: any): boolean {
+    if (!content_conf?.disabled_if) {
+      return false;
+    }
+    const device = this.elt?.device;
+    return new SafeEval({
+      config: device?.config,
+      device,
+      i18n,
+      entity: MyElement.createEntitiesContext(device, this._hass),
+    } as SafeEvalContext).evaluateCondition(content_conf.disabled_if);
+  }
+
+  /**
+   * The items of the open dialog shown, as one comparable string.
+   * @return a "1" (shown) or "0" (hidden) per item
+   */
+  _visibility(): string {
+    const content = this.to_render?.content;
+    if (!Array.isArray(content)) {
+      return "";
+    }
+    return content.map((c: any) => (this._hidden(c) ? "0" : "1")).join("");
   }
 
   _render_content(content_conf) {
@@ -498,7 +542,10 @@ export class Dialog extends LitElement {
       this.elts = [];
       this.extends_to_re_render = [];
       this.live_contents = [];
-      this.to_render.content.map((c) => this._render_content(c));
+      this.shown = this._visibility();
+      this.to_render.content
+        .filter((c) => !this._hidden(c))
+        .map((c) => this._render_content(c));
 
       // Check if submit button has a timer (now handled in run_actions via action.timer)
       const submit_button = MyElement.create_element(

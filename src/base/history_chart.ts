@@ -53,6 +53,9 @@
  *                  wants (default "zero"; use "min" for a temperature)
  *   step           true draws a staircase, right for a counter that jumps at
  *                  each dose (default true)
+ *   hide_empty     true to hide the whole chart (no blank panel) while no
+ *                  series has anything to draw, e.g. a reading never recorded
+ *                  yet in a dialog (default false)
  *   min_points     below this many samples a series is not drawn (default 1).
  *                  One is enough: a counter holds its value between changes,
  *                  so a lone sample is an honest flat line, and a day that has
@@ -657,8 +660,22 @@ export class HistoryChart extends MyElement {
   }
 
   override updated(): void {
+    this._toggle_empty();
     this._attach_canvas();
     this.draw();
+  }
+
+  /**
+   * With `hide_empty`, hide the chart while there is nothing to draw.
+   *
+   * Done here, when the series change, and not in draw(): a hidden canvas
+   * measures 0px, so draw() would never get to show it again.
+   */
+  private _toggle_empty(): void {
+    if (!this.conf?.hide_empty) {
+      return;
+    }
+    this.style.display = this.drawable_series().length === 0 ? "none" : "";
   }
 
   /**

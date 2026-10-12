@@ -1855,3 +1855,30 @@ describe("scene editor: header and tabs", () => {
     void front;
   });
 });
+
+describe("scene editor: water volume", () => {
+  it("edits the net water volume", async () => {
+    const { doc } = existing_doc();
+    const editor = await open_on(doc, "aquarium");
+    const root = editor.shadowRoot;
+    const input = () =>
+      fieldset(root, "Dimensions (cm)").querySelector('input[step="1"]') as any;
+    expect(input().value).toBe("");
+    fire(input(), "425");
+    expect(editor.doc.water_volume_l).toBe(425);
+    await editor.updateComplete;
+    expect(input().value).toBe("425");
+    fire(input(), "");
+    expect(editor.doc.water_volume_l).toBeNull();
+  });
+
+  it("takes the cloud volume unless one is set", async () => {
+    const { doc } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    const cloud = { ...editor._clouds[0], net_water_volume: 330 };
+    editor._apply_cloud(cloud);
+    expect(editor.doc.water_volume_l).toBe(330);
+    editor._apply_cloud({ ...cloud, net_water_volume: 500 });
+    expect(editor.doc.water_volume_l).toBe(330);
+  });
+});
