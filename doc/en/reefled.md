@@ -43,6 +43,10 @@ moon travels from the set to the next rise and shows the current phase
 (`todays_moon_day`). Tap the mode in the middle to change
 it (auto, manual, timer). When clouds are programmed a small cloud shows next
 to the mode; while they are passing, they drift in front of the sun.
+In manual mode with a duration (`Manual Duration` above 0), the time
+left counts down on the right face of the lamp, under its icons, with an
+hourglass; tap it to change the
+duration.
 
 ## Left face
 

@@ -16,5 +16,6 @@ export { RSLedSlider } from "./rsled_slider";
 export { RSLedProgramEditor } from "./rsled_program_editor";
 export { RSLedLinked } from "./rsled_linked";
 export { RSLedName } from "./rsled_name";
+export { RSLedCountdown } from "./rsled_countdown";
 export { RSLedWeatherSettings } from "./rsled_weather";
 export { RSLedTopoMap } from "./rsled_map";

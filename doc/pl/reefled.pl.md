@@ -43,7 +43,9 @@ końcach łuku. W nocy niebo staje się fioletowe, jak księżycowa LED lampy:
 księżyc wędruje od zachodu do następnego wschodu i pokazuje bieżącą fazę
 (`todays_moon_day`). Dotknij trybu na środku, aby go zmienić (auto,
 ręczny, timer). Gdy zaprogramowane są chmury, obok trybu pojawia się mała
-chmura; gdy przechodzą, przesuwają się przed słońcem.
+chmura; gdy przechodzą, przesuwają się przed słońcem. W trybie ręcznym
+z czasem trwania (czas trybu ręcznego większy od 0) na prawej ściance
+lampy, pod jej ikonami, odliczany jest pozostały czas z klepsydrą; dotknij go, aby zmienić czas trwania.
 
 ## Lewa ścianka
 

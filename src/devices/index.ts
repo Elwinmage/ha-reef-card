@@ -23,6 +23,7 @@ import {
   RSLedProgramEditor,
   RSLedLinked,
   RSLedName,
+  RSLedCountdown,
   RSLedWeatherSettings,
   RSLedTopoMap,
 } from "./redsea/rsled";
@@ -99,6 +100,8 @@ if (!customElements.get("rsled-weather-settings"))
   customElements.define("rsled-weather-settings", RSLedWeatherSettings);
 if (!customElements.get("rsled-name"))
   customElements.define("rsled-name", RSLedName);
+if (!customElements.get("rsled-countdown"))
+  customElements.define("rsled-countdown", RSLedCountdown);
 if (!customElements.get("rsled-sky"))
   customElements.define("rsled-sky", RSLedSky);
 if (!customElements.get("rsled-beam"))
@@ -180,6 +183,7 @@ export {
   RSLedProgramEditor,
   RSLedLinked,
   RSLedName,
+  RSLedCountdown,
   RSLedWeatherSettings,
   RSLedTopoMap,
 } from "./redsea/rsled";

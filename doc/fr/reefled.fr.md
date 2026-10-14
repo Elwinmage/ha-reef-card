@@ -44,7 +44,10 @@ la rampe : la lune va du coucher au lever suivant et affiche sa phase
 (`todays_moon_day`). Touchez le mode au centre pour le
 changer (auto, manuel, minuteur). Si des nuages sont programmés, un petit
 nuage apparaît à côté du mode ; pendant leur passage, ils défilent devant le
-soleil.
+soleil. En mode manuel avec une durée (durée du mode manuel supérieure à 0),
+le temps restant est décompté sur la face droite de la lampe, sous ses
+icônes, avec un sablier ; touchez-le pour
+changer la durée.
 
 ## Face gauche
 

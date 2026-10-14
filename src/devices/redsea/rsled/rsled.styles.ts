@@ -50,6 +50,20 @@ export const style_rsled_overlay = css`
     stroke-width: 3px;
   }
 
+  /* Time left of the manual mode, on the right face: written on the dark
+     body of the lamp, light whatever the theme, like the acclimation lines */
+  .rsled_countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: var(--rs-label-font, 14px);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    --mdc-icon-size: 1.2em;
+  }
+
   /* Current time, in the sun or the moon: read on both */
   .sky_time {
     font-size: 15px;

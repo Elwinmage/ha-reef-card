@@ -21,6 +21,9 @@ export const G1_FACE: FaceLayout = {
   acclimation: ["78%", "34.5%"],
   acclimation_text: ["84.5%", "34.2%"],
   right_skew: "19deg",
+  // Under the moon, on the face below the icons
+  countdown: ["67%", "35.2%"],
+  countdown_rotate: "4deg",
 };
 
 export const config = rsled_config({

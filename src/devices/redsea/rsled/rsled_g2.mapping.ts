@@ -10,7 +10,9 @@ import { FaceLayout, rsled_config } from "./rsled.common.mapping";
 /**
  * G2: rounded lamp, faces on the smooth band under the vents. The left face
  * holds six icons, 6.6% apart: they start close to its left edge so the last
- * one stays on the flat of the face, clear of the front corner.
+ * one stays on the flat of the face, clear of the front corner. The band is
+ * too narrow on the right face for a line under icons in its middle: they
+ * sit in its upper third, leaving the lower one to the countdown.
  */
 export const G2_FACE: FaceLayout = {
   device_state: ["5.5%", "39.6%"],
@@ -19,11 +21,15 @@ export const G2_FACE: FaceLayout = {
   battery_level: ["25.3%", "33.2%"],
   wifi_quality: ["31.9%", "31.1%"],
   maintenance_tasks: ["38.5%", "29%"],
-  identify: ["58.4%", "29.4%"],
-  moon_phase: ["68.5%", "32.1%"],
-  acclimation: ["78.7%", "36.5%"],
-  acclimation_text: ["85.5%", "37.6%"],
+  // Right face: icons in the upper third of the band, the manual mode
+  // countdown under them
+  identify: ["58.4%", "25.8%"],
+  moon_phase: ["68.5%", "29.9%"],
+  acclimation: ["78.7%", "33.7%"],
+  acclimation_text: ["85.5%", "34.7%"],
   right_skew: "21deg",
+  countdown: ["68.5%", "33.6%"],
+  countdown_rotate: "7deg",
 };
 
 /** The G2 top rises higher than the G1's: the mode goes up with it. */

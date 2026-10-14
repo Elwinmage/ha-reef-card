@@ -40,6 +40,10 @@ export interface FaceLayout {
   acclimation_text: [string, string];
   /** Slant of the right face, for the acclimation lines */
   right_skew: string;
+  /** Centre of the manual mode countdown, under the right face icons */
+  countdown: [string, string];
+  /** Extra turn of the countdown, so it lines up with the face's edge */
+  countdown_rotate: string;
 }
 
 /**
@@ -180,6 +184,22 @@ export function face_elements(face: FaceLayout) {
         data: { type: "led_acclimation" },
       },
       css: icon_at(face.acclimation),
+    },
+    // Time left of a manual mode run for a set time, under the icons
+    manual_countdown: {
+      name: "manual_countdown",
+      type: "rsled-countdown",
+      stateObj: null,
+      // Nothing to show outside the manual mode: never a <br>
+      no_br_if_disabled: true,
+      css: {
+        position: "absolute",
+        left: face.countdown[0],
+        top: face.countdown[1],
+        // Sheared like the face and a little narrowed by its perspective,
+        // so the text looks printed on it
+        transform: `translate(-50%,-50%) rotate(${face.countdown_rotate}) skewY(${face.right_skew}) scaleX(0.9)`,
+      },
     },
     // Acclimation progress, only while it runs
     acclimation_days: {

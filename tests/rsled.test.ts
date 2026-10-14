@@ -13,6 +13,13 @@ import "../src/devices/index";
 import { RSLed, RSLed160, RSLed170 } from "../src/devices/redsea/rsled/rsled";
 import { RSLedSky, SKY_DEFAULTS } from "../src/devices/redsea/rsled/rsled_sky";
 import {
+  COUNTDOWN_TICK_MS,
+  RSLedCountdown,
+  format_countdown,
+} from "../src/devices/redsea/rsled/rsled_countdown";
+import { G1_FACE } from "../src/devices/redsea/rsled/rsled_g1.mapping";
+import { G2_FACE } from "../src/devices/redsea/rsled/rsled_g2.mapping";
+import {
   BEAM_DEFAULTS,
   RSLedBeam,
   beam_light,
@@ -177,6 +184,31 @@ function makeLed(opts: Opts = {}, g2 = false): any {
   dev.hass = hass;
   dev._populate_entities();
   return dev;
+}
+
+/**
+ * Give a lamp its manual mode duration.
+ * @param minutes: the duration
+ * @param changed: when it was last written (ISO)
+ */
+function with_duration(dev: any, minutes: string, changed: string): string {
+  const id = "number.led_manual_duration";
+  dev.hass.states[id] = {
+    entity_id: id,
+    state: minutes,
+    attributes: {},
+    last_changed: changed,
+    last_updated: changed,
+  };
+  dev.entities["number.manual_duration"] = { entity_id: id };
+  return id;
+}
+
+/** Date the mode of a lamp last changed (ISO). */
+function mode_changed(dev: any, changed: string): void {
+  for (const id of ["select.led_mode", "sensor.led_mode"]) {
+    if (dev.hass.states[id]) dev.hass.states[id].last_changed = changed;
+  }
 }
 
 /** Put a lamp in a group: its `linked_leds` list. */
@@ -666,6 +698,52 @@ describe("RSLed device helpers", () => {
     expect(nosel.mode_label()).toBe("");
   });
 
+  it("manual_end(): the end of a manual mode with a duration", () => {
+    const t0 = "2026-01-13T15:00:00.000Z";
+    const t1 = "2026-01-13T15:10:00.000Z";
+    const start0 = Date.parse(t0);
+    // Auto: no end, whatever the duration
+    const auto = makeLed();
+    with_duration(auto, "30", t0);
+    expect(auto.manual_end()).toBeNull();
+    // Manual without a duration entity, with 0 or unavailable: no end
+    const dev = makeLed({ mode: "manual" });
+    mode_changed(dev, t0);
+    expect(dev.manual_end()).toBeNull();
+    const id = with_duration(dev, "0", t0);
+    expect(dev.manual_end()).toBeNull();
+    dev.hass.states[id].state = "unavailable";
+    expect(dev.manual_end()).toBeNull();
+    // From the switch to manual
+    dev.hass.states[id].state = "30";
+    expect(dev.manual_end()).toBe(start0 + 30 * 60_000);
+    // A duration written later starts the timer again
+    dev.hass.states[id].last_changed = t1;
+    expect(dev.manual_end()).toBe(Date.parse(t1) + 30 * 60_000);
+    // The timer mode counts down too, read from the sensor without select
+    const timer = makeLed({ mode: "timer", no_select: true });
+    mode_changed(timer, t1);
+    with_duration(timer, "5", t0);
+    expect(timer.manual_end()).toBe(Date.parse(t1) + 5 * 60_000);
+    // No date known: no end
+    const blind = makeLed({ mode: "manual" });
+    const bid = with_duration(blind, "5", "");
+    delete blind.hass.states[bid].last_changed;
+    expect(blind.manual_end()).toBeNull();
+  });
+
+  it("state_signature() follows the manual duration", () => {
+    const dev = makeLed({ mode: "manual" });
+    const id = with_duration(dev, "10", "2026-01-13T15:00:00.000Z");
+    const before = dev.state_signature();
+    dev.hass.states[id] = {
+      ...dev.hass.states[id],
+      state: "20",
+      last_updated: "t9",
+    };
+    expect(dev.state_signature()).not.toBe(before);
+  });
+
   it("reads the moon day, full moon by default", () => {
     expect(makeLed({ moon_day: "9" }).moon_day()).toBe(9);
     expect(makeLed({ moon_day: "unknown" }).moon_day()).toBe(15);
@@ -931,6 +1009,106 @@ describe("RSLedElement", () => {
     vi.advanceTimersByTime(RSLED_TICK_MS * 2);
     expect(spy).not.toHaveBeenCalled();
     el.disconnectedCallback(); // already stopped
+  });
+});
+
+// ─── Manual mode countdown ───────────────────────────────────────────────────
+
+describe("RSLedCountdown", () => {
+  it("format_countdown(): m:ss, h:mm:ss from an hour", () => {
+    expect(format_countdown(0)).toBe("0:00");
+    expect(format_countdown(-5000)).toBe("0:00");
+    expect(format_countdown(1500)).toBe("0:02");
+    expect(format_countdown(65_000)).toBe("1:05");
+    expect(format_countdown(3_600_000)).toBe("1:00:00");
+    expect(format_countdown(7_205_000)).toBe("2:00:05");
+  });
+
+  it("sits on the right face, slanted like it, under the icons", () => {
+    for (const [cfg, face] of [
+      [config, G1_FACE],
+      [config2, G2_FACE],
+    ] as const) {
+      const el = (cfg as any).elements.manual_countdown;
+      expect(el.type).toBe("rsled-countdown");
+      expect(el.css.left).toBe(face.countdown[0]);
+      expect(el.css.top).toBe(face.countdown[1]);
+      expect(el.css.transform).toContain(`skewY(${face.right_skew})`);
+      expect(el.css.transform).toContain(`rotate(${face.countdown_rotate})`);
+      // Under the moon icon
+      expect(parseFloat(face.countdown[1])).toBeGreaterThan(
+        parseFloat(face.moon_phase[1]),
+      );
+    }
+  });
+
+  it("counts the manual mode down, every second", async () => {
+    at("15:00");
+    const dev = makeLed({ mode: "manual" });
+    mode_changed(dev, "2026-01-13T15:00:00.000Z");
+    const id = with_duration(dev, "2", "2026-01-13T14:00:00.000Z");
+    const el = makeElement(RSLedCountdown, dev, { stateObj: null }) as any;
+    const root = await mount(el);
+    const text = () =>
+      root.querySelector(".rsled_countdown span")?.textContent?.trim();
+    expect(text()).toBe("2:00");
+    expect(
+      root.querySelector(".rsled_countdown ha-icon")!.getAttribute("icon"),
+    ).toBe("mdi:timer-sand");
+    vi.advanceTimersByTime(COUNTDOWN_TICK_MS * 5);
+    await el.updateComplete;
+    expect(text()).toBe("1:55");
+    // A click opens the duration
+    const seen: any[] = [];
+    el.addEventListener("hass-more-info", (e: any) => seen.push(e.detail));
+    (root.querySelector(".rsled_countdown") as any).dispatchEvent(
+      new Event("click"),
+    );
+    expect(seen).toEqual([{ entityId: id }]);
+    // Over: stays at 0:00 until the lamp leaves the manual mode
+    vi.advanceTimersByTime(COUNTDOWN_TICK_MS * 200);
+    await el.updateComplete;
+    expect(text()).toBe("0:00");
+    // Back to auto: gone, the second timer stopped
+    dev.hass.states["select.led_mode"].state = "auto";
+    el.requestUpdate();
+    await el.updateComplete;
+    expect(root.querySelector(".rsled_countdown")).toBeNull();
+    expect(el._countdown_tick).toBeNull();
+  });
+
+  it("stops its timer when it leaves the page", async () => {
+    at("15:00");
+    const dev = makeLed({ mode: "timer" });
+    mode_changed(dev, "2026-01-13T15:00:00.000Z");
+    with_duration(dev, "10", "2026-01-13T15:00:00.000Z");
+    const el = makeElement(RSLedCountdown, dev, { stateObj: null }) as any;
+    await mount(el);
+    expect(el._countdown_tick).not.toBeNull();
+    // Already ticking: no second timer
+    const tick = el._countdown_tick;
+    el.requestUpdate();
+    await el.updateComplete;
+    expect(el._countdown_tick).toBe(tick);
+    document.body.removeChild(el);
+    expect(el._countdown_tick).toBeNull();
+    // The duration gone: a click does nothing
+    delete dev.entities["number.manual_duration"];
+    const seen: any[] = [];
+    el.addEventListener("hass-more-info", (e: any) => seen.push(e.detail));
+    el._open_duration(new Event("click"));
+    expect(seen).toHaveLength(0);
+  });
+
+  it("shows nothing without a lamp or outside the manual mode", async () => {
+    const el = makeElement(RSLedCountdown, makeLed(), {
+      stateObj: null,
+    }) as any;
+    const root = await mount(el);
+    expect(root.querySelector(".rsled_countdown")).toBeNull();
+    expect(el._countdown_tick).toBeNull();
+    el.device = null;
+    expect(el.end()).toBeNull();
   });
 });
 
