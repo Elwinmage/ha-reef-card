@@ -290,6 +290,7 @@
   "wave_preview": "Preview on this pump",
   "wave_preview_start": "Preview",
   "wave_preview_stop": "Stop preview",
+  "wave_preview_title": "Preview",
   "wave_program": "Wave program",
   "wave_pump_note": "Only this pump changes: the other pumps of the group keep their own direction and intensities.",
   "wave_redsea": "Red Sea",

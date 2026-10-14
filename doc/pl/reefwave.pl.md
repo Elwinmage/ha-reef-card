@@ -41,7 +41,8 @@ Ostatni komunikat i ostatni alert, na górze.
 
 <img src="../img/rswave/zone_2.png"/>
 
-Włącz/wyłącz, konserwacja, ustawienia i Wi-Fi.
+Włącz/wyłącz, podgląd (oko nad zieloną diodą), konserwacja, ustawienia
+i Wi-Fi.
 
 ## Pasek LED
 
@@ -153,9 +154,19 @@ ReefBeat pozwala każdej pompie grupy odtwarzać falę po swojemu.
 <img src="../img/rswave/dialog_config.png"/>
 
 Zębatka otwiera ustawienia pompy: bieżącą falę (typ, kierunek,
-intensywności, czasy, kroki), `Opóźnienie wyłączenia skrótu`,
-`Zgrupowana z akwarium`, ustawienia i przyciski podglądu z integracji
-oraz akcje urządzenia (odświeżenie, reset, aktualizacja firmware).
+intensywności, czasy, kroki), przełącznik konserwacji,
+`Opóźnienie wyłączenia skrótu`, `Zgrupowana z akwarium` oraz akcje
+urządzenia (odświeżenie, reset, aktualizacja firmware).
+
+## Podgląd
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+Oko nad zieloną diodą klipsa otwiera podgląd pompy: przełącznik konserwacji
+(dostępny także w ustawieniach), falę do podglądu (typ, kierunek,
+intensywności, czasy, krok, czas trwania fali i podglądu) oraz przyciski
+integracji (start, stop, przejęcie bieżącej fali, zapis). Otwiera się także
+przy wyłączonej pompie.
 
 ## Bez konta w chmurze
 

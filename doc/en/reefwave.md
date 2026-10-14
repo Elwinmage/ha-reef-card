@@ -41,7 +41,8 @@ Last message and last alert, on top.
 
 <img src="../img/rswave/zone_2.png"/>
 
-On/off, maintenance, settings and Wi-Fi.
+On/off, preview (the eye over the green LED), maintenance, settings and
+Wi-Fi.
 
 ## LED strip
 
@@ -151,9 +152,19 @@ the ReefBeat app lets each pump of a group run a wave its own way.
 <img src="../img/rswave/dialog_config.png"/>
 
 The cog opens the settings of the pump: the wave running now (type,
-direction, intensities, times, steps), `Shortcut OFF delay`,
-`Grouped with the aquarium`, the preview settings and buttons of the
-integration, and the device actions (refresh, reset, firmware update).
+direction, intensities, times, steps), the maintenance switch,
+`Shortcut OFF delay`, `Grouped with the aquarium`, and the device actions
+(refresh, reset, firmware update).
+
+## Preview
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+The eye, over the green LED of the clip, opens the preview of the pump: the
+maintenance switch (also in the settings), the wave to preview (type,
+direction, intensities, times, step, wave and preview durations) and the
+buttons of the integration (start, stop, set from the current wave, save).
+It also opens on a pump that is switched off.
 
 ## Without a cloud account
 

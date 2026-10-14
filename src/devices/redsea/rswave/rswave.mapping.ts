@@ -6,7 +6,7 @@
  *
  *   ┌──────────────────────────────┐
  *   │  messages                    │  last_message / last_alert_message
- *   │   ● ●           ● ● ●        │  state, maintenance | settings, tasks, wifi
+ *   │   ● ◉ ●         ● ● ●        │  state, preview, maintenance | settings, tasks, wifi
  *   │  ══[ mode ]══════════════(%) │  LED strip: mode + name, end cap: speed
  *   │  ◣ flow                      │  animated at the pump speed
  *   │  ┌────────────────────────┐  │
@@ -48,6 +48,8 @@ export function icon_at(left: string, top: string) {
 /** Where the icons sit on the mounting clips, as [left, top] of their centre. */
 export const CLIPS = {
   device_state: ["31.7%", "14%"],
+  // Over the green LED of the picture, between on/off and maintenance
+  preview: ["36%", "14%"],
   maintenance: ["40%", "15.7%"],
   configuration: ["73.3%", "25%"],
   // On the right clip, halfway between the settings cog and the wifi
@@ -126,6 +128,25 @@ export const config = {
       master: true,
       tap_action: { domain: "switch", action: "toggle", data: "default" },
       css: icon_at(...CLIPS.maintenance),
+    },
+    // Preview of a wave and maintenance switch, in their own dialog
+    preview: {
+      name: "preview",
+      type: "click-image",
+      // No entity behind it: the dialog holds the preview entities
+      stateObj: null,
+      icon: "mdi:eye",
+      icon_color: COLOR_ERROR_HEX,
+      // The maintenance switch of the dialog is wanted on a stopped pump too
+      off_clickable: true,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "preview" },
+      },
+      // Slightly smaller than its neighbours: the LED leaves little room
+      css: icon_at(...CLIPS.preview),
+      elt_css: { "--mdc-icon-size": "20px" },
     },
     configuration: {
       name: "configuration",

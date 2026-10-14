@@ -41,7 +41,8 @@ La tarjeta se divide en 7 zonas:
 
 <img src="../img/rswave/zone_2.png"/>
 
-Encendido/apagado, mantenimiento, ajustes y Wi-Fi.
+Encendido/apagado, vista previa (el ojo sobre el LED verde), mantenimiento,
+ajustes y Wi-Fi.
 
 ## Tira LED
 
@@ -156,10 +157,19 @@ manera.
 <img src="../img/rswave/dialog_config.png"/>
 
 La rueda dentada abre los ajustes de la bomba: la ola en curso (tipo,
-dirección, intensidades, tiempos, pasos), `Retardo de apagado del acceso directo`,
-`Agrupada con el acuario`, los ajustes y botones de vista previa de la
-integración, y las acciones del dispositivo (actualizar, reiniciar,
-actualización del firmware).
+dirección, intensidades, tiempos, pasos), el interruptor de mantenimiento,
+`Retardo de apagado del acceso directo`, `Agrupada con el acuario`, y las
+acciones del dispositivo (actualizar, reiniciar, actualización del firmware).
+
+## Vista previa
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+El ojo, sobre el LED verde del clip, abre la vista previa de la bomba: el
+interruptor de mantenimiento (también en los ajustes), la ola a previsualizar
+(tipo, dirección, intensidades, tiempos, paso, duraciones de la ola y de la
+vista previa) y los botones de la integración (iniciar, detener, tomar la ola
+en curso, guardar). También se abre con la bomba apagada.
 
 ## Sin cuenta en la nube
 

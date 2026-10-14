@@ -312,6 +312,7 @@ describe("RSWave device", () => {
       expect(d).toBeInstanceOf(C);
       expect(d.initial_config).toBe(config);
       expect(d.dialogs.config).toBeDefined();
+      expect(d.dialogs.preview).toBeDefined();
       expect(d.dialogs.wifi).toBeDefined();
     }
     expect(RSWave.styles).toBeDefined();
@@ -500,8 +501,50 @@ describe("rswave mapping and dialogs", () => {
     const rows = dialogs_rswave.config.content[0].conf.entities;
     const names = rows.filter((r: any) => r.entity).map((r: any) => r.entity);
     for (const n of names) expect(n).toMatch(/^[a-z_]+\.[a-z_]+$/);
-    expect(names).toContain("number.wave_forward_intensity");
     expect(names).toContain("sensor.wave_forward_intensity");
+    expect(names).toContain("switch.maintenance");
+    // The preview settings moved to their own dialog
+    expect(names.some((n: string) => n.includes("preview"))).toBe(false);
+  });
+
+  it("the eye over the LED opens the preview dialog", () => {
+    const eye: any = config.elements.preview;
+    expect(eye.icon).toBe("mdi:eye");
+    expect(eye.stateObj).toBeNull();
+    expect(eye.off_clickable).toBe(true);
+    expect(eye.css).toEqual(icon_at(...CLIPS.preview));
+    expect(eye.tap_action).toEqual({
+      domain: "redsea_ui",
+      action: "dialog",
+      data: { type: "preview" },
+    });
+  });
+
+  it("preview dialog holds the maintenance switch and the preview", () => {
+    const dialog = dialogs_rswave.preview;
+    expect(dialog.name).toBe("preview");
+    expect(dialog.title_key).toContain("wave_preview_title");
+    const rows = dialog.content[0].conf.entities;
+    const names = rows.filter((r: any) => r.entity).map((r: any) => r.entity);
+    for (const n of names) expect(n).toMatch(/^[a-z_]+\.[a-z_]+$/);
+    expect(names[0]).toBe("switch.maintenance");
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "select.preview_wave_type",
+        "select.preview_wave_direction",
+        "number.wave_forward_intensity",
+        "number.wave_backward_intensity",
+        "number.wave_forward_time",
+        "number.wave_backward_time",
+        "number.wave_preview_step",
+        "number.wave_preview_wave_duration",
+        "number.wave_preview_duration",
+        "button.preview_start",
+        "button.preview_stop",
+        "button.preview_set_from_current",
+        "button.preview_save",
+      ]),
+    );
   });
 });
 
