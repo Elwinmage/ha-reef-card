@@ -54,19 +54,15 @@ export function is_upload(path: string | null | undefined): path is string {
 /**
  * URL of a view picture. A catalog picture is already an absolute, public
  * URL. An uploaded picture is private: its URL is the signed one handed out
- * by the integration (`images`), or, with a reeftank older than 0.1.1, the
- * legacy static path (`legacy_images_url`). null while it is not known.
+ * by the integration (`images`). null while it is not known.
  */
 export function image_url(
   path: string | null | undefined,
   images?: Record<string, string> | null,
-  legacy_images_url?: string | null,
 ): string | null {
   if (!path) return null;
   if (!is_upload(path)) return path;
-  const signed = images?.[path];
-  if (signed) return signed;
-  return legacy_images_url ? `${legacy_images_url}/${path}` : null;
+  return images?.[path] ?? null;
 }
 
 /**
@@ -80,7 +76,6 @@ export function image_url(
  */
 export class ImageUrls {
   private _urls: Record<string, string> = {};
-  private _legacy: string | null = null;
   private _ttl_s = 0;
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _pending = new Set<string>();
@@ -95,8 +90,6 @@ export class ImageUrls {
   /** Take the pictures of a payload (get, subscribe, save). */
   load(payload: Partial<AquariumPayload> | null | undefined): void {
     this._urls = { ...(payload?.images ?? {}) };
-    // An older integration: plain static path, nothing to sign
-    this._legacy = payload?.images ? null : (payload?.images_url ?? null);
     this._asked.clear();
     this._schedule(payload?.images_ttl ?? 0);
   }
@@ -109,14 +102,14 @@ export class ImageUrls {
 
   /** URL of a view picture; an unknown upload is signed in the background. */
   url(path: string | null | undefined): string | null {
-    const url = image_url(path, this._urls, this._legacy);
+    const url = image_url(path, this._urls);
     if (!url && is_upload(path)) this._ask(path);
     return url;
   }
 
   /** An <img> did not load: sign its picture again (once per period). */
   failed(path: string | null | undefined): void {
-    if (is_upload(path) && !this._legacy) this._ask(path);
+    if (is_upload(path)) this._ask(path);
   }
 
   /** Stop renewing (element removed from the page). */

@@ -202,7 +202,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
           return {
             document: structuredClone(doc),
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         case "reeftank/aquarium/save":
           return {
@@ -211,7 +214,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
               revision: (msg.document.revision ?? 0) + 1,
             },
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         default:
           return null;

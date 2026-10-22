@@ -129,7 +129,9 @@ function make_hass(doc: any, extra: Record<string, any> = {}) {
         cb({
           document: doc,
           entities: { feeding: "event.reefer_feeding" },
-          images_url: "/reeftank/images",
+          images: {
+            "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=0",
+          },
         });
         return () => undefined;
       }),
@@ -234,7 +236,7 @@ describe("card", () => {
     const card = await mount({ aquarium: "a1b2" }, hass);
     const root = card.shadowRoot;
     expect(root.querySelector("img.bg").getAttribute("src")).toBe(
-      "/reeftank/images/a1b2/front.webp",
+      "/api/reeftank/images/a1b2/front.webp?authSig=0",
     );
     expect(root.querySelector(".water.tint")).not.toBeNull();
     expect(root.querySelector("canvas.life")).not.toBeNull();
@@ -275,7 +277,7 @@ describe("card", () => {
     next.revision = 5;
     next.views = {};
     next.default_view = null;
-    h.push({ document: next, entities: {}, images_url: "/x" });
+    h.push({ document: next, entities: {}, images: {} });
     await card.updateComplete;
     expect(card.shadowRoot.textContent).toContain("No picture yet");
     h.push({ deleted: true });
@@ -296,8 +298,7 @@ describe("card", () => {
     );
     const card = await mount({ aquarium: "a1b2" }, h.hass);
     const bg = () => card.shadowRoot.querySelector("img.bg");
-    // legacy payload (reeftank < 0.1.1): static path
-    expect(bg().getAttribute("src")).toBe("/reeftank/images/a1b2/front.webp");
+    expect(bg().getAttribute("src")).toContain("authSig=0");
     const signed = "/api/reeftank/images/a1b2/front.webp?authSig=1";
     h.push({
       document: doc,
@@ -459,7 +460,9 @@ describe("card", () => {
       push({
         document: ops.set_region_drawn(doc, front, "main", false),
         entities: {},
-        images_url: "/reeftank/images",
+        images: {
+          "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=0",
+        },
       });
       await card.updateComplete;
       expect(root.querySelector("canvas.backdrop")).toBeNull();

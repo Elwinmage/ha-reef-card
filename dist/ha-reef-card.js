@@ -37567,19 +37567,16 @@ function qc(q, A) {
 function ki(q) {
   return !!q && !q.startsWith("/") && !/^https?:/.test(q);
 }
-function TOA(q, A, V) {
-  if (!q) return null;
-  if (!ki(q)) return q;
-  const e = A?.[q];
-  return e || (V ? `${V}/${q}` : null);
+function TOA(q, A) {
+  return q ? ki(q) ? A?.[q] ?? null : q : null;
 }
 class vr {
   constructor(A, V) {
-    this._api = A, this._changed = V, this._urls = {}, this._legacy = null, this._ttl_s = 0, this._timer = null, this._pending = /* @__PURE__ */ new Set(), this._asked = /* @__PURE__ */ new Set();
+    this._api = A, this._changed = V, this._urls = {}, this._ttl_s = 0, this._timer = null, this._pending = /* @__PURE__ */ new Set(), this._asked = /* @__PURE__ */ new Set();
   }
   /** Take the pictures of a payload (get, subscribe, save). */
   load(A) {
-    this._urls = { ...A?.images ?? {} }, this._legacy = A?.images ? null : A?.images_url ?? null, this._asked.clear(), this._schedule(A?.images_ttl ?? 0);
+    this._urls = { ...A?.images ?? {} }, this._asked.clear(), this._schedule(A?.images_ttl ?? 0);
   }
   /** A picture just uploaded, with the URL the upload returned. */
   add(A, V) {
@@ -37587,12 +37584,12 @@ class vr {
   }
   /** URL of a view picture; an unknown upload is signed in the background. */
   url(A) {
-    const V = TOA(A, this._urls, this._legacy);
+    const V = TOA(A, this._urls);
     return !V && ki(A) && this._ask(A), V;
   }
   /** An <img> did not load: sign its picture again (once per period). */
   failed(A) {
-    ki(A) && !this._legacy && this._ask(A);
+    ki(A) && this._ask(A);
   }
   /** Stop renewing (element removed from the page). */
   stop() {

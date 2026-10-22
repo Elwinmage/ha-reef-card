@@ -33,8 +33,6 @@ describe("helpers", () => {
     expect(image_url("a1/b.webp", { "a1/b.webp": "/s?authSig=1" })).toBe(
       "/s?authSig=1",
     );
-    // reeftank < 0.1.1: the legacy static path
-    expect(image_url("a1/b.webp", null, "/x")).toBe("/x/a1/b.webp");
     expect(is_upload("a1/b.webp")).toBe(true);
     expect(is_upload("/reeftank/catalog/p.webp")).toBe(false);
     expect(is_upload(null)).toBe(false);
@@ -148,14 +146,8 @@ describe("ImageUrls", () => {
     urls.stop();
   });
 
-  it("keeps the legacy static path of older integrations", async () => {
-    const api = signer();
-    const urls = new ImageUrls(() => api, vi.fn());
-    urls.load({ images_url: "/reeftank/images" });
-    expect(urls.url("a/b.webp")).toBe("/reeftank/images/a/b.webp");
-    urls.failed("a/b.webp");
-    await flush();
-    expect(api.sign_images).not.toHaveBeenCalled();
+  it("knows no URL without a payload", () => {
+    const urls = new ImageUrls(() => null, vi.fn());
     urls.load(null);
     expect(urls.url("a/b.webp")).toBeNull();
   });

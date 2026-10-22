@@ -178,8 +178,6 @@ export interface AquariumPayload {
   images?: Record<string, string>;
   /** Lifetime of the signed URLs, in seconds. */
   images_ttl?: number;
-  /** Static path of the pictures, sent by reeftank before 0.1.1 only. */
-  images_url?: string;
 }
 
 /** An aquarium of a vendor cloud (redsea/aquariums). */
