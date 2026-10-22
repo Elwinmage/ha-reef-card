@@ -174,7 +174,12 @@ export interface AquariumEntities {
 export interface AquariumPayload {
   document: AquariumDocument;
   entities: AquariumEntities;
-  images_url: string;
+  /** Uploaded pictures of the document → URL signed for this user. */
+  images?: Record<string, string>;
+  /** Lifetime of the signed URLs, in seconds. */
+  images_ttl?: number;
+  /** Static path of the pictures, sent by reeftank before 0.1.1 only. */
+  images_url?: string;
 }
 
 /** An aquarium of a vendor cloud (redsea/aquariums). */

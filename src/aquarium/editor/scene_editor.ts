@@ -31,6 +31,7 @@ import {
 import type { HassConfig } from "../../types/index";
 import type {
   AquariumDocument,
+  AquariumPayload,
   Catalog,
   CloudAquarium,
   CoralSpecies,
@@ -43,7 +44,7 @@ import type {
   View,
 } from "../types";
 import { RENDER_LEVELS } from "../types";
-import { ApiError, ReefTankApi, image_url, IMAGES_URL } from "../api";
+import { ApiError, ImageUrls, ReefTankApi } from "../api";
 import {
   WaterProjection,
   clip_path,
@@ -314,7 +315,11 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _saved_json = "";
   private _revision: number | null = null;
   private _is_new = true;
-  private _images_url = IMAGES_URL;
+  /** Signed URLs of the uploaded pictures. */
+  private _images = new ImageUrls(
+    () => this._api,
+    () => this.requestUpdate(),
+  );
   private _devices: DeviceList | null = null;
   /** Document before a drag, recorded for undo once something moves. */
   private _before_drag: AquariumDocument | null = null;
@@ -349,6 +354,7 @@ export class ReefAquariumSceneEditor extends LitElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener("keydown", this._on_key);
+    this._images.stop();
     this._catalog_unsub?.();
     this._catalog_unsub = null;
   }
@@ -384,7 +390,7 @@ export class ReefAquariumSceneEditor extends LitElement {
       this._follow_catalog();
       if (this.aquarium_id) {
         const payload = await this._api.get(this.aquarium_id);
-        this._set_loaded(payload.document, payload.images_url);
+        this._set_loaded(payload.document, payload);
       } else {
         this._doc = ops.new_document(i18n._("aq_new_aquarium_name"));
         this._is_new = true;
@@ -398,13 +404,16 @@ export class ReefAquariumSceneEditor extends LitElement {
     }
   }
 
-  private _set_loaded(doc: AquariumDocument, images_url?: string): void {
+  private _set_loaded(
+    doc: AquariumDocument,
+    payload?: Partial<AquariumPayload>,
+  ): void {
     this._doc = doc;
     this._revision = doc.revision;
     this._is_new = false;
     this._saved_json = JSON.stringify(doc);
     this._history = [];
-    this._images_url = images_url ?? IMAGES_URL;
+    this._images.load(payload);
     if (!this._view_id || !doc.views[this._view_id]) {
       this._view_id = doc.default_view ?? Object.keys(doc.views)[0] ?? null;
     }
@@ -434,7 +443,7 @@ export class ReefAquariumSceneEditor extends LitElement {
         ops.for_save(this._doc),
         this._is_new ? null : this._revision,
       );
-      this._set_loaded(payload.document, payload.images_url);
+      this._set_loaded(payload.document, payload);
       this.aquarium_id = payload.document.id ?? null;
       this._message = { kind: "info", text: i18n._("aq_saved") };
       return true;
@@ -909,6 +918,7 @@ export class ReefAquariumSceneEditor extends LitElement {
     this._message = { kind: "info", text: i18n._("aq_uploading") };
     try {
       const result = await this._api.upload(this._doc.id, file, file.name);
+      this._images.add(result.path, result.url);
       this.change(
         ops.update_view(this._doc, this._view_id, { image: result.path }),
       );
@@ -1023,7 +1033,7 @@ export class ReefAquariumSceneEditor extends LitElement {
     const view = this._view;
     if (!view)
       return html`<div class="empty">${i18n._("aq_no_view_yet")}</div>`;
-    const url = image_url(view.image, this._images_url);
+    const url = this._images.url(view.image);
     const sel = this._selection;
     const drawing =
       this._drag?.type === "lasso" ? this._drag.points : this._drawing;
@@ -1042,6 +1052,7 @@ export class ReefAquariumSceneEditor extends LitElement {
               class="bg"
               src="${url}"
               draggable="false"
+              @error=${() => this._images.failed(view.image)}
               @load=${(e: Event) => {
                 const img = e.target as HTMLImageElement;
                 if (img.naturalWidth)
@@ -2263,7 +2274,9 @@ export class ReefAquariumSceneEditor extends LitElement {
             >${i18n._("aq_feeding_source")}
             <select
               @change=${(e: Event) =>
-                set({ source: (e.target as HTMLSelectElement).value || null })}
+                set({
+                  source: (e.target as HTMLSelectElement).value || null,
+                })}
             >
               <option value="" ?selected=${!element.source}>
                 ${i18n._("aq_any_source")}

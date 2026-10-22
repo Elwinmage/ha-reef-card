@@ -964,6 +964,8 @@ describe("scene editor", () => {
     const input = { files: [new File(["x"], "p.jpg")], value: "p.jpg" };
     await editor._upload({ target: input });
     expect(editor.doc.views[front].image).toBe("a1b2/new.webp");
+    // shown with the (signed) URL the upload returned
+    expect(editor._images.url("a1b2/new.webp")).toBe("/x");
     expect(input.value).toBe("");
     hass.fetchWithAuth = vi.fn(async () => ({
       ok: false,

@@ -14,7 +14,6 @@ import {
 import { render } from "lit";
 import {
   ApiError,
-  IMAGES_URL,
   ReefTankApi,
   reset_catalog_cache,
 } from "../src/aquarium/api";
@@ -449,6 +448,28 @@ describe("scene editor: loading and saving", () => {
     expect(editor._catalog_unsub).toBeNull();
   });
 
+  it("signs the uploaded pictures it shows", async () => {
+    const { doc, front } = existing_doc();
+    doc.views[front].image = "a1b2/front.webp";
+    const signed = "/api/reeftank/images/a1b2/front.webp?authSig=1";
+    const hass = make_hass(doc, (msg) =>
+      msg.type === "reeftank/aquarium/get"
+        ? { document: structuredClone(doc), entities: {}, images: {} }
+        : msg.type === "reeftank/images/sign"
+          ? { "a1b2/front.webp": signed }
+          : undefined,
+    );
+    const editor = await open(hass, "a1b2");
+    editor._view_id = front;
+    editor.requestUpdate();
+    await editor.updateComplete;
+    await flush();
+    await editor.updateComplete;
+    const img = editor.shadowRoot.querySelector("img.bg");
+    expect(img.getAttribute("src")).toBe(signed);
+    editor.close(true);
+  });
+
   it("loads a document without views or a known water", async () => {
     const empty: any = ops.new_document("Empty");
     empty.id = "e1";
@@ -462,7 +483,7 @@ describe("scene editor: loading and saving", () => {
     const editor = await open(hass, "e1");
     expect(editor._view_id).toBeNull();
     expect(editor._water_id).toBe("main");
-    expect(editor._images_url).toBe(IMAGES_URL);
+    expect(editor._images.url("a1b2/x.webp")).toBeNull();
     // views tab without a view: no view settings
     editor._tab = "views";
     await editor.updateComplete;
@@ -967,6 +988,10 @@ describe("scene editor: stage", () => {
     Object.defineProperty(img, "naturalHeight", { value: 400 });
     img.dispatchEvent(new Event("load"));
     expect(editor._aspect).toBe(2);
+    // a picture that does not load (expired signature) is signed again
+    const failed = vi.spyOn(editor._images, "failed");
+    img.dispatchEvent(new Event("error"));
+    expect(failed).toHaveBeenCalledWith(editor.doc.views[front].image);
   });
 
   it("draws what each tab shows on the stage", async () => {

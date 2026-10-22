@@ -283,6 +283,46 @@ describe("card", () => {
     expect(card.shadowRoot.textContent).toContain("Aquarium not found");
   });
 
+  it("shows uploaded pictures through their signed URLs", async () => {
+    const { doc } = make_doc();
+    const h = make_hass(doc);
+    const call_ws = h.hass.callWS.getMockImplementation();
+    h.hass.callWS.mockImplementation(async (msg: any) =>
+      msg.type === "reeftank/images/sign"
+        ? {
+            "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=3",
+          }
+        : call_ws(msg),
+    );
+    const card = await mount({ aquarium: "a1b2" }, h.hass);
+    const bg = () => card.shadowRoot.querySelector("img.bg");
+    // legacy payload (reeftank < 0.1.1): static path
+    expect(bg().getAttribute("src")).toBe("/reeftank/images/a1b2/front.webp");
+    const signed = "/api/reeftank/images/a1b2/front.webp?authSig=1";
+    h.push({
+      document: doc,
+      entities: {},
+      images: { "a1b2/front.webp": signed },
+      images_ttl: 86400,
+    });
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toBe(signed);
+    // a renewed URL keeps the loaded background
+    const img = bg();
+    card._bg = img;
+    card._images.add("a1b2/front.webp", signed.replace("=1", "=2"));
+    card.requestUpdate();
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toContain("authSig=2");
+    expect(card._bg).toBe(img);
+    // a picture that does not load is signed again
+    bg().dispatchEvent(new Event("error"));
+    await new Promise((r) => setTimeout(r, 0));
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toContain("authSig=3");
+    card.remove();
+  });
+
   it("reloads the catalog when a release is installed", async () => {
     const { doc } = make_doc();
     const h = make_hass(doc);
