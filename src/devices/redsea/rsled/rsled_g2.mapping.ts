@@ -21,6 +21,7 @@ export const G2_FACE: FaceLayout = {
   battery_level: ["25.3%", "33.2%"],
   wifi_quality: ["31.9%", "31.1%"],
   maintenance_tasks: ["38.5%", "29%"],
+  poseidon: ["92.3%", "53.3%"],
   // Right face: icons in the upper third of the band, the manual mode
   // countdown under them
   identify: ["58.4%", "25.8%"],

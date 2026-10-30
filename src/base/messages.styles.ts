@@ -14,4 +14,9 @@ export default css`
   .messages_content {
     pointer-events: auto;
   }
+
+  /* A click on the text opens the message history */
+  .messages_text {
+    cursor: pointer;
+  }
 `;

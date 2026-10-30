@@ -16,6 +16,7 @@
  */
 import { COLOR_ERROR_HEX, COLOR_RS_RGB } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 /** CSS of an overlay covering the whole picture. */
 export const FULL_CANVAS = {
@@ -55,6 +56,8 @@ export const CLIPS = {
   // On the right clip, halfway between the settings cog and the wifi
   maintenance_tasks: ["78.7%", "25.9%"],
   wifi_quality: ["84%", "28.5%"],
+  // Over the status LED of the pump body
+  poseidon: ["33.3%", "33.6%"],
 } as const;
 
 export const config = {
@@ -164,6 +167,8 @@ export const config = {
     maintenance_tasks: maintenance_shortcut(
       icon_at(...CLIPS.maintenance_tasks),
     ),
+    // Poseidon mode: hold to switch it, tap for its settings
+    poseidon: poseidon_shortcut(icon_at(...CLIPS.poseidon), OFF_ON_PUMP),
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",

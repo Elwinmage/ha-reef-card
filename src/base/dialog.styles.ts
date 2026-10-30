@@ -33,10 +33,17 @@ export default css`
     justify-content: center;
     align-items: center;
     display: grid;
-    grid-template-columns: 40px 90%;
+    /* minmax(0, ...): the second column never grows past the dialog to fit
+       a wide content (a schedule row), which would push the dialog over
+       both sides of the card */
+    grid-template-columns: 40px minmax(0, 1fr);
     grid-gap: 10px;
-    /* Ensure hui-number-entity-row has enough width to render slider + value */
-    min-width: 350px;
+    box-sizing: border-box;
+    /* Ensure hui-number-entity-row has enough width to render slider + value,
+       but never more than the card: on a phone the card is narrower than
+       350px plus the paddings */
+    min-width: min(350px, calc(100% - 8px));
+    max-width: calc(100% - 8px);
   }
 
   #dialog-close {
@@ -54,6 +61,8 @@ export default css`
     padding-right: 5px;
     font-size: 1.5em;
     font-weight: bold;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   #dialog-content {
@@ -63,6 +72,17 @@ export default css`
     padding-right: 5px;
     width: 90%;
     margin-left: 5%;
+    box-sizing: border-box;
+    min-width: 0;
+    /* Last resort for a content that cannot shrink: scroll it, never the
+       whole dialog */
+    overflow-x: auto;
+  }
+
+  /* Nothing in the content is wider than the dialog */
+  #dialog-content > * {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   #dialog-buttons {
@@ -158,10 +178,43 @@ export default css`
     text-align: center;
     border-radius: 20px;
     display: flex;
+    /* On a narrow card the fields of an interval go on two lines rather
+       than widening the dialog */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
     margin-top: 5px;
     margin-bottom: 5px;
     background-color: aliceblue;
     border: 1px solid lightgray;
+  }
+
+  /* Each field (label + input) shares the row and may shrink */
+  .interval > div {
+    flex: 1 1 7em;
+    min-width: 0;
+  }
+
+  .interval input,
+  .interval select {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .interval input[type="time"] {
+    width: 100%;
+  }
+
+  form.schedule {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  form.schedule input[type="number"] {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   input {
@@ -220,5 +273,31 @@ export default css`
 
   :disabled {
     background-color: rgb(200, 200, 200);
+  }
+
+  /* Phones: every pixel counts */
+  @media (max-width: 500px) {
+    #dialog {
+      padding-left: 8px;
+      padding-right: 8px;
+      grid-gap: 6px;
+    }
+
+    #dialog-content {
+      width: 100%;
+      margin-left: 0;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    #dialog-buttons {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    button {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
   }
 `;

@@ -10,6 +10,7 @@
  */
 import { COLOR_ERROR_HEX } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 /** CSS of an overlay covering the whole design space. */
 const FULL_CANVAS = {
@@ -33,6 +34,8 @@ export interface FaceLayout {
   wifi_quality: [string, string];
   /** Maintenance shortcut, last of the left face, after the wifi */
   maintenance_tasks: [string, string];
+  /** Poseidon shortcut, over the status LED of the front corner */
+  poseidon: [string, string];
   identify: [string, string];
   moon_phase: [string, string];
   acclimation: [string, string];
@@ -141,6 +144,8 @@ export function face_elements(face: FaceLayout) {
     },
     // Maintenance tasks of the lamp
     maintenance_tasks: maintenance_shortcut(icon_at(face.maintenance_tasks)),
+    // Poseidon mode: hold to switch it, tap for its settings
+    poseidon: poseidon_shortcut(icon_at(face.poseidon), OFF_ON_LAMP),
 
     // ── Right face: ReefLED specific ──────────────────────────────────
     identify: {

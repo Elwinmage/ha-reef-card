@@ -7,6 +7,7 @@ import {
   COLOR_WHITE_60,
 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 export const config = {
   name: null,
@@ -322,6 +323,14 @@ export const config = {
       position: "absolute",
       top: "0%",
       right: "12%",
+    }),
+    // Poseidon mode: hold to switch it, tap for its settings.
+    // Next to the maintenance shortcut
+    poseidon: poseidon_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "0%",
+      right: "18%",
     }),
     remaining_length: {
       name: "remaining_length",

@@ -2,6 +2,53 @@
 
 ## MODIFICATIONS
 
+### Fix: dialogs wider than the card on a phone
+
+- A dialog never gets wider than the card any more: a wide content (the
+  intervals of the ReefDose schedule editor, for one) used to push it over
+  both sides of the card, leaving its edges out of reach. The content
+  shrinks with the dialog, and only what cannot shrink scrolls inside it.
+- ReefDose schedule: the fields of an interval (start, end, number of
+  doses, speed / volume) go on two lines when the card is narrow.
+- Smaller dialog paddings on phones; the maintenance list and the message
+  history of a device dialog follow the dialog width.
+
+### Poseidon shortcut
+
+- Every Red Sea device shows a trident once it has the Poseidon entities of
+  the redsea integration (its keys are known): in the device's "on" colour
+  in Poseidon mode, its "off" colour out of it, orange and blinking when
+  nothing went through the relay for a while (`silent` attribute). Hidden
+  on a device without them, and on LED groups.
+- Placed over the status LED of the device picture (ReefATO+, ReefDose,
+  ReefControl, ReefRun, ReefWave, ReefLED), next to the maintenance icons on
+  the ReefMat and the ReefControl Power.
+- A long press switches the Poseidon mode on or off; a tap opens the new
+  `poseidon` dialog: mode, strategy, polling pause, then what the relay sees
+  of the device (connection state, last frame from and to the device).
+  Works with the device switched off.
+- `scripts/check_entities.py` now finds the Poseidon entities of the
+  integration (`poseidon_mode`, `poseidon_poll_pause`, `poseidon_strategy`):
+  they are built from classes, not entity descriptions, and were missed.
+
+### Wifi dialog: aquarium
+
+- The wifi dialog shows the cloud aquarium of the device (`aquarium`
+  sensor of the redsea integration), after the linked account. Skipped
+  with an integration that does not provide it.
+
+### Messages: date and history
+
+- The scrolling message and alert banners start with the date and time of
+  the message (`timestamp` attribute of the sensors, redsea integration
+  with message history).
+- A click on the banner text opens the message history of the device
+  (new common dialog `messages_history`): messages and alerts, newest first,
+  filtered by kind (all / messages / alerts) and period (24 h, 7 days,
+  31 days, everything kept), with the HTTP method, path and status of each.
+  Opened from the alert banner, it shows the alerts first. The list reloads
+  when a new message or alert arrives. Works with the device switched off.
+
 ### RSDOSE: dose regulation dialogs
 
 - The head configuration holds the regulation mode (needs the redsea

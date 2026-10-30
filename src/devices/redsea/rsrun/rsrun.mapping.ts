@@ -1,5 +1,6 @@
 import { COLOR_WHITE_60 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 export const config = {
   name: null,
@@ -92,6 +93,14 @@ export const config = {
       position: "absolute",
       top: "0%",
       left: "12%",
+    }),
+    // Poseidon mode: hold to switch it, tap for its settings.
+    // Over the status LED, bottom right of the controller
+    poseidon: poseidon_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "13%",
+      right: "37%",
     }),
     battery_level: {
       name: "battery_level",

@@ -1,5 +1,9 @@
 /**
  * An auto scrolling text implemntation
+ *
+ * The text starts with the date of the message (sensor attribute
+ * `timestamp`). A click on the text opens the message history of the device
+ * (dialog `messages_history`, see device.dialogs.ts).
  */
 
 //----------------------------------------------------------------------------//
@@ -7,8 +11,10 @@
 //----------------------------------------------------------------------------//
 import { html } from "lit";
 
-import type { ElementConfig } from "../types/element";
+import type { Action, ElementConfig } from "../types/element";
 import { MyElement } from "./element";
+import { format_short } from "./messages_format";
+import i18n from "../translations/myi18n.js";
 
 import style_messages from "./messages.styles";
 
@@ -45,6 +51,10 @@ export class RSMessages extends MyElement {
     if (this.conf && "label" in this.conf) {
       value = this.conf.label + value + this.conf.label;
     }
+    const date = format_short(this.stateObj.attributes?.timestamp, this._hass);
+    if (date) {
+      value = `${date} · ${value}`;
+    }
     // Add a trash button to clean the message queue
     const conf: ElementConfig = {
       type: "click-image",
@@ -72,9 +82,32 @@ export class RSMessages extends MyElement {
 
     return html`
       <div class="messages_content" style=${computed_style}>
-        <marquee class="${sclass}">${value}</marquee>
+        <marquee
+          class="${sclass} messages_text"
+          title="${i18n._("messages_history_open")}"
+          @click=${(e: Event) => this._open_history(e)}
+        >
+          ${value}
+        </marquee>
         ${trash}
       </div>
     `;
+  }
+
+  /**
+   * Open the message history of the device.
+   *
+   * Works whether the device is on or off: reading the history acts on
+   * nothing.
+   * @param e: the click event, kept from the element's own tap handling
+   */
+  protected _open_history(e: Event): void {
+    e.stopPropagation();
+    const action: Action = {
+      domain: "redsea_ui",
+      action: "dialog",
+      data: { type: "messages_history" },
+    };
+    this.run_actions(action);
   }
 }

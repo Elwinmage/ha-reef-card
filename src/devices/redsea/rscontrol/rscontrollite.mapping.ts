@@ -50,6 +50,11 @@ export const config = {
       ...widgets.buzzer,
       css: { ...widgets.buzzer.css, top: "9.6%", left: "88.5%" },
     },
+    // And so does its status LED, under the Poseidon shortcut
+    poseidon: {
+      ...widgets.poseidon,
+      css: { ...widgets.poseidon.css, top: "11.6%", right: "8%" },
+    },
   },
   probes: { ...probes, max: 2 },
   ports: lite_ports,
