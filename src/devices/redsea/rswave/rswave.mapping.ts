@@ -57,7 +57,7 @@ export const CLIPS = {
   maintenance_tasks: ["78.7%", "25.9%"],
   wifi_quality: ["84%", "28.5%"],
   // Over the status LED of the pump body
-  poseidon: ["33.3%", "33.6%"],
+  poseidon: ["37.3%", "34.6%"],
 } as const;
 
 export const config = {

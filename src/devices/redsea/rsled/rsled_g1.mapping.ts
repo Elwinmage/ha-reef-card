@@ -16,7 +16,7 @@ export const G1_FACE: FaceLayout = {
   battery_level: ["25.9%", "35.2%"],
   wifi_quality: ["32.7%", "31.8%"],
   maintenance_tasks: ["39.5%", "28.5%"],
-  poseidon: ["87.5%", "49%"],
+  poseidon: ["87.5%", "47%"],
   identify: ["56%", "27.9%"],
   moon_phase: ["67%", "31.2%"],
   acclimation: ["78%", "34.5%"],

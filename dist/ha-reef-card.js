@@ -18008,7 +18008,7 @@ const RI = {
   battery_level: ["25.9%", "35.2%"],
   wifi_quality: ["32.7%", "31.8%"],
   maintenance_tasks: ["39.5%", "28.5%"],
-  poseidon: ["87.5%", "49%"],
+  poseidon: ["87.5%", "47%"],
   identify: ["56%", "27.9%"],
   moon_phase: ["67%", "31.2%"],
   acclimation: ["78%", "34.5%"],
@@ -22772,8 +22772,8 @@ const HOA = {
     poseidon: KA({
       flex: "0 0 auto",
       position: "absolute",
-      top: "13%",
-      right: "37%"
+      top: "0%",
+      left: "17%"
     }),
     battery_level: {
       name: "battery_level",
@@ -25726,7 +25726,7 @@ const lV = {
   maintenance_tasks: ["78.7%", "25.9%"],
   wifi_quality: ["84%", "28.5%"],
   // Over the status LED of the pump body
-  poseidon: ["33.3%", "33.6%"]
+  poseidon: ["37.3%", "34.6%"]
 }, iRA = {
   name: null,
   model: "RSWAVE",

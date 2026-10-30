@@ -99,8 +99,8 @@ export const config = {
     poseidon: poseidon_shortcut({
       flex: "0 0 auto",
       position: "absolute",
-      top: "13%",
-      right: "37%",
+      top: "0%",
+      left: "17%",
     }),
     battery_level: {
       name: "battery_level",
