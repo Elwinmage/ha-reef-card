@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the ReefControl hubs.
  *
@@ -442,6 +443,8 @@ export const dialogs_rscontrol = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   probe_conf: {

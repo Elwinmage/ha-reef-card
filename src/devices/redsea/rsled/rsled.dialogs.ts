@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the ReefLED.
  *   - config: device actions, mode, manual settings and diagnostics
@@ -39,6 +40,8 @@ export const dialogs_rsled = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   led_moon: {
@@ -128,6 +131,8 @@ export const dialogs_rsled_g2 = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
 };
@@ -145,14 +150,18 @@ export const dialogs_rsled_kelvin_only = {
     ...dialogs_rsled.config,
     content: [
       {
-        ...dialogs_rsled.config.content[0],
+        ...(dialogs_rsled.config.content[0] as any),
         conf: {
-          ...dialogs_rsled.config.content[0].conf,
-          entities: dialogs_rsled.config.content[0].conf.entities.filter(
+          ...(dialogs_rsled.config.content[0] as any).conf,
+          entities: (
+            dialogs_rsled.config.content[0] as any
+          ).conf.entities.filter(
             (e: any) => !WHITE_BLUE_LIGHTS.includes(e.entity),
           ),
         },
       },
+      // The message history button and what follows
+      ...dialogs_rsled.config.content.slice(1),
     ],
   },
 };
@@ -183,7 +192,8 @@ function virtual_dialogs(dialogs: any) {
     )
     .flat();
   // The whole set: merged over a real lamp's, the list of entities would
-  // keep the real lamp's extra rows
+  // keep the real lamp's extra rows. No message history: a virtual LED
+  // pushes nothing itself
   return {
     ...dialogs,
     config: {

@@ -7,12 +7,30 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RSMessages } from "../src/base/messages";
 import {
   format_long,
+  format_origin,
   format_short,
   parse_ts,
 } from "../src/base/messages_format";
 import { RSMessagesHistory } from "../src/base/messages_history";
 import { run_action } from "../src/devices/actions";
-import { dialogs_device } from "../src/devices/device.dialogs";
+import {
+  dialogs_device,
+  messages_history_button,
+} from "../src/devices/device.dialogs";
+import { dialogs_rsato } from "../src/devices/redsea/rsato/rsato.dialogs";
+import { dialogs_rscontrol } from "../src/devices/redsea/rscontrol/rscontrol.dialogs";
+import { dialogs_rsdose } from "../src/devices/redsea/rsdose/rsdose.dialogs";
+import {
+  dialogs_rsled,
+  dialogs_rsled_g2,
+  dialogs_rsled_kelvin_only,
+  dialogs_rsled_virtual_g1,
+} from "../src/devices/redsea/rsled/rsled.dialogs";
+import { dialogs_rsmat } from "../src/devices/redsea/rsmat/rsmat.dialogs";
+import { dialogs_rspower } from "../src/devices/redsea/rspower/rspower.dialogs";
+import { dialogs_rsrun } from "../src/devices/redsea/rsrun/rsrun.dialogs";
+import { dialogs_rswave } from "../src/devices/redsea/rswave/rswave.dialogs";
+import i18n from "../src/translations/myi18n.js";
 import { messages_history } from "../src/devices/messages_history.dialog_func_ext";
 
 class StubBanner extends RSMessages {
@@ -78,8 +96,7 @@ describe("messages_format", () => {
   it("formats short and long dates", () => {
     const hass = { locale: { language: "fr" } };
     const short = format_short(TS, hass);
-    expect(short).toMatch(/29/);
-    expect(short).toMatch(/10/);
+    expect(short).toMatch(/29\/10|10\/29/);
     expect(short).not.toMatch(/2026/);
     expect(format_long(TS, hass)).toMatch(/2026/);
     expect(format_short(undefined, hass)).toBe("");
@@ -131,6 +148,19 @@ describe("RSMessages banner", () => {
     expect(text).toMatch(/ · '⚠'Done'⚠'$/);
   });
 
+  it("tells where the message came from after its date", () => {
+    const m = banner({ timestamp: TS, origin: "reefbeat" });
+    render(m._render(""), container);
+    const text = container.querySelector("marquee")?.textContent?.trim() ?? "";
+    expect(text).toContain(` · ${i18n._("messages_origin_reefbeat")} · Done`);
+    // Without a date, the origin alone
+    const alone = banner({ origin: "ha" });
+    render(alone._render(""), container);
+    expect(container.querySelector("marquee")?.textContent?.trim()).toBe(
+      `${i18n._("messages_origin_ha")} · Done`,
+    );
+  });
+
   it("shows the bare text without a timestamp", () => {
     const m = banner({});
     render(m._render(""), container);
@@ -156,6 +186,44 @@ describe("RSMessages banner", () => {
     expect(seen[0].elt).toBe(m);
     // The element's own tap handling does not see the click
     expect(host).not.toHaveBeenCalled();
+  });
+});
+
+describe("format_origin", () => {
+  it("names the two origins, nothing else", () => {
+    expect(format_origin("ha")).toBe(i18n._("messages_origin_ha"));
+    expect(format_origin("reefbeat")).toBe(i18n._("messages_origin_reefbeat"));
+    expect(format_origin(undefined)).toBe("");
+    expect(format_origin("other")).toBe("");
+  });
+});
+
+describe("config dialogs", () => {
+  it("all end with the message history button", () => {
+    for (const dialogs of [
+      dialogs_rsato,
+      dialogs_rscontrol,
+      dialogs_rsdose,
+      dialogs_rsled,
+      dialogs_rsled_g2,
+      dialogs_rsled_kelvin_only,
+      dialogs_rsmat,
+      dialogs_rspower,
+      dialogs_rsrun,
+      dialogs_rswave,
+    ]) {
+      const content = (dialogs as any).config.content;
+      expect(content[content.length - 1]).toBe(messages_history_button);
+    }
+    // A virtual LED has no messages of its own
+    expect((dialogs_rsled_virtual_g1 as any).config.content).not.toContain(
+      messages_history_button,
+    );
+    // Back to the config dialog when the history is closed
+    expect(messages_history_button.conf.tap_action.data).toEqual({
+      type: "messages_history",
+      overload_quit: "config",
+    });
   });
 });
 
@@ -241,6 +309,7 @@ describe("RSMessagesHistory", () => {
       method: "post",
       path: "/mode",
       status: 400,
+      origin: "reefbeat",
     },
     {
       ts: "2026-10-28T07:00:00+00:00",
@@ -272,6 +341,14 @@ describe("RSMessagesHistory", () => {
       "POST /mode · 400",
     );
     expect(items[1]!.querySelector(".detail")).toBeNull();
+    // The origin after the date, none for the entries older than it
+    expect(items[0]!.querySelector(".origin")!.textContent).toBe(
+      i18n._("messages_origin_reefbeat"),
+    );
+    expect(
+      items[0]!.querySelector(".origin")!.classList.contains("origin-reefbeat"),
+    ).toBe(true);
+    expect(items[1]!.querySelector(".origin")).toBeNull();
     expect(view.retention).toBe(31);
   });
 

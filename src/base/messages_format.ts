@@ -106,3 +106,15 @@ export function format_day(ts: unknown, hass: any): string {
     return d.toISOString().slice(0, 10);
   }
 }
+
+/**
+ * Where a message came from, as shown after its date.
+ * @param origin: "ha" (a push of Home Assistant) or "reefbeat" (a command of
+ *   the ReefBeat app relayed by Poseidon)
+ * @return the label, or "" when unknown (entries older than the origin)
+ */
+export function format_origin(origin: unknown): string {
+  if (origin === "ha") return i18n._("messages_origin_ha");
+  if (origin === "reefbeat") return i18n._("messages_origin_reefbeat");
+  return "";
+}

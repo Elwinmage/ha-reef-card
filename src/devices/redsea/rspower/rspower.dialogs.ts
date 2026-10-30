@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the RSPower device.
  *
@@ -102,6 +103,8 @@ export const dialogs_rspower = {
           "elt.css": { "background-color": "rgba(0,0,0,0)" },
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
 

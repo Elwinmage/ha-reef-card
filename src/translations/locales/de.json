@@ -629,6 +629,8 @@
   "messages_history_empty": "Keine Meldung in diesem Zeitraum",
   "messages_history_count": "{count} Meldung(en)",
   "messages_history_retention": "{days} Tage aufbewahrt",
+  "messages_origin_ha": "Home Assistant",
+  "messages_origin_reefbeat": "ReefBeat-App",
   "dose_history": "Dosierverlauf",
   "dose_history_unavailable": "Verlauf nicht verfügbar",
   "dose_history_empty": "Keine Dosierung in diesem Zeitraum",

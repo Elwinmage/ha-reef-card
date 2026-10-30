@@ -556,10 +556,13 @@ describe("RSLed device helpers", () => {
     expect(Object.keys(dev.dialogs)).toEqual(
       expect.arrayContaining(["wifi", "config", "led_moon", "led_acclimation"]),
     );
-    expect(dialogs_rsled.config.content.length).toBe(1);
+    // The settings, then the message history button
+    expect(dialogs_rsled.config.content.length).toBe(2);
     // A real lamp's dialog offers its staggered sunrise offset
     expect(
-      dialogs_rsled.config.content[0].conf.entities.map((e: any) => e.entity),
+      (dialogs_rsled.config.content[0] as any).conf.entities.map(
+        (e: any) => e.entity,
+      ),
     ).toContain("number.sunrise_offset");
   });
 

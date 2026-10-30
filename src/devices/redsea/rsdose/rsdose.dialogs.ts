@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 import {
   brine_content,
   dialogs_regulation,
@@ -38,6 +39,8 @@ export const dialogs_rsdose = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   head_configuration: {

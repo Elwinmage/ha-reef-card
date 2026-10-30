@@ -629,6 +629,8 @@
   "messages_history_empty": "Brak komunikatów w tym okresie",
   "messages_history_count": "Komunikaty: {count}",
   "messages_history_retention": "przechowywane {days} dni",
+  "messages_origin_ha": "Home Assistant",
+  "messages_origin_reefbeat": "aplikacja ReefBeat",
   "dose_history": "Historia dawek",
   "dose_history_unavailable": "Historia niedostępna",
   "dose_history_empty": "Brak dawek w tym okresie",

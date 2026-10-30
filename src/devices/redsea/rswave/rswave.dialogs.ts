@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the ReefWave.
  *   - config: current wave, settings and device actions (the cog)
@@ -57,6 +58,8 @@ export const dialogs_rswave = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   preview: {

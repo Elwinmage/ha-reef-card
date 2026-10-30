@@ -629,6 +629,8 @@
   "messages_history_empty": "Nessun messaggio in questo periodo",
   "messages_history_count": "{count} messaggio/i",
   "messages_history_retention": "conservati {days} giorni",
+  "messages_origin_ha": "Home Assistant",
+  "messages_origin_reefbeat": "app ReefBeat",
   "dose_history": "Cronologia delle dosi",
   "dose_history_unavailable": "Cronologia non disponibile",
   "dose_history_empty": "Nessuna dose in questo periodo",

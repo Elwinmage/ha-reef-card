@@ -31,6 +31,36 @@ export const dialogs_maintenance = {
 };
 
 /**
+ * Button of the config dialog of a device opening its message history: the
+ * banners that open it too are not shown while there is no message.
+ */
+export const messages_history_button = {
+  view: "common-button",
+  conf: {
+    type: "common-button",
+    stateObj: null,
+    icon: "mdi:message-text-clock-outline",
+    tap_action: {
+      domain: "redsea_ui",
+      action: "dialog",
+      data: {
+        type: "messages_history",
+        overload_quit: "config",
+      },
+    },
+    label: "${i18n._('messages_history')}",
+    class: "dialog_button",
+    css: {
+      "margin-top": "5px",
+      "text-align": "center",
+    },
+    "elt.css": {
+      "background-color": "rgba(0,0,0,0)",
+    },
+  },
+};
+
+/**
  * Messages and alerts of one device, newest first. Opened by a click on the
  * scrolling message banner; the list is built at runtime, see
  * messages_history.dialog_func_ext.

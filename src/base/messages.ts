@@ -2,7 +2,8 @@
  * An auto scrolling text implemntation
  *
  * The text starts with the date of the message (sensor attribute
- * `timestamp`). A click on the text opens the message history of the device
+ * `timestamp`) and where it came from (attribute `origin`: Home Assistant or
+ * the ReefBeat app). A click on the text opens the message history of the device
  * (dialog `messages_history`, see device.dialogs.ts).
  */
 
@@ -13,7 +14,7 @@ import { html } from "lit";
 
 import type { Action, ElementConfig } from "../types/element";
 import { MyElement } from "./element";
-import { format_short } from "./messages_format";
+import { format_origin, format_short } from "./messages_format";
 import i18n from "../translations/myi18n.js";
 
 import style_messages from "./messages.styles";
@@ -51,9 +52,13 @@ export class RSMessages extends MyElement {
     if (this.conf && "label" in this.conf) {
       value = this.conf.label + value + this.conf.label;
     }
-    const date = format_short(this.stateObj.attributes?.timestamp, this._hass);
-    if (date) {
-      value = `${date} · ${value}`;
+    // Date, then where the message came from (sensor attribute `origin`)
+    const head = [
+      format_short(this.stateObj.attributes?.timestamp, this._hass),
+      format_origin(this.stateObj.attributes?.origin),
+    ].filter((x) => x);
+    if (head.length) {
+      value = `${head.join(" · ")} · ${value}`;
     }
     // Add a trash button to clean the message queue
     const conf: ElementConfig = {

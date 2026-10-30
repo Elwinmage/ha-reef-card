@@ -14,7 +14,7 @@
 import { LitElement, html, nothing } from "lit";
 
 import i18n from "../translations/myi18n.js";
-import { format_long } from "./messages_format";
+import { format_long, format_origin } from "./messages_format";
 import style_messages_history from "./messages_history.styles";
 
 //----------------------------------------------------------------------------//
@@ -30,6 +30,8 @@ export interface MessageEntry {
   method?: string;
   path?: string;
   status?: number;
+  /** "ha" or "reefbeat" (missing on the entries older than it) */
+  origin?: string;
 }
 
 /** Periods offered, in days (0: everything kept). */
@@ -193,6 +195,7 @@ export class RSMessagesHistory extends LitElement {
     const where = [entry.method?.toUpperCase(), entry.path]
       .filter((x) => x)
       .join(" ");
+    const origin = format_origin(entry.origin);
     const detail = [where, entry.status ? String(entry.status) : ""]
       .filter((x) => x)
       .join(" · ");
@@ -204,6 +207,11 @@ export class RSMessagesHistory extends LitElement {
             <time datetime="${entry.ts}"
               >${format_long(entry.ts, this._hass)}</time
             >
+            ${origin
+              ? html`<span class="origin origin-${entry.origin}"
+                  >${origin}</span
+                >`
+              : nothing}
             ${detail ? html`<span class="detail">${detail}</span>` : nothing}
           </div>
           <div class="text">${entry.text}</div>

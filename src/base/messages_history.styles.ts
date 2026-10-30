@@ -136,6 +136,14 @@ export default css`
     font-variant-numeric: tabular-nums;
   }
 
+  .origin {
+    font-weight: 500;
+  }
+
+  .origin-reefbeat {
+    color: var(--primary-color, currentColor);
+  }
+
   .text {
     white-space: pre-wrap;
     overflow-wrap: anywhere;

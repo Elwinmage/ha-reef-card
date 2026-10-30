@@ -2,6 +2,20 @@
 
 ## MODIFICATIONS
 
+### Messages: where they came from, and the history from the config dialog
+
+- After its date, a message or an alert tells where it came from: **Home
+  Assistant** (an answer to a push of Home Assistant) or the **ReefBeat
+  app** (an answer to a command of the app, relayed by Poseidon), in the
+  scrolling banner and in the message history (the `origin` attribute of
+  the message sensors and of the history entries, redsea integration). The
+  entries older than it show none.
+- The config dialog of every ReefBeat device (ReefATO+, ReefControl,
+  ReefDose, ReefLED, ReefMat, ReefPower, ReefRun, ReefWave) ends with a
+  **Message history** button: the banners that open it too are not shown
+  while there is no message. Closing the history goes back to the config
+  dialog. Not for a virtual ReefLED, which has no messages of its own.
+
 ### ReefDose: history of the doses of a head
 
 - The configuration dialog of a head gets a **Dose history** button, shown
