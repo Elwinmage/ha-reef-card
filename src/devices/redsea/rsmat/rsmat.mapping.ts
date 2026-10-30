@@ -330,7 +330,7 @@ export const config = {
       flex: "0 0 auto",
       position: "absolute",
       top: "0%",
-      right: "18%",
+      left: "17%",
     }),
     remaining_length: {
       name: "remaining_length",

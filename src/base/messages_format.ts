@@ -66,3 +66,43 @@ export function format_long(ts: unknown, hass: any): string {
     return d.toISOString().slice(0, 19).replace("T", " ");
   }
 }
+
+/**
+ * Time of day with seconds (dose history).
+ * @param ts: ISO timestamp
+ * @param hass: the Home Assistant object
+ * @return the formatted time, or "" when there is none
+ */
+export function format_time(ts: unknown, hass: any): string {
+  const d = parse_ts(ts);
+  if (!d) return "";
+  try {
+    return d.toLocaleTimeString(locale_of(hass), {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return d.toISOString().slice(11, 19);
+  }
+}
+
+/**
+ * Day with weekday (dose history headers).
+ * @param ts: ISO timestamp
+ * @param hass: the Home Assistant object
+ * @return the formatted day, or "" when there is none
+ */
+export function format_day(ts: unknown, hass: any): string {
+  const d = parse_ts(ts);
+  if (!d) return "";
+  try {
+    return d.toLocaleDateString(locale_of(hass), {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  } catch {
+    return d.toISOString().slice(0, 10);
+  }
+}

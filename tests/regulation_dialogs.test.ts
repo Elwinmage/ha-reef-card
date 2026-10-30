@@ -97,6 +97,8 @@ describe("regulation dialogs", () => {
     expect(opened(dialogs_rsdose.head_configuration)).toEqual([
       "priming",
       "head_calibration",
+      // Only shown in Poseidon mode (see dose_history.test.ts)
+      "dose_history",
       "regulation_assisted",
     ]);
     const head = dialogs_rsdose.head_configuration.content;

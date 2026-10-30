@@ -2,6 +2,18 @@
 
 ## MODIFICATIONS
 
+### ReefDose: history of the doses of a head
+
+- The configuration dialog of a head gets a **Dose history** button, shown
+  only while its doser is in Poseidon mode (its `poseidon_last_dose` sensor
+  is available): a ReefDose only tells its doses then.
+- The history lists the doses of the head, newest first, by day: start →
+  end, duration, volume, scheduled or manual (a manual dose from the
+  ReefBeat app has no start). Last 24 h, 7 or 31 days, or everything kept
+  (30 days by default), with the total volume of the period. It reloads by
+  itself when a new dose comes in while it is open.
+- Read from the `redsea.get_doses` action of the redsea integration.
+
 ### Fix: dialogs wider than the card on a phone
 
 - A dialog never gets wider than the card any more: a wide content (the
