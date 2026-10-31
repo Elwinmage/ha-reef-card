@@ -11,6 +11,7 @@ import {
   DOSE_HISTORY_HIDDEN,
   dialogs_rsdose,
 } from "../src/devices/redsea/rsdose/rsdose.dialogs";
+import i18n from "../src/translations/myi18n.js";
 import { SafeEval } from "../src/utils/SafeEval";
 
 const SENSOR = "sensor.doser_head_2_last_dose";
@@ -40,6 +41,8 @@ const DOSES = [
     started_at: "2026-10-29T22:00:00+01:00",
     ended_at: "2026-10-29T22:00:19+01:00",
     duration_s: 19,
+    // Not in the queue: from the flow of the head
+    start_estimated: true,
   },
 ];
 
@@ -125,6 +128,14 @@ describe("RSDoseHistory", () => {
     expect(doses[1].classList.contains("manual")).toBe(true);
     expect(doses[1].textContent).not.toMatch(/→/);
     expect(doses[2].querySelector(".volume")?.textContent).toBe("–");
+    // An estimated start and duration are marked
+    expect(doses[0].textContent).not.toMatch(/≈/);
+    expect(doses[0].querySelector("time")?.getAttribute("title")).toBe("");
+    expect(doses[2].querySelector(".when")?.textContent).toMatch(/≈/);
+    expect(doses[2].querySelector(".detail")?.textContent).toMatch(/≈ 19 s/);
+    expect(doses[2].querySelector("time")?.getAttribute("title")).toBe(
+      i18n._("dose_history_estimated"),
+    );
     expect(root.querySelector(".summary")?.textContent).toMatch(/13\.52/);
     expect(root.querySelector(".footer")?.textContent).toMatch(/3/);
     expect(root.querySelector(".footer")?.textContent).toMatch(/30/);

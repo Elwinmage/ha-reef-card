@@ -640,6 +640,7 @@
   "dose_history_manual": "Manual",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "início desconhecido",
+  "dose_history_estimated": "Estimado a partir do caudal da cabeça",
   "poseidon": "Modo Poseidon",
   "poseidon_connection_state": "Ligação ao broker",
   "poseidon_last_up": "Última trama do dispositivo",

@@ -640,6 +640,7 @@
   "dose_history_manual": "Ręczna",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "początek nieznany",
+  "dose_history_estimated": "Oszacowane na podstawie wydajności głowicy",
   "poseidon": "Tryb Poseidon",
   "poseidon_connection_state": "Połączenie z brokerem",
   "poseidon_last_up": "Ostatnia ramka z urządzenia",

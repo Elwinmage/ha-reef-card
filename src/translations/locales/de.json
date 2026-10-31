@@ -640,6 +640,7 @@
   "dose_history_manual": "Manuell",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "Beginn unbekannt",
+  "dose_history_estimated": "Aus der Förderrate des Kopfes geschätzt",
   "poseidon": "Poseidon-Modus",
   "poseidon_connection_state": "Verbindung zum Broker",
   "poseidon_last_up": "Letzter Frame vom Gerät",

@@ -2,6 +2,14 @@
 
 ## MODIFICATIONS
 
+### ReefDose: estimated start of a dose
+
+- A dose missing from the dosing queue (the one at midnight, a manual one
+  from the ReefBeat app) now has a start and a duration, estimated by the
+  redsea integration from the flow of its head (`start_estimated`): the
+  dose history shows them with a "≈" (tooltip: estimated from the flow of
+  the head).
+
 ### Messages: where they came from, and the history from the config dialog
 
 - After its date, a message or an alert tells where it came from: **Home

@@ -34,6 +34,8 @@ export interface DoseEntry {
   started_at?: string | null;
   ended_at: string;
   duration_s?: number | null;
+  /** Start and duration estimated from the flow of the head */
+  start_estimated?: boolean;
 }
 
 export class RSDoseHistory extends LitElement {
@@ -185,15 +187,19 @@ export class RSDoseHistory extends LitElement {
   private _render_dose(dose: DoseEntry) {
     const manual = dose.dose_type === "manual";
     const end = format_time(dose.ended_at, this._hass);
+    // Not in the dosing queue (the dose at midnight, a manual one from the
+    // app): start and duration estimated from the flow of the head
+    const approx = dose.start_estimated ? "≈ " : "";
     const start = dose.started_at
-      ? format_time(dose.started_at, this._hass)
+      ? approx + format_time(dose.started_at, this._hass)
       : "";
     const kind = manual
       ? i18n._("dose_history_manual")
       : i18n._("dose_history_scheduled");
     const duration =
       typeof dose.duration_s === "number"
-        ? i18n._("dose_history_duration", {
+        ? approx +
+          i18n._("dose_history_duration", {
             seconds: Math.round(dose.duration_s),
           })
         : i18n._("dose_history_no_start");
@@ -202,7 +208,14 @@ export class RSDoseHistory extends LitElement {
         <span class="kind" aria-hidden="true">${manual ? "✋" : "⏱"}</span>
         <span class="when">
           ${start
-            ? html`<time datetime="${dose.started_at}">${start}</time> → `
+            ? html`<time
+                  datetime="${dose.started_at}"
+                  title="${dose.start_estimated
+                    ? i18n._("dose_history_estimated")
+                    : ""}"
+                  >${start}</time
+                >
+                → `
             : nothing}
           <time datetime="${dose.ended_at}">${end}</time>
         </span>
