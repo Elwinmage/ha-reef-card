@@ -174,6 +174,28 @@ describe("RSDoseHistory", () => {
     expect((view as any)._period_label(31)).toMatch(/31/);
   });
 
+  it("names a compensation dose", async () => {
+    // The rest of a lowered daily dose, offered by the app (spy 2026-11-01)
+    const compensation = {
+      head: 2,
+      dose_type: "compensation",
+      volume: 0.072727,
+      started_at: null,
+      ended_at: "2026-11-01T22:39:37+01:00",
+      duration_s: null,
+    };
+    const view = view_of(
+      makeHass({ response: { doses: [compensation], retention_days: 30 } }),
+    );
+    views.push(view);
+    await settle(view);
+    const dose = view.shadowRoot!.querySelector(".dose")!;
+    expect(dose.querySelector(".detail")?.textContent).toMatch(
+      i18n._("dose_history_compensation"),
+    );
+    expect(dose.classList.contains("scheduled")).toBe(true);
+  });
+
   it("tells when there is nothing, or an error", async () => {
     const empty = view_of(makeHass({ response: { doses: "junk" } }));
     views.push(empty);

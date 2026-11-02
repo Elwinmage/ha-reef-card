@@ -638,6 +638,7 @@
   "dose_history_total": "{volume} mL insgesamt",
   "dose_history_scheduled": "Geplant",
   "dose_history_manual": "Manuell",
+  "dose_history_compensation": "Ausgleich",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "Beginn unbekannt",
   "dose_history_estimated": "Aus der Förderrate des Kopfes geschätzt",

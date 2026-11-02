@@ -638,6 +638,7 @@
   "dose_history_total": "{volume} mL en total",
   "dose_history_scheduled": "Programada",
   "dose_history_manual": "Manual",
+  "dose_history_compensation": "Compensación",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "inicio desconocido",
   "dose_history_estimated": "Estimado a partir del caudal del cabezal",

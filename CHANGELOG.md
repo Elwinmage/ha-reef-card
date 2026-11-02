@@ -2,6 +2,15 @@
 
 ## MODIFICATIONS
 
+### ReefDose: daily dose to 0.1 mL in assisted dosing, compensation doses
+
+- The assisted dosing dialog showed the daily dose sensor (whole mL, read
+  only): it now shows the daily dose number, set to 0.1 mL as the doser
+  takes it.
+- The dose history names the compensation doses (the rest of a lowered
+  daily dose, offered by the ReefBeat app) instead of showing them as
+  scheduled.
+
 ### ReefDose: estimated start of a dose
 
 - A dose missing from the dosing queue (the one at midnight, a manual one

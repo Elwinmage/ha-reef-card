@@ -193,9 +193,12 @@ export class RSDoseHistory extends LitElement {
     const start = dose.started_at
       ? approx + format_time(dose.started_at, this._hass)
       : "";
+    // The rest of a lowered daily dose, offered by the app
     const kind = manual
       ? i18n._("dose_history_manual")
-      : i18n._("dose_history_scheduled");
+      : dose.dose_type === "compensation"
+        ? i18n._("dose_history_compensation")
+        : i18n._("dose_history_scheduled");
     const duration =
       typeof dose.duration_s === "number"
         ? approx +

@@ -638,6 +638,7 @@
   "dose_history_total": "{volume} mL in totale",
   "dose_history_scheduled": "Programmata",
   "dose_history_manual": "Manuale",
+  "dose_history_compensation": "Compensazione",
   "dose_history_duration": "{seconds} s",
   "dose_history_no_start": "inizio sconosciuto",
   "dose_history_estimated": "Stimato dalla portata della testa",

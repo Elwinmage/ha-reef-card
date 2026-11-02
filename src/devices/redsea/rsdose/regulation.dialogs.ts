@@ -150,7 +150,8 @@ export const dialogs_regulation = {
         row("regulation_last_measurement"),
         row("regulation_consumption"),
         row("regulation_proposed_dose"),
-        row("daily_dose"),
+        // The number (0.1 mL steps), not the sensor of the same name
+        row("number.daily_dose"),
         divider,
         row("regulation_measurement"),
         row("regulation_record"),

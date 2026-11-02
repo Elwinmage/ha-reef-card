@@ -48,7 +48,7 @@ const BACKEND_KEYS = new Set([
   "brine_salinity",
   "brine_daily_volume",
   "regulation_alarm",
-  "daily_dose",
+  "number.daily_dose",
   "schedule_enabled",
 ]);
 
