@@ -78,6 +78,30 @@ export const POWER_FLOW_CARD_URL =
 export const POWER_FLOW_CARD_HACS_URL =
   "https://my.home-assistant.io/redirect/hacs_repository/?owner=flixlix&repository=power-flow-card-plus&category=plugin";
 
+// ─── VSON fish feeder (ESPHome) ───────────────────────────────────────────────
+
+/**
+ * ESPHome project name the hacked VSON fish feeder firmware declares
+ * (`esphome: project: name:`). Home Assistant splits it into the
+ * manufacturer ("vson") and the model ("fish_feeder") of the device, which
+ * is the only stable way to recognise it: ESPHome devices carry no
+ * identifier tuple, only a MAC address connection.
+ */
+export const VSON_FEEDER_PROJECT = "vson.fish_feeder";
+
+/**
+ * Model the fish feeder view is registered under: its custom element tag
+ * derives from it ("esphome-vsonfeeder"), and so does the key of its
+ * options in the card configuration.
+ */
+export const VSON_FEEDER_MODEL = "VSONFEEDER";
+
+/** Number of feeding slots the firmware exposes. */
+export const VSON_FEEDER_SLOTS = 5;
+
+/** Highest number of portions a slot accepts (see the firmware numbers). */
+export const VSON_FEEDER_MAX_PORTIONS = 10;
+
 // ─── Device domains ───────────────────────────────────────────────────────────
 
 /**
@@ -143,6 +167,14 @@ export interface KnownDeviceDomain {
    * free-text `model`, which a publisher may reword at any time.
    */
   model_ids?: Record<string, string>;
+  /**
+   * ESPHome style recognition, for devices registered without any
+   * identifier tuple: the "<manufacturer>.<model>" pair Home Assistant
+   * derives from the firmware project name, mapped to the model their view
+   * is registered under. Matched case-insensitively. When declared, a
+   * device of the domain whose pair is not listed is ignored.
+   */
+  project_names?: Record<string, string>;
 }
 
 /**
@@ -181,6 +213,15 @@ export const KNOWN_DEVICE_DOMAINS: Record<string, KnownDeviceDomain> = {
     tag_prefix: "reefbeat",
     model_ids: {
       [ENERGY_BACKUP_MODEL_ID]: ENERGY_BACKUP_MODEL,
+    },
+  },
+  // ESPHome registers its devices with a MAC connection and no identifier:
+  // they are recognised by the project name their firmware declares (see
+  // project_names), every other ESPHome device is left out.
+  esphome: {
+    tag_prefix: "esphome",
+    project_names: {
+      [VSON_FEEDER_PROJECT]: VSON_FEEDER_MODEL,
     },
   },
 };

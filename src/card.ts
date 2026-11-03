@@ -400,7 +400,7 @@ export class ReefCard extends LitElement {
       return;
     }
     // The integration domain (redsea, aquamedic...) picks the tag prefix.
-    const domain = domain_of(el?.identifiers) ?? "redsea";
+    const domain = domain_of(el?.identifiers, el) ?? "redsea";
     // Some models are ambiguous (ex: Aqua Medic's "DC Runner" covers both
     // the return pump and the skimmer) and get resolved via a role entity.
     const resolved_model = resolve_device_model(

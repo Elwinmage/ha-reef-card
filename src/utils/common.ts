@@ -171,10 +171,15 @@ export default class DeviceList {
       const dev = this._hass.devices[device_id];
       if (!dev) continue;
 
-      const dev_id = dev.identifiers[0];
-      if (!dev_id || !Array.isArray(dev_id)) continue;
-
-      const domain = KNOWN_DEVICE_DOMAINS[dev_id[0]];
+      // Identifier tuple of the device: absent for ESPHome, which is then
+      // recognised by its project name (see KnownDeviceDomain.project_names)
+      const ident = dev.identifiers?.[0];
+      const dev_id: [string, string] | undefined = Array.isArray(ident)
+        ? ident
+        : undefined;
+      const domain_name = domain_of(dev.identifiers, dev);
+      if (!domain_name) continue;
+      const domain = KNOWN_DEVICE_DOMAINS[domain_name];
       if (!domain) continue;
 
       // A domain shared with unrelated devices (mqtt) only keeps the ones
@@ -184,9 +189,11 @@ export default class DeviceList {
       }
 
       // Get only main device, not sub or cloud
-      const is_sub_device = (domain.sub_device_markers ?? []).some((marker) =>
-        dev_id[1].includes(marker),
-      );
+      const is_sub_device =
+        dev_id !== undefined &&
+        (domain.sub_device_markers ?? []).some((marker) =>
+          String(dev_id[1]).includes(marker),
+        );
       const is_excluded_model = (domain.excluded_models ?? []).includes(
         dev.model ?? "",
       );
@@ -203,7 +210,13 @@ export default class DeviceList {
       // What the integration registers the device under: its hardware id
       // (Red Sea) or device id (Aqua Medic). A sub-device carries its own,
       // derived from its parent's, so only a main device gives the uid.
-      const uid = is_sub_device ? undefined : String(dev_id[1]);
+      // A device without identifier (ESPHome) is known by its MAC address,
+      // which survives removing and adding the integration again.
+      const uid = is_sub_device
+        ? undefined
+        : dev_id
+          ? String(dev_id[1])
+          : (mac_of(dev) ?? dev.id);
 
       if (!is_sub_device && !is_excluded_model) {
         this.main_devices.push({
@@ -223,7 +236,7 @@ export default class DeviceList {
       } else {
         this.devices[key]?.elements.push(dev);
         // Changes main device name with main device
-        if (dev_id.length === 2 && this.devices[key]) {
+        if (dev_id?.length === 2 && this.devices[key]) {
           const device = this.devices[key];
           if (device) {
             device.name = dev.name;
@@ -258,15 +271,77 @@ function known_model_id(
 
 /**
  * Integration domain of a hass device, read from its first identifier tuple.
+ *
+ * ESPHome registers its devices without any identifier (a MAC connection
+ * only): a device whose "<manufacturer>.<model>" pair is a project name a
+ * domain declares (see KnownDeviceDomain.project_names) belongs to it.
  * @param identifiers: the `identifiers` array of a hass device
- * @return the domain (ex: "redsea", "aquamedic"), or undefined when the
- *         device carries no recognizable identifier tuple
+ * @param device: the hass device itself, for the project name fallback
+ * @return the domain (ex: "redsea", "aquamedic", "esphome"), or undefined
+ *         when the device carries no recognizable identifier tuple
  */
 export function domain_of(
   identifiers?: Array<string | [string, string]>,
+  device?: { manufacturer?: string | null; model?: string | null } | null,
 ): string | undefined {
   const ident = identifiers?.[0];
-  return Array.isArray(ident) ? ident[0] : undefined;
+  if (Array.isArray(ident)) return ident[0];
+  return device ? project_domain_of(device).domain : undefined;
+}
+
+/**
+ * Project name of an ESPHome device, as Home Assistant splits it into the
+ * manufacturer and the model of the device ("vson.fish_feeder").
+ * @param device: the hass device
+ * @return the lower-cased "<manufacturer>.<model>", or undefined
+ */
+export function project_name_of(device: {
+  manufacturer?: string | null;
+  model?: string | null;
+}): string | undefined {
+  if (!device?.manufacturer || !device?.model) return undefined;
+  return `${device.manufacturer}.${device.model}`.toLowerCase();
+}
+
+/**
+ * Find the domain declaring the project name of a device, and the model
+ * its view is registered under.
+ * @param device: the hass device
+ * @return the domain and the model, both undefined when none matches
+ */
+function project_domain_of(device: {
+  manufacturer?: string | null;
+  model?: string | null;
+}): { domain?: string; model?: string } {
+  const project = project_name_of(device);
+  if (!project) return {};
+  for (const [name, domain] of Object.entries(KNOWN_DEVICE_DOMAINS)) {
+    for (const [key, model] of Object.entries(domain.project_names ?? {})) {
+      if (key.toLowerCase() === project) return { domain: name, model };
+    }
+  }
+  return {};
+}
+
+/**
+ * MAC address a device is connected with (ESPHome), when it has one.
+ * @param device: the hass device
+ * @return the MAC address, or undefined
+ */
+function mac_of(device: Record<string, any>): string | undefined {
+  const connections = Array.isArray(device?.connections)
+    ? device.connections
+    : [];
+  for (const connection of connections) {
+    if (
+      Array.isArray(connection) &&
+      connection[0] === "mac" &&
+      typeof connection[1] === "string"
+    ) {
+      return connection[1];
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -406,6 +481,13 @@ export function resolve_device_model(
   const model_id = device?.elements?.[0]?.model_id;
   if (model_ids && known_model_id(model_ids, model_id)) {
     return model_ids[model_id] as string;
+  }
+  // A domain recognising its devices by project name (ESPHome) names
+  // their view too
+  const el = device?.elements?.[0];
+  if (domain && el && KNOWN_DEVICE_DOMAINS[domain]?.project_names) {
+    const found = project_domain_of(el);
+    if (found.domain === domain && found.model) return found.model;
   }
   const found = ambiguous_model_of(hass, device, domain, model);
   if (!found?.role) return model;

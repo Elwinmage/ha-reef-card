@@ -275,6 +275,18 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
+  <tr>
+    <td colspan="5"><b>ESPHome</b> — appareils hackés sous <a href="https://esphome.io">ESPHome</a></td>
+  </tr>
+  <tr>
+    <td><a href="vsonfeeder.fr.md#distributeur-de-nourriture-vson-hacké">Distributeur de nourriture</a></td>
+    <td>fishfeeder VSON (hacked)</td><td>✅</td>
+    <td width="200px"><img src="../../src/img/esphome/VSONFEEDER/closed_full.webp" width="100"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -295,6 +307,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/aquamedic.fr.md#aqua-medic)
 - [Maintenance](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/maintenance.fr.md#maintenance)
 - [Batterie de secours](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/energybackup.fr.md#batterie-de-secours)
+- [Distributeur de nourriture VSON (hacké)](vsonfeeder.fr.md#distributeur-de-nourriture-vson-hacké)
 - [FAQ](#faq)
 
 # Installation

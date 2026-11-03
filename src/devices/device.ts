@@ -320,7 +320,7 @@ export class RSDevice extends LitElement {
     return ambiguous_model_of(
       this._hass ?? undefined,
       this.device as DeviceInfo,
-      domain_of(el.identifiers),
+      domain_of(el.identifiers, el),
       el.model,
     );
   }
@@ -795,7 +795,10 @@ export class RSDevice extends LitElement {
    * Medic's switch is "power") overrides it — see KNOWN_DEVICE_DOMAINS.
    */
   private _power_translation_key(): string {
-    const domain = domain_of(this.device?.elements?.[0]?.identifiers);
+    const domain = domain_of(
+      this.device?.elements?.[0]?.identifiers,
+      this.device?.elements?.[0],
+    );
     return (
       (domain && KNOWN_DEVICE_DOMAINS[domain]?.power_translation_key) ||
       "device_state"

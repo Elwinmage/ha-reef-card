@@ -161,7 +161,7 @@ export function device_thumbnail(
   const el: any = info?.elements?.[0];
   if (info && el?.model) {
     try {
-      const domain = domain_of(el.identifiers) ?? "redsea";
+      const domain = domain_of(el.identifiers, el) ?? "redsea";
       const model = resolve_device_model(hass, info, domain, el.model);
       const device: any = RSDevice.create_device(
         RSDevice.tag_for_model(domain, model),

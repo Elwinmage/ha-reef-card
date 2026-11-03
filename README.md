@@ -282,6 +282,18 @@ All of them are documented together on the [ReefTech project page](https://elwin
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
+  <tr>
+    <td colspan="5"><b>ESPHome</b> — hacked devices running <a href="https://esphome.io">ESPHome</a></td>
+  </tr>
+  <tr>
+    <td><a href="doc/en/vsonfeeder.md#fish-feeder-vson-hacked">Fish feeder</a></td>
+    <td>fishfeeder VSON (hacked)</td><td>✅</td>
+    <td width="200px"><img src="src/img/esphome/VSONFEEDER/closed_full.webp" width="100"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -302,6 +314,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/aquamedic.md#aqua-medic)
 - [Maintenance](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/maintenance.md#maintenance)
 - [Energy backup](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/energybackup.md#energy-backup)
+- [Fish feeder VSON (hacked)](doc/en/vsonfeeder.md#fish-feeder-vson-hacked)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation

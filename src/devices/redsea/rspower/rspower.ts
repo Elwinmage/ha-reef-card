@@ -838,7 +838,7 @@ export class RSPower extends RSDevice {
       return raw;
     }
     const info = { name: String(dev.name ?? ""), elements: [dev] };
-    const domain = domain_of(dev.identifiers);
+    const domain = domain_of(dev.identifiers, dev);
     const found = ambiguous_model_of(this._hass, info, domain, raw);
     if (found && !found.entity_id) {
       const stored = this.config?.sockets?.["socket_" + socket]?.linked_model;
@@ -937,7 +937,8 @@ export class RSPower extends RSDevice {
     if (!device_id || device_id === OTHER_DEVICE_VALUE) {
       return "";
     }
-    const domain = domain_of(this._hass?.devices?.[device_id]?.identifiers);
+    const linked = this._hass?.devices?.[device_id];
+    const domain = domain_of(linked?.identifiers, linked);
     if (domain !== undefined && domain !== "redsea") {
       return "";
     }
@@ -994,7 +995,7 @@ export class RSPower extends RSDevice {
         ? resolve_device_model(
             this._hass,
             { name: String(dev.name ?? ""), elements: [dev] },
-            domain_of(dev.identifiers),
+            domain_of(dev.identifiers, dev),
             raw,
           )
         : raw;
