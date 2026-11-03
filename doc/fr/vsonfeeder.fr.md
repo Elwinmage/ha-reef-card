@@ -6,6 +6,10 @@ La carte pilote un distributeur automatique de nourriture VSON dont le contrôle
 
 <img src="../img/vsonfeeder/overview.png" width="400"/>
 
+## Hacker le distributeur
+
+Le distributeur (VSON WP8621 V1.2) est ouvert et sa carte d'origine remplacée par un ESP32 : le câblage du moteur, du capteur de trappe et du capteur de niveau de nourriture, ainsi que le flashage, sont expliqués dans ce fil de la communauté Home Assistant (en anglais) : [VSON WP8621 V1.2 fish feeder](https://community.home-assistant.io/t/vson-wp8621-v12-fish-feeder/759621).
+
 ## Firmware
 
 La configuration ESPHome se trouve dans [doc/esphome/vson-fish-feeder.yaml](../esphome/vson-fish-feeder.yaml). Mettez vos clés et mots de passe dans `secrets.yaml` (`fish_feeder_api_key`, `fish_feeder_ota_password`, `fish_feeder_ap_password`, ainsi que `wifi_ssid` et `wifi_password`).

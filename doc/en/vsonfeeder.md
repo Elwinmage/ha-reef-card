@@ -6,6 +6,10 @@ The card drives a VSON automatic fish feeder whose controller has been replaced 
 
 <img src="../img/vsonfeeder/overview.png" width="400"/>
 
+## Hacking the feeder
+
+The feeder (VSON WP8621 V1.2) is opened and its original board replaced by an ESP32: wiring of the motor, the trap sensor and the food level sensor, and flashing, are explained in this Home Assistant community thread: [VSON WP8621 V1.2 fish feeder](https://community.home-assistant.io/t/vson-wp8621-v12-fish-feeder/759621).
+
 ## Firmware
 
 The ESPHome configuration is in [doc/esphome/vson-fish-feeder.yaml](../esphome/vson-fish-feeder.yaml). Put your keys and passwords in `secrets.yaml` (`fish_feeder_api_key`, `fish_feeder_ota_password`, `fish_feeder_ap_password`, plus `wifi_ssid` and `wifi_password`).
