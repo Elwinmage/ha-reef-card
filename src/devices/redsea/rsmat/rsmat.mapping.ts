@@ -325,12 +325,13 @@ export const config = {
       right: "12%",
     }),
     // Poseidon mode: hold to switch it, tap for its settings.
-    // Next to the maintenance shortcut
+    // Directly under the wifi icon, so it stays grouped with it whichever
+    // side the mat is mounted on (the layout mirrors with the mount).
     poseidon: poseidon_shortcut({
       flex: "0 0 auto",
       position: "absolute",
-      top: "0%",
-      left: "17%",
+      top: "5.5%",
+      right: "0%",
     }),
     remaining_length: {
       name: "remaining_length",

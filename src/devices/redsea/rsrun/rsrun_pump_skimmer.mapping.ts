@@ -45,6 +45,8 @@ export const config = {
         top: "-18.8%",
         left: "77.2%",
         width: "25%",
+        // Square box so the circle scales with the card (see return pump)
+        "aspect-ratio": "1 / 1",
       },
     },
     speed_2: {
@@ -60,6 +62,7 @@ export const config = {
         top: "-18.8%",
         left: "-11.7%",
         width: "25%",
+        "aspect-ratio": "1 / 1",
       },
     },
     control_1: {
@@ -83,8 +86,9 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-15.4%",
-        left: "84.7%",
+        top: "-16.1%",
+        "--mdc-icon-size": "6cqw",
+        left: "83.6%",
       },
     },
     control_2: {
@@ -108,8 +112,9 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-15.4%",
-        left: "-4%",
+        top: "-16.1%",
+        "--mdc-icon-size": "6cqw",
+        left: "-5.1%",
       },
     },
     state: {

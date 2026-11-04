@@ -15,12 +15,12 @@ import { FaceLayout, rsled_config } from "./rsled.common.mapping";
  * sit in its upper third, leaving the lower one to the countdown.
  */
 export const G2_FACE: FaceLayout = {
-  device_state: ["5.5%", "39.6%"],
-  maintenance: ["12.1%", "37.5%"],
-  configuration: ["18.7%", "35.4%"],
-  battery_level: ["25.3%", "33.2%"],
-  wifi_quality: ["31.9%", "31.1%"],
-  maintenance_tasks: ["38.5%", "29%"],
+  device_state: ["5.5%", "41.1%"],
+  maintenance: ["12.1%", "39%"],
+  configuration: ["18.7%", "36.9%"],
+  battery_level: ["25.3%", "34.7%"],
+  wifi_quality: ["31.9%", "32.6%"],
+  maintenance_tasks: ["38.5%", "30.5%"],
   poseidon: ["92.3%", "53.3%"],
   // Right face: icons in the upper third of the band, the manual mode
   // countdown under them

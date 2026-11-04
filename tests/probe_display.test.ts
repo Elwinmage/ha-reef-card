@@ -330,7 +330,10 @@ describe("RSControl buzzer", () => {
   it("sits on the LED of each model and opens its settings", () => {
     const pro: any = proConfig.elements;
     const lite: any = liteConfig.elements;
-    expect(pro.buzzer.css.left).toBe("91.2%");
+    // Pro stacks the buzzer in the right-edge column (see rscontrolpro),
+    // so it no longer carries the LED's `left`; Lite keeps it on the LED.
+    expect(pro.buzzer.css.left).toBeUndefined();
+    expect(pro.buzzer.css.right).toBe("3%");
     expect(lite.buzzer.css.left).toBe("88.5%");
     expect(lite.buzzer.css.top).toBe("9.6%");
     expect(lite.buzzer.icon).toBe("mdi:bell-alert");

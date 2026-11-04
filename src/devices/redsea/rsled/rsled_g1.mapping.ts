@@ -10,12 +10,12 @@ import { FaceLayout, rsled_config } from "./rsled.common.mapping";
  * one stays on the flat of the face, clear of the front corner.
  */
 export const G1_FACE: FaceLayout = {
-  device_state: ["5.5%", "45.2%"],
-  maintenance: ["12.3%", "41.9%"],
-  configuration: ["19.1%", "38.5%"],
-  battery_level: ["25.9%", "35.2%"],
-  wifi_quality: ["32.7%", "31.8%"],
-  maintenance_tasks: ["39.5%", "28.5%"],
+  device_state: ["5.5%", "46.7%"],
+  maintenance: ["12.3%", "43.4%"],
+  configuration: ["19.1%", "40%"],
+  battery_level: ["25.9%", "36.7%"],
+  wifi_quality: ["32.7%", "33.3%"],
+  maintenance_tasks: ["39.5%", "30%"],
   poseidon: ["87.5%", "47%"],
   identify: ["56%", "27.9%"],
   moon_phase: ["67%", "31.2%"],

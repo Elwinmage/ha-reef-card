@@ -30,6 +30,9 @@ export const config = {
         top: "-184.2%",
         left: "77.2%",
         width: "25%",
+        // Square box so the circle scales with the card instead of the
+        // SVG falling back to a fixed pixel height (which drifts on mobile)
+        "aspect-ratio": "1 / 1",
       },
     },
     speed_2: {
@@ -45,6 +48,7 @@ export const config = {
         top: "-184.5%",
         left: "-11.7%",
         width: "25%",
+        "aspect-ratio": "1 / 1",
       },
     },
     control_1: {
@@ -68,8 +72,9 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-176%",
-        left: "84.2%",
+        top: "-178%",
+        "--mdc-icon-size": "6cqw",
+        left: "82.8%",
       },
     },
     control_2: {
@@ -93,8 +98,9 @@ export const config = {
       css: {
         flex: "0 0 auto",
         position: "absolute",
-        top: "-176%",
-        left: "-4%",
+        top: "-178%",
+        "--mdc-icon-size": "6cqw",
+        left: "-5.4%",
       },
     },
     flow: {
