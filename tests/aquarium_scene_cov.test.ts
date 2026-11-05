@@ -61,6 +61,7 @@ interface Call {
   op: string;
   args: any[];
   alpha: number;
+  composite?: string;
 }
 
 /**
@@ -95,7 +96,13 @@ function record_contexts(only_for?: (c: HTMLCanvasElement) => boolean) {
             });
           return (...args: any[]) => {
             if (k === "drawImage") last = args[0];
-            calls.push({ canvas, op: String(k), args, alpha: t.globalAlpha });
+            calls.push({
+              canvas,
+              op: String(k),
+              args,
+              alpha: t.globalAlpha,
+              composite: t.globalCompositeOperation,
+            });
           };
         },
         set: (t: any, k, v) => ((t[k] = v), true),
@@ -722,6 +729,78 @@ describe("AquariumScene drawing", () => {
     expect(calls.some((c) => c.canvas === canvas && c.op === "drawImage")).toBe(
       true,
     );
+  });
+
+  it("erases the glow behind what swims in front of a coral", () => {
+    const glow = document.createElement("canvas");
+    const { calls } = record_contexts();
+    let [doc, view] = scene_doc();
+    [doc] = ops.add_coral(doc, "main", coral, view, [0.5, 0.8]);
+    [doc] = ops.add_line(doc, "main", { species: fish.id, count: 1 });
+    const canvas = document.createElement("canvas");
+    canvas.getBoundingClientRect = () =>
+      ({ width: 400, height: 200 }) as DOMRect;
+    const s = new AquariumScene(canvas, glow);
+    s.configure({
+      doc,
+      view_id: view,
+      catalog: { fish: [fish], corals: [coral], presets: [] },
+      background: null,
+      seed: "s",
+    });
+    const body = document.createElement("canvas");
+    const fluo = document.createElement("canvas");
+    const c = s.regions[0].corals[0];
+    c.atlas = { body, glow: fluo };
+    c.coral = { ...c.coral, z: 0.5 };
+    const img = document.createElement("img");
+    (s as any)._atlases.set(fish.atlas["1x"], img);
+    const f: any = s.regions[0].sim.fish[0];
+    f.emerge = undefined;
+    s.set_light(
+      {
+        main: {
+          lamps: [{ x: 0, rgb: [40, 70, 255], power: 1, dark: false }],
+          dark: false,
+          none: false,
+        },
+      },
+      true,
+    );
+    const on_glow = () =>
+      calls.filter((k) => k.canvas === glow && k.op === "drawImage");
+
+    // In front of the coral: drawn again on the glow, erasing it
+    f.d = 0;
+    calls.length = 0;
+    s.draw();
+    const [first, second] = on_glow();
+    expect(first.args[0]).toBe(fluo);
+    expect(first.composite).not.toBe("destination-out");
+    expect(second.args[0]).toBe(img);
+    expect(second.composite).toBe("destination-out");
+
+    // Behind the coral: drawn before any glow, nothing to erase
+    f.d = 50;
+    calls.length = 0;
+    s.draw();
+    expect(on_glow().map((k) => k.args[0])).toEqual([fluo]);
+
+    // White light: no glow, nothing erased
+    f.d = 0;
+    s.set_light(
+      {
+        main: {
+          lamps: [{ x: 0, rgb: [255, 250, 235], power: 1, dark: false }],
+          dark: false,
+          none: false,
+        },
+      },
+      true,
+    );
+    calls.length = 0;
+    s.draw();
+    expect(on_glow()).toEqual([]);
   });
 
   it("draws the corals without a glow canvas", () => {

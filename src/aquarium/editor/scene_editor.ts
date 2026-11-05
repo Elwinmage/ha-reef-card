@@ -4,7 +4,7 @@
  * Tabs: the aquarium (name, cloud link, preset, dimensions, rendering),
  * its views (pictures, water outlines, decor, hotspots), the elements
  * placed on them (device tree, drag and drop), the lights and flow, the
- * livestock (inventory, corals) and the feeding sources.
+ * livestock (inventory, corals), the feeding sources and the monitoring.
  *
  * Every change goes through the pure operations of ops.ts on a working
  * copy, kept in an undo history; nothing reaches Home Assistant before
@@ -31,6 +31,7 @@ import {
 import type { HassConfig } from "../../types/index";
 import type {
   AquariumDocument,
+  AquariumEntities,
   AquariumPayload,
   Catalog,
   CloudAquarium,
@@ -39,6 +40,7 @@ import type {
   FishSpecies,
   Hotspot,
   LivestockLine,
+  Monitoring,
   Point,
   SceneElement,
   View,
@@ -80,7 +82,8 @@ type Tab =
   | "elements"
   | "lights"
   | "livestock"
-  | "feeding";
+  | "feeding"
+  | "monitoring";
 type Tool =
   | "select"
   | "region"
@@ -128,7 +131,18 @@ const TABS: Tab[] = [
   "lights",
   "livestock",
   "feeding",
+  "monitoring",
 ];
+
+/** Alarms of the monitoring, as named in `AquariumEntities`. */
+const MONITORING_ALARMS = [
+  "ph_base_low",
+  "ph_swing_high",
+  "ph_profile_off",
+  "orp_low",
+  "probe_suspect",
+  "kh_fast_change",
+] as const;
 
 /** Class of the modal dialog holding the editor. */
 export const SCENE_DIALOG_CLASS = "reef-aquarium-scene-dialog";
@@ -279,6 +293,13 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _depth: ops.DepthName = "middle";
   @state() private _hotspot_target = "";
   @state() private _coral_species = "";
+  /** Colours of a coral while its colour picker is dragged (not saved). */
+  @state() private _palette_draft: {
+    coral: string;
+    palette: string[];
+  } | null = null;
+  /** Colour of a coral open in the colour picker. */
+  @state() private _colour_edit: { coral: string; index: number } | null = null;
   /** Inventory line whose home is being placed (tool "home"). */
   @state() private _home_line: string | null = null;
   /** The drawn decor shown over the photo. */
@@ -313,6 +334,8 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _api: ReefTankApi | null = null;
   private _history: AquariumDocument[] = [];
   private _saved_json = "";
+  /** Entities of the aquarium, once saved. */
+  private _entities: AquariumEntities | null = null;
   private _revision: number | null = null;
   private _is_new = true;
   /** Signed URLs of the uploaded pictures. */
@@ -411,6 +434,7 @@ export class ReefAquariumSceneEditor extends LitElement {
     this._doc = doc;
     this._revision = doc.revision;
     this._is_new = false;
+    this._entities = payload?.entities ?? null;
     this._saved_json = JSON.stringify(doc);
     this._history = [];
     this._images.load(payload);
@@ -2664,6 +2688,15 @@ export class ReefAquariumSceneEditor extends LitElement {
                     ops.update_coral(doc, this._water_id, coral.id, patch),
                   );
                 const selected = sel?.type === "coral" && sel.id === coral.id;
+                // Colours shown: the one being chosen, else the saved ones
+                const shown =
+                  this._palette_draft?.coral === coral.id
+                    ? this._palette_draft.palette
+                    : palette.map(rgb_hex);
+                const editing =
+                  this._colour_edit?.coral === coral.id
+                    ? this._colour_edit.index
+                    : null;
                 return html`<div
                   class="card ${selected ? "current" : ""}"
                   @click=${() =>
@@ -2726,29 +2759,60 @@ export class ReefAquariumSceneEditor extends LitElement {
                       </select>
                     </label>
                   </div>
+                  ${palette.length && selected
+                    ? html`<reef-coral-preview
+                        class="coral-preview"
+                        .species=${species}
+                        .palette=${shown}
+                      ></reef-coral-preview>`
+                    : nothing}
                   ${palette.length
                     ? html`<div class="palette">
-                        ${palette.map(
-                          (c, i) =>
-                            html`<input
-                              type="color"
-                              .value=${rgb_hex(c)}
+                        ${shown.map(
+                          (hex, i) =>
+                            html`<button
+                              class="swatch ${editing === i ? "active" : ""}"
+                              style="background: ${hex}"
                               title="${i18n._("aq_colour")} ${i + 1}"
-                              @change=${(e: Event) => {
-                                const next = palette.map(rgb_hex);
-                                next[i] = (e.target as HTMLInputElement).value;
-                                set({ palette: next });
-                              }}
-                            />`,
+                              @click=${() =>
+                                (this._colour_edit =
+                                  editing === i
+                                    ? null
+                                    : { coral: coral.id, index: i })}
+                            ></button>`,
                         )}
                         <button
-                          class="icon"
+                          class="icon reset"
                           title="${i18n._("aq_reset_colours")}"
-                          @click=${() => set({ palette: [] })}
+                          @click=${() => {
+                            this._colour_edit = null;
+                            this._palette_draft = null;
+                            set({ palette: [] });
+                          }}
                         >
                           ↺
                         </button>
                       </div>`
+                    : nothing}
+                  ${selected && editing !== null
+                    ? html`<reef-colour-picker
+                        class="colour-picker"
+                        .value=${shown[editing]}
+                        @colour-input=${(e: CustomEvent) => {
+                          const next = [...shown];
+                          next[editing] = e.detail.value;
+                          this._palette_draft = {
+                            coral: coral.id,
+                            palette: next,
+                          };
+                        }}
+                        @colour-change=${(e: CustomEvent) => {
+                          const next = [...shown];
+                          next[editing] = e.detail.value;
+                          this._palette_draft = null;
+                          set({ palette: next });
+                        }}
+                      ></reef-colour-picker>`
                     : nothing}
                 </div>`;
               })}
@@ -2788,6 +2852,161 @@ export class ReefAquariumSceneEditor extends LitElement {
               <span class="hint">${i18n._("aq_coral_hint")}</span>
             </fieldset>`
         : nothing}
+    `;
+  }
+
+  /** An entity of the monitoring, with the list of what suits it. */
+  private _monitoring_entity(
+    field: keyof Monitoring,
+    kind: ops.MonitoringKind,
+  ): TemplateResult {
+    const doc = this._doc!;
+    return html`<label class="field"
+      >${i18n._(`aq_mon_${field}`)}
+      <input
+        list="monitoring_${kind}"
+        .value=${String(doc.monitoring![field] ?? "")}
+        @change=${(e: Event) =>
+          this.change(
+            ops.update_monitoring(doc, {
+              [field]: (e.target as HTMLInputElement).value.trim() || null,
+            }),
+          )}
+      />
+    </label>`;
+  }
+
+  /** A threshold, kept within what the integration accepts. */
+  private _monitoring_number(
+    field: keyof Monitoring,
+    min: number,
+    max: number,
+    step: number = 1,
+  ): TemplateResult {
+    const doc = this._doc!;
+    const current = doc.monitoring![field] as number;
+    return html`<label class="field small"
+      >${i18n._(`aq_mon_${field}`)}
+      <input
+        type="number"
+        min="${min}"
+        max="${max}"
+        step="${step}"
+        .value=${String(current)}
+        @change=${(e: Event) => {
+          const value = (e.target as HTMLInputElement).valueAsNumber;
+          this.change(
+            ops.update_monitoring(doc, {
+              [field]: Number.isNaN(value)
+                ? current
+                : Math.max(min, Math.min(max, value)),
+            }),
+          );
+        }}
+      />
+    </label>`;
+  }
+
+  /** Where the monitoring stands, from the entities of the integration. */
+  private _monitoring_status(): TemplateResult | typeof nothing {
+    const states = this._hass!.states as Record<string, any>;
+    const status = states[this._entities?.monitoring ?? ""];
+    if (!status) return nothing;
+    const learning =
+      status.state === "learning"
+        ? ` (${status.attributes?.learning_pct ?? 0} %)`
+        : "";
+    return html`<fieldset>
+      <legend>${i18n._("aq_mon_status")}</legend>
+      <span>${i18n._(`aq_mon_status_${status.state}`)}${learning}</span>
+      ${MONITORING_ALARMS.map((alarm) => {
+        const state = states[this._entities?.[alarm] ?? ""]?.state ?? "unknown";
+        return html`<div class="line monitoring-alarm ${state}">
+          <span class="grow">${i18n._(`aq_mon_alarm_${alarm}`)}</span>
+          <span>${i18n._(`aq_mon_state_${state}`)}</span>
+        </div>`;
+      })}
+    </fieldset>`;
+  }
+
+  private _panel_monitoring(): TemplateResult {
+    const doc = this._doc!;
+    const monitoring = doc.monitoring;
+    if (!monitoring)
+      return html`<span class="hint">${i18n._("aq_mon_unavailable")}</span>`;
+    const kinds: ops.MonitoringKind[] = [
+      "ph",
+      "orp",
+      "co2",
+      "kh",
+      "calibration",
+      "pause",
+    ];
+    return html`
+      ${this._monitoring_status()}
+      <fieldset>
+        <legend>${i18n._("aq_mon_measures")}</legend>
+        ${this._monitoring_entity("ph_entity", "ph")}
+        ${this._monitoring_entity("orp_entity", "orp")}
+        ${this._monitoring_entity("co2_entity", "co2")}
+        ${this._monitoring_entity("kh_entity", "kh")}
+        <span class="hint">${i18n._("aq_mon_measures_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_calibration")}</legend>
+        ${this._monitoring_entity("ph_calibration_entity", "calibration")}
+        ${this._monitoring_entity("orp_calibration_entity", "calibration")}
+        <span class="hint">${i18n._("aq_mon_calibration_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_pause")}</legend>
+        ${monitoring.pause_entities.map(
+          (id) =>
+            html`<div class="line">
+              <span class="grow">${id}</span>
+              <button
+                class="icon"
+                @click=${() => this.change(ops.remove_pause_entity(doc, id))}
+              >
+                ✕
+              </button>
+            </div>`,
+        )}
+        <input
+          list="monitoring_pause"
+          placeholder="+ ${i18n._("aq_mon_add_pause")}"
+          @change=${(e: Event) => {
+            const input = e.target as HTMLInputElement;
+            const value = input.value.trim();
+            input.value = "";
+            this.change(ops.add_pause_entity(doc, value));
+          }}
+        />
+        ${this._monitoring_number("pause_hours", 1, 48)}
+        <span class="hint">${i18n._("aq_mon_pause_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_thresholds")}</legend>
+        <div class="monitoring-numbers">
+          ${this._monitoring_number("learning_days", 7, 30)}
+          ${this._monitoring_number("ph_base_drop", 0.02, 1, 0.01)}
+          ${this._monitoring_number("ph_swing_pct", 10, 300, 5)}
+          ${this._monitoring_number("ph_profile_band", 0.01, 1, 0.01)}
+          ${this._monitoring_number("ph_profile_hours", 2, 12)}
+          ${this._monitoring_number("orp_drop_mv", 5, 200)}
+          ${this._monitoring_number("orp_drop_hours", 2, 48)}
+          ${this._monitoring_number("kh_change_max", 0.1, 3, 0.1)}
+        </div>
+        <span class="hint">${i18n._("aq_mon_thresholds_hint")}</span>
+      </fieldset>
+      ${kinds.map(
+        (kind) =>
+          html`<datalist id="monitoring_${kind}">
+            ${ops
+              .monitoring_candidates(this._hass, kind)
+              .map((c) => html`<option value="${c.id}">${c.name}</option>`)}
+          </datalist>`,
+      )}
     `;
   }
 
@@ -3022,7 +3241,9 @@ export class ReefAquariumSceneEditor extends LitElement {
                           ? this._panel_lights()
                           : this._tab === "livestock"
                             ? this._panel_livestock()
-                            : this._panel_feeding()}
+                            : this._tab === "feeding"
+                              ? this._panel_feeding()
+                              : this._panel_monitoring()}
                 </div>
               </aside>
               <main>${this._render_stage()}</main>

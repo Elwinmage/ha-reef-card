@@ -20,6 +20,12 @@ import style_animations from "../../../utils/animations.styles";
 import style_rscontrol from "./rscontrol.styles";
 import { merge } from "../../../utils/merge";
 import i18n from "../../../translations/myi18n";
+import {
+  read_trends,
+  TREND_REFRESH_MS,
+  type Trend,
+  type TrendReading,
+} from "../../../utils/trend";
 
 import type { ProbeEntity } from "../../../types/index";
 
@@ -52,6 +58,13 @@ interface EntityScope {
  * `probe_uid` / `probe_type` / `probe_index`, and the 12V port entities with
  * `port`, which is what `_scan_entities()` groups them by.
  */
+/** Icon of each direction a reading can take. */
+const TREND_ICONS: Record<Trend, string> = {
+  up: "mdi:arrow-up",
+  down: "mdi:arrow-down",
+  stable: "mdi:tilde",
+};
+
 export class RSControl extends RSDevice {
   static styles = [style_common, style_animations, style_rscontrol];
 
@@ -78,6 +91,13 @@ export class RSControl extends RSDevice {
 
   // Port elements, kept across renders by port number
   private _port_elements: Record<number, any> = {};
+
+  // Direction of each reading of the summary bar, by entity id
+  _trends: Record<string, Trend> = {};
+  // What the trends were last read for, to read them again in time
+  private _trends_read = 0;
+  private _trends_ids = "";
+  private _trends_busy = false;
 
   constructor() {
     super();
@@ -273,6 +293,63 @@ export class RSControl extends RSDevice {
     }
     for (const port of Object.values(this._port_elements)) {
       if (port) port.hass = obj;
+    }
+    void this._refresh_trends();
+  }
+
+  /**
+   * Readings of the summary bar that have a direction: the numeric ones of a
+   * connected probe, and the temperature.
+   * @return the readings
+   */
+  private _trend_readings(): TrendReading[] {
+    const temp = this.summary_temperature();
+    const entries = [
+      ...this.summary_items()
+        .filter((i) => i.chart && i.level !== "error")
+        .map((i) => ({ type: i.type, entity_id: i.entity_id })),
+      ...(temp ? [{ type: "temperature", entity_id: temp.entity_id }] : []),
+    ];
+    const readings: TrendReading[] = [];
+    for (const { type, entity_id } of entries) {
+      const state = this._hass.states[entity_id];
+      const value = Number.parseFloat(state?.state);
+      if (Number.isFinite(value)) {
+        const unit = state.attributes?.unit_of_measurement;
+        readings.push({ entity_id, type, unit, value });
+      }
+    }
+    return readings;
+  }
+
+  /**
+   * Read the trends again every few minutes, or when the readings change. A
+   * failed read leaves the last ones until the next time: a trend is a hint,
+   * never worth an error.
+   */
+  private async _refresh_trends(): Promise<void> {
+    if (!this.config?.summary || !this._hass?.callWS || this._trends_busy) {
+      return;
+    }
+    const readings = this._trend_readings();
+    const ids = readings.map((r) => r.entity_id).join(",");
+    const now = Date.now();
+    if (
+      !ids ||
+      (ids === this._trends_ids && now - this._trends_read < TREND_REFRESH_MS)
+    ) {
+      return;
+    }
+    this._trends_busy = true;
+    this._trends_ids = ids;
+    this._trends_read = now;
+    try {
+      this._trends = await read_trends(this._hass, readings, this._trends);
+      this.requestUpdate();
+    } catch (err) {
+      console.debug("rscontrol: no trends", err);
+    } finally {
+      this._trends_busy = false;
     }
   }
 
@@ -717,6 +794,62 @@ export class RSControl extends RSDevice {
   }
 
   /**
+   * Open the history of a reading of the summary bar.
+   * @param entity_id: the reading
+   */
+  _open_history(entity_id: string): void {
+    for (const probe of this._probes) {
+      const primary = probe.entities[PRIMARY_KEYS[probe.type]];
+      const temperature = probe.entities.probe_temperature;
+      if (probe.control_probe && primary?.entity_id === entity_id) {
+        probe.control_probe.open_history("probe_primary");
+        return;
+      }
+      if (probe.control_probe && temperature?.entity_id === entity_id) {
+        probe.control_probe.open_history("probe_secondary");
+        return;
+      }
+    }
+    if (this.get_entity("temperature_fusion")?.entity_id === entity_id) {
+      this.dispatchEvent(
+        new CustomEvent("display-dialog", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            type: "temperature_history",
+            elt: {
+              device: this,
+              get_entity: (key: string) =>
+                key === "probe_temperature"
+                  ? this._probes
+                      .map((p) => p.entities.probe_temperature)
+                      .find(Boolean)
+                  : this.get_entity(key),
+            },
+          },
+        }),
+      );
+      return;
+    }
+    this._more_info(entity_id);
+  }
+
+  /**
+   * Direction of a reading, for the summary bar.
+   * @param entity_id: the reading
+   */
+  private _render_trend(entity_id: string): TemplateResult | typeof nothing {
+    const trend = this._trends[entity_id];
+    return trend
+      ? html`<ha-icon
+          class="summary_trend"
+          icon="${TREND_ICONS[trend]}"
+          title="${i18n._(`trend_${trend}`)}"
+        ></ha-icon>`
+      : nothing;
+  }
+
+  /**
    * State object of a probe entity.
    * @param probe: the probe
    * @param key: the entity's translation key
@@ -751,6 +884,7 @@ export class RSControl extends RSDevice {
     title: string;
     icon: string;
     level: ProbeLevel;
+    chart: boolean;
   }[] {
     const items: {
       type: string;
@@ -759,6 +893,7 @@ export class RSControl extends RSDevice {
       title: string;
       icon: string;
       level: ProbeLevel;
+      chart: boolean;
     }[] = [];
     for (const type of ["ph", "orp", "ec", "leak", "ato"]) {
       for (const probe of this._probes.filter((p) => p.type === type)) {
@@ -778,6 +913,7 @@ export class RSControl extends RSDevice {
             title: this._format(primary),
             icon: wet ? "mdi:water-alert" : "mdi:water-check",
             level: disconnected ? "error" : wet ? "danger" : "desired",
+            chart: false,
           });
         } else if (type === "ato") {
           const water = String(primary.state);
@@ -796,6 +932,7 @@ export class RSControl extends RSDevice {
                 : water === "above" || water === "below"
                   ? "acceptable"
                   : "error",
+            chart: false,
           });
         } else {
           // pH has no unit in Home Assistant: name it, as on the probe
@@ -811,6 +948,7 @@ export class RSControl extends RSDevice {
               this._probe_state(probe, "probe_level"),
               disconnected,
             ),
+            chart: true,
           });
         }
       }
@@ -827,6 +965,7 @@ export class RSControl extends RSDevice {
         title: this._format(entity),
         icon: "mdi:water-pump-off",
         level: "danger",
+        chart: false,
       });
     }
     return items;
@@ -906,8 +1045,8 @@ export class RSControl extends RSDevice {
       ? html`<span
           class="summary_item summary_temperature"
           title="${i18n._("temperature")}"
-          @click="${() => this._more_info(temp.entity_id)}"
-          >${this._format(temp)}</span
+          @click="${() => this._open_history(temp.entity_id)}"
+          >${this._format(temp)}${this._render_trend(temp.entity_id)}</span
         >`
       : nothing;
     const anomaly_icon =
@@ -928,8 +1067,11 @@ export class RSControl extends RSDevice {
         class="summary_item summary_${item.type}"
         title="${item.title}"
         style="color:${level_color(item.level)}"
-        @click="${() => this._more_info(item.entity_id)}"
-        >${icon}${item.text}</span
+        @click="${() =>
+          item.chart
+            ? this._open_history(item.entity_id)
+            : this._more_info(item.entity_id)}"
+        >${icon}${item.text}${this._render_trend(item.entity_id)}</span
       >`;
     });
     return html`<div class="summary" style="${this.get_style(conf)}">

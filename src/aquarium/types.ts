@@ -129,6 +129,30 @@ export interface FeedSource {
   kind?: "feeder" | "shortcut" | "manual" | null;
 }
 
+/** What is monitored in an aquarium, and the thresholds of its alarms. */
+export interface Monitoring {
+  ph_entity?: string | null;
+  orp_entity?: string | null;
+  /** CO2 of the room: tells a CO2 effect from an alkalinity problem. */
+  co2_entity?: string | null;
+  /** KH tests, in dKH: tells a KH drop from a CO2 effect or a probe. */
+  kh_entity?: string | null;
+  /** Entities changing when a probe was calibrated (a date, usually). */
+  ph_calibration_entity?: string | null;
+  orp_calibration_entity?: string | null;
+  /** The analysis is suspended while one of them is on. */
+  pause_entities: string[];
+  learning_days: number;
+  ph_base_drop: number;
+  ph_swing_pct: number;
+  ph_profile_band: number;
+  ph_profile_hours: number;
+  orp_drop_mv: number;
+  orp_drop_hours: number;
+  kh_change_max: number;
+  pause_hours: number;
+}
+
 export interface AquariumDocument {
   version: number;
   id?: string;
@@ -149,6 +173,8 @@ export interface AquariumDocument {
   };
   waters: Record<string, Water>;
   feeding: { sources: FeedSource[]; dedup_s: number; duration_s: number };
+  /** Absent until saved, or with a reeftank older than the monitoring. */
+  monitoring?: Monitoring;
   views: Record<string, View>;
   default_view?: string | null;
 }
@@ -169,6 +195,14 @@ export interface AquariumEntities {
   corals?: string | null;
   feedings_today?: string | null;
   feeding?: string | null;
+  monitoring?: string | null;
+  ph_base_low?: string | null;
+  ph_swing_high?: string | null;
+  ph_profile_off?: string | null;
+  orp_low?: string | null;
+  probe_suspect?: string | null;
+  kh_fast_change?: string | null;
+  kh_estimated?: string | null;
 }
 
 export interface AquariumPayload {

@@ -64,4 +64,8 @@ export default css`
     gap: 0.2em;
     cursor: pointer;
   }
+
+  .summary ha-icon.summary_trend {
+    --mdc-icon-size: 1em;
+  }
 `;

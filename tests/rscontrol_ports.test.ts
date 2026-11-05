@@ -1090,7 +1090,7 @@ describe("RSControl summary", () => {
     expect(anomaly(null, null)).toBe(false);
   });
 
-  it("renders the bar, each item opening its more-info", () => {
+  it("renders the bar, each reading opening its history", () => {
     const hub = makeHub(
       makeHass([
         ...fullSpecs(),
@@ -1102,6 +1102,12 @@ describe("RSControl summary", () => {
     hub.addEventListener("hass-more-info", (e: any) =>
       opened.push(e.detail.entityId),
     );
+    const dialogs: string[] = [];
+    let elt: any = null;
+    hub.addEventListener("display-dialog", (e: any) => {
+      dialogs.push(e.detail.type);
+      elt = e.detail.elt;
+    });
     const dom = toDom(hub._render_summary());
     document.body.appendChild(hub);
     const alarm = dom.querySelector(".summary_alarm") as HTMLElement;
@@ -1109,12 +1115,12 @@ describe("RSControl summary", () => {
     for (const cls of ["temperature", "anomaly", "ph", "leak"]) {
       (dom.querySelector(".summary_" + cls) as HTMLElement).click();
     }
-    expect(opened).toEqual([
-      "sensor.fus",
-      "sensor.anom",
-      "sensor.ph",
-      "binary_sensor.lk",
-    ]);
+    expect(dialogs).toEqual(["temperature_history"]);
+    // The fused value takes the bounds of a temperature reading
+    expect(elt.get_entity("temperature_fusion").entity_id).toBe("sensor.fus");
+    expect(elt.get_entity("probe_temperature").entity_id).toBe("sensor.ph_t");
+    // No probe element in this harness: the pH falls back on its more-info
+    expect(opened).toEqual(["sensor.anom", "sensor.ph", "binary_sensor.lk"]);
     expect(
       (dom.querySelector(".summary_ph") as HTMLElement).getAttribute("style"),
     ).toContain(COLOR_LEVEL_DESIRED_HEX);
@@ -1124,6 +1130,133 @@ describe("RSControl summary", () => {
       ),
     ).toContain(COLOR_LEVEL_DANGER_HEX);
     hub.remove();
+  });
+
+  it("opens the history of a reading through its probe", () => {
+    const hub = makeHub(makeHass(fullSpecs()));
+    const ph = hub._probes.find((p: any) => p.type === "ph");
+    const open_history = vi.fn();
+    ph.control_probe = { open_history };
+    hub._open_history("sensor.ph");
+    hub._open_history("sensor.ph_t");
+    expect(open_history.mock.calls).toEqual([
+      ["probe_primary"],
+      ["probe_secondary"],
+    ]);
+  });
+
+  it("marks the readings with their trend", () => {
+    const hub = makeHub(makeHass(fullSpecs()));
+    hub._trends = {
+      "sensor.ph": "up",
+      "sensor.orp": "down",
+      "sensor.ec": "stable",
+    };
+    const dom = toDom(hub._render_summary());
+    const icon = (cls: string) =>
+      dom.querySelector(`.summary_${cls} .summary_trend`);
+    expect(icon("ph")?.getAttribute("icon")).toBe("mdi:arrow-up");
+    expect(icon("orp")?.getAttribute("icon")).toBe("mdi:arrow-down");
+    expect(icon("ec")?.getAttribute("icon")).toBe("mdi:tilde");
+    expect(icon("leak")).toBeNull();
+  });
+
+  describe("reading the trends", () => {
+    const flush = () => new Promise((r) => setTimeout(r, 0));
+    const rising = (start: number) => ({
+      "sensor.ph": [0, 1, 2, 3].map((i) => ({
+        s: String(7.9 + i * 0.1),
+        lu: (start + i * 1200000) / 1000,
+      })),
+    });
+
+    function hub_with(callWS: any) {
+      const hass = makeHass(fullSpecs());
+      hass.callWS = callWS;
+      return { hub: makeHub(hass), hass };
+    }
+
+    it("reads numeric readings once, and again after a while", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      try {
+        const callWS = vi.fn(async (msg: any) =>
+          rising(Date.parse(msg.start_time)),
+        );
+        const { hub, hass } = hub_with(callWS);
+        hub.hass = hass;
+        await flush();
+        expect(hub._trends["sensor.ph"]).toBe("up");
+        expect(callWS).toHaveBeenCalledTimes(1);
+        expect(callWS.mock.calls[0][0].entity_ids).toEqual([
+          "sensor.ph",
+          "sensor.orp",
+          "sensor.ec",
+          "sensor.t",
+        ]);
+        hub.hass = hass;
+        await flush();
+        expect(callWS).toHaveBeenCalledTimes(1);
+        vi.advanceTimersByTime(6 * 60 * 1000);
+        hub.hass = hass;
+        await flush();
+        expect(callWS).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("keeps the last trends when the recorder fails", async () => {
+      const callWS = vi.fn(async () => {
+        throw new Error("no recorder");
+      });
+      const { hub, hass } = hub_with(callWS);
+      hub._trends = { "sensor.ph": "up" };
+      hub.hass = hass;
+      await flush();
+      expect(hub._trends).toEqual({ "sensor.ph": "up" });
+    });
+
+    it("does not read twice at once", async () => {
+      let release = (_value?: unknown) => undefined as void;
+      const callWS = vi.fn(
+        () => new Promise((resolve) => (release = resolve as any)),
+      );
+      const { hub, hass } = hub_with(callWS);
+      hub.hass = hass;
+      hub.hass = hass;
+      release({});
+      await flush();
+      expect(callWS).toHaveBeenCalledTimes(1);
+    });
+
+    it("skips what is not a number or a connected probe", async () => {
+      const callWS = vi.fn(async () => ({}));
+      const hass = makeHass(
+        fullSpecs().filter((s: any) => s.id !== "sensor.t"),
+      );
+      hass.callWS = callWS;
+      hass.states["sensor.ph"].state = "unavailable";
+      hass.states["sensor.ph_t"].state = "unknown";
+      hass.states["sensor.orp"].state = "abc";
+      hass.states["sensor.ec"].state = "abc";
+      const hub = makeHub(hass);
+      hub.hass = hass;
+      await flush();
+      expect(callWS).not.toHaveBeenCalled();
+    });
+
+    it("needs a summary bar and the websocket", async () => {
+      const callWS = vi.fn(async () => ({}));
+      const { hub, hass } = hub_with(callWS);
+      const summary = hub.config.summary;
+      hub.config.summary = null;
+      hub.hass = hass;
+      hub.config.summary = summary;
+      hass.callWS = undefined;
+      hub.hass = hass;
+      await flush();
+      expect(callWS).not.toHaveBeenCalled();
+    });
   });
 
   it("renders a quiet bar, and none without its setup", () => {

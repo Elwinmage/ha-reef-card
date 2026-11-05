@@ -18,6 +18,7 @@ import type {
   Preset,
   SceneElement,
   View,
+  Monitoring,
   Water,
 } from "../types";
 import { MAX_DARKNESS } from "../light";
@@ -780,6 +781,102 @@ export function update_feeding(
   const out = clone(doc);
   Object.assign(out.feeding, clone(patch));
   return out;
+}
+
+/** Change settings of the monitoring (of a document that has them). */
+export function update_monitoring(
+  doc: AquariumDocument,
+  patch: Partial<Monitoring>,
+): AquariumDocument {
+  const out = clone(doc);
+  Object.assign(out.monitoring!, clone(patch));
+  return out;
+}
+
+/** Add an entity pausing the analysis (an id already there is ignored). */
+export function add_pause_entity(
+  doc: AquariumDocument,
+  entity_id: string,
+): AquariumDocument {
+  const current = doc.monitoring!.pause_entities;
+  if (!entity_id || current.includes(entity_id)) return doc;
+  return update_monitoring(doc, { pause_entities: [...current, entity_id] });
+}
+
+/** Remove an entity pausing the analysis. */
+export function remove_pause_entity(
+  doc: AquariumDocument,
+  entity_id: string,
+): AquariumDocument {
+  return update_monitoring(doc, {
+    pause_entities: doc.monitoring!.pause_entities.filter(
+      (id) => id !== entity_id,
+    ),
+  });
+}
+
+/** What a monitoring field can be filled with. */
+export type MonitoringKind =
+  | "ph"
+  | "orp"
+  | "co2"
+  | "kh"
+  | "calibration"
+  | "pause";
+
+/** Translation key of the date of a ReefSense probe's last adjustment. */
+const PROBE_CALIBRATION_KEY = "probe_last_adjustment";
+const PAUSE_DOMAINS = ["switch", "input_boolean", "binary_sensor"];
+const named = (id: string, word: string) =>
+  new RegExp(`[._]${word}([._]|$)`).test(id);
+
+function monitoring_match(id: string, state: any, kind: MonitoringKind) {
+  const domain = id.split(".")[0];
+  if (kind === "pause") return PAUSE_DOMAINS.includes(domain);
+  if (kind === "kh")
+    return (
+      ["sensor", "input_number"].includes(domain) &&
+      (state.attributes.unit_of_measurement === "dKH" || named(id, "kh"))
+    );
+  if (domain !== "sensor") return false;
+  const { device_class, unit_of_measurement: unit } = state.attributes;
+  // A number without a class: not a date, a level or a status of the probe
+  const plain = !device_class && !Number.isNaN(Number(state.state));
+  switch (kind) {
+    case "ph":
+      // pH has no unit: this leaves out the temperature of a pH probe
+      return device_class === "ph" || (plain && !unit && named(id, "ph"));
+    case "orp":
+      return unit === "mV" || (plain && named(id, "orp"));
+    case "co2":
+      return device_class === "carbon_dioxide" || named(id, "co2");
+    case "calibration":
+      return device_class === "timestamp";
+  }
+}
+
+/**
+ * Entities offered for a monitoring field. Any entity can still be typed in:
+ * this only shortens the list.
+ */
+export function monitoring_candidates(
+  hass: any,
+  kind: MonitoringKind,
+): { id: string; name: string }[] {
+  const states: Record<string, any> = hass?.states ?? {};
+  let ids = Object.keys(states).filter((id) =>
+    monitoring_match(id, states[id], kind),
+  );
+  if (kind === "calibration") {
+    const dates = ids.filter(
+      (id) => hass?.entities?.[id]?.translation_key === PROBE_CALIBRATION_KEY,
+    );
+    if (dates.length) ids = dates;
+  }
+  return ids.sort().map((id) => ({
+    id,
+    name: states[id].attributes.friendly_name ?? id,
+  }));
 }
 
 /** A document in the shape the integration validates (no stray keys). */

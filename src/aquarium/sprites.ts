@@ -192,6 +192,42 @@ export interface CoralAtlas {
 const _corals = new Map<string, Promise<CoralAtlas>>();
 
 /**
+ * The recoloured atlas of a coral, not cached: the editor's preview asks
+ * for one per colour tried, and keeps only the last.
+ * @param species: the coral
+ * @param chosen: the user's colours (species defaults where missing)
+ */
+export async function recolour_atlas(
+  species: CoralSpecies,
+  chosen: string[] | undefined,
+): Promise<CoralAtlas> {
+  const palette = coral_palette(species, chosen);
+  const fluo = [0, 1, 2, 3].map((i) => Boolean(species.palette?.[i]?.fluo));
+  const [shade_img, mask_img] = await Promise.all([
+    load_image(species.atlas.shade),
+    load_image(species.atlas.mask),
+  ]);
+  const shade = pixels_of(shade_img);
+  const mask = pixels_of(mask_img);
+  const make = (data: Uint8ClampedArray): HTMLCanvasElement => {
+    const canvas = document.createElement("canvas");
+    canvas.width = shade.width;
+    canvas.height = shade.height;
+    const ctx = canvas.getContext("2d")!;
+    const image = ctx.createImageData(shade.width, shade.height);
+    image.data.set(data);
+    ctx.putImageData(image, 0, 0);
+    return canvas;
+  };
+  return {
+    body: make(recolor_pixels(shade.data, mask.data, palette)),
+    glow: fluo.some((f) => f)
+      ? make(recolor_pixels(shade.data, mask.data, palette, fluo))
+      : null,
+  };
+}
+
+/**
  * The recoloured atlas of a coral (cached per species and palette).
  */
 export function coral_atlas(
@@ -199,33 +235,10 @@ export function coral_atlas(
   chosen: string[] | undefined,
 ): Promise<CoralAtlas> {
   const palette = coral_palette(species, chosen);
-  const fluo = [0, 1, 2, 3].map((i) => Boolean(species.palette?.[i]?.fluo));
   const key = `${species.source}:${species.id}:${palette.map(rgb_hex).join("")}`;
   let promise = _corals.get(key);
   if (!promise) {
-    promise = Promise.all([
-      load_image(species.atlas.shade),
-      load_image(species.atlas.mask),
-    ]).then(([shade_img, mask_img]) => {
-      const shade = pixels_of(shade_img);
-      const mask = pixels_of(mask_img);
-      const make = (data: Uint8ClampedArray): HTMLCanvasElement => {
-        const canvas = document.createElement("canvas");
-        canvas.width = shade.width;
-        canvas.height = shade.height;
-        const ctx = canvas.getContext("2d")!;
-        const image = ctx.createImageData(shade.width, shade.height);
-        image.data.set(data);
-        ctx.putImageData(image, 0, 0);
-        return canvas;
-      };
-      return {
-        body: make(recolor_pixels(shade.data, mask.data, palette)),
-        glow: fluo.some((f) => f)
-          ? make(recolor_pixels(shade.data, mask.data, palette, fluo))
-          : null,
-      };
-    });
+    promise = recolour_atlas(species, chosen);
     promise.catch(() => _corals.delete(key));
     _corals.set(key, promise);
   }

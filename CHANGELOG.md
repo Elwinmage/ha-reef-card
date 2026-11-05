@@ -115,6 +115,22 @@
 - "DIY - Brine" supplement, with its own bottle picture: the only supplement
   regulated on the salinity.
 
+### ReefControl: trends and history
+
+- Summary bar: an arrow up, an arrow down or a tilde after the temperature, pH,
+  ORP and salinity, from the slope of their last hour.
+- A tap on these readings, or on the value of a probe, opens their history over
+  the level bands, on 24 hours or 7 days, with a button to the more-info dialog.
+  Over 7 days the chart reads the five-minute statistics and marks the days.
+
+### Aquarium editor: water monitoring
+
+- New "Monitoring" tab: the pH, ORP, room CO2 and KH tests entities, the entities telling
+  a probe was calibrated, the entities pausing the analysis and the thresholds
+  of the alarms, with the entities that suit each field listed first. It also
+  shows the status of the monitoring and of its alarms. Needs reeftank
+  with the monitoring; saved in `monitoring`.
+
 ### Aquarium editor: water volume
 
 - New "Net water volume (L)" field under the dimensions, pre-filled from the

@@ -1770,17 +1770,90 @@ describe("scene editor: livestock panel", () => {
     fire(card().querySelector("select"), "front");
     expect(coral().z).toBe(ops.DEPTHS.front);
     await editor.updateComplete;
-    const colours = card().querySelectorAll("input[type=color]");
-    expect(colours.length).toBeGreaterThan(1);
-    fire(colours[1], "#123456");
-    expect(coral().palette[1]).toBe("#123456");
-    expect(coral().palette).toHaveLength(colours.length);
+    const swatches = card().querySelectorAll(".palette .swatch");
+    expect(swatches.length).toBeGreaterThan(1);
+    (swatches[1] as HTMLButtonElement).click();
     await editor.updateComplete;
-    (card().querySelector(".palette button") as HTMLButtonElement).click();
+    card()
+      .querySelector("reef-colour-picker")!
+      .dispatchEvent(
+        new CustomEvent("colour-change", { detail: { value: "#123456" } }),
+      );
+    expect(coral().palette[1]).toBe("#123456");
+    expect(coral().palette).toHaveLength(swatches.length);
+    await editor.updateComplete;
+    (card().querySelector(".palette .reset") as HTMLButtonElement).click();
     expect(coral().palette).toEqual([]);
+    expect(editor._colour_edit).toBeNull();
     await editor.updateComplete;
     (card().querySelector("button.icon") as HTMLButtonElement).click();
     expect(editor.doc.waters.main.corals).toHaveLength(0);
+  });
+
+  it("previews the coral in large while its colours are chosen", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open_on(doc, "livestock", front);
+    const root = editor.shadowRoot;
+    const coral = () => editor.doc.waters.main.corals[0];
+    const card = () =>
+      fieldset(root, "Corals").querySelector(".card") as HTMLElement;
+    const preview = () => card().querySelector("reef-coral-preview") as any;
+    const picker = () => card().querySelector("reef-colour-picker") as any;
+    const swatch = (i: number) =>
+      card().querySelectorAll(".palette .swatch")[i] as HTMLButtonElement;
+    const send = (type: string, value: string) =>
+      picker().dispatchEvent(new CustomEvent(type, { detail: { value } }));
+    // only for the selected coral, the picker closed
+    expect(preview()).toBeNull();
+    card().click();
+    await editor.updateComplete;
+    expect(preview().species.id).toBe(coral().species);
+    expect(picker()).toBeNull();
+    const defaults = [...preview().palette];
+
+    // a swatch opens the picker on its colour, below the preview
+    swatch(0).click();
+    await editor.updateComplete;
+    expect(swatch(0).classList.contains("active")).toBe(true);
+    expect(picker().value).toBe(defaults[0]);
+    const order = [...card().children].map((e) => e.localName);
+    expect(order.indexOf("reef-coral-preview")).toBeLessThan(
+      order.indexOf("reef-colour-picker"),
+    );
+
+    // sliding: shown on the preview and the swatch, not saved
+    send("colour-input", "#abcdef");
+    await editor.updateComplete;
+    expect(preview().palette[0]).toBe("#abcdef");
+    expect(swatch(0).style.background).toBe("rgb(171, 205, 239)");
+    expect(coral().palette ?? []).toEqual([]);
+
+    // another coral's draft does not change this one
+    editor._palette_draft = { coral: "other", palette: ["#000000"] };
+    await editor.updateComplete;
+    expect(preview().palette).toEqual(defaults);
+
+    // released: saved, the draft dropped, the picker still open
+    send("colour-change", "#abcdef");
+    await editor.updateComplete;
+    expect(coral().palette[0]).toBe("#abcdef");
+    expect(editor._palette_draft).toBeNull();
+    expect(preview().palette[0]).toBe("#abcdef");
+    expect(picker()).not.toBeNull();
+
+    // another swatch moves the picker, the same one closes it
+    swatch(1).click();
+    await editor.updateComplete;
+    expect(editor._colour_edit.index).toBe(1);
+    swatch(1).click();
+    await editor.updateComplete;
+    expect(picker()).toBeNull();
+
+    // the picker of an unselected coral stays closed
+    swatch(0).click();
+    editor._selection = null;
+    await editor.updateComplete;
+    expect(picker()).toBeNull();
   });
 });
 

@@ -490,7 +490,7 @@ export class ControlProbe extends RSDevice {
   }
 
   /**
-   * Open the last 24 hours of a reading.
+   * Open the history of a reading.
    *
    * The dialog resolves its entities through the element it is given: the
    * probe itself stands for it, since the dialog wants an element whose

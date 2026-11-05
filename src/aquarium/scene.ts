@@ -8,7 +8,9 @@
  * along its polygon once and redrawn over what swims behind it.
  *
  * A second canvas, blended in `screen` above the light tint, draws the
- * fluorescent colours of the corals: they glow under actinic light.
+ * fluorescent colours of the corals: they glow under actinic light. Being
+ * above everything, the glow is erased wherever something is drawn in
+ * front of a coral (a fish, a decor), or it would show through.
  */
 
 import type {
@@ -322,6 +324,8 @@ export function tank_size(doc: AquariumDocument): SimEnv["size"] {
 interface DrawItem {
   z: number;
   draw: (ctx: CanvasRenderingContext2D) => void;
+  /** A coral: draws the glow itself, never erases it. */
+  coral?: boolean;
 }
 
 interface RegionScene {
@@ -380,6 +384,8 @@ export class AquariumScene {
   private _acc = 0;
   /** Scratch canvas tinting fish frames with the depth haze. */
   private _scratch: HTMLCanvasElement | null = null;
+  /** Some glow drawn in the current frame (else nothing to erase). */
+  private _glowing = false;
   /** Seconds of the last simulation step (cross-fades of the fish clips). */
   private _dt = 0;
   private _running = false;
@@ -625,6 +631,7 @@ export class AquariumScene {
     ctx.clearRect(0, 0, W, H);
     const glow = this._glow?.getContext("2d") ?? null;
     glow?.clearRect(0, 0, W, H);
+    this._glowing = false;
     const size = this._setup ? tank_size(this._setup.doc) : DEFAULT_DIMENSIONS;
 
     for (const r of this._regions) {
@@ -668,6 +675,7 @@ export class AquariumScene {
         items.push({
           z: c.coral.z,
           draw: (ctx2) => this._draw_coral(ctx2, glow, r, c),
+          coral: true,
         });
       }
       items.sort((a, b) => b.z - a.z);
@@ -679,7 +687,16 @@ export class AquariumScene {
       );
       ctx.closePath();
       ctx.clip();
-      for (const item of items) item.draw(ctx);
+      for (const item of items) {
+        item.draw(ctx);
+        // In front of a glowing coral: its glow does not show through
+        if (glow && this._glowing && !item.coral) {
+          glow.save();
+          glow.globalCompositeOperation = "destination-out";
+          item.draw(glow);
+          glow.restore();
+        }
+      }
       ctx.restore();
     }
   }
@@ -809,6 +826,7 @@ export class AquariumScene {
       glow.globalAlpha = strength;
       glow.drawImage(c.atlas!.glow, sx, sy, sw, sh, dx, dy, width, height);
       glow.restore();
+      this._glowing = true;
     }
   }
 }

@@ -363,6 +363,7 @@ view: front # optional: the view to start on
 - **Sand and rocks**: trace the sand line against the front glass (and the back wall when the picture shows the top of the sand) and outline the rocks with their depth: fish keep above the sand, swim behind the rocks, and sand dwellers crawl on it.
 - **Drawn decor**: when the photo of the water is not usable, a water can be drawn instead (water, sand, rock textures of the catalog), the rest of the picture kept.
 - **Behaviour**: shoals, open-water cruisers, sand dwellers, fish living around a home, gobies peeking out of their burrow; at night fish hide or rest, under a veil that keeps the tank readable.
+- **Water monitoring**: the _Monitoring_ tab of the editor chooses the pH, ORP, room CO2 and KH tests entities and sets the alarm thresholds; the alarms compare the tank with its own recent history.
 - **Species**: fish and corals come from the [ReefTank catalog](https://github.com/Elwinmage/reeftank-catalog), downloaded and kept up to date by the integration. The editor lists them with a thumbnail; a name that is not in the catalog swims as a generic fish.
 
 The full guide (scene editor, entities, services, catalog) is in the [ReefTank README](https://github.com/Elwinmage/ha-reeftank-component).

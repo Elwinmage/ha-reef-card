@@ -198,6 +198,17 @@ export default css`
     gap: 6px;
     font-size: 0.9em;
   }
+  .monitoring-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .monitoring-alarm.on {
+    color: var(--error-color, #db4437);
+    font-weight: 600;
+  }
+
   .hint {
     color: var(--secondary-text-color, #777);
     font-size: 0.82em;
@@ -213,6 +224,24 @@ export default css`
   }
   .row3 {
     flex-wrap: nowrap;
+  }
+  .coral-preview {
+    margin: 6px 0;
+  }
+  .palette .swatch {
+    width: 32px;
+    height: 24px;
+    padding: 0;
+    border-radius: 4px;
+    border: 1px solid var(--divider-color, #ccc);
+    cursor: pointer;
+  }
+  .palette .swatch.active {
+    outline: 2px solid var(--primary-color, #03a9f4);
+    outline-offset: 1px;
+  }
+  .colour-picker {
+    margin-top: 6px;
   }
   .line .grow {
     font-size: 0.9em;
