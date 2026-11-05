@@ -115,6 +115,13 @@
 - "DIY - Brine" supplement, with its own bottle picture: the only supplement
   regulated on the salinity.
 
+### Fish feeder view
+
+- The low reserve warning moves onto the glass of the lid, over the food.
+- "Uptime" printed above its display.
+- The right face lists the feedings of the day: those gone by struck through,
+  the next one in orange, the later ones in green.
+
 ### Aquarium view: outlined devices
 
 - Devices tab: a device can be outlined on the picture, instead of or along

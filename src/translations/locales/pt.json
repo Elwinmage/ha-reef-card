@@ -720,6 +720,7 @@
   "feeder_uptime": "Tempo de funcionamento do controlador",
   "feeder_uptime_dh": "{d} d {h} h",
   "feeder_uptime_hm": "{h} h {m}",
+  "feeder_uptime_label": "Uptime",
   "feeder_restart": "Reiniciar o alimentador",
   "trend_down": "A descer",
   "trend_stable": "Estável",

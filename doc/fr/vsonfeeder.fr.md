@@ -44,9 +44,10 @@ L'image suit les capteurs :
 | **Trappe ouverte** | <img src="../../src/img/esphome/VSONFEEDER/open_full.webp" width="120"/>   | <img src="../../src/img/esphome/VSONFEEDER/open_empty.webp" width="120"/>   |
 
 - Tant que la trappe est ouverte (ou que le moteur tourne), des granulés en tombent.
-- Trois éléments sont « collés » sur les faces du distributeur, inclinés pour les suivre :
+- Quatre éléments sont « collés » sur le distributeur, déformés pour suivre ses faces :
   - sur la face avant, au-dessus de la trappe, un petit afficheur donne le **temps de fonctionnement** du contrôleur (un clic ouvre le capteur) ;
-  - sur la face droite, un avertissement rouge **clignote** quand le capteur de niveau signale une réserve basse (un clic ouvre le capteur) ;
+  - sur la vitre du couvercle, un avertissement rouge **clignote** quand le capteur de niveau signale une réserve basse (un clic ouvre le capteur) ;
+  - sur la face droite, les **nourrissages du jour** : barrés en gris une fois leur heure passée, le prochain en orange, les suivants en vert. Seules les heures disent lesquels sont passés : le firmware ne garde aucune trace des portions données ;
   - plus bas sur la face droite, le bouton **redémarrer** : une première touche l'arme (il passe en orange), une seconde dans les 3 secondes redémarre le contrôleur.
 - Un clic sur l'image ouvre le capteur de trappe.
 - L'icône <img src="https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/wrench-clock.svg" width="16"/> en haut à droite ouvre les tâches de maintenance du distributeur, s'il en a.

@@ -3,8 +3,8 @@
  *
  * Left: the feeder, drawn from four pictures (trap open or closed, reserve
  * full or empty), with pellets falling while the trap is open. The uptime,
- * the restart button and the low reserve warning are drawn on the faces of
- * the feeder, skewed to follow them.
+ * the restart button, the feedings of the day and the low reserve warning
+ * are drawn on the faces of the feeder, deformed to follow them.
  * Right: the next feeding, the five feeding slots (hour and portions, both
  * editable in place) and the button giving one portion now.
  *
@@ -30,6 +30,7 @@ import {
 import {
   clamp_portions,
   daily_portions,
+  day_feedings,
   feeder_slots,
   format_time,
   next_feeding,
@@ -362,6 +363,7 @@ export class VSONFeeder extends RSDevice {
     feeding: boolean,
     empty: boolean,
     online: boolean,
+    slots: FeederSlot[],
   ): TemplateResult {
     const roles = this._get_entities().roles;
     return html`
@@ -384,9 +386,10 @@ export class VSONFeeder extends RSDevice {
               </div>`
             : ""}
           ${this._render_uptime(online)} ${this._render_restart(online)}
+          ${this._render_schedule(slots)}
           ${empty
             ? html`<div
-                class="ff-face right ff-food-alert blink"
+                class="ff-face top ff-food-alert blink"
                 title="${i18n._("feeder_food_low")}"
                 @click="${() => this._more_info(roles.food_low)}"
               >
@@ -417,12 +420,33 @@ export class VSONFeeder extends RSDevice {
               h: parts.h,
               m: String(parts.m).padStart(2, "0"),
             });
-    return html`<div
-      class="ff-face front ff-uptime"
-      title="${i18n._("feeder_uptime")}"
-      @click="${() => this._more_info(entity_id)}"
-    >
-      <ha-icon icon="mdi:timer-outline"></ha-icon><span>${text}</span>
+    return html`<div class="ff-face front ff-uptime-label">
+        ${i18n._("feeder_uptime_label")}
+      </div>
+      <div
+        class="ff-face front ff-uptime"
+        title="${i18n._("feeder_uptime")}"
+        @click="${() => this._more_info(entity_id)}"
+      >
+        <ha-icon icon="mdi:timer-outline"></ha-icon><span>${text}</span>
+      </div>`;
+  }
+
+  /**
+   * Feedings of the day, printed on the right face: those gone by struck
+   * through, the next one standing out.
+   * @param slots: the feeding slots
+   */
+  private _render_schedule(slots: FeederSlot[]): TemplateResult | string {
+    const feedings = day_feedings(slots, new Date());
+    if (!feedings.length) return "";
+    return html`<div class="ff-face ff-schedule">
+      ${feedings.map(
+        (feeding) =>
+          html`<span class="${feeding.state}"
+            >${format_time(feeding.minutes)}</span
+          >`,
+      )}
     </div>`;
   }
 
@@ -603,7 +627,7 @@ export class VSONFeeder extends RSDevice {
 
     return html`
       <div class="ff-root">
-        ${this._render_stage(open, feeding, empty, online)}
+        ${this._render_stage(open, feeding, empty, online, slots)}
         <div class="ff-panel">
           <div class="ff-title">
             <span>${this.device?.name ?? ""}</span>

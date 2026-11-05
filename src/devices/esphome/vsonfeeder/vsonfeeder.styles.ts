@@ -111,6 +111,24 @@ export default css`
     transform: translate(-50%, -50%) skewY(-23.3deg) scaleX(0.8);
   }
 
+  /* Flat on the glass of the lid: its edges follow the two faces below */
+  .ff-face.top {
+    transform: translate(-50%, -50%) matrix(0.74, 0.27, -0.74, 0.32, 0, 0);
+  }
+
+  /* Printed above the uptime display */
+  .ff-uptime-label {
+    left: 4.6%;
+    top: 34.6%;
+    width: 28%;
+    text-align: center;
+    font-size: 3.4cqw;
+    font-weight: 500;
+    line-height: 1.1;
+    color: #5f6368;
+    pointer-events: none;
+  }
+
   /* Uptime: a small display on the front face, above the trap */
   .ff-uptime {
     left: 4.6%;
@@ -184,23 +202,57 @@ export default css`
 
   /* Empty reserve: a red warning on the right face */
   .ff-food-alert {
-    left: 73%;
-    top: 47.8%;
-    width: 10cqw;
-    height: 10cqw;
+    left: 39%;
+    top: 25%;
+    width: 20cqw;
+    height: 20cqw;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 2cqw;
-    color: #fff;
-    background: var(--ff-warn);
-    box-shadow: 0 0 2.4cqw rgba(219, 68, 55, 0.7);
+    color: var(--ff-warn);
+    filter: drop-shadow(0 0 1.2cqw rgba(255, 255, 255, 0.9));
     cursor: pointer;
   }
 
   .ff-food-alert ha-icon {
-    --mdc-icon-size: 6.4cqw;
+    --mdc-icon-size: 20cqw;
     display: inline-flex;
+  }
+
+  /* Feedings of the day, printed on the right face. No pointer: a tap goes
+     through to the picture. */
+  .ff-schedule {
+    left: 65%;
+    top: 41.6%;
+    width: 35.5%;
+    height: 31%;
+    transform-origin: left top;
+    transform: skewY(-23.3deg) scaleX(0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5cqw;
+    font-size: 4.8cqw;
+    font-weight: 500;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  .ff-schedule .past {
+    color: #9aa0a6;
+    font-weight: 400;
+    text-decoration: line-through;
+  }
+
+  .ff-schedule .next {
+    color: #e65100;
+    font-weight: 700;
+  }
+
+  .ff-schedule .later {
+    color: #2e7d32;
   }
 
   /* ── Slots panel ────────────────────────────────────────────────────── */

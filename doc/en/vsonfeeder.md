@@ -44,9 +44,10 @@ The picture follows the sensors:
 | **Trap open**   | <img src="../../src/img/esphome/VSONFEEDER/open_full.webp" width="120"/>   | <img src="../../src/img/esphome/VSONFEEDER/open_empty.webp" width="120"/>   |
 
 - While the trap is open (or the motor runs), pellets fall from it.
-- Three things are stuck on the faces of the feeder, skewed to follow them:
+- Four things are stuck on the feeder, deformed to follow its faces:
   - on the front face, above the trap, a small display gives the **uptime** of the controller (a click opens the sensor);
-  - on the right face, a red warning **blinks** when the food level sensor reports that the reserve is low (a click opens the sensor);
+  - on the glass of the lid, a red warning **blinks** when the food level sensor reports that the reserve is low (a click opens the sensor);
+  - on the right face, the **feedings of the day**: struck through in grey once their hour has passed, the next one in orange, the later ones in green. Only the hours say which are past: the firmware keeps no record of the portions given;
   - lower on the right face, the **restart** button: a first tap arms it (it turns orange), a second tap within 3 seconds restarts the controller.
 - A click on the picture opens the trap sensor.
 - The <img src="https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/wrench-clock.svg" width="16"/> icon in the top right corner opens the maintenance tasks of the feeder, when it has any.

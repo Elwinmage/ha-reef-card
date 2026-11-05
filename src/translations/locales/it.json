@@ -720,6 +720,7 @@
   "feeder_uptime": "Tempo di attività del controller",
   "feeder_uptime_dh": "{d} g {h} h",
   "feeder_uptime_hm": "{h} h {m}",
+  "feeder_uptime_label": "Uptime",
   "feeder_restart": "Riavvia il distributore",
   "trend_down": "In calo",
   "trend_stable": "Stabile",

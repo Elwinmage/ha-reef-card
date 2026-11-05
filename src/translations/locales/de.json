@@ -720,6 +720,7 @@
   "feeder_uptime": "Laufzeit der Steuerung",
   "feeder_uptime_dh": "{d} T. {h} Std.",
   "feeder_uptime_hm": "{h} Std. {m}",
+  "feeder_uptime_label": "Laufzeit",
   "feeder_restart": "Futterautomat neu starten",
   "trend_down": "Fallend",
   "trend_stable": "Stabil",

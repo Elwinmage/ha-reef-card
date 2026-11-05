@@ -13,6 +13,7 @@ import {
   pending_settled,
   clamp_portions,
   daily_portions,
+  day_feedings,
   entity_matches,
   feeder_slots,
   format_time,
@@ -303,7 +304,7 @@ describe("VSONFeeder view", () => {
       "open_empty",
     );
     expect(root.querySelectorAll(".ff-pellets span")).toHaveLength(9);
-    expect(root.querySelector(".ff-food-alert.right")).not.toBeNull();
+    expect(root.querySelector(".ff-food-alert.top")).not.toBeNull();
     expect(root.querySelector(".ff-feed").disabled).toBe(true);
   });
 
@@ -527,6 +528,44 @@ describe("VSONFeeder corner cases", () => {
   });
 });
 
+describe("day_feedings", () => {
+  const slot = (index: number, minutes: number | null, portions = 1): any => ({
+    index,
+    minutes,
+    portions,
+    active: minutes !== null && portions > 0,
+    unavailable: false,
+  });
+  const at = (h: number, m: number) => new Date(2026, 10, 5, h, m);
+
+  it("sorts the day and tells what is past, next and later", () => {
+    const slots = [slot(1, 840), slot(2, 420), slot(3, 1290), slot(4, 630)];
+    expect(day_feedings(slots, at(12, 0))).toEqual([
+      { minutes: 420, state: "past" },
+      { minutes: 630, state: "past" },
+      { minutes: 840, state: "next" },
+      { minutes: 1290, state: "later" },
+    ]);
+  });
+
+  it("calls next a feeding due this minute", () => {
+    const states = day_feedings([slot(1, 720)], at(12, 0));
+    expect(states[0]!.state).toBe("next");
+    expect(day_feedings([slot(1, 720)], at(12, 1))[0]!.state).toBe("past");
+  });
+
+  it("leaves out slots off and slots the firmware skips", () => {
+    const slots = [slot(1, 420), slot(2, 420), slot(3, 600, 0), slot(4, null)];
+    expect(day_feedings(slots, at(6, 0))).toEqual([
+      { minutes: 420, state: "next" },
+    ]);
+  });
+
+  it("has nothing next once the day is over", () => {
+    expect(day_feedings([slot(1, 420)], at(23, 0))[0]!.state).toBe("past");
+  });
+});
+
 describe("VSONFeeder face overlays", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -599,6 +638,71 @@ describe("VSONFeeder face overlays", () => {
     el.remove();
     expect(el._restart_timer).toBeNull();
     expect(el._restart_armed).toBe(false);
+  });
+});
+
+describe("VSONFeeder feedings on the right face", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    document.body.innerHTML = "";
+  });
+
+  async function mount(hass: any) {
+    const info = {
+      name: "F",
+      key: "dev_feeder",
+      elements: [hass.devices.dev_feeder],
+    };
+    const el: any = RSDevice.create_device(
+      "esphome-vsonfeeder",
+      hass,
+      {},
+      info,
+    );
+    document.body.appendChild(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  it("prints the feedings of the day and the uptime label", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 10, 5, 12, 0));
+    const el = await mount(
+      make_hass({
+        slots: [
+          ["08:00:00", "1"],
+          ["12:30:00", "2"],
+          ["18:00:00", "1"],
+          ["00:00:00", "0"],
+          ["00:00:00", "0"],
+        ],
+      }),
+    );
+    const root = el.shadowRoot;
+    const times = [...root.querySelectorAll(".ff-schedule span")];
+    expect(times.map((t: any) => [t.textContent, t.className])).toEqual([
+      ["08:00", "past"],
+      ["12:30", "next"],
+      ["18:00", "later"],
+    ]);
+    expect(root.querySelector(".ff-uptime-label").textContent).toContain(
+      "Uptime",
+    );
+  });
+
+  it("prints nothing without a feeding", async () => {
+    const el = await mount(
+      make_hass({
+        slots: [
+          ["08:00:00", "0"],
+          ["09:00:00", "0"],
+          ["10:00:00", "0"],
+          ["11:00:00", "0"],
+          ["12:00:00", "0"],
+        ],
+      }),
+    );
+    expect(el.shadowRoot.querySelector(".ff-schedule")).toBeNull();
   });
 });
 

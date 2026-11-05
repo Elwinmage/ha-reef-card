@@ -720,6 +720,7 @@
   "feeder_uptime": "Czas pracy sterownika",
   "feeder_uptime_dh": "{d} d. {h} godz.",
   "feeder_uptime_hm": "{h} godz. {m}",
+  "feeder_uptime_label": "Uptime",
   "feeder_restart": "Uruchom karmnik ponownie",
   "trend_down": "Spada",
   "trend_stable": "Stabilnie",

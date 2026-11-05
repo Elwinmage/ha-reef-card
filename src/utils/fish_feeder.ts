@@ -139,6 +139,16 @@ export function resolve_feeder_entities(
   return found;
 }
 
+/** Where a feeding of the day stands against the current time. */
+export type FeedingState = "past" | "next" | "later";
+
+/** A feeding of the day. */
+export interface DayFeeding {
+  /** Minutes since midnight */
+  minutes: number;
+  state: FeedingState;
+}
+
 /**
  * Entity ids the view reads, to tell when it has to be drawn again.
  * @param entities: the feeder entities
@@ -271,6 +281,27 @@ export function next_feeding(
     }
   }
   return best;
+}
+
+/**
+ * Feedings of the current day, in order. Only the hours say which are past:
+ * the firmware reports no record of the portions actually given.
+ * @param slots: the feeding slots
+ * @param now: the current time
+ * @return the feedings, without the slots the firmware skips
+ */
+export function day_feedings(slots: FeederSlot[], now: Date): DayFeeding[] {
+  const current = now.getHours() * 60 + now.getMinutes();
+  const skipped = shadowed_slots(slots);
+  const times = slots
+    .filter((slot) => slot.active && !skipped.includes(slot.index))
+    .map((slot) => slot.minutes as number)
+    .sort((a, b) => a - b);
+  const next = times.find((minutes) => minutes >= current);
+  return times.map((minutes) => ({
+    minutes,
+    state: minutes === next ? "next" : minutes < current ? "past" : "later",
+  }));
 }
 
 /**
