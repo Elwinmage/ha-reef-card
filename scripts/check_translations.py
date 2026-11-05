@@ -84,7 +84,7 @@ class TranslationVerifier:
         'aq_tab_lights',
         'aq_tab_livestock',
         'aq_tab_views',
-        'aq_tool_hotspot',
+        'aq_tool_rectangle',
         'aq_tool_lasso',
         'aq_tool_polygon',
         'aq_tool_select',

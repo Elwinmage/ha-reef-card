@@ -214,7 +214,9 @@ export function apply_preset(
   }
   // Hotspots of the preset may point to views it does not bring
   for (const view of Object.values(out.views)) {
-    view.hotspots = view.hotspots.filter((h) => out.views[h.goto]);
+    view.hotspots = view.hotspots.filter(
+      (h) => h.device_id || out.views[h.goto!],
+    );
   }
   if (!out.default_view || !out.views[out.default_view]) {
     out.default_view =
@@ -473,15 +475,20 @@ export function add_hotspot(
   view_id: string,
   poly: Point[],
   goto: string,
+  device_id?: string | null,
 ): [AquariumDocument, string | null] {
-  if (poly.length < 3 || !doc.views[view_id] || !doc.views[goto])
+  if (
+    poly.length < 3 ||
+    !doc.views[view_id] ||
+    (!device_id && !doc.views[goto])
+  )
     return [doc, null];
   const out = clone(doc);
   const id = new_id();
   out.views[view_id].hotspots.push({
     id,
     poly: poly.map(clamp_point),
-    goto,
+    ...(device_id ? { goto: null, device_id } : { goto }),
     label: "",
   });
   return [out, id];

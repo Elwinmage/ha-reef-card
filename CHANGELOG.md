@@ -115,6 +115,19 @@
 - "DIY - Brine" supplement, with its own bottle picture: the only supplement
   regulated on the salinity.
 
+### Aquarium view: outlined devices
+
+- Devices tab: a device can be outlined on the picture, instead of or along
+  with its thumbnail, with a rectangle, the lasso or a polygon. A tap on the
+  zone opens the device. Needs reeftank with `device_id` on hotspots.
+- Zones opening a view can be drawn with the rectangle and the lasso too.
+
+### Aquarium view: fish size
+
+- New "Fish size" setting of the aquarium: a ratio over the real size of the
+  fish, to fine-tune the render against the picture. Needs reeftank with
+  `render.fish_scale`.
+
 ### ReefControl: trends and history
 
 - Summary bar: an arrow up, an arrow down or a tilde after the temperature, pH,

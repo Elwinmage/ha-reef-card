@@ -602,6 +602,30 @@ describe("AquariumScene drawing", () => {
     expect(arcs[0].args[2]).toBeGreaterThanOrEqual(1.2);
   });
 
+  it("scales the fish with the aquarium's setting", () => {
+    const { calls } = record_contexts();
+    const { s, canvas } = fish_scene({ ...fish, facing: undefined } as any);
+    const img = document.createElement("img");
+    (s as any)._atlases.set(fish.atlas["1x"], img);
+    const f: any = s.regions[0].sim.fish[0];
+    f.d = 0;
+    f.emerge = undefined;
+    const width = () => {
+      calls.length = 0;
+      s.draw();
+      const drawn = calls.find(
+        (c) => c.canvas === canvas && c.op === "drawImage" && c.args[0] === img,
+      );
+      return drawn!.args[7] as number;
+    };
+    const usual = width();
+    (s as any)._setup.doc = {
+      ...(s as any)._setup.doc,
+      render: { fish_scale: 2 },
+    };
+    expect(width()).toBeCloseTo(usual * 2);
+  });
+
   it("draws a fish fully out, and a burrowed one with a null scale", () => {
     const { calls } = record_contexts();
     const plain = { ...fish, facing: undefined, length_frac: undefined } as any;

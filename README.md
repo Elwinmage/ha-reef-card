@@ -359,7 +359,7 @@ view: front # optional: the view to start on
 
 - **Create and edit** an aquarium from the card editor: _New aquarium_ or _Edit the scene_ opens a full-screen editor (pictures, water outline, decor, clickable zones, devices and entities dragged from a tree, lamps, livestock, feeding sources). With a ReefBeat cloud account, the aquarium of the cloud pre-fills dimensions, lamps, feeding shortcuts, and filters the Red Sea devices.
 - **Render levels**: `static` (picture, devices, entities, clickable zones), `light` (plus the colour of the lamps on the water), `full` (plus fish, corals and the feeding animation).
-- A tap on a device opens its view of this card; on an entity, its usual action.
+- A tap on a device opens its view of this card; on an entity, its usual action. A device can also be outlined on the picture (rectangle, lasso or polygon) rather than shown as a thumbnail.
 - **Sand and rocks**: trace the sand line against the front glass (and the back wall when the picture shows the top of the sand) and outline the rocks with their depth: fish keep above the sand, swim behind the rocks, and sand dwellers crawl on it.
 - **Drawn decor**: when the photo of the water is not usable, a water can be drawn instead (water, sand, rock textures of the catalog), the rest of the picture kept.
 - **Behaviour**: shoals, open-water cruisers, sand dwellers, fish living around a home, gobies peeking out of their burrow; at night fish hide or rest, under a veil that keeps the tank readable.

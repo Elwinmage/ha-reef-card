@@ -14,6 +14,7 @@
 import { LitElement, html, nothing, svg, type TemplateResult } from "lit";
 import { state } from "lit/decorators.js";
 import {
+  mdiSelectDrag,
   mdiShakerOutline,
   mdiDevices,
   mdiChevronRight,
@@ -61,6 +62,7 @@ import {
   build_tree,
   default_element_type,
   floor_icon,
+  tree_devices,
   tree_empty,
   type TreeArea,
   type TreeDevice,
@@ -91,6 +93,8 @@ type Tool =
   | "decor"
   | "lasso"
   | "hotspot"
+  | "hotspot_rect"
+  | "hotspot_lasso"
   | "coral"
   | "home";
 
@@ -116,7 +120,16 @@ type Drag =
       y: number;
     }
   | { type: "lasso"; points: Point[] }
+  | { type: "rect"; from: Point; to: Point }
   | null;
+
+/** Smallest side of a rectangular zone: less is a click, not a zone. */
+const MIN_RECT_SIZE = 0.01;
+
+/** Corners of the rectangle between two opposite points. */
+function rect_points(from: Point, to: Point): Point[] {
+  return [from, [to[0], from[1]], to, [from[0], to[1]]];
+}
 
 const DEPTH_COLOURS: Record<ops.DepthName, string> = {
   front: "#ff9f43",
@@ -292,6 +305,8 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _selection: Selection = null;
   @state() private _depth: ops.DepthName = "middle";
   @state() private _hotspot_target = "";
+  /** Device being outlined on the picture (Devices tab). */
+  @state() private _outline_device = "";
   @state() private _coral_species = "";
   /** Colours of a coral while its colour picker is dragged (not saved). */
   @state() private _palette_draft: {
@@ -603,9 +618,14 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _stage_down(e: PointerEvent): void {
     const p = this._point(e);
     if (!p || !this._doc || !this._view_id) return;
-    if (this._tool === "lasso") {
+    if (this._tool === "lasso" || this._tool === "hotspot_lasso") {
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       this._drag = { type: "lasso", points: [p] };
+      return;
+    }
+    if (this._tool === "hotspot_rect") {
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      this._drag = { type: "rect", from: p, to: p };
       return;
     }
     if (this._tool === "decor" || this._tool === "hotspot") {
@@ -686,6 +706,10 @@ export class ReefAquariumSceneEditor extends LitElement {
         drag.points.push(p);
         this.requestUpdate();
         break;
+      case "rect":
+        drag.to = p;
+        this.requestUpdate();
+        break;
       case "corner":
         this.change(
           ops.move_region_corner(this._doc, v, drag.water, drag.index, p),
@@ -745,7 +769,9 @@ export class ReefAquariumSceneEditor extends LitElement {
     const drag = this._drag;
     if (drag?.type === "lasso" && this._doc && this._view_id) {
       const poly = simplify(drag.points, 0.004);
-      if (poly.length >= 3) {
+      if (poly.length >= 3 && this._tool === "hotspot_lasso") {
+        this._add_hotspot(poly);
+      } else if (poly.length >= 3) {
         const [doc, id] = ops.add_decor(
           this._doc,
           this._view_id,
@@ -755,6 +781,12 @@ export class ReefAquariumSceneEditor extends LitElement {
         this.change(doc);
         if (id) this._selection = { type: "decor", id };
       }
+    }
+    if (drag?.type === "rect") {
+      const poly = rect_points(drag.from, drag.to);
+      const wide = Math.abs(drag.to[0] - drag.from[0]) >= MIN_RECT_SIZE;
+      const high = Math.abs(drag.to[1] - drag.from[1]) >= MIN_RECT_SIZE;
+      if (wide && high) this._add_hotspot(poly);
     }
     if (drag && drag.type !== "new") this._drag = null;
     this._before_drag = null;
@@ -883,28 +915,76 @@ export class ReefAquariumSceneEditor extends LitElement {
     this._backdrop.paint(canvas);
   }
 
+  /**
+   * Add a clickable zone towards the chosen target, or the first one offered.
+   * @param poly: its outline
+   * @return whether there was a target to open
+   */
+  private _add_hotspot(poly: Point[]): boolean {
+    const doc = this._doc!;
+    const v = this._view_id!;
+    const device = this._outline_device;
+    const goto =
+      this._hotspot_target ||
+      Object.keys(doc.views).find((id) => id !== v) ||
+      "";
+    const [next, id] = ops.add_hotspot(doc, v, poly, goto, device || null);
+    if (!id) {
+      this._message = { kind: "error", text: i18n._("aq_hotspot_needs_view") };
+      return false;
+    }
+    this.change(next);
+    this._selection = { type: "hotspot", id };
+    // One outline per device, as a rule: back to moving things around
+    if (device) this._outline_stop();
+    return true;
+  }
+
+  /** Start outlining a device on the picture. */
+  private _outline_start(device_id: string): void {
+    this._outline_device = device_id;
+    this._selection = null;
+    this._drawing = [];
+    this._tool = "hotspot_rect";
+  }
+
+  /** Leave the outlining of a device. */
+  private _outline_stop(): void {
+    this._outline_device = "";
+    this._tool = "select";
+  }
+
+  /**
+   * Devices a zone can open: those of the aquarium first, then the others.
+   * Only to change the device of a zone: the tree chooses it in the first
+   * place.
+   * @return one entry per device, by name
+   */
+  private _hotspot_devices(): { id: string; name: string }[] {
+    const hass = this._hass;
+    if (!hass) return [];
+    const doc = this._doc!;
+    const linked = this._clouds.find((c) => c.uid === doc.cloud?.uid);
+    const place = aquarium_place(hass, doc.id, linked?.device_ids ?? []);
+    const near = place
+      ? tree_devices(
+          build_tree(hass, {
+            scope: {
+              areas: new Set([place.area_id]),
+              devices: new Set(linked?.device_ids ?? []),
+            },
+          }),
+        )
+      : [];
+    const ids = new Set(near.map((d) => d.id));
+    const others = tree_devices(build_tree(hass)).filter((d) => !ids.has(d.id));
+    return [...near, ...others].map(({ id, name }) => ({ id, name }));
+  }
+
   private _finish_shape(): void {
     if (!this._doc || !this._view_id || this._drawing.length < 3) return;
     if (this._tool === "hotspot") {
-      const goto =
-        this._hotspot_target ||
-        Object.keys(this._doc.views).find((v) => v !== this._view_id) ||
-        "";
-      const [doc, id] = ops.add_hotspot(
-        this._doc,
-        this._view_id,
-        this._drawing,
-        goto,
-      );
-      if (!id) {
-        this._message = {
-          kind: "error",
-          text: i18n._("aq_hotspot_needs_view"),
-        };
-        return;
-      }
-      this.change(doc);
-      this._selection = { type: "hotspot", id };
+      if (!this._add_hotspot(this._drawing)) return;
     } else {
       const [doc, id] = ops.add_decor(
         this._doc,
@@ -1059,8 +1139,13 @@ export class ReefAquariumSceneEditor extends LitElement {
       return html`<div class="empty">${i18n._("aq_no_view_yet")}</div>`;
     const url = this._images.url(view.image);
     const sel = this._selection;
+    const drag = this._drag;
     const drawing =
-      this._drag?.type === "lasso" ? this._drag.points : this._drawing;
+      drag?.type === "lasso"
+        ? drag.points
+        : drag?.type === "rect"
+          ? [...rect_points(drag.from, drag.to), drag.from]
+          : this._drawing;
     const tab = this._tab;
     return html`<div class="stage-wrap">
       <div
@@ -1531,6 +1616,29 @@ export class ReefAquariumSceneEditor extends LitElement {
               })}
           />
         </label>
+        <label class="field"
+          >${i18n._("aq_fish_scale")}
+          <input
+            type="number"
+            min="25"
+            max="300"
+            step="5"
+            .value=${String(Math.round((doc.render.fish_scale ?? 1) * 100))}
+            @change=${(e: Event) => {
+              const pct = (e.target as HTMLInputElement).valueAsNumber;
+              this.change({
+                ...structuredClone(doc),
+                render: {
+                  ...doc.render,
+                  fish_scale: Number.isNaN(pct)
+                    ? (doc.render.fish_scale ?? 1)
+                    : Math.max(25, Math.min(300, pct)) / 100,
+                },
+              });
+            }}
+          />
+          <span class="hint">${i18n._("aq_fish_scale_hint")}</span>
+        </label>
         ${this._render_night_darkness(doc)}
         <label class="field"
           >${i18n._("aq_photo_light")}
@@ -1598,9 +1706,10 @@ export class ReefAquariumSceneEditor extends LitElement {
       sel?.type === "decor"
         ? view?.decor.find((d) => d.id === sel.id)
         : undefined;
+    // Zones opening a device are edited with the devices
     const selected_hotspot =
       sel?.type === "hotspot"
-        ? view?.hotspots.find((h) => h.id === sel.id)
+        ? view?.hotspots.find((h) => h.id === sel.id && !h.device_id)
         : undefined;
     const other_views = Object.entries(doc.views).filter(([id]) => id !== v);
     return html`
@@ -1799,7 +1908,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                       </select>
                     </label>
                     <div class="buttons">
-                      ${this._tool_button("hotspot", "aq_tool_hotspot")}
+                      ${this._zone_tools()}
                       ${selected_hotspot
                         ? html`<button
                             class="danger"
@@ -1984,6 +2093,18 @@ export class ReefAquariumSceneEditor extends LitElement {
     </div>`;
   }
 
+  /** Tools drawing a clickable zone. */
+  private _zone_tools(): TemplateResult {
+    return html`${this._tool_button("hotspot_rect", "aq_tool_rectangle")}
+    ${this._tool_button("hotspot_lasso", "aq_tool_lasso")}
+    ${this._tool_button("hotspot", "aq_tool_polygon")}
+    ${this._drawing.length >= 3
+      ? html`<button @click=${this._finish_shape}>
+          ${i18n._("aq_finish_shape")}
+        </button>`
+      : nothing}`;
+  }
+
   private _tool_button(tool: Tool, label: string): TemplateResult {
     return html`<button
       class="${this._tool === tool ? "active" : ""}"
@@ -2031,6 +2152,77 @@ export class ReefAquariumSceneEditor extends LitElement {
     >
       +
     </button>`;
+  }
+
+  /** Button of the tree outlining a device on the picture. */
+  private _outline_button(device_id: string): TemplateResult {
+    return html`<button
+      class="add outline ${this._outline_device === device_id ? "active" : ""}"
+      title="${i18n._("aq_outline_device")}"
+      @pointerdown=${(e: Event) => e.stopPropagation()}
+      @click=${(e: Event) => {
+        e.stopPropagation();
+        this._outline_start(device_id);
+      }}
+    >
+      <svg viewBox="0 0 24 24"><path d="${mdiSelectDrag}"></path></svg>
+    </button>`;
+  }
+
+  /** The zone of a device: being drawn, or selected on the picture. */
+  private _outline_panel(): TemplateResult | typeof nothing {
+    const sel = this._selection;
+    const zone =
+      sel?.type === "hotspot"
+        ? this._view?.hotspots.find((h) => h.id === sel.id && h.device_id)
+        : undefined;
+    const outlined = this._outline_device;
+    if (outlined) {
+      return html`<fieldset>
+        <legend>
+          ${i18n._("aq_outline_device")}: ${device_name(this._hass!, outlined)}
+        </legend>
+        <div class="buttons">
+          ${this._zone_tools()}
+          <button @click=${() => this._outline_stop()}>
+            ${i18n._("aq_outline_cancel")}
+          </button>
+        </div>
+        <span class="hint">${i18n._("aq_outline_device_hint")}</span>
+      </fieldset>`;
+    }
+    if (!zone) return nothing;
+    const devices = this._hotspot_devices();
+    // A device gone from Home Assistant still shows as the target of its zone
+    if (!devices.some((d) => d.id === zone.device_id)) {
+      devices.push({ id: zone.device_id!, name: zone.device_id! });
+    }
+    return html`<fieldset>
+      <legend>${i18n._("aq_outline_zone")}</legend>
+      <label class="field"
+        >${i18n._("aq_outline_opens")}
+        <select
+          @change=${(e: Event) =>
+            this.change(
+              ops.update_hotspot(this._doc!, this._view_id!, zone.id, {
+                device_id: (e.target as HTMLSelectElement).value,
+              }),
+            )}
+        >
+          ${devices.map(
+            (d) =>
+              html`<option value="${d.id}" ?selected=${d.id === zone.device_id}>
+                ${d.name}
+              </option>`,
+          )}
+        </select>
+      </label>
+      <div class="buttons">
+        <button class="danger" @click=${this._delete_selection}>
+          ${i18n._("aq_delete")}
+        </button>
+      </div>
+    </fieldset>`;
   }
 
   private _render_tree_entity(ent: TreeEntity, depth: number): TemplateResult {
@@ -2091,7 +2283,7 @@ export class ReefAquariumSceneEditor extends LitElement {
             ? html`<span class="sub">${dev.model}</span>`
             : nothing}</span
         >
-        ${this._add_button("device", dev.id)}
+        ${this._add_button("device", dev.id)} ${this._outline_button(dev.id)}
         ${has_children
           ? this._chevron(open)
           : html`<span class="chevron"></span>`}
@@ -2185,6 +2377,7 @@ export class ReefAquariumSceneEditor extends LitElement {
         : undefined;
     return html`
       ${element && v ? this._element_properties(element, v) : nothing}
+      ${this._outline_panel()}
       <input
         class="search"
         placeholder="${i18n._("aq_search")}"
@@ -3198,6 +3391,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                         @click=${() => (
                           (this._tab = t),
                           (this._tool = "select"),
+                          (this._outline_device = ""),
                           (this._drawing = [])
                         )}
                       >

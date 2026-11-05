@@ -30,6 +30,7 @@ import type { HassConfig } from "../types/index";
 import type {
   AquariumPayload,
   Catalog,
+  Hotspot,
   Point,
   RenderLevel,
   SceneElement,
@@ -520,6 +521,14 @@ export class ReefAquariumCard extends LitElement {
     this._overlay = card;
   }
 
+  /** Tooltip of a clickable zone: its label, or what it opens. */
+  private _hotspot_title(hotspot: Hotspot): string {
+    if (hotspot.label) return hotspot.label;
+    return hotspot.device_id
+      ? device_name(this._hass, hotspot.device_id)
+      : (this._payload?.document.views[hotspot.goto!]?.name ?? "");
+  }
+
   private _close_overlay(): void {
     this._overlay = null;
   }
@@ -680,9 +689,12 @@ export class ReefAquariumCard extends LitElement {
             (h) =>
               svg`<polygon
                 points="${svg_points(h.poly)}"
-                @click=${() => this._goto(h.goto)}
+                @click=${() =>
+                  h.device_id
+                    ? this._open_device(h.device_id)
+                    : this._goto(h.goto!)}
               >
-                <title>${h.label || doc.views[h.goto]?.name || ""}</title>
+                <title>${this._hotspot_title(h)}</title>
               </polygon>`,
           )}
         </svg>

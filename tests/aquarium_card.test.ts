@@ -269,6 +269,31 @@ describe("card", () => {
     card._back();
   });
 
+  it("opens a device from an outlined zone", async () => {
+    const { doc } = make_doc();
+    const front = Object.keys(doc.views)[0]!;
+    const zone = {
+      id: "z1",
+      poly: [
+        [0.1, 0.1],
+        [0.2, 0.1],
+        [0.2, 0.2],
+      ],
+      goto: null,
+      device_id: "led",
+      label: "",
+    };
+    doc.views[front]!.hotspots = [zone as any];
+    const { hass } = make_hass(doc);
+    const card = await mount({ aquarium: "a1b2", view: front }, hass);
+    const open = vi.spyOn(card, "_open_device").mockImplementation(() => {});
+    card.shadowRoot
+      .querySelector("svg.hotspots polygon")
+      .dispatchEvent(new MouseEvent("click"));
+    expect(open).toHaveBeenCalledWith("led");
+    expect(card._view_id).toBe(front);
+  });
+
   it("follows the document and its deletion", async () => {
     const { doc } = make_doc();
     const h = make_hass(doc);

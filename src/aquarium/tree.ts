@@ -285,6 +285,24 @@ export function tree_empty(tree: Tree): boolean {
   return !tree.floors.length && !tree.areas.length && !tree.unassigned;
 }
 
+/**
+ * Every device of a tree, sub-devices included.
+ * @return the devices, by name
+ */
+export function tree_devices(tree: Tree): TreeDevice[] {
+  const found: TreeDevice[] = [];
+  const walk = (devices: TreeDevice[]) => {
+    for (const device of devices) {
+      found.push(device);
+      walk(device.children);
+    }
+  };
+  const areas = [...tree.floors.flatMap((f) => f.areas), ...tree.areas];
+  if (tree.unassigned) areas.push(tree.unassigned);
+  areas.forEach((area) => walk(area.devices));
+  return found.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 /** Card element best suited to an entity. */
 export function default_element_type(entity_id: string): string {
   const domain = entity_id.split(".")[0];

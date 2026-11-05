@@ -418,6 +418,16 @@ export default css`
   .tree-row svg.chevron.open {
     transform: rotate(90deg);
   }
+  .tree-row .add.outline svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    fill: currentColor;
+  }
+  .tree-row .add.outline.active {
+    opacity: 1;
+    color: var(--primary-color, #03a9f4);
+  }
   .tree-row .add {
     padding: 0 6px;
     line-height: 1.3;
@@ -512,6 +522,8 @@ export default css`
   }
   .stage.tool-decor,
   .stage.tool-hotspot,
+  .stage.tool-hotspot_rect,
+  .stage.tool-hotspot_lasso,
   .stage.tool-lasso,
   .stage.tool-coral,
   .stage.tool-home {

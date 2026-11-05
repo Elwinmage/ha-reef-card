@@ -715,7 +715,10 @@ export class AquariumScene {
     const [x, y] = r.projection.to_picture(f.x / size.length, v, z);
     // The frame holds the fish with some room (tail swing, turn)
     const width =
-      (f.size * this._px_per_cm(r, v, z)) / (f.species.length_frac || 1);
+      (f.size *
+        (this._setup!.doc.render?.fish_scale ?? 1) *
+        this._px_per_cm(r, v, z)) /
+      (f.species.length_frac || 1);
     const [fw, fh] = f.species.frame;
     const height = (width * fh) / fw;
     const { frame, turn_clip, clip } = fish_frame(f, r.sim.idle(f));

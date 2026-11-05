@@ -98,7 +98,10 @@ export interface SceneElement {
 export interface Hotspot {
   id: string;
   poly: Point[];
-  goto: string;
+  /** View it opens; null when it opens a device. */
+  goto: string | null;
+  /** Device whose view it opens. */
+  device_id?: string | null;
   label: string;
 }
 
@@ -167,6 +170,8 @@ export interface AquariumDocument {
   render: {
     level: RenderLevel;
     max_fish: number;
+    /** Fish size against the tank: 1 keeps their real size in cm. */
+    fish_scale?: number;
     caustics: boolean;
     /** Darkness of the water with the lamps off, 0..0.95 (default 0.55). */
     night_darkness?: number;
