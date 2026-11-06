@@ -243,18 +243,26 @@ export function edit_container(elt, hass, shadowRoot) {
   const stateObj = elt._hass.states[supplements_list.entity_id];
   const options = stateObj.attributes.options || [];
 
+  let selected: Promise<unknown> = Promise.resolve();
   if (options.length > 0) {
     const last_option = options[options.length - 1];
 
-    elt._hass.callService("select", "select_option", {
-      entity_id: supplements_list.entity_id,
-      option: last_option,
-    });
+    selected = Promise.resolve(
+      elt._hass.callService("select", "select_option", {
+        entity_id: supplements_list.entity_id,
+        option: last_option,
+      }),
+    );
   }
-  elt._hass.callService("text", "set_value", {
-    entity_id: text_box.entity_id,
-    value: display_name,
-  });
+  // The text box only becomes available once "other" is selected: set its
+  // value after the select call, not alongside it, or HA rejects it as
+  // unavailable.
+  return selected.then(() =>
+    elt._hass.callService("text", "set_value", {
+      entity_id: text_box.entity_id,
+      value: display_name,
+    }),
+  );
 }
 
 export function head_configuration(

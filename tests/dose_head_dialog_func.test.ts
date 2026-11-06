@@ -516,7 +516,7 @@ describe("set_container_volume() — supplement without sizes", () => {
   });
 });
 describe("edit_container()", () => {
-  it("calls select_option and set_value when options are present", () => {
+  it("calls select_option and set_value when options are present", async () => {
     const sr = makeShadowRoot();
     const hass = makeHass({
       states: {
@@ -529,7 +529,7 @@ describe("edit_container()", () => {
     });
     const elt = makeElt();
     elt._hass = hass;
-    edit_container(elt, hass, sr as any);
+    await edit_container(elt, hass, sr as any);
     expect(hass.callService).toHaveBeenCalledWith(
       "select",
       "select_option",
@@ -540,6 +540,35 @@ describe("edit_container()", () => {
       "set_value",
       expect.objectContaining({ entity_id: "text.display", value: "KH" }),
     );
+  });
+
+  it("sets the display name only once select_option has completed", async () => {
+    const sr = makeShadowRoot();
+    const hass = makeHass({
+      states: {
+        "select.supps": {
+          entity_id: "select.supps",
+          state: SUPP_WITH_SIZES.fullname,
+          attributes: { options: ["opt1", "Other"] },
+        },
+      },
+    });
+    let release: () => void = () => {};
+    hass.callService.mockImplementation((_d: string, service: string) =>
+      service === "select_option"
+        ? new Promise<void>((resolve) => (release = resolve))
+        : Promise.resolve(),
+    );
+    const elt = makeElt();
+    elt._hass = hass;
+    const done = edit_container(elt, hass, sr as any);
+    await Promise.resolve();
+    const set_value = () =>
+      hass.callService.mock.calls.filter((c: any[]) => c[1] === "set_value");
+    expect(set_value()).toHaveLength(0);
+    release();
+    await done;
+    expect(set_value()).toHaveLength(1);
   });
 
   it("skips select_option when options list is empty", () => {

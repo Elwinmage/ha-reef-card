@@ -239,7 +239,7 @@ Hier ist die Liste der unterstützten Bilder für Ergänzungsmittel, nach Marke 
 </details>
 
 <details>
-<summary><b>Red Sea &nbsp; <sup>10/13 🖼️</sup></b></summary>
+<summary><b>Red Sea &nbsp; <sup>14/17 🖼️</sup></b></summary>
 
 <table>
 <tr><td>✅</td><td>Bio Active (Colors D)</td><td><img style='width:20%;' src='../../public/img/supplements/7af9b16b-9e63-488e-8c86-261ef8c4a1ce.supplement.png'/></td></tr>
@@ -254,6 +254,10 @@ Hier ist die Liste der unterstützten Bilder für Ergänzungsmittel, nach Marke 
 <tr><td>✅</td><td>NO3PO4-X</td><td><img style='width:20%;' src='../../public/img/supplements/ffaf6ff8-bc6d-44eb-9e4b-e679943dc835.supplement.png'/></td></tr>
 <tr><td>✅</td><td>Potassium (Colors B)</td><td><img style='width:20%;' src='../../public/img/supplements/2f386917-54bd-4dd4-aa8b-9d1fea37edc5.supplement.png'/></td></tr>
 <tr><td>✅</td><td>Reef Energy Plus</td><td><img style='width:20%;' src='../../public/img/supplements/bf9a7da3-741b-4c1d-8542-d9344a95fb70.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Part 1: Calcium & Magnesium</td><td><img style='width:20%;' src='../../public/img/supplements/6b7d2c15-0d25-4447-b089-854ef6ba99f2.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Part 2: KH/Alkalinity &PH stabilizer</td><td><img style='width:20%;' src='../../public/img/supplements/6f6a53db-0985-47f4-92bd-cef092d97d22.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Part 3: Iodine & Potassium</td><td><img style='width:20%;' src='../../public/img/supplements/18c5a293-f14d-4d40-ad43-0420e54f9a45.supplement.png'/></td></tr>
+<tr><td>✅</td><td>ReefCare Part 4: Iron & Bioactive elements</td><td><img style='width:20%;' src='../../public/img/supplements/bb73e4c2-e366-4304-aaeb-50e4b52fa10f.supplement.png'/></td></tr>
 <tr><td>✅</td><td>ReefCare Program</td><td><img style='width:20%;' src='../../public/img/supplements/redsea-reefcare.supplement.png'/></td></tr>
 </table>
 </details>

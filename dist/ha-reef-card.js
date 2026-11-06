@@ -9798,6 +9798,58 @@ const OSA = [
     concentration: null,
     made_by_redsea: !0,
     fullname: "RedSea - ReefCare Program"
+  },
+  // ReefCare parts as standalone supplements: the ReefBeat app keeps them
+  // on their heads once the bundle is split, so a head can dose one alone.
+  // Kept after the bundle: a lookup by uid still finds the bundle part first.
+  // Sizes are the bundle sizes times the part ratio.
+  {
+    uid: "6b7d2c15-0d25-4447-b089-854ef6ba99f2",
+    name: "Part 1: Calcium & Magnesium",
+    display_name: "Part 1",
+    short_name: "P1",
+    brand_name: "Red Sea",
+    type: null,
+    concentration: null,
+    made_by_redsea: !0,
+    fullname: "Red Sea - ReefCare Part 1: Calcium & Magnesium",
+    sizes: [500, 1e3, 2e3]
+  },
+  {
+    uid: "6f6a53db-0985-47f4-92bd-cef092d97d22",
+    name: "Part 2: KH/Alkalinity &PH stabilizer",
+    display_name: "Part 2",
+    short_name: "P2",
+    brand_name: "Red Sea",
+    type: null,
+    concentration: null,
+    made_by_redsea: !0,
+    fullname: "Red Sea - ReefCare Part 2: KH/Alkalinity &PH stabilizer",
+    sizes: [1e3, 2e3, 4e3]
+  },
+  {
+    uid: "18c5a293-f14d-4d40-ad43-0420e54f9a45",
+    name: "Part 3: Iodine & Potassium",
+    display_name: "Part 3",
+    short_name: "P3",
+    brand_name: "Red Sea",
+    type: null,
+    concentration: null,
+    made_by_redsea: !0,
+    fullname: "Red Sea - ReefCare Part 3: Iodine & Potassium",
+    sizes: [250, 500, 1e3]
+  },
+  {
+    uid: "bb73e4c2-e366-4304-aaeb-50e4b52fa10f",
+    name: "Part 4: Iron & Bioactive elements",
+    display_name: "Part 4",
+    short_name: "P4",
+    brand_name: "Red Sea",
+    type: null,
+    concentration: null,
+    made_by_redsea: !0,
+    fullname: "Red Sea - ReefCare Part 4: Iron & Bioactive elements",
+    sizes: [250, 500, 1e3]
   }
 ];
 class RSA {
@@ -9982,17 +10034,22 @@ function Hr(i, A, V) {
 function bSA(i, A, V) {
   Hr(i, A, V);
   const e = i.device.get_entity("supplement").attributes.supplement.display_name, t = i.device.get_entity("new_supplement_display_name"), q = i.device.get_entity("supplements"), a = i._hass.states[q.entity_id].attributes.options || [];
+  let n = Promise.resolve();
   if (a.length > 0) {
-    const n = a[a.length - 1];
-    i._hass.callService("select", "select_option", {
-      entity_id: q.entity_id,
-      option: n
-    });
+    const c = a[a.length - 1];
+    n = Promise.resolve(
+      i._hass.callService("select", "select_option", {
+        entity_id: q.entity_id,
+        option: c
+      })
+    );
   }
-  i._hass.callService("text", "set_value", {
-    entity_id: t.entity_id,
-    value: e
-  });
+  return n.then(
+    () => i._hass.callService("text", "set_value", {
+      entity_id: t.entity_id,
+      value: e
+    })
+  );
 }
 function yr(i, A, V, e = null) {
   if (i.device.bundle && i.device.config.id > 1)
@@ -47754,7 +47811,7 @@ customElements.get("reef-aquarium-card-editor") || customElements.define("reef-a
 customElements.get("reef-aquarium-scene-editor") || customElements.define("reef-aquarium-scene-editor", U);
 customElements.get("reef-coral-preview") || customElements.define("reef-coral-preview", bV);
 customElements.get("reef-colour-picker") || customElements.define("reef-colour-picker", Vt);
-const JyA = "v1.0.1";
+const JyA = "v2.0.0";
 function XyA() {
   console.info(
     `%c 🪸 REEF CARD %c ${JyA} `,

@@ -2,6 +2,16 @@
 
 ## MODIFICATIONS
 
+### ReefDose: ReefCare parts as standalone supplements
+
+- The four ReefCare parts are now standalone supplements too (supplement
+  list synced from the redsea integration): a head can be given one part
+  alone from the add supplement dialog, with its picture, its details and
+  its container sizes. The supplements page of the documentation lists them.
+- Renaming a container: the display name is set once `other` is selected in
+  the supplement select, instead of at the same time (Home Assistant warned
+  that the `supplement_display_name` text was unavailable and dropped it).
+
 ### ReefDose: daily dose to 0.1 mL in assisted dosing, compensation doses
 
 - The assisted dosing dialog showed the daily dose sensor (whole mL, read
