@@ -416,9 +416,6 @@ export class ReefCard extends LitElement {
       this.user_config,
       device,
     );
-    // TODO : Implement MAIN tank view support
-    // Issue URL: https://github.com/Elwinmage/ha-reef-card/issues/11
-    // labels: enhancement
   }
 
   /**
