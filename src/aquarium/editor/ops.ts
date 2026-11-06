@@ -138,6 +138,9 @@ export function match_preset(
 
 /** Litres in a US gallon. */
 const LITRES_PER_GALLON = 3.78541;
+/** Bounds of the integration: a document beyond them is refused. */
+const MAX_VOLUME_L = 100000;
+const MAX_DIMENSION_CM = 2000;
 
 /**
  * Water volume of a cloud aquarium in litres: the net volume, else the
@@ -150,9 +153,25 @@ export function cloud_volume_l(cloud: CloudAquarium): number | null {
   );
   if (volume === undefined) return null;
   const unit = (cloud.measuring_unit ?? "").toLowerCase();
-  return Math.round(
+  const litres = Math.round(
     unit.includes("gallon") ? volume * LITRES_PER_GALLON : volume,
   );
+  return litres >= 1 && litres <= MAX_VOLUME_L ? litres : null;
+}
+
+/**
+ * Dimensions of a cloud aquarium, or null when they are not usable: the
+ * cloud reports 0 for an aquarium whose dimensions were never entered.
+ */
+export function cloud_dimensions(
+  cloud: CloudAquarium,
+): AquariumDocument["dimensions_cm"] {
+  const d = cloud.dimensions_cm;
+  if (!d) return null;
+  const valid = [d.length, d.width, d.height].every(
+    (v) => typeof v === "number" && v >= 1 && v <= MAX_DIMENSION_CM,
+  );
+  return valid ? d : null;
 }
 
 /**
@@ -165,7 +184,7 @@ export function from_cloud(
 ): AquariumDocument {
   const doc = new_document(cloud.name);
   doc.cloud = { provider: cloud.provider, uid: cloud.uid };
-  doc.dimensions_cm = cloud.dimensions_cm ?? null;
+  doc.dimensions_cm = cloud_dimensions(cloud);
   doc.water_volume_l = cloud_volume_l(cloud);
   const lamps = cloud.device_ids.filter(is_lamp);
   doc.waters.main.lights = lamps.map((device_id, i) => ({

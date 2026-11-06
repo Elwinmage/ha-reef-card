@@ -83,6 +83,18 @@ describe("cloud and presets", () => {
     expect(ops.from_cloud(cloud).waters.main.lights).toEqual([]);
   });
 
+  it("ignores what the cloud cannot fill in", () => {
+    // Real cloud data: an aquarium whose dimensions were never entered
+    const empty = {
+      ...cloud,
+      dimensions_cm: { length: 0, width: 0, height: 0 },
+    };
+    expect(ops.from_cloud(empty).dimensions_cm).toBeNull();
+    expect(
+      ops.from_cloud({ ...cloud, net_water_volume: 0.2 }).water_volume_l,
+    ).toBeNull();
+  });
+
   const presets: Preset[] = [
     {
       id: "r425",

@@ -591,6 +591,8 @@
   "aq_photo_light": "Die Fotos wurden aufgenommen unter",
   "aq_photo_white": "weißem Licht",
   "aq_picture": "Bild",
+  "aq_picture_change": "Bild ändern",
+  "aq_picture_choose": "Bild auswählen",
   "aq_picture_hint": "JPEG, PNG oder WebP, höchstens 20 MB. Standort und andere Metadaten werden entfernt.",
   "aq_place_coral": "Auf dem Bild platzieren",
   "aq_preset": "Vorlage",

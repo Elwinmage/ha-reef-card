@@ -962,6 +962,33 @@ describe("scene editor", () => {
     expect(installed).toBeNull();
   });
 
+  it("offers to choose or change the picture", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "views";
+    editor._view_id = front;
+    await editor.updateComplete;
+    const button = () =>
+      editor.shadowRoot.querySelector("button.choose-file") as HTMLElement;
+    const input = editor.shadowRoot.querySelector(
+      "input[type=file]",
+    ) as HTMLInputElement;
+    // The native control stays hidden: it would say that no file is chosen
+    expect(input.hidden).toBe(true);
+    const click = vi.spyOn(input, "click").mockImplementation(() => undefined);
+    button().click();
+    expect(click).toHaveBeenCalled();
+
+    editor._doc.views[front].image = "a1b2/p.webp";
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(button().textContent).toContain("Change the picture");
+    editor._doc.views[front].image = null;
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(button().textContent).toContain("Choose a picture");
+  });
+
   it("uploads a picture", async () => {
     const { doc, front } = existing_doc();
     const hass = make_hass(doc);

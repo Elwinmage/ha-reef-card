@@ -591,6 +591,8 @@
   "aq_photo_light": "Zdjęcia zrobiono przy",
   "aq_photo_white": "białym świetle",
   "aq_picture": "Obraz",
+  "aq_picture_change": "Zmień obraz",
+  "aq_picture_choose": "Wybierz obraz",
   "aq_picture_hint": "JPEG, PNG lub WebP, maksymalnie 20 MB. Lokalizacja i inne metadane są usuwane.",
   "aq_place_coral": "Umieść na obrazie",
   "aq_preset": "Szablon",

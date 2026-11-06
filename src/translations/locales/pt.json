@@ -591,6 +591,8 @@
   "aq_photo_light": "As fotos foram tiradas com",
   "aq_photo_white": "luz branca",
   "aq_picture": "Imagem",
+  "aq_picture_change": "Alterar a imagem",
+  "aq_picture_choose": "Escolher uma imagem",
   "aq_picture_hint": "JPEG, PNG ou WebP, 20 MB no máximo. A localização e outros metadados são removidos.",
   "aq_place_coral": "Colocar na imagem",
   "aq_preset": "Modelo",

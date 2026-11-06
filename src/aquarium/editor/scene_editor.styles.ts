@@ -161,6 +161,9 @@ export default css`
     gap: 3px;
     font-size: 0.9em;
   }
+  .field > button.choose-file {
+    align-self: flex-start;
+  }
   .field.small {
     flex: 1 1 0;
     min-width: 0;

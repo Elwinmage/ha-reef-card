@@ -591,6 +591,8 @@
   "aq_photo_light": "Las fotos se tomaron con",
   "aq_photo_white": "luz blanca",
   "aq_picture": "Imagen",
+  "aq_picture_change": "Cambiar la imagen",
+  "aq_picture_choose": "Elegir una imagen",
   "aq_picture_hint": "JPEG, PNG o WebP, 20 MB como máximo. Se eliminan la ubicación y otros metadatos.",
   "aq_place_coral": "Colocar en la imagen",
   "aq_preset": "Plantilla",

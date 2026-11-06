@@ -532,6 +532,9 @@ describe("scene editor: loading and saving", () => {
     expect(editor._error_text(new ApiError("not_found", ""))).toContain(
       "no longer exists",
     );
+    expect(
+      editor._error_text(new ApiError("invalid_format", "bad length")),
+    ).toContain("(bad length)");
     expect(editor._error_text({ message: "boom" })).toBe("Error: boom");
     expect(editor._error_text(undefined)).toBe("Error: ");
   });

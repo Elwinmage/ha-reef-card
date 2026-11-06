@@ -591,6 +591,8 @@
   "aq_photo_light": "The photos were taken under",
   "aq_photo_white": "white light",
   "aq_picture": "Picture",
+  "aq_picture_change": "Change the picture",
+  "aq_picture_choose": "Choose a picture",
   "aq_picture_hint": "JPEG, PNG or WebP, 20 MB at most. Location and other metadata are removed.",
   "aq_place_coral": "Place on the picture",
   "aq_preset": "Preset",

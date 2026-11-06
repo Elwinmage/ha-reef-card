@@ -464,8 +464,11 @@ export class ReefAquariumSceneEditor extends LitElement {
     const code = err instanceof ApiError ? err.code : String(err?.code ?? "");
     const key = `aq_err_${code}`;
     const text = i18n._(key);
-    return text.endsWith(key)
-      ? `${i18n._("aq_err_generic")} ${err?.message ?? ""}`
+    if (text.endsWith(key))
+      return `${i18n._("aq_err_generic")} ${err?.message ?? ""}`;
+    // The integration tells what it refused: without it, nobody can fix it
+    return code === "invalid_format" && err?.message
+      ? `${text} (${err.message})`
       : text;
   }
 
@@ -1756,16 +1759,31 @@ export class ReefAquariumSceneEditor extends LitElement {
                       }),
                     )}
               /></label>
-              <label class="field"
-                >${i18n._("aq_picture")}
+              <div class="field">
+                ${i18n._("aq_picture")}
+                <button
+                  class="choose-file"
+                  ?disabled=${this._busy}
+                  @click=${(e: Event) =>
+                    (
+                      (e.currentTarget as HTMLElement)
+                        .nextElementSibling as HTMLInputElement
+                    ).click()}
+                >
+                  ${i18n._(
+                    view?.image ? "aq_picture_change" : "aq_picture_choose",
+                  )}
+                </button>
+                <!-- Hidden: it is emptied after each upload, and would say
+                     that no file is chosen next to a picture on display -->
                 <input
                   type="file"
                   accept="image/*"
-                  ?disabled=${this._busy}
+                  hidden
                   @change=${this._upload}
                 />
                 <span class="hint">${i18n._("aq_picture_hint")}</span>
-              </label>
+              </div>
               <div class="buttons">
                 ${doc.default_view !== v
                   ? html`<button
