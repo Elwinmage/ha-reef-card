@@ -118,7 +118,11 @@ de gauche à droite :
 
 Chaque mesure prend la couleur de son niveau : vert pour souhaité, orange pour
 acceptable, rouge pour danger, blanc quand la sonde ne donne pas de mesure
-valide. Un clic sur une mesure ouvre sa boîte de dialogue d'informations.
+valide. La température, le pH, l'ORP et la salinité sont suivis de leur
+**tendance** sur la dernière heure : une flèche vers le haut, une flèche vers le
+bas ou un tilde. Un clic sur une mesure ouvre son historique sur les bandes de
+niveau, sur 24 heures ou 7 jours, avec un bouton vers sa boîte de dialogue
+d'informations.
 
 ## Sondes
 
@@ -131,7 +135,7 @@ liste. Chacune affiche :
 
 - Sa **mesure**, et la **température intégrée** juste en dessous pour les sondes
   pH, salinité et ATO, colorées selon leur niveau. Un clic sur une valeur ouvre
-  sa boîte de dialogue d'informations.
+  son historique, comme dans le résumé.
 - Une **barre de situation** par mesure : les bandes rouge, orange et verte sont
   les plages de danger, acceptable et souhaitée réglées sur la sonde, et le
   repère noir indique où se situe la mesure. La mesure principale est sur la

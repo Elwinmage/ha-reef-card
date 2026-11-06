@@ -86,6 +86,17 @@ Dieser Bereich ermöglicht die Anzeige der aktuellen Kopfprogrammierung und dere
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Dosierregelung
+
+Die Kopfkonfiguration enthält die **Dosierregelung** der [redsea-Integration](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/de/reefdose.de.md#dosierregelung):
+
+- **Assistierte Dosierung**: Die Schaltfläche **Assistierte Dosierung** öffnet einen Dialog mit dem Diagramm Ihrer Testergebnisse, der Eingabe eines neuen Ergebnisses, der vorgeschlagenen Dosis zum Übernehmen oder Verwerfen und den Einstellungen der Berechnung. Nichts erreicht den Dosierer, bevor Sie es übernehmen.
+- **Salzlösung**: Der Kopf wird allein von Home Assistant mit manuellen Dosen gesteuert, daher zeigt seine Konfiguration statt des Programms die Salzlösung: Salinität der letzten Woche, Zustand und Alarm, geplante Salzlösung, Refraktometerprüfung und Einstellungen. In der Hauptansicht zeigen Ring und mittlere Beschriftung die heute dosierte gegenüber der geplanten Salzlösung, die untere Beschriftung die Salinität.
+
+### Dosierverlauf
+
+Solange der Dosierer im [Poseidon-Modus](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/de/poseidon.de.md#poseidon-modus) ist, hat die Kopfkonfiguration eine Schaltfläche **Dosierverlauf**: die Dosen des Kopfes, neueste zuerst, nach Tagen, mit Beginn, Ende, Dauer, Menge und Art (geplant, manuell, Kompensation). Letzte 24 h, 7 oder 31 Tage oder alles Gespeicherte, mit der Gesamtmenge des Zeitraums. Ein mit „≈“ markierter Beginn ist aus dem Durchfluss des Kopfes geschätzt.
+
 ## Verwaltung der Ergänzungsmittel
 
  <img src="../img/rsdose/zone_5.png"/>

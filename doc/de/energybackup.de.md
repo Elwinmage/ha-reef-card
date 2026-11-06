@@ -10,7 +10,7 @@ Der Dienst veröffentlicht seine Sensoren über MQTT: Sein Gerät (standardmäß
 
 ## Power Flow Card Plus
 
-Die Flüsse werden von [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus) gezeichnet, einer separaten Karte, die installiert sein muss (HACS → Frontend). Solange sie fehlt, zeigt die Ansicht einen Link, der sie in HACS öffnet:
+Die Flüsse werden von [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus) gezeichnet, einer separaten Karte, die installiert sein muss (_Einstellungen > Marketplace_). Solange sie fehlt, zeigt die Ansicht einen Link, der sie in HACS öffnet:
 
 <img src="../img/energybackup/install.png"/>
 

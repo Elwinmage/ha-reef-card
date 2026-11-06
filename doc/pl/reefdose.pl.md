@@ -86,6 +86,17 @@ Ta strefa pozwala wizualizować bieżące programowanie głowic i je zmieniać.
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regulacja dozowania
+
+Konfiguracja głowicy zawiera **Regulację dozowania** [integracji redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/pl/reefdose.pl.md#regulacja-dozowania):
+
+- **Dozowanie wspomagane**: przycisk **Dozowanie wspomagane** otwiera okno z wykresem wyników testów, wpisywaniem nowego wyniku, proponowaną dawką do zastosowania lub odrzucenia oraz ustawieniami obliczeń. Nic nie trafia do dozownika, dopóki jej nie zastosujesz.
+- **Solanka**: głowicą steruje wyłącznie Home Assistant, dawkami ręcznymi, więc jej konfiguracja pokazuje solankę zamiast harmonogramu: zasolenie z ostatniego tygodnia, stan i alarm, planowaną solankę, kontrolę refraktometrem i ustawienia. W widoku głównym pierścień i środkowa etykieta pokazują solankę dozowaną dziś względem planowanej, a dolna etykieta zasolenie.
+
+### Historia dawek
+
+Gdy dozownik jest w [trybie Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/pl/poseidon.pl.md#tryb-poseidon), konfiguracja głowicy ma przycisk **Historia dawek**: dawki głowicy, od najnowszych, według dni, z początkiem, końcem, czasem trwania, objętością i typem (zaplanowana, ręczna, kompensacja). Ostatnie 24 h, 7 lub 31 dni albo wszystko, co zachowano, z łączną objętością okresu. Początek oznaczony „≈” jest szacowany na podstawie przepływu głowicy.
+
 ## Zarządzanie suplementami
 
  <img src="../img/rsdose/zone_5.png"/>

@@ -86,6 +86,17 @@ Esta zona permite visualizar la programación actual de las cabezas y modificarl
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regulación de dosificación
+
+La configuración del cabezal contiene la **Regulación de dosificación** de la [integración redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/es/reefdose.es.md#regulación-de-dosificación):
+
+- **Dosificación asistida**: el botón **Dosificación asistida** abre un diálogo con el gráfico de sus resultados de test, la entrada de un nuevo resultado, la dosis propuesta para aplicar o descartar, y los ajustes del cálculo. Nada llega al dosificador hasta que usted lo aplica.
+- **Salmuera**: el cabezal lo controla solo Home Assistant, con dosis manuales, así que su configuración muestra la salmuera en lugar del programa: salinidad de la última semana, estado y alarma, salmuera prevista, control con refractómetro y ajustes. En la vista principal, el anillo y la etiqueta central muestran la salmuera dosificada hoy frente a la prevista, y la etiqueta inferior la salinidad.
+
+### Historial de dosis
+
+Mientras el dosificador está en [modo Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/es/poseidon.es.md#modo-poseidon), la configuración de un cabezal tiene un botón **Historial de dosis**: las dosis del cabezal, de la más reciente a la más antigua, por día, con inicio, fin, duración, volumen y tipo (programada, manual, compensación). Últimas 24 h, 7 o 31 días, o todo lo guardado, con el volumen total del periodo. Un inicio marcado con «≈» se estima a partir del caudal del cabezal.
+
 ## Gestión de suplementos
 
  <img src="../img/rsdose/zone_5.png"/>

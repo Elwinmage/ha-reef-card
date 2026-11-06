@@ -114,7 +114,10 @@ do prawej:
 
 Każdy odczyt przyjmuje kolor swojego poziomu: zielony dla pożądanego,
 pomarańczowy dla akceptowalnego, czerwony dla zagrożenia, biały, gdy sonda nie
-podaje prawidłowego odczytu. Kliknięcie odczytu otwiera jego okno informacji.
+podaje prawidłowego odczytu. Po temperaturze, pH, ORP i zasoleniu widać ich
+**trend** z ostatniej godziny: strzałkę w górę, strzałkę w dół lub tyldę.
+Kliknięcie odczytu otwiera jego historię na tle pasm poziomów, z 24 godzin lub 7
+dni, z przyciskiem do okna informacji.
 
 ## Sondy
 
@@ -127,7 +130,7 @@ wymienia. Każda pokazuje:
 
 - Swój **odczyt** oraz **wbudowaną temperaturę** tuż pod nim dla sond pH,
   zasolenia i ATO, pokolorowane według poziomu. Kliknięcie wartości otwiera jej
-  okno informacji.
+  historię, jak w podsumowaniu.
 - **Pasek sytuacji** dla każdego odczytu: czerwone, pomarańczowe i zielone pasma
   to zakresy zagrożenia, akceptowalny i pożądany ustawione w sondzie, a czarny
   znacznik pokazuje, gdzie znajduje się odczyt. Główny odczyt jest na lewym

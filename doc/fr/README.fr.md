@@ -14,7 +14,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Lit](https://img.shields.io/badge/Lit-3.3-blue?style=flat-square&logo=lit)](https://lit.dev/)
-[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg?token=XXXX)](https://codecov.io/gh/Elwinmage/ha-reef-card)
+[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg)](https://codecov.io/gh/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 # Langues supportées : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](../../README.md) [<img src="https://flagicons.lipis.dev/flags/4x3/es.svg" style="width: 5%"/>](../es/README.es.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pt.svg" style="width: 5%"/>](../pt/README.pt.md) [<img src="https://flagicons.lipis.dev/flags/4x3/de.svg" style="width: 5%"/>](../de/README.de.md) [<img src="https://flagicons.lipis.dev/flags/4x3/it.svg" style="width: 5%"/>](../it/README.it.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pl.svg" style="width: 5%"/>](../pl/README.pl.md)
@@ -35,6 +35,8 @@ Elle prend aussi en charge les pompes Aqua Medic de [ha-aquamedic-component](htt
 leurs tâches de maintenance apparaissent dans cette même vue.
 
 Les flux d'énergie de [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (secteur, batterie, pompes) ont aussi leur vue, dessinée avec [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
+Une seconde carte donne vie à votre bac avec [ha-reeftank-component](https://github.com/Elwinmage/ha-reeftank-component) : voir la [vue aquarium](#vue-aquarium).
 
 <!-- generated:demo-videos:start -->
 
@@ -118,7 +120,7 @@ Les projets ReefTech s'articulent entre eux : les intégrations font entrer votr
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-blueprints/main/icon.png" width="64" alt="ha-reef-blueprints" /></td>
     <td>🐬<br /><a href="https://github.com/Elwinmage/ha-reef-blueprints"><b>ha-reef-blueprints</b></a></td>
-    <td>Blueprints de notification communs à tout l'écosystème : entretiens en retard trouvés via le contrat <code>reef_role</code>, et appareils devenus injoignables. Huit langues.</td>
+    <td>Blueprints d'automatisation communs à tout l'écosystème : entretiens en retard trouvés via le contrat <code>reef_role</code>, appareils devenus injoignables, test périodique des chauffages et surveillance des relais. Huit langues.</td>
     <td>les trois intégrations</td>
   </tr>
   <tr>
@@ -296,6 +298,8 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Vue aquarium](#vue-aquarium)
+- [Commun aux appareils Red Sea](#commun-aux-appareils-red-sea)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefato.fr.md#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol.fr.md#reefcontrol)
 - [ReefControl-Power](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/reefcontrol-power.fr.md#reefcontrol-power)
@@ -312,13 +316,16 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 
 # Installation
 
+> [!NOTE]
+> Depuis Home Assistant 2026.11, HACS fait partie de Home Assistant sous le nom de **Marketplace** (_Paramètres > Marketplace_) : rien à installer, et une installation HACS existante est migrée automatiquement. Sur un Home Assistant plus ancien, les mêmes étapes fonctionnent dans HACS.
+
 ## Installation directe
 
-Cliquez ici pour accéder directement au dépôt dans HACS et cliquez sur « Télécharger » : [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Cliquez ici pour accéder directement au dépôt dans la Marketplace et cliquez sur « Installer » : [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
-## Rechercher dans HACS
+## Rechercher dans la Marketplace
 
-Ou recherchez « reef-card » dans HACS.
+Ou recherchez « reef-card » dans _Paramètres > Marketplace_.
 
 <p align="center">
 <img src="../img/hacs_search.png" alt="Image">
@@ -338,6 +345,33 @@ L'éditeur de la carte y enregistre l'identifiant stable de l'appareil (son iden
 <td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
+
+## Commun aux appareils Red Sea
+
+- **Messages** : les bandeaux défilants donnent la date du dernier message et de la dernière alerte, et disent s'ils viennent de Home Assistant ou de l'app ReefBeat. Un clic sur un bandeau, ou le bouton **Historique des messages** de la fenêtre de configuration, ouvre l'historique, filtré par type et par période.
+- **Poseidon** : un appareil utilisant le [mode Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/fr/poseidon.fr.md#mode-poseidon) de l'intégration affiche un trident : de sa couleur « on » en mode Poseidon, de sa couleur « off » hors de ce mode, orange et clignotant quand plus rien ne passe par le relais depuis un moment. Un appui ouvre sa fenêtre (mode, stratégie, pause du relevé, ce que voit le relais), un appui long active ou désactive le mode.
+
+## Vue aquarium
+
+Une seconde carte, `custom:reef-aquarium-card`, montre une photo de votre bac avec ses appareils et ses entités, l'eau éclairée par vos lampes et, si vous le souhaitez, des poissons et des coraux vivants. Elle a besoin de l'[intégration ReefTank](https://github.com/Elwinmage/ha-reeftank-component), qui stocke les aquariums et leurs images.
+
+```yaml
+type: custom:reef-aquarium-card
+aquarium: a1b2 # chosen in the card editor
+render: static # optional: static, light or full; can only lower the aquarium's level
+view: front # optional: the view to start on
+```
+
+- **Créer et modifier** un aquarium depuis l'éditeur de la carte : _Nouvel aquarium_ ou _Modifier la scène_ ouvre un éditeur plein écran (images, contour de l'eau, décor, zones cliquables, appareils et entités glissés depuis une arborescence, lampes, population, sources de nourrissage). Avec un compte cloud ReefBeat, l'aquarium du cloud préremplit les dimensions, les lampes et les raccourcis de nourrissage, et filtre les appareils Red Sea.
+- **Niveaux de rendu** : `static` (image, appareils, entités, zones cliquables), `light` (plus la couleur des lampes sur l'eau), `full` (plus les poissons, les coraux et l'animation de nourrissage).
+- Un appui sur un appareil ouvre sa vue dans cette carte ; sur une entité, son action habituelle. Un appareil peut aussi être détouré sur l'image (rectangle, lasso ou polygone) plutôt qu'affiché en vignette.
+- **Sable et roches** : tracez la ligne de sable contre la vitre avant (et contre la paroi du fond quand l'image montre le dessus du sable) et détourez les roches avec leur profondeur : les poissons restent au-dessus du sable, nagent derrière les roches, et les espèces de fond rampent dessus.
+- **Décor dessiné** : quand la photo de l'eau n'est pas exploitable, l'eau peut être dessinée (eau, sable, textures de roche du catalogue), le reste de l'image étant conservé.
+- **Comportement** : bancs, nageurs de pleine eau, espèces de fond, poissons vivant autour d'un refuge, gobies sortant de leur terrier ; la nuit, les poissons se cachent ou se reposent, sous un voile qui garde le bac lisible.
+- **Surveillance de l'eau** : l'onglet _Surveillance_ de l'éditeur choisit les entités pH, ORP, CO2 de la pièce et tests KH et règle les seuils des alarmes ; les alarmes comparent le bac à son propre historique récent.
+- **Espèces** : poissons et coraux viennent du [catalogue ReefTank](https://github.com/Elwinmage/reeftank-catalog), téléchargé et tenu à jour par l'intégration. L'éditeur les liste avec une vignette ; un nom absent du catalogue nage comme un poisson générique.
+
+Le guide complet (éditeur de scène, entités, services, catalogue) est dans le [README de ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/fr/README.fr.md).
 
 # FAQ
 

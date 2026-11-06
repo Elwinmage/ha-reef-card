@@ -86,6 +86,17 @@ Questa zona permette di visualizzare la programmazione corrente delle teste e di
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regolazione del dosaggio
+
+La configurazione della testa contiene la **Regolazione del dosaggio** dell'[integrazione redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/it/reefdose.it.md#regolazione-del-dosaggio):
+
+- **Dosaggio assistito**: il pulsante **Dosaggio assistito** apre una finestra con il grafico dei risultati dei test, l'inserimento di un nuovo risultato, la dose proposta da applicare o ignorare e le impostazioni del calcolo. Nulla arriva al dosatore finché non la applichi.
+- **Salamoia**: la testa è gestita dal solo Home Assistant, con dosi manuali, quindi la sua configurazione mostra la salamoia al posto del programma: salinità dell'ultima settimana, stato e allarme, salamoia prevista, controllo con rifrattometro e impostazioni. Nella vista principale, l'anello e l'etichetta centrale mostrano la salamoia dosata oggi rispetto a quella prevista, e l'etichetta in basso la salinità.
+
+### Cronologia delle dosi
+
+Finché il dosatore è in [modalità Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/it/poseidon.it.md#modalità-poseidon), la configurazione di una testa ha un pulsante **Cronologia delle dosi**: le dosi della testa, dalla più recente, per giorno, con inizio, fine, durata, volume e tipo (programmata, manuale, compensazione). Ultime 24 h, 7 o 31 giorni, o tutto ciò che è conservato, con il volume totale del periodo. Un inizio segnato con «≈» è stimato dalla portata della testa.
+
 ## Gestione degli integratori
 
  <img src="../img/rsdose/zone_5.png"/>

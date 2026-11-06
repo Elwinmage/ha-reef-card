@@ -14,7 +14,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Lit](https://img.shields.io/badge/Lit-3.3-blue?style=flat-square&logo=lit)](https://lit.dev/)
-[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg?token=XXXX)](https://codecov.io/gh/Elwinmage/ha-reef-card)
+[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg)](https://codecov.io/gh/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 # Supported languages : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" width="5%"/>](doc/fr/README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" width="5%"/>](README.md) [<img src="https://flagicons.lipis.dev/flags/4x3/es.svg" width="5%"/>](doc/es/README.es.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pt.svg" width="5%"/>](doc/pt/README.pt.md) [<img src="https://flagicons.lipis.dev/flags/4x3/de.svg" width="5%"/>](doc/de/README.de.md) [<img src="https://flagicons.lipis.dev/flags/4x3/it.svg" width="5%"/>](doc/it/README.it.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pl.svg" width="5%"/>](doc/pl/README.pl.md)
@@ -35,6 +35,8 @@ It also supports the Aqua Medic pumps of [ha-aquamedic-component](https://github
 their maintenance tasks show up in that same view.
 
 The power flows of [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (mains, battery, pumps) get their own view too, drawn with [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
+A second card brings your tank to life with [ha-reeftank-component](https://github.com/Elwinmage/ha-reeftank-component): see the [aquarium view](#aquarium-view).
 
 <!-- generated:demo-videos:start -->
 
@@ -118,7 +120,7 @@ The ReefTech projects fit together: the integrations bring your equipment into H
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-blueprints/main/icon.png" width="64" alt="ha-reef-blueprints" /></td>
     <td>🐬<br /><a href="https://github.com/Elwinmage/ha-reef-blueprints"><b>ha-reef-blueprints</b></a></td>
-    <td>Notification blueprints shared by the whole ecosystem: overdue maintenance found through the <code>reef_role</code> contract, and devices that went unreachable. Eight languages.</td>
+    <td>Automation blueprints shared by the whole ecosystem: overdue maintenance found through the <code>reef_role</code> contract, devices that went unreachable, a periodic heater test and a relay watch. Eight languages.</td>
     <td>all three integrations</td>
   </tr>
   <tr>
@@ -303,6 +305,8 @@ All of them are documented together on the [ReefTech project page](https://elwin
 
 - [Installation](https://github.com/Elwinmage/ha-reef-card/#installation)
 - [Configuration](https://github.com/Elwinmage/ha-reef-card/#configuration)
+- [Aquarium view](https://github.com/Elwinmage/ha-reef-card/#aquarium-view)
+- [Common to the Red Sea devices](https://github.com/Elwinmage/ha-reef-card/#common-to-the-red-sea-devices)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefato.md#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefcontrol.md#reefcontrol)
 - [ReefControl-Power](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/reefcontrol-power.md#reefcontrol-power)
@@ -319,13 +323,16 @@ All of them are documented together on the [ReefTech project page](https://elwin
 
 # Installation
 
+> [!NOTE]
+> Since Home Assistant 2026.11, HACS is part of Home Assistant as the **Marketplace** (_Settings > Marketplace_): nothing to install, and an existing HACS installation is migrated automatically. On an older Home Assistant, the same steps work in HACS.
+
 ## Direct installation
 
-Click here to open the repository directly in HACS and click "Download": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Click here to open the repository directly in the Marketplace and click "Install": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
-## Search in HACS
+## Search in the Marketplace
 
-Or search for «reef-card» in HACS.
+Or search for «reef-card» in _Settings > Marketplace_.
 
 <p align="center">
 <img src="doc/img/hacs_search.png" alt="Image">
@@ -345,6 +352,11 @@ The card editor stores the stable identifier of the device there (its hardware i
 <td><img src="doc/img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
+
+## Common to the Red Sea devices
+
+- **Messages**: the scrolling banners give the date of the last message and alert, and whether it came from Home Assistant or from the ReefBeat app. A click on a banner, or the **Message history** button of the configuration dialog, opens the history, filtered by kind and period.
+- **Poseidon**: a device using the [Poseidon mode](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/en/poseidon.md#poseidon-mode) of the integration shows a trident: in its "on" colour in Poseidon mode, its "off" colour out of it, orange and blinking when nothing went through the relay for a while. A tap opens its dialog (mode, strategy, polling pause, what the relay sees), a long press switches the mode on or off.
 
 ## Aquarium view
 
