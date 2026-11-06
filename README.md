@@ -61,6 +61,7 @@ A second card brings your tank to life with [ha-reeftank-component](https://gith
 </tr>
 <tr>
 <td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Aqua Medic demo" width="300"/></a><br/><em>Aqua Medic demo</em></td>
+<td><a href="https://www.youtube.com/watch?v=ZtYobmQZf9k"><img src="https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg" alt="Aquarium view demo" width="300"/></a><br/><em>Aquarium view demo</em></td>
 </tr>
 </table>
 

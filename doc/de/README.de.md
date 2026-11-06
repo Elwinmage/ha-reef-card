@@ -61,6 +61,7 @@ Eine zweite Karte erweckt Ihr Becken mit [ha-reeftank-component](https://github.
 </tr>
 <tr>
 <td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Aqua-Medic-Demo" width="300"/></a><br/><em>Aqua-Medic-Demo</em></td>
+<td><a href="https://www.youtube.com/watch?v=ZtYobmQZf9k"><img src="https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg" alt="Aquarienansicht-Demo" width="300"/></a><br/><em>Aquarienansicht-Demo</em></td>
 </tr>
 </table>
 

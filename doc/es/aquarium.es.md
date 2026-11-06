@@ -2,6 +2,10 @@
 
 # Vista de acuario
 
+La vista de acuario en acción:
+
+[![Ver el video](https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg)](https://www.youtube.com/watch?v=ZtYobmQZf9k)
+
 Una segunda tarjeta, `custom:reef-aquarium-card`, muestra una foto de su acuario con sus dispositivos y entidades, el agua iluminada por sus lámparas y, si lo desea, peces y corales vivos. Necesita la [integración ReefTank](https://github.com/Elwinmage/ha-reeftank-component), que guarda los acuarios y sus imágenes.
 
 ## La vista

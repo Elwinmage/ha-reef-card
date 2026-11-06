@@ -2,6 +2,10 @@
 
 # Vue aquarium
 
+La vue aquarium en action :
+
+[![Regarder la vidéo](https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg)](https://www.youtube.com/watch?v=ZtYobmQZf9k)
+
 Une seconde carte, `custom:reef-aquarium-card`, montre une photo de votre bac avec ses appareils et ses entités, l'eau éclairée par vos lampes et, si vous le souhaitez, des poissons et des coraux vivants. Elle a besoin de l'[intégration ReefTank](https://github.com/Elwinmage/ha-reeftank-component), qui stocke les aquariums et leurs images.
 
 ## La vue
