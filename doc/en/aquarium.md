@@ -80,6 +80,8 @@ Pictures; for each water: outline, sand line (front and back), rocks with their 
 
 Your devices and entities by floor and area, dragged onto the picture.
 
+Tick **Hide the label** to draw the value alone, and choose its **Text colour**: the label stays in the editor.
+
 ### Light & flow
 
 <img src="../img/aquarium/editor_lights.png"/>

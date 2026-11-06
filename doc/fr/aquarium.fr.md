@@ -80,6 +80,8 @@ Les images ; pour chaque eau : contour, ligne de sable (avant et arrière), roch
 
 Vos appareils et entités par étage et par pièce, glissés sur l'image.
 
+Cochez **Masquer le libellé** pour n'afficher que la valeur, et choisissez sa **Couleur du texte** : le libellé reste dans l'éditeur.
+
 ### Lumière et brassage
 
 <img src="../img/aquarium/editor_lights.png"/>

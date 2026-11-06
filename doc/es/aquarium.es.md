@@ -80,6 +80,8 @@ Las imágenes; para cada agua: contorno, línea de arena (delante y detrás), ro
 
 Sus dispositivos y entidades por planta y zona, arrastrados sobre la imagen.
 
+Marque **Ocultar la etiqueta** para mostrar solo el valor y elija su **Color del texto**: la etiqueta se conserva en el editor.
+
 ### Luz y corriente
 
 <img src="../img/aquarium/editor_lights.png"/>

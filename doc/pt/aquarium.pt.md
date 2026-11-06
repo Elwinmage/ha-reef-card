@@ -80,6 +80,8 @@ As imagens; para cada água: contorno, linha da areia (frente e fundo), rochas e
 
 Os seus dispositivos e entidades por piso e divisão, arrastados para a imagem.
 
+Marque **Ocultar a etiqueta** para mostrar apenas o valor e escolha a **Cor do texto**: a etiqueta mantém-se no editor.
+
 ### Luz e corrente
 
 <img src="../img/aquarium/editor_lights.png"/>

@@ -80,6 +80,8 @@ Le immagini; per ogni acqua: contorno, linea della sabbia (davanti e dietro), ro
 
 I vostri dispositivi ed entità per piano e area, trascinati sull'immagine.
 
+Seleziona **Nascondi l'etichetta** per mostrare solo il valore e scegli il suo **Colore del testo**: l'etichetta resta nell'editor.
+
 ### Luce e corrente
 
 <img src="../img/aquarium/editor_lights.png"/>

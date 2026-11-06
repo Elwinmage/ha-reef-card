@@ -918,6 +918,7 @@ export function for_save(doc: AquariumDocument): AquariumDocument {
     for (const element of view.elements) {
       if (!element.source) delete element.source;
       if (element.kind !== "entity") delete element.type;
+      if (!element.text_color) delete element.text_color;
     }
   }
   if (!out.default_view || !out.views[out.default_view]) {

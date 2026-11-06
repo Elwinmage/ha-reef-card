@@ -598,7 +598,7 @@ export class ReefAquariumCard extends LitElement {
           >
         </div>`;
       }
-      const key = `${element.id}:${element.entity_id}:${element.type ?? ""}:${element.label}`;
+      const key = `${element.id}:${element.entity_id}:${element.type ?? ""}:${element.hide_label ? "" : element.label}:${element.text_color ?? ""}`;
       let node = this._elements.get(key);
       if (!node) {
         node = create_entity_element(hass, element) ?? undefined;

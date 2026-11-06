@@ -962,6 +962,102 @@ describe("scene editor", () => {
     expect(installed).toBeNull();
   });
 
+  it("shows the confirmation of a save for 5 seconds", async () => {
+    const { doc } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    vi.useFakeTimers();
+    try {
+      await editor.save();
+      expect(editor._message.text).toBe("Saved");
+      vi.advanceTimersByTime(4999);
+      expect(editor._message.text).toBe("Saved");
+      vi.advanceTimersByTime(1);
+      expect(editor._message).toBeNull();
+
+      // an error shown meanwhile stays
+      await editor.save();
+      editor._message = { kind: "error", text: "boom" };
+      vi.advanceTimersByTime(5000);
+      expect(editor._message.text).toBe("boom");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("chooses how a toggleable entity is drawn", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "elements";
+    editor._view_id = front;
+    editor._doc.views[front].elements = [
+      {
+        id: "e1",
+        kind: "entity",
+        entity_id: "switch.heater",
+        pos: [0.5, 0.5],
+        scale: 1,
+        label: "",
+        roles: [],
+      },
+    ];
+    editor._selection = { type: "element", id: "e1" };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    const select = editor.shadowRoot.querySelector(
+      "fieldset.props select",
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("common-switch");
+    select.value = "common-sensor";
+    select.dispatchEvent(new Event("change"));
+    expect(editor.doc.views[front].elements[0].type).toBe("common-sensor");
+  });
+
+  it("sets the text of an entity", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "elements";
+    editor._view_id = front;
+    const element = {
+      id: "e1",
+      kind: "entity",
+      entity_id: "sensor.temp",
+      pos: [0.5, 0.5],
+      scale: 1,
+      label: "Temp",
+      roles: [],
+    };
+    editor._doc.views[front].elements = [element];
+    const set = vi.fn();
+    expect(editor._entity_text(element, set)).toBeTruthy();
+    editor._selection = { type: "element", id: "e1" };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    const props = editor.shadowRoot.querySelector("fieldset.props");
+    const swatch = props.querySelector(".swatch") as HTMLElement;
+    swatch.click();
+    await editor.updateComplete;
+    const picker = props.querySelector("reef-colour-picker");
+    picker.dispatchEvent(
+      new CustomEvent("colour-change", { detail: { value: "#ff0000" } }),
+    );
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].text_color).toBe("#ff0000");
+    const hide = props.querySelector(
+      "label.check input[type=checkbox]",
+    ) as HTMLInputElement;
+    hide.click();
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].hide_label).toBe(true);
+    (props.querySelector(".reset") as HTMLElement).click();
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].text_color).toBeNull();
+    expect(
+      (await import("../src/aquarium/editor/ops")).for_save(editor.doc).views[
+        front
+      ].elements[0],
+    ).not.toHaveProperty("text_color");
+  });
+
   it("offers to choose or change the picture", async () => {
     const { doc, front } = existing_doc();
     const editor = await open(make_hass(doc), "a1b2");

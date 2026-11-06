@@ -303,10 +303,14 @@ export function tree_devices(tree: Tree): TreeDevice[] {
   return found.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** Whether an entity can be toggled, so drawn as a switch. */
+export function is_toggleable(entity_id: string): boolean {
+  return ["switch", "light", "input_boolean", "fan", "siren"].includes(
+    entity_id.split(".")[0],
+  );
+}
+
 /** Card element best suited to an entity. */
 export function default_element_type(entity_id: string): string {
-  const domain = entity_id.split(".")[0];
-  if (["switch", "light", "input_boolean", "fan", "siren"].includes(domain))
-    return "common-switch";
-  return "common-sensor";
+  return is_toggleable(entity_id) ? "common-switch" : "common-sensor";
 }

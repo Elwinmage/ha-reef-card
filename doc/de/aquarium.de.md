@@ -80,6 +80,8 @@ Bilder; für jedes Wasser: Umriss, Sandlinie (vorne und hinten), Steine mit ihre
 
 Ihre Geräte und Entitäten nach Etage und Bereich, auf das Bild gezogen.
 
+Aktivieren Sie **Beschriftung ausblenden**, um nur den Wert anzuzeigen, und wählen Sie seine **Textfarbe**: Die Beschriftung bleibt im Editor erhalten.
+
 ### Licht & Strömung
 
 <img src="../img/aquarium/editor_lights.png"/>

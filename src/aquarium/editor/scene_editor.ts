@@ -62,6 +62,7 @@ import {
   build_tree,
   default_element_type,
   floor_icon,
+  is_toggleable,
   tree_devices,
   tree_empty,
   type TreeArea,
@@ -146,6 +147,18 @@ const TABS: Tab[] = [
   "feeding",
   "monitoring",
 ];
+
+/**
+ * Lowest top of a lamp mark, which stands above the water: with a water
+ * reaching the top of the picture, it would be drawn outside of the stage.
+ */
+const LAMP_MARK_TOP = "30px";
+
+/** How long the confirmation of a save stays on display. */
+const SAVED_MESSAGE_MS = 5000;
+
+/** Text colour of an entity without a colour of its own (as CHIP_CSS). */
+const DEFAULT_TEXT_COLOR = "#ffffff";
 
 /** Alarms of the monitoring, as named in `AquariumEntities`. */
 const MONITORING_ALARMS = [
@@ -315,6 +328,9 @@ export class ReefAquariumSceneEditor extends LitElement {
   } | null = null;
   /** Colour of a coral open in the colour picker. */
   @state() private _colour_edit: { coral: string; index: number } | null = null;
+  private _saved_timer?: ReturnType<typeof setTimeout>;
+  /** Element whose text colour is being chosen. */
+  @state() private _text_colour_edit: string | null = null;
   /** Inventory line whose home is being placed (tool "home"). */
   @state() private _home_line: string | null = null;
   /** The drawn decor shown over the photo. */
@@ -392,6 +408,7 @@ export class ReefAquariumSceneEditor extends LitElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener("keydown", this._on_key);
+    clearTimeout(this._saved_timer);
     this._images.stop();
     this._catalog_unsub?.();
     this._catalog_unsub = null;
@@ -476,6 +493,17 @@ export class ReefAquariumSceneEditor extends LitElement {
     return Boolean(this._doc) && JSON.stringify(this._doc) !== this._saved_json;
   }
 
+  /** Tell the save worked, for a moment: nothing is left to act upon. */
+  private _show_saved(): void {
+    const message = { kind: "info" as const, text: i18n._("aq_saved") };
+    this._message = message;
+    clearTimeout(this._saved_timer);
+    this._saved_timer = setTimeout(() => {
+      // Another message took its place meanwhile: it stays
+      if (this._message === message) this._message = null;
+    }, SAVED_MESSAGE_MS);
+  }
+
   /** Save the working copy. */
   async save(): Promise<boolean> {
     if (!this._doc || !this._api) return false;
@@ -487,7 +515,7 @@ export class ReefAquariumSceneEditor extends LitElement {
       );
       this._set_loaded(payload.document, payload);
       this.aquarium_id = payload.document.id ?? null;
-      this._message = { kind: "info", text: i18n._("aq_saved") };
+      this._show_saved();
       return true;
     } catch (err: any) {
       this._message = { kind: "error", text: this._error_text(err) };
@@ -1322,8 +1350,22 @@ export class ReefAquariumSceneEditor extends LitElement {
           >`;
     } else if (el.kind === "entity" && el.entity_id) {
       const s = hass.states?.[el.entity_id];
-      const text = `${el.label || s?.attributes?.friendly_name || el.entity_id}: ${s?.state ?? "?"}`;
-      body = html`<span class="chip">${text}</span>`;
+      // What the card will draw; the tooltip tells which entity it is
+      const text = s
+        ? [
+            el.hide_label ? "" : el.label,
+            s.state,
+            s.attributes?.unit_of_measurement,
+          ]
+            .filter((part) => part)
+            .join(" ")
+        : `${el.label || el.entity_id}: ?`;
+      body = html`<span
+        class="chip"
+        style="${el.text_color ? `color:${el.text_color}` : ""}"
+        title="${s?.attributes?.friendly_name ?? el.entity_id}"
+        >${text}</span
+      >`;
     } else {
       // A marker shows its role in its own icon: no badge
       body = html`<span class="chip"
@@ -1430,7 +1472,8 @@ export class ReefAquariumSceneEditor extends LitElement {
         out.push(
           html`<div
             class="lamp"
-            style="left:${p[0] * 100}%;top:${p[1] * 100}%"
+            style="left:${p[0] * 100}%;top:max(${p[1] *
+            100}%, ${LAMP_MARK_TOP})"
             title="${light.device_id
               ? device_name(this._hass!, light.device_id)
               : light.entity_id}"
@@ -2440,6 +2483,55 @@ export class ReefAquariumSceneEditor extends LitElement {
     `;
   }
 
+  /** How an entity shows its text: with its label or not, and its colour. */
+  private _entity_text(
+    element: SceneElement,
+    set: (patch: Partial<SceneElement>) => void,
+  ): TemplateResult {
+    const editing = this._text_colour_edit === element.id;
+    return html`<label class="check"
+        ><input
+          type="checkbox"
+          .checked=${Boolean(element.hide_label)}
+          @change=${(e: Event) =>
+            set({ hide_label: (e.target as HTMLInputElement).checked })}
+        />
+        ${i18n._("aq_hide_label")}</label
+      >
+      <div class="field">
+        ${i18n._("aq_text_color")}
+        <div class="palette">
+          <button
+            class="swatch ${editing ? "active" : ""}"
+            style="background: ${element.text_color ?? DEFAULT_TEXT_COLOR}"
+            title="${i18n._("aq_text_color")}"
+            @click=${() =>
+              (this._text_colour_edit = editing ? null : element.id)}
+          ></button>
+          ${element.text_color
+            ? html`<button
+                class="icon reset"
+                title="${i18n._("aq_reset_text_color")}"
+                @click=${() => {
+                  this._text_colour_edit = null;
+                  set({ text_color: null });
+                }}
+              >
+                ↺
+              </button>`
+            : nothing}
+        </div>
+        ${editing
+          ? html`<reef-colour-picker
+              class="colour-picker"
+              .value=${element.text_color ?? DEFAULT_TEXT_COLOR}
+              @colour-change=${(e: CustomEvent) =>
+                set({ text_color: e.detail.value })}
+            ></reef-colour-picker>`
+          : nothing}
+      </div>`;
+  }
+
   private _element_properties(
     element: SceneElement,
     v: string,
@@ -2461,7 +2553,8 @@ export class ReefAquariumSceneEditor extends LitElement {
           @change=${(e: Event) =>
             set({ label: (e.target as HTMLInputElement).value })}
       /></label>
-      ${element.kind === "entity"
+      ${element.kind === "entity" ? this._entity_text(element, set) : nothing}
+      ${element.kind === "entity" && is_toggleable(element.entity_id ?? "")
         ? html`<label class="field"
             >${i18n._("aq_element_type")}
             <select
@@ -2472,7 +2565,8 @@ export class ReefAquariumSceneEditor extends LitElement {
                 (t) =>
                   html`<option
                     value="${t}"
-                    ?selected=${(element.type ?? "common-sensor") === t}
+                    ?selected=${(element.type ??
+                      default_element_type(element.entity_id ?? "")) === t}
                   >
                     ${i18n._(`aq_type_${t.replace("common-", "")}`)}
                   </option>`,
@@ -2613,7 +2707,17 @@ export class ReefAquariumSceneEditor extends LitElement {
                   (id) => html`<option value="entity|${id}">${id}</option>`,
                 )}
               </select>
-              <span class="hint">${i18n._("aq_lights_hint")}</span>
+              <span class="hint"
+                >${i18n._(
+                  this._view?.regions.some(
+                    (r) =>
+                      r.water === this._water_id &&
+                      WaterProjection.valid(r.quad),
+                  )
+                    ? "aq_lights_hint"
+                    : "aq_home_needs_outline",
+                )}</span
+              >
             </fieldset>
             <fieldset>
               <legend>${i18n._("aq_flow")}</legend>

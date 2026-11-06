@@ -80,6 +80,8 @@ Obrazy; dla każdej wody: obrys, linia piasku (przód i tył), skały i ich gł�
 
 Twoje urządzenia i encje według pięter i obszarów, przeciągane na obraz.
 
+Zaznacz **Ukryj etykietę**, aby wyświetlać tylko wartość, i wybierz **Kolor tekstu**: etykieta pozostaje w edytorze.
+
 ### Światło i przepływ
 
 <img src="../img/aquarium/editor_lights.png"/>

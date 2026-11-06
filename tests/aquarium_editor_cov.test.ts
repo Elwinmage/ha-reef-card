@@ -1092,7 +1092,7 @@ describe("scene editor: stage", () => {
     );
     expect(chips).toContain("Probe");
     expect(chips).toContain("sensor.gone: ?");
-    expect(chips).toContain("Water: 25");
+    expect(chips).toContain("25");
     expect(chips).toContain("Spot");
     const probe = [...root.querySelectorAll(".el")].find((e: any) =>
       e.textContent.includes("Probe"),
@@ -1120,6 +1120,19 @@ describe("scene editor: stage", () => {
       l.getAttribute("title"),
     );
     expect(lamps).toEqual(["RSLED-1", "light.room"]);
+    // a mark stays on the stage, even with the water at the top of the picture
+    expect(root.querySelector(".lamp").getAttribute("style")).toContain("30px");
+    const hint = () =>
+      [...root.querySelectorAll("aside .hint")]
+        .map((h: any) => h.textContent)
+        .join(" ");
+    expect(hint()).toContain("Drag the ☀");
+    // no outline, no mark: the panel says why
+    editor._water_id = "none";
+    editor._doc.waters.none = { ...editor._doc.waters.main, lights: [] };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(hint()).toContain("Outline the water on this view first.");
   });
 });
 
@@ -1594,19 +1607,19 @@ describe("scene editor: devices panel", () => {
     expect(props().querySelector("legend").textContent.trim()).toBe(
       "sensor.temp",
     );
-    expect(props().querySelector("select").value).toBe("common-sensor");
+    // A sensor cannot be a switch: nothing to choose
+    expect(props().querySelector("select")).toBeNull();
     fire(props().querySelector("input"), "Temp");
     expect(el(1).label).toBe("Temp");
-    await editor.updateComplete;
-    fire(props().querySelector("select"), "common-switch");
-    expect(el(1).type).toBe("common-switch");
     await editor.updateComplete;
     fire(props().querySelector("input[type=range]"), "2");
     expect(el(1).scale).toBe(2);
     await editor.updateComplete;
     // a feeding point, for one source
     const check = () =>
-      props().querySelector("input[type=checkbox]") as HTMLInputElement;
+      [...props().querySelectorAll("input[type=checkbox]")].at(
+        -1,
+      ) as HTMLInputElement;
     fire(check(), true, "change", "checked");
     expect(el(1).roles).toEqual(["feeding_point"]);
     await editor.updateComplete;

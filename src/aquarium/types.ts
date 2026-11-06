@@ -91,6 +91,10 @@ export interface SceneElement {
   pos: Point;
   scale: number;
   label: string;
+  /** Entity: keep the label for the editor, draw the value alone. */
+  hide_label?: boolean;
+  /** Entity: colour of the text (#rrggbb), the chip's own when none. */
+  text_color?: string | null;
   roles: string[];
   source?: string | null;
 }
