@@ -4,7 +4,15 @@
 
 Une seconde carte, `custom:reef-aquarium-card`, montre une photo de votre bac avec ses appareils et ses entités, l'eau éclairée par vos lampes et, si vous le souhaitez, des poissons et des coraux vivants. Elle a besoin de l'[intégration ReefTank](https://github.com/Elwinmage/ha-reeftank-component), qui stocke les aquariums et leurs images.
 
-<img src="../img/aquarium/preview.webp"/>
+## La vue
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+Pas de zones fixes comme sur les vues des appareils : vous placez vos appareils et vos entités où vous voulez sur votre image.
+
+- **Image** : la photo de la vue, ou l'eau dessinée, teintée par vos lampes à partir du niveau `light`.
+- **Appareils et entités** : un appui sur un appareil ouvre sa vue dans cette carte ; sur une entité, son action habituelle. Un appareil peut aussi être détouré sur l'image (rectangle, lasso ou polygone) plutôt qu'affiché en vignette.
+- **Zones cliquables** : un appui sur une zone cliquable ouvre une autre vue de l'aquarium (la décante dans le meuble, par exemple) ; le bouton ← revient à la précédente.
 
 ## Premiers pas
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 Avec un compte cloud ReefBeat, l'aquarium du cloud préremplit les dimensions, les lampes et les raccourcis de nourrissage, et filtre les appareils Red Sea.
-
-## La vue
-
-La carte est divisée en 3 zones :
-
-1. Image
-2. Appareils et entités
-3. Zones cliquables
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Image
-
-<img src="../img/aquarium/zone_1.png"/>
-
-La photo de la vue, ou l'eau dessinée, teintée par vos lampes à partir du niveau `light`.
-
-### 2. Appareils et entités
-
-<img src="../img/aquarium/zone_2.png"/>
-
-Un appui sur un appareil ouvre sa vue dans cette carte ; sur une entité, son action habituelle. Un appareil peut aussi être détouré sur l'image (rectangle, lasso ou polygone) plutôt qu'affiché en vignette.
-
-### 3. Zones cliquables
-
-<img src="../img/aquarium/zone_3.png"/>
-
-Un appui sur une zone cliquable ouvre une autre vue de l'aquarium (la décante dans le meuble, par exemple) ; le bouton ← revient à la précédente.
 
 ## L'éditeur de scène
 
@@ -115,11 +95,11 @@ Les alarmes comparent le bac à son propre historique récent.
 
 Chaque aquarium s'affiche à l'un de trois niveaux ; une carte peut l'abaisser, par exemple sur une tablette murale lente :
 
-| Niveau                  | Affiche                     |                                                            |
-| ----------------------- | --------------------------- | ---------------------------------------------------------- |
-| **Statique** (`static`) | image, appareils et entités | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Lumière** (`light`)   | plus la couleur des lampes  | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Complet** (`full`)    | plus poissons et coraux     | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Niveau                  | Affiche                     |
+| ----------------------- | --------------------------- |
+| **Statique** (`static`) | image, appareils et entités |
+| **Lumière** (`light`)   | plus la couleur des lampes  |
+| **Complet** (`full`)    | plus poissons et coraux     |
 
 Une photo du local technique avec ses appareils en direct est un très bon aquarium `static`.
 

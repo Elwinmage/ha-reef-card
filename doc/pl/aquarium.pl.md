@@ -4,7 +4,15 @@
 
 Druga karta, `custom:reef-aquarium-card`, pokazuje zdjęcie Twojego akwarium z urządzeniami i encjami, wodę oświetloną Twoimi lampami oraz, jeśli chcesz, żywe ryby i koralowce. Wymaga [integracji ReefTank](https://github.com/Elwinmage/ha-reeftank-component), która przechowuje akwaria i ich zdjęcia.
 
-<img src="../img/aquarium/preview.webp"/>
+## Widok
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+Nie ma stałych stref jak w widokach urządzeń: umieszczasz urządzenia i encje w dowolnym miejscu na swoim obrazie.
+
+- **Obraz**: zdjęcie widoku lub narysowana woda, zabarwiona przez Twoje lampy od poziomu `light`.
+- **Urządzenia i encje**: dotknięcie urządzenia otwiera jego widok w tej karcie, a encji — jej zwykłą akcję. Urządzenie można też obrysować na zdjęciu (prostokąt, lasso lub wielokąt) zamiast pokazywać jako miniaturę.
+- **Strefy klikalne**: dotknięcie klikalnej strefy otwiera inny widok akwarium (na przykład sump w szafce); przycisk ← wraca do poprzedniego.
 
 ## Pierwsze kroki
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 Z kontem chmury ReefBeat akwarium z chmury wstępnie wypełnia wymiary, lampy i skróty karmienia oraz filtruje urządzenia Red Sea.
-
-## Widok
-
-Karta jest podzielona na 3 strefy:
-
-1. Obraz
-2. Urządzenia i encje
-3. Strefy klikalne
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Obraz
-
-<img src="../img/aquarium/zone_1.png"/>
-
-Zdjęcie widoku lub narysowana woda, zabarwiona przez Twoje lampy od poziomu `light`.
-
-### 2. Urządzenia i encje
-
-<img src="../img/aquarium/zone_2.png"/>
-
-Dotknięcie urządzenia otwiera jego widok w tej karcie, a encji — jej zwykłą akcję. Urządzenie można też obrysować na zdjęciu (prostokąt, lasso lub wielokąt) zamiast pokazywać jako miniaturę.
-
-### 3. Strefy klikalne
-
-<img src="../img/aquarium/zone_3.png"/>
-
-Dotknięcie klikalnej strefy otwiera inny widok akwarium (na przykład sump w szafce); przycisk ← wraca do poprzedniego.
 
 ## Edytor sceny
 
@@ -115,11 +95,11 @@ Alarmy porównują akwarium z jego własną niedawną historią.
 
 Każde akwarium jest wyświetlane na jednym z trzech poziomów; karta może go obniżyć, np. na wolnym tablecie ściennym:
 
-| Poziom                   | Pokazuje                  |                                                            |
-| ------------------------ | ------------------------- | ---------------------------------------------------------- |
-| **Statyczny** (`static`) | obraz, urządzenia i encje | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Światło** (`light`)    | plus kolor lamp           | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Pełny** (`full`)       | plus ryby i koralowce     | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Poziom                   | Pokazuje                  |
+| ------------------------ | ------------------------- |
+| **Statyczny** (`static`) | obraz, urządzenia i encje |
+| **Światło** (`light`)    | plus kolor lamp           |
+| **Pełny** (`full`)       | plus ryby i koralowce     |
 
 Zdjęcie pomieszczenia technicznego z urządzeniami na żywo to pełnoprawne akwarium `static`.
 

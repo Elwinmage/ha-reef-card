@@ -4,7 +4,15 @@
 
 A second card, `custom:reef-aquarium-card`, shows a picture of your tank with its devices and entities on it, the water lit by your lamps and, if you wish, fish and corals alive in it. It needs the [ReefTank integration](https://github.com/Elwinmage/ha-reeftank-component), which stores the aquariums and their pictures.
 
-<img src="../img/aquarium/preview.webp"/>
+## The view
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+There are no fixed zones as on the device views: you put your devices and entities wherever you want on your picture.
+
+- **Picture**: the photo of the view, or the drawn water, tinted by your lamps from the `light` level.
+- **Devices and entities**: a tap on a device opens its view of this card; on an entity, its usual action. A device can also be outlined on the picture (rectangle, lasso or polygon) rather than shown as a thumbnail.
+- **Clickable zones**: a tap on a clickable zone opens another view of the aquarium (the sump in the cabinet, for instance); the ← button comes back to the previous one.
 
 ## Getting started
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 With a ReefBeat cloud account, the aquarium of the cloud pre-fills dimensions, lamps, feeding shortcuts, and filters the Red Sea devices.
-
-## The view
-
-The card is divided into 3 zones:
-
-1. Picture
-2. Devices and entities
-3. Clickable zones
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Picture
-
-<img src="../img/aquarium/zone_1.png"/>
-
-The photo of the view, or the drawn water, tinted by your lamps from the `light` level.
-
-### 2. Devices and entities
-
-<img src="../img/aquarium/zone_2.png"/>
-
-A tap on a device opens its view of this card; on an entity, its usual action. A device can also be outlined on the picture (rectangle, lasso or polygon) rather than shown as a thumbnail.
-
-### 3. Clickable zones
-
-<img src="../img/aquarium/zone_3.png"/>
-
-A tap on a clickable zone opens another view of the aquarium (the sump in the cabinet, for instance); the ← button comes back to the previous one.
 
 ## The scene editor
 
@@ -115,11 +95,11 @@ The alarms compare the tank with its own recent history.
 
 Each aquarium renders at one of three levels; a card can lower it, e.g. on a slow wall tablet:
 
-| Level                 | Shows                         |                                                            |
-| --------------------- | ----------------------------- | ---------------------------------------------------------- |
-| **Static** (`static`) | picture, devices and entities | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Light** (`light`)   | plus the colour of the lamps  | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Full** (`full`)     | plus fish and corals          | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Level                 | Shows                         |
+| --------------------- | ----------------------------- |
+| **Static** (`static`) | picture, devices and entities |
+| **Light** (`light`)   | plus the colour of the lamps  |
+| **Full** (`full`)     | plus fish and corals          |
 
 A picture of the technical room with live devices on it is a perfectly good `static` aquarium.
 

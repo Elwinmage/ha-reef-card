@@ -4,7 +4,15 @@
 
 Eine zweite Karte, `custom:reef-aquarium-card`, zeigt ein Foto Ihres Beckens mit seinen Geräten und Entitäten, das Wasser beleuchtet von Ihren Lampen und, wenn Sie möchten, lebendige Fische und Korallen. Sie benötigt die [ReefTank-Integration](https://github.com/Elwinmage/ha-reeftank-component), die die Aquarien und ihre Bilder speichert.
 
-<img src="../img/aquarium/preview.webp"/>
+## Die Ansicht
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+Anders als bei den Geräteansichten gibt es keine festen Zonen: Sie platzieren Ihre Geräte und Entitäten, wo Sie wollen, auf Ihrem Bild.
+
+- **Bild**: Das Foto der Ansicht oder das gezeichnete Wasser, ab der Stufe `light` von Ihren Lampen getönt.
+- **Geräte und Entitäten**: Ein Tippen auf ein Gerät öffnet seine Ansicht in dieser Karte, auf eine Entität ihre übliche Aktion. Ein Gerät kann auch auf dem Bild umrandet werden (Rechteck, Lasso oder Polygon), statt als Miniatur zu erscheinen.
+- **Klickbare Zonen**: Ein Tippen auf eine klickbare Zone öffnet eine andere Ansicht des Aquariums (zum Beispiel das Technikbecken im Unterschrank); die Schaltfläche ← führt zur vorherigen zurück.
 
 ## Erste Schritte
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 Mit einem ReefBeat-Cloud-Konto füllt das Cloud-Aquarium Maße, Lampen und Fütterungs-Kurzbefehle vor und filtert die Red-Sea-Geräte.
-
-## Die Ansicht
-
-Die Karte ist in 3 Zonen unterteilt:
-
-1. Bild
-2. Geräte und Entitäten
-3. Klickbare Zonen
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Bild
-
-<img src="../img/aquarium/zone_1.png"/>
-
-Das Foto der Ansicht oder das gezeichnete Wasser, ab der Stufe `light` von Ihren Lampen getönt.
-
-### 2. Geräte und Entitäten
-
-<img src="../img/aquarium/zone_2.png"/>
-
-Ein Tippen auf ein Gerät öffnet seine Ansicht in dieser Karte, auf eine Entität ihre übliche Aktion. Ein Gerät kann auch auf dem Bild umrandet werden (Rechteck, Lasso oder Polygon), statt als Miniatur zu erscheinen.
-
-### 3. Klickbare Zonen
-
-<img src="../img/aquarium/zone_3.png"/>
-
-Ein Tippen auf eine klickbare Zone öffnet eine andere Ansicht des Aquariums (zum Beispiel das Technikbecken im Unterschrank); die Schaltfläche ← führt zur vorherigen zurück.
 
 ## Der Szeneneditor
 
@@ -115,11 +95,11 @@ Die Alarme vergleichen das Becken mit seinem eigenen jüngsten Verlauf.
 
 Jedes Aquarium wird in einer von drei Stufen dargestellt; eine Karte kann sie senken, z. B. auf einem langsamen Wandtablet:
 
-| Stufe                   | Zeigt                      |                                                            |
-| ----------------------- | -------------------------- | ---------------------------------------------------------- |
-| **Statisch** (`static`) | Bild, Geräte und Entitäten | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Licht** (`light`)     | plus die Farbe der Lampen  | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Voll** (`full`)       | plus Fische und Korallen   | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Stufe                   | Zeigt                      |
+| ----------------------- | -------------------------- |
+| **Statisch** (`static`) | Bild, Geräte und Entitäten |
+| **Licht** (`light`)     | plus die Farbe der Lampen  |
+| **Voll** (`full`)       | plus Fische und Korallen   |
 
 Ein Foto des Technikraums mit live angezeigten Geräten ist ein vollwertiges `static`-Aquarium.
 

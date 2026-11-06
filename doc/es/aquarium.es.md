@@ -4,7 +4,15 @@
 
 Una segunda tarjeta, `custom:reef-aquarium-card`, muestra una foto de su acuario con sus dispositivos y entidades, el agua iluminada por sus lámparas y, si lo desea, peces y corales vivos. Necesita la [integración ReefTank](https://github.com/Elwinmage/ha-reeftank-component), que guarda los acuarios y sus imágenes.
 
-<img src="../img/aquarium/preview.webp"/>
+## La vista
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+No hay zonas fijas como en las vistas de los dispositivos: coloque sus dispositivos y entidades donde quiera sobre su imagen.
+
+- **Imagen**: la foto de la vista, o el agua dibujada, teñida por sus lámparas a partir del nivel `light`.
+- **Dispositivos y entidades**: un toque en un dispositivo abre su vista en esta tarjeta; en una entidad, su acción habitual. Un dispositivo también puede contornearse en la imagen (rectángulo, lazo o polígono) en lugar de mostrarse como miniatura.
+- **Zonas clicables**: una pulsación en una zona clicable abre otra vista del acuario (el sump del mueble, por ejemplo); el botón ← vuelve a la anterior.
 
 ## Primeros pasos
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 Con una cuenta en la nube ReefBeat, el acuario de la nube rellena las dimensiones, las lámparas y los atajos de alimentación, y filtra los dispositivos Red Sea.
-
-## La vista
-
-La tarjeta se divide en 3 zonas:
-
-1. Imagen
-2. Dispositivos y entidades
-3. Zonas clicables
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Imagen
-
-<img src="../img/aquarium/zone_1.png"/>
-
-La foto de la vista, o el agua dibujada, teñida por sus lámparas a partir del nivel `light`.
-
-### 2. Dispositivos y entidades
-
-<img src="../img/aquarium/zone_2.png"/>
-
-Un toque en un dispositivo abre su vista en esta tarjeta; en una entidad, su acción habitual. Un dispositivo también puede contornearse en la imagen (rectángulo, lazo o polígono) en lugar de mostrarse como miniatura.
-
-### 3. Zonas clicables
-
-<img src="../img/aquarium/zone_3.png"/>
-
-Una pulsación en una zona clicable abre otra vista del acuario (el sump del mueble, por ejemplo); el botón ← vuelve a la anterior.
 
 ## El editor de escena
 
@@ -115,11 +95,11 @@ Las alarmas comparan el acuario con su propio historial reciente.
 
 Cada acuario se muestra en uno de tres niveles; una tarjeta puede bajarlo, por ejemplo en una tableta de pared lenta:
 
-| Nivel                   | Muestra                          |                                                            |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------- |
-| **Estático** (`static`) | imagen, dispositivos y entidades | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Luz** (`light`)       | más el color de las lámparas     | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Completo** (`full`)   | más peces y corales              | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Nivel                   | Muestra                          |
+| ----------------------- | -------------------------------- |
+| **Estático** (`static`) | imagen, dispositivos y entidades |
+| **Luz** (`light`)       | más el color de las lámparas     |
+| **Completo** (`full`)   | más peces y corales              |
 
 Una foto del cuarto técnico con sus dispositivos en vivo es un acuario `static` perfectamente válido.
 

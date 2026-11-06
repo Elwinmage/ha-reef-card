@@ -4,7 +4,15 @@
 
 Una seconda card, `custom:reef-aquarium-card`, mostra una foto della tua vasca con i suoi dispositivi ed entità, l'acqua illuminata dalle tue lampade e, se vuoi, pesci e coralli vivi. Richiede l'[integrazione ReefTank](https://github.com/Elwinmage/ha-reeftank-component), che conserva gli acquari e le loro immagini.
 
-<img src="../img/aquarium/preview.webp"/>
+## La vista
+
+<img src="../img/aquarium/view_tank.png" width="360"/> <img src="../img/aquarium/view_sump.png" width="360"/>
+
+Non ci sono zone fisse come nelle viste dei dispositivi: posiziona i tuoi dispositivi e le tue entità dove vuoi sulla tua immagine.
+
+- **Immagine**: la foto della vista, o l'acqua disegnata, tinta dalle tue lampade a partire dal livello `light`.
+- **Dispositivi ed entità**: un tocco su un dispositivo apre la sua vista in questa card; su un'entità, la sua azione abituale. Un dispositivo può anche essere contornato sull'immagine (rettangolo, lazo o poligono) invece di apparire come miniatura.
+- **Zone cliccabili**: un tocco su una zona cliccabile apre un'altra vista dell'acquario (la sump nel mobile, per esempio); il pulsante ← torna alla precedente.
 
 ## Primi passi
 
@@ -24,34 +32,6 @@ view: front # optional: the view to start on
 ```
 
 Con un account cloud ReefBeat, l'acquario del cloud precompila dimensioni, lampade e scorciatoie di alimentazione, e filtra i dispositivi Red Sea.
-
-## La vista
-
-La card è divisa in 3 zone:
-
-1. Immagine
-2. Dispositivi ed entità
-3. Zone cliccabili
-
-<img src="../img/aquarium/aquarium_zones.png"/>
-
-### 1. Immagine
-
-<img src="../img/aquarium/zone_1.png"/>
-
-La foto della vista, o l'acqua disegnata, tinta dalle tue lampade a partire dal livello `light`.
-
-### 2. Dispositivi ed entità
-
-<img src="../img/aquarium/zone_2.png"/>
-
-Un tocco su un dispositivo apre la sua vista in questa card; su un'entità, la sua azione abituale. Un dispositivo può anche essere contornato sull'immagine (rettangolo, lazo o poligono) invece di apparire come miniatura.
-
-### 3. Zone cliccabili
-
-<img src="../img/aquarium/zone_3.png"/>
-
-Un tocco su una zona cliccabile apre un'altra vista dell'acquario (la sump nel mobile, per esempio); il pulsante ← torna alla precedente.
 
 ## L'editor di scena
 
@@ -115,11 +95,11 @@ Gli allarmi confrontano la vasca con la sua cronologia recente.
 
 Ogni acquario è reso a uno di tre livelli; una scheda può abbassarlo, ad esempio su un tablet a muro lento:
 
-| Livello                | Mostra                          |                                                            |
-| ---------------------- | ------------------------------- | ---------------------------------------------------------- |
-| **Statico** (`static`) | immagine, dispositivi ed entità | <img src="../img/aquarium/render_static.png" width="240"/> |
-| **Luce** (`light`)     | più il colore delle lampade     | <img src="../img/aquarium/render_light.png" width="240"/>  |
-| **Completo** (`full`)  | più pesci e coralli             | <img src="../img/aquarium/render_full.png" width="240"/>   |
+| Livello                | Mostra                          |
+| ---------------------- | ------------------------------- |
+| **Statico** (`static`) | immagine, dispositivi ed entità |
+| **Luce** (`light`)     | più il colore delle lampade     |
+| **Completo** (`full`)  | più pesci e coralli             |
 
 Una foto del locale tecnico con i dispositivi in tempo reale è un ottimo acquario `static`.
 
