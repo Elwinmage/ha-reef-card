@@ -68,6 +68,8 @@ Zaznacz **Ukryj etykietę**, aby wyświetlać tylko wartość, i wybierz **Kolor
 
 Lampy oświetlające każdą wodę i ich położenie; pompy poruszające wodę.
 
+- **Podgląd światła**: zaznacz go, aby wypróbować na obrazie temperaturę barwową (od 9000 do 23 000 K, zakres ReefLED) i natężenie. Nic nie jest wysyłane do lamp.
+
 ### Obsada
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Ryby (gatunek, liczba, rozmiar, schronienie) i koralowce (gatunek, rozmiar, kolo
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Encje rejestrujące karmienie i miejsce, gdzie spada pokarm.
+
+- **Punkty karmienia**: urządzenie lub encja z zakładki **Urządzenia** może być punktem karmienia, w którym gromadzą się ryby. Ustawienie karmnika jako punktu dodaje też jego encję karmienia do źródeł i wiąże z nią punkt; każde źródło wyświetla swoje punkty.
 
 ### Monitorowanie
 

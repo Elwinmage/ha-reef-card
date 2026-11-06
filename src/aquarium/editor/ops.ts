@@ -785,6 +785,65 @@ export function add_feed_source(
   return [out, id];
 }
 
+/**
+ * Make an element a feeding point, or not. A point made from a feeder
+ * records its feedings too: its feed entity becomes a feeding source (the
+ * one already listed, if any) and the point is bound to it.
+ * @param feed_entity: the entity feeding of the element, if it has one
+ */
+export function set_feeding_point(
+  doc: AquariumDocument,
+  view_id: string,
+  element_id: string,
+  on: boolean,
+  feed_entity: string | null = null,
+): AquariumDocument {
+  let out = clone(doc);
+  const element = out.views[view_id]?.elements.find((e) => e.id === element_id);
+  if (!element) return doc;
+  if (!on) {
+    element.roles = [];
+    element.source = null;
+    return out;
+  }
+  element.roles = ["feeding_point"];
+  if (feed_entity && !element.source) {
+    let source = out.feeding.sources.find((s) => s.entity_id === feed_entity);
+    if (!source) {
+      const [next, id] = add_feed_source(out, feed_entity, "feeder");
+      out = next;
+      source = out.feeding.sources.find((s) => s.id === id)!;
+    }
+    out.views[view_id].elements.find((e) => e.id === element_id)!.source =
+      source.id;
+  }
+  return out;
+}
+
+/** Where a feeding point stands, for the list of the feeding sources. */
+export interface FeedingPointRef {
+  view_id: string;
+  element: SceneElement;
+}
+
+/**
+ * Feeding points of the document, by the source they are bound to ("" for
+ * the ones answering any source).
+ */
+export function feeding_points_by_source(
+  doc: AquariumDocument,
+): Record<string, FeedingPointRef[]> {
+  const out: Record<string, FeedingPointRef[]> = {};
+  for (const [view_id, view] of Object.entries(doc.views)) {
+    for (const element of view.elements) {
+      if (!element.roles.includes("feeding_point")) continue;
+      const key = element.source ?? "";
+      (out[key] ??= []).push({ view_id, element });
+    }
+  }
+  return out;
+}
+
 /** Remove a feeding source; elements bound to it fall back to any feeding. */
 export function remove_feed_source(
   doc: AquariumDocument,

@@ -757,6 +757,20 @@ export default css`
   .home-row select {
     width: auto;
   }
+  .points {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: -2px 0 6px 8px;
+    font-size: 0.8em;
+    color: var(--secondary-text-color, #777);
+  }
+  .points svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    fill: currentColor;
+  }
   .lamp {
     position: absolute;
     transform: translate(-50%, -110%);

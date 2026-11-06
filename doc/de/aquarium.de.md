@@ -68,6 +68,8 @@ Aktivieren Sie **Beschriftung ausblenden**, um nur den Wert anzuzeigen, und wäh
 
 Lampen, die jedes Wasser beleuchten, und ihre Position; Pumpen, die das Wasser bewegen.
 
+- **Lichtvorschau**: Aktivieren Sie sie, um eine Farbtemperatur (9.000 bis 23.000 K, der Bereich der ReefLED) und eine Intensität auf dem Bild auszuprobieren. An die Lampen wird nichts gesendet.
+
 ### Besatz
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Fische (Art, Anzahl, Größe, Revier) und Korallen (Art, Größe, Farben, Positi
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Entitäten, die eine Fütterung protokollieren, und wo das Futter fällt.
+
+- **Fütterungspunkte**: Ein Gerät oder eine Entität des Reiters **Geräte** kann ein Fütterungspunkt sein, an dem sich die Fische sammeln. Wird ein Futterautomat dazu gemacht, kommt auch seine Fütterungsentität zu den Quellen und der Punkt wird an sie gebunden; jede Quelle listet ihre Punkte.
 
 ### Überwachung
 

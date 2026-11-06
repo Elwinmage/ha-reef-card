@@ -68,6 +68,8 @@ Tick **Hide the label** to draw the value alone, and choose its **Text colour**:
 
 Lamps lighting each water and their position; pumps that make the water move.
 
+- **Light preview**: tick it to try a colour temperature (9,000 to 23,000 K, the range of the ReefLED) and an intensity on the picture. Nothing is sent to the lamps.
+
 ### Livestock
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Fish (species, count, size, home) and corals (species, size, colours, position).
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Entities that record a feeding, and where the food falls.
+
+- **Feeding points**: a device or an entity of the **Devices** tab can be a feeding point, where the fish gather. Making a feeder one also adds its feed entity to the sources and binds the point to it; each source lists its points.
 
 ### Monitoring
 

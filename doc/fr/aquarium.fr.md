@@ -68,6 +68,8 @@ Cochez **Masquer le libellé** pour n'afficher que la valeur, et choisissez sa *
 
 Les lampes qui éclairent chaque eau et leur position ; les pompes qui font bouger l'eau.
 
+- **Aperçu de la lumière** : cochez-le pour essayer une température de couleur (9 000 à 23 000 K, la plage de la ReefLED) et une intensité sur l'image. Rien n'est envoyé aux lampes.
+
 ### Population
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Poissons (espèce, nombre, taille, abri) et coraux (espèce, taille, couleurs, p
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Les entités qui enregistrent un nourrissage, et où tombe la nourriture.
+
+- **Points de nourrissage** : un appareil ou une entité de l'onglet **Appareils** peut être un point de nourrissage, où les poissons se rassemblent. En faire un d'un nourrisseur ajoute aussi son entité de nourrissage aux sources et y lie le point ; chaque source liste ses points.
 
 ### Surveillance
 

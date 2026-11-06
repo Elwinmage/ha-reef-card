@@ -1127,6 +1127,37 @@ describe("scene editor: stage", () => {
         .map((h: any) => h.textContent)
         .join(" ");
     expect(hint()).toContain("Drag the ☀");
+    // light preview: off by default, then tints the outlined waters
+    const tints = () => root.querySelectorAll(".stage .water.tint").length;
+    expect(tints()).toBe(0);
+    const preview = [...root.querySelectorAll("aside fieldset")].find(
+      (f: any) => f.textContent.includes("Light preview"),
+    ) as HTMLElement;
+    const ranges = () =>
+      [...preview.querySelectorAll("input[type=range]")] as HTMLInputElement[];
+    expect(ranges().every((r) => r.disabled)).toBe(true);
+    fire(
+      preview.querySelector("input[type=checkbox]"),
+      true,
+      "change",
+      "checked",
+    );
+    await editor.updateComplete;
+    expect(tints()).toBeGreaterThan(0);
+    const before = root
+      .querySelector(".stage .water.tint")
+      .getAttribute("style");
+    fire(ranges()[0], "9000", "input");
+    await editor.updateComplete;
+    expect(preview.textContent).toContain("9");
+    expect(
+      root.querySelector(".stage .water.tint").getAttribute("style"),
+    ).not.toBe(before);
+    fire(ranges()[1], "0", "input");
+    await editor.updateComplete;
+    expect(editor._preview_intensity).toBe(0);
+    // nothing changes in the document
+    expect(editor.dirty).toBe(false);
     // no outline, no mark: the panel says why
     editor._water_id = "none";
     editor._doc.waters.none = { ...editor._doc.waters.main, lights: [] };

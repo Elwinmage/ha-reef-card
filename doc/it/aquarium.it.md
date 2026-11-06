@@ -68,6 +68,8 @@ Seleziona **Nascondi l'etichetta** per mostrare solo il valore e scegli il suo *
 
 Le lampade che illuminano ogni acqua e la loro posizione; le pompe che muovono l'acqua.
 
+- **Anteprima della luce**: selezionala per provare una temperatura di colore (da 9.000 a 23.000 K, la gamma della ReefLED) e un'intensità sull'immagine. Nulla viene inviato alle lampade.
+
 ### Fauna
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Pesci (specie, numero, taglia, rifugio) e coralli (specie, taglia, colori, posiz
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Le entità che registrano un'alimentazione, e dove cade il cibo.
+
+- **Punti di alimentazione**: un dispositivo o un'entità della scheda **Dispositivi** può essere un punto di alimentazione, dove si radunano i pesci. Farlo con un alimentatore aggiunge anche la sua entità di alimentazione alle fonti e vi lega il punto; ogni fonte elenca i suoi punti.
 
 ### Monitoraggio
 

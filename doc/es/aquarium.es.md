@@ -68,6 +68,8 @@ Marque **Ocultar la etiqueta** para mostrar solo el valor y elija su **Color del
 
 Las lámparas que iluminan cada agua y su posición; las bombas que mueven el agua.
 
+- **Vista previa de la luz**: márquela para probar una temperatura de color (de 9.000 a 23.000 K, el rango de la ReefLED) y una intensidad sobre la imagen. No se envía nada a las lámparas.
+
 ### Fauna
 
 <img src="../img/aquarium/editor_livestock.png"/>
@@ -82,6 +84,8 @@ Peces (especie, número, tamaño, refugio) y corales (especie, tamaño, colores,
 <img src="../img/aquarium/editor_feeding.png"/>
 
 Las entidades que registran una alimentación, y dónde cae la comida.
+
+- **Puntos de alimentación**: un dispositivo o una entidad de la pestaña **Dispositivos** puede ser un punto de alimentación, donde se reúnen los peces. Convertir un comedero en uno añade también su entidad de alimentación a las fuentes y vincula el punto a ella; cada fuente lista sus puntos.
 
 ### Vigilancia
 

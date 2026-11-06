@@ -70,7 +70,14 @@ import {
   type TreeEntity,
   type TreeFloor,
 } from "../tree";
-import { device_entities, night_darkness, tint_layers } from "../light";
+import {
+  device_entities,
+  night_darkness,
+  tint_layers,
+  type RGB,
+  type WaterLight,
+} from "../light";
+import { kelvin_rgb } from "../../devices/redsea/rsled/rsled_program";
 import { Backdrop, drawn_region } from "../backdrop";
 import { device_name, device_thumbnail } from "../elements";
 import { coral_palette, rgb_hex } from "../sprites";
@@ -153,6 +160,14 @@ const TABS: Tab[] = [
  * reaching the top of the picture, it would be drawn outside of the stage.
  */
 const LAMP_MARK_TOP = "30px";
+
+/** Kelvin range of the light preview: the one of the ReefLED. */
+const PREVIEW_KELVIN_MIN = 9000;
+const PREVIEW_KELVIN_MAX = 23000;
+const PREVIEW_KELVIN_DEFAULT = 15000;
+
+/** Domains of the entities that can drop food (as the feeding sources). */
+const FEED_DOMAINS = ["switch", "button", "input_button", "input_boolean"];
 
 /** How long the confirmation of a save stays on display. */
 const SAVED_MESSAGE_MS = 5000;
@@ -339,6 +354,10 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _night_preview = false;
   /** Night darkness while its slider moves, not yet in the document. */
   @state() private _night_live: number | null = null;
+  /** Light tried in the Light & flow tab (preview only, never sent). */
+  @state() private _light_preview = false;
+  @state() private _preview_kelvin = PREVIEW_KELVIN_DEFAULT;
+  @state() private _preview_intensity = 100;
   /** Sand line edited by the sand tool: front glass or back wall. */
   @state() private _sand_line: ops.SandLine = "sand";
   /** Species picker opened (fish or coral), with its search text. */
@@ -1139,15 +1158,94 @@ export class ReefAquariumSceneEditor extends LitElement {
    * the lamps off: same layers, same darkness.
    */
   private _render_night(view: View): TemplateResult[] {
+    return this._render_light(view, () => ({
+      lamps: [],
+      dark: true,
+      none: false,
+    }));
+  }
+
+  /**
+   * The water of each outlined region under the light tried in the Light &
+   * flow tab: every lamp of the water at the chosen kelvin and intensity.
+   */
+  /** Kelvin and intensity tried on the picture, never sent to the lamps. */
+  private _light_preview_controls(): TemplateResult {
+    const on = this._light_preview;
+    return html`<fieldset>
+      <legend>${i18n._("aq_light_preview")}</legend>
+      <label class="check"
+        ><input
+          type="checkbox"
+          .checked=${on}
+          @change=${(e: Event) =>
+            (this._light_preview = (e.target as HTMLInputElement).checked)}
+        />${i18n._("aq_light_preview_show")}</label
+      >
+      <label class="field"
+        >${i18n._("aq_light_preview_kelvin")}
+        (${this._preview_kelvin.toLocaleString()} K)
+        <input
+          type="range"
+          min="${PREVIEW_KELVIN_MIN}"
+          max="${PREVIEW_KELVIN_MAX}"
+          step="500"
+          ?disabled=${!on}
+          .value=${String(this._preview_kelvin)}
+          @input=${(e: Event) =>
+            (this._preview_kelvin = Number(
+              (e.target as HTMLInputElement).value,
+            ))}
+      /></label>
+      <label class="field"
+        >${i18n._("aq_light_preview_intensity")} (${this._preview_intensity} %)
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          ?disabled=${!on}
+          .value=${String(this._preview_intensity)}
+          @input=${(e: Event) =>
+            (this._preview_intensity = Number(
+              (e.target as HTMLInputElement).value,
+            ))}
+      /></label>
+      <span class="hint">${i18n._("aq_light_preview_hint")}</span>
+    </fieldset>`;
+  }
+
+  private _render_light_preview(view: View): TemplateResult[] {
+    const rgb = kelvin_rgb(this._preview_kelvin) as RGB;
+    const power = this._preview_intensity / 100;
+    return this._render_light(view, (water_id) => {
+      const lights = this._doc!.waters[water_id]?.lights ?? [];
+      // A water without lamps is lit from the middle, to see the colour
+      const xs = lights.length ? lights.map((l) => l.x) : [0.5];
+      return {
+        lamps: xs
+          .map((x) => ({ x, rgb, power, dark: power <= 0 }))
+          .sort((a, b) => a.x - b.x),
+        dark: power <= 0,
+        none: false,
+      };
+    });
+  }
+
+  /** Light layers over each outlined region, as the card draws them. */
+  private _render_light(
+    view: View,
+    light_of: (water_id: string) => WaterLight,
+  ): TemplateResult[] {
     const doc = this._doc!;
-    const layers = tint_layers(
-      { lamps: [], dark: true, none: false },
-      doc.photo_light ?? "white",
-      this._night_value(doc),
-    )!;
     return view.regions
       .filter((r) => WaterProjection.valid(r.quad))
       .map((r) => {
+        const layers = tint_layers(
+          light_of(r.water),
+          doc.photo_light ?? "white",
+          this._night_value(doc),
+        )!;
         const clip = clip_path(r.quad);
         return html`<div
             class="water tint"
@@ -1203,6 +1301,9 @@ export class ReefAquariumSceneEditor extends LitElement {
         ${this._preview ? html`<canvas class="backdrop"></canvas>` : nothing}
         ${tab === "aquarium" && this._night_preview
           ? this._render_night(view)
+          : nothing}
+        ${tab === "lights" && this._light_preview
+          ? this._render_light_preview(view)
           : nothing}
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
           ${view.regions.map(
@@ -2590,11 +2691,15 @@ export class ReefAquariumSceneEditor extends LitElement {
           type="checkbox"
           .checked=${feeding}
           @change=${(e: Event) =>
-            set({
-              roles: (e.target as HTMLInputElement).checked
-                ? ["feeding_point"]
-                : [],
-            })}
+            this.change(
+              ops.set_feeding_point(
+                doc,
+                v,
+                element.id,
+                (e.target as HTMLInputElement).checked,
+                this._feed_entity(element),
+              ),
+            )}
         />
         ${i18n._("aq_feeding_point")}</label
       >
@@ -2626,6 +2731,58 @@ export class ReefAquariumSceneEditor extends LitElement {
         ${i18n._("aq_delete")}
       </button>
     </fieldset>`;
+  }
+
+  /**
+   * The entity feeding of an element: the feed switch or button of a device
+   * (a feeder), or the entity itself when it is one.
+   * @return the entity id, or null when the element does not feed
+   */
+  private _feed_entity(element: SceneElement): string | null {
+    const feeds = (entity_id: string) => {
+      const [domain, object_id = ""] = entity_id.split(".");
+      return (
+        FEED_DOMAINS.includes(domain) && /(^|_)feed(ing)?($|_)/.test(object_id)
+      );
+    };
+    if (element.kind === "entity")
+      return element.entity_id && feeds(element.entity_id)
+        ? element.entity_id
+        : null;
+    if (element.kind !== "device" || !element.device_id) return null;
+    const entities: Record<string, any> = (this._hass?.entities as any) ?? {};
+    const own = Object.keys(entities)
+      .filter((id) => entities[id]?.device_id === element.device_id)
+      .filter(feeds)
+      .sort();
+    // The feeder's own feed switch first (ESPHome VSON: manual_feed)
+    return own.find((id) => id.endsWith("_manual_feed")) ?? own[0] ?? null;
+  }
+
+  /** Name of a feeding point, as the feeding panel lists it. */
+  private _point_name(ref: ops.FeedingPointRef): string {
+    const e = ref.element;
+    const name =
+      e.label ||
+      (e.kind === "device"
+        ? device_name(this._hass!, e.device_id)
+        : e.kind === "entity"
+          ? (e.entity_id ?? "")
+          : i18n._("aq_marker"));
+    const view = this._doc!.views[ref.view_id]?.name;
+    return view ? `${name} (${view})` : name;
+  }
+
+  /** The feeding points answering a source, under it. */
+  private _points_line(
+    points: ops.FeedingPointRef[] | undefined,
+    prefix: string = "",
+  ): TemplateResult | typeof nothing {
+    if (!points?.length) return nothing;
+    return html`<div class="points" title="${i18n._("aq_feeding_point")}">
+      <svg viewBox="0 0 24 24"><path d="${mdiMapMarker}"></path></svg>
+      <span>${prefix}${points.map((p) => this._point_name(p)).join(", ")}</span>
+    </div>`;
   }
 
   private _panel_lights(): TemplateResult {
@@ -2759,6 +2916,7 @@ export class ReefAquariumSceneEditor extends LitElement {
               </datalist>
               <span class="hint">${i18n._("aq_flow_hint")}</span>
             </fieldset>
+            ${this._light_preview_controls()}
             <label class="field"
               >${i18n._("aq_sand_band")}
               <input
@@ -3342,40 +3500,45 @@ export class ReefAquariumSceneEditor extends LitElement {
       "event",
       "binary_sensor",
     ]);
+    const points = ops.feeding_points_by_source(doc);
     return html`
       <fieldset>
         <legend>${i18n._("aq_feeding_sources")}</legend>
         ${doc.feeding.sources.map(
           (s) =>
             html`<div class="line">
-              <span class="grow">${s.entity_id}</span>
-              <select
-                @change=${(e: Event) => {
-                  const next = structuredClone(doc);
-                  const src = next.feeding.sources.find((x) => x.id === s.id)!;
-                  src.kind = ((e.target as HTMLSelectElement).value ||
-                    null) as any;
-                  this.change(next);
-                }}
-              >
-                <option value="" ?selected=${!s.kind}>
-                  ${i18n._("aq_kind_auto")}
-                </option>
-                ${["feeder", "shortcut", "manual"].map(
-                  (k) =>
-                    html`<option value="${k}" ?selected=${s.kind === k}>
-                      ${i18n._(`aq_kind_${k}`)}
-                    </option>`,
-                )}
-              </select>
-              <button
-                class="icon"
-                @click=${() => this.change(ops.remove_feed_source(doc, s.id))}
-              >
-                ✕
-              </button>
-            </div>`,
+                <span class="grow">${s.entity_id}</span>
+                <select
+                  @change=${(e: Event) => {
+                    const next = structuredClone(doc);
+                    const src = next.feeding.sources.find(
+                      (x) => x.id === s.id,
+                    )!;
+                    src.kind = ((e.target as HTMLSelectElement).value ||
+                      null) as any;
+                    this.change(next);
+                  }}
+                >
+                  <option value="" ?selected=${!s.kind}>
+                    ${i18n._("aq_kind_auto")}
+                  </option>
+                  ${["feeder", "shortcut", "manual"].map(
+                    (k) =>
+                      html`<option value="${k}" ?selected=${s.kind === k}>
+                        ${i18n._(`aq_kind_${k}`)}
+                      </option>`,
+                  )}
+                </select>
+                <button
+                  class="icon"
+                  @click=${() => this.change(ops.remove_feed_source(doc, s.id))}
+                >
+                  ✕
+                </button>
+              </div>
+              ${this._points_line(points[s.id])}`,
         )}
+        ${this._points_line(points[""], `${i18n._("aq_any_source")}: `)}
         ${suggestions.map(
           (id) =>
             html`<button
