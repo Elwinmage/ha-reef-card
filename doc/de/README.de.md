@@ -36,7 +36,7 @@ ihre Wartungsaufgaben erscheinen in derselben Ansicht.
 
 Auch die Energieflüsse von [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (Netz, Batterie, Pumpen) haben ihre eigene Ansicht, gezeichnet mit [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
 
-Eine zweite Karte erweckt Ihr Becken mit [ha-reeftank-component](https://github.com/Elwinmage/ha-reeftank-component) zum Leben: siehe die [Aquarienansicht](#aquarienansicht).
+Eine zweite Karte erweckt Ihr Becken mit [ha-reeftank-component](https://github.com/Elwinmage/ha-reeftank-component) zum Leben: siehe die [Aquarienansicht](aquarium.de.md#aquarienansicht).
 
 <!-- generated:demo-videos:start -->
 
@@ -289,6 +289,18 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
+  <tr>
+    <td colspan="5"><b>ReefTank</b> — über <a href="https://github.com/Elwinmage/ha-reeftank-component">ha-reeftank-component</a></td>
+  </tr>
+  <tr>
+    <td><a href="aquarium.de.md#aquarienansicht">Aquarienansicht</a></td>
+    <td>Ihr Aquarium<br />(Foto, Lampen, Besatz)</td><td>✅</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reeftank-component/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquarium,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquarium,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -298,7 +310,6 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
 
 - [Installation](#installation)
 - [Konfiguration](#konfiguration)
-- [Aquarienansicht](#aquarienansicht)
 - [Gemeinsam für die Red-Sea-Geräte](#gemeinsam-für-die-red-sea-geräte)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefato.de.md#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/reefcontrol.de.md#reefcontrol)
@@ -312,6 +323,7 @@ Alle zusammen sind auf der [ReefTech-Projektseite](https://elwinmage.github.io/r
 - [Wartung](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/maintenance.de.md#wartung)
 - [Notstromversorgung](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/de/energybackup.de.md#notstromversorgung)
 - [Futterautomat VSON (gehackt)](vsonfeeder.de.md#futterautomat-vson-gehackt)
+- [Aquarienansicht](aquarium.de.md#aquarienansicht)
 - [FAQ](#faq)
 
 # Installation
@@ -350,28 +362,6 @@ Der Karteneditor speichert dort die stabile Kennung des Geräts (seine Hardware-
 
 - **Meldungen**: Die Laufbanner zeigen das Datum der letzten Meldung und des letzten Alarms und ob sie von Home Assistant oder der ReefBeat-App stammen. Ein Klick auf ein Banner oder die Schaltfläche **Meldungsverlauf** im Konfigurationsdialog öffnet den Verlauf, gefiltert nach Art und Zeitraum.
 - **Poseidon**: Ein Gerät, das den [Poseidon-Modus](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/de/poseidon.de.md#poseidon-modus) der Integration nutzt, zeigt einen Dreizack: im Poseidon-Modus in seiner „Ein“-Farbe, außerhalb in seiner „Aus“-Farbe, orange blinkend, wenn seit einer Weile nichts mehr durch das Relais ging. Ein Tippen öffnet seinen Dialog (Modus, Strategie, Abfragepause, was das Relais sieht), langes Drücken schaltet den Modus ein oder aus.
-
-## Aquarienansicht
-
-Eine zweite Karte, `custom:reef-aquarium-card`, zeigt ein Foto Ihres Beckens mit seinen Geräten und Entitäten, das Wasser beleuchtet von Ihren Lampen und, wenn Sie möchten, lebendige Fische und Korallen. Sie benötigt die [ReefTank-Integration](https://github.com/Elwinmage/ha-reeftank-component), die die Aquarien und ihre Bilder speichert.
-
-```yaml
-type: custom:reef-aquarium-card
-aquarium: a1b2 # chosen in the card editor
-render: static # optional: static, light or full; can only lower the aquarium's level
-view: front # optional: the view to start on
-```
-
-- **Erstellen und bearbeiten** Sie ein Aquarium im Karteneditor: _Neues Aquarium_ oder _Szene bearbeiten_ öffnet einen Vollbild-Editor (Bilder, Wasserumriss, Dekor, klickbare Zonen, aus einem Baum gezogene Geräte und Entitäten, Lampen, Besatz, Fütterungsquellen). Mit einem ReefBeat-Cloud-Konto füllt das Cloud-Aquarium Maße, Lampen und Fütterungs-Kurzbefehle vor und filtert die Red-Sea-Geräte.
-- **Renderstufen**: `static` (Bild, Geräte, Entitäten, klickbare Zonen), `light` (zusätzlich die Lampenfarbe auf dem Wasser), `full` (zusätzlich Fische, Korallen und die Fütterungsanimation).
-- Ein Tippen auf ein Gerät öffnet seine Ansicht in dieser Karte, auf eine Entität ihre übliche Aktion. Ein Gerät kann auch auf dem Bild umrandet werden (Rechteck, Lasso oder Polygon), statt als Miniatur zu erscheinen.
-- **Sand und Felsen**: Zeichnen Sie die Sandlinie an der Frontscheibe (und an der Rückwand, wenn das Bild die Sandoberfläche zeigt) und umranden Sie die Felsen mit ihrer Tiefe: Fische bleiben über dem Sand, schwimmen hinter den Felsen, und Bodenbewohner kriechen darauf.
-- **Gezeichnetes Dekor**: Ist das Foto des Wassers unbrauchbar, kann das Wasser gezeichnet werden (Wasser, Sand, Felstexturen des Katalogs), der Rest des Bildes bleibt erhalten.
-- **Verhalten**: Schwärme, Freiwasserschwimmer, Bodenbewohner, Fische mit festem Revier, Grundeln, die aus ihrem Bau schauen; nachts verstecken sich die Fische oder ruhen, unter einem Schleier, der das Becken lesbar lässt.
-- **Wasserüberwachung**: Der Reiter _Überwachung_ des Editors wählt die Entitäten für pH, ORP, Raum-CO2 und KH-Tests und legt die Alarmschwellen fest; die Alarme vergleichen das Becken mit seinem eigenen jüngsten Verlauf.
-- **Arten**: Fische und Korallen stammen aus dem [ReefTank-Katalog](https://github.com/Elwinmage/reeftank-catalog), den die Integration herunterlädt und aktuell hält. Der Editor listet sie mit einer Miniatur auf; ein Name, der nicht im Katalog steht, schwimmt als generischer Fisch.
-
-Die vollständige Anleitung (Szeneneditor, Entitäten, Dienste, Katalog) steht im [ReefTank-README](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/de/README.de.md).
 
 # FAQ
 

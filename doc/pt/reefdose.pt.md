@@ -91,7 +91,12 @@ Esta zona permite visualizar a programação atual das cabeças e alterá-la.
 A configuração da cabeça contém a **Regulação da dosagem** da [integração redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/pt/reefdose.pt.md#regulação-da-dosagem):
 
 - **Dosagem assistida**: o botão **Dosagem assistida** abre uma janela com o gráfico dos resultados de teste, a introdução de um novo resultado, a dose proposta para aplicar ou ignorar, e as definições do cálculo. Nada chega ao doseador até a aplicar.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
 - **Salmoura**: a cabeça é controlada apenas pelo Home Assistant, com doses manuais, por isso a sua configuração mostra a salmoura em vez do programa: salinidade da última semana, estado e alarme, salmoura prevista, controlo com refratómetro e definições. Na vista principal, o anel e a etiqueta central mostram a salmoura dosada hoje face à prevista, e a etiqueta inferior a salinidade.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
 
 ### Histórico das doses
 

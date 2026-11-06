@@ -91,7 +91,12 @@ Questa zona permette di visualizzare la programmazione corrente delle teste e di
 La configurazione della testa contiene la **Regolazione del dosaggio** dell'[integrazione redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/it/reefdose.it.md#regolazione-del-dosaggio):
 
 - **Dosaggio assistito**: il pulsante **Dosaggio assistito** apre una finestra con il grafico dei risultati dei test, l'inserimento di un nuovo risultato, la dose proposta da applicare o ignorare e le impostazioni del calcolo. Nulla arriva al dosatore finché non la applichi.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
 - **Salamoia**: la testa è gestita dal solo Home Assistant, con dosi manuali, quindi la sua configurazione mostra la salamoia al posto del programma: salinità dell'ultima settimana, stato e allarme, salamoia prevista, controllo con rifrattometro e impostazioni. Nella vista principale, l'anello e l'etichetta centrale mostrano la salamoia dosata oggi rispetto a quella prevista, e l'etichetta in basso la salinità.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
 
 ### Cronologia delle dosi
 

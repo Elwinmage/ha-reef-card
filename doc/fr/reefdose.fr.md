@@ -91,7 +91,12 @@ Cette zone permet de visualiser la programmation courante des têtes et de la ch
 La configuration de la tête contient la **Régulation du dosage** de l'[intégration redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/fr/reefdose.fr.md#régulation-du-dosage) :
 
 - **Dosage assisté** : le bouton **Dosage assisté** ouvre une fenêtre avec le graphique de vos résultats de test, la saisie d'un nouveau résultat, la dose proposée à appliquer ou à ignorer, et les réglages du calcul. Rien n'est envoyé au doseur tant que vous ne l'appliquez pas.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
 - **Saumure** : la tête est pilotée par Home Assistant seul, avec des doses manuelles ; sa configuration montre donc la saumure à la place du programme : salinité de la dernière semaine, état et alarme, saumure prévue, contrôle au réfractomètre et réglages. Sur la vue principale, l'anneau et le libellé central montrent la saumure dosée aujourd'hui par rapport à la saumure prévue, et le libellé du bas la salinité.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
 
 ### Historique des doses
 
