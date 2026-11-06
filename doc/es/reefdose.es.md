@@ -86,6 +86,22 @@ Esta zona permite visualizar la programación actual de las cabezas y modificarl
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regulación de dosificación
+
+La configuración del cabezal contiene la **Regulación de dosificación** de la [integración redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/es/reefdose.es.md#regulación-de-dosificación):
+
+- **Dosificación asistida**: el botón **Dosificación asistida** abre un diálogo con el gráfico de sus resultados de test, la entrada de un nuevo resultado, la dosis propuesta para aplicar o descartar, y los ajustes del cálculo. Nada llega al dosificador hasta que usted lo aplica.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
+- **Salmuera**: el cabezal lo controla solo Home Assistant, con dosis manuales, así que su configuración muestra la salmuera en lugar del programa: salinidad de la última semana, estado y alarma, salmuera prevista, control con refractómetro y ajustes. En la vista principal, el anillo y la etiqueta central muestran la salmuera dosificada hoy frente a la prevista, y la etiqueta inferior la salinidad.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
+
+### Historial de dosis
+
+Mientras el dosificador está en [modo Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/es/poseidon.es.md#modo-poseidon), la configuración de un cabezal tiene un botón **Historial de dosis**: las dosis del cabezal, de la más reciente a la más antigua, por día, con inicio, fin, duración, volumen y tipo (programada, manual, compensación). Últimas 24 h, 7 o 31 días, o todo lo guardado, con el volumen total del periodo. Un inicio marcado con «≈» se estima a partir del caudal del cabezal.
+
 ## Gestión de suplementos
 
  <img src="../img/rsdose/zone_5.png"/>
@@ -167,6 +183,14 @@ Aquí está la lista de imágenes de suplementos compatibles, agrupadas por marc
 <tr><td>❌</td><td colspan='2'>Replenish</td></tr>
 <tr><td>❌</td><td colspan='2'>Restore</td></tr>
 <tr><td>❌</td><td colspan='2'>Strontion</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>DIY &nbsp; <sup>1/1 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Brine</td><td><img style='width:20%;' src='../../public/img/supplements/b99739a8-bced-420e-bbdb-86ccd14524fd.supplement.png'/></td></tr>
 </table>
 </details>
 

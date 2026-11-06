@@ -115,8 +115,11 @@ hub, from left to right:
 - <span>Waves <img src="../img/mdi/mdi_waves.png" width="20"/> per ATO probe, green on a desired level, orange below or above it.</span>
 
 Each reading takes the colour of its level: green for desired, orange for
-acceptable, red for danger, white when the probe gives no valid reading.
-Clicking a reading opens its more-info dialog.
+acceptable, red for danger, white when the probe gives no valid reading. The
+temperature, pH, ORP and salinity are followed by their **trend** over the last
+hour: an arrow up, an arrow down or a tilde. Clicking a reading opens its
+history over the level bands, on 24 hours or 7 days, with a button to its
+more-info dialog.
 
 ## Probes
 
@@ -129,7 +132,7 @@ them. Each one shows:
 
 - Its **reading**, and the **embedded temperature** right under it for the pH,
   salinity and ATO probes, coloured by their level. Clicking a value opens its
-  more-info dialog.
+  history, as in the summary.
 - A **situation bar** per reading: the red, orange and green bands are the
   danger, acceptable and desired ranges set on the probe, and the black marker
   is where the reading stands. The main reading goes on the left bar, the

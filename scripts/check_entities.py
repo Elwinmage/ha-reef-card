@@ -437,7 +437,95 @@ def extract_component_entities(component_dir: Path) -> dict[str, dict[str, list[
                     if k not in result[dev][plat]:
                         result[dev][plat].append(k)
 
+    # Poseidon entities: built from classes, not descriptions (see below)
+    for dev, platforms in extract_poseidon_entities(component_dir).items():
+        for plat, keys in platforms.items():
+            for k in keys:
+                if k not in result[dev][plat]:
+                    result[dev][plat].append(k)
+
     return dict(result)
+
+
+# ---------------------------------------------------------------------------
+# Step 1 – Poseidon entities of the Red Sea component
+# ---------------------------------------------------------------------------
+#
+# The Poseidon entry adds entities to every device whose keys are known
+# (mode switch, polling pause, strategy). They belong to the Poseidon config
+# entry but are attached to the device, so the card sees them as the
+# device's own. They are not described by EntityDescription tuples: each one
+# is a class with an ``_attr_translation_key``, created by an adder callback
+# in the platform's async_setup_entry, which the EntityExtractor walk cannot
+# follow. The platform of a class is the platform file importing it.
+
+POSEIDON_MODULE = "poseidon.switch_entity"
+
+# Card devices a Poseidon entity can show on: every real Red Sea device.
+# A LED group is no device of its own, it has no keys.
+POSEIDON_DEVICES: list[str] = [
+    d for d in EntityExtractor.ALL_DEVICES if d != "rsled_virtual"
+]
+
+
+def _class_translation_keys(tree: ast.Module) -> dict[str, str]:
+    """{ class name: its _attr_translation_key } of a module."""
+    keys: dict[str, str] = {}
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef):
+            continue
+        for stmt in node.body:
+            target: ast.expr | None = None
+            value: ast.expr | None = None
+            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1:
+                target, value = stmt.targets[0], stmt.value
+            elif isinstance(stmt, ast.AnnAssign):
+                target, value = stmt.target, stmt.value
+            if (
+                isinstance(target, ast.Name)
+                and target.id == "_attr_translation_key"
+                and isinstance(value, ast.Constant)
+                and isinstance(value.value, str)
+            ):
+                keys[node.name] = value.value
+    return keys
+
+
+def extract_poseidon_entities(
+    component_dir: Path,
+) -> dict[str, dict[str, list[str]]]:
+    """
+    Returns: { device: { platform: [translation_key, ...] } } for the
+    Poseidon entities, or {} with a component without Poseidon.
+    """
+    module_file = component_dir / (POSEIDON_MODULE.replace(".", "/") + ".py")
+    if not module_file.exists():
+        return {}
+    class_keys = _class_translation_keys(
+        ast.parse(module_file.read_text(encoding="utf-8"), filename=str(module_file))
+    )
+
+    per_platform: dict[str, list[str]] = defaultdict(list)
+    for platform in PLATFORMS:
+        py_file = component_dir / f"{platform}.py"
+        if not py_file.exists():
+            continue
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        for node in ast.walk(tree):
+            if not (
+                isinstance(node, ast.ImportFrom)
+                and (node.module or "").endswith(POSEIDON_MODULE)
+            ):
+                continue
+            for alias in node.names:
+                key = class_keys.get(alias.name)
+                if key and key not in per_platform[platform]:
+                    per_platform[platform].append(key)
+
+    result: dict[str, dict[str, list[str]]] = {}
+    for device in POSEIDON_DEVICES:
+        result[device] = {plat: list(keys) for plat, keys in per_platform.items()}
+    return result
 
 
 # ---------------------------------------------------------------------------

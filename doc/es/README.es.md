@@ -14,7 +14,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Lit](https://img.shields.io/badge/Lit-3.3-blue?style=flat-square&logo=lit)](https://lit.dev/)
-[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg?token=XXXX)](https://codecov.io/gh/Elwinmage/ha-reef-card)
+[![codecov](https://codecov.io/gh/Elwinmage/ha-reef-card/branch/main/graph/badge.svg)](https://codecov.io/gh/Elwinmage/ha-reef-card)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 # Idiomas compatibles : [<img src="https://flagicons.lipis.dev/flags/4x3/fr.svg" style="width: 5%;"/>](../fr/README.fr.md) [<img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 5%"/>](../../README.md) [<img src="https://flagicons.lipis.dev/flags/4x3/es.svg" style="width: 5%"/>](README.es.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pt.svg" style="width: 5%"/>](../pt/README.pt.md) [<img src="https://flagicons.lipis.dev/flags/4x3/de.svg" style="width: 5%"/>](../de/README.de.md) [<img src="https://flagicons.lipis.dev/flags/4x3/it.svg" style="width: 5%"/>](../it/README.it.md) [<img src="https://flagicons.lipis.dev/flags/4x3/pl.svg" style="width: 5%"/>](../pl/README.pl.md)
@@ -35,6 +35,8 @@ También es compatible con las bombas Aqua Medic de [ha-aquamedic-component](htt
 sus tareas de mantenimiento aparecen en esa misma vista.
 
 Los flujos de energía de [reefbeatEnergyBackup](https://github.com/Elwinmage/reefbeatEnergyBackup) (red, batería, bombas) también tienen su vista, dibujada con [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus).
+
+Una segunda tarjeta da vida a su acuario con [ha-reeftank-component](https://github.com/Elwinmage/ha-reeftank-component): vea la [vista de acuario](aquarium.es.md#vista-de-acuario).
 
 <!-- generated:demo-videos:start -->
 
@@ -59,6 +61,7 @@ Los flujos de energía de [reefbeatEnergyBackup](https://github.com/Elwinmage/re
 </tr>
 <tr>
 <td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Demo Aqua Medic" width="300"/></a><br/><em>Demo Aqua Medic</em></td>
+<td><a href="https://www.youtube.com/watch?v=ZtYobmQZf9k"><img src="https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg" alt="Demo vista de acuario" width="300"/></a><br/><em>Demo vista de acuario</em></td>
 </tr>
 </table>
 
@@ -69,6 +72,8 @@ Los flujos de energía de [reefbeatEnergyBackup](https://github.com/Elwinmage/re
 ## Proyectos relacionados
 
 Los proyectos ReefTech encajan entre sí: las integraciones traen tu equipo a Home Assistant, la tarjeta lo muestra y lo controla, y el respaldo lo mantiene en marcha durante un corte. Cada uno funciona también por su cuenta.
+
+<p align="center"><a href="https://elwinmage.github.io/reeftank/"><img src="https://raw.githubusercontent.com/Elwinmage/reeftank/main/assets/flower/ecosystem-flower.png" width="480" alt="ReefTech project ecosystem" /></a></p>
 
 <table>
   <tr>
@@ -116,7 +121,7 @@ Los proyectos ReefTech encajan entre sí: las integraciones traen tu equipo a Ho
   <tr>
     <td><img src="https://raw.githubusercontent.com/Elwinmage/ha-reef-blueprints/main/icon.png" width="64" alt="ha-reef-blueprints" /></td>
     <td>🐬<br /><a href="https://github.com/Elwinmage/ha-reef-blueprints"><b>ha-reef-blueprints</b></a></td>
-    <td>Blueprints de notificación comunes a todo el ecosistema: mantenimientos vencidos encontrados por el contrato <code>reef_role</code>, y dispositivos que dejaron de responder. Ocho idiomas.</td>
+    <td>Blueprints de automatización comunes a todo el ecosistema: mantenimientos vencidos encontrados por el contrato <code>reef_role</code>, dispositivos que dejaron de responder, una prueba periódica de calentadores y una vigilancia de relés. Ocho idiomas.</td>
     <td>las tres integraciones</td>
   </tr>
   <tr>
@@ -273,6 +278,30 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
       <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:energybackup,all label:bug" style="text-decoration:none">🐛</a>
     </td>
   </tr>
+  <tr>
+    <td colspan="5"><b>ESPHome</b> — dispositivos modificados con <a href="https://esphome.io">ESPHome</a></td>
+  </tr>
+  <tr>
+    <td><a href="vsonfeeder.es.md#comedero-vson-modificado">Comedero</a></td>
+    <td>fishfeeder VSON (hacked)</td><td>✅</td>
+    <td width="200px"><img src="../../src/img/esphome/VSONFEEDER/closed_full.webp" width="100"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:vsonfeeder,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5"><b>ReefTank</b> — a través de <a href="https://github.com/Elwinmage/ha-reeftank-component">ha-reeftank-component</a></td>
+  </tr>
+  <tr>
+    <td><a href="aquarium.es.md#vista-de-acuario">Vista de acuario</a></td>
+    <td>Su acuario<br />(foto, lámparas, fauna)</td><td>✅</td>
+    <td width="200px"><img src="https://raw.githubusercontent.com/Elwinmage/ha-reeftank-component/main/icon.png" width="64"/></td>
+    <td>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquarium,all label:enhancement" style="text-decoration:none">📆</a>
+      <a href="https://github.com/Elwinmage/ha-reef-card/issues?q=is:issue state:open label:aquarium,all label:bug" style="text-decoration:none">🐛</a>
+    </td>
+  </tr>
 </table>
 
 > [!NOTE]
@@ -282,6 +311,7 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
 
 - [Instalación](#instalación)
 - [Configuración](#configuración)
+- [Común a los dispositivos Red Sea](#común-a-los-dispositivos-red-sea)
 - [ReefATO+](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefato.es.md#reefato)
 - [ReefControl](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefcontrol.es.md#reefcontrol)
 - [ReefControl-Power](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/reefcontrol-power.es.md#reefcontrol-power)
@@ -293,17 +323,22 @@ Todos están documentados juntos en la [página del proyecto ReefTech](https://e
 - [Aqua Medic](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/aquamedic.es.md#aqua-medic)
 - [Mantenimiento](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/maintenance.es.md#mantenimiento)
 - [Respaldo de energía](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/es/energybackup.es.md#respaldo-de-energía)
+- [Comedero VSON (modificado)](vsonfeeder.es.md#comedero-vson-modificado)
+- [Vista de acuario](aquarium.es.md#vista-de-acuario)
 - [FAQ](#faq)
 
 # Instalación
 
+> [!NOTE]
+> Desde Home Assistant 2026.11, HACS forma parte de Home Assistant con el nombre de **Marketplace** (_Ajustes > Marketplace_): no hay nada que instalar, y una instalación de HACS existente se migra automáticamente. En un Home Assistant más antiguo, los mismos pasos funcionan en HACS.
+
 ## Instalación directa
 
-Haga clic aquí para acceder directamente al repositorio en HACS y haga clic en "Descargar": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
+Haga clic aquí para ir directamente al repositorio en el Marketplace y haga clic en "Instalar": [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Elwinmage&repository=ha-reef-card&category=plugin)
 
-## Buscar en HACS
+## Buscar en el Marketplace
 
-O busque «reef-card» en HACS.
+O busque «reef-card» en _Ajustes > Marketplace_.
 
 <p align="center">
 <img src="../img/hacs_search.png" alt="Image">
@@ -323,6 +358,11 @@ El editor de la tarjeta guarda ahí el identificador estable del dispositivo (su
 <td><img src="../img/card_rsdose4_config.png"/></td>
     </tr>
 </table>
+
+## Común a los dispositivos Red Sea
+
+- **Mensajes**: los banners desplazables dan la fecha del último mensaje y de la última alerta, y si vienen de Home Assistant o de la app ReefBeat. Un clic en un banner, o el botón **Historial de mensajes** del diálogo de configuración, abre el historial, filtrado por tipo y periodo.
+- **Poseidon**: un dispositivo que usa el [modo Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/es/poseidon.es.md#modo-poseidon) de la integración muestra un tridente: con su color «on» en modo Poseidon, su color «off» fuera de él, naranja y parpadeando cuando nada pasa por el relé desde hace un rato. Un toque abre su diálogo (modo, estrategia, pausa de la consulta, lo que ve el relé), una pulsación larga activa o desactiva el modo.
 
 # FAQ
 

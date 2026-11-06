@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the ReefControl hubs.
  *
@@ -184,7 +185,7 @@ export const dialogs_rscontrol = {
   },
 
   /**
-   * Last 24 hours of a probe reading over its level bands, opened from its
+   * History of a probe reading over its level bands, opened from its
    * situation bar or its dot. The dialog reads the probe's own entities
    * (see ControlProbe.open_history): the main reading, or the embedded
    * temperature.
@@ -192,12 +193,21 @@ export const dialogs_rscontrol = {
   probe_history: history_dialog(
     "probe_history",
     "probe_primary",
-    "${i18n._('history_24h')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''}",
+    "${i18n._('history')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''}",
   ),
   probe_temp_history: history_dialog(
     "probe_temp_history",
     "probe_secondary",
-    "${i18n._('history_24h')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''} · ${i18n._('temperature')}",
+    "${i18n._('history')} ${device?.display_name ? device.display_name() : entity.probe_name?.state || ''} · ${i18n._('temperature')}",
+  ),
+
+  /** History of the temperature the hub fuses from its sources. */
+  temperature_history: history_dialog(
+    "temperature_history",
+    "temperature_fusion",
+    "${i18n._('history')} ${i18n._('temperature')}",
+    // The fused value has no bounds: those of the first temperature reading
+    "probe_temperature",
   ),
 
   /**
@@ -442,6 +452,8 @@ export const dialogs_rscontrol = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   probe_conf: {

@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 export const dialogs_rsrun = {
   config: {
     name: "config",
@@ -19,6 +20,8 @@ export const dialogs_rsrun = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
 };

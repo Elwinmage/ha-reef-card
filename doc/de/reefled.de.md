@@ -44,7 +44,9 @@ Mond-LED der Leuchte: Der Mond wandert vom Untergang bis zum nächsten
 Aufgang und zeigt die aktuelle Phase (`todays_moon_day`). Tippen Sie auf
 den Modus in der Mitte, um ihn zu ändern (Auto, manuell, Timer). Sind
 Wolken programmiert, erscheint eine kleine Wolke neben dem Modus; während
-sie vorbeiziehen, treiben sie vor der Sonne.
+sie vorbeiziehen, treiben sie vor der Sonne. Im manuellen Modus mit einer
+Dauer (Dauer des manuellen Modus über 0) läuft die Restzeit mit einer
+Sanduhr auf der rechten Seite der Leuchte unter ihren Symbolen ab; tippen Sie darauf, um die Dauer zu ändern.
 
 ## Linke Seite
 

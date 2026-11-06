@@ -10,7 +10,7 @@ The service publishes its sensors over MQTT, so its device (`Reef Battery Backup
 
 ## Power Flow Card Plus
 
-The flows are drawn by [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus), a separate card that has to be installed (HACS → Frontend). While it is missing, the view shows a link opening it in HACS:
+The flows are drawn by [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus), a separate card that has to be installed from the Marketplace. While it is missing, the view shows a link opening it in HACS:
 
 <img src="../img/energybackup/install.png"/>
 

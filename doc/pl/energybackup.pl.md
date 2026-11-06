@@ -10,7 +10,7 @@ Usługa publikuje swoje czujniki przez MQTT: jej urządzenie (domyślnie `Reef B
 
 ## Power Flow Card Plus
 
-Przepływy rysuje [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus), osobna karta, którą trzeba zainstalować (HACS → Frontend). Dopóki jej brakuje, widok pokazuje link otwierający ją w HACS:
+Przepływy rysuje [Power Flow Card Plus](https://github.com/flixlix/power-flow-card-plus), osobna karta, którą trzeba zainstalować (_Ustawienia > Marketplace_). Dopóki jej brakuje, widok pokazuje link otwierający ją w HACS:
 
 <img src="../img/energybackup/install.png"/>
 

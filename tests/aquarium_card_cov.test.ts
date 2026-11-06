@@ -125,7 +125,9 @@ function make_hass(doc: any, extra: Record<string, any> = {}) {
         cb({
           document: doc,
           entities: { feeding: "event.reefer_feeding" },
-          images_url: "/reeftank/images",
+          images: {
+            "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=0",
+          },
         });
         return () => undefined;
       }),
@@ -280,7 +282,7 @@ describe("card subscriptions", () => {
     const card = await mount({ aquarium: "a1b2", view: cabinet }, h.hass);
     expect(card._view_id).toBe(cabinet);
     card._view_id = "ghost";
-    h.push({ document: doc, entities: {}, images_url: "/x" });
+    h.push({ document: doc, entities: {}, images: {} });
     expect(card._view_id).toBe(cabinet);
   });
 });
@@ -548,7 +550,7 @@ describe("Lovelace editor", () => {
         if (msg.type === "reeftank/aquarium/list")
           return [{ id: "a1b2", name: "Reefer" }];
         if (msg.type === "reeftank/aquarium/get")
-          return { document: { views }, entities: {}, images_url: "/x" };
+          return { document: { views }, entities: {}, images: {} };
         return null;
       }),
     } as any;

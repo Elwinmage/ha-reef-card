@@ -1,3 +1,4 @@
+import { messages_history_button } from "../../device.dialogs";
 /**
  * Dialog definitions for the RSPower device.
  *
@@ -9,12 +10,12 @@
 import { history_dialog } from "../../../utils/history_dialog";
 
 export const dialogs_rspower = {
-  // Last 24 hours of the local temperature over its level bands, opened
+  // History of the local temperature over its level bands, opened
   // from its value, its bar or its dot
   power_temperature_history: history_dialog(
     "power_temperature_history",
     "power_temperature",
-    "${i18n._('history_24h')} ${i18n._('temperature')}",
+    "${i18n._('history')} ${i18n._('temperature')}",
   ),
   config: {
     name: "config",
@@ -102,6 +103,8 @@ export const dialogs_rspower = {
           "elt.css": { "background-color": "rgba(0,0,0,0)" },
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
 

@@ -6,6 +6,9 @@ import { ReefCardEditor } from "./editor";
 
 import "./devices/index";
 import "./aquarium/index";
+import { log_banner } from "./banner";
+
+log_banner();
 
 customElements.define("reef-card", ReefCard);
 customElements.define("reef-card-editor", ReefCardEditor);

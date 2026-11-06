@@ -41,7 +41,8 @@ Letzte Meldung und letzter Alarm, oben.
 
 <img src="../img/rswave/zone_2.png"/>
 
-Ein/Aus, Wartung, Einstellungen und WLAN.
+Ein/Aus, Vorschau (das Auge über der grünen LED), Wartung, Einstellungen
+und WLAN.
 
 ## LED-Streifen
 
@@ -163,10 +164,19 @@ auf ihre Weise spielen lässt.
 <img src="../img/rswave/dialog_config.png"/>
 
 Das Zahnrad öffnet die Einstellungen der Pumpe: die laufende Welle (Typ,
-Richtung, Intensitäten, Zeiten, Stufen), `Verknüpfung AUS-Verzögerung`,
-`Mit dem Aquarium gruppiert`, die Vorschau-Einstellungen und -Schaltflächen
-der Integration und die Geräteaktionen (Aktualisieren, Zurücksetzen,
-Firmware-Update).
+Richtung, Intensitäten, Zeiten, Stufen), den Wartungsschalter,
+`Verknüpfung AUS-Verzögerung`, `Mit dem Aquarium gruppiert` und die
+Geräteaktionen (Aktualisieren, Zurücksetzen, Firmware-Update).
+
+## Vorschau
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+Das Auge über der grünen LED des Clips öffnet die Vorschau der Pumpe: den
+Wartungsschalter (auch in den Einstellungen), die Vorschauwelle (Typ,
+Richtung, Intensitäten, Zeiten, Stufe, Wellen- und Vorschaudauer) und die
+Schaltflächen der Integration (Starten, Stoppen, von der aktuellen Welle
+übernehmen, Speichern). Es öffnet sich auch bei ausgeschalteter Pumpe.
 
 ## Ohne Cloud-Konto
 

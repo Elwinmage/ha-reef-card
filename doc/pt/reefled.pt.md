@@ -42,7 +42,9 @@ extremidades do arco. À noite o céu fica violeta, como o LED de lua da
 lâmpada: a lua vai do pôr do sol ao nascer seguinte e mostra a fase atual
 (`todays_moon_day`). Toque no modo ao centro para o alterar (auto, manual,
 temporizador). Se houver nuvens programadas, aparece uma pequena nuvem
-junto ao modo; enquanto passam, deslizam à frente do sol.
+junto ao modo; enquanto passam, deslizam à frente do sol. Em modo manual
+com uma duração (duração do modo manual superior a 0), o tempo restante é
+contado na face direita da lâmpada, sob os seus ícones, com uma ampulheta; toque nele para alterar a duração.
 
 ## Face esquerda
 

@@ -532,6 +532,25 @@ export const style_rswave_schedule = css`
     border-color: var(--error-color, #db4437);
   }
 
+  /* Action in progress: the turning arrow of the timer buttons
+     (element.ts _wait_timer), without the countdown */
+  .busy_spin {
+    display: inline-block;
+    margin-right: 4px;
+    font-size: 1.1em;
+    line-height: 1;
+    animation: rswave-spin 1s linear infinite;
+  }
+
+  @keyframes rswave-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   /* ── Library ───────────────────────────────────────────────────── */
 
   .lib_open {

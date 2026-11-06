@@ -117,8 +117,11 @@ esquerda para a direita:
 - <span>Ondas <img src="../img/mdi/mdi_waves.png" width="20"/> por sonda ATO, verdes num nível desejado, laranja abaixo ou acima.</span>
 
 Cada leitura assume a cor do seu nível: verde para desejado, laranja para
-aceitável, vermelho para perigo, branco quando a sonda não dá uma leitura
-válida. Um clique numa leitura abre a sua janela de informação.
+aceitável, vermelho para perigo, branco quando a sonda não dá uma leitura válida.
+A temperatura, o pH, o ORP e a salinidade são seguidos da sua **tendência** na
+última hora: uma seta para cima, uma seta para baixo ou um til. Um clique numa
+leitura abre o seu histórico sobre as bandas de nível, de 24 horas ou 7 dias, com
+um botão para a sua janela de informação.
 
 ## Sondas
 
@@ -130,8 +133,8 @@ Cada sonda do hub pende de uma caixa de extensão, pela ordem em que o hub as
 lista. Cada uma mostra:
 
 - A sua **leitura**, e a **temperatura integrada** logo abaixo para as sondas de
-  pH, salinidade e ATO, coloridas conforme o seu nível. Um clique num valor abre
-  a sua janela de informação.
+  pH, salinidade e ATO, coloridas conforme o seu nível. Um clique num valor abre o
+  seu histórico, como no resumo.
 - Uma **barra de situação** por leitura: as faixas vermelha, laranja e verde são
   os intervalos de perigo, aceitável e desejado definidos na sonda, e a marca
   preta indica onde está a leitura. A leitura principal fica na barra da

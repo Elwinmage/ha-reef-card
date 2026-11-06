@@ -120,6 +120,18 @@ export function legend(
 }
 
 /**
+ * Label of a button whose action may be running: the turning arrow of the
+ * timer buttons goes before it while it runs.
+ * @param label: text of the button
+ * @param running: whether its action is in progress
+ */
+export function busy_label(label: string, running: boolean): TemplateResult {
+  return running
+    ? html`<span class="busy_spin" aria-hidden="true">↻</span>${label}`
+    : html`${label}`;
+}
+
+/**
  * Translated name of a wave type.
  * @param type: nw, ra, re, st, su, un
  */
@@ -264,6 +276,8 @@ export class RSWaveSchedule extends RSWaveElement {
   @state() protected _error = "";
   /** A call is running */
   @state() protected _busy = false;
+  /** The program is being written (the save button shows it) */
+  @state() protected _saving = false;
   /** A slot asked while the last one starts too close to midnight */
   @state() protected _room_ask = false;
   /** Wave shown in the wave zone under the table */
@@ -488,11 +502,13 @@ export class RSWaveSchedule extends RSWaveElement {
       return;
     }
     this._busy = true;
+    this._saving = true;
     this._error = "";
     const res = await ask(this.wave, "wave_program_save", {
       slots: this._slots.map((s) => ({ ...s })),
     });
     this._busy = false;
+    this._saving = false;
     if (res.ok) {
       this.closeEditor();
     } else {
@@ -800,7 +816,9 @@ export class RSWaveSchedule extends RSWaveElement {
             ?disabled=${blocked}
             @click=${() => this.save()}
           >
-            ${this._busy ? i18n._("wave_saving") : i18n._("wave_save")}
+            ${this._saving
+              ? busy_label(i18n._("wave_saving"), true)
+              : i18n._("wave_save")}
           </button>
         </div>
         ${loading || !this._library?.linked

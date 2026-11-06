@@ -117,7 +117,10 @@ zusammen, von links nach rechts:
 
 Jeder Messwert nimmt die Farbe seiner Stufe an: grün für erwünscht, orange für
 akzeptabel, rot für Gefahr, weiß, wenn die Sonde keinen gültigen Messwert
-liefert. Ein Klick auf einen Messwert öffnet seinen Info-Dialog.
+liefert. Temperatur, pH, ORP und Salinität folgt ihr **Trend** der letzten
+Stunde: ein Pfeil nach oben, ein Pfeil nach unten oder eine Tilde. Ein Klick auf
+einen Messwert öffnet seinen Verlauf über den Stufenbändern, für 24 Stunden oder
+7 Tage, mit einer Schaltfläche zu seinem Info-Dialog.
 
 ## Sonden
 
@@ -130,7 +133,7 @@ der Hub sie auflistet. Jede zeigt:
 
 - Ihren **Messwert** und direkt darunter die **eingebaute Temperatur** bei den
   pH-, Salinitäts- und ATO-Sonden, eingefärbt nach ihrer Stufe. Ein Klick auf
-  einen Wert öffnet seinen Info-Dialog.
+  einen Wert öffnet seinen Verlauf, wie in der Übersicht.
 - Einen **Lagebalken** pro Messwert: Die roten, orangen und grünen Bänder sind
   die an der Sonde eingestellten Gefahren-, akzeptablen und erwünschten Bereiche,
   und die schwarze Markierung zeigt, wo der Messwert liegt. Der Hauptmesswert

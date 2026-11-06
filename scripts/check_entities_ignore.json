@@ -1,5 +1,5 @@
 {
-  "dev_in_progress": ["rswave"],
+  "dev_in_progress": [],
   "ignore": {
     "*": {},
     "rsrun": {

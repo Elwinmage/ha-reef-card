@@ -52,6 +52,9 @@ export interface ProgramTarget {
  * elements are laid out in a fixed design space (RSLED_CANVAS) and the
  * helpers below give them the program, the time and the light levels.
  */
+/** Modes in which the lamp follows its manual levels, maybe for a time. */
+export const MANUAL_MODES = ["manual", "timer"];
+
 export class RSLed extends RSDevice {
   constructor() {
     super();
@@ -349,6 +352,34 @@ export class RSLed extends RSDevice {
     return entity.state;
   }
 
+  // ── Manual mode countdown ─────────────────────────────────────────────
+
+  // check-entities: uses manual_duration
+
+  /**
+   * End of the manual mode, when it lasts a set time.
+   *
+   * The lamp does not tell the time left: the countdown starts when the mode
+   * turns manual, or when the duration is written (a write starts the timer
+   * again on the lamp), whichever is the latest.
+   * @return the end, in ms since the epoch; null outside the manual mode or
+   *         without a duration
+   */
+  manual_end(): number | null {
+    if (!MANUAL_MODES.includes(this.mode())) return null;
+    const duration = this.get_entity("number.manual_duration");
+    const minutes = Number(duration?.state);
+    if (!Number.isFinite(minutes) || minutes <= 0) return null;
+    const mode =
+      this.get_entity("select.mode") ?? this.get_entity("sensor.mode");
+    const start = Math.max(
+      Date.parse(mode?.last_changed ?? ""),
+      Date.parse(duration?.last_changed ?? ""),
+    );
+    if (!Number.isFinite(start)) return null;
+    return start + minutes * 60_000;
+  }
+
   /** Moon day of the lunar cycle (1..28), full moon when unknown. */
   moon_day(): number {
     const day = Number(this.get_entity("todays_moon_day")?.state);
@@ -372,6 +403,8 @@ export class RSLed extends RSDevice {
     "device_state",
     // Sunrise offset, shown under the sky
     "number.sunrise_offset",
+    // Duration of the manual mode: its countdown, under the mode
+    "number.manual_duration",
     // Acclimation: the beam's curves scaled by its intensity factor
     "acclimation",
     "acclimation_current_intensity_factor",

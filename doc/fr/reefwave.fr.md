@@ -41,7 +41,8 @@ Dernier message et dernière alerte, en haut.
 
 <img src="../img/rswave/zone_2.png"/>
 
-Marche/arrêt, maintenance, réglages et Wi-Fi.
+Marche/arrêt, aperçu (l'œil sur la LED verte), maintenance, réglages et
+Wi-Fi.
 
 ## Bandeau LED
 
@@ -159,10 +160,20 @@ ReefBeat laissant chaque pompe d'un groupe jouer une vague à sa façon.
 <img src="../img/rswave/dialog_config.png"/>
 
 La roue dentée ouvre les réglages de la pompe : la vague en cours (type,
-direction, intensités, temps, paliers), `Temporisation de reprise d'actions`,
-`Groupée avec l'aquarium`, les réglages et boutons de prévisualisation de
-l'intégration, et les actions de l'appareil (rafraîchissement,
-réinitialisation, mise à jour du firmware).
+direction, intensités, temps, paliers), l'interrupteur de maintenance,
+`Temporisation de reprise d'actions`, `Groupée avec l'aquarium`, et les
+actions de l'appareil (rafraîchissement, réinitialisation, mise à jour du
+firmware).
+
+## Aperçu
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+L'œil, sur la LED verte du clip, ouvre l'aperçu de la pompe : l'interrupteur
+de maintenance (présent aussi dans les réglages), la vague à prévisualiser
+(type, direction, intensités, temps, palier, durées de la vague et de
+l'aperçu) et les boutons de l'intégration (démarrer, arrêter, reprendre la
+vague en cours, enregistrer). Il s'ouvre aussi sur une pompe éteinte.
 
 ## Sans compte cloud
 

@@ -1,4 +1,6 @@
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
+import { with_brine_mode } from "./brine.mapping";
 
 export const config4 = {
   name: null,
@@ -119,6 +121,18 @@ export const config4 = {
       top: "6%",
       right: "0%",
     }),
+    // Poseidon mode: hold to switch it, tap for its settings.
+    // Over the status LED, bottom right of the doser
+    poseidon: poseidon_shortcut(
+      {
+        flex: "0 0 auto",
+        position: "absolute",
+        width: "5.5%",
+        top: "23%",
+        right: "0.5%",
+      },
+      "rgba(255,255,255,0.55)",
+    ),
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",
@@ -247,7 +261,7 @@ export const config4 = {
           top: "8%",
         },
       },
-      elements: {
+      elements: with_brine_mode({
         supplement: {
           name: "supplement",
           label:
@@ -443,7 +457,7 @@ export const config4 = {
             data: "default",
           },
         },
-      },
+      }),
     },
     head_1: {
       id: 1,

@@ -14,7 +14,6 @@ import {
 import { render } from "lit";
 import {
   ApiError,
-  IMAGES_URL,
   ReefTankApi,
   reset_catalog_cache,
 } from "../src/aquarium/api";
@@ -203,7 +202,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
           return {
             document: structuredClone(doc),
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         case "reeftank/aquarium/save":
           return {
@@ -212,7 +214,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
               revision: (msg.document.revision ?? 0) + 1,
             },
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         default:
           return null;
@@ -449,6 +454,28 @@ describe("scene editor: loading and saving", () => {
     expect(editor._catalog_unsub).toBeNull();
   });
 
+  it("signs the uploaded pictures it shows", async () => {
+    const { doc, front } = existing_doc();
+    doc.views[front].image = "a1b2/front.webp";
+    const signed = "/api/reeftank/images/a1b2/front.webp?authSig=1";
+    const hass = make_hass(doc, (msg) =>
+      msg.type === "reeftank/aquarium/get"
+        ? { document: structuredClone(doc), entities: {}, images: {} }
+        : msg.type === "reeftank/images/sign"
+          ? { "a1b2/front.webp": signed }
+          : undefined,
+    );
+    const editor = await open(hass, "a1b2");
+    editor._view_id = front;
+    editor.requestUpdate();
+    await editor.updateComplete;
+    await flush();
+    await editor.updateComplete;
+    const img = editor.shadowRoot.querySelector("img.bg");
+    expect(img.getAttribute("src")).toBe(signed);
+    editor.close(true);
+  });
+
   it("loads a document without views or a known water", async () => {
     const empty: any = ops.new_document("Empty");
     empty.id = "e1";
@@ -462,7 +489,7 @@ describe("scene editor: loading and saving", () => {
     const editor = await open(hass, "e1");
     expect(editor._view_id).toBeNull();
     expect(editor._water_id).toBe("main");
-    expect(editor._images_url).toBe(IMAGES_URL);
+    expect(editor._images.url("a1b2/x.webp")).toBeNull();
     // views tab without a view: no view settings
     editor._tab = "views";
     await editor.updateComplete;
@@ -505,6 +532,9 @@ describe("scene editor: loading and saving", () => {
     expect(editor._error_text(new ApiError("not_found", ""))).toContain(
       "no longer exists",
     );
+    expect(
+      editor._error_text(new ApiError("invalid_format", "bad length")),
+    ).toContain("(bad length)");
     expect(editor._error_text({ message: "boom" })).toBe("Error: boom");
     expect(editor._error_text(undefined)).toBe("Error: ");
   });
@@ -967,6 +997,10 @@ describe("scene editor: stage", () => {
     Object.defineProperty(img, "naturalHeight", { value: 400 });
     img.dispatchEvent(new Event("load"));
     expect(editor._aspect).toBe(2);
+    // a picture that does not load (expired signature) is signed again
+    const failed = vi.spyOn(editor._images, "failed");
+    img.dispatchEvent(new Event("error"));
+    expect(failed).toHaveBeenCalledWith(editor.doc.views[front].image);
   });
 
   it("draws what each tab shows on the stage", async () => {
@@ -1058,7 +1092,7 @@ describe("scene editor: stage", () => {
     );
     expect(chips).toContain("Probe");
     expect(chips).toContain("sensor.gone: ?");
-    expect(chips).toContain("Water: 25");
+    expect(chips).toContain("25");
     expect(chips).toContain("Spot");
     const probe = [...root.querySelectorAll(".el")].find((e: any) =>
       e.textContent.includes("Probe"),
@@ -1086,6 +1120,50 @@ describe("scene editor: stage", () => {
       l.getAttribute("title"),
     );
     expect(lamps).toEqual(["RSLED-1", "light.room"]);
+    // a mark stays on the stage, even with the water at the top of the picture
+    expect(root.querySelector(".lamp").getAttribute("style")).toContain("30px");
+    const hint = () =>
+      [...root.querySelectorAll("aside .hint")]
+        .map((h: any) => h.textContent)
+        .join(" ");
+    expect(hint()).toContain("Drag the ☀");
+    // light preview: off by default, then tints the outlined waters
+    const tints = () => root.querySelectorAll(".stage .water.tint").length;
+    expect(tints()).toBe(0);
+    const preview = [...root.querySelectorAll("aside fieldset")].find(
+      (f: any) => f.textContent.includes("Light preview"),
+    ) as HTMLElement;
+    const ranges = () =>
+      [...preview.querySelectorAll("input[type=range]")] as HTMLInputElement[];
+    expect(ranges().every((r) => r.disabled)).toBe(true);
+    fire(
+      preview.querySelector("input[type=checkbox]"),
+      true,
+      "change",
+      "checked",
+    );
+    await editor.updateComplete;
+    expect(tints()).toBeGreaterThan(0);
+    const before = root
+      .querySelector(".stage .water.tint")
+      .getAttribute("style");
+    fire(ranges()[0], "9000", "input");
+    await editor.updateComplete;
+    expect(preview.textContent).toContain("9");
+    expect(
+      root.querySelector(".stage .water.tint").getAttribute("style"),
+    ).not.toBe(before);
+    fire(ranges()[1], "0", "input");
+    await editor.updateComplete;
+    expect(editor._preview_intensity).toBe(0);
+    // nothing changes in the document
+    expect(editor.dirty).toBe(false);
+    // no outline, no mark: the panel says why
+    editor._water_id = "none";
+    editor._doc.waters.none = { ...editor._doc.waters.main, lights: [] };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(hint()).toContain("Outline the water on this view first.");
   });
 });
 
@@ -1560,19 +1638,19 @@ describe("scene editor: devices panel", () => {
     expect(props().querySelector("legend").textContent.trim()).toBe(
       "sensor.temp",
     );
-    expect(props().querySelector("select").value).toBe("common-sensor");
+    // A sensor cannot be a switch: nothing to choose
+    expect(props().querySelector("select")).toBeNull();
     fire(props().querySelector("input"), "Temp");
     expect(el(1).label).toBe("Temp");
-    await editor.updateComplete;
-    fire(props().querySelector("select"), "common-switch");
-    expect(el(1).type).toBe("common-switch");
     await editor.updateComplete;
     fire(props().querySelector("input[type=range]"), "2");
     expect(el(1).scale).toBe(2);
     await editor.updateComplete;
     // a feeding point, for one source
     const check = () =>
-      props().querySelector("input[type=checkbox]") as HTMLInputElement;
+      [...props().querySelectorAll("input[type=checkbox]")].at(
+        -1,
+      ) as HTMLInputElement;
     fire(check(), true, "change", "checked");
     expect(el(1).roles).toEqual(["feeding_point"]);
     await editor.updateComplete;
@@ -1739,17 +1817,90 @@ describe("scene editor: livestock panel", () => {
     fire(card().querySelector("select"), "front");
     expect(coral().z).toBe(ops.DEPTHS.front);
     await editor.updateComplete;
-    const colours = card().querySelectorAll("input[type=color]");
-    expect(colours.length).toBeGreaterThan(1);
-    fire(colours[1], "#123456");
-    expect(coral().palette[1]).toBe("#123456");
-    expect(coral().palette).toHaveLength(colours.length);
+    const swatches = card().querySelectorAll(".palette .swatch");
+    expect(swatches.length).toBeGreaterThan(1);
+    (swatches[1] as HTMLButtonElement).click();
     await editor.updateComplete;
-    (card().querySelector(".palette button") as HTMLButtonElement).click();
+    card()
+      .querySelector("reef-colour-picker")!
+      .dispatchEvent(
+        new CustomEvent("colour-change", { detail: { value: "#123456" } }),
+      );
+    expect(coral().palette[1]).toBe("#123456");
+    expect(coral().palette).toHaveLength(swatches.length);
+    await editor.updateComplete;
+    (card().querySelector(".palette .reset") as HTMLButtonElement).click();
     expect(coral().palette).toEqual([]);
+    expect(editor._colour_edit).toBeNull();
     await editor.updateComplete;
     (card().querySelector("button.icon") as HTMLButtonElement).click();
     expect(editor.doc.waters.main.corals).toHaveLength(0);
+  });
+
+  it("previews the coral in large while its colours are chosen", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open_on(doc, "livestock", front);
+    const root = editor.shadowRoot;
+    const coral = () => editor.doc.waters.main.corals[0];
+    const card = () =>
+      fieldset(root, "Corals").querySelector(".card") as HTMLElement;
+    const preview = () => card().querySelector("reef-coral-preview") as any;
+    const picker = () => card().querySelector("reef-colour-picker") as any;
+    const swatch = (i: number) =>
+      card().querySelectorAll(".palette .swatch")[i] as HTMLButtonElement;
+    const send = (type: string, value: string) =>
+      picker().dispatchEvent(new CustomEvent(type, { detail: { value } }));
+    // only for the selected coral, the picker closed
+    expect(preview()).toBeNull();
+    card().click();
+    await editor.updateComplete;
+    expect(preview().species.id).toBe(coral().species);
+    expect(picker()).toBeNull();
+    const defaults = [...preview().palette];
+
+    // a swatch opens the picker on its colour, below the preview
+    swatch(0).click();
+    await editor.updateComplete;
+    expect(swatch(0).classList.contains("active")).toBe(true);
+    expect(picker().value).toBe(defaults[0]);
+    const order = [...card().children].map((e) => e.localName);
+    expect(order.indexOf("reef-coral-preview")).toBeLessThan(
+      order.indexOf("reef-colour-picker"),
+    );
+
+    // sliding: shown on the preview and the swatch, not saved
+    send("colour-input", "#abcdef");
+    await editor.updateComplete;
+    expect(preview().palette[0]).toBe("#abcdef");
+    expect(swatch(0).style.background).toBe("rgb(171, 205, 239)");
+    expect(coral().palette ?? []).toEqual([]);
+
+    // another coral's draft does not change this one
+    editor._palette_draft = { coral: "other", palette: ["#000000"] };
+    await editor.updateComplete;
+    expect(preview().palette).toEqual(defaults);
+
+    // released: saved, the draft dropped, the picker still open
+    send("colour-change", "#abcdef");
+    await editor.updateComplete;
+    expect(coral().palette[0]).toBe("#abcdef");
+    expect(editor._palette_draft).toBeNull();
+    expect(preview().palette[0]).toBe("#abcdef");
+    expect(picker()).not.toBeNull();
+
+    // another swatch moves the picker, the same one closes it
+    swatch(1).click();
+    await editor.updateComplete;
+    expect(editor._colour_edit.index).toBe(1);
+    swatch(1).click();
+    await editor.updateComplete;
+    expect(picker()).toBeNull();
+
+    // the picker of an unselected coral stays closed
+    swatch(0).click();
+    editor._selection = null;
+    await editor.updateComplete;
+    expect(picker()).toBeNull();
   });
 });
 
@@ -1853,5 +2004,32 @@ describe("scene editor: header and tabs", () => {
     expect(closed).toHaveBeenCalledWith("a1b2");
     expect(document.querySelector(`.${SCENE_DIALOG_CLASS}`)).toBeNull();
     void front;
+  });
+});
+
+describe("scene editor: water volume", () => {
+  it("edits the net water volume", async () => {
+    const { doc } = existing_doc();
+    const editor = await open_on(doc, "aquarium");
+    const root = editor.shadowRoot;
+    const input = () =>
+      fieldset(root, "Dimensions (cm)").querySelector('input[step="1"]') as any;
+    expect(input().value).toBe("");
+    fire(input(), "425");
+    expect(editor.doc.water_volume_l).toBe(425);
+    await editor.updateComplete;
+    expect(input().value).toBe("425");
+    fire(input(), "");
+    expect(editor.doc.water_volume_l).toBeNull();
+  });
+
+  it("takes the cloud volume unless one is set", async () => {
+    const { doc } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    const cloud = { ...editor._clouds[0], net_water_volume: 330 };
+    editor._apply_cloud(cloud);
+    expect(editor.doc.water_volume_l).toBe(330);
+    editor._apply_cloud({ ...cloud, net_water_volume: 500 });
+    expect(editor.doc.water_volume_l).toBe(330);
   });
 });

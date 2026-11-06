@@ -1,3 +1,18 @@
+import { messages_history_button } from "../../device.dialogs";
+import {
+  brine_content,
+  dialogs_regulation,
+  regulation_content,
+  schedule_content,
+} from "./regulation.dialogs";
+
+/**
+ * The dose history of a head is hidden while its last dose sensor is missing
+ * or unavailable: the doser only tells its doses in Poseidon mode.
+ */
+export const DOSE_HISTORY_HIDDEN =
+  "!entity.poseidon_last_dose || entity.poseidon_last_dose.state === 'unavailable'";
+
 export const dialogs_rsdose = {
   config: {
     name: "config",
@@ -24,6 +39,8 @@ export const dialogs_rsdose = {
           ],
         },
       },
+      // The history, even while no banner shows a message
+      messages_history_button,
     ],
   },
   head_configuration: {
@@ -78,6 +95,30 @@ export const dialogs_rsdose = {
           },
         },
       },
+      // The doses of the head, told by the doser in Poseidon mode only
+      {
+        view: "common-button",
+        disabled_if: DOSE_HISTORY_HIDDEN,
+        conf: {
+          type: "common-button",
+          stateObj: null,
+          icon: "mdi:history",
+          tap_action: {
+            domain: "redsea_ui",
+            action: "dialog",
+            data: {
+              type: "dose_history",
+              overload_quit: "head_configuration",
+            },
+          },
+          label: "${i18n._('dose_history')}",
+          class: "dialog_button",
+          css: {},
+          "elt.css": {
+            "background-color": "rgba(0,0,0,0)",
+          },
+        },
+      },
       {
         view: "hui-entities-card",
         conf: {
@@ -86,14 +127,26 @@ export const dialogs_rsdose = {
             { entity: "dose_compensation", name: { type: "entity" } },
             { entity: "last_calibration", name: { type: "entity" } },
             { entity: "recalibration_required", name: { type: "entity" } },
-            { entity: "schedule_enabled", name: { type: "entity" } },
           ],
         },
       },
-
+      // Dose regulation of the head: the schedule, or the brine in brine
+      // mode where Home Assistant drives the head with manual doses
+      ...regulation_content,
+      ...schedule_content,
+      ...brine_content,
+    ],
+  },
+  dose_history: {
+    name: "dose_history",
+    title_key: "${i18n._('dose_history')}  n°${config.id}",
+    close_cross: false,
+    content: [
       {
         view: "extend",
-        extend: "dose_head_dialog_func_ext",
+        extend: "dose_history_dialog_func_ext",
+        // A new dose reloads the list while it is open
+        re_render: true,
       },
     ],
   },
@@ -577,4 +630,6 @@ export const dialogs_rsdose = {
       },
     },
   },
+  // Dose regulation of a head (regulation.dialogs.ts)
+  ...dialogs_regulation,
 };

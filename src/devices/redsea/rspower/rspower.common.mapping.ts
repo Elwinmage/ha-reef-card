@@ -12,6 +12,7 @@ import {
   COLOR_WHITE_60,
 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 /** Device-level widgets, identical on both models. */
 export const elements = {
@@ -282,6 +283,17 @@ export const elements = {
     top: "2%",
     right: "28%",
   }),
+  // Poseidon mode: hold to switch it, tap for its settings.
+  // Next to the maintenance switch
+  poseidon: poseidon_shortcut(
+    {
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "2%",
+      left: "22%",
+    },
+    "rgba(255,255,255,0.55)",
+  ),
   battery_level: {
     name: "battery_level",
     type: "common-sensor",

@@ -86,6 +86,22 @@ This zone allows you to view the current head schedule and change it.
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Dose regulation
+
+The head configuration holds the **Dose regulation** of the [redsea integration](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/en/reefdose.md#dose-regulation):
+
+- **Assisted dosing**: the **Assisted dosing** button opens a dialog with the chart of your test results, the entry of a new result, the proposed dose to apply or dismiss, and the settings of the computation. Nothing reaches the doser until you apply it.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
+- **Brine**: the head is driven by Home Assistant alone, with manual doses, so its configuration shows the brine instead of the schedule: salinity over the last week, state and alarm, brine planned, refractometer check and settings. On the main view, the ring and the middle label show the brine dosed today against the brine planned, and the bottom label the salinity.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
+
+### Dose history
+
+While the doser is in [Poseidon mode](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/en/poseidon.md#poseidon-mode), the configuration of a head gets a **Dose history** button: the doses of the head, newest first, by day, with start, end, duration, volume and type (scheduled, manual, compensation). Last 24 h, 7 or 31 days, or everything kept, with the total volume of the period. A start marked "≈" is estimated from the flow of the head.
+
 ## Supplement management
 
  <img src="../img/rsdose/zone_5.png"/>
@@ -167,6 +183,14 @@ Here is the list of supported images for supplements, grouped by brand. If yours
 <tr><td>❌</td><td colspan='2'>Replenish</td></tr>
 <tr><td>❌</td><td colspan='2'>Restore</td></tr>
 <tr><td>❌</td><td colspan='2'>Strontion</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>DIY &nbsp; <sup>1/1 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Brine</td><td><img style='width:20%;' src='../../public/img/supplements/b99739a8-bced-420e-bbdb-86ccd14524fd.supplement.png'/></td></tr>
 </table>
 </details>
 

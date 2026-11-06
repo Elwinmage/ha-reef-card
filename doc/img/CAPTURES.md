@@ -26,6 +26,7 @@ capture of the whole card, once the rectangles of the device are filled in its
 | `rswave/library.png`        | Wave library                  |
 | `rswave/pump_settings.png`  | This pump in the current wave |
 | `rswave/dialog_config.png`  | Settings                      |
+| `rswave/dialog_preview.png` | Preview                       |
 
 ## aquamedic
 

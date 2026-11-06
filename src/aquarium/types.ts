@@ -91,6 +91,10 @@ export interface SceneElement {
   pos: Point;
   scale: number;
   label: string;
+  /** Entity: keep the label for the editor, draw the value alone. */
+  hide_label?: boolean;
+  /** Entity: colour of the text (#rrggbb), the chip's own when none. */
+  text_color?: string | null;
   roles: string[];
   source?: string | null;
 }
@@ -98,7 +102,10 @@ export interface SceneElement {
 export interface Hotspot {
   id: string;
   poly: Point[];
-  goto: string;
+  /** View it opens; null when it opens a device. */
+  goto: string | null;
+  /** Device whose view it opens. */
+  device_id?: string | null;
   label: string;
 }
 
@@ -129,6 +136,30 @@ export interface FeedSource {
   kind?: "feeder" | "shortcut" | "manual" | null;
 }
 
+/** What is monitored in an aquarium, and the thresholds of its alarms. */
+export interface Monitoring {
+  ph_entity?: string | null;
+  orp_entity?: string | null;
+  /** CO2 of the room: tells a CO2 effect from an alkalinity problem. */
+  co2_entity?: string | null;
+  /** KH tests, in dKH: tells a KH drop from a CO2 effect or a probe. */
+  kh_entity?: string | null;
+  /** Entities changing when a probe was calibrated (a date, usually). */
+  ph_calibration_entity?: string | null;
+  orp_calibration_entity?: string | null;
+  /** The analysis is suspended while one of them is on. */
+  pause_entities: string[];
+  learning_days: number;
+  ph_base_drop: number;
+  ph_swing_pct: number;
+  ph_profile_band: number;
+  ph_profile_hours: number;
+  orp_drop_mv: number;
+  orp_drop_hours: number;
+  kh_change_max: number;
+  pause_hours: number;
+}
+
 export interface AquariumDocument {
   version: number;
   id?: string;
@@ -137,16 +168,22 @@ export interface AquariumDocument {
   cloud?: { provider: string; uid: string } | null;
   preset?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
+  /** Net water volume (L): tank and sump, without rock and sand. */
+  water_volume_l?: number | null;
   photo_light: "white" | "blue";
   render: {
     level: RenderLevel;
     max_fish: number;
+    /** Fish size against the tank: 1 keeps their real size in cm. */
+    fish_scale?: number;
     caustics: boolean;
     /** Darkness of the water with the lamps off, 0..0.95 (default 0.55). */
     night_darkness?: number;
   };
   waters: Record<string, Water>;
   feeding: { sources: FeedSource[]; dedup_s: number; duration_s: number };
+  /** Absent until saved, or with a reeftank older than the monitoring. */
+  monitoring?: Monitoring;
   views: Record<string, View>;
   default_view?: string | null;
 }
@@ -167,12 +204,23 @@ export interface AquariumEntities {
   corals?: string | null;
   feedings_today?: string | null;
   feeding?: string | null;
+  monitoring?: string | null;
+  ph_base_low?: string | null;
+  ph_swing_high?: string | null;
+  ph_profile_off?: string | null;
+  orp_low?: string | null;
+  probe_suspect?: string | null;
+  kh_fast_change?: string | null;
+  kh_estimated?: string | null;
 }
 
 export interface AquariumPayload {
   document: AquariumDocument;
   entities: AquariumEntities;
-  images_url: string;
+  /** Uploaded pictures of the document → URL signed for this user. */
+  images?: Record<string, string>;
+  /** Lifetime of the signed URLs, in seconds. */
+  images_ttl?: number;
 }
 
 /** An aquarium of a vendor cloud (redsea/aquariums). */
@@ -185,6 +233,10 @@ export interface CloudAquarium {
   system_series?: string | null;
   system_type?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
+  /** Volumes in the account's unit (`measuring_unit`: litres or gallons). */
+  water_volume?: number | null;
+  net_water_volume?: number | null;
+  measuring_unit?: string | null;
   device_ids: string[];
   feeding_entities: string[];
 }

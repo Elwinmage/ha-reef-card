@@ -7,6 +7,7 @@ import {
   COLOR_WHITE_60,
 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 export const config = {
   name: null,
@@ -322,6 +323,15 @@ export const config = {
       position: "absolute",
       top: "0%",
       right: "12%",
+    }),
+    // Poseidon mode: hold to switch it, tap for its settings.
+    // Directly under the wifi icon, so it stays grouped with it whichever
+    // side the mat is mounted on (the layout mirrors with the mount).
+    poseidon: poseidon_shortcut({
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "5.5%",
+      right: "0%",
     }),
     remaining_length: {
       name: "remaining_length",

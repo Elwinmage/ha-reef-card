@@ -1,0 +1,509 @@
+esphome:
+  name: "fish-feeder"
+  friendly_name: "Fish Feeder"
+  # Lets ha-reef-card recognise the feeder: Home Assistant turns the project
+  # name into the manufacturer ("vson") and the model ("fish_feeder").
+  project:
+    name: "vson.fish_feeder"
+    version: "1.2.0"
+  on_boot:
+    priority: -10
+    then:
+      - delay: 2s
+      - if:
+          condition:
+            binary_sensor.is_on: open_close_sensor
+          then:
+            - switch.turn_on: motor_switch
+      - logger.log:
+          format: "Hello Fish Feeder"
+      - logger.log:
+          format: "Restoring feeding slots: %d [%d]"
+          args: ["id(g_feed_time_slot_1)", "id(g_food_portion_slot_1)"]
+      # SLOT 1
+      - datetime.time.set:
+          id: feed_slot_1
+          time: !lambda |-
+            return {.second = 0, .minute = uint8_t(id(g_feed_time_slot_1)%60), .hour = uint8_t(id(g_feed_time_slot_1)/60)};
+      - number.set:
+          id: food_portion_slot_1
+          value: !lambda |-
+            return int(id(g_food_portion_slot_1));
+      # SLOT 2
+      - datetime.time.set:
+          id: feed_slot_2
+          time: !lambda |-
+            return {.second = 0, .minute = uint8_t(id(g_feed_time_slot_2)%60), .hour = uint8_t(id(g_feed_time_slot_2)/60)};
+      - number.set:
+          id: food_portion_slot_2
+          value: !lambda |-
+            return int(id(g_food_portion_slot_2));
+      # SLOT 3
+      - datetime.time.set:
+          id: feed_slot_3
+          time: !lambda |-
+            return {.second = 0, .minute = uint8_t(id(g_feed_time_slot_3)%60), .hour = uint8_t(id(g_feed_time_slot_3)/60)};
+      - number.set:
+          id: food_portion_slot_3
+          value: !lambda |-
+            return int(id(g_food_portion_slot_3));
+      # SLOT 4
+      - datetime.time.set:
+          id: feed_slot_4
+          time: !lambda |-
+            return {.second = 0, .minute = uint8_t(id(g_feed_time_slot_4)%60), .hour = uint8_t(id(g_feed_time_slot_4)/60)};
+      - number.set:
+          id: food_portion_slot_4
+          value: !lambda |-
+            return int(id(g_food_portion_slot_4));
+      # SLOT 5
+      - datetime.time.set:
+          id: feed_slot_5
+          time: !lambda |-
+            return {.second = 0, .minute = uint8_t(id(g_feed_time_slot_5)%60), .hour = uint8_t(id(g_feed_time_slot_5)/60)};
+      - number.set:
+          id: food_portion_slot_5
+          value: !lambda |-
+            return int(id(g_food_portion_slot_5));
+
+globals:
+  # Portion counter
+  - id: g_portion_count
+    type: int
+    restore_value: False
+    initial_value: "0"
+  # Portion counter
+  - id: g_feeding_in_progress
+    type: int
+    restore_value: False
+    initial_value: "0"
+  # SLOT 1
+  - id: g_feed_time_slot_1
+    type: int
+    restore_value: true
+    initial_value: "0"
+  - id: g_food_portion_slot_1
+    type: int
+    restore_value: true
+    initial_value: "0"
+  # SLOT 2
+  - id: g_feed_time_slot_2
+    type: int
+    restore_value: true
+    initial_value: "0"
+  - id: g_food_portion_slot_2
+    type: int
+    restore_value: true
+    initial_value: "0"
+  # SLOT 3
+  - id: g_feed_time_slot_3
+    type: int
+    restore_value: true
+    initial_value: "0"
+  - id: g_food_portion_slot_3
+    type: int
+    restore_value: true
+    initial_value: "0"
+  # SLOT 4
+  - id: g_feed_time_slot_4
+    type: int
+    restore_value: true
+    initial_value: "0"
+  - id: g_food_portion_slot_4
+    type: int
+    restore_value: true
+    initial_value: "0"
+  # SLOT 5
+  - id: g_feed_time_slot_5
+    type: int
+    restore_value: true
+    initial_value: "0"
+  - id: g_food_portion_slot_5
+    type: int
+    restore_value: true
+    initial_value: "0"
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret fish_feeder_api_key
+
+ota:
+  - platform: esphome
+    password: !secret fish_feeder_ota_password
+
+esp32:
+  board: lolin_s2_mini #Pinout: https://www.wemos.cc/en/latest/s2/s2_mini.html
+  framework:
+    type: esp-idf
+    version: recommended
+
+preferences:
+  flash_write_interval: 0s
+
+logger:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: 192.168.0.120 # adapt to your network
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  ap:
+    ssid: "Fish Feeder Fallback Hotspot"
+    password: !secret fish_feeder_ap_password
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+  - platform: sntp
+    id: sntp_time
+    timezone: "Europe/Paris"
+    servers:
+      - pool.ntp.org
+      - time.cloudflare.com
+    on_time:
+      - seconds: 0
+        minutes: 0
+        hours: 1
+        days_of_week: 1-7
+        then:
+          - switch.toggle: restart_switch
+
+captive_portal:
+
+# Template sensor to display the Open/Close Counter value
+sensor:
+  - platform: uptime
+    name: "System - Uptime"
+
+datetime:
+  # SLOT 1
+  - platform: template
+    time_id: homeassistant_time
+    name: "Slot 1"
+    id: feed_slot_1
+    type: TIME
+    optimistic: True
+    restore_value: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Set time for slot 1:"
+    on_time:
+      - if:
+          condition:
+            - lambda: "return id(food_portion_slot_1).state > 0;"
+            - lambda: "return id(g_feeding_in_progress) == 0;"
+          then:
+            - lambda: "id(g_feeding_in_progress) = 1;"
+            - lambda: "id(g_portion_count)=id(g_food_portion_slot_1);"
+            - while:
+                condition:
+                  - lambda: "return id(g_portion_count) > 0;"
+                then:
+                  - lambda: "id(g_portion_count) -= 1;"
+                  - logger.log:
+                      format: "Portions slot 1 to give: %d"
+                      args: ["id(g_portion_count)"]
+                  - switch.turn_on: motor_switch
+                  - delay: 30s
+            - lambda: "id(g_feeding_in_progress) = 0;"
+
+    on_value:
+      then:
+        - logger.log:
+            format: "Set time.on_value for slot 1"
+        - lambda: |-
+            id(g_feed_time_slot_1) = x.hour*60+x.minute;
+  # SLOT 2
+  - platform: template
+    time_id: homeassistant_time
+    name: "Slot 2"
+    id: feed_slot_2
+    type: TIME
+    optimistic: True
+    restore_value: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Set time for slot 2:"
+    on_time:
+      - if:
+          condition:
+            - lambda: "return id(food_portion_slot_2).state > 0;"
+            - lambda: "return id(g_feeding_in_progress) == 0;"
+          then:
+            - lambda: "id(g_feeding_in_progress) = 1;"
+            - lambda: "id(g_portion_count)=id(g_food_portion_slot_2);"
+            - while:
+                condition:
+                  - lambda: "return id(g_portion_count) > 0;"
+                then:
+                  - lambda: "id(g_portion_count) -= 1;"
+                  - logger.log:
+                      format: "Portions slot 2 to give: %d"
+                      args: ["id(g_portion_count)"]
+                  - switch.turn_on: motor_switch
+                  - delay: 30s
+            - lambda: "id(g_feeding_in_progress) = 0;"
+    on_value:
+      then:
+        - logger.log:
+            format: "Set time.on_value for slot 2"
+        - lambda: |-
+            id(g_feed_time_slot_2) = x.hour*60+x.minute;
+  # SLOT 3
+  - platform: template
+    time_id: homeassistant_time
+    name: "Slot 3"
+    id: feed_slot_3
+    type: TIME
+    optimistic: True
+    restore_value: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Set time for slot 3:"
+    on_time:
+      - if:
+          condition:
+            - lambda: "return id(food_portion_slot_3).state > 0;"
+            - lambda: "return id(g_feeding_in_progress) == 0;"
+          then:
+            - lambda: "id(g_feeding_in_progress) = 1;"
+            - lambda: "id(g_portion_count)=id(g_food_portion_slot_3);"
+            - while:
+                condition:
+                  - lambda: "return id(g_portion_count) > 0;"
+                then:
+                  - lambda: "id(g_portion_count) -= 1;"
+                  - logger.log:
+                      format: "Portions to give: %d"
+                      args: ["id(g_portion_count)"]
+                  - switch.turn_on: motor_switch
+                  - delay: 30s
+            - lambda: "id(g_feeding_in_progress) = 0;"
+    on_value:
+      then:
+        - logger.log:
+            format: "Set time.on_value for slot 3"
+        - lambda: |-
+            id(g_feed_time_slot_3) = x.hour*60+x.minute;
+  # SLOT 4
+  - platform: template
+    time_id: homeassistant_time
+    name: "Slot 4"
+    id: feed_slot_4
+    type: TIME
+    optimistic: True
+    restore_value: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Set time for slot 4:"
+    on_time:
+      - if:
+          condition:
+            - lambda: "return id(food_portion_slot_4).state > 0;"
+            - lambda: "return id(g_feeding_in_progress) == 0;"
+          then:
+            - lambda: "id(g_feeding_in_progress) = 1;"
+            - lambda: "id(g_portion_count)=id(g_food_portion_slot_4);"
+            - while:
+                condition:
+                  - lambda: "return id(g_portion_count) > 0;"
+                then:
+                  - lambda: "id(g_portion_count) -= 1;"
+                  - logger.log:
+                      format: "Portions to give: %d"
+                      args: ["id(g_portion_count)"]
+                  - switch.turn_on: motor_switch
+                  - delay: 30s
+            - lambda: "id(g_feeding_in_progress) = 0;"
+    on_value:
+      then:
+        - logger.log:
+            format: "Set time.on_value for slot 4"
+        - lambda: |-
+            id(g_feed_time_slot_4) = x.hour*60+x.minute;
+  # SLOT 5
+  - platform: template
+    time_id: homeassistant_time
+    name: "Slot 5"
+    id: feed_slot_5
+    type: TIME
+    optimistic: True
+    restore_value: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Set time for slot 5:"
+    on_time:
+      - if:
+          condition:
+            - lambda: "return id(food_portion_slot_5).state > 0;"
+            - lambda: "return id(g_feeding_in_progress) == 0;"
+          then:
+            - lambda: "id(g_feeding_in_progress) = 1;"
+            - lambda: "id(g_portion_count)=id(g_food_portion_slot_5);"
+            - while:
+                condition:
+                  - lambda: "return id(g_portion_count) > 0;"
+                then:
+                  - lambda: "id(g_portion_count) -= 1;"
+                  - logger.log:
+                      format: "Portions to give: %d"
+                      args: ["id(g_portion_count)"]
+                  - switch.turn_on: motor_switch
+                  - delay: 30s
+            - lambda: "id(g_feeding_in_progress) = 0;"
+    on_value:
+      then:
+        - logger.log:
+            format: "Set time.on_value for slot 5"
+        - lambda: |-
+            id(g_feed_time_slot_5) = x.hour*60+x.minute;
+
+# Define binary sensors
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO4
+      mode:
+        input: true
+        pulldown: true
+    name: "Open/Close Sensor"
+    id: open_close_sensor
+    device_class: door
+    filters:
+      - delayed_on_off: 2s
+    on_state_change:
+      then:
+        - if:
+            condition:
+              binary_sensor.is_off: open_close_sensor
+            then:
+              - switch.turn_off: motor_switch
+  - platform: gpio
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: False
+    name: "Food Level Sensor"
+    id: food_level_sensor
+    device_class: problem
+    icon: "mdi:alert"
+
+###########################
+# NUMBER
+number:
+  # SLOT 1
+  - platform: template
+    id: food_portion_slot_1
+    name: "Portion slot 1"
+    icon: "mdi:shaker"
+    step: 1
+    max_value: 10
+    min_value: 0
+    # Optimistic: the new value is published as soon as it is set. With a
+    # lambda instead, Home Assistant only got it at the next poll of the
+    # template (every 60 s by default), which made the card look stuck.
+    optimistic: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Number of portion set"
+        - lambda: |-
+            id(g_food_portion_slot_1) = x;
+  # SLOT 2
+  - platform: template
+    id: food_portion_slot_2
+    name: "Portion slot 2"
+    icon: "mdi:shaker"
+    step: 1
+    max_value: 10
+    min_value: 0
+    # Optimistic: the new value is published as soon as it is set. With a
+    # lambda instead, Home Assistant only got it at the next poll of the
+    # template (every 60 s by default), which made the card look stuck.
+    optimistic: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Number of portion set"
+        - lambda: |-
+            id(g_food_portion_slot_2) = x;
+    # SLOT 3
+  - platform: template
+    id: food_portion_slot_3
+    name: "Portion slot 3"
+    icon: "mdi:shaker"
+    step: 1
+    max_value: 10
+    min_value: 0
+    # Optimistic: the new value is published as soon as it is set. With a
+    # lambda instead, Home Assistant only got it at the next poll of the
+    # template (every 60 s by default), which made the card look stuck.
+    optimistic: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Number of portion set"
+        - lambda: |-
+            id(g_food_portion_slot_3) = x;
+    # SLOT 4
+  - platform: template
+    id: food_portion_slot_4
+    name: "Portion slot 4"
+    icon: "mdi:shaker"
+    step: 1
+    max_value: 10
+    min_value: 0
+    # Optimistic: the new value is published as soon as it is set. With a
+    # lambda instead, Home Assistant only got it at the next poll of the
+    # template (every 60 s by default), which made the card look stuck.
+    optimistic: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Number of portion set"
+        - lambda: |-
+            id(g_food_portion_slot_4) = x;
+    # SLOT 5
+  - platform: template
+    id: food_portion_slot_5
+    name: "Portion slot 5"
+    icon: "mdi:shaker"
+    step: 1
+    max_value: 10
+    min_value: 0
+    # Optimistic: the new value is published as soon as it is set. With a
+    # lambda instead, Home Assistant only got it at the next poll of the
+    # template (every 60 s by default), which made the card look stuck.
+    optimistic: true
+    set_action:
+      then:
+        - logger.log:
+            format: "Number of portion set"
+        - lambda: |-
+            id(g_food_portion_slot_5) = x;
+
+# Define the switch for controlling the motor
+switch:
+  - platform: gpio
+    pin:
+      number: GPIO5
+    id: motor_switch
+    name: "Manual Feed"
+    restore_mode: ALWAYS_OFF
+    icon: mdi:pinwheel
+
+  - platform: restart
+    name: "System - Restart"
+    id: restart_switch
+
+  - platform: safe_mode
+    name: "System - Safe mode"

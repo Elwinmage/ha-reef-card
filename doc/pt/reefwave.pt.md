@@ -41,7 +41,8 @@ O cartão está dividido em 7 zonas:
 
 <img src="../img/rswave/zone_2.png"/>
 
-Ligar/desligar, manutenção, definições e Wi-Fi.
+Ligar/desligar, pré-visualização (o olho sobre o LED verde), manutenção,
+definições e Wi-Fi.
 
 ## Fita LED
 
@@ -156,10 +157,19 @@ deixa cada bomba de um grupo executar uma onda à sua maneira.
 <img src="../img/rswave/dialog_config.png"/>
 
 A roda dentada abre as definições da bomba: a onda em curso (tipo, direção,
-intensidades, tempos, passos), `Atraso de desligamento do atalho`,
-`Agrupada com o aquário`, as definições e os botões de pré-visualização
-da integração, e as ações do dispositivo (atualizar, repor, atualização do
-firmware).
+intensidades, tempos, passos), o interruptor de manutenção,
+`Atraso de desligamento do atalho`, `Agrupada com o aquário`, e as ações do
+dispositivo (atualizar, repor, atualização do firmware).
+
+## Pré-visualização
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+O olho, sobre o LED verde do clipe, abre a pré-visualização da bomba: o
+interruptor de manutenção (também nas definições), a onda a pré-visualizar
+(tipo, direção, intensidades, tempos, passo, durações da onda e da
+pré-visualização) e os botões da integração (iniciar, parar, retomar a onda
+em curso, guardar). Também abre com a bomba desligada.
 
 ## Sem conta na nuvem
 

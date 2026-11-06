@@ -161,6 +161,9 @@ export default css`
     gap: 3px;
     font-size: 0.9em;
   }
+  .field > button.choose-file {
+    align-self: flex-start;
+  }
   .field.small {
     flex: 1 1 0;
     min-width: 0;
@@ -198,6 +201,17 @@ export default css`
     gap: 6px;
     font-size: 0.9em;
   }
+  .monitoring-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .monitoring-alarm.on {
+    color: var(--error-color, #db4437);
+    font-weight: 600;
+  }
+
   .hint {
     color: var(--secondary-text-color, #777);
     font-size: 0.82em;
@@ -213,6 +227,24 @@ export default css`
   }
   .row3 {
     flex-wrap: nowrap;
+  }
+  .coral-preview {
+    margin: 6px 0;
+  }
+  .palette .swatch {
+    width: 32px;
+    height: 24px;
+    padding: 0;
+    border-radius: 4px;
+    border: 1px solid var(--divider-color, #ccc);
+    cursor: pointer;
+  }
+  .palette .swatch.active {
+    outline: 2px solid var(--primary-color, #03a9f4);
+    outline-offset: 1px;
+  }
+  .colour-picker {
+    margin-top: 6px;
   }
   .line .grow {
     font-size: 0.9em;
@@ -389,6 +421,16 @@ export default css`
   .tree-row svg.chevron.open {
     transform: rotate(90deg);
   }
+  .tree-row .add.outline svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    fill: currentColor;
+  }
+  .tree-row .add.outline.active {
+    opacity: 1;
+    color: var(--primary-color, #03a9f4);
+  }
   .tree-row .add {
     padding: 0 6px;
     line-height: 1.3;
@@ -483,6 +525,8 @@ export default css`
   }
   .stage.tool-decor,
   .stage.tool-hotspot,
+  .stage.tool-hotspot_rect,
+  .stage.tool-hotspot_lasso,
   .stage.tool-lasso,
   .stage.tool-coral,
   .stage.tool-home {
@@ -712,6 +756,20 @@ export default css`
   }
   .home-row select {
     width: auto;
+  }
+  .points {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: -2px 0 6px 8px;
+    font-size: 0.8em;
+    color: var(--secondary-text-color, #777);
+  }
+  .points svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    fill: currentColor;
   }
   .lamp {
     position: absolute;

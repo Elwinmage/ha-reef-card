@@ -86,6 +86,22 @@ Esta zona permite visualizar a programação atual das cabeças e alterá-la.
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regulação da dosagem
+
+A configuração da cabeça contém a **Regulação da dosagem** da [integração redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/pt/reefdose.pt.md#regulação-da-dosagem):
+
+- **Dosagem assistida**: o botão **Dosagem assistida** abre uma janela com o gráfico dos resultados de teste, a introdução de um novo resultado, a dose proposta para aplicar ou ignorar, e as definições do cálculo. Nada chega ao doseador até a aplicar.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
+- **Salmoura**: a cabeça é controlada apenas pelo Home Assistant, com doses manuais, por isso a sua configuração mostra a salmoura em vez do programa: salinidade da última semana, estado e alarme, salmoura prevista, controlo com refratómetro e definições. Na vista principal, o anel e a etiqueta central mostram a salmoura dosada hoje face à prevista, e a etiqueta inferior a salinidade.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
+
+### Histórico das doses
+
+Enquanto o doseador está em [modo Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/pt/poseidon.pt.md#modo-poseidon), a configuração de uma cabeça tem um botão **Histórico das doses**: as doses da cabeça, da mais recente para a mais antiga, por dia, com início, fim, duração, volume e tipo (programada, manual, compensação). Últimas 24 h, 7 ou 31 dias, ou tudo o que está guardado, com o volume total do período. Um início marcado com «≈» é estimado a partir do caudal da cabeça.
+
 ## Gestão de suplementos
 
  <img src="../img/rsdose/zone_5.png"/>
@@ -167,6 +183,14 @@ Aqui está a lista de imagens suportadas para suplementos, agrupadas por marca. 
 <tr><td>❌</td><td colspan='2'>Replenish</td></tr>
 <tr><td>❌</td><td colspan='2'>Restore</td></tr>
 <tr><td>❌</td><td colspan='2'>Strontion</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>DIY &nbsp; <sup>1/1 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Brine</td><td><img style='width:20%;' src='../../public/img/supplements/b99739a8-bced-420e-bbdb-86ccd14524fd.supplement.png'/></td></tr>
 </table>
 </details>
 

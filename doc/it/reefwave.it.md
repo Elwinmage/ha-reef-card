@@ -41,7 +41,8 @@ Ultimo messaggio e ultimo avviso, in alto.
 
 <img src="../img/rswave/zone_2.png"/>
 
-Acceso/spento, manutenzione, impostazioni e Wi-Fi.
+Acceso/spento, anteprima (l'occhio sul LED verde), manutenzione,
+impostazioni e Wi-Fi.
 
 ## Striscia LED
 
@@ -157,10 +158,20 @@ modo suo.
 <img src="../img/rswave/dialog_config.png"/>
 
 L'ingranaggio apre le impostazioni della pompa: l'onda in corso (tipo,
-direzione, intensità, tempi, passi), `Ritardo spegnimento collegamento rapido`,
-`Raggruppata con l'acquario`, le impostazioni e i pulsanti di anteprima
-dell'integrazione, e le azioni del dispositivo (aggiornamento dei dati,
-reset, aggiornamento del firmware).
+direzione, intensità, tempi, passi), l'interruttore di manutenzione,
+`Ritardo spegnimento collegamento rapido`, `Raggruppata con l'acquario`, e le
+azioni del dispositivo (aggiornamento dei dati, reset, aggiornamento del
+firmware).
+
+## Anteprima
+
+<img src="../img/rswave/dialog_preview.png"/>
+
+L'occhio, sul LED verde della clip, apre l'anteprima della pompa:
+l'interruttore di manutenzione (presente anche nelle impostazioni), l'onda da
+provare (tipo, direzione, intensità, tempi, passo, durate dell'onda e
+dell'anteprima) e i pulsanti dell'integrazione (avvia, ferma, riprendi l'onda
+in corso, salva). Si apre anche a pompa spenta.
 
 ## Senza account cloud
 

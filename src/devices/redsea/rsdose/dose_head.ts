@@ -235,11 +235,21 @@ export class DoseHead extends RSDevice {
         (this.entities["schedule_enabled"] &&
           this._hass.states[this.entities["schedule_enabled"].entity_id] &&
           this._hass.states[this.entities["schedule_enabled"].entity_id]
-            .state === "off"))
+            .state === "off" &&
+          !this.brine_mode()))
     ) {
       res = false;
     }
     return res;
+  }
+
+  /**
+   * Whether Home Assistant drives the head with manual doses (brine mode of
+   * the dose regulation): its own schedule is off then, the head is not.
+   */
+  brine_mode(): boolean {
+    const mode = this.entities?.["regulation_mode"];
+    return !!mode && this._hass?.states[mode.entity_id]?.state === "brine";
   }
 
   update_state(value) {

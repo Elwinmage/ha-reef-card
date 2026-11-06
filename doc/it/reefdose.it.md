@@ -86,6 +86,22 @@ Questa zona permette di visualizzare la programmazione corrente delle teste e di
 
   <img src="../img/rsdose/zone_4_dialog_schedule.png"/>
 
+### Regolazione del dosaggio
+
+La configurazione della testa contiene la **Regolazione del dosaggio** dell'[integrazione redsea](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/it/reefdose.it.md#regolazione-del-dosaggio):
+
+- **Dosaggio assistito**: il pulsante **Dosaggio assistito** apre una finestra con il grafico dei risultati dei test, l'inserimento di un nuovo risultato, la dose proposta da applicare o ignorare e le impostazioni del calcolo. Nulla arriva al dosatore finché non la applichi.
+
+  <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
+
+- **Salamoia**: la testa è gestita dal solo Home Assistant, con dosi manuali, quindi la sua configurazione mostra la salamoia al posto del programma: salinità dell'ultima settimana, stato e allarme, salamoia prevista, controllo con rifrattometro e impostazioni. Nella vista principale, l'anello e l'etichetta centrale mostrano la salamoia dosata oggi rispetto a quella prevista, e l'etichetta in basso la salinità.
+
+  <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>
+
+### Cronologia delle dosi
+
+Finché il dosatore è in [modalità Poseidon](https://github.com/Elwinmage/ha-reefbeat-component/blob/main/doc/it/poseidon.it.md#modalità-poseidon), la configurazione di una testa ha un pulsante **Cronologia delle dosi**: le dosi della testa, dalla più recente, per giorno, con inizio, fine, durata, volume e tipo (programmata, manuale, compensazione). Ultime 24 h, 7 o 31 giorni, o tutto ciò che è conservato, con il volume totale del periodo. Un inizio segnato con «≈» è stimato dalla portata della testa.
+
 ## Gestione degli integratori
 
  <img src="../img/rsdose/zone_5.png"/>
@@ -167,6 +183,14 @@ Ecco l'elenco delle immagini supportate per gli integratori, raggruppate per mar
 <tr><td>❌</td><td colspan='2'>Replenish</td></tr>
 <tr><td>❌</td><td colspan='2'>Restore</td></tr>
 <tr><td>❌</td><td colspan='2'>Strontion</td></tr>
+</table>
+</details>
+
+<details>
+<summary><b>DIY &nbsp; <sup>1/1 🖼️</sup></b></summary>
+
+<table>
+<tr><td>✅</td><td>Brine</td><td><img style='width:20%;' src='../../public/img/supplements/b99739a8-bced-420e-bbdb-86ccd14524fd.supplement.png'/></td></tr>
 </table>
 </details>
 

@@ -116,8 +116,11 @@ de izquierda a derecha:
 - <span>Olas <img src="../img/mdi/mdi_waves.png" width="20"/> por sonda ATO, verdes en un nivel deseado, naranjas por debajo o por encima.</span>
 
 Cada lectura toma el color de su nivel: verde para deseado, naranja para
-aceptable, rojo para peligro, blanco cuando la sonda no da una lectura válida.
-Un clic en una lectura abre su diálogo de información.
+aceptable, rojo para peligro, blanco cuando la sonda no da una lectura válida. La
+temperatura, el pH, el ORP y la salinidad van seguidos de su **tendencia** de la
+última hora: una flecha arriba, una flecha abajo o una tilde. Un clic en una
+lectura abre su historial sobre las bandas de nivel, de 24 horas o 7 días, con un
+botón a su diálogo de información.
 
 ## Sondas
 
@@ -130,7 +133,7 @@ lista. Cada una muestra:
 
 - Su **lectura**, y la **temperatura integrada** justo debajo para las sondas de
   pH, salinidad y ATO, coloreadas según su nivel. Un clic en un valor abre su
-  diálogo de información.
+  historial, como en el resumen.
 - Una **barra de situación** por lectura: las bandas roja, naranja y verde son
   los rangos de peligro, aceptable y deseado ajustados en la sonda, y la marca
   negra indica dónde está la lectura. La lectura principal va en la barra

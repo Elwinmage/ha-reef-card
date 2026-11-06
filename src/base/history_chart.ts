@@ -53,12 +53,19 @@
  *                  wants (default "zero"; use "min" for a temperature)
  *   step           true draws a staircase, right for a counter that jumps at
  *                  each dose (default true)
+ *   hide_empty     true to hide the whole chart (no blank panel) while no
+ *                  series has anything to draw, e.g. a reading never recorded
+ *                  yet in a dialog (default false)
  *   min_points     below this many samples a series is not drawn (default 1).
  *                  One is enough: a counter holds its value between changes,
  *                  so a lone sample is an honest flat line, and a day that has
  *                  seen a single fill would otherwise draw nothing at all.
  *   refresh        seconds between two reads at most (default 60, or 1 in
  *                  demo mode where the whole point is to move)
+ *   periods        hours the user can pick from, as buttons over the chart;
+ *                  the first one is shown first unless `hours` says otherwise
+ *   more_info      true to add a button opening the more-info dialog of the
+ *                  first series
  *   zones          true to draw the five level bands behind the curves, from
  *                  the `ranges` attribute of the first series (`[acceptable
  *                  low, desired low, desired high, acceptable high]`), or
@@ -66,6 +73,8 @@
  *                  acceptable, desired, acceptable, danger. The vertical
  *                  scale then always shows the acceptable span, with a margin
  *                  of danger on both sides.
+ *   zones_entity   key of the entity whose `ranges` give the bands, for a
+ *                  first series without any
  *   zone_alpha     opacity of the bands (default 0.3)
  *   demo_seconds   demo aid, off by default. Compresses time: the last N real
  *                  seconds of recorded history are stretched across the whole
@@ -83,11 +92,12 @@
 //----------------------------------------------------------------------------//
 //   IMPORT
 //----------------------------------------------------------------------------//
-import { html, TemplateResult } from "lit";
+import { html, nothing, TemplateResult } from "lit";
 import type { CSSResultGroup } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 
 import { MyElement } from "./element";
+import i18n from "../translations/myi18n";
 import type { HassConfig } from "../types/index";
 
 import style_history_chart from "./history_chart.styles";
@@ -128,6 +138,12 @@ const PADDING_RIGHT = 4;
 const LABEL_GAP = 3;
 /** Below this width the chart is treated as an overlay: fewer, smaller marks. */
 const NARROW_WIDTH = 160;
+/** Above this many hours, read statistics rather than every state change. */
+const STATISTICS_ABOVE_HOURS = 48;
+/** Statistics move every five minutes: reading them more often is wasted. */
+const STATISTICS_REFRESH_S = 300;
+/** Above this many hours, the x axis is marked with days rather than hours. */
+const DAY_MARKS_ABOVE_HOURS = 48;
 /** Level bands, bottom to top, when `zones` is on (symmetrical). */
 const ZONE_COLORS: readonly string[] = BAR_ZONES;
 /** Share of the acceptable span shown as danger above and below it. */
@@ -141,6 +157,9 @@ export class HistoryChart extends MyElement {
 
   /** Curves currently drawn, in declaration order. */
   @property({ attribute: false }) series: HistorySeries[] = [];
+
+  /** Hours picked with the period buttons, over the configured ones. */
+  @state() private _period: number | null = null;
 
   /** Epoch ms of the last completed read, to honour `refresh`. */
   private _last_fetch = 0;
@@ -215,7 +234,7 @@ export class HistoryChart extends MyElement {
    * Number of hours of history to draw.
    */
   get hours(): number {
-    const raw = Number(this.conf?.hours);
+    const raw = Number(this._period ?? this.conf?.hours);
     return Number.isFinite(raw) && raw > 0 ? raw : 24;
   }
 
@@ -444,7 +463,10 @@ export class HistoryChart extends MyElement {
     }
     // A demo that only redraws once a minute does not move; the whole point
     // is a curve growing on screen.
-    const default_refresh = this.demo_seconds > 0 ? 1 : 60;
+    const hours = this.hours;
+    const statistics = hours > STATISTICS_ABOVE_HOURS;
+    const default_refresh =
+      this.demo_seconds > 0 ? 1 : statistics ? STATISTICS_REFRESH_S : 60;
     const refresh = Number(this.conf?.refresh ?? default_refresh) * 1000;
     if (this._fetching || now - this._last_fetch < refresh) {
       return;
@@ -457,22 +479,27 @@ export class HistoryChart extends MyElement {
       // "today" window runs to tomorrow's midnight.
       const end = new Date(Math.min(now, span.end));
       const start = new Date(span.start);
-      const answer = await hass.callWS({
-        type: "history/history_during_period",
-        start_time: start.toISOString(),
-        end_time: end.toISOString(),
-        entity_ids: wanted.map((s) => s.entity_id),
-        // The chart only needs numbers: skipping attributes keeps the payload
-        // small on entities that have been updating all day.
-        minimal_response: true,
-        no_attributes: true,
-        // Every recorded change, not the "significant" subset: this is a
-        // numeric curve, and the filter defaults to true.
-        significant_changes_only: false,
-      });
-      const parsed = wanted.map((s) =>
-        HistoryChart.parse_history(answer, s.entity_id),
-      );
+      const ids = wanted.map((s) => s.entity_id);
+      let parsed = statistics
+        ? await this._read_statistics(hass, ids, start, end)
+        : [];
+      if (!parsed.flat().length) {
+        // Also what an entity without statistics falls back on
+        const answer = await hass.callWS({
+          type: "history/history_during_period",
+          start_time: start.toISOString(),
+          end_time: end.toISOString(),
+          entity_ids: ids,
+          // The chart only needs numbers: skipping attributes keeps the
+          // payload small on entities that have been updating all day.
+          minimal_response: true,
+          no_attributes: true,
+          // Every recorded change, not the "significant" subset: this is a
+          // numeric curve, and the filter defaults to true.
+          significant_changes_only: false,
+        });
+        parsed = ids.map((id) => HistoryChart.parse_history(answer, id));
+      }
 
       if (this.demo_seconds > 0) {
         // Anchored on the oldest sample in the rolling window, so the curve
@@ -529,6 +556,75 @@ export class HistoryChart extends MyElement {
     } finally {
       this._fetching = false;
     }
+    // Another period was picked during the read: it answered the old one
+    if (this.hours !== hours) {
+      this._last_fetch = 0;
+      await this.fetch_history();
+    }
+  }
+
+  /**
+   * Read the five-minute statistics of a long window: a week of every state
+   * change would be thousands of points per curve.
+   *
+   * @return the samples of each entity
+   */
+  private async _read_statistics(
+    hass: any,
+    ids: string[],
+    start: Date,
+    end: Date,
+  ): Promise<HistoryPoint[][]> {
+    const answer = await hass.callWS({
+      type: "recorder/statistics_during_period",
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      statistic_ids: ids,
+      period: "5minute",
+      types: ["mean"],
+    });
+    return ids.map((id) => HistoryChart.parse_statistics(answer, id));
+  }
+
+  /**
+   * Turn a statistics answer into usable samples.
+   *
+   * @param answer: the raw websocket answer
+   * @param entity_id: the entity the samples belong to
+   * @return the samples, oldest first
+   */
+  static parse_statistics(answer: any, entity_id: string): HistoryPoint[] {
+    const rows = answer?.[entity_id];
+    if (!Array.isArray(rows)) {
+      return [];
+    }
+    const points: HistoryPoint[] = [];
+    for (const row of rows) {
+      const t = new Date(row?.start).getTime();
+      const v = row?.mean;
+      if (Number.isFinite(t) && typeof v === "number") {
+        points.push({ t, v });
+      }
+    }
+    return points.sort((a, b) => a.t - b.t);
+  }
+
+  /** Show another period. */
+  select_period(hours: number): void {
+    this._period = hours;
+    this._last_fetch = 0;
+    void this.fetch_history();
+  }
+
+  /** Open the more-info dialog of the first series. */
+  open_more_info(): void {
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        bubbles: true,
+        composed: true,
+        detail: { entityId: this.entity_ids()[0] },
+      }),
+    );
   }
 
   /**
@@ -578,7 +674,10 @@ export class HistoryChart extends MyElement {
       return parse_ranges(zones);
     }
     // Read from the entity: raw device bounds, brought to its displayed unit
-    const first = this.series[0]?.entity_id;
+    const source = this.conf?.zones_entity;
+    const first = source
+      ? this.resolve_entity_id(source)
+      : this.series[0]?.entity_id;
     return first
       ? entity_ranges((this._hass as any)?.states?.[first] ?? null)
       : null;
@@ -657,8 +756,22 @@ export class HistoryChart extends MyElement {
   }
 
   override updated(): void {
+    this._toggle_empty();
     this._attach_canvas();
     this.draw();
+  }
+
+  /**
+   * With `hide_empty`, hide the chart while there is nothing to draw.
+   *
+   * Done here, when the series change, and not in draw(): a hidden canvas
+   * measures 0px, so draw() would never get to show it again.
+   */
+  private _toggle_empty(): void {
+    if (!this.conf?.hide_empty) {
+      return;
+    }
+    this.style.display = this.drawable_series().length === 0 ? "none" : "";
   }
 
   /**
@@ -891,15 +1004,12 @@ export class HistoryChart extends MyElement {
 
     ctx.lineWidth = 0.5;
 
-    // --- x axis: hour marks ------------------------------------------------
+    // --- x axis: hour or day marks -----------------------------------------
     const hours = scale.span / 3600 / 1000;
     const hour_step = Math.max(1, Math.round(hours / (small ? 3 : 6)));
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    // Walked forward from the left edge so a calendar day starts on 00h,
-    // rather than backward from now, which would land on arbitrary hours.
-    for (let ahead = 0; ahead < hours; ahead += hour_step) {
-      const stamp = scale.first + ahead * 3600 * 1000;
+    const mark = (stamp: number, label: string) => {
       const x = chart_x + ((stamp - scale.first) / scale.span) * chart_w;
       ctx.strokeStyle = grid_color;
       ctx.beginPath();
@@ -907,8 +1017,30 @@ export class HistoryChart extends MyElement {
       ctx.lineTo(x, chart_y + chart_h);
       ctx.stroke();
       ctx.fillStyle = text_color;
-      const label = new Date(stamp).getHours().toString().padStart(2, "0");
-      ctx.fillText(`${label}h`, x, chart_y + chart_h + 2);
+      ctx.fillText(label, x, chart_y + chart_h + 2);
+    };
+    if (hours > DAY_MARKS_ABOVE_HOURS) {
+      // On local midnights, stepping by calendar days: a day of the change
+      // to daylight saving time does not last 24 hours.
+      const day = new Date(scale.first);
+      day.setHours(24, 0, 0, 0);
+      for (
+        ;
+        day.getTime() < scale.first + scale.span;
+        day.setDate(day.getDate() + 1)
+      ) {
+        const date = day.getDate().toString().padStart(2, "0");
+        const month = (day.getMonth() + 1).toString().padStart(2, "0");
+        mark(day.getTime(), `${date}/${month}`);
+      }
+    } else {
+      // Walked forward from the left edge so a calendar day starts on 00h,
+      // rather than backward from now, which would land on arbitrary hours.
+      for (let ahead = 0; ahead < hours; ahead += hour_step) {
+        const stamp = scale.first + ahead * 3600 * 1000;
+        const label = new Date(stamp).getHours().toString().padStart(2, "0");
+        mark(stamp, `${label}h`);
+      }
     }
 
     // --- y axis: value marks ----------------------------------------------
@@ -1015,8 +1147,35 @@ export class HistoryChart extends MyElement {
   protected override _render(_style: string = ""): TemplateResult {
     return html`
       <div class="history-chart-container" style="${_style}">
+        ${this._render_toolbar()}
         <canvas></canvas>
       </div>
     `;
+  }
+
+  /** Period buttons and more-info button, when configured. */
+  private _render_toolbar(): TemplateResult | typeof nothing {
+    const periods: number[] = this.conf?.periods ?? [];
+    if (!periods.length && !this.conf?.more_info) return nothing;
+    return html`<div class="toolbar">
+      ${periods.map(
+        (hours) =>
+          html`<button
+            class="${hours === this.hours ? "active" : ""}"
+            @click=${() => this.select_period(hours)}
+          >
+            ${i18n._(`history_period_${hours}`)}
+          </button>`,
+      )}
+      ${this.conf?.more_info
+        ? html`<button
+            class="more_info"
+            title="${i18n._("history_more_info")}"
+            @click=${() => this.open_more_info()}
+          >
+            <ha-icon icon="mdi:information-outline"></ha-icon>
+          </button>`
+        : nothing}
+    </div>`;
   }
 }

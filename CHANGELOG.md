@@ -2,6 +2,162 @@
 
 ## MODIFICATIONS
 
+### ReefDose: daily dose to 0.1 mL in assisted dosing, compensation doses
+
+- The assisted dosing dialog showed the daily dose sensor (whole mL, read
+  only): it now shows the daily dose number, set to 0.1 mL as the doser
+  takes it.
+- The dose history names the compensation doses (the rest of a lowered
+  daily dose, offered by the ReefBeat app) instead of showing them as
+  scheduled.
+
+### ReefDose: estimated start of a dose
+
+- A dose missing from the dosing queue (the one at midnight, a manual one
+  from the ReefBeat app) now has a start and a duration, estimated by the
+  redsea integration from the flow of its head (`start_estimated`): the
+  dose history shows them with a "≈" (tooltip: estimated from the flow of
+  the head).
+
+### Messages: where they came from, and the history from the config dialog
+
+- After its date, a message or an alert tells where it came from: **Home
+  Assistant** (an answer to a push of Home Assistant) or the **ReefBeat
+  app** (an answer to a command of the app, relayed by Poseidon), in the
+  scrolling banner and in the message history (the `origin` attribute of
+  the message sensors and of the history entries, redsea integration). The
+  entries older than it show none.
+- The config dialog of every ReefBeat device (ReefATO+, ReefControl,
+  ReefDose, ReefLED, ReefMat, ReefPower, ReefRun, ReefWave) ends with a
+  **Message history** button: the banners that open it too are not shown
+  while there is no message. Closing the history goes back to the config
+  dialog. Not for a virtual ReefLED, which has no messages of its own.
+
+### ReefDose: history of the doses of a head
+
+- The configuration dialog of a head gets a **Dose history** button, shown
+  only while its doser is in Poseidon mode (its `poseidon_last_dose` sensor
+  is available): a ReefDose only tells its doses then.
+- The history lists the doses of the head, newest first, by day: start →
+  end, duration, volume, scheduled or manual (a manual dose from the
+  ReefBeat app has no start). Last 24 h, 7 or 31 days, or everything kept
+  (30 days by default), with the total volume of the period. It reloads by
+  itself when a new dose comes in while it is open.
+- Read from the `redsea.get_doses` action of the redsea integration.
+
+### Fix: dialogs wider than the card on a phone
+
+- A dialog never gets wider than the card any more: a wide content (the
+  intervals of the ReefDose schedule editor, for one) used to push it over
+  both sides of the card, leaving its edges out of reach. The content
+  shrinks with the dialog, and only what cannot shrink scrolls inside it.
+- ReefDose schedule: the fields of an interval (start, end, number of
+  doses, speed / volume) go on two lines when the card is narrow.
+- Smaller dialog paddings on phones; the maintenance list and the message
+  history of a device dialog follow the dialog width.
+
+### Poseidon shortcut
+
+- Every Red Sea device shows a trident once it has the Poseidon entities of
+  the redsea integration (its keys are known): in the device's "on" colour
+  in Poseidon mode, its "off" colour out of it, orange and blinking when
+  nothing went through the relay for a while (`silent` attribute). Hidden
+  on a device without them, and on LED groups.
+- Placed over the status LED of the device picture (ReefATO+, ReefDose,
+  ReefControl, ReefRun, ReefWave, ReefLED), next to the maintenance icons on
+  the ReefMat and the ReefControl Power.
+- A long press switches the Poseidon mode on or off; a tap opens the new
+  `poseidon` dialog: mode, strategy, polling pause, then what the relay sees
+  of the device (connection state, last frame from and to the device).
+  Works with the device switched off.
+- `scripts/check_entities.py` now finds the Poseidon entities of the
+  integration (`poseidon_mode`, `poseidon_poll_pause`, `poseidon_strategy`):
+  they are built from classes, not entity descriptions, and were missed.
+
+### Wifi dialog: aquarium
+
+- The wifi dialog shows the cloud aquarium of the device (`aquarium`
+  sensor of the redsea integration), after the linked account. Skipped
+  with an integration that does not provide it.
+
+### Messages: date and history
+
+- The scrolling message and alert banners start with the date and time of
+  the message (`timestamp` attribute of the sensors, redsea integration
+  with message history).
+- A click on the banner text opens the message history of the device
+  (new common dialog `messages_history`): messages and alerts, newest first,
+  filtered by kind (all / messages / alerts) and period (24 h, 7 days,
+  31 days, everything kept), with the HTTP method, path and status of each.
+  Opened from the alert banner, it shows the alerts first. The list reloads
+  when a new message or alert arrives. Works with the device switched off.
+
+### RSDOSE: dose regulation dialogs
+
+- The head configuration holds the regulation mode (needs the redsea
+  integration's dose regulation entities). In assisted mode an "Assisted
+  dosing" button opens its dialog (test results chart, record a result,
+  proposed dose to apply or dismiss, settings).
+- Brine mode: the head is driven by Home Assistant alone with manual doses,
+  so its configuration shows the brine (salinity chart, state, alarm,
+  planned brine, refractometer check, settings) instead of the schedule.
+  The dialog switches as soon as the mode changes.
+- Brine mode on the main view: the ring and the middle label show the brine
+  dosed today against the brine planned for the day, the bottom label the
+  salinity instead of the number of doses, the container its level without
+  the days left. The head stays coloured with its schedule off.
+- A chart with nothing recorded yet is hidden rather than drawn as a blank
+  panel (`hide_empty` option of `history-chart`).
+- Dialogs: any item of a dialog's content can take a `disabled_if`; the
+  dialog is rebuilt when an item shows or hides. Elements: new
+  `remove_if_disabled` option, taking a disabled element out of the layout
+  (two elements can then share one place, one at a time).
+- "DIY - Brine" supplement, with its own bottle picture: the only supplement
+  regulated on the salinity.
+
+### Fish feeder view
+
+- The low reserve warning moves onto the glass of the lid, over the food.
+- "Uptime" printed above its display.
+- The right face lists the feedings of the day: those gone by struck through,
+  the next one in orange, the later ones in green.
+
+### Aquarium view: outlined devices
+
+- Devices tab: a device can be outlined on the picture, instead of or along
+  with its thumbnail, with a rectangle, the lasso or a polygon. A tap on the
+  zone opens the device. Needs reeftank with `device_id` on hotspots.
+- Zones opening a view can be drawn with the rectangle and the lasso too.
+
+### Aquarium view: fish size
+
+- New "Fish size" setting of the aquarium: a ratio over the real size of the
+  fish, to fine-tune the render against the picture. Needs reeftank with
+  `render.fish_scale`.
+
+### ReefControl: trends and history
+
+- Summary bar: an arrow up, an arrow down or a tilde after the temperature, pH,
+  ORP and salinity, from the slope of their last hour.
+- A tap on these readings, or on the value of a probe, opens their history over
+  the level bands, on 24 hours or 7 days, with a button to the more-info dialog.
+  Over 7 days the chart reads the five-minute statistics and marks the days.
+
+### Aquarium editor: water monitoring
+
+- New "Monitoring" tab: the pH, ORP, room CO2 and KH tests entities, the entities telling
+  a probe was calibrated, the entities pausing the analysis and the thresholds
+  of the alarms, with the entities that suit each field listed first. It also
+  shows the status of the monitoring and of its alarms. Needs reeftank
+  with the monitoring; saved in `monitoring`.
+
+### Aquarium editor: water volume
+
+- New "Net water volume (L)" field under the dimensions, pre-filled from the
+  ReefBeat cloud aquarium (net volume, else gross, converted from gallons).
+  Saved as `water_volume_l` (needs reeftank with the water volume); the
+  ReefDose dose regulation reads it.
+
 ### Aquarium view (new card: `custom:reef-aquarium-card`)
 
 - A picture of the tank with devices and entities placed on it; needs the

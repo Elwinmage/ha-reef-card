@@ -4,7 +4,7 @@
  * Tabs: the aquarium (name, cloud link, preset, dimensions, rendering),
  * its views (pictures, water outlines, decor, hotspots), the elements
  * placed on them (device tree, drag and drop), the lights and flow, the
- * livestock (inventory, corals) and the feeding sources.
+ * livestock (inventory, corals), the feeding sources and the monitoring.
  *
  * Every change goes through the pure operations of ops.ts on a working
  * copy, kept in an undo history; nothing reaches Home Assistant before
@@ -14,6 +14,7 @@
 import { LitElement, html, nothing, svg, type TemplateResult } from "lit";
 import { state } from "lit/decorators.js";
 import {
+  mdiSelectDrag,
   mdiShakerOutline,
   mdiDevices,
   mdiChevronRight,
@@ -31,6 +32,8 @@ import {
 import type { HassConfig } from "../../types/index";
 import type {
   AquariumDocument,
+  AquariumEntities,
+  AquariumPayload,
   Catalog,
   CloudAquarium,
   CoralSpecies,
@@ -38,12 +41,13 @@ import type {
   FishSpecies,
   Hotspot,
   LivestockLine,
+  Monitoring,
   Point,
   SceneElement,
   View,
 } from "../types";
 import { RENDER_LEVELS } from "../types";
-import { ApiError, ReefTankApi, image_url, IMAGES_URL } from "../api";
+import { ApiError, ImageUrls, ReefTankApi } from "../api";
 import {
   WaterProjection,
   clip_path,
@@ -58,13 +62,22 @@ import {
   build_tree,
   default_element_type,
   floor_icon,
+  is_toggleable,
+  tree_devices,
   tree_empty,
   type TreeArea,
   type TreeDevice,
   type TreeEntity,
   type TreeFloor,
 } from "../tree";
-import { device_entities, night_darkness, tint_layers } from "../light";
+import {
+  device_entities,
+  night_darkness,
+  tint_layers,
+  type RGB,
+  type WaterLight,
+} from "../light";
+import { kelvin_rgb } from "../../devices/redsea/rsled/rsled_program";
 import { Backdrop, drawn_region } from "../backdrop";
 import { device_name, device_thumbnail } from "../elements";
 import { coral_palette, rgb_hex } from "../sprites";
@@ -79,7 +92,8 @@ type Tab =
   | "elements"
   | "lights"
   | "livestock"
-  | "feeding";
+  | "feeding"
+  | "monitoring";
 type Tool =
   | "select"
   | "region"
@@ -87,6 +101,8 @@ type Tool =
   | "decor"
   | "lasso"
   | "hotspot"
+  | "hotspot_rect"
+  | "hotspot_lasso"
   | "coral"
   | "home";
 
@@ -112,7 +128,16 @@ type Drag =
       y: number;
     }
   | { type: "lasso"; points: Point[] }
+  | { type: "rect"; from: Point; to: Point }
   | null;
+
+/** Smallest side of a rectangular zone: less is a click, not a zone. */
+const MIN_RECT_SIZE = 0.01;
+
+/** Corners of the rectangle between two opposite points. */
+function rect_points(from: Point, to: Point): Point[] {
+  return [from, [to[0], from[1]], to, [from[0], to[1]]];
+}
 
 const DEPTH_COLOURS: Record<ops.DepthName, string> = {
   front: "#ff9f43",
@@ -127,7 +152,38 @@ const TABS: Tab[] = [
   "lights",
   "livestock",
   "feeding",
+  "monitoring",
 ];
+
+/**
+ * Lowest top of a lamp mark, which stands above the water: with a water
+ * reaching the top of the picture, it would be drawn outside of the stage.
+ */
+const LAMP_MARK_TOP = "30px";
+
+/** Kelvin range of the light preview: the one of the ReefLED. */
+const PREVIEW_KELVIN_MIN = 9000;
+const PREVIEW_KELVIN_MAX = 23000;
+const PREVIEW_KELVIN_DEFAULT = 15000;
+
+/** Domains of the entities that can drop food (as the feeding sources). */
+const FEED_DOMAINS = ["switch", "button", "input_button", "input_boolean"];
+
+/** How long the confirmation of a save stays on display. */
+const SAVED_MESSAGE_MS = 5000;
+
+/** Text colour of an entity without a colour of its own (as CHIP_CSS). */
+const DEFAULT_TEXT_COLOR = "#ffffff";
+
+/** Alarms of the monitoring, as named in `AquariumEntities`. */
+const MONITORING_ALARMS = [
+  "ph_base_low",
+  "ph_swing_high",
+  "ph_profile_off",
+  "orp_low",
+  "probe_suspect",
+  "kh_fast_change",
+] as const;
 
 /** Class of the modal dialog holding the editor. */
 export const SCENE_DIALOG_CLASS = "reef-aquarium-scene-dialog";
@@ -277,7 +333,19 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _selection: Selection = null;
   @state() private _depth: ops.DepthName = "middle";
   @state() private _hotspot_target = "";
+  /** Device being outlined on the picture (Devices tab). */
+  @state() private _outline_device = "";
   @state() private _coral_species = "";
+  /** Colours of a coral while its colour picker is dragged (not saved). */
+  @state() private _palette_draft: {
+    coral: string;
+    palette: string[];
+  } | null = null;
+  /** Colour of a coral open in the colour picker. */
+  @state() private _colour_edit: { coral: string; index: number } | null = null;
+  private _saved_timer?: ReturnType<typeof setTimeout>;
+  /** Element whose text colour is being chosen. */
+  @state() private _text_colour_edit: string | null = null;
   /** Inventory line whose home is being placed (tool "home"). */
   @state() private _home_line: string | null = null;
   /** The drawn decor shown over the photo. */
@@ -286,6 +354,10 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _night_preview = false;
   /** Night darkness while its slider moves, not yet in the document. */
   @state() private _night_live: number | null = null;
+  /** Light tried in the Light & flow tab (preview only, never sent). */
+  @state() private _light_preview = false;
+  @state() private _preview_kelvin = PREVIEW_KELVIN_DEFAULT;
+  @state() private _preview_intensity = 100;
   /** Sand line edited by the sand tool: front glass or back wall. */
   @state() private _sand_line: ops.SandLine = "sand";
   /** Species picker opened (fish or coral), with its search text. */
@@ -312,9 +384,15 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _api: ReefTankApi | null = null;
   private _history: AquariumDocument[] = [];
   private _saved_json = "";
+  /** Entities of the aquarium, once saved. */
+  private _entities: AquariumEntities | null = null;
   private _revision: number | null = null;
   private _is_new = true;
-  private _images_url = IMAGES_URL;
+  /** Signed URLs of the uploaded pictures. */
+  private _images = new ImageUrls(
+    () => this._api,
+    () => this.requestUpdate(),
+  );
   private _devices: DeviceList | null = null;
   /** Document before a drag, recorded for undo once something moves. */
   private _before_drag: AquariumDocument | null = null;
@@ -349,6 +427,8 @@ export class ReefAquariumSceneEditor extends LitElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener("keydown", this._on_key);
+    clearTimeout(this._saved_timer);
+    this._images.stop();
     this._catalog_unsub?.();
     this._catalog_unsub = null;
   }
@@ -384,7 +464,7 @@ export class ReefAquariumSceneEditor extends LitElement {
       this._follow_catalog();
       if (this.aquarium_id) {
         const payload = await this._api.get(this.aquarium_id);
-        this._set_loaded(payload.document, payload.images_url);
+        this._set_loaded(payload.document, payload);
       } else {
         this._doc = ops.new_document(i18n._("aq_new_aquarium_name"));
         this._is_new = true;
@@ -398,13 +478,17 @@ export class ReefAquariumSceneEditor extends LitElement {
     }
   }
 
-  private _set_loaded(doc: AquariumDocument, images_url?: string): void {
+  private _set_loaded(
+    doc: AquariumDocument,
+    payload?: Partial<AquariumPayload>,
+  ): void {
     this._doc = doc;
     this._revision = doc.revision;
     this._is_new = false;
+    this._entities = payload?.entities ?? null;
     this._saved_json = JSON.stringify(doc);
     this._history = [];
-    this._images_url = images_url ?? IMAGES_URL;
+    this._images.load(payload);
     if (!this._view_id || !doc.views[this._view_id]) {
       this._view_id = doc.default_view ?? Object.keys(doc.views)[0] ?? null;
     }
@@ -416,13 +500,27 @@ export class ReefAquariumSceneEditor extends LitElement {
     const code = err instanceof ApiError ? err.code : String(err?.code ?? "");
     const key = `aq_err_${code}`;
     const text = i18n._(key);
-    return text.endsWith(key)
-      ? `${i18n._("aq_err_generic")} ${err?.message ?? ""}`
+    if (text.endsWith(key))
+      return `${i18n._("aq_err_generic")} ${err?.message ?? ""}`;
+    // The integration tells what it refused: without it, nobody can fix it
+    return code === "invalid_format" && err?.message
+      ? `${text} (${err.message})`
       : text;
   }
 
   get dirty(): boolean {
     return Boolean(this._doc) && JSON.stringify(this._doc) !== this._saved_json;
+  }
+
+  /** Tell the save worked, for a moment: nothing is left to act upon. */
+  private _show_saved(): void {
+    const message = { kind: "info" as const, text: i18n._("aq_saved") };
+    this._message = message;
+    clearTimeout(this._saved_timer);
+    this._saved_timer = setTimeout(() => {
+      // Another message took its place meanwhile: it stays
+      if (this._message === message) this._message = null;
+    }, SAVED_MESSAGE_MS);
   }
 
   /** Save the working copy. */
@@ -434,9 +532,9 @@ export class ReefAquariumSceneEditor extends LitElement {
         ops.for_save(this._doc),
         this._is_new ? null : this._revision,
       );
-      this._set_loaded(payload.document, payload.images_url);
+      this._set_loaded(payload.document, payload);
       this.aquarium_id = payload.document.id ?? null;
-      this._message = { kind: "info", text: i18n._("aq_saved") };
+      this._show_saved();
       return true;
     } catch (err: any) {
       this._message = { kind: "error", text: this._error_text(err) };
@@ -570,9 +668,14 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _stage_down(e: PointerEvent): void {
     const p = this._point(e);
     if (!p || !this._doc || !this._view_id) return;
-    if (this._tool === "lasso") {
+    if (this._tool === "lasso" || this._tool === "hotspot_lasso") {
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       this._drag = { type: "lasso", points: [p] };
+      return;
+    }
+    if (this._tool === "hotspot_rect") {
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      this._drag = { type: "rect", from: p, to: p };
       return;
     }
     if (this._tool === "decor" || this._tool === "hotspot") {
@@ -653,6 +756,10 @@ export class ReefAquariumSceneEditor extends LitElement {
         drag.points.push(p);
         this.requestUpdate();
         break;
+      case "rect":
+        drag.to = p;
+        this.requestUpdate();
+        break;
       case "corner":
         this.change(
           ops.move_region_corner(this._doc, v, drag.water, drag.index, p),
@@ -712,7 +819,9 @@ export class ReefAquariumSceneEditor extends LitElement {
     const drag = this._drag;
     if (drag?.type === "lasso" && this._doc && this._view_id) {
       const poly = simplify(drag.points, 0.004);
-      if (poly.length >= 3) {
+      if (poly.length >= 3 && this._tool === "hotspot_lasso") {
+        this._add_hotspot(poly);
+      } else if (poly.length >= 3) {
         const [doc, id] = ops.add_decor(
           this._doc,
           this._view_id,
@@ -722,6 +831,12 @@ export class ReefAquariumSceneEditor extends LitElement {
         this.change(doc);
         if (id) this._selection = { type: "decor", id };
       }
+    }
+    if (drag?.type === "rect") {
+      const poly = rect_points(drag.from, drag.to);
+      const wide = Math.abs(drag.to[0] - drag.from[0]) >= MIN_RECT_SIZE;
+      const high = Math.abs(drag.to[1] - drag.from[1]) >= MIN_RECT_SIZE;
+      if (wide && high) this._add_hotspot(poly);
     }
     if (drag && drag.type !== "new") this._drag = null;
     this._before_drag = null;
@@ -850,28 +965,76 @@ export class ReefAquariumSceneEditor extends LitElement {
     this._backdrop.paint(canvas);
   }
 
+  /**
+   * Add a clickable zone towards the chosen target, or the first one offered.
+   * @param poly: its outline
+   * @return whether there was a target to open
+   */
+  private _add_hotspot(poly: Point[]): boolean {
+    const doc = this._doc!;
+    const v = this._view_id!;
+    const device = this._outline_device;
+    const goto =
+      this._hotspot_target ||
+      Object.keys(doc.views).find((id) => id !== v) ||
+      "";
+    const [next, id] = ops.add_hotspot(doc, v, poly, goto, device || null);
+    if (!id) {
+      this._message = { kind: "error", text: i18n._("aq_hotspot_needs_view") };
+      return false;
+    }
+    this.change(next);
+    this._selection = { type: "hotspot", id };
+    // One outline per device, as a rule: back to moving things around
+    if (device) this._outline_stop();
+    return true;
+  }
+
+  /** Start outlining a device on the picture. */
+  private _outline_start(device_id: string): void {
+    this._outline_device = device_id;
+    this._selection = null;
+    this._drawing = [];
+    this._tool = "hotspot_rect";
+  }
+
+  /** Leave the outlining of a device. */
+  private _outline_stop(): void {
+    this._outline_device = "";
+    this._tool = "select";
+  }
+
+  /**
+   * Devices a zone can open: those of the aquarium first, then the others.
+   * Only to change the device of a zone: the tree chooses it in the first
+   * place.
+   * @return one entry per device, by name
+   */
+  private _hotspot_devices(): { id: string; name: string }[] {
+    const hass = this._hass;
+    if (!hass) return [];
+    const doc = this._doc!;
+    const linked = this._clouds.find((c) => c.uid === doc.cloud?.uid);
+    const place = aquarium_place(hass, doc.id, linked?.device_ids ?? []);
+    const near = place
+      ? tree_devices(
+          build_tree(hass, {
+            scope: {
+              areas: new Set([place.area_id]),
+              devices: new Set(linked?.device_ids ?? []),
+            },
+          }),
+        )
+      : [];
+    const ids = new Set(near.map((d) => d.id));
+    const others = tree_devices(build_tree(hass)).filter((d) => !ids.has(d.id));
+    return [...near, ...others].map(({ id, name }) => ({ id, name }));
+  }
+
   private _finish_shape(): void {
     if (!this._doc || !this._view_id || this._drawing.length < 3) return;
     if (this._tool === "hotspot") {
-      const goto =
-        this._hotspot_target ||
-        Object.keys(this._doc.views).find((v) => v !== this._view_id) ||
-        "";
-      const [doc, id] = ops.add_hotspot(
-        this._doc,
-        this._view_id,
-        this._drawing,
-        goto,
-      );
-      if (!id) {
-        this._message = {
-          kind: "error",
-          text: i18n._("aq_hotspot_needs_view"),
-        };
-        return;
-      }
-      this.change(doc);
-      this._selection = { type: "hotspot", id };
+      if (!this._add_hotspot(this._drawing)) return;
     } else {
       const [doc, id] = ops.add_decor(
         this._doc,
@@ -909,6 +1072,7 @@ export class ReefAquariumSceneEditor extends LitElement {
     this._message = { kind: "info", text: i18n._("aq_uploading") };
     try {
       const result = await this._api.upload(this._doc.id, file, file.name);
+      this._images.add(result.path, result.url);
       this.change(
         ops.update_view(this._doc, this._view_id, { image: result.path }),
       );
@@ -994,15 +1158,94 @@ export class ReefAquariumSceneEditor extends LitElement {
    * the lamps off: same layers, same darkness.
    */
   private _render_night(view: View): TemplateResult[] {
+    return this._render_light(view, () => ({
+      lamps: [],
+      dark: true,
+      none: false,
+    }));
+  }
+
+  /**
+   * The water of each outlined region under the light tried in the Light &
+   * flow tab: every lamp of the water at the chosen kelvin and intensity.
+   */
+  /** Kelvin and intensity tried on the picture, never sent to the lamps. */
+  private _light_preview_controls(): TemplateResult {
+    const on = this._light_preview;
+    return html`<fieldset>
+      <legend>${i18n._("aq_light_preview")}</legend>
+      <label class="check"
+        ><input
+          type="checkbox"
+          .checked=${on}
+          @change=${(e: Event) =>
+            (this._light_preview = (e.target as HTMLInputElement).checked)}
+        />${i18n._("aq_light_preview_show")}</label
+      >
+      <label class="field"
+        >${i18n._("aq_light_preview_kelvin")}
+        (${this._preview_kelvin.toLocaleString()} K)
+        <input
+          type="range"
+          min="${PREVIEW_KELVIN_MIN}"
+          max="${PREVIEW_KELVIN_MAX}"
+          step="500"
+          ?disabled=${!on}
+          .value=${String(this._preview_kelvin)}
+          @input=${(e: Event) =>
+            (this._preview_kelvin = Number(
+              (e.target as HTMLInputElement).value,
+            ))}
+      /></label>
+      <label class="field"
+        >${i18n._("aq_light_preview_intensity")} (${this._preview_intensity} %)
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          ?disabled=${!on}
+          .value=${String(this._preview_intensity)}
+          @input=${(e: Event) =>
+            (this._preview_intensity = Number(
+              (e.target as HTMLInputElement).value,
+            ))}
+      /></label>
+      <span class="hint">${i18n._("aq_light_preview_hint")}</span>
+    </fieldset>`;
+  }
+
+  private _render_light_preview(view: View): TemplateResult[] {
+    const rgb = kelvin_rgb(this._preview_kelvin) as RGB;
+    const power = this._preview_intensity / 100;
+    return this._render_light(view, (water_id) => {
+      const lights = this._doc!.waters[water_id]?.lights ?? [];
+      // A water without lamps is lit from the middle, to see the colour
+      const xs = lights.length ? lights.map((l) => l.x) : [0.5];
+      return {
+        lamps: xs
+          .map((x) => ({ x, rgb, power, dark: power <= 0 }))
+          .sort((a, b) => a.x - b.x),
+        dark: power <= 0,
+        none: false,
+      };
+    });
+  }
+
+  /** Light layers over each outlined region, as the card draws them. */
+  private _render_light(
+    view: View,
+    light_of: (water_id: string) => WaterLight,
+  ): TemplateResult[] {
     const doc = this._doc!;
-    const layers = tint_layers(
-      { lamps: [], dark: true, none: false },
-      doc.photo_light ?? "white",
-      this._night_value(doc),
-    )!;
     return view.regions
       .filter((r) => WaterProjection.valid(r.quad))
       .map((r) => {
+        const layers = tint_layers(
+          light_of(r.water),
+          doc.photo_light ?? "white",
+          this._night_value(doc),
+        )!;
         const clip = clip_path(r.quad);
         return html`<div
             class="water tint"
@@ -1023,10 +1266,15 @@ export class ReefAquariumSceneEditor extends LitElement {
     const view = this._view;
     if (!view)
       return html`<div class="empty">${i18n._("aq_no_view_yet")}</div>`;
-    const url = image_url(view.image, this._images_url);
+    const url = this._images.url(view.image);
     const sel = this._selection;
+    const drag = this._drag;
     const drawing =
-      this._drag?.type === "lasso" ? this._drag.points : this._drawing;
+      drag?.type === "lasso"
+        ? drag.points
+        : drag?.type === "rect"
+          ? [...rect_points(drag.from, drag.to), drag.from]
+          : this._drawing;
     const tab = this._tab;
     return html`<div class="stage-wrap">
       <div
@@ -1042,6 +1290,7 @@ export class ReefAquariumSceneEditor extends LitElement {
               class="bg"
               src="${url}"
               draggable="false"
+              @error=${() => this._images.failed(view.image)}
               @load=${(e: Event) => {
                 const img = e.target as HTMLImageElement;
                 if (img.naturalWidth)
@@ -1052,6 +1301,9 @@ export class ReefAquariumSceneEditor extends LitElement {
         ${this._preview ? html`<canvas class="backdrop"></canvas>` : nothing}
         ${tab === "aquarium" && this._night_preview
           ? this._render_night(view)
+          : nothing}
+        ${tab === "lights" && this._light_preview
+          ? this._render_light_preview(view)
           : nothing}
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
           ${view.regions.map(
@@ -1199,8 +1451,22 @@ export class ReefAquariumSceneEditor extends LitElement {
           >`;
     } else if (el.kind === "entity" && el.entity_id) {
       const s = hass.states?.[el.entity_id];
-      const text = `${el.label || s?.attributes?.friendly_name || el.entity_id}: ${s?.state ?? "?"}`;
-      body = html`<span class="chip">${text}</span>`;
+      // What the card will draw; the tooltip tells which entity it is
+      const text = s
+        ? [
+            el.hide_label ? "" : el.label,
+            s.state,
+            s.attributes?.unit_of_measurement,
+          ]
+            .filter((part) => part)
+            .join(" ")
+        : `${el.label || el.entity_id}: ?`;
+      body = html`<span
+        class="chip"
+        style="${el.text_color ? `color:${el.text_color}` : ""}"
+        title="${s?.attributes?.friendly_name ?? el.entity_id}"
+        >${text}</span
+      >`;
     } else {
       // A marker shows its role in its own icon: no badge
       body = html`<span class="chip"
@@ -1307,7 +1573,8 @@ export class ReefAquariumSceneEditor extends LitElement {
         out.push(
           html`<div
             class="lamp"
-            style="left:${p[0] * 100}%;top:${p[1] * 100}%"
+            style="left:${p[0] * 100}%;top:max(${p[1] *
+            100}%, ${LAMP_MARK_TOP})"
             title="${light.device_id
               ? device_name(this._hass!, light.device_id)
               : light.entity_id}"
@@ -1431,6 +1698,25 @@ export class ReefAquariumSceneEditor extends LitElement {
               /></label>`,
           )}
         </div>
+        <label class="field"
+          >${i18n._("aq_water_volume")}
+          <input
+            type="number"
+            min="1"
+            step="1"
+            .value=${typeof doc.water_volume_l === "number"
+              ? String(doc.water_volume_l)
+              : ""}
+            @change=${(e: Event) => {
+              const value = Number((e.target as HTMLInputElement).value);
+              this.change({
+                ...structuredClone(doc),
+                water_volume_l: value >= 1 ? value : null,
+              });
+            }}
+          />
+          <span class="hint">${i18n._("aq_water_volume_hint")}</span>
+        </label>
       </fieldset>
       <fieldset>
         <legend>${i18n._("aq_rendering")}</legend>
@@ -1477,6 +1763,29 @@ export class ReefAquariumSceneEditor extends LitElement {
               })}
           />
         </label>
+        <label class="field"
+          >${i18n._("aq_fish_scale")}
+          <input
+            type="number"
+            min="25"
+            max="300"
+            step="5"
+            .value=${String(Math.round((doc.render.fish_scale ?? 1) * 100))}
+            @change=${(e: Event) => {
+              const pct = (e.target as HTMLInputElement).valueAsNumber;
+              this.change({
+                ...structuredClone(doc),
+                render: {
+                  ...doc.render,
+                  fish_scale: Number.isNaN(pct)
+                    ? (doc.render.fish_scale ?? 1)
+                    : Math.max(25, Math.min(300, pct)) / 100,
+                },
+              });
+            }}
+          />
+          <span class="hint">${i18n._("aq_fish_scale_hint")}</span>
+        </label>
         ${this._render_night_darkness(doc)}
         <label class="field"
           >${i18n._("aq_photo_light")}
@@ -1510,6 +1819,8 @@ export class ReefAquariumSceneEditor extends LitElement {
     const next = structuredClone(doc);
     next.cloud = filled.cloud;
     if (!next.dimensions_cm) next.dimensions_cm = filled.dimensions_cm;
+    if (typeof next.water_volume_l !== "number")
+      next.water_volume_l = filled.water_volume_l;
     if (
       this._is_new &&
       (!next.name || next.name === i18n._("aq_new_aquarium_name"))
@@ -1542,9 +1853,10 @@ export class ReefAquariumSceneEditor extends LitElement {
       sel?.type === "decor"
         ? view?.decor.find((d) => d.id === sel.id)
         : undefined;
+    // Zones opening a device are edited with the devices
     const selected_hotspot =
       sel?.type === "hotspot"
-        ? view?.hotspots.find((h) => h.id === sel.id)
+        ? view?.hotspots.find((h) => h.id === sel.id && !h.device_id)
         : undefined;
     const other_views = Object.entries(doc.views).filter(([id]) => id !== v);
     return html`
@@ -1591,16 +1903,31 @@ export class ReefAquariumSceneEditor extends LitElement {
                       }),
                     )}
               /></label>
-              <label class="field"
-                >${i18n._("aq_picture")}
+              <div class="field">
+                ${i18n._("aq_picture")}
+                <button
+                  class="choose-file"
+                  ?disabled=${this._busy}
+                  @click=${(e: Event) =>
+                    (
+                      (e.currentTarget as HTMLElement)
+                        .nextElementSibling as HTMLInputElement
+                    ).click()}
+                >
+                  ${i18n._(
+                    view?.image ? "aq_picture_change" : "aq_picture_choose",
+                  )}
+                </button>
+                <!-- Hidden: it is emptied after each upload, and would say
+                     that no file is chosen next to a picture on display -->
                 <input
                   type="file"
                   accept="image/*"
-                  ?disabled=${this._busy}
+                  hidden
                   @change=${this._upload}
                 />
                 <span class="hint">${i18n._("aq_picture_hint")}</span>
-              </label>
+              </div>
               <div class="buttons">
                 ${doc.default_view !== v
                   ? html`<button
@@ -1743,7 +2070,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                       </select>
                     </label>
                     <div class="buttons">
-                      ${this._tool_button("hotspot", "aq_tool_hotspot")}
+                      ${this._zone_tools()}
                       ${selected_hotspot
                         ? html`<button
                             class="danger"
@@ -1928,6 +2255,18 @@ export class ReefAquariumSceneEditor extends LitElement {
     </div>`;
   }
 
+  /** Tools drawing a clickable zone. */
+  private _zone_tools(): TemplateResult {
+    return html`${this._tool_button("hotspot_rect", "aq_tool_rectangle")}
+    ${this._tool_button("hotspot_lasso", "aq_tool_lasso")}
+    ${this._tool_button("hotspot", "aq_tool_polygon")}
+    ${this._drawing.length >= 3
+      ? html`<button @click=${this._finish_shape}>
+          ${i18n._("aq_finish_shape")}
+        </button>`
+      : nothing}`;
+  }
+
   private _tool_button(tool: Tool, label: string): TemplateResult {
     return html`<button
       class="${this._tool === tool ? "active" : ""}"
@@ -1975,6 +2314,77 @@ export class ReefAquariumSceneEditor extends LitElement {
     >
       +
     </button>`;
+  }
+
+  /** Button of the tree outlining a device on the picture. */
+  private _outline_button(device_id: string): TemplateResult {
+    return html`<button
+      class="add outline ${this._outline_device === device_id ? "active" : ""}"
+      title="${i18n._("aq_outline_device")}"
+      @pointerdown=${(e: Event) => e.stopPropagation()}
+      @click=${(e: Event) => {
+        e.stopPropagation();
+        this._outline_start(device_id);
+      }}
+    >
+      <svg viewBox="0 0 24 24"><path d="${mdiSelectDrag}"></path></svg>
+    </button>`;
+  }
+
+  /** The zone of a device: being drawn, or selected on the picture. */
+  private _outline_panel(): TemplateResult | typeof nothing {
+    const sel = this._selection;
+    const zone =
+      sel?.type === "hotspot"
+        ? this._view?.hotspots.find((h) => h.id === sel.id && h.device_id)
+        : undefined;
+    const outlined = this._outline_device;
+    if (outlined) {
+      return html`<fieldset>
+        <legend>
+          ${i18n._("aq_outline_device")}: ${device_name(this._hass!, outlined)}
+        </legend>
+        <div class="buttons">
+          ${this._zone_tools()}
+          <button @click=${() => this._outline_stop()}>
+            ${i18n._("aq_outline_cancel")}
+          </button>
+        </div>
+        <span class="hint">${i18n._("aq_outline_device_hint")}</span>
+      </fieldset>`;
+    }
+    if (!zone) return nothing;
+    const devices = this._hotspot_devices();
+    // A device gone from Home Assistant still shows as the target of its zone
+    if (!devices.some((d) => d.id === zone.device_id)) {
+      devices.push({ id: zone.device_id!, name: zone.device_id! });
+    }
+    return html`<fieldset>
+      <legend>${i18n._("aq_outline_zone")}</legend>
+      <label class="field"
+        >${i18n._("aq_outline_opens")}
+        <select
+          @change=${(e: Event) =>
+            this.change(
+              ops.update_hotspot(this._doc!, this._view_id!, zone.id, {
+                device_id: (e.target as HTMLSelectElement).value,
+              }),
+            )}
+        >
+          ${devices.map(
+            (d) =>
+              html`<option value="${d.id}" ?selected=${d.id === zone.device_id}>
+                ${d.name}
+              </option>`,
+          )}
+        </select>
+      </label>
+      <div class="buttons">
+        <button class="danger" @click=${this._delete_selection}>
+          ${i18n._("aq_delete")}
+        </button>
+      </div>
+    </fieldset>`;
   }
 
   private _render_tree_entity(ent: TreeEntity, depth: number): TemplateResult {
@@ -2035,7 +2445,7 @@ export class ReefAquariumSceneEditor extends LitElement {
             ? html`<span class="sub">${dev.model}</span>`
             : nothing}</span
         >
-        ${this._add_button("device", dev.id)}
+        ${this._add_button("device", dev.id)} ${this._outline_button(dev.id)}
         ${has_children
           ? this._chevron(open)
           : html`<span class="chevron"></span>`}
@@ -2129,6 +2539,7 @@ export class ReefAquariumSceneEditor extends LitElement {
         : undefined;
     return html`
       ${element && v ? this._element_properties(element, v) : nothing}
+      ${this._outline_panel()}
       <input
         class="search"
         placeholder="${i18n._("aq_search")}"
@@ -2173,6 +2584,55 @@ export class ReefAquariumSceneEditor extends LitElement {
     `;
   }
 
+  /** How an entity shows its text: with its label or not, and its colour. */
+  private _entity_text(
+    element: SceneElement,
+    set: (patch: Partial<SceneElement>) => void,
+  ): TemplateResult {
+    const editing = this._text_colour_edit === element.id;
+    return html`<label class="check"
+        ><input
+          type="checkbox"
+          .checked=${Boolean(element.hide_label)}
+          @change=${(e: Event) =>
+            set({ hide_label: (e.target as HTMLInputElement).checked })}
+        />
+        ${i18n._("aq_hide_label")}</label
+      >
+      <div class="field">
+        ${i18n._("aq_text_color")}
+        <div class="palette">
+          <button
+            class="swatch ${editing ? "active" : ""}"
+            style="background: ${element.text_color ?? DEFAULT_TEXT_COLOR}"
+            title="${i18n._("aq_text_color")}"
+            @click=${() =>
+              (this._text_colour_edit = editing ? null : element.id)}
+          ></button>
+          ${element.text_color
+            ? html`<button
+                class="icon reset"
+                title="${i18n._("aq_reset_text_color")}"
+                @click=${() => {
+                  this._text_colour_edit = null;
+                  set({ text_color: null });
+                }}
+              >
+                ↺
+              </button>`
+            : nothing}
+        </div>
+        ${editing
+          ? html`<reef-colour-picker
+              class="colour-picker"
+              .value=${element.text_color ?? DEFAULT_TEXT_COLOR}
+              @colour-change=${(e: CustomEvent) =>
+                set({ text_color: e.detail.value })}
+            ></reef-colour-picker>`
+          : nothing}
+      </div>`;
+  }
+
   private _element_properties(
     element: SceneElement,
     v: string,
@@ -2194,7 +2654,8 @@ export class ReefAquariumSceneEditor extends LitElement {
           @change=${(e: Event) =>
             set({ label: (e.target as HTMLInputElement).value })}
       /></label>
-      ${element.kind === "entity"
+      ${element.kind === "entity" ? this._entity_text(element, set) : nothing}
+      ${element.kind === "entity" && is_toggleable(element.entity_id ?? "")
         ? html`<label class="field"
             >${i18n._("aq_element_type")}
             <select
@@ -2205,7 +2666,8 @@ export class ReefAquariumSceneEditor extends LitElement {
                 (t) =>
                   html`<option
                     value="${t}"
-                    ?selected=${(element.type ?? "common-sensor") === t}
+                    ?selected=${(element.type ??
+                      default_element_type(element.entity_id ?? "")) === t}
                   >
                     ${i18n._(`aq_type_${t.replace("common-", "")}`)}
                   </option>`,
@@ -2229,11 +2691,15 @@ export class ReefAquariumSceneEditor extends LitElement {
           type="checkbox"
           .checked=${feeding}
           @change=${(e: Event) =>
-            set({
-              roles: (e.target as HTMLInputElement).checked
-                ? ["feeding_point"]
-                : [],
-            })}
+            this.change(
+              ops.set_feeding_point(
+                doc,
+                v,
+                element.id,
+                (e.target as HTMLInputElement).checked,
+                this._feed_entity(element),
+              ),
+            )}
         />
         ${i18n._("aq_feeding_point")}</label
       >
@@ -2242,7 +2708,9 @@ export class ReefAquariumSceneEditor extends LitElement {
             >${i18n._("aq_feeding_source")}
             <select
               @change=${(e: Event) =>
-                set({ source: (e.target as HTMLSelectElement).value || null })}
+                set({
+                  source: (e.target as HTMLSelectElement).value || null,
+                })}
             >
               <option value="" ?selected=${!element.source}>
                 ${i18n._("aq_any_source")}
@@ -2263,6 +2731,58 @@ export class ReefAquariumSceneEditor extends LitElement {
         ${i18n._("aq_delete")}
       </button>
     </fieldset>`;
+  }
+
+  /**
+   * The entity feeding of an element: the feed switch or button of a device
+   * (a feeder), or the entity itself when it is one.
+   * @return the entity id, or null when the element does not feed
+   */
+  private _feed_entity(element: SceneElement): string | null {
+    const feeds = (entity_id: string) => {
+      const [domain, object_id = ""] = entity_id.split(".");
+      return (
+        FEED_DOMAINS.includes(domain) && /(^|_)feed(ing)?($|_)/.test(object_id)
+      );
+    };
+    if (element.kind === "entity")
+      return element.entity_id && feeds(element.entity_id)
+        ? element.entity_id
+        : null;
+    if (element.kind !== "device" || !element.device_id) return null;
+    const entities: Record<string, any> = (this._hass?.entities as any) ?? {};
+    const own = Object.keys(entities)
+      .filter((id) => entities[id]?.device_id === element.device_id)
+      .filter(feeds)
+      .sort();
+    // The feeder's own feed switch first (ESPHome VSON: manual_feed)
+    return own.find((id) => id.endsWith("_manual_feed")) ?? own[0] ?? null;
+  }
+
+  /** Name of a feeding point, as the feeding panel lists it. */
+  private _point_name(ref: ops.FeedingPointRef): string {
+    const e = ref.element;
+    const name =
+      e.label ||
+      (e.kind === "device"
+        ? device_name(this._hass!, e.device_id)
+        : e.kind === "entity"
+          ? (e.entity_id ?? "")
+          : i18n._("aq_marker"));
+    const view = this._doc!.views[ref.view_id]?.name;
+    return view ? `${name} (${view})` : name;
+  }
+
+  /** The feeding points answering a source, under it. */
+  private _points_line(
+    points: ops.FeedingPointRef[] | undefined,
+    prefix: string = "",
+  ): TemplateResult | typeof nothing {
+    if (!points?.length) return nothing;
+    return html`<div class="points" title="${i18n._("aq_feeding_point")}">
+      <svg viewBox="0 0 24 24"><path d="${mdiMapMarker}"></path></svg>
+      <span>${prefix}${points.map((p) => this._point_name(p)).join(", ")}</span>
+    </div>`;
   }
 
   private _panel_lights(): TemplateResult {
@@ -2344,7 +2864,17 @@ export class ReefAquariumSceneEditor extends LitElement {
                   (id) => html`<option value="entity|${id}">${id}</option>`,
                 )}
               </select>
-              <span class="hint">${i18n._("aq_lights_hint")}</span>
+              <span class="hint"
+                >${i18n._(
+                  this._view?.regions.some(
+                    (r) =>
+                      r.water === this._water_id &&
+                      WaterProjection.valid(r.quad),
+                  )
+                    ? "aq_lights_hint"
+                    : "aq_home_needs_outline",
+                )}</span
+              >
             </fieldset>
             <fieldset>
               <legend>${i18n._("aq_flow")}</legend>
@@ -2386,6 +2916,7 @@ export class ReefAquariumSceneEditor extends LitElement {
               </datalist>
               <span class="hint">${i18n._("aq_flow_hint")}</span>
             </fieldset>
+            ${this._light_preview_controls()}
             <label class="field"
               >${i18n._("aq_sand_band")}
               <input
@@ -2630,6 +3161,15 @@ export class ReefAquariumSceneEditor extends LitElement {
                     ops.update_coral(doc, this._water_id, coral.id, patch),
                   );
                 const selected = sel?.type === "coral" && sel.id === coral.id;
+                // Colours shown: the one being chosen, else the saved ones
+                const shown =
+                  this._palette_draft?.coral === coral.id
+                    ? this._palette_draft.palette
+                    : palette.map(rgb_hex);
+                const editing =
+                  this._colour_edit?.coral === coral.id
+                    ? this._colour_edit.index
+                    : null;
                 return html`<div
                   class="card ${selected ? "current" : ""}"
                   @click=${() =>
@@ -2692,29 +3232,60 @@ export class ReefAquariumSceneEditor extends LitElement {
                       </select>
                     </label>
                   </div>
+                  ${palette.length && selected
+                    ? html`<reef-coral-preview
+                        class="coral-preview"
+                        .species=${species}
+                        .palette=${shown}
+                      ></reef-coral-preview>`
+                    : nothing}
                   ${palette.length
                     ? html`<div class="palette">
-                        ${palette.map(
-                          (c, i) =>
-                            html`<input
-                              type="color"
-                              .value=${rgb_hex(c)}
+                        ${shown.map(
+                          (hex, i) =>
+                            html`<button
+                              class="swatch ${editing === i ? "active" : ""}"
+                              style="background: ${hex}"
                               title="${i18n._("aq_colour")} ${i + 1}"
-                              @change=${(e: Event) => {
-                                const next = palette.map(rgb_hex);
-                                next[i] = (e.target as HTMLInputElement).value;
-                                set({ palette: next });
-                              }}
-                            />`,
+                              @click=${() =>
+                                (this._colour_edit =
+                                  editing === i
+                                    ? null
+                                    : { coral: coral.id, index: i })}
+                            ></button>`,
                         )}
                         <button
-                          class="icon"
+                          class="icon reset"
                           title="${i18n._("aq_reset_colours")}"
-                          @click=${() => set({ palette: [] })}
+                          @click=${() => {
+                            this._colour_edit = null;
+                            this._palette_draft = null;
+                            set({ palette: [] });
+                          }}
                         >
                           ↺
                         </button>
                       </div>`
+                    : nothing}
+                  ${selected && editing !== null
+                    ? html`<reef-colour-picker
+                        class="colour-picker"
+                        .value=${shown[editing]}
+                        @colour-input=${(e: CustomEvent) => {
+                          const next = [...shown];
+                          next[editing] = e.detail.value;
+                          this._palette_draft = {
+                            coral: coral.id,
+                            palette: next,
+                          };
+                        }}
+                        @colour-change=${(e: CustomEvent) => {
+                          const next = [...shown];
+                          next[editing] = e.detail.value;
+                          this._palette_draft = null;
+                          set({ palette: next });
+                        }}
+                      ></reef-colour-picker>`
                     : nothing}
                 </div>`;
               })}
@@ -2757,6 +3328,161 @@ export class ReefAquariumSceneEditor extends LitElement {
     `;
   }
 
+  /** An entity of the monitoring, with the list of what suits it. */
+  private _monitoring_entity(
+    field: keyof Monitoring,
+    kind: ops.MonitoringKind,
+  ): TemplateResult {
+    const doc = this._doc!;
+    return html`<label class="field"
+      >${i18n._(`aq_mon_${field}`)}
+      <input
+        list="monitoring_${kind}"
+        .value=${String(doc.monitoring![field] ?? "")}
+        @change=${(e: Event) =>
+          this.change(
+            ops.update_monitoring(doc, {
+              [field]: (e.target as HTMLInputElement).value.trim() || null,
+            }),
+          )}
+      />
+    </label>`;
+  }
+
+  /** A threshold, kept within what the integration accepts. */
+  private _monitoring_number(
+    field: keyof Monitoring,
+    min: number,
+    max: number,
+    step: number = 1,
+  ): TemplateResult {
+    const doc = this._doc!;
+    const current = doc.monitoring![field] as number;
+    return html`<label class="field small"
+      >${i18n._(`aq_mon_${field}`)}
+      <input
+        type="number"
+        min="${min}"
+        max="${max}"
+        step="${step}"
+        .value=${String(current)}
+        @change=${(e: Event) => {
+          const value = (e.target as HTMLInputElement).valueAsNumber;
+          this.change(
+            ops.update_monitoring(doc, {
+              [field]: Number.isNaN(value)
+                ? current
+                : Math.max(min, Math.min(max, value)),
+            }),
+          );
+        }}
+      />
+    </label>`;
+  }
+
+  /** Where the monitoring stands, from the entities of the integration. */
+  private _monitoring_status(): TemplateResult | typeof nothing {
+    const states = this._hass!.states as Record<string, any>;
+    const status = states[this._entities?.monitoring ?? ""];
+    if (!status) return nothing;
+    const learning =
+      status.state === "learning"
+        ? ` (${status.attributes?.learning_pct ?? 0} %)`
+        : "";
+    return html`<fieldset>
+      <legend>${i18n._("aq_mon_status")}</legend>
+      <span>${i18n._(`aq_mon_status_${status.state}`)}${learning}</span>
+      ${MONITORING_ALARMS.map((alarm) => {
+        const state = states[this._entities?.[alarm] ?? ""]?.state ?? "unknown";
+        return html`<div class="line monitoring-alarm ${state}">
+          <span class="grow">${i18n._(`aq_mon_alarm_${alarm}`)}</span>
+          <span>${i18n._(`aq_mon_state_${state}`)}</span>
+        </div>`;
+      })}
+    </fieldset>`;
+  }
+
+  private _panel_monitoring(): TemplateResult {
+    const doc = this._doc!;
+    const monitoring = doc.monitoring;
+    if (!monitoring)
+      return html`<span class="hint">${i18n._("aq_mon_unavailable")}</span>`;
+    const kinds: ops.MonitoringKind[] = [
+      "ph",
+      "orp",
+      "co2",
+      "kh",
+      "calibration",
+      "pause",
+    ];
+    return html`
+      ${this._monitoring_status()}
+      <fieldset>
+        <legend>${i18n._("aq_mon_measures")}</legend>
+        ${this._monitoring_entity("ph_entity", "ph")}
+        ${this._monitoring_entity("orp_entity", "orp")}
+        ${this._monitoring_entity("co2_entity", "co2")}
+        ${this._monitoring_entity("kh_entity", "kh")}
+        <span class="hint">${i18n._("aq_mon_measures_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_calibration")}</legend>
+        ${this._monitoring_entity("ph_calibration_entity", "calibration")}
+        ${this._monitoring_entity("orp_calibration_entity", "calibration")}
+        <span class="hint">${i18n._("aq_mon_calibration_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_pause")}</legend>
+        ${monitoring.pause_entities.map(
+          (id) =>
+            html`<div class="line">
+              <span class="grow">${id}</span>
+              <button
+                class="icon"
+                @click=${() => this.change(ops.remove_pause_entity(doc, id))}
+              >
+                ✕
+              </button>
+            </div>`,
+        )}
+        <input
+          list="monitoring_pause"
+          placeholder="+ ${i18n._("aq_mon_add_pause")}"
+          @change=${(e: Event) => {
+            const input = e.target as HTMLInputElement;
+            const value = input.value.trim();
+            input.value = "";
+            this.change(ops.add_pause_entity(doc, value));
+          }}
+        />
+        ${this._monitoring_number("pause_hours", 1, 48)}
+        <span class="hint">${i18n._("aq_mon_pause_hint")}</span>
+      </fieldset>
+      <fieldset>
+        <legend>${i18n._("aq_mon_thresholds")}</legend>
+        <div class="monitoring-numbers">
+          ${this._monitoring_number("learning_days", 7, 30)}
+          ${this._monitoring_number("ph_base_drop", 0.02, 1, 0.01)}
+          ${this._monitoring_number("ph_swing_pct", 10, 300, 5)}
+          ${this._monitoring_number("ph_profile_band", 0.01, 1, 0.01)}
+          ${this._monitoring_number("ph_profile_hours", 2, 12)}
+          ${this._monitoring_number("orp_drop_mv", 5, 200)}
+          ${this._monitoring_number("orp_drop_hours", 2, 48)}
+          ${this._monitoring_number("kh_change_max", 0.1, 3, 0.1)}
+        </div>
+        <span class="hint">${i18n._("aq_mon_thresholds_hint")}</span>
+      </fieldset>
+      ${kinds.map(
+        (kind) =>
+          html`<datalist id="monitoring_${kind}">
+            ${ops
+              .monitoring_candidates(this._hass, kind)
+              .map((c) => html`<option value="${c.id}">${c.name}</option>`)}
+          </datalist>`,
+      )}
+    `;
+  }
+
   private _panel_feeding(): TemplateResult {
     const doc = this._doc!;
     const linked = doc.cloud
@@ -2774,40 +3500,45 @@ export class ReefAquariumSceneEditor extends LitElement {
       "event",
       "binary_sensor",
     ]);
+    const points = ops.feeding_points_by_source(doc);
     return html`
       <fieldset>
         <legend>${i18n._("aq_feeding_sources")}</legend>
         ${doc.feeding.sources.map(
           (s) =>
             html`<div class="line">
-              <span class="grow">${s.entity_id}</span>
-              <select
-                @change=${(e: Event) => {
-                  const next = structuredClone(doc);
-                  const src = next.feeding.sources.find((x) => x.id === s.id)!;
-                  src.kind = ((e.target as HTMLSelectElement).value ||
-                    null) as any;
-                  this.change(next);
-                }}
-              >
-                <option value="" ?selected=${!s.kind}>
-                  ${i18n._("aq_kind_auto")}
-                </option>
-                ${["feeder", "shortcut", "manual"].map(
-                  (k) =>
-                    html`<option value="${k}" ?selected=${s.kind === k}>
-                      ${i18n._(`aq_kind_${k}`)}
-                    </option>`,
-                )}
-              </select>
-              <button
-                class="icon"
-                @click=${() => this.change(ops.remove_feed_source(doc, s.id))}
-              >
-                ✕
-              </button>
-            </div>`,
+                <span class="grow">${s.entity_id}</span>
+                <select
+                  @change=${(e: Event) => {
+                    const next = structuredClone(doc);
+                    const src = next.feeding.sources.find(
+                      (x) => x.id === s.id,
+                    )!;
+                    src.kind = ((e.target as HTMLSelectElement).value ||
+                      null) as any;
+                    this.change(next);
+                  }}
+                >
+                  <option value="" ?selected=${!s.kind}>
+                    ${i18n._("aq_kind_auto")}
+                  </option>
+                  ${["feeder", "shortcut", "manual"].map(
+                    (k) =>
+                      html`<option value="${k}" ?selected=${s.kind === k}>
+                        ${i18n._(`aq_kind_${k}`)}
+                      </option>`,
+                  )}
+                </select>
+                <button
+                  class="icon"
+                  @click=${() => this.change(ops.remove_feed_source(doc, s.id))}
+                >
+                  ✕
+                </button>
+              </div>
+              ${this._points_line(points[s.id])}`,
         )}
+        ${this._points_line(points[""], `${i18n._("aq_any_source")}: `)}
         ${suggestions.map(
           (id) =>
             html`<button
@@ -2945,6 +3676,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                         @click=${() => (
                           (this._tab = t),
                           (this._tool = "select"),
+                          (this._outline_device = ""),
                           (this._drawing = [])
                         )}
                       >
@@ -2988,7 +3720,9 @@ export class ReefAquariumSceneEditor extends LitElement {
                           ? this._panel_lights()
                           : this._tab === "livestock"
                             ? this._panel_livestock()
-                            : this._panel_feeding()}
+                            : this._tab === "feeding"
+                              ? this._panel_feeding()
+                              : this._panel_monitoring()}
                 </div>
               </aside>
               <main>${this._render_stage()}</main>

@@ -37,11 +37,14 @@ import {
 } from "./rswave_program";
 import { WaveLibrary, ask, fetch_library } from "./rswave_api";
 import { type_icon } from "./rswave_icons";
-import { direction_label, tr, type_label } from "./rswave_schedule";
+import { busy_label, direction_label, tr, type_label } from "./rswave_schedule";
 import i18n from "../../../translations/myi18n";
 
 /** What the editor is doing with the selected wave. */
 type Step = "edit" | "name" | "delete";
+
+/** Actions of the editor whose button shows they are running. */
+type Action = "update" | "create" | "delete" | "preview" | "preview_stop";
 
 export class RSWaveLibrary extends RSWaveElement {
   static override styles = style_rswave_schedule;
@@ -55,6 +58,11 @@ export class RSWaveLibrary extends RSWaveElement {
   @state() protected _name = "";
   @state() protected _error = "";
   @state() protected _busy = false;
+  /**
+   * Action in progress, until the library is read again: its button shows
+   * the turning arrow ("" when none)
+   */
+  @state() protected _pending: Action | "" = "";
   /** Preview settings: direction and duration (min) */
   @state() protected _preview_dir = "alt";
   @state() protected _preview_min = 5;
@@ -99,6 +107,7 @@ export class RSWaveLibrary extends RSWaveElement {
     this._step = "edit";
     this._error = "";
     this._busy = false;
+    this._pending = "";
     void this.load();
   }
 
@@ -232,6 +241,15 @@ export class RSWaveLibrary extends RSWaveElement {
 
   /** Run the wave being edited on this pump for a while. */
   async preview(): Promise<void> {
+    this._pending = "preview";
+    try {
+      await this._preview();
+    } finally {
+      this._pending = "";
+    }
+  }
+
+  protected async _preview(): Promise<void> {
     const w = this._wave;
     if (!w) return;
     await this.run("wave_preview", {
@@ -242,10 +260,28 @@ export class RSWaveLibrary extends RSWaveElement {
   }
 
   async stop_preview(): Promise<void> {
+    this._pending = "preview_stop";
+    try {
+      await this._stop_preview();
+    } finally {
+      this._pending = "";
+    }
+  }
+
+  protected async _stop_preview(): Promise<void> {
     await this.run("wave_preview_stop", {});
   }
 
   async update_wave(): Promise<void> {
+    this._pending = "update";
+    try {
+      await this._update_wave();
+    } finally {
+      this._pending = "";
+    }
+  }
+
+  protected async _update_wave(): Promise<void> {
     const w = this._wave;
     if (!w || !w.uid || w.default) return;
     // The name can be changed too (the pumps using the wave follow)
@@ -270,6 +306,15 @@ export class RSWaveLibrary extends RSWaveElement {
   }
 
   async create_wave(): Promise<void> {
+    this._pending = "create";
+    try {
+      await this._create_wave();
+    } finally {
+      this._pending = "";
+    }
+  }
+
+  protected async _create_wave(): Promise<void> {
     const w = this._wave;
     const name = this._name.trim();
     if (!w || !name) {
@@ -289,6 +334,15 @@ export class RSWaveLibrary extends RSWaveElement {
 
   // Not remove(): that name is HTMLElement's
   async delete_wave(): Promise<void> {
+    this._pending = "delete";
+    try {
+      await this._delete_wave();
+    } finally {
+      this._pending = "";
+    }
+  }
+
+  protected async _delete_wave(): Promise<void> {
     const w = this._wave;
     if (!w || !w.uid) return;
     const res = await this.run("wave_library_delete", { uid: w.uid });
@@ -380,7 +434,7 @@ export class RSWaveLibrary extends RSWaveElement {
     const isNew = !w.uid;
     const nw = w.type === "nw";
     const users = isNew ? [] : this.users(w.uid);
-    const busy = this._busy;
+    const busy = this._busy || this._pending !== "";
     return html`<div class="lib_edit">
       ${isNew || w.default || nw
         ? html`<h4>${isNew ? i18n._("wave_new_title") : w.name}</h4>`
@@ -432,7 +486,10 @@ export class RSWaveLibrary extends RSWaveElement {
               ?disabled=${busy}
               @click=${() => this.create_wave()}
             >
-              ${i18n._("wave_create_confirm")}
+              ${busy_label(
+                i18n._("wave_create_confirm"),
+                this._pending === "create",
+              )}
             </button>
             ${isNew
               ? nothing
@@ -453,7 +510,7 @@ export class RSWaveLibrary extends RSWaveElement {
                 ?disabled=${busy}
                 @click=${() => this.delete_wave()}
               >
-                ${i18n._("wave_delete")}
+                ${busy_label(i18n._("wave_delete"), this._pending === "delete")}
               </button>
               <button class="btn_cancel" @click=${() => (this._step = "edit")}>
                 ${i18n._("wave_cancel")}
@@ -465,7 +522,7 @@ export class RSWaveLibrary extends RSWaveElement {
                 ?disabled=${busy || w.default || nw}
                 @click=${() => this.update_wave()}
               >
-                ${i18n._("wave_update")}
+                ${busy_label(i18n._("wave_update"), this._pending === "update")}
               </button>
               <button
                 class="btn_cancel create_start"
@@ -522,17 +579,23 @@ export class RSWaveLibrary extends RSWaveElement {
       ${running
         ? html`<button
             class="btn_delete preview_stop"
-            ?disabled=${this._busy}
+            ?disabled=${this._busy || this._pending !== ""}
             @click=${() => this.stop_preview()}
           >
-            ${i18n._("wave_preview_stop")}
+            ${busy_label(
+              i18n._("wave_preview_stop"),
+              this._pending === "preview_stop",
+            )}
           </button>`
         : html`<button
             class="btn_cancel preview_start"
-            ?disabled=${this._busy}
+            ?disabled=${this._busy || this._pending !== ""}
             @click=${() => this.preview()}
           >
-            ${i18n._("wave_preview_start")}
+            ${busy_label(
+              i18n._("wave_preview_start"),
+              this._pending === "preview",
+            )}
           </button>`}
     </div>`;
   }

@@ -44,7 +44,10 @@ luna de la lámpara: la luna va del atardecer al siguiente amanecer y
 muestra la fase actual (`todays_moon_day`). Toque el modo del centro para
 cambiarlo (auto, manual, temporizador). Si hay nubes programadas, aparece
 una pequeña nube junto al modo; mientras pasan, se desplazan delante del
-sol.
+sol. En modo manual con una duración (duración del modo manual mayor que 0),
+el tiempo restante se cuenta hacia atrás en la cara derecha de la lámpara,
+bajo sus iconos, con un reloj de arena;
+tóquelo para cambiar la duración.
 
 ## Cara izquierda
 

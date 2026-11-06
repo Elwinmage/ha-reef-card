@@ -484,6 +484,23 @@ describe("RSWaveSchedule editor", () => {
     return { ...ctx, el, root };
   }
 
+  it("shows the turning arrow on the save button while it runs", async () => {
+    const { el, root, callWS } = await openEditor();
+    let release: (v: any) => void = () => {};
+    callWS.mockImplementationOnce(
+      () => new Promise((resolve) => (release = resolve)),
+    );
+    const save = () =>
+      root.querySelector(".panel_footer .btn_save") as HTMLElement;
+    save().click();
+    await settle(el);
+    expect(save().querySelector(".busy_spin")).not.toBeNull();
+    expect(save().textContent).toContain(i18n._("wave_saving"));
+    release({ response: { saved: true } });
+    await settle(el);
+    expect(el._saving).toBe(false);
+  });
+
   it("opens on the current program with the library", async () => {
     const { el, root, calls } = await openEditor();
     expect(calls[0].service).toBe("wave_library");
@@ -784,6 +801,43 @@ describe("RSWaveLibrary", () => {
     await settle(el);
     return { ...ctx, el, root };
   }
+
+  it("shows the turning arrow on the update button while it runs", async () => {
+    const { el, root, callWS } = await openLibrary();
+    el.pick("nuit");
+    await el.updateComplete;
+    // The save hangs until released
+    let release: (v: any) => void = () => {};
+    callWS.mockImplementationOnce(
+      () => new Promise((resolve) => (release = resolve)),
+    );
+    (root.querySelector(".btn_save.update") as HTMLElement).click();
+    await settle(el);
+    const update = root.querySelector(".btn_save.update") as any;
+    expect(update.querySelector(".busy_spin")).not.toBeNull();
+    expect(update.disabled).toBe(true);
+    // Only the button of the running action turns
+    expect(root.querySelectorAll(".busy_spin")).toHaveLength(1);
+    release({ response: { uid: "nuit" } });
+    await settle(el);
+    await settle(el);
+    expect(el._pending).toBe("");
+    expect(root.querySelector(".busy_spin")).toBeNull();
+  });
+
+  it("clears the arrow when the action is refused", async () => {
+    const { el, root } = await openLibrary({
+      fail: { wave_library_delete: "nope" },
+    });
+    el.pick("rsstep");
+    el._step = "delete";
+    el._library.usage = {};
+    await el.updateComplete;
+    (root.querySelector(".btn_delete.confirm") as HTMLElement).click();
+    await settle(el);
+    expect(el._error).toBe("nope");
+    expect(el._pending).toBe("");
+  });
 
   it("is an icon on the pump that never re-renders by itself", async () => {
     const el = makeElement(StubLibrary, {});

@@ -12,7 +12,7 @@ import type { SceneElement } from "./types";
 import DeviceList, { domain_of, resolve_device_model } from "../utils/common";
 import { MyElement } from "../base/element";
 import { RSDevice } from "../devices/device";
-import { default_element_type } from "./tree";
+import { default_element_type, is_toggleable } from "./tree";
 
 /** Style of an entity chip over the picture. */
 const CHIP_CSS: Record<string, string> = {
@@ -32,8 +32,15 @@ export function entity_element_config(
   entity_id: string,
   type?: string,
   label?: string,
+  text_color?: string | null,
 ): ElementConfig {
-  const element_type = type || default_element_type(entity_id);
+  // A switch cannot draw nor toggle anything else: former documents may
+  // still ask for it on a sensor
+  const element_type =
+    type === "common-switch" && !is_toggleable(entity_id)
+      ? "common-sensor"
+      : type || default_element_type(entity_id);
+  const css = { ...CHIP_CSS, ...(text_color ? { color: text_color } : {}) };
   const domain = entity_id.split(".")[0];
   // The card's more-info action takes the entity key as a plain string
   const more_info = {
@@ -47,7 +54,7 @@ export function entity_element_config(
       name: entity_id,
       style: "switch",
       label: label || false,
-      css: { ...CHIP_CSS },
+      css,
       tap_action: {
         domain: "homeassistant",
         action: "toggle",
@@ -59,13 +66,14 @@ export function entity_element_config(
   const conf: ElementConfig = {
     type: element_type,
     name: entity_id,
-    css: { ...CHIP_CSS },
+    css,
     tap_action: more_info,
   } as ElementConfig;
   if (domain === "button") {
     conf.tap_action = { domain: "button", action: "press", data: "default" };
     conf.hold_action = more_info;
     conf.icon = true;
+    if (text_color) conf.icon_color = text_color;
   }
   if (domain === "binary_sensor") conf.translate_values = true;
   if (label) conf.prefix = JSON.stringify(label + " ");
@@ -100,7 +108,8 @@ export function create_entity_element(
   const conf = entity_element_config(
     element.entity_id,
     element.type,
-    element.label,
+    element.hide_label ? undefined : element.label,
+    element.text_color,
   );
   try {
     return MyElement.create_element(
@@ -161,7 +170,7 @@ export function device_thumbnail(
   const el: any = info?.elements?.[0];
   if (info && el?.model) {
     try {
-      const domain = domain_of(el.identifiers) ?? "redsea";
+      const domain = domain_of(el.identifiers, el) ?? "redsea";
       const model = resolve_device_model(hass, info, domain, el.model);
       const device: any = RSDevice.create_device(
         RSDevice.tag_for_model(domain, model),

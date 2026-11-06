@@ -145,6 +145,9 @@ def python_to_ts(indent: int, output: Path) -> bool:
     # Remove quotes around object keys: "key": -> key:
     body = re.sub(r'"([\w]+)"(\s*):', r'\1\2:', body)
 
+    # Python comments on their own line -> JS comments
+    body = re.sub(r"^(\s*)#\s?", r"\1// ", body, flags=re.MULTILINE)
+
     # Re-indent: original Python uses 4-space indent -> convert to `indent` spaces
     indent_str = " " * indent
     def reindent(line: str) -> str:

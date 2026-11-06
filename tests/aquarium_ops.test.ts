@@ -83,6 +83,18 @@ describe("cloud and presets", () => {
     expect(ops.from_cloud(cloud).waters.main.lights).toEqual([]);
   });
 
+  it("ignores what the cloud cannot fill in", () => {
+    // Real cloud data: an aquarium whose dimensions were never entered
+    const empty = {
+      ...cloud,
+      dimensions_cm: { length: 0, width: 0, height: 0 },
+    };
+    expect(ops.from_cloud(empty).dimensions_cm).toBeNull();
+    expect(
+      ops.from_cloud({ ...cloud, net_water_volume: 0.2 }).water_volume_l,
+    ).toBeNull();
+  });
+
   const presets: Preset[] = [
     {
       id: "r425",
@@ -398,6 +410,48 @@ describe("lights, flow, livestock, feeding", () => {
     expect(d.feeding.sources).toEqual([]);
     expect(d.views[front].elements.find((e) => e.id === el)!.source).toBeNull();
     d = ops.update_feeding(d, { duration_s: 60 });
+
+    // a feeder made a feeding point: its feed entity becomes a source
+    let feeder: string | null;
+    [d, feeder] = ops.add_element(d, front, {
+      kind: "device",
+      device_id: "vson",
+      pos: [0.2, 0.1],
+    } as any);
+    d = ops.set_feeding_point(
+      d,
+      front,
+      feeder!,
+      true,
+      "switch.vson_manual_feed",
+    );
+    const point = () => d.views[front].elements.find((e) => e.id === feeder)!;
+    expect(point().roles).toEqual(["feeding_point"]);
+    const source = d.feeding.sources.find(
+      (s) => s.entity_id === "switch.vson_manual_feed",
+    )!;
+    expect(source.kind).toBe("feeder");
+    expect(point().source).toBe(source.id);
+    // again: the source is not listed twice
+    d = ops.set_feeding_point(
+      d,
+      front,
+      feeder!,
+      true,
+      "switch.vson_manual_feed",
+    );
+    expect(d.feeding.sources).toHaveLength(1);
+    expect(ops.feeding_points_by_source(d)[source.id]).toHaveLength(1);
+    expect(ops.feeding_points_by_source(d)[""]).toHaveLength(1);
+    // off: no more a point, the source stays
+    d = ops.set_feeding_point(d, front, feeder!, false);
+    expect(point().roles).toEqual([]);
+    expect(point().source).toBeNull();
+    expect(d.feeding.sources).toHaveLength(1);
+    // without feed entity: a point answering any source
+    d = ops.set_feeding_point(d, front, feeder!, true);
+    expect(point().source).toBeNull();
+    expect(ops.set_feeding_point(d, front, "ghost", true)).toBe(d);
     expect(d.feeding.duration_s).toBe(60);
   });
 

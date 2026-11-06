@@ -129,7 +129,9 @@ function make_hass(doc: any, extra: Record<string, any> = {}) {
         cb({
           document: doc,
           entities: { feeding: "event.reefer_feeding" },
-          images_url: "/reeftank/images",
+          images: {
+            "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=0",
+          },
         });
         return () => undefined;
       }),
@@ -234,7 +236,7 @@ describe("card", () => {
     const card = await mount({ aquarium: "a1b2" }, hass);
     const root = card.shadowRoot;
     expect(root.querySelector("img.bg").getAttribute("src")).toBe(
-      "/reeftank/images/a1b2/front.webp",
+      "/api/reeftank/images/a1b2/front.webp?authSig=0",
     );
     expect(root.querySelector(".water.tint")).not.toBeNull();
     expect(root.querySelector("canvas.life")).not.toBeNull();
@@ -267,6 +269,31 @@ describe("card", () => {
     card._back();
   });
 
+  it("opens a device from an outlined zone", async () => {
+    const { doc } = make_doc();
+    const front = Object.keys(doc.views)[0]!;
+    const zone = {
+      id: "z1",
+      poly: [
+        [0.1, 0.1],
+        [0.2, 0.1],
+        [0.2, 0.2],
+      ],
+      goto: null,
+      device_id: "led",
+      label: "",
+    };
+    doc.views[front]!.hotspots = [zone as any];
+    const { hass } = make_hass(doc);
+    const card = await mount({ aquarium: "a1b2", view: front }, hass);
+    const open = vi.spyOn(card, "_open_device").mockImplementation(() => {});
+    card.shadowRoot
+      .querySelector("svg.hotspots polygon")
+      .dispatchEvent(new MouseEvent("click"));
+    expect(open).toHaveBeenCalledWith("led");
+    expect(card._view_id).toBe(front);
+  });
+
   it("follows the document and its deletion", async () => {
     const { doc } = make_doc();
     const h = make_hass(doc);
@@ -275,12 +302,51 @@ describe("card", () => {
     next.revision = 5;
     next.views = {};
     next.default_view = null;
-    h.push({ document: next, entities: {}, images_url: "/x" });
+    h.push({ document: next, entities: {}, images: {} });
     await card.updateComplete;
     expect(card.shadowRoot.textContent).toContain("No picture yet");
     h.push({ deleted: true });
     await card.updateComplete;
     expect(card.shadowRoot.textContent).toContain("Aquarium not found");
+  });
+
+  it("shows uploaded pictures through their signed URLs", async () => {
+    const { doc } = make_doc();
+    const h = make_hass(doc);
+    const call_ws = h.hass.callWS.getMockImplementation();
+    h.hass.callWS.mockImplementation(async (msg: any) =>
+      msg.type === "reeftank/images/sign"
+        ? {
+            "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=3",
+          }
+        : call_ws(msg),
+    );
+    const card = await mount({ aquarium: "a1b2" }, h.hass);
+    const bg = () => card.shadowRoot.querySelector("img.bg");
+    expect(bg().getAttribute("src")).toContain("authSig=0");
+    const signed = "/api/reeftank/images/a1b2/front.webp?authSig=1";
+    h.push({
+      document: doc,
+      entities: {},
+      images: { "a1b2/front.webp": signed },
+      images_ttl: 86400,
+    });
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toBe(signed);
+    // a renewed URL keeps the loaded background
+    const img = bg();
+    card._bg = img;
+    card._images.add("a1b2/front.webp", signed.replace("=1", "=2"));
+    card.requestUpdate();
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toContain("authSig=2");
+    expect(card._bg).toBe(img);
+    // a picture that does not load is signed again
+    bg().dispatchEvent(new Event("error"));
+    await new Promise((r) => setTimeout(r, 0));
+    await card.updateComplete;
+    expect(bg().getAttribute("src")).toContain("authSig=3");
+    card.remove();
   });
 
   it("reloads the catalog when a release is installed", async () => {
@@ -419,7 +485,9 @@ describe("card", () => {
       push({
         document: ops.set_region_drawn(doc, front, "main", false),
         entities: {},
-        images_url: "/reeftank/images",
+        images: {
+          "a1b2/front.webp": "/api/reeftank/images/a1b2/front.webp?authSig=0",
+        },
       });
       await card.updateComplete;
       expect(root.querySelector("canvas.backdrop")).toBeNull();

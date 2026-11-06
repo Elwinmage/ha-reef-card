@@ -117,7 +117,10 @@ sinistra a destra:
 
 Ogni lettura prende il colore del suo livello: verde per desiderato, arancione
 per accettabile, rosso per pericolo, bianco quando la sonda non fornisce una
-lettura valida. Un clic su una lettura apre la sua finestra di informazioni.
+lettura valida. Temperatura, pH, ORP e salinità sono seguiti dalla loro
+**tendenza** dell'ultima ora: una freccia in su, una freccia in giù o una tilde.
+Un clic su una lettura apre la sua cronologia sulle fasce di livello, su 24 ore o
+7 giorni, con un pulsante verso la sua finestra di informazioni.
 
 ## Sonde
 
@@ -130,7 +133,7 @@ le elenca. Ognuna mostra:
 
 - La sua **lettura**, e la **temperatura integrata** subito sotto per le sonde di
   pH, salinità e ATO, colorate secondo il loro livello. Un clic su un valore apre
-  la sua finestra di informazioni.
+  la sua cronologia, come nel riepilogo.
 - Una **barra di situazione** per lettura: le bande rossa, arancione e verde sono
   gli intervalli di pericolo, accettabile e desiderato impostati sulla sonda, e
   il segno nero indica dove si trova la lettura. La lettura principale è sulla

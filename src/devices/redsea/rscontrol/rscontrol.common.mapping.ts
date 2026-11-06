@@ -20,6 +20,7 @@ import {
   COLOR_RS_RGBSTR,
 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 /** Full-canvas overlay, never catching clicks aimed at what lies below. */
 const OVERLAY_CSS = {
@@ -444,6 +445,18 @@ export const widgets = {
     top: "1.8%",
     right: "7%",
   }),
+  // Poseidon mode: hold to switch it, tap for its settings.
+  // Over the status LED, right of the knob (RSCONTROL Pro; the Lite
+  // moves it, see rscontrollite.mapping.ts)
+  poseidon: poseidon_shortcut(
+    {
+      flex: "0 0 auto",
+      position: "absolute",
+      top: "11%",
+      right: "3%",
+    },
+    "rgba(255,255,255,0.55)",
+  ),
   buzzer: {
     name: "buzzer_active",
     type: "click-image",

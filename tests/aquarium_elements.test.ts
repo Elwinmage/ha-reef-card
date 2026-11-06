@@ -58,6 +58,33 @@ describe("entity elements", () => {
       label: "Heater",
     });
     expect((sw.tap_action as any).action).toBe("toggle");
+    // A former document: a sensor cannot be drawn as a switch
+    expect(entity_element_config("sensor.temp", "common-switch").type).toBe(
+      "common-sensor",
+    );
+    expect(entity_element_config("switch.heater", "common-sensor").type).toBe(
+      "common-sensor",
+    );
+    const red = entity_element_config("sensor.temp", undefined, "", "#ff0000");
+    expect(red.css?.color).toBe("#ff0000");
+    expect(entity_element_config("sensor.temp").css?.color).toBe("white");
+    expect(
+      entity_element_config("button.feed", undefined, "", "#ff0000").icon_color,
+    ).toBe("#ff0000");
+    const hidden: any = create_entity_element(
+      { states: { "sensor.temp": { state: "25" } } } as any,
+      {
+        id: "e1",
+        kind: "entity",
+        entity_id: "sensor.temp",
+        pos: [0.5, 0.5],
+        scale: 1,
+        label: "Temp",
+        hide_label: true,
+        roles: [],
+      },
+    );
+    expect(hidden.conf.prefix).toBeUndefined();
     const btn = entity_element_config("button.feed");
     expect((btn.tap_action as any).domain).toBe("button");
     expect(btn.icon).toBe(true);

@@ -30,13 +30,14 @@ import type { HassConfig } from "../types/index";
 import type {
   AquariumPayload,
   Catalog,
+  Hotspot,
   Point,
   RenderLevel,
   SceneElement,
   View,
 } from "./types";
 import { RENDER_LEVELS } from "./types";
-import { ReefTankApi, image_url } from "./api";
+import { ImageUrls, ReefTankApi } from "./api";
 import { WaterProjection, clip_path, svg_points } from "./geometry";
 import {
   night_darkness,
@@ -141,7 +142,13 @@ export class ReefAquariumCard extends LitElement {
   private _catalog: Catalog | null = null;
   private _stack: string[] = [];
   private _bg: HTMLImageElement | null = null;
-  private _bg_url: string | null = null;
+  /** Picture path of the background (its signed URL changes on renewal). */
+  private _bg_path: string | null = null;
+  /** Signed URLs of the uploaded pictures. */
+  private _images = new ImageUrls(
+    () => this._api,
+    () => this.requestUpdate(),
+  );
   private _elements = new Map<string, MyElement>();
   private _devices: DeviceList | null = null;
   private _scene: AquariumScene | null = null;
@@ -281,6 +288,7 @@ export class ReefAquariumCard extends LitElement {
     }
     this._error = null;
     this._payload = msg;
+    this._images.load(msg);
     const doc = msg.document;
     if (!this._view_id || !doc.views[this._view_id]) {
       this._view_id =
@@ -366,6 +374,7 @@ export class ReefAquariumCard extends LitElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this._unsubscribe();
+    this._images.stop();
     this._stop_catalog();
     document.removeEventListener("visibilitychange", this._on_visibility);
     this._io?.disconnect();
@@ -460,7 +469,7 @@ export class ReefAquariumCard extends LitElement {
     ) as HTMLCanvasElement | null;
     const view = doc.views[this._view_id];
     const is_drawn = drawn(view);
-    const key = `${doc.id}:${doc.revision}:${this._view_id}:${Boolean(this._catalog)}:${this._bg_url}:${Boolean(this._bg?.naturalWidth)}:${is_drawn}`;
+    const key = `${doc.id}:${doc.revision}:${this._view_id}:${Boolean(this._catalog)}:${this._bg_path}:${Boolean(this._bg?.naturalWidth)}:${is_drawn}`;
     if (this._scene && key === this._scene_key) return;
     this._scene_key = key;
     this._scene?.stop();
@@ -510,6 +519,14 @@ export class ReefAquariumCard extends LitElement {
     card.setConfig({ type: "custom:reef-card", device: selector });
     card.hass = this._hass;
     this._overlay = card;
+  }
+
+  /** Tooltip of a clickable zone: its label, or what it opens. */
+  private _hotspot_title(hotspot: Hotspot): string {
+    if (hotspot.label) return hotspot.label;
+    return hotspot.device_id
+      ? device_name(this._hass, hotspot.device_id)
+      : (this._payload?.document.views[hotspot.goto!]?.name ?? "");
   }
 
   private _close_overlay(): void {
@@ -581,7 +598,7 @@ export class ReefAquariumCard extends LitElement {
           >
         </div>`;
       }
-      const key = `${element.id}:${element.entity_id}:${element.type ?? ""}:${element.label}`;
+      const key = `${element.id}:${element.entity_id}:${element.type ?? ""}:${element.hide_label ? "" : element.label}:${element.text_color ?? ""}`;
       let node = this._elements.get(key);
       if (!node) {
         node = create_entity_element(hass, element) ?? undefined;
@@ -639,11 +656,12 @@ export class ReefAquariumCard extends LitElement {
     const view = this._view_id ? doc.views[this._view_id] : undefined;
     if (!view) return html`<ha-card>${this._message("no_view")}</ha-card>`;
     const level = this.level;
-    const url = image_url(view.image, payload.images_url);
+    const path = view.image ?? null;
+    const url = this._images.url(path);
     // Regions drawn over the photo (the rest of the picture stays)
     const is_drawn = drawn(view);
-    if (url !== this._bg_url) {
-      this._bg_url = url;
+    if (path !== this._bg_path) {
+      this._bg_path = path;
       this._bg = null;
     }
     return html`<ha-card>
@@ -655,6 +673,7 @@ export class ReefAquariumCard extends LitElement {
               alt="${doc.name}"
               crossorigin="anonymous"
               @load=${this._on_bg_load}
+              @error=${() => this._images.failed(path)}
             />`
           : nothing}
         ${is_drawn ? html`<canvas class="backdrop"></canvas>` : nothing}
@@ -670,9 +689,12 @@ export class ReefAquariumCard extends LitElement {
             (h) =>
               svg`<polygon
                 points="${svg_points(h.poly)}"
-                @click=${() => this._goto(h.goto)}
+                @click=${() =>
+                  h.device_id
+                    ? this._open_device(h.device_id)
+                    : this._goto(h.goto!)}
               >
-                <title>${h.label || doc.views[h.goto]?.name || ""}</title>
+                <title>${this._hotspot_title(h)}</title>
               </polygon>`,
           )}
         </svg>

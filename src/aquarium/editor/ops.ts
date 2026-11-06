@@ -18,6 +18,7 @@ import type {
   Preset,
   SceneElement,
   View,
+  Monitoring,
   Water,
 } from "../types";
 import { MAX_DARKNESS } from "../light";
@@ -135,6 +136,44 @@ export function match_preset(
   return null;
 }
 
+/** Litres in a US gallon. */
+const LITRES_PER_GALLON = 3.78541;
+/** Bounds of the integration: a document beyond them is refused. */
+const MAX_VOLUME_L = 100000;
+const MAX_DIMENSION_CM = 2000;
+
+/**
+ * Water volume of a cloud aquarium in litres: the net volume, else the
+ * gross one, converted when the account counts in gallons.
+ * @return the volume, or null when the cloud gives none
+ */
+export function cloud_volume_l(cloud: CloudAquarium): number | null {
+  const volume = [cloud.net_water_volume, cloud.water_volume].find(
+    (v): v is number => typeof v === "number" && v > 0,
+  );
+  if (volume === undefined) return null;
+  const unit = (cloud.measuring_unit ?? "").toLowerCase();
+  const litres = Math.round(
+    unit.includes("gallon") ? volume * LITRES_PER_GALLON : volume,
+  );
+  return litres >= 1 && litres <= MAX_VOLUME_L ? litres : null;
+}
+
+/**
+ * Dimensions of a cloud aquarium, or null when they are not usable: the
+ * cloud reports 0 for an aquarium whose dimensions were never entered.
+ */
+export function cloud_dimensions(
+  cloud: CloudAquarium,
+): AquariumDocument["dimensions_cm"] {
+  const d = cloud.dimensions_cm;
+  if (!d) return null;
+  const valid = [d.length, d.width, d.height].every(
+    (v) => typeof v === "number" && v >= 1 && v <= MAX_DIMENSION_CM,
+  );
+  return valid ? d : null;
+}
+
 /**
  * A document pre-filled from a cloud aquarium.
  * @param is_lamp: tells which of its devices are lamps
@@ -145,7 +184,8 @@ export function from_cloud(
 ): AquariumDocument {
   const doc = new_document(cloud.name);
   doc.cloud = { provider: cloud.provider, uid: cloud.uid };
-  doc.dimensions_cm = cloud.dimensions_cm ?? null;
+  doc.dimensions_cm = cloud_dimensions(cloud);
+  doc.water_volume_l = cloud_volume_l(cloud);
   const lamps = cloud.device_ids.filter(is_lamp);
   doc.waters.main.lights = lamps.map((device_id, i) => ({
     device_id,
@@ -193,7 +233,9 @@ export function apply_preset(
   }
   // Hotspots of the preset may point to views it does not bring
   for (const view of Object.values(out.views)) {
-    view.hotspots = view.hotspots.filter((h) => out.views[h.goto]);
+    view.hotspots = view.hotspots.filter(
+      (h) => h.device_id || out.views[h.goto!],
+    );
   }
   if (!out.default_view || !out.views[out.default_view]) {
     out.default_view =
@@ -452,15 +494,20 @@ export function add_hotspot(
   view_id: string,
   poly: Point[],
   goto: string,
+  device_id?: string | null,
 ): [AquariumDocument, string | null] {
-  if (poly.length < 3 || !doc.views[view_id] || !doc.views[goto])
+  if (
+    poly.length < 3 ||
+    !doc.views[view_id] ||
+    (!device_id && !doc.views[goto])
+  )
     return [doc, null];
   const out = clone(doc);
   const id = new_id();
   out.views[view_id].hotspots.push({
     id,
     poly: poly.map(clamp_point),
-    goto,
+    ...(device_id ? { goto: null, device_id } : { goto }),
     label: "",
   });
   return [out, id];
@@ -738,6 +785,65 @@ export function add_feed_source(
   return [out, id];
 }
 
+/**
+ * Make an element a feeding point, or not. A point made from a feeder
+ * records its feedings too: its feed entity becomes a feeding source (the
+ * one already listed, if any) and the point is bound to it.
+ * @param feed_entity: the entity feeding of the element, if it has one
+ */
+export function set_feeding_point(
+  doc: AquariumDocument,
+  view_id: string,
+  element_id: string,
+  on: boolean,
+  feed_entity: string | null = null,
+): AquariumDocument {
+  let out = clone(doc);
+  const element = out.views[view_id]?.elements.find((e) => e.id === element_id);
+  if (!element) return doc;
+  if (!on) {
+    element.roles = [];
+    element.source = null;
+    return out;
+  }
+  element.roles = ["feeding_point"];
+  if (feed_entity && !element.source) {
+    let source = out.feeding.sources.find((s) => s.entity_id === feed_entity);
+    if (!source) {
+      const [next, id] = add_feed_source(out, feed_entity, "feeder");
+      out = next;
+      source = out.feeding.sources.find((s) => s.id === id)!;
+    }
+    out.views[view_id].elements.find((e) => e.id === element_id)!.source =
+      source.id;
+  }
+  return out;
+}
+
+/** Where a feeding point stands, for the list of the feeding sources. */
+export interface FeedingPointRef {
+  view_id: string;
+  element: SceneElement;
+}
+
+/**
+ * Feeding points of the document, by the source they are bound to ("" for
+ * the ones answering any source).
+ */
+export function feeding_points_by_source(
+  doc: AquariumDocument,
+): Record<string, FeedingPointRef[]> {
+  const out: Record<string, FeedingPointRef[]> = {};
+  for (const [view_id, view] of Object.entries(doc.views)) {
+    for (const element of view.elements) {
+      if (!element.roles.includes("feeding_point")) continue;
+      const key = element.source ?? "";
+      (out[key] ??= []).push({ view_id, element });
+    }
+  }
+  return out;
+}
+
 /** Remove a feeding source; elements bound to it fall back to any feeding. */
 export function remove_feed_source(
   doc: AquariumDocument,
@@ -762,6 +868,102 @@ export function update_feeding(
   return out;
 }
 
+/** Change settings of the monitoring (of a document that has them). */
+export function update_monitoring(
+  doc: AquariumDocument,
+  patch: Partial<Monitoring>,
+): AquariumDocument {
+  const out = clone(doc);
+  Object.assign(out.monitoring!, clone(patch));
+  return out;
+}
+
+/** Add an entity pausing the analysis (an id already there is ignored). */
+export function add_pause_entity(
+  doc: AquariumDocument,
+  entity_id: string,
+): AquariumDocument {
+  const current = doc.monitoring!.pause_entities;
+  if (!entity_id || current.includes(entity_id)) return doc;
+  return update_monitoring(doc, { pause_entities: [...current, entity_id] });
+}
+
+/** Remove an entity pausing the analysis. */
+export function remove_pause_entity(
+  doc: AquariumDocument,
+  entity_id: string,
+): AquariumDocument {
+  return update_monitoring(doc, {
+    pause_entities: doc.monitoring!.pause_entities.filter(
+      (id) => id !== entity_id,
+    ),
+  });
+}
+
+/** What a monitoring field can be filled with. */
+export type MonitoringKind =
+  | "ph"
+  | "orp"
+  | "co2"
+  | "kh"
+  | "calibration"
+  | "pause";
+
+/** Translation key of the date of a ReefSense probe's last adjustment. */
+const PROBE_CALIBRATION_KEY = "probe_last_adjustment";
+const PAUSE_DOMAINS = ["switch", "input_boolean", "binary_sensor"];
+const named = (id: string, word: string) =>
+  new RegExp(`[._]${word}([._]|$)`).test(id);
+
+function monitoring_match(id: string, state: any, kind: MonitoringKind) {
+  const domain = id.split(".")[0];
+  if (kind === "pause") return PAUSE_DOMAINS.includes(domain);
+  if (kind === "kh")
+    return (
+      ["sensor", "input_number"].includes(domain) &&
+      (state.attributes.unit_of_measurement === "dKH" || named(id, "kh"))
+    );
+  if (domain !== "sensor") return false;
+  const { device_class, unit_of_measurement: unit } = state.attributes;
+  // A number without a class: not a date, a level or a status of the probe
+  const plain = !device_class && !Number.isNaN(Number(state.state));
+  switch (kind) {
+    case "ph":
+      // pH has no unit: this leaves out the temperature of a pH probe
+      return device_class === "ph" || (plain && !unit && named(id, "ph"));
+    case "orp":
+      return unit === "mV" || (plain && named(id, "orp"));
+    case "co2":
+      return device_class === "carbon_dioxide" || named(id, "co2");
+    case "calibration":
+      return device_class === "timestamp";
+  }
+}
+
+/**
+ * Entities offered for a monitoring field. Any entity can still be typed in:
+ * this only shortens the list.
+ */
+export function monitoring_candidates(
+  hass: any,
+  kind: MonitoringKind,
+): { id: string; name: string }[] {
+  const states: Record<string, any> = hass?.states ?? {};
+  let ids = Object.keys(states).filter((id) =>
+    monitoring_match(id, states[id], kind),
+  );
+  if (kind === "calibration") {
+    const dates = ids.filter(
+      (id) => hass?.entities?.[id]?.translation_key === PROBE_CALIBRATION_KEY,
+    );
+    if (dates.length) ids = dates;
+  }
+  return ids.sort().map((id) => ({
+    id,
+    name: states[id].attributes.friendly_name ?? id,
+  }));
+}
+
 /** A document in the shape the integration validates (no stray keys). */
 export function for_save(doc: AquariumDocument): AquariumDocument {
   const out = clone(doc);
@@ -775,6 +977,7 @@ export function for_save(doc: AquariumDocument): AquariumDocument {
     for (const element of view.elements) {
       if (!element.source) delete element.source;
       if (element.kind !== "entity") delete element.type;
+      if (!element.text_color) delete element.text_color;
     }
   }
   if (!out.default_view || !out.views[out.default_view]) {

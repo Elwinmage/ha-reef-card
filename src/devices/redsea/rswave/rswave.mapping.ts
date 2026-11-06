@@ -6,7 +6,7 @@
  *
  *   ┌──────────────────────────────┐
  *   │  messages                    │  last_message / last_alert_message
- *   │   ● ●           ● ● ●        │  state, maintenance | settings, tasks, wifi
+ *   │   ● ◉ ●         ● ● ●        │  state, preview, maintenance | settings, tasks, wifi
  *   │  ══[ mode ]══════════════(%) │  LED strip: mode + name, end cap: speed
  *   │  ◣ flow                      │  animated at the pump speed
  *   │  ┌────────────────────────┐  │
@@ -16,6 +16,7 @@
  */
 import { COLOR_ERROR_HEX, COLOR_RS_RGB } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 /** CSS of an overlay covering the whole picture. */
 export const FULL_CANVAS = {
@@ -48,11 +49,15 @@ export function icon_at(left: string, top: string) {
 /** Where the icons sit on the mounting clips, as [left, top] of their centre. */
 export const CLIPS = {
   device_state: ["31.7%", "14%"],
+  // Over the green LED of the picture, between on/off and maintenance
+  preview: ["36%", "14%"],
   maintenance: ["40%", "15.7%"],
   configuration: ["73.3%", "25%"],
   // On the right clip, halfway between the settings cog and the wifi
   maintenance_tasks: ["78.7%", "25.9%"],
   wifi_quality: ["84%", "28.5%"],
+  // Over the status LED of the pump body
+  poseidon: ["37.3%", "34.6%"],
 } as const;
 
 export const config = {
@@ -127,6 +132,25 @@ export const config = {
       tap_action: { domain: "switch", action: "toggle", data: "default" },
       css: icon_at(...CLIPS.maintenance),
     },
+    // Preview of a wave and maintenance switch, in their own dialog
+    preview: {
+      name: "preview",
+      type: "click-image",
+      // No entity behind it: the dialog holds the preview entities
+      stateObj: null,
+      icon: "mdi:eye",
+      icon_color: COLOR_ERROR_HEX,
+      // The maintenance switch of the dialog is wanted on a stopped pump too
+      off_clickable: true,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "dialog",
+        data: { type: "preview" },
+      },
+      // Slightly smaller than its neighbours: the LED leaves little room
+      css: icon_at(...CLIPS.preview),
+      elt_css: { "--mdc-icon-size": "20px" },
+    },
     configuration: {
       name: "configuration",
       type: "click-image",
@@ -143,6 +167,8 @@ export const config = {
     maintenance_tasks: maintenance_shortcut(
       icon_at(...CLIPS.maintenance_tasks),
     ),
+    // Poseidon mode: hold to switch it, tap for its settings
+    poseidon: poseidon_shortcut(icon_at(...CLIPS.poseidon), OFF_ON_PUMP),
     wifi_quality: {
       name: "wifi_quality",
       type: "common-sensor",

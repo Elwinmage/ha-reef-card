@@ -31,7 +31,9 @@ export default css`
   /* Inside a device dialog: the dialog is always white, whatever the theme,
      so the list brings its own card background to stay readable. */
   .maint-root.embedded {
-    min-width: 300px;
+    /* Never wider than the dialog, on a phone */
+    min-width: min(300px, 100%);
+    box-sizing: border-box;
     max-height: 60vh;
     overflow-y: auto;
     padding: 8px 10px 12px 10px;

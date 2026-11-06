@@ -194,7 +194,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
           return {
             document: structuredClone(doc),
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         case "reeftank/aquarium/save":
           return {
@@ -203,7 +206,10 @@ function make_hass(doc: any, handler?: (msg: any) => any) {
               revision: (msg.document.revision ?? 0) + 1,
             },
             entities: {},
-            images_url: "/reeftank/images",
+            images: {
+              "a1b2/front.webp":
+                "/api/reeftank/images/a1b2/front.webp?authSig=0",
+            },
           };
         case "reeftank/aquarium/list":
           return [
@@ -793,7 +799,7 @@ describe("scene editor", () => {
       msg.type === "reeftank/catalog"
         ? { ...catalog, fish: [...catalog.fish, fox] }
         : msg.type === "reeftank/aquarium/get"
-          ? { document: structuredClone(doc), entities: {}, images_url: "/x" }
+          ? { document: structuredClone(doc), entities: {}, images: {} }
           : [],
     );
     const editor = await open(hass, "a1b2");
@@ -922,7 +928,7 @@ describe("scene editor", () => {
       msg.type === "reeftank/catalog"
         ? { fish, corals: [], presets: [], pack }
         : msg.type === "reeftank/aquarium/get"
-          ? { document: structuredClone(doc), entities: {}, images_url: "/x" }
+          ? { document: structuredClone(doc), entities: {}, images: {} }
           : [],
     );
     hass.connection = {
@@ -956,6 +962,186 @@ describe("scene editor", () => {
     expect(installed).toBeNull();
   });
 
+  it("shows the confirmation of a save for 5 seconds", async () => {
+    const { doc } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    vi.useFakeTimers();
+    try {
+      await editor.save();
+      expect(editor._message.text).toBe("Saved");
+      vi.advanceTimersByTime(4999);
+      expect(editor._message.text).toBe("Saved");
+      vi.advanceTimersByTime(1);
+      expect(editor._message).toBeNull();
+
+      // an error shown meanwhile stays
+      await editor.save();
+      editor._message = { kind: "error", text: "boom" };
+      vi.advanceTimersByTime(5000);
+      expect(editor._message.text).toBe("boom");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("chooses how a toggleable entity is drawn", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "elements";
+    editor._view_id = front;
+    editor._doc.views[front].elements = [
+      {
+        id: "e1",
+        kind: "entity",
+        entity_id: "switch.heater",
+        pos: [0.5, 0.5],
+        scale: 1,
+        label: "",
+        roles: [],
+      },
+    ];
+    editor._selection = { type: "element", id: "e1" };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    const select = editor.shadowRoot.querySelector(
+      "fieldset.props select",
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("common-switch");
+    select.value = "common-sensor";
+    select.dispatchEvent(new Event("change"));
+    expect(editor.doc.views[front].elements[0].type).toBe("common-sensor");
+  });
+
+  it("makes a feeder a feeding point and lists it under its source", async () => {
+    const { doc, front } = existing_doc();
+    const hass = make_hass(doc);
+    hass.entities["switch.vson_manual_feed"] = { device_id: "vson" };
+    hass.entities["sensor.vson_uptime"] = { device_id: "vson" };
+    const editor = await open(hass, "a1b2");
+    expect(editor._feed_entity({ kind: "device", device_id: "vson" })).toBe(
+      "switch.vson_manual_feed",
+    );
+    expect(
+      editor._feed_entity({ kind: "device", device_id: "led" }),
+    ).toBeNull();
+    expect(
+      editor._feed_entity({ kind: "entity", entity_id: "button.feed_now" }),
+    ).toBe("button.feed_now");
+    expect(
+      editor._feed_entity({ kind: "entity", entity_id: "sensor.temp" }),
+    ).toBeNull();
+    expect(editor._feed_entity({ kind: "marker" })).toBeNull();
+
+    editor._view_id = front;
+    editor._doc.views[front].elements = [
+      {
+        id: "f1",
+        kind: "device",
+        device_id: "vson",
+        pos: [0.5, 0.1],
+        scale: 1,
+        label: "Feeder",
+        roles: [],
+      },
+    ];
+    editor._tab = "elements";
+    editor._selection = { type: "element", id: "f1" };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    const check = [
+      ...editor.shadowRoot.querySelectorAll(
+        "fieldset.props input[type=checkbox]",
+      ),
+    ].at(-1) as HTMLInputElement;
+    check.click();
+    await editor.updateComplete;
+    const added = editor.doc.feeding.sources.find(
+      (s: any) => s.entity_id === "switch.vson_manual_feed",
+    );
+    expect(added.kind).toBe("feeder");
+    expect(editor.doc.views[front].elements[0].source).toBe(added.id);
+
+    editor._tab = "feeding";
+    await editor.updateComplete;
+    const lines = [...editor.shadowRoot.querySelectorAll("aside .points")].map(
+      (p: any) => p.textContent.trim(),
+    );
+    expect(lines.some((t) => t.includes("Feeder"))).toBe(true);
+  });
+
+  it("sets the text of an entity", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "elements";
+    editor._view_id = front;
+    const element = {
+      id: "e1",
+      kind: "entity",
+      entity_id: "sensor.temp",
+      pos: [0.5, 0.5],
+      scale: 1,
+      label: "Temp",
+      roles: [],
+    };
+    editor._doc.views[front].elements = [element];
+    const set = vi.fn();
+    expect(editor._entity_text(element, set)).toBeTruthy();
+    editor._selection = { type: "element", id: "e1" };
+    editor.requestUpdate();
+    await editor.updateComplete;
+    const props = editor.shadowRoot.querySelector("fieldset.props");
+    const swatch = props.querySelector(".swatch") as HTMLElement;
+    swatch.click();
+    await editor.updateComplete;
+    const picker = props.querySelector("reef-colour-picker");
+    picker.dispatchEvent(
+      new CustomEvent("colour-change", { detail: { value: "#ff0000" } }),
+    );
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].text_color).toBe("#ff0000");
+    const hide = props.querySelector(
+      "label.check input[type=checkbox]",
+    ) as HTMLInputElement;
+    hide.click();
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].hide_label).toBe(true);
+    (props.querySelector(".reset") as HTMLElement).click();
+    await editor.updateComplete;
+    expect(editor.doc.views[front].elements[0].text_color).toBeNull();
+    expect(
+      (await import("../src/aquarium/editor/ops")).for_save(editor.doc).views[
+        front
+      ].elements[0],
+    ).not.toHaveProperty("text_color");
+  });
+
+  it("offers to choose or change the picture", async () => {
+    const { doc, front } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    editor._tab = "views";
+    editor._view_id = front;
+    await editor.updateComplete;
+    const button = () =>
+      editor.shadowRoot.querySelector("button.choose-file") as HTMLElement;
+    const input = editor.shadowRoot.querySelector(
+      "input[type=file]",
+    ) as HTMLInputElement;
+    // The native control stays hidden: it would say that no file is chosen
+    expect(input.hidden).toBe(true);
+    const click = vi.spyOn(input, "click").mockImplementation(() => undefined);
+    button().click();
+    expect(click).toHaveBeenCalled();
+
+    editor._doc.views[front].image = "a1b2/p.webp";
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(button().textContent).toContain("Change the picture");
+    editor._doc.views[front].image = null;
+    editor.requestUpdate();
+    await editor.updateComplete;
+    expect(button().textContent).toContain("Choose a picture");
+  });
+
   it("uploads a picture", async () => {
     const { doc, front } = existing_doc();
     const hass = make_hass(doc);
@@ -964,6 +1150,8 @@ describe("scene editor", () => {
     const input = { files: [new File(["x"], "p.jpg")], value: "p.jpg" };
     await editor._upload({ target: input });
     expect(editor.doc.views[front].image).toBe("a1b2/new.webp");
+    // shown with the (signed) URL the upload returned
+    expect(editor._images.url("a1b2/new.webp")).toBe("/x");
     expect(input.value).toBe("");
     hass.fetchWithAuth = vi.fn(async () => ({
       ok: false,

@@ -12,6 +12,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { nothing, render } from "lit";
 import { HistoryChart } from "../src/base/history_chart";
 
 // jsdom has no ResizeObserver; record the callback so tests can fire it
@@ -1620,5 +1621,205 @@ describe("HistoryChart zones", () => {
     expect(HistoryChart.format_tick(8.25, 0.05)).toBe("8.25");
     expect(HistoryChart.format_tick(26.4, 2)).toBe("26");
     expect(HistoryChart.format_tick(26.6, 1)).toBe("27");
+  });
+});
+
+//----------------------------------------------------------------------------//
+//   hide_empty
+//----------------------------------------------------------------------------//
+
+describe("HistoryChart hide_empty", () => {
+  const point = { t: 1, v: 2 };
+
+  it("hides the chart while nothing can be drawn", () => {
+    const el = makeChart({ hide_empty: true });
+    el.series = [];
+    el.updated();
+    expect(el.style.display).toBe("none");
+    el.series = [{ entity_id: "sensor.usage", points: [point] }];
+    el.updated();
+    expect(el.style.display).toBe("");
+  });
+
+  it("keeps the blank panel by default", () => {
+    const el = makeChart();
+    el.series = [];
+    el.updated();
+    expect(el.style.display).toBe("");
+  });
+});
+
+describe("HistoryChart periods", () => {
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+  const hass = (callWS: any) => ({
+    callWS,
+    states: { "sensor.usage": { state: "1", attributes: {} } },
+  });
+
+  function chart(callWS: any, conf: any = {}) {
+    const el = makeChart({
+      hours: 24,
+      periods: [24, 168],
+      more_info: true,
+      ...conf,
+    });
+    (el as any)._hass = hass(callWS);
+    return el;
+  }
+
+  const stats = (msg: any) =>
+    msg.type === "recorder/statistics_during_period"
+      ? {
+          "sensor.usage": [
+            { start: 2000, mean: 2 },
+            { start: "1970-01-01T00:00:01Z", mean: 1 },
+            { start: 3000, mean: null },
+            { start: "junk", mean: 3 },
+          ],
+        }
+      : {};
+
+  it("parses statistics, oldest first", () => {
+    expect(
+      HistoryChart.parse_statistics(
+        stats({ type: "recorder/statistics_during_period" }),
+        "sensor.usage",
+      ),
+    ).toEqual([
+      { t: 1000, v: 1 },
+      { t: 2000, v: 2 },
+    ]);
+    expect(HistoryChart.parse_statistics({}, "sensor.usage")).toEqual([]);
+  });
+
+  it("reads the history on short periods, statistics on long ones", async () => {
+    const callWS = vi.fn(async (msg: any) => stats(msg));
+    const el = chart(callWS);
+    await el.fetch_history();
+    expect(callWS.mock.calls.map((c: any[]) => c[0].type)).toEqual([
+      "history/history_during_period",
+    ]);
+
+    callWS.mockClear();
+    el.select_period(168);
+    await flush();
+    expect(el.hours).toBe(168);
+    expect(callWS.mock.calls[0]![0]).toMatchObject({
+      type: "recorder/statistics_during_period",
+      period: "5minute",
+      types: ["mean"],
+    });
+    expect(callWS).toHaveBeenCalledTimes(1);
+    expect(el.series[0].points).toHaveLength(2);
+  });
+
+  it("falls back on the history without statistics", async () => {
+    const callWS = vi.fn(async () => ({}));
+    const el = chart(callWS);
+    el.select_period(168);
+    await flush();
+    expect(callWS.mock.calls.map((c: any[]) => c[0].type)).toEqual([
+      "recorder/statistics_during_period",
+      "history/history_during_period",
+    ]);
+  });
+
+  it("reads again when a period is picked during a read", async () => {
+    const callWS = vi.fn(async (msg: any) => stats(msg));
+    const el = chart(callWS);
+    const first = el.fetch_history();
+    el.select_period(168);
+    await first;
+    await flush();
+    const types = callWS.mock.calls.map((c: any[]) => c[0].type);
+    expect(types).toContain("recorder/statistics_during_period");
+  });
+
+  it("draws its buttons and marks the active period", () => {
+    const el = chart(vi.fn());
+    const text = renderText(el._render_toolbar());
+    expect(text).toContain("toolbar");
+    expect(text).toContain("more_info");
+    expect(makeChart()._render_toolbar()).toBe(nothing);
+    expect(
+      renderText(makeChart({ periods: [24] })._render_toolbar()),
+    ).not.toContain("more_info");
+  });
+
+  it("wires its buttons", async () => {
+    const callWS = vi.fn(async (msg: any) => stats(msg));
+    const el = chart(callWS);
+    const seen: string[] = [];
+    el.addEventListener("hass-more-info", (e: any) =>
+      seen.push(e.detail.entityId),
+    );
+    const host = document.createElement("div");
+    render(el._render_toolbar(), host, { host: el });
+    const buttons = host.querySelectorAll("button");
+    expect(buttons[0]!.className).toBe("active");
+    expect(buttons[1]!.className).toBe("");
+    buttons[1]!.click();
+    buttons[2]!.click();
+    await flush();
+    expect(el.hours).toBe(168);
+    expect(seen).toEqual(["sensor.usage"]);
+  });
+
+  it("takes its bands from another entity when told to", () => {
+    const el = makeChart({ zones: true, zones_entity: "average" });
+    el.series = [{ entity_id: "sensor.usage", points: [] }];
+    el._hass = {
+      states: {
+        "sensor.usage": { state: "1", attributes: {} },
+        "sensor.average": { state: "1", attributes: { ranges: [1, 2, 3, 4] } },
+      },
+    };
+    expect(el.zone_ranges()).toEqual([1, 2, 3, 4]);
+    el.conf.zones_entity = "gone";
+    expect(el.zone_ranges()).toBeNull();
+  });
+
+  it("opens the more-info of the first series", () => {
+    const el = chart(vi.fn());
+    const seen: string[] = [];
+    el.addEventListener("hass-more-info", (e: any) =>
+      seen.push(e.detail.entityId),
+    );
+    el.open_more_info();
+    expect(seen).toEqual(["sensor.usage"]);
+  });
+
+  it("marks days on a long window, hours on a short one", () => {
+    const labels = (hours: number) => {
+      const ctx: any = {
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        fillText: vi.fn(),
+      };
+      const first = new Date(2026, 9, 29, 12).getTime();
+      makeChart().draw_grid(
+        ctx,
+        0,
+        0,
+        400,
+        200,
+        { first, span: hours * 3600000, low: 0, range: 1 },
+        () => 0,
+        10,
+      );
+      return ctx.fillText.mock.calls.map((c: any[]) => c[0]);
+    };
+    expect(labels(168).slice(0, 7)).toEqual([
+      "30/10",
+      "31/10",
+      "01/11",
+      "02/11",
+      "03/11",
+      "04/11",
+      "05/11",
+    ]);
+    expect(labels(24)[0]).toBe("12h");
   });
 });

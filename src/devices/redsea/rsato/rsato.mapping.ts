@@ -5,6 +5,7 @@ import {
   COLOR_ERROR_HEX,
 } from "../../../utils/colors";
 import { maintenance_shortcut } from "../maintenance/maintenance.shortcut";
+import { poseidon_shortcut } from "../poseidon/poseidon.shortcut";
 
 export const config = {
   name: null,
@@ -252,6 +253,17 @@ export const config = {
       top: "10%",
       left: "93%",
     }),
+    // Poseidon mode: hold to switch it, tap for its settings.
+    // Over the status LED, right end of the lower bar
+    poseidon: poseidon_shortcut(
+      {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "15.8%",
+        left: "93.5%",
+      },
+      "rgba(255,255,255,0.55)",
+    ),
     auto_fill: {
       name: "auto_fill",
       type: "click-image",

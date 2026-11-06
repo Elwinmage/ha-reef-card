@@ -1056,6 +1056,20 @@ export const SUPPLEMENTS: Supplement[] = [
     made_by_redsea: false,
     fullname: "Tropic Marin - Potassium",
   },
+  // Salt dissolved in osmosis water, made by the reefer (not a product).
+  // The only supplement offering the salinity regulation of a head
+  // (dose_regulation.py: brine mode, its concentration in g/L set there).
+  {
+    uid: "b99739a8-bced-420e-bbdb-86ccd14524fd",
+    name: "Brine",
+    display_name: "Brine",
+    short_name: "NaCl",
+    brand_name: "DIY",
+    type: null,
+    concentration: null,
+    made_by_redsea: false,
+    fullname: "DIY - Brine",
+  },
   {
     uid: "redsea-reefcare",
     name: "ReefCare",

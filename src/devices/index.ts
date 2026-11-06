@@ -23,6 +23,7 @@ import {
   RSLedProgramEditor,
   RSLedLinked,
   RSLedName,
+  RSLedCountdown,
   RSLedWeatherSettings,
   RSLedTopoMap,
 } from "./redsea/rsled";
@@ -53,6 +54,7 @@ import { AMSmartDrift } from "./aquamedic/smartdrift";
 import { AMDCRunner } from "./aquamedic/dcrunner";
 import { AMDCSkimmer } from "./aquamedic/dcskimmer";
 import { EnergyBackup } from "./reefbeat/energybackup";
+import { VSONFeeder } from "./esphome/vsonfeeder";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -99,6 +101,8 @@ if (!customElements.get("rsled-weather-settings"))
   customElements.define("rsled-weather-settings", RSLedWeatherSettings);
 if (!customElements.get("rsled-name"))
   customElements.define("rsled-name", RSLedName);
+if (!customElements.get("rsled-countdown"))
+  customElements.define("rsled-countdown", RSLedCountdown);
 if (!customElements.get("rsled-sky"))
   customElements.define("rsled-sky", RSLedSky);
 if (!customElements.get("rsled-beam"))
@@ -161,6 +165,8 @@ if (!customElements.get("aquamedic-dcskimmer"))
   customElements.define("aquamedic-dcskimmer", AMDCSkimmer);
 if (!customElements.get("reefbeat-energybackup"))
   customElements.define("reefbeat-energybackup", EnergyBackup);
+if (!customElements.get("esphome-vsonfeeder"))
+  customElements.define("esphome-vsonfeeder", VSONFeeder);
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -180,6 +186,7 @@ export {
   RSLedProgramEditor,
   RSLedLinked,
   RSLedName,
+  RSLedCountdown,
   RSLedWeatherSettings,
   RSLedTopoMap,
 } from "./redsea/rsled";
@@ -210,3 +217,4 @@ export { AMSmartDrift } from "./aquamedic/smartdrift";
 export { AMDCRunner } from "./aquamedic/dcrunner";
 export { AMDCSkimmer } from "./aquamedic/dcskimmer";
 export { EnergyBackup } from "./reefbeat/energybackup";
+export { VSONFeeder } from "./esphome/vsonfeeder";

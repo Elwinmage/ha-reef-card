@@ -44,7 +44,10 @@ lampada: la luna va dal tramonto all'alba successiva e mostra la fase
 corrente (`todays_moon_day`). Tocca la modalità al centro per cambiarla
 (auto, manuale, timer). Se sono programmate delle nuvole, una piccola
 nuvola appare accanto alla modalità; mentre passano, scorrono davanti al
-sole.
+sole. In modalità manuale con una durata (durata della modalità manuale
+maggiore di 0), il tempo restante scorre sul lato destro della lampada, sotto le sue icone,
+con una
+clessidra; toccala per cambiare la durata.
 
 ## Faccia sinistra
 
