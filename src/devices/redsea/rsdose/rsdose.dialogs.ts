@@ -5,6 +5,12 @@ import {
   regulation_content,
   schedule_content,
 } from "./regulation.dialogs";
+import {
+  HEAD_CALIBRATION_IMG,
+  PRIMING_IMG,
+  READ_GRADUATED_IMG,
+  TRASH_ICON,
+} from "../../../base/ui_images";
 
 /**
  * The dose history of a head is hidden while its last dose sensor is missing
@@ -158,7 +164,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/head_calibration.png",
+          image: HEAD_CALIBRATION_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -205,7 +211,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/read_graduated.jpg",
+          image: READ_GRADUATED_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -256,7 +262,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/read_graduated.jpg",
+          image: READ_GRADUATED_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -324,7 +330,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/head_calibration.png",
+          image: HEAD_CALIBRATION_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -392,7 +398,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/priming.png",
+          image: PRIMING_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -463,7 +469,7 @@ export const dialogs_rsdose = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/trash.svg",
+          image: TRASH_ICON,
           type: "click-image",
           stateObj: null,
           tap_action: [

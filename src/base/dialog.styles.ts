@@ -3,7 +3,9 @@
  * @module base.dialog.styles
  */
 
-import { css } from "lit";
+import { css, unsafeCSS } from "lit";
+
+import { TRASH_ICON } from "./ui_images";
 
 export default css`
   #window-mask {
@@ -258,7 +260,7 @@ export default css`
 
   button.delete_button {
     background-color: red;
-    background: url("/hacsfiles/ha-reef-card/img/trash.svg");
+    background: url("${unsafeCSS(TRASH_ICON)}");
     background-position: center;
     background-repeat: no-repeat;
   }
