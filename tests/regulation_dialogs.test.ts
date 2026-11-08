@@ -1,8 +1,7 @@
 // Dialogs of the dose regulation of a ReefDose head
 
-import { existsSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { SUPPLEMENTS } from "../src/devices/redsea/rsdose/supplements_list";
+import supplements_list from "../src/devices/redsea/rsdose/supplements";
 import { MyElement } from "../src/base/element";
 import { SafeEval } from "../src/utils/SafeEval";
 import { dialogs_rsdose } from "../src/devices/redsea/rsdose/rsdose.dialogs";
@@ -198,11 +197,11 @@ describe("regulation dialogs", () => {
 
   it("offer the brine supplement, with its own bottle", () => {
     const uid = "b99739a8-bced-420e-bbdb-86ccd14524fd";
-    const brine = SUPPLEMENTS.find((s) => s.uid === uid);
+    const brine = supplements_list.get_supplement_from_uid(uid);
     expect(brine?.fullname).toBe("DIY - Brine");
     expect(brine?.made_by_redsea).toBe(false);
-    expect(existsSync(`public/img/supplements/${uid}.supplement.png`)).toBe(
-      true,
+    expect(supplements_list.image_of(uid)).toMatch(
+      /^\/redsea_catalog\/pack\/items\/diy-brine\/image\.webp/,
     );
   });
 });

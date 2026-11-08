@@ -52,15 +52,13 @@ class StubDH extends DoseHead {
 }
 if (!customElements.get("stub-dh-cov"))
   customElements.define("stub-dh-cov", StubDH);
+// The bottle visual of the supplement: found (200) or missing (404)
 function mockXHR(xhrStatus = 200) {
-  const origXHR = (globalThis as any).XMLHttpRequest;
-  (globalThis as any).XMLHttpRequest = class {
-    status = xhrStatus;
-    open() {}
-    send() {}
-  };
+  const spy = vi
+    .spyOn(supplements_list, "image_of")
+    .mockReturnValue(xhrStatus === 200 ? "/redsea_catalog/pack/x.webp" : null);
   return () => {
-    (globalThis as any).XMLHttpRequest = origXHR;
+    spy.mockRestore();
   };
 }
 function makeState_B(
@@ -1109,18 +1107,44 @@ describe("DoseHead._render_container() L76-78 — 404 triggers fallback image", 
       attributes: { supplement: { uid: "test-uid-404" } },
     };
 
-    const originalXHR = window.XMLHttpRequest;
-    class MockXHR404 {
-      status = 404;
-      open = vi.fn();
-      send = vi.fn();
-    }
-    (window as any).XMLHttpRequest = MockXHR404;
-
+    const restore = mockXHR(404);
     head._render_container();
 
     expect(head.supplement_info).toBe(true);
-    (window as any).XMLHttpRequest = originalXHR;
+    restore();
+  });
+
+  it("does not ask for a picture before the catalog is read", async () => {
+    const head = await makeHead("stub-dose-head-not-loaded");
+    head.supplement = {
+      attributes: { supplement: { uid: "test-uid-404" } },
+    };
+    const restore = mockXHR(404);
+    supplements_list._loaded = false;
+    try {
+      head._render_container();
+      expect(head.supplement_info).toBe(false);
+    } finally {
+      supplements_list._loaded = true;
+      restore();
+    }
+  });
+
+  it("redraws when the catalog arrives, stops once removed", async () => {
+    const head = await makeHead("stub-dose-head-listen");
+    const update = vi.spyOn(head, "requestUpdate");
+    document.body.appendChild(head);
+    await head.updateComplete;
+    // Connected twice: one listener only
+    await head.connectedCallback();
+    update.mockClear();
+    for (const listener of [...supplements_list._listeners]) listener();
+    expect(update).toHaveBeenCalledTimes(1);
+    head.remove();
+    expect(head._unsub_catalog).toBeNull();
+    update.mockClear();
+    for (const listener of [...supplements_list._listeners]) listener();
+    expect(update).not.toHaveBeenCalled();
   });
 
   it("does not set supplement_info when status is 200", async () => {
@@ -1129,18 +1153,11 @@ describe("DoseHead._render_container() L76-78 — 404 triggers fallback image", 
       attributes: { supplement: { uid: "test-uid-200" } },
     };
 
-    const originalXHR = window.XMLHttpRequest;
-    class MockXHR200 {
-      status = 200;
-      open = vi.fn();
-      send = vi.fn();
-    }
-    (window as any).XMLHttpRequest = MockXHR200;
-
+    const restore = mockXHR(200);
     head._render_container();
 
     expect(head.supplement_info).toBe(false);
-    (window as any).XMLHttpRequest = originalXHR;
+    restore();
   });
 });
 describe("DoseHead.container_warning() L217 — boolean expression branches", () => {

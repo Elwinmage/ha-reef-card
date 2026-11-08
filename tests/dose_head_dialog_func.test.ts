@@ -13,6 +13,9 @@ import {
 } from "../src/devices/redsea/rsdose/dose_head.dialog_func_ext";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RSDevice from "../src/devices/device";
+import supplements_list, {
+  GENERIC_CONTAINER,
+} from "../src/devices/redsea/rsdose/supplements";
 
 class StubButton extends HTMLElement {
   hass: any = null;
@@ -140,15 +143,13 @@ class StubDH extends DoseHead {
 }
 if (!customElements.get("stub-dh-cov"))
   customElements.define("stub-dh-cov", StubDH);
+// The bottle visual of the supplement: found (200) or missing (404)
 function mockXHR(xhrStatus = 200) {
-  const origXHR = (globalThis as any).XMLHttpRequest;
-  (globalThis as any).XMLHttpRequest = class {
-    status = xhrStatus;
-    open() {}
-    send() {}
-  };
+  const spy = vi
+    .spyOn(supplements_list, "image_of")
+    .mockReturnValue(xhrStatus === 200 ? "/redsea_catalog/pack/x.webp" : null);
   return () => {
-    (globalThis as any).XMLHttpRequest = origXHR;
+    spy.mockRestore();
   };
 }
 function makeState(
@@ -309,21 +310,27 @@ describe("set_manual_head_volume()", () => {
     expect(btn?.conf?.label).toBe("2mL");
   });
 });
-describe("add_supplement() — supplement found (http 200)", () => {
+describe("add_supplement() — supplement found (catalog visual)", () => {
+  let restore: () => void;
   beforeEach(() => {
-    (global as any).XMLHttpRequest = class {
-      status = 200;
-      open() {}
-      send() {}
-    };
+    restore = mockXHR(200);
   });
+  afterEach(() => restore());
 
   it("creates #add-supplement with the uid as dataset", () => {
+    const setConfig = vi.spyOn(
+      customElements.get("click-image")!.prototype as any,
+      "setConfig",
+    );
     const sr = makeShadowRoot();
     add_supplement(makeElt(), makeHass(), sr as any);
     const div = sr.querySelector("#add-supplement") as HTMLElement;
     expect(div).toBeTruthy();
     expect(div.dataset.supplementUid).toBe(SUPP_WITH_SIZES.uid);
+    expect(setConfig.mock.calls.at(-1)?.[0]).toMatchObject({
+      image: "/redsea_catalog/pack/x.webp",
+    });
+    setConfig.mockRestore();
   });
 
   it("includes fullname in the info block", () => {
@@ -340,19 +347,25 @@ describe("add_supplement() — supplement found (http 200)", () => {
     expect(sr.querySelector("#add-supplement")!.innerHTML).toContain("mL");
   });
 });
-describe("add_supplement() — supplement found (http 404, fallback image)", () => {
+describe("add_supplement() — supplement found (no visual, generic bottle)", () => {
+  let restore: () => void;
   beforeEach(() => {
-    (global as any).XMLHttpRequest = class {
-      status = 404;
-      open() {}
-      send() {}
-    };
+    restore = mockXHR(404);
   });
+  afterEach(() => restore());
 
-  it("still creates #add-supplement", () => {
+  it("still creates #add-supplement, with the generic bottle", () => {
+    const setConfig = vi.spyOn(
+      customElements.get("click-image")!.prototype as any,
+      "setConfig",
+    );
     const sr = makeShadowRoot();
     add_supplement(makeElt(), makeHass(), sr as any);
     expect(sr.querySelector("#add-supplement")).toBeTruthy();
+    expect(setConfig.mock.calls.at(-1)?.[0]).toMatchObject({
+      image: GENERIC_CONTAINER,
+    });
+    setConfig.mockRestore();
   });
 });
 describe("add_supplement() — supplement not found → hui card branch", () => {
@@ -369,13 +382,11 @@ describe("add_supplement() — supplement not found → hui card branch", () => 
   });
 });
 describe("add_supplement() — same-uid guard", () => {
+  let restore: () => void;
   beforeEach(() => {
-    (global as any).XMLHttpRequest = class {
-      status = 200;
-      open() {}
-      send() {}
-    };
+    restore = mockXHR(200);
   });
+  afterEach(() => restore());
 
   it("does NOT rebuild DOM when uid is unchanged; propagates hass to inner elements", () => {
     const sr = makeShadowRoot();
@@ -412,13 +423,11 @@ describe("add_supplement() — same-uid guard", () => {
   });
 });
 describe("add_supplement() — supplement without sizes field", () => {
+  let restore: () => void;
   beforeEach(() => {
-    (global as any).XMLHttpRequest = class {
-      status = 200;
-      open() {}
-      send() {}
-    };
+    restore = mockXHR(200);
   });
+  afterEach(() => restore());
 
   it("does not render a sizes h2 when supplement.sizes is absent", () => {
     const sr = makeShadowRoot();

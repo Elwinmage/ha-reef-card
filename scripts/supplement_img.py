@@ -11,15 +11,15 @@ For each page:
   - Each brand is a collapsible <details> block showing:
       * brand name
       * count of supplements with image / total for that brand
-  - Image paths are adjusted relative to each page's location
+  - Images link to the visuals of reeftech-catalog (checked out next to
+    this repository, as ../reeftech-catalog)
   - Section heading and intro text are localized per language
 
 Exit code is always 0: pre-commit detects file modifications automatically.
 """
 
 
-import os
-import re
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -30,12 +30,31 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 CARD_DIR   = SCRIPT_DIR.parent
 
-IMG_DIR    = CARD_DIR / "public" / "img" / "supplements"
-
 DOC_DIR    = CARD_DIR / "doc"
 
-sys.path.insert(0, str(SCRIPT_DIR))
-from supplements_list import SUPPLEMENTS  # noqa: E402
+# Supplements and their bottle visuals live in reeftech-catalog, checked out
+# next to this repository (like ha-reefbeat-component for the other scripts)
+CATALOG_DIR = CARD_DIR.parent / "reeftech-catalog" / "supplements" / "items"
+# Visuals are linked on the catalog's main branch: they are not in this repo
+CATALOG_RAW = "https://raw.githubusercontent.com/Elwinmage/reeftech-catalog/main/supplements/items"
+CATALOG_ISSUES = "https://github.com/Elwinmage/reeftech-catalog/issues/new?labels=supplement"
+
+
+def load_supplements() -> list[dict]:
+    """Supplements of the catalog, with their catalog id and visual (if any)."""
+    supplements = []
+    for folder in sorted(CATALOG_DIR.iterdir()):
+        descriptor = folder / "supplement.json"
+        if not descriptor.is_file():
+            continue
+        data = json.loads(descriptor.read_text(encoding="utf-8"))
+        data["catalog_id"] = folder.name
+        data["has_image"] = (folder / "image.webp").is_file()
+        supplements.append(data)
+    return supplements
+
+
+SUPPLEMENTS: list[dict] = load_supplements() if CATALOG_DIR.is_dir() else []
 
 # ---------------------------------------------------------------------------
 # Per-language configuration
@@ -48,7 +67,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Here is the list of supported images for supplements, grouped by brand. "
             "If yours has a ❌, you can request its addition "
-            "[here](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[here](" + CATALOG_ISSUES + ")."
         ),
     ),
     "fr": (
@@ -56,7 +75,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Voici la liste des images de suppléments supportées, regroupées par marque. "
             "Si la vôtre affiche ❌, vous pouvez demander son ajout "
-            "[ici](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[ici](" + CATALOG_ISSUES + ")."
         ),
     ),
     "de": (
@@ -64,7 +83,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Hier ist die Liste der unterstützten Bilder für Ergänzungsmittel, nach Marke gruppiert. "
             "Wenn Ihres ein ❌ anzeigt, können Sie dessen Hinzufügung "
-            "[hier](https://github.com/Elwinmage/ha-reef-card/discussions/25) beantragen."
+            "[hier](" + CATALOG_ISSUES + ") beantragen."
         ),
     ),
     "es": (
@@ -72,7 +91,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Aquí está la lista de imágenes de suplementos compatibles, agrupadas por marca. "
             "Si el tuyo tiene un ❌, puedes solicitar su incorporación "
-            "[aquí](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[aquí](" + CATALOG_ISSUES + ")."
         ),
     ),
     "it": (
@@ -80,7 +99,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Ecco l'elenco delle immagini supportate per gli integratori, raggruppate per marca. "
             "Se il tuo mostra un ❌, puoi richiederne l'aggiunta "
-            "[qui](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[qui](" + CATALOG_ISSUES + ")."
         ),
     ),
     "pl": (
@@ -88,7 +107,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Oto lista obsługiwanych obrazów dla suplementów, pogrupowanych według marki. "
             "Jeśli Twój wyświetla ❌, możesz poprosić o jego dodanie "
-            "[tutaj](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[tutaj](" + CATALOG_ISSUES + ")."
         ),
     ),
     "pt": (
@@ -96,7 +115,7 @@ LANG_CONFIG: dict[str, tuple[str, str]] = {
         (
             "Aqui está a lista de imagens suportadas para suplementos, agrupadas por marca. "
             "Se o seu apresenta um ❌, pode solicitar a sua adição "
-            "[aqui](https://github.com/Elwinmage/ha-reef-card/discussions/25)."
+            "[aqui](" + CATALOG_ISSUES + ")."
         ),
     ),
 }
@@ -116,14 +135,9 @@ def reefdose_page(lang: str) -> Path:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def img_path(uid: str, readme_path: Path) -> str:
-    """Return the image src path relative to the given page location."""
-    img_file = IMG_DIR / f"{uid}.supplement.png"
-    return os.path.relpath(img_file, readme_path.parent).replace("\\", "/")
-
-
-def has_image(uid: str) -> bool:
-    return (IMG_DIR / f"{uid}.supplement.png").exists()
+def img_path(supplement: dict) -> str:
+    """URL of the bottle visual of a supplement in reeftech-catalog."""
+    return f"{CATALOG_RAW}/{supplement['catalog_id']}/image.webp"
 
 
 def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
@@ -133,7 +147,7 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
     """
     brands: dict = defaultdict(list)
     for s in SUPPLEMENTS:
-        brands[s["brand_name"]].append(s)
+        brands[s["brand"]].append(s)
     for brand in brands:
         brands[brand].sort(key=lambda s: s["fullname"])
 
@@ -144,7 +158,7 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
     for brand in sorted(brands.keys()):
         brand_supplements = brands[brand]
         total    = len(brand_supplements)
-        with_img = sum(1 for s in brand_supplements if has_image(s["uid"]))
+        with_img = sum(1 for s in brand_supplements if s["has_image"])
 
         summary = f"{brand} &nbsp; <sup>{with_img}/{total} 🖼️</sup>"
 
@@ -153,10 +167,9 @@ def build_supplement_block(readme_path: Path, heading: str, intro: str) -> str:
         lines.append("<table>")
 
         for s in brand_supplements:
-            uid  = s["uid"]
             name = s["fullname"].split(" - ", 1)[-1]
-            if has_image(uid):
-                src = img_path(uid, readme_path)
+            if s["has_image"]:
+                src = img_path(s)
                 lines.append(
                     f"<tr><td>✅</td>"
                     f"<td>{name}</td>"
@@ -213,6 +226,9 @@ def update_readme(readme_path: Path, lang: str) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 def main() -> None:
+    if not SUPPLEMENTS:
+        print(f"SKIP: no reeftech-catalog checkout at {CATALOG_DIR}")
+        sys.exit(0)
     print(f"Loaded {len(SUPPLEMENTS)} supplements.")
     print("Checking Supplements section in the ReefDose pages...")
     changed = False
