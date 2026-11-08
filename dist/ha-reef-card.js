@@ -46722,7 +46722,7 @@ customElements.get("reef-aquarium-card-editor") || customElements.define("reef-a
 customElements.get("reef-aquarium-scene-editor") || customElements.define("reef-aquarium-scene-editor", D);
 customElements.get("reef-coral-preview") || customElements.define("reef-coral-preview", BV);
 customElements.get("reef-colour-picker") || customElements.define("reef-colour-picker", et);
-const q8A = "v2.0.1";
+const q8A = "v2.1.1";
 function s8A() {
   console.info(
     `%c 🪸 REEF CARD %c ${q8A} `,
