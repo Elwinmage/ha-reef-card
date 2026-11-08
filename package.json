@@ -29,6 +29,7 @@
     "@typescript-eslint/parser": "^8.58.1",
     "@vitest/coverage-istanbul": "5.1.0",
     "@vitest/coverage-v8": "5.1.0",
+    "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.7",
