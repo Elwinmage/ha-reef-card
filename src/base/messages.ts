@@ -18,6 +18,7 @@ import { format_origin, format_short } from "./messages_format";
 import i18n from "../translations/myi18n.js";
 
 import style_messages from "./messages.styles";
+import { TRASH_ICON } from "./ui_images";
 
 //----------------------------------------------------------------------------//
 export class RSMessages extends MyElement {
@@ -65,7 +66,7 @@ export class RSMessages extends MyElement {
       type: "click-image",
       name: "trash",
       stateObj: false,
-      image: "/hacsfiles/ha-reef-card/img/trash.svg",
+      image: TRASH_ICON,
       tap_action: {
         domain: "redsea",
         action: "clean_message",

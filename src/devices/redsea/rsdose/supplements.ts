@@ -5,10 +5,10 @@
 // (reeftech-catalog), through its websocket: a new supplement no longer needs
 // a release of the card. The card itself never accesses the network.
 import { Supplement } from "../../../types/supplement";
+import { GENERIC_CONTAINER_IMG } from "../../../base/ui_images";
 
 // Bottle shown when a supplement has no visual of its own
-export const GENERIC_CONTAINER =
-  "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png";
+export const GENERIC_CONTAINER = GENERIC_CONTAINER_IMG;
 
 const CATALOG_COMMAND = "redsea/catalog";
 const SUBSCRIBE_COMMAND = "redsea/catalog/subscribe";

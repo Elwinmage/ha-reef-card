@@ -1,3 +1,7 @@
+import {
+  FULL_CUP_CALIBRATION_IMG,
+  OVER_SKIMMING_CALIBRATION_IMG,
+} from "../../../base/ui_images";
 export const dialogs_rsrun_pump_skimmer = {
   config_skimmer: {
     name: "config_skimmer",
@@ -122,7 +126,7 @@ export const dialogs_rsrun_pump_skimmer = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/ic_full_cup_calibration.png",
+          image: FULL_CUP_CALIBRATION_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
@@ -186,7 +190,7 @@ export const dialogs_rsrun_pump_skimmer = {
       {
         view: "click-image",
         conf: {
-          image: "/hacsfiles/ha-reef-card/img/ic_over_skimming_calibration.png",
+          image: OVER_SKIMMING_CALIBRATION_IMG,
           type: "click-image",
           stateObj: null,
           tap_action: [],
