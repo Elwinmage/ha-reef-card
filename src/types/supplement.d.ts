@@ -1,7 +1,7 @@
 export interface Supplement {
   uid: string;
   name: string;
-  display_name: string;
+  display_name: string | null;
   short_name: string;
   brand_name: string;
   type: string | null;
@@ -10,4 +10,7 @@ export interface Supplement {
   fullname: string;
   sizes?: number[];
   bundle?: any;
+  // Visuals served by the redsea integration (supplements catalog)
+  image?: string | null;
+  thumb?: string | null;
 }

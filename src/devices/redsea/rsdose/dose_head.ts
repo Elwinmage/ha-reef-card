@@ -9,6 +9,7 @@ import style_sensors from "../../../base/sensor.styles";
 import i18n from "../../../translations/myi18n";
 import { MyElement } from "../../../base/element";
 import { OFF_COLOR } from "../../../utils/constants";
+import supplements_list, { GENERIC_CONTAINER } from "./supplements";
 
 export class DoseHead extends RSDevice {
   static styles = [styles, style_sensors];
@@ -29,6 +30,7 @@ export class DoseHead extends RSDevice {
   supplement: StateObject | null = null;
   stock_alert: number | null = null;
   supplement_info: boolean = false;
+  _unsub_catalog: (() => void) | null = null;
   bundle: boolean = false;
   last_state_container_warning: boolean = false;
 
@@ -259,6 +261,20 @@ export class DoseHead extends RSDevice {
     this.requestUpdate();
   }
 
+  async connectedCallback() {
+    await super.connectedCallback();
+    // Redraw the bottle when the supplements catalog arrives or changes
+    this._unsub_catalog ??= supplements_list.on_change(() =>
+      this.requestUpdate(),
+    );
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unsub_catalog?.();
+    this._unsub_catalog = null;
+  }
+
   _render_ask() {
     if (
       this.supplement_info &&
@@ -267,7 +283,7 @@ export class DoseHead extends RSDevice {
       return html`<a
         class="addSupplement"
         target="_blank"
-        href="https://github.com/Elwinmage/ha-reef-card/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(
+        href="https://github.com/Elwinmage/reeftech-catalog/issues/new?labels=supplement&title=Add+supplement+picture+for+${this.supplement.attributes.supplement.brand_name.replace(
           " ",
           "+",
         )}+${this.supplement.attributes.supplement.name.replace(
@@ -299,17 +315,13 @@ export class DoseHead extends RSDevice {
     let img = null;
     let warning: any = html``;
     this.supplement_info = false;
-    img =
-      "/hacsfiles/ha-reef-card/img/supplements/" +
-      supplement_uid +
-      ".supplement.png";
-    const http = new XMLHttpRequest();
-    http.open("HEAD", img, false);
-    http.send();
-    if (http.status === 404) {
-      img =
-        "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png";
-      this.supplement_info = true;
+    // Visuals come from the supplements catalog of the integration
+    supplements_list.ensure_loaded(this._hass);
+    img = supplements_list.image_of(supplement_uid);
+    if (!img) {
+      img = GENERIC_CONTAINER;
+      // Only once the catalog is read: before, the visual may just be on its way
+      this.supplement_info = supplements_list.loaded;
     }
     let style = html``;
     if (!this.state_on) {

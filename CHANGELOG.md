@@ -2,6 +2,22 @@
 
 ## MODIFICATIONS
 
+### ReefDose: supplements from the redsea integration (reeftech-catalog)
+
+- The card no longer bundles the supplement list nor the bottle pictures
+  (`supplements_list.ts`, `public/img/supplements/`): it reads them from the
+  redsea integration (`redsea/catalog`), which keeps the supplements catalog
+  of [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog) up to
+  date. A new supplement or picture no longer needs a release of the card;
+  the list reloads by itself when a catalog release is installed.
+- No more synchronous HTTP request per head to find out whether a bottle
+  picture exists: the catalog says it.
+- _Ask for a picture_ now opens an issue on reeftech-catalog.
+- The supplements of the ReefDose pages are generated from a
+  `../reeftech-catalog` checkout (`scripts/supplement_img.py`), pictures
+  linked on its main branch; `update_supplements_list.py` is gone.
+- Needs the redsea integration with the supplements catalog (next release).
+
 ### ReefDose: ReefCare parts as standalone supplements
 
 - The four ReefCare parts are now standalone supplements too (supplement

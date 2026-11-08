@@ -5,6 +5,14 @@
  * MyI18n can query it at module load time and detect the "en" language.
  */
 
+// The supplements catalog, as the redsea integration sends it
+// (`data.items` of redsea/catalog): the card no longer bundles the list.
+import catalog from "./data/redsea_supplements_catalog.json";
+import supplements_list from "../src/devices/redsea/rsdose/supplements";
+
+supplements_list.set_catalog(catalog as any);
+supplements_list._loaded = true;
+
 // Register the custom element before any src module is imported
 class MockHomeAssistant extends HTMLElement {
   hass = { language: "en", selectedLanguage: "en" };

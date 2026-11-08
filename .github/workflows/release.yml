@@ -42,25 +42,28 @@ jobs:
               sha: '${{steps.update_manifest.outputs.tag_sha}}'
             })
 
-      - name: Build HACS zip release
+      - name: Check bundle
         run: |
-          # HACS unzips the release asset named after hacs.json "filename"
-          # straight into www/community/ha-reef-card/, so the archive must
-          # contain the *content* of dist/, not the dist/ folder itself.
-          #
-          # Also regenerate the .gz: HACS only creates it when it writes a .js
-          # file individually, never when extracting an archive. Without it,
-          # a stale .gz would keep being served by the /hacsfiles endpoint.
-          gzip -9 -k -f dist/ha-reef-card.js
-          cd dist && zip -r "${GITHUB_WORKSPACE}/ha-reef-card.js" .
-          unzip -l "${GITHUB_WORKSPACE}/ha-reef-card.js"
+          # HACS only supports zip_release for integrations. For a dashboard
+          # card it downloads the asset named after hacs.json "filename" as-is
+          # (and gzips it itself), so the asset MUST be the plain JS bundle.
+          f="dist/ha-reef-card.js"
+          test -s "$f" || { echo "::error::$f missing or empty"; exit 1; }
+          # Refuse to ship an archive disguised as JS (zip 'PK', gzip 1f8b).
+          magic=$(head -c 2 "$f" | od -An -tx1 | tr -d ' \n')
+          case "$magic" in
+            504b|1f8b) echo "::error::$f is an archive, not JavaScript"; exit 1 ;;
+          esac
+          ls -la dist/
 
       - name: Create Release with Assets
         uses: ncipollo/release-action@v1
         with:
-          prerelease: true # Passe à false si tu veux des versions stables
+          prerelease: true
           tag: ${{ github.event.inputs.tag }}
-          # 🎯 C'EST CETTE LIGNE QUI FAIT LA DIFFÉRENCE :
-          artifacts: "ha-reef-card.js" # Indique le chemin de ton fichier compiled/JS
+          # Plain JS bundle, uploaded under the name HACS looks for.
+          artifacts: "dist/ha-reef-card.js"
           allowUpdates: true
+          # Overwrite a previously uploaded (zipped) asset with the same name.
+          replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}

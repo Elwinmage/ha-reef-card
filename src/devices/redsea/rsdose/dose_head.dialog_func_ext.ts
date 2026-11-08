@@ -1,4 +1,4 @@
-import supplements_list from "./supplements";
+import supplements_list, { GENERIC_CONTAINER } from "./supplements";
 
 import i18n from "../../../translations/myi18n";
 import * as com from "../../../utils/common";
@@ -51,12 +51,12 @@ export function set_manual_head_volume(elt, hass, shadowRoot) {
 }
 
 export function add_supplement(elt, hass, shadowRoot) {
+  supplements_list.ensure_loaded(hass);
   const selected_supplement = elt.device.get_entity("supplements").state;
   const supplement =
     supplements_list.get_supplement_from_fullname(selected_supplement);
 
-  let img =
-    "/hacsfiles/ha-reef-card/img/supplements/generic_container.supplement.png";
+  let img = GENERIC_CONTAINER;
   const cc = shadowRoot.querySelector("#add-supplement");
 
   // Guard: only rebuild the DOM if the selected supplement has actually changed.
@@ -76,16 +76,7 @@ export function add_supplement(elt, hass, shadowRoot) {
   }
 
   if (supplement) {
-    const t_img =
-      "/hacsfiles/ha-reef-card/img/supplements/" +
-      supplement.uid +
-      ".supplement.png";
-    const http = new XMLHttpRequest();
-    http.open("HEAD", t_img, false);
-    http.send();
-    if (http.status !== 404) {
-      img = t_img;
-    }
+    img = supplements_list.image_of(supplement.uid) ?? img;
     const r_element = customElements.get("click-image");
     const content: any = new r_element();
     const conf_img = {
@@ -176,6 +167,7 @@ export function add_supplement(elt, hass, shadowRoot) {
 }
 
 export function set_container_volume(elt, hass, shadowRoot) {
+  supplements_list.ensure_loaded(hass);
   let selected_supplement =
     elt.device.get_entity("supplement").attributes.supplement.uid;
   let supplement =
