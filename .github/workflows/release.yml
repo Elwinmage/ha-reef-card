@@ -17,11 +17,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
       - name: "Set version number from trigger's tag"
         id: update_manifest
         run: |
           yq -i -o json '.version="${{ github.event.inputs.tag}}"' \
             "${{ github.workspace }}/package.json"
+          # Build AFTER the version bump: the console banner reads the version
+          # from package.json at build time. The committed dist/ is rebuilt
+          # here so the released asset and the tagged tree are this exact
+          # code, never a stale local build.
+          npm run build
           git config --global user.email "moranderic31@gmail.com"
           git config --global user.name "Elwinmage"
           git commit -a -m "Update version"
