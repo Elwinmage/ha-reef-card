@@ -1851,11 +1851,13 @@ export class RSLedProgramEditor extends LitElement {
         />
         ☀ ${i18n._("led_weather_mode")}</label
       >
-      ${notice
-        ? html`<div class="weather_notice ${pending ? "pending" : ""}">
-            ${notice}
-          </div>`
-        : ""}
+      ${
+        notice
+          ? html`<div class="weather_notice ${pending ? "pending" : ""}">
+              ${notice}
+            </div>`
+          : ""
+      }
     </div>`;
   }
 
@@ -1876,30 +1878,34 @@ export class RSLedProgramEditor extends LitElement {
         ${this._render_group("led_library_redsea", true, selected)}
         ${this._render_group("led_library_mine", false, selected)}
       </select>
-      ${this.own_entry()
-        ? html`<button
-            class="icon_btn library_rename"
-            title="${i18n._("led_library_rename")}"
-            @click=${() => {
-              this.rename_error = "";
-              // Only drawn for one of the user's programs
-              this.renaming = this.own_entry()!.name;
-            }}
-          >
-            ✎
-          </button>`
-        : ""}
-      ${this.own_entry()
-        ? html`<button
-            class="icon_btn library_delete"
-            title="${i18n._("led_library_delete")}"
-            @click=${() => {
-              this.deleting = true;
-            }}
-          >
-            🗑
-          </button>`
-        : ""}
+      ${
+        this.own_entry()
+          ? html`<button
+              class="icon_btn library_rename"
+              title="${i18n._("led_library_rename")}"
+              @click=${() => {
+                this.rename_error = "";
+                // Only drawn for one of the user's programs
+                this.renaming = this.own_entry()!.name;
+              }}
+            >
+              ✎
+            </button>`
+          : ""
+      }
+      ${
+        this.own_entry()
+          ? html`<button
+              class="icon_btn library_delete"
+              title="${i18n._("led_library_delete")}"
+              @click=${() => {
+                this.deleting = true;
+              }}
+            >
+              🗑
+            </button>`
+          : ""
+      }
     </div>`;
   }
 
@@ -1975,9 +1981,11 @@ export class RSLedProgramEditor extends LitElement {
             }}
           />
         </label>
-        ${this.rename_error
-          ? html`<span class="rename_error">⚠ ${this.rename_error}</span>`
-          : ""}
+        ${
+          this.rename_error
+            ? html`<span class="rename_error">⚠ ${this.rename_error}</span>`
+            : ""
+        }
         <div class="naming_buttons">
           <button
             class="cancel renaming_cancel"
@@ -2026,15 +2034,17 @@ export class RSLedProgramEditor extends LitElement {
           >
             ${i18n._("cancel")}
           </button>
-          ${this.own_entry()
-            ? html`<button
-                class="save naming_update"
-                ?disabled=${!this.naming.trim()}
-                @click=${() => this.confirm_name(true)}
-              >
-                ${i18n._("led_library_update")}
-              </button>`
-            : ""}
+          ${
+            this.own_entry()
+              ? html`<button
+                  class="save naming_update"
+                  ?disabled=${!this.naming.trim()}
+                  @click=${() => this.confirm_name(true)}
+                >
+                  ${i18n._("led_library_update")}
+                </button>`
+              : ""
+          }
           <button
             class="save naming_save"
             ?disabled=${!this.naming.trim()}
@@ -2081,19 +2091,21 @@ export class RSLedProgramEditor extends LitElement {
               </option>`,
           )}
         </select>
-        ${this.format === "wb" && this.white_blue_allowed()
-          ? html`<div class="mode" title="${i18n._("white_blue_sliders")}">
-              <span
-                class="mode_wb ${this.mode === "wb" ? "on" : ""}"
-                @click=${() => this.set_mode("wb")}
-                >W/B</span
-              ><span
-                class="mode_k ${this.mode === "kelvin" ? "on" : ""}"
-                @click=${() => this.set_mode("kelvin")}
-                >K</span
-              >
-            </div>`
-          : ""}
+        ${
+          this.format === "wb" && this.white_blue_allowed()
+            ? html`<div class="mode" title="${i18n._("white_blue_sliders")}">
+                <span
+                  class="mode_wb ${this.mode === "wb" ? "on" : ""}"
+                  @click=${() => this.set_mode("wb")}
+                  >W/B</span
+                ><span
+                  class="mode_k ${this.mode === "kelvin" ? "on" : ""}"
+                  @click=${() => this.set_mode("kelvin")}
+                  >K</span
+                >
+              </div>`
+            : ""
+        }
         <button class="icon_btn close" @click=${() => this.close()}>✕</button>
       </div>
       ${this._render_weather_notice()} ${this._render_library()}
@@ -2115,19 +2127,23 @@ export class RSLedProgramEditor extends LitElement {
       <div class="body">
         <div class="chart">${this._render_chart()}</div>
         <div class="points">
-          ${this.weather_on()
-            ? html`<div class="colours_hint">
-                  ${i18n._("led_weather_colours_only")}
-                </div>
-                ${this._render_table()} ${this._render_weather()}`
-            : html`${this._render_table()} ${this._render_clouds()}`}
+          ${
+            this.weather_on()
+              ? html`<div class="colours_hint">
+                    ${i18n._("led_weather_colours_only")}
+                  </div>
+                  ${this._render_table()} ${this._render_weather()}`
+              : html`${this._render_table()} ${this._render_clouds()}`
+          }
         </div>
-        ${this.preview_loading
-          ? html`<div class="loading_zone">
-              <div class="spinner"></div>
-              <span>${i18n._("led_weather_loading")}</span>
-            </div>`
-          : ""}
+        ${
+          this.preview_loading
+            ? html`<div class="loading_zone">
+                <div class="spinner"></div>
+                <span>${i18n._("led_weather_loading")}</span>
+              </div>`
+            : ""
+        }
       </div>
       <div class="footer">
         <label
@@ -2153,11 +2169,13 @@ export class RSLedProgramEditor extends LitElement {
         </button>
         <button
           class="save"
-          ?disabled=${this.saving !== null ||
-          this.preview_loading ||
-          (this.weather_on() &&
-            this.weather_draft === null &&
-            !this.settings_dirty)}
+          ?disabled=${
+            this.saving !== null ||
+            this.preview_loading ||
+            (this.weather_on() &&
+              this.weather_draft === null &&
+              !this.settings_dirty)
+          }
           @click=${() => this.save()}
         >
           ${i18n._("save")}
@@ -2203,27 +2221,29 @@ export class RSLedProgramEditor extends LitElement {
         />
         ☁ ${i18n._("led_weather_clouds")}</label
       >
-      ${clouds
-        ? html`${time("from")} – ${time("to")}
-            <select
-              class="clouds_level"
-              ?disabled=${locked}
-              @change=${(e: Event) =>
-                this.set_clouds_intensity(
-                  (e.target as HTMLSelectElement).value,
+      ${
+        clouds
+          ? html`${time("from")} – ${time("to")}
+              <select
+                class="clouds_level"
+                ?disabled=${locked}
+                @change=${(e: Event) =>
+                  this.set_clouds_intensity(
+                    (e.target as HTMLSelectElement).value,
+                  )}
+              >
+                ${CLOUD_LEVELS.map(
+                  (level) =>
+                    html`<option
+                      value="${level}"
+                      ?selected=${level === clouds.intensity}
+                    >
+                      ${labels[level]}
+                    </option>`,
                 )}
-            >
-              ${CLOUD_LEVELS.map(
-                (level) =>
-                  html`<option
-                    value="${level}"
-                    ?selected=${level === clouds.intensity}
-                  >
-                    ${labels[level]}
-                  </option>`,
-              )}
-            </select>`
-        : ""}
+              </select>`
+          : ""
+      }
     </div>`;
   }
 
@@ -2331,38 +2351,43 @@ export class RSLedProgramEditor extends LitElement {
                 )}
             />
           </td>
-          ${kelvin
-            ? html`<td>
-                <input
-                  class="kelvin"
-                  type="number"
-                  step=${this.kelvin_step(p.k ?? DEFAULT_KELVIN)}
-                  ?disabled=${k_locked}
-                  .value=${String(p.k ?? DEFAULT_KELVIN)}
-                  style="border-color:${rgb_css(
-                    kelvin_rgb(p.k ?? DEFAULT_KELVIN),
-                  )}"
-                  @change=${(e: Event) =>
-                    this.set_kelvin(
-                      n,
-                      Number((e.target as HTMLInputElement).value),
-                    )}
-                />
-              </td>`
-            : ""}
+          ${
+            kelvin
+              ? html`<td>
+                  <input
+                    class="kelvin"
+                    type="number"
+                    step=${this.kelvin_step(p.k ?? DEFAULT_KELVIN)}
+                    ?disabled=${k_locked}
+                    .value=${String(p.k ?? DEFAULT_KELVIN)}
+                    style="border-color:${rgb_css(
+                      kelvin_rgb(p.k ?? DEFAULT_KELVIN),
+                    )}"
+                    @change=${(e: Event) =>
+                      this.set_kelvin(
+                        n,
+                        Number((e.target as HTMLInputElement).value),
+                      )}
+                  />
+                </td>`
+              : ""
+          }
           <td>
-            ${locked
-              ? ""
-              : n === 0 || n === last
-                ? html`<span title="${i18n._(n === 0 ? "led_rise" : "led_set")}"
-                    >${n === 0 ? "↗" : "↘"}</span
-                  >`
-                : html`<button
-                    class="icon_btn remove"
-                    @click=${() => this.remove_point(n)}
-                  >
-                    ✕
-                  </button>`}
+            ${
+              locked
+                ? ""
+                : n === 0 || n === last
+                  ? html`<span
+                      title="${i18n._(n === 0 ? "led_rise" : "led_set")}"
+                      >${n === 0 ? "↗" : "↘"}</span
+                    >`
+                  : html`<button
+                      class="icon_btn remove"
+                      @click=${() => this.remove_point(n)}
+                    >
+                      ✕
+                    </button>`
+            }
           </td>
         </tr>`,
     );
@@ -2381,15 +2406,19 @@ export class RSLedProgramEditor extends LitElement {
         </tr>
         ${rows}
       </table>
-      ${locked
-        ? ""
-        : html`<button class="add" @click=${() => this.add_point()}>
-            + ${i18n._("led_add_point")}
-          </button>`}
-      ${pts.length && !locked
-        ? html`<button class="add clear" @click=${() => this.clear_channel()}>
-            ${i18n._("delete")}
-          </button>`
-        : ""}`;
+      ${
+        locked
+          ? ""
+          : html`<button class="add" @click=${() => this.add_point()}>
+              + ${i18n._("led_add_point")}
+            </button>`
+      }
+      ${
+        pts.length && !locked
+          ? html`<button class="add clear" @click=${() => this.clear_channel()}>
+              ${i18n._("delete")}
+            </button>`
+          : ""
+      }`;
   }
 }

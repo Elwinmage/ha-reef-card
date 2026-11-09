@@ -154,12 +154,14 @@ export class RSLedSlider extends MyElement {
     >
       ${icon ? html`<ha-icon class="vicon" .icon=${icon}></ha-icon>` : ""}
       <div class="vtrack" style="background:${this.track_background()}">
-        ${this._is_kelvin
-          ? ""
-          : html`<div
-              class="vtrack_mask"
-              style="height:${100 - clamped}%"
-            ></div>`}
+        ${
+          this._is_kelvin
+            ? ""
+            : html`<div
+                class="vtrack_mask"
+                style="height:${100 - clamped}%"
+              ></div>`
+        }
       </div>
       <div class="vthumb" style="bottom:${clamped}%">${label}</div>
     </div>`;

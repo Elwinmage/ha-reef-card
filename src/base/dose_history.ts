@@ -210,16 +210,20 @@ export class RSDoseHistory extends LitElement {
       <li class="dose ${manual ? "manual" : "scheduled"}">
         <span class="kind" aria-hidden="true">${manual ? "✋" : "⏱"}</span>
         <span class="when">
-          ${start
-            ? html`<time
-                  datetime="${dose.started_at}"
-                  title="${dose.start_estimated
-                    ? i18n._("dose_history_estimated")
-                    : ""}"
-                  >${start}</time
-                >
-                → `
-            : nothing}
+          ${
+            start
+              ? html`<time
+                    datetime="${dose.started_at}"
+                    title="${
+                      dose.start_estimated
+                        ? i18n._("dose_history_estimated")
+                        : ""
+                    }"
+                    >${start}</time
+                  >
+                  → `
+              : nothing
+          }
           <time datetime="${dose.ended_at}">${end}</time>
         </span>
         <span class="volume">${this._volume(dose.volume)}</span>
@@ -265,13 +269,15 @@ export class RSDoseHistory extends LitElement {
                 </option>`,
             )}
           </select>
-          ${this.entries.length
-            ? html`<span class="summary"
-                >${i18n._("dose_history_total", {
-                  volume: total.toFixed(2),
-                })}</span
-              >`
-            : nothing}
+          ${
+            this.entries.length
+              ? html`<span class="summary"
+                  >${i18n._("dose_history_total", {
+                    volume: total.toFixed(2),
+                  })}</span
+                >`
+              : nothing
+          }
           <button
             class="refresh"
             title="${i18n._("messages_history_refresh")}"
@@ -282,23 +288,29 @@ export class RSDoseHistory extends LitElement {
             ⟳
           </button>
         </div>
-        ${this.error
-          ? html`<div class="error">${this.error}</div>`
-          : this.entries.length === 0
-            ? html`<div class="empty">
-                ${this.loading
-                  ? i18n._("messages_history_loading")
-                  : i18n._("dose_history_empty")}
-              </div>`
-            : this._render_list()}
+        ${
+          this.error
+            ? html`<div class="error">${this.error}</div>`
+            : this.entries.length === 0
+              ? html`<div class="empty">
+                  ${
+                    this.loading
+                      ? i18n._("messages_history_loading")
+                      : i18n._("dose_history_empty")
+                  }
+                </div>`
+              : this._render_list()
+        }
         <div class="footer">
           ${i18n._("dose_history_count", { count: this.entries.length })}
-          ${this.retention
-            ? html` ·
-              ${i18n._("messages_history_retention", {
-                days: this.retention,
-              })}`
-            : nothing}
+          ${
+            this.retention
+              ? html` ·
+                ${i18n._("messages_history_retention", {
+                  days: this.retention,
+                })}`
+              : nothing
+          }
         </div>
       </div>
     `;

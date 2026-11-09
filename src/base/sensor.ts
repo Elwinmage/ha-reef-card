@@ -211,9 +211,9 @@ export class Sensor extends MyElement {
     // keeps them consistent whatever unit_css does.
     const text_color = this.resolve_text_color();
     const body = html`${value}
-    ${unit
-      ? html`<span style=${this.get_style("unit_css")}>${unit}</span>`
-      : ""}`;
+    ${
+      unit ? html`<span style=${this.get_style("unit_css")}>${unit}</span>` : ""
+    }`;
 
     return text_color
       ? html`<span style="color:${text_color}">${body}</span>`

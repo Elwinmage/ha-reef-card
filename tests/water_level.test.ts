@@ -99,6 +99,72 @@ describe("WaterLevel — ratio mode", () => {
     expect(el.resolveLevel()).toBe(50);
   });
 
+  it("derives the factor from the units when both are known (issue #124)", () => {
+    // Tank volume displayed in mL by the user: target_factor must be ignored
+    const el = makeRatio();
+    el.stateObj = makeState("2500", "sensor.volume_left", {
+      unit_of_measurement: "mL",
+    });
+    el.stateObjTarget = makeState("5000", "sensor.ato_tank_volume", {
+      unit_of_measurement: "mL",
+    });
+    expect(el.resolveLevel()).toBe(50);
+  });
+
+  it("converts the value unit too when it is displayed in L", () => {
+    const el = makeRatio();
+    el.stateObj = makeState("2.5", "sensor.volume_left", {
+      unit_of_measurement: "L",
+    });
+    el.stateObjTarget = makeState("5", "sensor.ato_tank_volume", {
+      unit_of_measurement: "L",
+    });
+    expect(el.resolveLevel()).toBe(50);
+  });
+
+  it("uses the units over target_factor for the default mL over L", () => {
+    const el = makeRatio({ target_factor: 1 });
+    el.stateObj = makeState("2500", "sensor.volume_left", {
+      unit_of_measurement: "mL",
+    });
+    el.stateObjTarget = makeState("5", "sensor.ato_tank_volume", {
+      unit_of_measurement: "L",
+    });
+    expect(el.resolveLevel()).toBe(50);
+  });
+
+  it("falls back to target_factor when the units do not match", () => {
+    const el = makeRatio();
+    el.stateObj = makeState("2500", "sensor.volume_left", {
+      unit_of_measurement: "mL",
+    });
+    el.stateObjTarget = makeState("5", "sensor.ato_tank_volume", {
+      unit_of_measurement: "kg",
+    });
+    expect(el.resolveLevel()).toBe(50);
+  });
+
+  it("ignores the units for a literal or attribute target", () => {
+    const lit = makeRatio({ target: 5, target_factor: 1000 });
+    lit.stateObj = makeState("2500", "sensor.volume_left", {
+      unit_of_measurement: "mL",
+    });
+    expect(lit.resolveLevel()).toBe(50);
+
+    const attr = makeRatio({ target_attribute: "cap", target_factor: 1000 });
+    attr.stateObj = makeState("2500", "sensor.volume_left", {
+      unit_of_measurement: "mL",
+      cap: 5,
+    });
+    expect(attr.resolveLevel()).toBe(50);
+  });
+
+  it("falls back to target_factor when the target entity is missing", () => {
+    const el = makeRatio();
+    el.stateObjTarget = null;
+    expect(el.getUnitFactor()).toBeNull();
+  });
+
   it("ignores target_factor when it is absent or zero", () => {
     const el = makeRatio({ target_factor: 0 });
     // Falls back to factor 1: 2500 / 5 clamps to 100

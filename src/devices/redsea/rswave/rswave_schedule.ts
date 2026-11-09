@@ -665,11 +665,13 @@ export class RSWaveSchedule extends RSWaveElement {
       <td class="end">${hhmm(end)}</td>
       <td>
         <select class="wave" @change=${(e: Event) => this.on_wave(index, e)}>
-          ${wave
-            ? nothing
-            : html`<option value="${slot.wave_uid}" selected>
-                ${i18n._("wave_unknown")}
-              </option>`}
+          ${
+            wave
+              ? nothing
+              : html`<option value="${slot.wave_uid}" selected>
+                  ${i18n._("wave_unknown")}
+                </option>`
+          }
           ${waves.map(
             (w) =>
               html`<option
@@ -700,9 +702,9 @@ export class RSWaveSchedule extends RSWaveElement {
       <td class="num">${moving ? `${wave!.rti} %` : "–"}</td>
       <td class="actions">
         <button
-          class="btn_icon edit ${slot.wave_uid === this._focus
-            ? "focused"
-            : ""}"
+          class="btn_icon edit ${
+            slot.wave_uid === this._focus ? "focused" : ""
+          }"
           title="${i18n._("wave_edit")}"
           @click=${() => (this._focus = slot.wave_uid)}
         >
@@ -746,63 +748,68 @@ export class RSWaveSchedule extends RSWaveElement {
         </div>
         ${this.notes()}
         <div class="panel_table">
-          ${loading
-            ? html`<p class="note">${i18n._("wave_loading")}</p>`
-            : html`<table>
-                  <thead>
-                    <tr>
-                      <th>${i18n._("wave_col_start")}</th>
-                      <th>${i18n._("wave_col_end")}</th>
-                      <th>${i18n._("wave_col_wave")}</th>
-                      <th>${i18n._("wave_col_type")}</th>
-                      <th>${i18n._("wave_col_direction")}</th>
-                      <th>${i18n._("wave_col_forward")}</th>
-                      <th>${i18n._("wave_col_reverse")}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${slots.map((slot, i) =>
-                      this.row(
-                        slot,
-                        i,
-                        i + 1 < slots.length
-                          ? slots[i + 1].st
-                          : MINUTES_PER_DAY,
-                        i === cur,
-                      ),
-                    )}
-                  </tbody>
-                </table>
-                <button
-                  class="btn_add"
-                  ?disabled=${next_slot(slots) === null &&
-                  make_room(slots) === null}
-                  @click=${() => this.add_slot()}
-                >
-                  ${i18n._("wave_add_slot")}
-                </button>
-                ${this._room_ask
-                  ? html`<div class="room_ask">
-                      <p class="error">${i18n._("wave_slot_no_room")}</p>
-                      <div class="lib_actions">
-                        <button
-                          class="btn_cancel room_cancel"
-                          @click=${() => {
-                            this._room_ask = false;
-                          }}
-                        >
-                          ${i18n._("cancel")}
-                        </button>
-                        <button
-                          class="btn_save room_confirm"
-                          @click=${() => this.confirm_room()}
-                        >
-                          ${i18n._("wave_slot_shift")}
-                        </button>
-                      </div>
-                    </div>`
-                  : nothing}`}
+          ${
+            loading
+              ? html`<p class="note">${i18n._("wave_loading")}</p>`
+              : html`<table>
+                    <thead>
+                      <tr>
+                        <th>${i18n._("wave_col_start")}</th>
+                        <th>${i18n._("wave_col_end")}</th>
+                        <th>${i18n._("wave_col_wave")}</th>
+                        <th>${i18n._("wave_col_type")}</th>
+                        <th>${i18n._("wave_col_direction")}</th>
+                        <th>${i18n._("wave_col_forward")}</th>
+                        <th>${i18n._("wave_col_reverse")}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${slots.map((slot, i) =>
+                        this.row(
+                          slot,
+                          i,
+                          i + 1 < slots.length
+                            ? slots[i + 1].st
+                            : MINUTES_PER_DAY,
+                          i === cur,
+                        ),
+                      )}
+                    </tbody>
+                  </table>
+                  <button
+                    class="btn_add"
+                    ?disabled=${
+                      next_slot(slots) === null && make_room(slots) === null
+                    }
+                    @click=${() => this.add_slot()}
+                  >
+                    ${i18n._("wave_add_slot")}
+                  </button>
+                  ${
+                    this._room_ask
+                      ? html`<div class="room_ask">
+                          <p class="error">${i18n._("wave_slot_no_room")}</p>
+                          <div class="lib_actions">
+                            <button
+                              class="btn_cancel room_cancel"
+                              @click=${() => {
+                                this._room_ask = false;
+                              }}
+                            >
+                              ${i18n._("cancel")}
+                            </button>
+                            <button
+                              class="btn_save room_confirm"
+                              @click=${() => this.confirm_room()}
+                            >
+                              ${i18n._("wave_slot_shift")}
+                            </button>
+                          </div>
+                        </div>`
+                      : nothing
+                  }`
+          }
         </div>
         <!-- Save and cancel belong to the program: right under its table,
              before the waves of the library -->
@@ -816,26 +823,30 @@ export class RSWaveSchedule extends RSWaveElement {
             ?disabled=${blocked}
             @click=${() => this.save()}
           >
-            ${this._saving
-              ? busy_label(i18n._("wave_saving"), true)
-              : i18n._("wave_save")}
+            ${
+              this._saving
+                ? busy_label(i18n._("wave_saving"), true)
+                : i18n._("wave_save")
+            }
           </button>
         </div>
-        ${loading || !this._library?.linked
-          ? nothing
-          : html`<div class="wave_zone">
-              <h4>${i18n._("wave_zone")}</h4>
-              <rswave-library
-                .device=${this.device}
-                .conf=${{ inline: true }}
-                .stateOn=${true}
-                .stateObj=${null}
-                .hass=${this._hass}
-                .focus_uid=${this._focus}
-                @wave-library-changed=${(e: Event) =>
-                  this.on_library_changed(e)}
-              ></rswave-library>
-            </div>`}
+        ${
+          loading || !this._library?.linked
+            ? nothing
+            : html`<div class="wave_zone">
+                <h4>${i18n._("wave_zone")}</h4>
+                <rswave-library
+                  .device=${this.device}
+                  .conf=${{ inline: true }}
+                  .stateOn=${true}
+                  .stateObj=${null}
+                  .hass=${this._hass}
+                  .focus_uid=${this._focus}
+                  @wave-library-changed=${(e: Event) =>
+                    this.on_library_changed(e)}
+                ></rswave-library>
+              </div>`
+        }
       </div>
     </div>`;
   }

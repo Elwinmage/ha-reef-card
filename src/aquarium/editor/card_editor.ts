@@ -162,11 +162,13 @@ export class ReefAquariumCardEditor extends LitElement {
         <button @click=${() => this._edit(null)}>
           ${i18n._("aq_new_aquarium")}
         </button>
-        ${this._config.aquarium
-          ? html`<button @click=${() => this._edit(this._config.aquarium!)}>
-              ${i18n._("aq_edit_scene")}
-            </button>`
-          : nothing}
+        ${
+          this._config.aquarium
+            ? html`<button @click=${() => this._edit(this._config.aquarium!)}>
+                ${i18n._("aq_edit_scene")}
+              </button>`
+            : nothing
+        }
       </div>
       <div class="row">
         <label for="render">${i18n._("aq_render_level")}</label>
@@ -190,31 +192,33 @@ export class ReefAquariumCardEditor extends LitElement {
         </select>
         <span class="hint">${i18n._("aq_render_hint")}</span>
       </div>
-      ${this._views.length > 1
-        ? html`<div class="row">
-            <label for="view">${i18n._("aq_start_view")}</label>
-            <select
-              id="view"
-              @change=${(e: Event) =>
-                this._set({
-                  view: (e.target as HTMLSelectElement).value || undefined,
-                })}
-            >
-              <option value="" ?selected=${!this._config.view}>
-                ${i18n._("aq_default_view")}
-              </option>
-              ${this._views.map(
-                (v) =>
-                  html`<option
-                    value="${v.id}"
-                    ?selected=${v.id === this._config.view}
-                  >
-                    ${v.name}
-                  </option>`,
-              )}
-            </select>
-          </div>`
-        : nothing}
+      ${
+        this._views.length > 1
+          ? html`<div class="row">
+              <label for="view">${i18n._("aq_start_view")}</label>
+              <select
+                id="view"
+                @change=${(e: Event) =>
+                  this._set({
+                    view: (e.target as HTMLSelectElement).value || undefined,
+                  })}
+              >
+                <option value="" ?selected=${!this._config.view}>
+                  ${i18n._("aq_default_view")}
+                </option>
+                ${this._views.map(
+                  (v) =>
+                    html`<option
+                      value="${v.id}"
+                      ?selected=${v.id === this._config.view}
+                    >
+                      ${v.name}
+                    </option>`,
+                )}
+              </select>
+            </div>`
+          : nothing
+      }
     `;
   }
 }

@@ -198,31 +198,33 @@ export class RSLedBeam extends RSLedElement {
       </defs>
       ${dark ? this._lens(g, grad_id) : ""}
       <path
-        class="clickable beam_shape ${this.led?.identifying?.()
-          ? "beam_identify"
-          : ""}"
+        class="clickable beam_shape ${
+          this.led?.identifying?.() ? "beam_identify" : ""
+        }"
         d="${shape}"
         fill="url(#${grad_id})"
       ></path>
-      ${dark
-        ? ""
-        : svg`<ellipse
+      ${
+        dark
+          ? ""
+          : svg`<ellipse
               class="beam_pool"
               cx="${(g.bottom.x1 + g.bottom.x2) / 2}"
               cy="${g.bottom.y}"
               rx="${(g.bottom.x2 - g.bottom.x1) / 2}"
               ry="18"
               fill="url(#${grad_id}_pool)"
-            ></ellipse>`}
+            ></ellipse>`
+      }
       <text
         class="beam_text"
         x="${g.intensity.x}"
         y="${g.intensity.y}"
         text-anchor="middle"
       >
-        ${intensity_txt}${intensity_tip
-          ? svg`<title>${intensity_tip}</title>`
-          : ""}
+        ${intensity_txt}${
+          intensity_tip ? svg`<title>${intensity_tip}</title>` : ""
+        }
       </text>
       <text
         class="beam_title"

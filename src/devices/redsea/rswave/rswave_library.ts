@@ -372,14 +372,18 @@ export class RSWaveLibrary extends RSWaveElement {
             ></path>
           </svg>
           <span class="lib_name">${w.name}</span>
-          ${w.default
-            ? html`<span class="badge">${i18n._("wave_redsea")}</span>`
-            : nothing}
-          ${users.length
-            ? html`<span class="lib_users"
-                >${tr("wave_used_by", { pumps: users.join(", ") })}</span
-              >`
-            : nothing}
+          ${
+            w.default
+              ? html`<span class="badge">${i18n._("wave_redsea")}</span>`
+              : nothing
+          }
+          ${
+            users.length
+              ? html`<span class="lib_users"
+                  >${tr("wave_used_by", { pumps: users.join(", ") })}</span
+                >`
+              : nothing
+          }
         </button>`;
       })}
       <button class="btn_add" @click=${() => this.start_new()}>
@@ -436,115 +440,130 @@ export class RSWaveLibrary extends RSWaveElement {
     const users = isNew ? [] : this.users(w.uid);
     const busy = this._busy || this._pending !== "";
     return html`<div class="lib_edit">
-      ${isNew || w.default || nw
-        ? html`<h4>${isNew ? i18n._("wave_new_title") : w.name}</h4>`
-        : html`<input
-            type="text"
-            class="wave_name"
-            maxlength=${WAVE_NAME_MAX}
-            title="${i18n._("wave_rename")}"
-            .value=${w.name}
-            @input=${(e: Event) => this.set_name(e)}
-          />`}
-      ${w.default
-        ? html`<p class="note">${i18n._("wave_redsea_readonly")}</p>`
-        : nothing}
+      ${
+        isNew || w.default || nw
+          ? html`<h4>${isNew ? i18n._("wave_new_title") : w.name}</h4>`
+          : html`<input
+              type="text"
+              class="wave_name"
+              maxlength=${WAVE_NAME_MAX}
+              title="${i18n._("wave_rename")}"
+              .value=${w.name}
+              @input=${(e: Event) => this.set_name(e)}
+            />`
+      }
+      ${
+        w.default
+          ? html`<p class="note">${i18n._("wave_redsea_readonly")}</p>`
+          : nothing
+      }
       ${this.renderTypes(w, nw)}
       <div class="lib_fields">
         ${(WAVE_TYPE_FIELDS[w.type] ?? []).map((k) =>
           this.renderField(w, k, false),
         )}
-        ${nw
-          ? nothing
-          : html`${this.renderField(w, "fti", false)}
-              ${this.renderField(w, "rti", false)}
-              <label class="lib_field check">
-                <input
-                  type="checkbox"
-                  class="field_sync"
-                  .checked=${w.sync === true}
-                  @change=${(e: Event) => this.set_sync(e)}
-                />
-                <span>${i18n._("wave_field_sync")}</span>
-              </label>`}
+        ${
+          nw
+            ? nothing
+            : html`${this.renderField(w, "fti", false)}
+                ${this.renderField(w, "rti", false)}
+                <label class="lib_field check">
+                  <input
+                    type="checkbox"
+                    class="field_sync"
+                    .checked=${w.sync === true}
+                    @change=${(e: Event) => this.set_sync(e)}
+                  />
+                  <span>${i18n._("wave_field_sync")}</span>
+                </label>`
+        }
       </div>
       ${nw ? nothing : html`<p class="hint">${i18n._("wave_shape_note")}</p>`}
       ${nw ? nothing : this.renderPreview()}
-      ${this._step === "name"
-        ? html`<div class="lib_actions">
-            <input
-              type="text"
-              class="new_name"
-              maxlength=${WAVE_NAME_MAX}
-              placeholder="${i18n._("wave_field_name")}"
-              .value=${this._name}
-              @input=${(e: Event) =>
-                (this._name = (e.target as HTMLInputElement).value)}
-            />
-            <button
-              class="btn_save create"
-              ?disabled=${busy}
-              @click=${() => this.create_wave()}
-            >
-              ${busy_label(
-                i18n._("wave_create_confirm"),
-                this._pending === "create",
-              )}
-            </button>
-            ${isNew
-              ? nothing
-              : html`<button
+      ${
+        this._step === "name"
+          ? html`<div class="lib_actions">
+              <input
+                type="text"
+                class="new_name"
+                maxlength=${WAVE_NAME_MAX}
+                placeholder="${i18n._("wave_field_name")}"
+                .value=${this._name}
+                @input=${(e: Event) =>
+                  (this._name = (e.target as HTMLInputElement).value)}
+              />
+              <button
+                class="btn_save create"
+                ?disabled=${busy}
+                @click=${() => this.create_wave()}
+              >
+                ${busy_label(
+                  i18n._("wave_create_confirm"),
+                  this._pending === "create",
+                )}
+              </button>
+              ${
+                isNew
+                  ? nothing
+                  : html`<button
+                      class="btn_cancel"
+                      @click=${() => (this._step = "edit")}
+                    >
+                      ${i18n._("wave_cancel")}
+                    </button>`
+              }
+            </div>`
+          : this._step === "delete"
+            ? html`<div class="lib_actions">
+                <span class="warn"
+                  >${tr("wave_delete_confirm", { name: w.name })}</span
+                >
+                <button
+                  class="btn_delete confirm"
+                  ?disabled=${busy}
+                  @click=${() => this.delete_wave()}
+                >
+                  ${busy_label(i18n._("wave_delete"), this._pending === "delete")}
+                </button>
+                <button
                   class="btn_cancel"
                   @click=${() => (this._step = "edit")}
                 >
                   ${i18n._("wave_cancel")}
-                </button>`}
-          </div>`
-        : this._step === "delete"
-          ? html`<div class="lib_actions">
-              <span class="warn"
-                >${tr("wave_delete_confirm", { name: w.name })}</span
-              >
-              <button
-                class="btn_delete confirm"
-                ?disabled=${busy}
-                @click=${() => this.delete_wave()}
-              >
-                ${busy_label(i18n._("wave_delete"), this._pending === "delete")}
-              </button>
-              <button class="btn_cancel" @click=${() => (this._step = "edit")}>
-                ${i18n._("wave_cancel")}
-              </button>
-            </div>`
-          : html`<div class="lib_actions">
-              <button
-                class="btn_save update"
-                ?disabled=${busy || w.default || nw}
-                @click=${() => this.update_wave()}
-              >
-                ${busy_label(i18n._("wave_update"), this._pending === "update")}
-              </button>
-              <button
-                class="btn_cancel create_start"
-                ?disabled=${busy || nw}
-                @click=${() => {
-                  this._name = "";
-                  this._step = "name";
-                }}
-              >
-                ${i18n._("wave_create")}
-              </button>
-              <button
-                class="btn_delete"
-                ?disabled=${busy || w.default || users.length > 0}
-                title="${users.length
-                  ? tr("wave_used_by", { pumps: users.join(", ") })
-                  : ""}"
-                @click=${() => (this._step = "delete")}
-              >
-                ${i18n._("wave_delete")}
-              </button>
-            </div>`}
+                </button>
+              </div>`
+            : html`<div class="lib_actions">
+                <button
+                  class="btn_save update"
+                  ?disabled=${busy || w.default || nw}
+                  @click=${() => this.update_wave()}
+                >
+                  ${busy_label(i18n._("wave_update"), this._pending === "update")}
+                </button>
+                <button
+                  class="btn_cancel create_start"
+                  ?disabled=${busy || nw}
+                  @click=${() => {
+                    this._name = "";
+                    this._step = "name";
+                  }}
+                >
+                  ${i18n._("wave_create")}
+                </button>
+                <button
+                  class="btn_delete"
+                  ?disabled=${busy || w.default || users.length > 0}
+                  title="${
+                    users.length
+                      ? tr("wave_used_by", { pumps: users.join(", ") })
+                      : ""
+                  }"
+                  @click=${() => (this._step = "delete")}
+                >
+                  ${i18n._("wave_delete")}
+                </button>
+              </div>`
+      }
     </div>`;
   }
 
@@ -576,27 +595,29 @@ export class RSWaveLibrary extends RSWaveElement {
             </option>`,
         )}
       </select>
-      ${running
-        ? html`<button
-            class="btn_delete preview_stop"
-            ?disabled=${this._busy || this._pending !== ""}
-            @click=${() => this.stop_preview()}
-          >
-            ${busy_label(
-              i18n._("wave_preview_stop"),
-              this._pending === "preview_stop",
-            )}
-          </button>`
-        : html`<button
-            class="btn_cancel preview_start"
-            ?disabled=${this._busy || this._pending !== ""}
-            @click=${() => this.preview()}
-          >
-            ${busy_label(
-              i18n._("wave_preview_start"),
-              this._pending === "preview",
-            )}
-          </button>`}
+      ${
+        running
+          ? html`<button
+              class="btn_delete preview_stop"
+              ?disabled=${this._busy || this._pending !== ""}
+              @click=${() => this.stop_preview()}
+            >
+              ${busy_label(
+                i18n._("wave_preview_stop"),
+                this._pending === "preview_stop",
+              )}
+            </button>`
+          : html`<button
+              class="btn_cancel preview_start"
+              ?disabled=${this._busy || this._pending !== ""}
+              @click=${() => this.preview()}
+            >
+              ${busy_label(
+                i18n._("wave_preview_start"),
+                this._pending === "preview",
+              )}
+            </button>`
+      }
     </div>`;
   }
 

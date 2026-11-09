@@ -302,9 +302,11 @@ export class ReefCard extends LitElement {
         (option) => html`
           <option
             value="${option.value}"
-            ?selected=${option.value === MAINTENANCE_DEVICE_ID
-              ? this.current_device?.is_maintenance === true
-              : this.current_device?.device?.key === option.value}
+            ?selected=${
+              option.value === MAINTENANCE_DEVICE_ID
+                ? this.current_device?.is_maintenance === true
+                : this.current_device?.device?.key === option.value
+            }
           >
             ${option.text}
           </option>

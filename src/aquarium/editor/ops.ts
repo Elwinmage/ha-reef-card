@@ -902,12 +902,7 @@ export function remove_pause_entity(
 
 /** What a monitoring field can be filled with. */
 export type MonitoringKind =
-  | "ph"
-  | "orp"
-  | "co2"
-  | "kh"
-  | "calibration"
-  | "pause";
+  "ph" | "orp" | "co2" | "kh" | "calibration" | "pause";
 
 /** Translation key of the date of a ReefSense probe's last adjustment. */
 const PROBE_CALIBRATION_KEY = "probe_last_adjustment";

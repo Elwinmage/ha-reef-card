@@ -253,11 +253,7 @@ export interface Clip {
 }
 
 export type BehaviorProfile =
-  | "shoal"
-  | "cruiser"
-  | "benthic"
-  | "hover"
-  | "sand";
+  "shoal" | "cruiser" | "benthic" | "hover" | "sand";
 export type NightMode = "hide" | "hover" | "rest_bottom";
 
 export interface FishBehavior {

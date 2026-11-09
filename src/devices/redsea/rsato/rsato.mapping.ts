@@ -369,8 +369,10 @@ export const config = {
         left: "17%",
       },
     },
-    // RO reservoir: a genuine volume ratio. volume_left is in mL and
-    // ato_tank_volume in L, hence target_factor. min_percent is the residue
+    // RO reservoir: a genuine volume ratio. The factor between volume_left
+    // and ato_tank_volume is derived from their unit_of_measurement (the user
+    // may change either display unit in HA); target_factor is the fallback
+    // for the integration defaults (mL over L). min_percent is the residue
     // the pump cannot siphon, so an "empty" tank still shows a water line;
     // max_percent is the container rim in the background picture.
     volume_left: {

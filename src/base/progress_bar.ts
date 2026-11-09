@@ -176,13 +176,15 @@ export class ProgressBar extends SensorTarget {
             style="width: ${fill}%; --progress-fill-color: ${fillColor}"
           ></div>
         </div>
-        ${label
-          ? html`<span class="progress-label"
-              >${label}${userUnit
-                ? html`<span class="unit">${userUnit}</span>`
-                : ""}</span
-            >`
-          : ""}
+        ${
+          label
+            ? html`<span class="progress-label"
+                >${label}${
+                  userUnit ? html`<span class="unit">${userUnit}</span>` : ""
+                }</span
+              >`
+            : ""
+        }
         <span class="progress-value">${displayPercent}${percentUnit}</span>
       </div>
     `;

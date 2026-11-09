@@ -199,17 +199,21 @@ export class RSPlaceSearch extends LitElement {
           🔍
         </button>
       </div>
-      ${this._places.length
-        ? html`<ul>
-            ${this._places.map(
-              (p) => html`<li @click=${() => this.pick(p)}>${p.label}</li>`,
-            )}
-          </ul>`
-        : nothing}
-      ${this._note
-        ? html`<div class="note ${this._error ? "error" : ""}">
-            ${this._note}
-          </div>`
-        : nothing}`;
+      ${
+        this._places.length
+          ? html`<ul>
+              ${this._places.map(
+                (p) => html`<li @click=${() => this.pick(p)}>${p.label}</li>`,
+              )}
+            </ul>`
+          : nothing
+      }
+      ${
+        this._note
+          ? html`<div class="note ${this._error ? "error" : ""}">
+              ${this._note}
+            </div>`
+          : nothing
+      }`;
   }
 }

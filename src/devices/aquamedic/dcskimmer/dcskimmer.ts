@@ -177,15 +177,17 @@ export class AMDCSkimmer extends AMRunnerSeries {
       ${style}
       <div class="skimmer-picture" style="${substyle}">
         <img class="device_img" id="rsdevice_img" alt="" src="${bg_img}" />
-        ${running
-          ? html`<div class="water-overlay">
-                <div
-                  class="water-inner"
-                  style="${this._water_style(this.speed())}"
-                ></div>
-              </div>
-              <div class="foam-overlay"></div>`
-          : nothing}
+        ${
+          running
+            ? html`<div class="water-overlay">
+                  <div
+                    class="water-inner"
+                    style="${this._water_style(this.speed())}"
+                  ></div>
+                </div>
+                <div class="foam-overlay"></div>`
+            : nothing
+        }
       </div>
       <div>${this._render_elements(this.is_on())}</div>
     </div>`;

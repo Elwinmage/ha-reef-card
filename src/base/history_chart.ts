@@ -1167,15 +1167,17 @@ export class HistoryChart extends MyElement {
             ${i18n._(`history_period_${hours}`)}
           </button>`,
       )}
-      ${this.conf?.more_info
-        ? html`<button
-            class="more_info"
-            title="${i18n._("history_more_info")}"
-            @click=${() => this.open_more_info()}
-          >
-            <ha-icon icon="mdi:information-outline"></ha-icon>
-          </button>`
-        : nothing}
+      ${
+        this.conf?.more_info
+          ? html`<button
+              class="more_info"
+              title="${i18n._("history_more_info")}"
+              @click=${() => this.open_more_info()}
+            >
+              <ha-icon icon="mdi:information-outline"></ha-icon>
+            </button>`
+          : nothing
+      }
     </div>`;
   }
 }

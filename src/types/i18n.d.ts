@@ -9,14 +9,7 @@ export type NestedTranslation = {
 export type LanguageDictionary = NestedTranslation;
 
 export type SupportedLanguage =
-  | "en"
-  | "fr"
-  | "de"
-  | "es"
-  | "it"
-  | "nl"
-  | "pt"
-  | "pl";
+  "en" | "fr" | "de" | "es" | "it" | "nl" | "pt" | "pl";
 
 export interface I18nConfig {
   fallbackLanguage?: SupportedLanguage;

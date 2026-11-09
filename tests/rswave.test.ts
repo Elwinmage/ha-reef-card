@@ -306,9 +306,11 @@ describe("rswave_program", () => {
 describe("RSWave device", () => {
   it("both models share the mapping and the program dialog", () => {
     for (const C of [RSWave25, RSWave45]) {
-      const d = new (customElements.get(
-        C === RSWave25 ? "redsea-rswave25" : "redsea-rswave45",
-      ) as any)();
+      const d = new (
+        customElements.get(
+          C === RSWave25 ? "redsea-rswave25" : "redsea-rswave45",
+        ) as any
+      )();
       expect(d).toBeInstanceOf(C);
       expect(d.initial_config).toBe(config);
       expect(d.dialogs.config).toBeDefined();

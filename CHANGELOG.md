@@ -562,8 +562,8 @@ desired_high, acceptable_high]`, from `/temperature/config`) and `level`
 - Fix: leak probe sensors were removed at every start-up ("Removing orphaned
   probe entity …_leak"). Their unique_id lacked the probe type
   (`probe_{uid}_detected`), so the orphan purge did not recognise them as
-belonging to a current probe. They are now keyed
-`probe_leak_{uid}\_detected`; an existing entry is migrated before the
+  belonging to a current probe. They are now keyed
+  `probe_leak_{uid}\_detected`; an existing entry is migrated before the
   platforms load, so the entity_id and its history are kept.
 - Every ReefSense probe entity (sensors and the leak `binary_sensor`) now
   carries `probe_uid`, `probe_type` and `probe_index` state attributes. All

@@ -336,9 +336,13 @@ export class Schedule extends MyElement {
                 <span class="gh"></span>
                 <span class="gh">${i18n._("sched_start")}</span>
                 <span class="gh">${i18n._("sched_intensity")}</span>
-                ${hasPulse
-                  ? html`<span class="gh">${i18n._("sched_pulse_time")}</span>`
-                  : nothing}
+                ${
+                  hasPulse
+                    ? html`<span class="gh"
+                        >${i18n._("sched_pulse_time")}</span
+                      >`
+                    : nothing
+                }
                 <span class="gh"></span>
 
                 ${this._editPoints.map((pt, i) => {
@@ -368,16 +372,18 @@ export class Schedule extends MyElement {
                       .value=${String(pt.value)}
                       @change=${(e: Event) => this._onValueChange(i, e)}
                     />
-                    ${hasPulse
-                      ? html`<input
-                          type="number"
-                          class="${cls}"
-                          min=${minPulse}
-                          max=${maxPulse}
-                          .value=${String(pt.pulse ?? 0)}
-                          @change=${(e: Event) => this._onPulseChange(i, e)}
-                        />`
-                      : nothing}
+                    ${
+                      hasPulse
+                        ? html`<input
+                            type="number"
+                            class="${cls}"
+                            min=${minPulse}
+                            max=${maxPulse}
+                            .value=${String(pt.pulse ?? 0)}
+                            @change=${(e: Event) => this._onPulseChange(i, e)}
+                          />`
+                        : nothing
+                    }
                     <button
                       class="btn-icon delete"
                       ?disabled=${!canDelete}
@@ -404,9 +410,11 @@ export class Schedule extends MyElement {
             <span
               class="preview-status ${this._previewRunning ? "running" : ""}"
             >
-              ${this._previewRunning
-                ? i18n._("sched_preview_running")
-                : i18n._("sched_preview_stopped")}
+              ${
+                this._previewRunning
+                  ? i18n._("sched_preview_running")
+                  : i18n._("sched_preview_stopped")
+              }
             </span>
             <div class="preview-field">
               <span class="preview-field-label"
@@ -421,31 +429,35 @@ export class Schedule extends MyElement {
                 @change=${this._onPreviewValueChange}
               />
             </div>
-            ${hasPulse
-              ? html`<div class="preview-field">
-                  <span class="preview-field-label"
-                    >${i18n._("sched_pulse_time")}</span
+            ${
+              hasPulse
+                ? html`<div class="preview-field">
+                    <span class="preview-field-label"
+                      >${i18n._("sched_pulse_time")}</span
+                    >
+                    <input
+                      type="number"
+                      class="preview-input"
+                      min=${minPulse}
+                      max=${maxPulse}
+                      .value=${String(this._previewPulse)}
+                      @change=${this._onPreviewPulseChange}
+                    />
+                  </div>`
+                : nothing
+            }
+            ${
+              this._previewRunning
+                ? html`<button class="btn-stop" @click=${this._stopPreview}>
+                    ${i18n._("sched_stop")}
+                  </button>`
+                : html`<button
+                    class="btn-start"
+                    @click=${this._startPreviewFromBar}
                   >
-                  <input
-                    type="number"
-                    class="preview-input"
-                    min=${minPulse}
-                    max=${maxPulse}
-                    .value=${String(this._previewPulse)}
-                    @change=${this._onPreviewPulseChange}
-                  />
-                </div>`
-              : nothing}
-            ${this._previewRunning
-              ? html`<button class="btn-stop" @click=${this._stopPreview}>
-                  ${i18n._("sched_stop")}
-                </button>`
-              : html`<button
-                  class="btn-start"
-                  @click=${this._startPreviewFromBar}
-                >
-                  ${i18n._("sched_preview")}
-                </button>`}
+                    ${i18n._("sched_preview")}
+                  </button>`
+            }
           </div>
 
           <div class="editor-footer">

@@ -267,9 +267,9 @@ describe("ambiguous model — delegate with no registered tag", () => {
       },
     };
     try {
-      const device: any = new (customElements.get(
-        "aquamedic-dcrunner",
-      ) as any)();
+      const device: any = new (
+        customElements.get("aquamedic-dcrunner") as any
+      )();
       device.device = {
         name: "Pump",
         elements: [

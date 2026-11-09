@@ -127,9 +127,11 @@ export class LevelIndicator extends MyElement {
       ${BAR_ZONES.map(
         (zone) => html`<div class="zone" style="background:${zone}"></div>`,
       )}
-      ${pos === null
-        ? ""
-        : html`<div class="cursor" style="top:${pos * 100}%"></div>`}
+      ${
+        pos === null
+          ? ""
+          : html`<div class="cursor" style="top:${pos * 100}%"></div>`
+      }
     </div>`;
   }
 }

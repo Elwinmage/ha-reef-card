@@ -153,12 +153,14 @@ export class RSSkimmer extends RSPump {
           >
             <div class="water-inner" style="${waterBgStyle}"></div>
           </div>
-          ${!isOff
-            ? html`<div
-                class="${foamClass}"
-                style="--water-play-state: ${waterPlayState}"
-              ></div>`
-            : ""}
+          ${
+            !isOff
+              ? html`<div
+                  class="${foamClass}"
+                  style="--water-play-state: ${waterPlayState}"
+                ></div>`
+              : ""
+          }
         </div>
         ${this._render_elements(pumpOn, "sensor_in")}
       </div>

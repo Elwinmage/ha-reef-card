@@ -28,6 +28,7 @@ import { property } from "lit/decorators.js";
 import type { StateObject, HassConfig } from "../types/index";
 
 import { Sensor } from "./sensor";
+import { unit_factor } from "../utils/units";
 
 import style_sensor_target from "./sensor_target.styles";
 
@@ -119,13 +120,36 @@ export class SensorTarget extends Sensor {
 
   /**
    * Multiplier applied to the resolved target so value and target can live in
-   * different units without a template sensor in Home Assistant. The RO
-   * reservoir reports volume_left in mL while ato_tank_volume is in L, hence
-   * target_factor: 1000.
+   * different units without a template sensor in Home Assistant.
+   *
+   * When the target comes from a sibling entity and both entities report a
+   * known unit of the same dimension (e.g. mL and L), the factor is derived
+   * from those units. The user may change the display unit of either entity
+   * in Home Assistant, so a hard-coded factor cannot be trusted. The
+   * configured target_factor is only a fallback for entities whose unit is
+   * missing or unknown (the RO reservoir default: volume_left in mL over
+   * ato_tank_volume in L, hence target_factor: 1000).
    */
   protected getTargetFactor(): number {
+    const fromUnits = this.getUnitFactor();
+    if (fromUnits !== null) return fromUnits;
     const factor = (this.conf as any)?.target_factor;
     return typeof factor === "number" && factor !== 0 ? factor : 1;
+  }
+
+  /**
+   * Conversion factor from the target entity's unit to the value's unit.
+   * @returns null when the target is not an entity or a unit is unusable
+   */
+  protected getUnitFactor(): number | null {
+    // target_attribute and literal targets carry no unit of their own
+    if ((this.conf as any)?.target_attribute) return null;
+    if (typeof this.conf?.target === "number") return null;
+    if (!this.stateObj || !this.stateObjTarget) return null;
+    return unit_factor(
+      this.stateObjTarget.attributes?.unit_of_measurement,
+      this.stateObj.attributes?.unit_of_measurement,
+    );
   }
 
   /** Target before any unit conversion. */

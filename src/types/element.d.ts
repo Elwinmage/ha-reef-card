@@ -59,11 +59,7 @@ export type DisabledCondition =
       attribute?: string;
       value?: any;
       operator?:
-        | "equals"
-        | "not_equals"
-        | "greater_than"
-        | "less_than"
-        | "contains";
+        "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
     }
   | DisabledCondition[];
 
@@ -186,9 +182,11 @@ export interface ProgressConfig extends BaseElementConfig {
   target?: string | number;
   /**
    * Multiplier applied to the resolved target, for when value and target are
-   * reported in different units. volume_left is in mL and ato_tank_volume in
-   * L, so target_factor: 1000 makes the ratio meaningful without adding a
-   * template sensor in Home Assistant.
+   * reported in different units. Only a fallback: when the target is an
+   * entity and both entities report a known unit_of_measurement of the same
+   * dimension, the factor is derived from those units instead (see
+   * utils/units.ts). Defaults: volume_left in mL and ato_tank_volume in L,
+   * so target_factor: 1000.
    */
   target_factor?: number;
   label?: DynamicValue<string>;

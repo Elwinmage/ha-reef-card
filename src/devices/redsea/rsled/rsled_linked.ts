@@ -161,9 +161,11 @@ export class RSLedLinked extends RSLedElement {
               src="${lamp.g2 ? LINKED_THUMBS.g2 : LINKED_THUMBS.g1}"
             />
             <span>${lamp.name}</span>
-            ${staggered && offset_label(lamp)
-              ? html`<span class="offset">${offset_label(lamp)}</span>`
-              : ""}
+            ${
+              staggered && offset_label(lamp)
+                ? html`<span class="offset">${offset_label(lamp)}</span>`
+                : ""
+            }
           </div>`,
       )}
     </div>`;

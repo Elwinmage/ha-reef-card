@@ -309,28 +309,32 @@ export class RSWaveSpeed extends ProgressCircle {
             &#x2715;
           </button>
         </div>
-        ${it
-          ? html`<p class="current_wave">
-              ${type_cell(it.type)} <strong>${it.name}</strong>
-            </p>`
-          : html`<p class="note">${i18n._("wave_no_program")}</p>`}
-        ${moving
-          ? html`<div class="dir_buttons">
-                ${["fw", "rw", "alt"].map(
-                  (d) =>
-                    html`<button
-                      class="dir_${d} ${d === this._dir ? "selected" : ""}"
-                      @click=${() => (this._dir = d)}
-                    >
-                      <span class="glyph">${DIRECTION_GLYPHS[d]}</span>
-                      <span>${direction_label(d)}</span>
-                    </button>`,
-                )}
-              </div>
-              ${field("_fti", "wave_field_fti", this._dir === "rw")}
-              ${field("_rti", "wave_field_rti", this._dir === "fw")}
-              <p class="hint">${i18n._("wave_pump_note")}</p>`
-          : nothing}
+        ${
+          it
+            ? html`<p class="current_wave">
+                ${type_cell(it.type)} <strong>${it.name}</strong>
+              </p>`
+            : html`<p class="note">${i18n._("wave_no_program")}</p>`
+        }
+        ${
+          moving
+            ? html`<div class="dir_buttons">
+                  ${["fw", "rw", "alt"].map(
+                    (d) =>
+                      html`<button
+                        class="dir_${d} ${d === this._dir ? "selected" : ""}"
+                        @click=${() => (this._dir = d)}
+                      >
+                        <span class="glyph">${DIRECTION_GLYPHS[d]}</span>
+                        <span>${direction_label(d)}</span>
+                      </button>`,
+                  )}
+                </div>
+                ${field("_fti", "wave_field_fti", this._dir === "rw")}
+                ${field("_rti", "wave_field_rti", this._dir === "fw")}
+                <p class="hint">${i18n._("wave_pump_note")}</p>`
+            : nothing
+        }
         ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
         <div class="panel_footer">
           <button class="btn_cancel" @click=${() => this.closeSettings()}>

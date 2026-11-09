@@ -10,7 +10,7 @@
  *   {
  *     name: "volume_left",          // in mL
  *     target: "ato_tank_volume",    // in L
- *     target_factor: 1000,          // L -> mL
+ *     target_factor: 1000,          // L -> mL, fallback when units are unknown
  *     type: "water-level",
  *     min_percent: 12,              // pump cannot siphon the last cm
  *     max_percent: 90,
@@ -359,15 +359,16 @@ export class WaterLevel extends ProgressBar {
           xmlns="http://www.w3.org/2000/svg"
         >
           <g class="wl-body wl-blend" style="--wl-offset: ${offset}px">
-            ${wave
-              ? svg`<path
+            ${
+              wave
+                ? svg`<path
                     class="wl-wave${alertClass}"
                     style="${this.alertStyle()}"
                     d="${WAVE_PATH}"
                     fill="${water}"
                     fill-opacity="${opacity}"
                   ></path>`
-              : svg`<rect
+                : svg`<rect
                     class="${alertClass.trim()}"
                     style="${this.alertStyle()}"
                     x="-100"
@@ -376,7 +377,8 @@ export class WaterLevel extends ProgressBar {
                     height="100"
                     fill="${water}"
                     fill-opacity="${opacity}"
-                  ></rect>`}
+                  ></rect>`
+            }
           </g>
         </svg>
         ${this.renderValue(level)}

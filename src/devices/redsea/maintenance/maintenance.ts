@@ -517,18 +517,22 @@ export class RSMaintenance extends RSDevice {
           <button
             id="hide-muted"
             class="maint-mute-filter ${this._hide_muted ? "active" : ""}"
-            title="${this._hide_muted
-              ? i18n._("maintenance_show_muted")
-              : i18n._("maintenance_hide_muted")}"
+            title="${
+              this._hide_muted
+                ? i18n._("maintenance_show_muted")
+                : i18n._("maintenance_hide_muted")
+            }"
             @click="${() => this._toggle_hide_muted()}"
           >
             <ha-icon
               icon="${this._hide_muted ? "mdi:bell-off-outline" : "mdi:bell"}"
             ></ha-icon>
             <span>
-              ${this._hide_muted
-                ? i18n._("maintenance_show_muted")
-                : i18n._("maintenance_hide_muted")}
+              ${
+                this._hide_muted
+                  ? i18n._("maintenance_show_muted")
+                  : i18n._("maintenance_hide_muted")
+              }
             </span>
           </button>
         </div>
@@ -556,12 +560,14 @@ export class RSMaintenance extends RSDevice {
           class="maint-row ${item.notify ? "" : "muted"}"
           title="${this._row_title(item)}"
         >
-          ${item.icon
-            ? html`<ha-icon class="maint-icon" icon="${item.icon}"></ha-icon>`
-            : html`<ha-icon
-                class="maint-icon"
-                icon="mdi:wrench-check"
-              ></ha-icon>`}
+          ${
+            item.icon
+              ? html`<ha-icon class="maint-icon" icon="${item.icon}"></ha-icon>`
+              : html`<ha-icon
+                  class="maint-icon"
+                  icon="mdi:wrench-check"
+                ></ha-icon>`
+          }
           <div
             class="maint-body"
             @click="${() => this._more_info(item)}"
@@ -572,16 +578,18 @@ export class RSMaintenance extends RSDevice {
             <div class="maint-line">
               <span class="maint-name">
                 ${item.name}
-                ${with_device
-                  ? html`<span class="maint-device">
-                      -
-                      ${this._device_label(
-                        item.device_name,
-                        item.pump_type,
-                        item.pump_model,
-                      )}</span
-                    >`
-                  : ""}
+                ${
+                  with_device
+                    ? html`<span class="maint-device">
+                        -
+                        ${this._device_label(
+                          item.device_name,
+                          item.pump_type,
+                          item.pump_model,
+                        )}</span
+                      >`
+                    : ""
+                }
               </span>
               <span class="maint-remaining ${item.status}">
                 ${this._remaining_label(item)}
@@ -594,43 +602,53 @@ export class RSMaintenance extends RSDevice {
               ></div>
             </div>
           </div>
-          ${options.show_interval && item.interval_entity_id
-            ? html`<button
-                class="maint-tune ${this._editing === item.entity_id
-                  ? "open"
-                  : ""}"
-                title="${i18n._("maintenance_edit_interval")}"
-                @click="${() => this._toggle_editor(item)}"
-              >
-                <ha-icon icon="mdi:calendar-edit"></ha-icon>
-              </button>`
-            : ""}
-          ${options.show_notify && item.notify_entity_id
-            ? html`<button
-                class="maint-bell ${item.notify ? "on" : "off"}"
-                title="${item.notify
-                  ? i18n._("maintenance_mute")
-                  : i18n._("maintenance_unmute")}"
-                @click="${() => this._toggle_notify(item)}"
-              >
-                <ha-icon
-                  icon="${item.notify ? "mdi:bell-ring" : "mdi:bell-off"}"
-                ></ha-icon>
-              </button>`
-            : ""}
-          ${options.show_reset
-            ? html`<button
-                class="maint-done"
-                title="${i18n._("maintenance_mark_done")}"
-                @click="${() => this._mark_done(item)}"
-              >
-                <ha-icon icon="mdi:check"></ha-icon>
-              </button>`
-            : ""}
+          ${
+            options.show_interval && item.interval_entity_id
+              ? html`<button
+                  class="maint-tune ${
+                    this._editing === item.entity_id ? "open" : ""
+                  }"
+                  title="${i18n._("maintenance_edit_interval")}"
+                  @click="${() => this._toggle_editor(item)}"
+                >
+                  <ha-icon icon="mdi:calendar-edit"></ha-icon>
+                </button>`
+              : ""
+          }
+          ${
+            options.show_notify && item.notify_entity_id
+              ? html`<button
+                  class="maint-bell ${item.notify ? "on" : "off"}"
+                  title="${
+                    item.notify
+                      ? i18n._("maintenance_mute")
+                      : i18n._("maintenance_unmute")
+                  }"
+                  @click="${() => this._toggle_notify(item)}"
+                >
+                  <ha-icon
+                    icon="${item.notify ? "mdi:bell-ring" : "mdi:bell-off"}"
+                  ></ha-icon>
+                </button>`
+              : ""
+          }
+          ${
+            options.show_reset
+              ? html`<button
+                  class="maint-done"
+                  title="${i18n._("maintenance_mark_done")}"
+                  @click="${() => this._mark_done(item)}"
+                >
+                  <ha-icon icon="mdi:check"></ha-icon>
+                </button>`
+              : ""
+          }
         </div>
-        ${this._editing === item.entity_id
-          ? this._render_interval_editor(item)
-          : ""}
+        ${
+          this._editing === item.entity_id
+            ? this._render_interval_editor(item)
+            : ""
+        }
       </div>
     `;
   }
@@ -687,9 +705,11 @@ export class RSMaintenance extends RSDevice {
   ): TemplateResult {
     if (items.length === 0) {
       return html`<div class="maint-empty">
-        ${this._hide_ok
-          ? i18n._("maintenance_all_ok")
-          : i18n._("maintenance_no_task")}
+        ${
+          this._hide_ok
+            ? i18n._("maintenance_all_ok")
+            : i18n._("maintenance_no_task")
+        }
       </div>`;
     }
 
@@ -763,12 +783,14 @@ export class RSMaintenance extends RSDevice {
     return html`
       <div class="maint-root ${this.embedded ? "embedded" : ""}">
         <div class="maint-header">
-          ${this.embedded
-            ? ""
-            : html`<div class="maint-title">
-                <ha-icon icon="mdi:wrench-clock"></ha-icon>
-                ${i18n._("maintenance_view")}
-              </div>`}
+          ${
+            this.embedded
+              ? ""
+              : html`<div class="maint-title">
+                  <ha-icon icon="mdi:wrench-clock"></ha-icon>
+                  ${i18n._("maintenance_view")}
+                </div>`
+          }
           ${this._render_counters(all)}
         </div>
         ${this._render_toolbar(all)} ${this._render_list(sorted, options)}
@@ -882,14 +904,16 @@ export class RSMaintenance extends RSDevice {
         )}
       </div>
       <div class="maint-devices-hint">
-        ${options.devices.length === 0
-          ? i18n._("maintenance_filter_devices_hint")
-          : html`<button
-              class="maint-devices-clear"
-              @click="${() => this._update_option("devices", [])}"
-            >
-              ${i18n._("maintenance_filter_devices_all")}
-            </button>`}
+        ${
+          options.devices.length === 0
+            ? i18n._("maintenance_filter_devices_hint")
+            : html`<button
+                class="maint-devices-clear"
+                @click="${() => this._update_option("devices", [])}"
+              >
+                ${i18n._("maintenance_filter_devices_all")}
+              </button>`
+        }
       </div>
     `;
   }

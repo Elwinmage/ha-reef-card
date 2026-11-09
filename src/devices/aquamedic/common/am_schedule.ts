@@ -360,26 +360,28 @@ export class AMSchedule extends MyElement {
         .value=${String(slot.value)}
         @change=${(e: Event) => this._on_number(index, "value", e)}
       />
-      ${rules.has_frequency
-        ? html`<input
-              type="number"
-              class="${cls}"
-              min="0"
-              max="100"
-              ?disabled=${!is_running_mode(slot.mode)}
-              .value=${String(slot.frequency ?? 0)}
-              @change=${(e: Event) => this._on_number(index, "frequency", e)}
-            />
-            <input
-              type="checkbox"
-              ?disabled=${!is_running_mode(slot.mode)}
-              .checked=${slot.tide === true}
-              @change=${(e: Event) =>
-                this._update(index, {
-                  tide: (e.target as HTMLInputElement).checked,
-                })}
-            />`
-        : nothing}
+      ${
+        rules.has_frequency
+          ? html`<input
+                type="number"
+                class="${cls}"
+                min="0"
+                max="100"
+                ?disabled=${!is_running_mode(slot.mode)}
+                .value=${String(slot.frequency ?? 0)}
+                @change=${(e: Event) => this._on_number(index, "frequency", e)}
+              />
+              <input
+                type="checkbox"
+                ?disabled=${!is_running_mode(slot.mode)}
+                .checked=${slot.tide === true}
+                @change=${(e: Event) =>
+                  this._update(index, {
+                    tide: (e.target as HTMLInputElement).checked,
+                  })}
+              />`
+          : nothing
+      }
       <button
         class="btn-icon"
         title="${i18n._("delete")}"
@@ -415,10 +417,12 @@ export class AMSchedule extends MyElement {
               <span class="gh">${i18n._("sched_to")}</span>
               <span class="gh">${i18n._("am_sched_mode")}</span>
               <span class="gh">${i18n._("am_sched_value")}</span>
-              ${rules.has_frequency
-                ? html`<span class="gh">${i18n._("am_sched_frequency")}</span>
-                    <span class="gh">${i18n._("am_sched_tide")}</span>`
-                : nothing}
+              ${
+                rules.has_frequency
+                  ? html`<span class="gh">${i18n._("am_sched_frequency")}</span>
+                      <span class="gh">${i18n._("am_sched_tide")}</span>`
+                  : nothing
+              }
               <span class="gh"></span>
               ${this._draft.map((slot, i) =>
                 this._render_row(slot, i, rules, i === running),

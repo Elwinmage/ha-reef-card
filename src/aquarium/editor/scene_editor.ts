@@ -1285,26 +1285,32 @@ export class ReefAquariumSceneEditor extends LitElement {
         @pointerup=${this._stage_up}
         @dblclick=${() => this._drawing.length >= 3 && this._finish_shape()}
       >
-        ${url
-          ? html`<img
-              class="bg"
-              src="${url}"
-              draggable="false"
-              @error=${() => this._images.failed(view.image)}
-              @load=${(e: Event) => {
-                const img = e.target as HTMLImageElement;
-                if (img.naturalWidth)
-                  this._aspect = img.naturalWidth / img.naturalHeight;
-              }}
-            />`
-          : html`<div class="noimage">${i18n._("aq_upload_hint")}</div>`}
+        ${
+          url
+            ? html`<img
+                class="bg"
+                src="${url}"
+                draggable="false"
+                @error=${() => this._images.failed(view.image)}
+                @load=${(e: Event) => {
+                  const img = e.target as HTMLImageElement;
+                  if (img.naturalWidth)
+                    this._aspect = img.naturalWidth / img.naturalHeight;
+                }}
+              />`
+            : html`<div class="noimage">${i18n._("aq_upload_hint")}</div>`
+        }
         ${this._preview ? html`<canvas class="backdrop"></canvas>` : nothing}
-        ${tab === "aquarium" && this._night_preview
-          ? this._render_night(view)
-          : nothing}
-        ${tab === "lights" && this._light_preview
-          ? this._render_light_preview(view)
-          : nothing}
+        ${
+          tab === "aquarium" && this._night_preview
+            ? this._render_night(view)
+            : nothing
+        }
+        ${
+          tab === "lights" && this._light_preview
+            ? this._render_light_preview(view)
+            : nothing
+        }
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
           ${view.regions.map(
             (r) =>
@@ -1313,19 +1319,21 @@ export class ReefAquariumSceneEditor extends LitElement {
                 points="${svg_points(r.quad)}"
               ></polygon>`,
           )}
-          ${tab === "views"
-            ? view.regions.flatMap((r) =>
-                (["sand", "sand_back"] as ops.SandLine[])
-                  .filter((line) => (r[line]?.length ?? 0) >= 2)
-                  .map(
-                    (line) =>
-                      svg`<polyline
+          ${
+            tab === "views"
+              ? view.regions.flatMap((r) =>
+                  (["sand", "sand_back"] as ops.SandLine[])
+                    .filter((line) => (r[line]?.length ?? 0) >= 2)
+                    .map(
+                      (line) =>
+                        svg`<polyline
                           class="sand ${line === "sand_back" ? "back" : ""} ${r.water === this._water_id ? "current" : ""}"
                           points="${svg_points(smooth_line(r[line]!))}"
                         ></polyline>`,
-                  ),
-              )
-            : nothing}
+                    ),
+                )
+              : nothing
+          }
           ${view.decor.map(
             (d) =>
               svg`<polygon
@@ -1351,14 +1359,18 @@ export class ReefAquariumSceneEditor extends LitElement {
                 }}
               ></polygon>`,
           )}
-          ${drawing.length
-            ? svg`<polyline class="drawing" points="${svg_points(drawing)}"></polyline>`
-            : nothing}
+          ${
+            drawing.length
+              ? svg`<polyline class="drawing" points="${svg_points(drawing)}"></polyline>`
+              : nothing
+          }
         </svg>
         ${this._render_handles(view)}
-        ${tab === "elements" || tab === "feeding" || tab === "views"
-          ? view.elements.map((el) => this._render_element(el))
-          : nothing}
+        ${
+          tab === "elements" || tab === "feeding" || tab === "views"
+            ? view.elements.map((el) => this._render_element(el))
+            : nothing
+        }
         ${tab === "livestock" ? this._render_coral_marks() : nothing}
         ${tab === "livestock" ? this._render_home_marks() : nothing}
         ${tab === "lights" ? this._render_lamp_marks(view) : nothing}
@@ -1477,20 +1489,23 @@ export class ReefAquariumSceneEditor extends LitElement {
     }
     return html`<div
       class="el ${selected ? "selected" : ""}"
-      style="left:${el.pos[0] * 100}%;top:${el.pos[1] *
-      100}%;transform:translate(-50%,-50%) scale(${el.scale || 1})"
+      style="left:${el.pos[0] * 100}%;top:${
+        el.pos[1] * 100
+      }%;transform:translate(-50%,-50%) scale(${el.scale || 1})"
       @pointerdown=${(e: PointerEvent) => {
         this._selection = { type: "element", id: el.id };
         this._start_drag(e, { type: "element", id: el.id });
       }}
     >
       ${body}
-      ${feeding && el.kind !== "marker"
-        ? html`<span class="badge" title="${i18n._("aq_feeding_point")}"
-            ><svg viewBox="0 0 24 24">
-              <path d="${mdiShakerOutline}"></path></svg
-          ></span>`
-        : nothing}
+      ${
+        feeding && el.kind !== "marker"
+          ? html`<span class="badge" title="${i18n._("aq_feeding_point")}"
+              ><svg viewBox="0 0 24 24">
+                <path d="${mdiShakerOutline}"></path></svg
+            ></span>`
+          : nothing
+      }
     </div>`;
   }
 
@@ -1509,8 +1524,9 @@ export class ReefAquariumSceneEditor extends LitElement {
         out.push(
           html`<div
             class="coral ${selected ? "selected" : ""}"
-            style="left:${coral.pos[0] * 100}%;top:${coral.pos[1] *
-            100}%;--c:${colour}"
+            style="left:${coral.pos[0] * 100}%;top:${
+              coral.pos[1] * 100
+            }%;--c:${colour}"
             title="${coral.name || species_name(species, coral.species)}"
             @pointerdown=${(e: PointerEvent) => {
               this._selection = {
@@ -1573,11 +1589,14 @@ export class ReefAquariumSceneEditor extends LitElement {
         out.push(
           html`<div
             class="lamp"
-            style="left:${p[0] * 100}%;top:max(${p[1] *
-            100}%, ${LAMP_MARK_TOP})"
-            title="${light.device_id
-              ? device_name(this._hass!, light.device_id)
-              : light.entity_id}"
+            style="left:${p[0] * 100}%;top:max(${
+              p[1] * 100
+            }%, ${LAMP_MARK_TOP})"
+            title="${
+              light.device_id
+                ? device_name(this._hass!, light.device_id)
+                : light.entity_id
+            }"
             @pointerdown=${(e: PointerEvent) =>
               this._start_drag(e, { type: "lamp", water: region.water, index })}
           >
@@ -1633,54 +1652,61 @@ export class ReefAquariumSceneEditor extends LitElement {
               name: (e.target as HTMLInputElement).value,
             })}
       /></label>
-      ${this._clouds.length
-        ? html`<label class="field"
-            >${i18n._("aq_cloud_aquarium")}
-            <select
-              @change=${(e: Event) => {
-                const uid = (e.target as HTMLSelectElement).value;
-                const cloud = this._clouds.find((c) => c.uid === uid);
-                if (cloud) this._apply_cloud(cloud);
-              }}
-            >
-              <option value="">—</option>
-              ${this._clouds.map(
-                (c) =>
-                  html`<option
-                    value="${c.uid}"
-                    ?selected=${doc.cloud?.uid === c.uid}
-                  >
-                    ${c.name}${c.system_model ? ` (${c.system_model})` : ""}
-                  </option>`,
-              )}
-            </select>
-            <span class="hint">${i18n._("aq_cloud_hint")}</span>
-          </label>`
-        : nothing}
-      ${presets.length
-        ? html`<label class="field"
-            >${i18n._("aq_preset")}
-            <select
-              @change=${(e: Event) => {
-                const preset = presets.find(
-                  (p) => p.id === (e.target as HTMLSelectElement).value,
-                );
-                if (preset) {
-                  this.change(ops.apply_preset(doc, preset));
-                  this._view_id = this._doc!.default_view ?? null;
-                }
-              }}
-            >
-              <option value="">—</option>
-              ${presets.map(
-                (p) =>
-                  html`<option value="${p.id}" ?selected=${doc.preset === p.id}>
-                    ${species_name({ ...p, id: p.name ?? p.id }, p.id)}
-                  </option>`,
-              )}
-            </select>
-          </label>`
-        : nothing}
+      ${
+        this._clouds.length
+          ? html`<label class="field"
+              >${i18n._("aq_cloud_aquarium")}
+              <select
+                @change=${(e: Event) => {
+                  const uid = (e.target as HTMLSelectElement).value;
+                  const cloud = this._clouds.find((c) => c.uid === uid);
+                  if (cloud) this._apply_cloud(cloud);
+                }}
+              >
+                <option value="">—</option>
+                ${this._clouds.map(
+                  (c) =>
+                    html`<option
+                      value="${c.uid}"
+                      ?selected=${doc.cloud?.uid === c.uid}
+                    >
+                      ${c.name}${c.system_model ? ` (${c.system_model})` : ""}
+                    </option>`,
+                )}
+              </select>
+              <span class="hint">${i18n._("aq_cloud_hint")}</span>
+            </label>`
+          : nothing
+      }
+      ${
+        presets.length
+          ? html`<label class="field"
+              >${i18n._("aq_preset")}
+              <select
+                @change=${(e: Event) => {
+                  const preset = presets.find(
+                    (p) => p.id === (e.target as HTMLSelectElement).value,
+                  );
+                  if (preset) {
+                    this.change(ops.apply_preset(doc, preset));
+                    this._view_id = this._doc!.default_view ?? null;
+                  }
+                }}
+              >
+                <option value="">—</option>
+                ${presets.map(
+                  (p) =>
+                    html`<option
+                      value="${p.id}"
+                      ?selected=${doc.preset === p.id}
+                    >
+                      ${species_name({ ...p, id: p.name ?? p.id }, p.id)}
+                    </option>`,
+                )}
+              </select>
+            </label>`
+          : nothing
+      }
       <fieldset>
         <legend>${i18n._("aq_dimensions")}</legend>
         <div class="row3">
@@ -1704,9 +1730,11 @@ export class ReefAquariumSceneEditor extends LitElement {
             type="number"
             min="1"
             step="1"
-            .value=${typeof doc.water_volume_l === "number"
-              ? String(doc.water_volume_l)
-              : ""}
+            .value=${
+              typeof doc.water_volume_l === "number"
+                ? String(doc.water_volume_l)
+                : ""
+            }
             @change=${(e: Event) => {
               const value = Number((e.target as HTMLInputElement).value);
               this.change({
@@ -1805,11 +1833,13 @@ export class ReefAquariumSceneEditor extends LitElement {
           </select>
         </label>
       </fieldset>
-      ${!this._is_new
-        ? html`<button class="danger" @click=${this._delete_aquarium}>
-            ${i18n._("aq_delete_aquarium")}
-          </button>`
-        : nothing}
+      ${
+        !this._is_new
+          ? html`<button class="danger" @click=${this._delete_aquarium}>
+              ${i18n._("aq_delete_aquarium")}
+            </button>`
+          : nothing
+      }
     `;
   }
 
@@ -1868,10 +1898,9 @@ export class ReefAquariumSceneEditor extends LitElement {
               @click=${() => ((this._view_id = id), (this._selection = null))}
             >
               <span
-                >${vw.name || i18n._("aq_view_unnamed")}${doc.default_view ===
-                id
-                  ? " ★"
-                  : ""}</span
+                >${vw.name || i18n._("aq_view_unnamed")}${
+                  doc.default_view === id ? " ★" : ""
+                }</span
               >
             </div>`,
         )}
@@ -1888,204 +1917,230 @@ export class ReefAquariumSceneEditor extends LitElement {
       >
         + ${i18n._("aq_add_view")}
       </button>
-      ${view && v
-        ? html`
-            <fieldset>
-              <legend>${i18n._("aq_this_view")}</legend>
-              <label class="field"
-                >${i18n._("aq_name")}
-                <input
-                  .value=${view.name}
-                  @change=${(e: Event) =>
-                    this.change(
-                      ops.update_view(doc, v, {
-                        name: (e.target as HTMLInputElement).value,
-                      }),
-                    )}
-              /></label>
-              <div class="field">
-                ${i18n._("aq_picture")}
-                <button
-                  class="choose-file"
-                  ?disabled=${this._busy}
-                  @click=${(e: Event) =>
-                    (
-                      (e.currentTarget as HTMLElement)
-                        .nextElementSibling as HTMLInputElement
-                    ).click()}
-                >
-                  ${i18n._(
-                    view?.image ? "aq_picture_change" : "aq_picture_choose",
-                  )}
-                </button>
-                <!-- Hidden: it is emptied after each upload, and would say
-                     that no file is chosen next to a picture on display -->
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  @change=${this._upload}
-                />
-                <span class="hint">${i18n._("aq_picture_hint")}</span>
-              </div>
-              <div class="buttons">
-                ${doc.default_view !== v
-                  ? html`<button
-                      @click=${() =>
-                        this.change({
-                          ...structuredClone(doc),
-                          default_view: v,
-                        })}
-                    >
-                      ${i18n._("aq_make_default")}
-                    </button>`
-                  : nothing}
-                <button
-                  class="danger"
-                  @click=${() => (
-                    this.change(ops.remove_view(doc, v)),
-                    (this._view_id = this._doc!.default_view ?? null)
-                  )}
-                >
-                  ${i18n._("aq_delete_view")}
-                </button>
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>${i18n._("aq_water_outline")}</legend>
-              ${this._water_select()}
-              <div class="buttons">
-                <button
-                  @click=${() => {
-                    const id = Object.keys(doc.waters).includes("sump")
-                      ? `water${Object.keys(doc.waters).length + 1}`
-                      : "sump";
-                    this.change(ops.add_water(doc, id));
-                    this._water_id = id;
-                  }}
-                >
-                  + ${i18n._("aq_add_water")}
-                </button>
-                <button
-                  class="${this._tool === "region" ? "active" : ""}"
-                  @click=${() => {
-                    if (!region || region.quad.length !== 4)
+      ${
+        view && v
+          ? html`
+              <fieldset>
+                <legend>${i18n._("aq_this_view")}</legend>
+                <label class="field"
+                  >${i18n._("aq_name")}
+                  <input
+                    .value=${view.name}
+                    @change=${(e: Event) =>
                       this.change(
-                        ops.set_region(
-                          doc,
-                          v,
-                          this._water_id,
-                          rect_quad(0.1, 0.1, 0.9, 0.6),
-                        ),
-                      );
-                    this._tool = "region";
-                  }}
-                >
-                  ${region?.quad.length === 4
-                    ? i18n._("aq_edit_outline")
-                    : i18n._("aq_outline")}
-                </button>
-                ${region
-                  ? html`<button
-                      class="danger"
-                      @click=${() =>
-                        this.change(ops.remove_region(doc, v, this._water_id))}
-                    >
-                      ${i18n._("aq_remove_outline")}
-                    </button>`
-                  : nothing}
-              </div>
-              <span class="hint">${i18n._("aq_outline_hint")}</span>
-            </fieldset>
-            ${this._sand_fieldset()} ${this._backdrop_fieldset()}
-            <fieldset>
-              <legend>${i18n._("aq_decor")}</legend>
-              <div class="buttons">
-                ${(["front", "middle", "back"] as ops.DepthName[]).map(
-                  (name) =>
-                    html`<button
-                      class="depth ${this._depth === name ? "active" : ""}"
-                      style="--c:${DEPTH_COLOURS[name]}"
-                      @click=${() => {
-                        this._depth = name;
-                        if (selected_decor)
-                          this.change(
-                            ops.update_decor(doc, v, selected_decor.id, {
-                              z: ops.DEPTHS[name],
-                            }),
-                          );
-                      }}
-                    >
-                      ${i18n._(`aq_depth_${name}`)}
-                    </button>`,
-                )}
-              </div>
-              <div class="buttons">
-                ${this._tool_button("decor", "aq_tool_polygon")}
-                ${this._tool_button("lasso", "aq_tool_lasso")}
-                ${this._tool_button("select", "aq_tool_select")}
-                ${this._drawing.length >= 3
-                  ? html`<button @click=${this._finish_shape}>
-                      ${i18n._("aq_finish_shape")}
-                    </button>`
-                  : nothing}
-                ${selected_decor
-                  ? html`<button
-                      class="danger"
-                      @click=${this._delete_selection}
-                    >
-                      ${i18n._("aq_delete")}
-                    </button>`
-                  : nothing}
-              </div>
-              <span class="hint">${i18n._("aq_decor_hint")}</span>
-            </fieldset>
-            <fieldset>
-              <legend>${i18n._("aq_hotspots")}</legend>
-              ${other_views.length
-                ? html`<label class="field"
-                      >${i18n._("aq_hotspot_target")}
-                      <select
-                        @change=${(e: Event) => {
-                          const goto = (e.target as HTMLSelectElement).value;
-                          this._hotspot_target = goto;
-                          if (selected_hotspot)
+                        ops.update_view(doc, v, {
+                          name: (e.target as HTMLInputElement).value,
+                        }),
+                      )}
+                /></label>
+                <div class="field">
+                  ${i18n._("aq_picture")}
+                  <button
+                    class="choose-file"
+                    ?disabled=${this._busy}
+                    @click=${(e: Event) =>
+                      (
+                        (e.currentTarget as HTMLElement)
+                          .nextElementSibling as HTMLInputElement
+                      ).click()}
+                  >
+                    ${i18n._(
+                      view?.image ? "aq_picture_change" : "aq_picture_choose",
+                    )}
+                  </button>
+                  <!-- Hidden: it is emptied after each upload, and would say
+                     that no file is chosen next to a picture on display -->
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    @change=${this._upload}
+                  />
+                  <span class="hint">${i18n._("aq_picture_hint")}</span>
+                </div>
+                <div class="buttons">
+                  ${
+                    doc.default_view !== v
+                      ? html`<button
+                          @click=${() =>
+                            this.change({
+                              ...structuredClone(doc),
+                              default_view: v,
+                            })}
+                        >
+                          ${i18n._("aq_make_default")}
+                        </button>`
+                      : nothing
+                  }
+                  <button
+                    class="danger"
+                    @click=${() => (
+                      this.change(ops.remove_view(doc, v)),
+                      (this._view_id = this._doc!.default_view ?? null)
+                    )}
+                  >
+                    ${i18n._("aq_delete_view")}
+                  </button>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend>${i18n._("aq_water_outline")}</legend>
+                ${this._water_select()}
+                <div class="buttons">
+                  <button
+                    @click=${() => {
+                      const id = Object.keys(doc.waters).includes("sump")
+                        ? `water${Object.keys(doc.waters).length + 1}`
+                        : "sump";
+                      this.change(ops.add_water(doc, id));
+                      this._water_id = id;
+                    }}
+                  >
+                    + ${i18n._("aq_add_water")}
+                  </button>
+                  <button
+                    class="${this._tool === "region" ? "active" : ""}"
+                    @click=${() => {
+                      if (!region || region.quad.length !== 4)
+                        this.change(
+                          ops.set_region(
+                            doc,
+                            v,
+                            this._water_id,
+                            rect_quad(0.1, 0.1, 0.9, 0.6),
+                          ),
+                        );
+                      this._tool = "region";
+                    }}
+                  >
+                    ${
+                      region?.quad.length === 4
+                        ? i18n._("aq_edit_outline")
+                        : i18n._("aq_outline")
+                    }
+                  </button>
+                  ${
+                    region
+                      ? html`<button
+                          class="danger"
+                          @click=${() =>
                             this.change(
-                              ops.update_hotspot(doc, v, selected_hotspot.id, {
-                                goto,
+                              ops.remove_region(doc, v, this._water_id),
+                            )}
+                        >
+                          ${i18n._("aq_remove_outline")}
+                        </button>`
+                      : nothing
+                  }
+                </div>
+                <span class="hint">${i18n._("aq_outline_hint")}</span>
+              </fieldset>
+              ${this._sand_fieldset()} ${this._backdrop_fieldset()}
+              <fieldset>
+                <legend>${i18n._("aq_decor")}</legend>
+                <div class="buttons">
+                  ${(["front", "middle", "back"] as ops.DepthName[]).map(
+                    (name) =>
+                      html`<button
+                        class="depth ${this._depth === name ? "active" : ""}"
+                        style="--c:${DEPTH_COLOURS[name]}"
+                        @click=${() => {
+                          this._depth = name;
+                          if (selected_decor)
+                            this.change(
+                              ops.update_decor(doc, v, selected_decor.id, {
+                                z: ops.DEPTHS[name],
                               }),
                             );
                         }}
                       >
-                        ${other_views.map(
-                          ([id, vw]) =>
-                            html`<option
-                              value="${id}"
-                              ?selected=${(selected_hotspot?.goto ??
-                                this._hotspot_target) === id}
-                            >
-                              ${vw.name || id}
-                            </option>`,
-                        )}
-                      </select>
-                    </label>
-                    <div class="buttons">
-                      ${this._zone_tools()}
-                      ${selected_hotspot
-                        ? html`<button
-                            class="danger"
-                            @click=${this._delete_selection}
+                        ${i18n._(`aq_depth_${name}`)}
+                      </button>`,
+                  )}
+                </div>
+                <div class="buttons">
+                  ${this._tool_button("decor", "aq_tool_polygon")}
+                  ${this._tool_button("lasso", "aq_tool_lasso")}
+                  ${this._tool_button("select", "aq_tool_select")}
+                  ${
+                    this._drawing.length >= 3
+                      ? html`<button @click=${this._finish_shape}>
+                          ${i18n._("aq_finish_shape")}
+                        </button>`
+                      : nothing
+                  }
+                  ${
+                    selected_decor
+                      ? html`<button
+                          class="danger"
+                          @click=${this._delete_selection}
+                        >
+                          ${i18n._("aq_delete")}
+                        </button>`
+                      : nothing
+                  }
+                </div>
+                <span class="hint">${i18n._("aq_decor_hint")}</span>
+              </fieldset>
+              <fieldset>
+                <legend>${i18n._("aq_hotspots")}</legend>
+                ${
+                  other_views.length
+                    ? html`<label class="field"
+                          >${i18n._("aq_hotspot_target")}
+                          <select
+                            @change=${(e: Event) => {
+                              const goto = (e.target as HTMLSelectElement)
+                                .value;
+                              this._hotspot_target = goto;
+                              if (selected_hotspot)
+                                this.change(
+                                  ops.update_hotspot(
+                                    doc,
+                                    v,
+                                    selected_hotspot.id,
+                                    {
+                                      goto,
+                                    },
+                                  ),
+                                );
+                            }}
                           >
-                            ${i18n._("aq_delete")}
-                          </button>`
-                        : nothing}
-                    </div>`
-                : html`<span class="hint"
-                    >${i18n._("aq_hotspot_needs_view")}</span
-                  >`}
-            </fieldset>
-          `
-        : nothing}
+                            ${other_views.map(
+                              ([id, vw]) =>
+                                html`<option
+                                  value="${id}"
+                                  ?selected=${
+                                    (selected_hotspot?.goto ??
+                                      this._hotspot_target) === id
+                                  }
+                                >
+                                  ${vw.name || id}
+                                </option>`,
+                            )}
+                          </select>
+                        </label>
+                        <div class="buttons">
+                          ${this._zone_tools()}
+                          ${
+                            selected_hotspot
+                              ? html`<button
+                                  class="danger"
+                                  @click=${this._delete_selection}
+                                >
+                                  ${i18n._("aq_delete")}
+                                </button>`
+                              : nothing
+                          }
+                        </div>`
+                    : html`<span class="hint"
+                        >${i18n._("aq_hotspot_needs_view")}</span
+                      >`
+                }
+              </fieldset>
+            `
+          : nothing
+      }
     `;
   }
 
@@ -2118,19 +2173,21 @@ export class ReefAquariumSceneEditor extends LitElement {
         >
           ${i18n._(has_line ? "aq_sand_edit" : "aq_sand_draw")}
         </button>
-        ${has_line
-          ? html`<button
-              class="danger"
-              @click=${() => {
-                this.change(
-                  ops.set_sand_line(this._doc!, v, this._water_id, [], line),
-                );
-                this._tool = "select";
-              }}
-            >
-              ${i18n._("aq_delete")}
-            </button>`
-          : nothing}
+        ${
+          has_line
+            ? html`<button
+                class="danger"
+                @click=${() => {
+                  this.change(
+                    ops.set_sand_line(this._doc!, v, this._water_id, [], line),
+                  );
+                  this._tool = "select";
+                }}
+              >
+                ${i18n._("aq_delete")}
+              </button>`
+            : nothing
+        }
       </div>`;
     };
     return html`<fieldset>
@@ -2179,23 +2236,25 @@ export class ReefAquariumSceneEditor extends LitElement {
     };
     return html`<fieldset>
       <legend>${i18n._("aq_backdrop")}</legend>
-      ${region && WaterProjection.valid(region.quad)
-        ? html`<label class="check"
-            ><input
-              type="checkbox"
-              .checked=${drawn_region(view, region)}
-              @change=${(e: Event) =>
-                this.change(
-                  ops.set_region_drawn(
-                    this._doc!,
-                    v,
-                    this._water_id,
-                    (e.target as HTMLInputElement).checked,
-                  ),
-                )}
-            />${i18n._("aq_backdrop_drawn_water")}</label
-          >`
-        : nothing}
+      ${
+        region && WaterProjection.valid(region.quad)
+          ? html`<label class="check"
+              ><input
+                type="checkbox"
+                .checked=${drawn_region(view, region)}
+                @change=${(e: Event) =>
+                  this.change(
+                    ops.set_region_drawn(
+                      this._doc!,
+                      v,
+                      this._water_id,
+                      (e.target as HTMLInputElement).checked,
+                    ),
+                  )}
+              />${i18n._("aq_backdrop_drawn_water")}</label
+            >`
+          : nothing
+      }
       <div class="row3">${select("rock")} ${select("sand")}</div>
       <label class="check"
         ><input
@@ -2226,32 +2285,36 @@ export class ReefAquariumSceneEditor extends LitElement {
       >
         ${i18n._(line.home ? "aq_home_move" : "aq_home_place")}
       </button>
-      ${line.home
-        ? html`<select
-              title="${i18n._("aq_depth")}"
-              @change=${(e: Event) =>
-                set({
-                  home: [
-                    line.home![0],
-                    line.home![1],
-                    ops.DEPTHS[
-                      (e.target as HTMLSelectElement).value as ops.DepthName
+      ${
+        line.home
+          ? html`<select
+                title="${i18n._("aq_depth")}"
+                @change=${(e: Event) =>
+                  set({
+                    home: [
+                      line.home![0],
+                      line.home![1],
+                      ops.DEPTHS[
+                        (e.target as HTMLSelectElement).value as ops.DepthName
+                      ],
                     ],
-                  ],
-                })}
-            >
-              ${(["front", "middle", "back"] as ops.DepthName[]).map(
-                (n) =>
-                  html`<option
-                    value="${n}"
-                    ?selected=${ops.depth_name(line.home![2]) === n}
-                  >
-                    ${i18n._(`aq_depth_${n}`)}
-                  </option>`,
-              )}
-            </select>
-            <button class="icon" @click=${() => set({ home: null })}>✕</button>`
-        : nothing}
+                  })}
+              >
+                ${(["front", "middle", "back"] as ops.DepthName[]).map(
+                  (n) =>
+                    html`<option
+                      value="${n}"
+                      ?selected=${ops.depth_name(line.home![2]) === n}
+                    >
+                      ${i18n._(`aq_depth_${n}`)}
+                    </option>`,
+                )}
+              </select>
+              <button class="icon" @click=${() => set({ home: null })}>
+                ✕
+              </button>`
+          : nothing
+      }
     </div>`;
   }
 
@@ -2260,11 +2323,13 @@ export class ReefAquariumSceneEditor extends LitElement {
     return html`${this._tool_button("hotspot_rect", "aq_tool_rectangle")}
     ${this._tool_button("hotspot_lasso", "aq_tool_lasso")}
     ${this._tool_button("hotspot", "aq_tool_polygon")}
-    ${this._drawing.length >= 3
-      ? html`<button @click=${this._finish_shape}>
-          ${i18n._("aq_finish_shape")}
-        </button>`
-      : nothing}`;
+    ${
+      this._drawing.length >= 3
+        ? html`<button @click=${this._finish_shape}>
+            ${i18n._("aq_finish_shape")}
+          </button>`
+        : nothing
+    }`;
   }
 
   private _tool_button(tool: Tool, label: string): TemplateResult {
@@ -2440,22 +2505,27 @@ export class ReefAquariumSceneEditor extends LitElement {
       >
         ${brand}
         <span class="label"
-          ><span class="name">${dev.name}</span>${dev.model &&
-          dev.model !== dev.name
-            ? html`<span class="sub">${dev.model}</span>`
-            : nothing}</span
+          ><span class="name">${dev.name}</span>${
+            dev.model && dev.model !== dev.name
+              ? html`<span class="sub">${dev.model}</span>`
+              : nothing
+          }</span
         >
         ${this._add_button("device", dev.id)} ${this._outline_button(dev.id)}
-        ${has_children
-          ? this._chevron(open)
-          : html`<span class="chevron"></span>`}
+        ${
+          has_children
+            ? this._chevron(open)
+            : html`<span class="chevron"></span>`
+        }
       </div>
-      ${open
-        ? html`${dev.entities.map((e) =>
-            this._render_tree_entity(e, depth + 1),
-          )}
-          ${dev.children.map((c) => this._render_tree_device(c, depth + 1))}`
-        : nothing}`;
+      ${
+        open
+          ? html`${dev.entities.map((e) =>
+              this._render_tree_entity(e, depth + 1),
+            )}
+            ${dev.children.map((c) => this._render_tree_device(c, depth + 1))}`
+          : nothing
+      }`;
   }
 
   private _render_tree_area(area: TreeArea, depth: number): TemplateResult {
@@ -2467,9 +2537,11 @@ export class ReefAquariumSceneEditor extends LitElement {
         style="--depth:${depth}"
         @click=${() => this._toggle(key)}
       >
-        ${area.id
-          ? this._icon(area.icon, mdiTextureBox)
-          : this._icon(null, mdiDevices)}
+        ${
+          area.id
+            ? this._icon(area.icon, mdiTextureBox)
+            : this._icon(null, mdiDevices)
+        }
         <span class="label"
           ><span class="name"
             >${area.id ? area.name : i18n._("aq_unassigned")}</span
@@ -2478,12 +2550,14 @@ export class ReefAquariumSceneEditor extends LitElement {
         <span class="count">${count}</span>
         ${this._chevron(open)}
       </div>
-      ${open
-        ? html`${area.devices.map((d) =>
-            this._render_tree_device(d, depth + 1),
-          )}
-          ${area.entities.map((e) => this._render_tree_entity(e, depth + 1))}`
-        : nothing}`;
+      ${
+        open
+          ? html`${area.devices.map((d) =>
+              this._render_tree_device(d, depth + 1),
+            )}
+            ${area.entities.map((e) => this._render_tree_entity(e, depth + 1))}`
+          : nothing
+      }`;
   }
 
   private _render_tree_floor(floor: TreeFloor): TemplateResult {
@@ -2547,16 +2621,18 @@ export class ReefAquariumSceneEditor extends LitElement {
         @input=${(e: Event) =>
           (this._search = (e.target as HTMLInputElement).value)}
       />
-      ${place
-        ? html`<label class="switch"
-            ><input
-              type="checkbox"
-              .checked=${this._all_areas}
-              @change=${(e: Event) =>
-                (this._all_areas = (e.target as HTMLInputElement).checked)}
-            /><span class="slider"></span> ${i18n._("aq_all_areas")}</label
-          >`
-        : nothing}
+      ${
+        place
+          ? html`<label class="switch"
+              ><input
+                type="checkbox"
+                .checked=${this._all_areas}
+                @change=${(e: Event) =>
+                  (this._all_areas = (e.target as HTMLInputElement).checked)}
+              /><span class="slider"></span> ${i18n._("aq_all_areas")}</label
+            >`
+          : nothing
+      }
       <button
         @click=${() =>
           v &&
@@ -2574,12 +2650,16 @@ export class ReefAquariumSceneEditor extends LitElement {
       <div class="tree">
         ${tree?.floors.map((f) => this._render_tree_floor(f))}
         ${tree?.areas.map((a) => this._render_tree_area(a, 0))}
-        ${tree?.unassigned
-          ? this._render_tree_area(tree.unassigned, 0)
-          : nothing}
-        ${!tree || tree_empty(tree)
-          ? html`<div class="hint">${i18n._("aq_no_match")}</div>`
-          : nothing}
+        ${
+          tree?.unassigned
+            ? this._render_tree_area(tree.unassigned, 0)
+            : nothing
+        }
+        ${
+          !tree || tree_empty(tree)
+            ? html`<div class="hint">${i18n._("aq_no_match")}</div>`
+            : nothing
+        }
       </div>
     `;
   }
@@ -2609,27 +2689,31 @@ export class ReefAquariumSceneEditor extends LitElement {
             @click=${() =>
               (this._text_colour_edit = editing ? null : element.id)}
           ></button>
-          ${element.text_color
-            ? html`<button
-                class="icon reset"
-                title="${i18n._("aq_reset_text_color")}"
-                @click=${() => {
-                  this._text_colour_edit = null;
-                  set({ text_color: null });
-                }}
-              >
-                ↺
-              </button>`
-            : nothing}
+          ${
+            element.text_color
+              ? html`<button
+                  class="icon reset"
+                  title="${i18n._("aq_reset_text_color")}"
+                  @click=${() => {
+                    this._text_colour_edit = null;
+                    set({ text_color: null });
+                  }}
+                >
+                  ↺
+                </button>`
+              : nothing
+          }
         </div>
-        ${editing
-          ? html`<reef-colour-picker
-              class="colour-picker"
-              .value=${element.text_color ?? DEFAULT_TEXT_COLOR}
-              @colour-change=${(e: CustomEvent) =>
-                set({ text_color: e.detail.value })}
-            ></reef-colour-picker>`
-          : nothing}
+        ${
+          editing
+            ? html`<reef-colour-picker
+                class="colour-picker"
+                .value=${element.text_color ?? DEFAULT_TEXT_COLOR}
+                @colour-change=${(e: CustomEvent) =>
+                  set({ text_color: e.detail.value })}
+              ></reef-colour-picker>`
+            : nothing
+        }
       </div>`;
   }
 
@@ -2643,9 +2727,11 @@ export class ReefAquariumSceneEditor extends LitElement {
     const feeding = element.roles.includes("feeding_point");
     return html`<fieldset class="props">
       <legend>
-        ${element.kind === "device"
-          ? device_name(this._hass!, element.device_id)
-          : element.entity_id || i18n._("aq_marker")}
+        ${
+          element.kind === "device"
+            ? device_name(this._hass!, element.device_id)
+            : element.entity_id || i18n._("aq_marker")
+        }
       </legend>
       <label class="field"
         >${i18n._("aq_label")}
@@ -2655,26 +2741,30 @@ export class ReefAquariumSceneEditor extends LitElement {
             set({ label: (e.target as HTMLInputElement).value })}
       /></label>
       ${element.kind === "entity" ? this._entity_text(element, set) : nothing}
-      ${element.kind === "entity" && is_toggleable(element.entity_id ?? "")
-        ? html`<label class="field"
-            >${i18n._("aq_element_type")}
-            <select
-              @change=${(e: Event) =>
-                set({ type: (e.target as HTMLSelectElement).value })}
-            >
-              ${["common-sensor", "common-switch"].map(
-                (t) =>
-                  html`<option
-                    value="${t}"
-                    ?selected=${(element.type ??
-                      default_element_type(element.entity_id ?? "")) === t}
-                  >
-                    ${i18n._(`aq_type_${t.replace("common-", "")}`)}
-                  </option>`,
-              )}
-            </select>
-          </label>`
-        : nothing}
+      ${
+        element.kind === "entity" && is_toggleable(element.entity_id ?? "")
+          ? html`<label class="field"
+              >${i18n._("aq_element_type")}
+              <select
+                @change=${(e: Event) =>
+                  set({ type: (e.target as HTMLSelectElement).value })}
+              >
+                ${["common-sensor", "common-switch"].map(
+                  (t) =>
+                    html`<option
+                      value="${t}"
+                      ?selected=${
+                        (element.type ??
+                          default_element_type(element.entity_id ?? "")) === t
+                      }
+                    >
+                      ${i18n._(`aq_type_${t.replace("common-", "")}`)}
+                    </option>`,
+                )}
+              </select>
+            </label>`
+          : nothing
+      }
       <label class="field"
         >${i18n._("aq_scale")}
         <input
@@ -2703,30 +2793,32 @@ export class ReefAquariumSceneEditor extends LitElement {
         />
         ${i18n._("aq_feeding_point")}</label
       >
-      ${feeding && doc.feeding.sources.length
-        ? html`<label class="field"
-            >${i18n._("aq_feeding_source")}
-            <select
-              @change=${(e: Event) =>
-                set({
-                  source: (e.target as HTMLSelectElement).value || null,
-                })}
-            >
-              <option value="" ?selected=${!element.source}>
-                ${i18n._("aq_any_source")}
-              </option>
-              ${doc.feeding.sources.map(
-                (s) =>
-                  html`<option
-                    value="${s.id}"
-                    ?selected=${element.source === s.id}
-                  >
-                    ${s.entity_id}
-                  </option>`,
-              )}
-            </select>
-          </label>`
-        : nothing}
+      ${
+        feeding && doc.feeding.sources.length
+          ? html`<label class="field"
+              >${i18n._("aq_feeding_source")}
+              <select
+                @change=${(e: Event) =>
+                  set({
+                    source: (e.target as HTMLSelectElement).value || null,
+                  })}
+              >
+                <option value="" ?selected=${!element.source}>
+                  ${i18n._("aq_any_source")}
+                </option>
+                ${doc.feeding.sources.map(
+                  (s) =>
+                    html`<option
+                      value="${s.id}"
+                      ?selected=${element.source === s.id}
+                    >
+                      ${s.entity_id}
+                    </option>`,
+                )}
+              </select>
+            </label>`
+          : nothing
+      }
       <button class="danger" @click=${this._delete_selection}>
         ${i18n._("aq_delete")}
       </button>
@@ -2801,140 +2893,147 @@ export class ReefAquariumSceneEditor extends LitElement {
     ]);
     return html`
       ${this._water_select()}
-      ${water
-        ? html`
-            <fieldset>
-              <legend>${i18n._("aq_lights")}</legend>
-              ${water.lights.map(
-                (l, i) =>
-                  html`<div class="line">
-                    <span class="grow"
-                      >${l.device_id
-                        ? device_name(this._hass!, l.device_id)
-                        : l.entity_id}</span
-                    >
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      .value=${String(l.x)}
-                      title="${i18n._("aq_light_position")}"
-                      @change=${(e: Event) =>
-                        this.change(
-                          ops.update_light(doc, this._water_id, i, {
-                            x: Number((e.target as HTMLInputElement).value),
-                          }),
-                        )}
-                    />
-                    <button
-                      class="icon"
-                      @click=${() =>
-                        this.change(ops.remove_light(doc, this._water_id, i))}
-                    >
-                      ✕
-                    </button>
-                  </div>`,
-              )}
-              <select
-                @change=${(e: Event) => {
-                  const value = (e.target as HTMLSelectElement).value;
-                  (e.target as HTMLSelectElement).value = "";
-                  if (!value) return;
-                  const [kind, ref] = value.split("|");
-                  this.change(
-                    ops.add_light(
-                      doc,
-                      this._water_id,
-                      kind === "device"
-                        ? { device_id: ref }
-                        : { entity_id: ref },
-                    ),
-                  );
-                }}
-              >
-                <option value="">+ ${i18n._("aq_add_light")}</option>
-                ${lamps.map(
-                  (id) =>
-                    html`<option value="device|${id}">
-                      ${device_name(this._hass!, id)}
-                    </option>`,
+      ${
+        water
+          ? html`
+              <fieldset>
+                <legend>${i18n._("aq_lights")}</legend>
+                ${water.lights.map(
+                  (l, i) =>
+                    html`<div class="line">
+                      <span class="grow"
+                        >${
+                          l.device_id
+                            ? device_name(this._hass!, l.device_id)
+                            : l.entity_id
+                        }</span
+                      >
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        .value=${String(l.x)}
+                        title="${i18n._("aq_light_position")}"
+                        @change=${(e: Event) =>
+                          this.change(
+                            ops.update_light(doc, this._water_id, i, {
+                              x: Number((e.target as HTMLInputElement).value),
+                            }),
+                          )}
+                      />
+                      <button
+                        class="icon"
+                        @click=${() =>
+                          this.change(ops.remove_light(doc, this._water_id, i))}
+                      >
+                        ✕
+                      </button>
+                    </div>`,
                 )}
-                ${light_entities.map(
-                  (id) => html`<option value="entity|${id}">${id}</option>`,
-                )}
-              </select>
-              <span class="hint"
-                >${i18n._(
-                  this._view?.regions.some(
-                    (r) =>
-                      r.water === this._water_id &&
-                      WaterProjection.valid(r.quad),
-                  )
-                    ? "aq_lights_hint"
-                    : "aq_home_needs_outline",
-                )}</span
-              >
-            </fieldset>
-            <fieldset>
-              <legend>${i18n._("aq_flow")}</legend>
-              ${water.flow.map(
-                (id) =>
-                  html`<div class="line">
-                    <span class="grow">${id}</span>
-                    <button
-                      class="icon"
-                      @click=${() =>
-                        this.change(
-                          ops.set_flow(
-                            doc,
-                            this._water_id,
-                            water.flow.filter((f) => f !== id),
-                          ),
-                        )}
-                    >
-                      ✕
-                    </button>
-                  </div>`,
-              )}
-              <input
-                list="flow_entities"
-                placeholder="+ ${i18n._("aq_add_flow")}"
-                @change=${(e: Event) => {
-                  const value = (e.target as HTMLInputElement).value.trim();
-                  (e.target as HTMLInputElement).value = "";
-                  if (value)
+                <select
+                  @change=${(e: Event) => {
+                    const value = (e.target as HTMLSelectElement).value;
+                    (e.target as HTMLSelectElement).value = "";
+                    if (!value) return;
+                    const [kind, ref] = value.split("|");
                     this.change(
-                      ops.set_flow(doc, this._water_id, [...water.flow, value]),
+                      ops.add_light(
+                        doc,
+                        this._water_id,
+                        kind === "device"
+                          ? { device_id: ref }
+                          : { entity_id: ref },
+                      ),
                     );
-                }}
-              />
-              <datalist id="flow_entities">
-                ${flow_entities.map(
-                  (id) => html`<option value="${id}"></option>`,
-                )}
-              </datalist>
-              <span class="hint">${i18n._("aq_flow_hint")}</span>
-            </fieldset>
-            ${this._light_preview_controls()}
-            <label class="field"
-              >${i18n._("aq_sand_band")}
-              <input
-                type="range"
-                min="0"
-                max="0.5"
-                step="0.01"
-                .value=${String(water.sand_band)}
-                @change=${(e: Event) =>
-                  this.change(
-                    ops.update_water(doc, this._water_id, {
-                      sand_band: Number((e.target as HTMLInputElement).value),
-                    }),
+                  }}
+                >
+                  <option value="">+ ${i18n._("aq_add_light")}</option>
+                  ${lamps.map(
+                    (id) =>
+                      html`<option value="device|${id}">
+                        ${device_name(this._hass!, id)}
+                      </option>`,
                   )}
-              />
-            </label>
-          `
-        : nothing}
+                  ${light_entities.map(
+                    (id) => html`<option value="entity|${id}">${id}</option>`,
+                  )}
+                </select>
+                <span class="hint"
+                  >${i18n._(
+                    this._view?.regions.some(
+                      (r) =>
+                        r.water === this._water_id &&
+                        WaterProjection.valid(r.quad),
+                    )
+                      ? "aq_lights_hint"
+                      : "aq_home_needs_outline",
+                  )}</span
+                >
+              </fieldset>
+              <fieldset>
+                <legend>${i18n._("aq_flow")}</legend>
+                ${water.flow.map(
+                  (id) =>
+                    html`<div class="line">
+                      <span class="grow">${id}</span>
+                      <button
+                        class="icon"
+                        @click=${() =>
+                          this.change(
+                            ops.set_flow(
+                              doc,
+                              this._water_id,
+                              water.flow.filter((f) => f !== id),
+                            ),
+                          )}
+                      >
+                        ✕
+                      </button>
+                    </div>`,
+                )}
+                <input
+                  list="flow_entities"
+                  placeholder="+ ${i18n._("aq_add_flow")}"
+                  @change=${(e: Event) => {
+                    const value = (e.target as HTMLInputElement).value.trim();
+                    (e.target as HTMLInputElement).value = "";
+                    if (value)
+                      this.change(
+                        ops.set_flow(doc, this._water_id, [
+                          ...water.flow,
+                          value,
+                        ]),
+                      );
+                  }}
+                />
+                <datalist id="flow_entities">
+                  ${flow_entities.map(
+                    (id) => html`<option value="${id}"></option>`,
+                  )}
+                </datalist>
+                <span class="hint">${i18n._("aq_flow_hint")}</span>
+              </fieldset>
+              ${this._light_preview_controls()}
+              <label class="field"
+                >${i18n._("aq_sand_band")}
+                <input
+                  type="range"
+                  min="0"
+                  max="0.5"
+                  step="0.01"
+                  .value=${String(water.sand_band)}
+                  @change=${(e: Event) =>
+                    this.change(
+                      ops.update_water(doc, this._water_id, {
+                        sand_band: Number((e.target as HTMLInputElement).value),
+                      }),
+                    )}
+                />
+              </label>
+            `
+          : nothing
+      }
     `;
   }
 
@@ -2989,39 +3088,47 @@ export class ReefAquariumSceneEditor extends LitElement {
           else if (value && kind === "fish") pick(value);
         }}
       />
-      ${open
-        ? html`<div class="picker-list">
-            ${matches.map(
-              (s) =>
-                html`<button
-                  class="pick"
-                  @mousedown=${(e: Event) => e.preventDefault()}
-                  @click=${() => pick(s.id)}
-                >
-                  ${species_thumb(s, kind)}
-                  <span class="grow">${species_name(s, s.id)}</span>
-                  ${s.scientific
-                    ? html`<small><i>${s.scientific}</i></small>`
-                    : html`<small>${s.id}</small>`}
-                </button>`,
-            )}
-            ${kind === "fish" && query && !exact
-              ? html`<button
-                  class="pick custom"
-                  @mousedown=${(e: Event) => e.preventDefault()}
-                  @click=${() => pick(text.trim())}
-                >
-                  ${species_thumb(undefined, kind)}
-                  <span class="grow"
-                    >${i18n._("aq_inventory_only", { name: text.trim() })}</span
+      ${
+        open
+          ? html`<div class="picker-list">
+              ${matches.map(
+                (s) =>
+                  html`<button
+                    class="pick"
+                    @mousedown=${(e: Event) => e.preventDefault()}
+                    @click=${() => pick(s.id)}
                   >
-                </button>`
-              : nothing}
-            ${!matches.length && kind === "coral"
-              ? html`<span class="hint">${i18n._("aq_no_match")}</span>`
-              : nothing}
-          </div>`
-        : nothing}
+                    ${species_thumb(s, kind)}
+                    <span class="grow">${species_name(s, s.id)}</span>
+                    ${
+                      s.scientific
+                        ? html`<small><i>${s.scientific}</i></small>`
+                        : html`<small>${s.id}</small>`
+                    }
+                  </button>`,
+              )}
+              ${
+                kind === "fish" && query && !exact
+                  ? html`<button
+                      class="pick custom"
+                      @mousedown=${(e: Event) => e.preventDefault()}
+                      @click=${() => pick(text.trim())}
+                    >
+                      ${species_thumb(undefined, kind)}
+                      <span class="grow"
+                        >${i18n._("aq_inventory_only", { name: text.trim() })}</span
+                      >
+                    </button>`
+                  : nothing
+              }
+              ${
+                !matches.length && kind === "coral"
+                  ? html`<span class="hint">${i18n._("aq_no_match")}</span>`
+                  : nothing
+              }
+            </div>`
+          : nothing
+      }
     </div>`;
   }
 
@@ -3045,286 +3152,305 @@ export class ReefAquariumSceneEditor extends LitElement {
     const sel = this._selection;
     return html`
       ${this._water_select()} ${this._catalog_notice()}
-      ${water
-        ? html`<fieldset>
-              <legend>${i18n._("aq_fish_inventory")}</legend>
-              ${water.livestock.map((line) => {
-                const species = this._species_fish(line.species);
-                const set = (patch: any) =>
-                  this.change(
-                    ops.update_line(doc, this._water_id, line.id, patch),
-                  );
-                const size = line.size_cm ?? species?.size_cm ?? null;
-                return html`<div class="card">
-                  <div class="line">
-                    ${species_thumb(species, "fish")}
-                    <strong class="grow"
-                      >${line.name || species_name(species, line.species)}
-                      ${species_latin(species)}</strong
-                    >
-                    ${species
-                      ? nothing
-                      : html`<span class="hint"
-                          >${i18n._("aq_no_animation")}</span
-                        >`}
-                    <button
-                      class="icon"
-                      @click=${() =>
-                        this.change(
-                          ops.remove_line(doc, this._water_id, line.id),
-                        )}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div class="row3">
-                    <label class="field small"
-                      >${i18n._("aq_count")}<input
-                        type="number"
-                        min="0"
-                        .value=${String(line.count)}
-                        @change=${(e: Event) =>
-                          set({
-                            count: Math.max(
-                              0,
-                              Number((e.target as HTMLInputElement).value) || 0,
-                            ),
-                          })}
-                    /></label>
-                    <label class="field small"
-                      >${i18n._("aq_size_min")}<input
-                        type="number"
-                        min="0.1"
-                        step="0.5"
-                        .value=${size ? String(size[0]) : ""}
-                        @change=${(e: Event) =>
-                          set({
-                            size_cm: [
-                              Number((e.target as HTMLInputElement).value) || 1,
-                              size?.[1] ?? 5,
-                            ],
-                          })}
-                    /></label>
-                    <label class="field small"
-                      >${i18n._("aq_size_max")}<input
-                        type="number"
-                        min="0.1"
-                        step="0.5"
-                        .value=${size ? String(size[1]) : ""}
-                        @change=${(e: Event) =>
-                          set({
-                            size_cm: [
-                              size?.[0] ?? 1,
-                              Number((e.target as HTMLInputElement).value) || 5,
-                            ],
-                          })}
-                    /></label>
-                  </div>
-                  <label class="field"
-                    >${i18n._("aq_note")}<input
-                      .value=${line.note}
-                      @change=${(e: Event) =>
-                        set({ note: (e.target as HTMLInputElement).value })}
-                  /></label>
-                  ${this._home_controls(line, set)}
-                </div>`;
-              })}
-              ${this._species_picker(
-                "fish",
-                fish,
-                `+ ${i18n._("aq_add_fish")}`,
-                (id) => {
-                  const species = fish.find((s) => s.id === id);
-                  const [next] = ops.add_line(doc, this._water_id, {
-                    species: id,
-                    count: 1,
-                    size_cm: species?.size_cm ?? null,
-                    kind: "fish",
-                  });
-                  this.change(next);
-                },
-              )}
-              <span class="hint">${i18n._("aq_fish_hint")}</span>
-              ${this._tool === "home"
-                ? html`<span class="hint">${i18n._("aq_home_hint")}</span>`
-                : nothing}
-            </fieldset>
-            <fieldset>
-              <legend>${i18n._("aq_corals")}</legend>
-              ${water.corals.map((coral) => {
-                const species = this._species_coral(coral.species);
-                const palette = species
-                  ? coral_palette(species, coral.palette)
-                  : [];
-                const set = (patch: any) =>
-                  this.change(
-                    ops.update_coral(doc, this._water_id, coral.id, patch),
-                  );
-                const selected = sel?.type === "coral" && sel.id === coral.id;
-                // Colours shown: the one being chosen, else the saved ones
-                const shown =
-                  this._palette_draft?.coral === coral.id
-                    ? this._palette_draft.palette
-                    : palette.map(rgb_hex);
-                const editing =
-                  this._colour_edit?.coral === coral.id
-                    ? this._colour_edit.index
-                    : null;
-                return html`<div
-                  class="card ${selected ? "current" : ""}"
-                  @click=${() =>
-                    (this._selection = {
-                      type: "coral",
-                      id: coral.id,
-                      water: this._water_id,
-                    })}
-                >
-                  <div class="line">
-                    ${species_thumb(species, "coral")}
-                    <strong class="grow"
-                      >${coral.name || species_name(species, coral.species)}
-                      ${species_latin(species)}</strong
-                    >
-                    <button
-                      class="icon"
-                      @click=${() =>
-                        this.change(
-                          ops.remove_coral(doc, this._water_id, coral.id),
-                        )}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div class="row3">
-                    <label class="field small"
-                      >${i18n._("aq_size_cm")}<input
-                        type="number"
-                        min="0.5"
-                        step="0.5"
-                        .value=${String(coral.size_cm)}
-                        @change=${(e: Event) =>
-                          set({
-                            size_cm:
-                              Number((e.target as HTMLInputElement).value) ||
-                              10,
-                          })}
-                    /></label>
-                    <label class="field small"
-                      >${i18n._("aq_depth")}
-                      <select
-                        @change=${(e: Event) =>
-                          set({
-                            z: ops.DEPTHS[
-                              (e.target as HTMLSelectElement)
-                                .value as ops.DepthName
-                            ],
-                          })}
+      ${
+        water
+          ? html`<fieldset>
+                <legend>${i18n._("aq_fish_inventory")}</legend>
+                ${water.livestock.map((line) => {
+                  const species = this._species_fish(line.species);
+                  const set = (patch: any) =>
+                    this.change(
+                      ops.update_line(doc, this._water_id, line.id, patch),
+                    );
+                  const size = line.size_cm ?? species?.size_cm ?? null;
+                  return html`<div class="card">
+                    <div class="line">
+                      ${species_thumb(species, "fish")}
+                      <strong class="grow"
+                        >${line.name || species_name(species, line.species)}
+                        ${species_latin(species)}</strong
                       >
-                        ${(["front", "middle", "back"] as ops.DepthName[]).map(
-                          (n) =>
-                            html`<option
-                              value="${n}"
-                              ?selected=${ops.depth_name(coral.z) === n}
-                            >
-                              ${i18n._(`aq_depth_${n}`)}
-                            </option>`,
-                        )}
-                      </select>
-                    </label>
-                  </div>
-                  ${palette.length && selected
-                    ? html`<reef-coral-preview
-                        class="coral-preview"
-                        .species=${species}
-                        .palette=${shown}
-                      ></reef-coral-preview>`
-                    : nothing}
-                  ${palette.length
-                    ? html`<div class="palette">
-                        ${shown.map(
-                          (hex, i) =>
-                            html`<button
-                              class="swatch ${editing === i ? "active" : ""}"
-                              style="background: ${hex}"
-                              title="${i18n._("aq_colour")} ${i + 1}"
-                              @click=${() =>
-                                (this._colour_edit =
-                                  editing === i
-                                    ? null
-                                    : { coral: coral.id, index: i })}
-                            ></button>`,
-                        )}
-                        <button
-                          class="icon reset"
-                          title="${i18n._("aq_reset_colours")}"
-                          @click=${() => {
-                            this._colour_edit = null;
-                            this._palette_draft = null;
-                            set({ palette: [] });
-                          }}
-                        >
-                          ↺
-                        </button>
-                      </div>`
-                    : nothing}
-                  ${selected && editing !== null
-                    ? html`<reef-colour-picker
-                        class="colour-picker"
-                        .value=${shown[editing]}
-                        @colour-input=${(e: CustomEvent) => {
-                          const next = [...shown];
-                          next[editing] = e.detail.value;
-                          this._palette_draft = {
-                            coral: coral.id,
-                            palette: next,
-                          };
-                        }}
-                        @colour-change=${(e: CustomEvent) => {
-                          const next = [...shown];
-                          next[editing] = e.detail.value;
-                          this._palette_draft = null;
-                          set({ palette: next });
-                        }}
-                      ></reef-colour-picker>`
-                    : nothing}
-                </div>`;
-              })}
-              <div class="field">
-                ${i18n._("aq_coral_species")}
-                ${this._coral_species
-                  ? html`<div class="line chosen">
-                      ${species_thumb(
-                        this._species_coral(this._coral_species),
-                        "coral",
-                      )}
-                      <span class="grow"
-                        >${species_name(
-                          this._species_coral(this._coral_species),
-                          this._coral_species,
-                        )}
-                        ${species_latin(
-                          this._species_coral(this._coral_species),
-                        )}</span
+                      ${
+                        species
+                          ? nothing
+                          : html`<span class="hint"
+                              >${i18n._("aq_no_animation")}</span
+                            >`
+                      }
+                      <button
+                        class="icon"
+                        @click=${() =>
+                          this.change(
+                            ops.remove_line(doc, this._water_id, line.id),
+                          )}
                       >
-                    </div>`
-                  : nothing}
+                        ✕
+                      </button>
+                    </div>
+                    <div class="row3">
+                      <label class="field small"
+                        >${i18n._("aq_count")}<input
+                          type="number"
+                          min="0"
+                          .value=${String(line.count)}
+                          @change=${(e: Event) =>
+                            set({
+                              count: Math.max(
+                                0,
+                                Number((e.target as HTMLInputElement).value) ||
+                                  0,
+                              ),
+                            })}
+                      /></label>
+                      <label class="field small"
+                        >${i18n._("aq_size_min")}<input
+                          type="number"
+                          min="0.1"
+                          step="0.5"
+                          .value=${size ? String(size[0]) : ""}
+                          @change=${(e: Event) =>
+                            set({
+                              size_cm: [
+                                Number((e.target as HTMLInputElement).value) ||
+                                  1,
+                                size?.[1] ?? 5,
+                              ],
+                            })}
+                      /></label>
+                      <label class="field small"
+                        >${i18n._("aq_size_max")}<input
+                          type="number"
+                          min="0.1"
+                          step="0.5"
+                          .value=${size ? String(size[1]) : ""}
+                          @change=${(e: Event) =>
+                            set({
+                              size_cm: [
+                                size?.[0] ?? 1,
+                                Number((e.target as HTMLInputElement).value) ||
+                                  5,
+                              ],
+                            })}
+                      /></label>
+                    </div>
+                    <label class="field"
+                      >${i18n._("aq_note")}<input
+                        .value=${line.note}
+                        @change=${(e: Event) =>
+                          set({ note: (e.target as HTMLInputElement).value })}
+                    /></label>
+                    ${this._home_controls(line, set)}
+                  </div>`;
+                })}
                 ${this._species_picker(
-                  "coral",
-                  corals,
-                  i18n._("aq_search"),
+                  "fish",
+                  fish,
+                  `+ ${i18n._("aq_add_fish")}`,
                   (id) => {
-                    this._coral_species = id;
-                    this._tool = "coral";
+                    const species = fish.find((s) => s.id === id);
+                    const [next] = ops.add_line(doc, this._water_id, {
+                      species: id,
+                      count: 1,
+                      size_cm: species?.size_cm ?? null,
+                      kind: "fish",
+                    });
+                    this.change(next);
                   },
                 )}
-              </div>
-              <div class="buttons">
-                ${this._tool_button("coral", "aq_place_coral")}
-                ${this._tool_button("select", "aq_tool_select")}
-              </div>
-              <span class="hint">${i18n._("aq_coral_hint")}</span>
-            </fieldset>`
-        : nothing}
+                <span class="hint">${i18n._("aq_fish_hint")}</span>
+                ${
+                  this._tool === "home"
+                    ? html`<span class="hint">${i18n._("aq_home_hint")}</span>`
+                    : nothing
+                }
+              </fieldset>
+              <fieldset>
+                <legend>${i18n._("aq_corals")}</legend>
+                ${water.corals.map((coral) => {
+                  const species = this._species_coral(coral.species);
+                  const palette = species
+                    ? coral_palette(species, coral.palette)
+                    : [];
+                  const set = (patch: any) =>
+                    this.change(
+                      ops.update_coral(doc, this._water_id, coral.id, patch),
+                    );
+                  const selected = sel?.type === "coral" && sel.id === coral.id;
+                  // Colours shown: the one being chosen, else the saved ones
+                  const shown =
+                    this._palette_draft?.coral === coral.id
+                      ? this._palette_draft.palette
+                      : palette.map(rgb_hex);
+                  const editing =
+                    this._colour_edit?.coral === coral.id
+                      ? this._colour_edit.index
+                      : null;
+                  return html`<div
+                    class="card ${selected ? "current" : ""}"
+                    @click=${() =>
+                      (this._selection = {
+                        type: "coral",
+                        id: coral.id,
+                        water: this._water_id,
+                      })}
+                  >
+                    <div class="line">
+                      ${species_thumb(species, "coral")}
+                      <strong class="grow"
+                        >${coral.name || species_name(species, coral.species)}
+                        ${species_latin(species)}</strong
+                      >
+                      <button
+                        class="icon"
+                        @click=${() =>
+                          this.change(
+                            ops.remove_coral(doc, this._water_id, coral.id),
+                          )}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div class="row3">
+                      <label class="field small"
+                        >${i18n._("aq_size_cm")}<input
+                          type="number"
+                          min="0.5"
+                          step="0.5"
+                          .value=${String(coral.size_cm)}
+                          @change=${(e: Event) =>
+                            set({
+                              size_cm:
+                                Number((e.target as HTMLInputElement).value) ||
+                                10,
+                            })}
+                      /></label>
+                      <label class="field small"
+                        >${i18n._("aq_depth")}
+                        <select
+                          @change=${(e: Event) =>
+                            set({
+                              z: ops.DEPTHS[
+                                (e.target as HTMLSelectElement)
+                                  .value as ops.DepthName
+                              ],
+                            })}
+                        >
+                          ${(
+                            ["front", "middle", "back"] as ops.DepthName[]
+                          ).map(
+                            (n) =>
+                              html`<option
+                                value="${n}"
+                                ?selected=${ops.depth_name(coral.z) === n}
+                              >
+                                ${i18n._(`aq_depth_${n}`)}
+                              </option>`,
+                          )}
+                        </select>
+                      </label>
+                    </div>
+                    ${
+                      palette.length && selected
+                        ? html`<reef-coral-preview
+                            class="coral-preview"
+                            .species=${species}
+                            .palette=${shown}
+                          ></reef-coral-preview>`
+                        : nothing
+                    }
+                    ${
+                      palette.length
+                        ? html`<div class="palette">
+                            ${shown.map(
+                              (hex, i) =>
+                                html`<button
+                                  class="swatch ${editing === i ? "active" : ""}"
+                                  style="background: ${hex}"
+                                  title="${i18n._("aq_colour")} ${i + 1}"
+                                  @click=${() =>
+                                    (this._colour_edit =
+                                      editing === i
+                                        ? null
+                                        : { coral: coral.id, index: i })}
+                                ></button>`,
+                            )}
+                            <button
+                              class="icon reset"
+                              title="${i18n._("aq_reset_colours")}"
+                              @click=${() => {
+                                this._colour_edit = null;
+                                this._palette_draft = null;
+                                set({ palette: [] });
+                              }}
+                            >
+                              ↺
+                            </button>
+                          </div>`
+                        : nothing
+                    }
+                    ${
+                      selected && editing !== null
+                        ? html`<reef-colour-picker
+                            class="colour-picker"
+                            .value=${shown[editing]}
+                            @colour-input=${(e: CustomEvent) => {
+                              const next = [...shown];
+                              next[editing] = e.detail.value;
+                              this._palette_draft = {
+                                coral: coral.id,
+                                palette: next,
+                              };
+                            }}
+                            @colour-change=${(e: CustomEvent) => {
+                              const next = [...shown];
+                              next[editing] = e.detail.value;
+                              this._palette_draft = null;
+                              set({ palette: next });
+                            }}
+                          ></reef-colour-picker>`
+                        : nothing
+                    }
+                  </div>`;
+                })}
+                <div class="field">
+                  ${i18n._("aq_coral_species")}
+                  ${
+                    this._coral_species
+                      ? html`<div class="line chosen">
+                          ${species_thumb(
+                            this._species_coral(this._coral_species),
+                            "coral",
+                          )}
+                          <span class="grow"
+                            >${species_name(
+                              this._species_coral(this._coral_species),
+                              this._coral_species,
+                            )}
+                            ${species_latin(
+                              this._species_coral(this._coral_species),
+                            )}</span
+                          >
+                        </div>`
+                      : nothing
+                  }
+                  ${this._species_picker(
+                    "coral",
+                    corals,
+                    i18n._("aq_search"),
+                    (id) => {
+                      this._coral_species = id;
+                      this._tool = "coral";
+                    },
+                  )}
+                </div>
+                <div class="buttons">
+                  ${this._tool_button("coral", "aq_place_coral")}
+                  ${this._tool_button("select", "aq_tool_select")}
+                </div>
+                <span class="hint">${i18n._("aq_coral_hint")}</span>
+              </fieldset>`
+          : nothing
+      }
     `;
   }
 
@@ -3606,16 +3732,18 @@ export class ReefAquariumSceneEditor extends LitElement {
               )}
         /></label>
       </div>
-      ${!this._is_new && doc.id
-        ? html`<button
-            @click=${() =>
-              (this._hass as any)?.callService("reeftank", "feed", {
-                aquarium: doc.id,
-              })}
-          >
-            ${i18n._("aq_test_feeding")}
-          </button>`
-        : nothing}
+      ${
+        !this._is_new && doc.id
+          ? html`<button
+              @click=${() =>
+                (this._hass as any)?.callService("reeftank", "feed", {
+                  aquarium: doc.id,
+                })}
+            >
+              ${i18n._("aq_test_feeding")}
+            </button>`
+          : nothing
+      }
     `;
   }
 
@@ -3630,16 +3758,20 @@ export class ReefAquariumSceneEditor extends LitElement {
       <div class="dialog" role="dialog" aria-modal="true">
         <header>
           <h2>${doc?.name ?? i18n._("aq_loading")}</h2>
-          ${this._message
-            ? html`<span class="message ${this._message.kind}"
-                >${this._message.text}</span
-              >`
-            : nothing}
-          ${this._message?.kind === "error" && !this._is_new
-            ? html`<button @click=${this._reload}>
-                ${i18n._("aq_reload")}
-              </button>`
-            : nothing}
+          ${
+            this._message
+              ? html`<span class="message ${this._message.kind}"
+                  >${this._message.text}</span
+                >`
+              : nothing
+          }
+          ${
+            this._message?.kind === "error" && !this._is_new
+              ? html`<button @click=${this._reload}>
+                  ${i18n._("aq_reload")}
+                </button>`
+              : nothing
+          }
           <span class="grow"></span>
           <button
             class="icon"
@@ -3665,78 +3797,86 @@ export class ReefAquariumSceneEditor extends LitElement {
             <svg viewBox="0 0 24 24"><path d="${mdiClose}"></path></svg>
           </button>
         </header>
-        ${doc
-          ? html`<div class="body">
-              <aside>
-                <nav>
-                  ${TABS.map(
-                    (t) =>
-                      html`<button
-                        class="${this._tab === t ? "active" : ""}"
-                        @click=${() => (
-                          (this._tab = t),
-                          (this._tool = "select"),
-                          (this._outline_device = ""),
-                          (this._drawing = [])
-                        )}
-                      >
-                        ${i18n._(`aq_tab_${t}`)}
-                      </button>`,
-                  )}
-                </nav>
-                <div class="panel">
-                  ${this._tab !== "aquarium" &&
-                  this._tab !== "views" &&
-                  Object.keys(doc.views).length > 1
-                    ? html`<label class="field"
-                        >${i18n._("aq_view")}
-                        <select
-                          @change=${(e: Event) => (
-                            (this._view_id = (
-                              e.target as HTMLSelectElement
-                            ).value),
-                            (this._selection = null)
+        ${
+          doc
+            ? html`<div class="body">
+                <aside>
+                  <nav>
+                    ${TABS.map(
+                      (t) =>
+                        html`<button
+                          class="${this._tab === t ? "active" : ""}"
+                          @click=${() => (
+                            (this._tab = t),
+                            (this._tool = "select"),
+                            (this._outline_device = ""),
+                            (this._drawing = [])
                           )}
                         >
-                          ${Object.entries(doc.views).map(
-                            ([id, v]) =>
-                              html`<option
-                                value="${id}"
-                                ?selected=${id === this._view_id}
-                              >
-                                ${v.name || id}
-                              </option>`,
-                          )}
-                        </select>
-                      </label>`
-                    : nothing}
-                  ${this._tab === "aquarium"
-                    ? this._panel_aquarium()
-                    : this._tab === "views"
-                      ? this._panel_views()
-                      : this._tab === "elements"
-                        ? this._panel_elements()
-                        : this._tab === "lights"
-                          ? this._panel_lights()
-                          : this._tab === "livestock"
-                            ? this._panel_livestock()
-                            : this._tab === "feeding"
-                              ? this._panel_feeding()
-                              : this._panel_monitoring()}
-                </div>
-              </aside>
-              <main>${this._render_stage()}</main>
-            </div>`
-          : html`<div class="body loading">${i18n._("aq_loading")}</div>`}
-        ${drag?.type === "new"
-          ? html`<div class="ghost" style="left:${drag.x}px;top:${drag.y}px">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="${drag.kind === "device" ? mdiDevices : mdiMapMarker}"
-                ></path></svg
-              >${drag.label}
-            </div>`
-          : nothing}
+                          ${i18n._(`aq_tab_${t}`)}
+                        </button>`,
+                    )}
+                  </nav>
+                  <div class="panel">
+                    ${
+                      this._tab !== "aquarium" &&
+                      this._tab !== "views" &&
+                      Object.keys(doc.views).length > 1
+                        ? html`<label class="field"
+                            >${i18n._("aq_view")}
+                            <select
+                              @change=${(e: Event) => (
+                                (this._view_id = (
+                                  e.target as HTMLSelectElement
+                                ).value),
+                                (this._selection = null)
+                              )}
+                            >
+                              ${Object.entries(doc.views).map(
+                                ([id, v]) =>
+                                  html`<option
+                                    value="${id}"
+                                    ?selected=${id === this._view_id}
+                                  >
+                                    ${v.name || id}
+                                  </option>`,
+                              )}
+                            </select>
+                          </label>`
+                        : nothing
+                    }
+                    ${
+                      this._tab === "aquarium"
+                        ? this._panel_aquarium()
+                        : this._tab === "views"
+                          ? this._panel_views()
+                          : this._tab === "elements"
+                            ? this._panel_elements()
+                            : this._tab === "lights"
+                              ? this._panel_lights()
+                              : this._tab === "livestock"
+                                ? this._panel_livestock()
+                                : this._tab === "feeding"
+                                  ? this._panel_feeding()
+                                  : this._panel_monitoring()
+                    }
+                  </div>
+                </aside>
+                <main>${this._render_stage()}</main>
+              </div>`
+            : html`<div class="body loading">${i18n._("aq_loading")}</div>`
+        }
+        ${
+          drag?.type === "new"
+            ? html`<div class="ghost" style="left:${drag.x}px;top:${drag.y}px">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="${drag.kind === "device" ? mdiDevices : mdiMapMarker}"
+                  ></path></svg
+                >${drag.label}
+              </div>`
+            : nothing
+        }
       </div>
     </div>`;
   }

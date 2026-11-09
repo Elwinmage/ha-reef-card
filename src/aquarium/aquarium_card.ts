@@ -617,18 +617,22 @@ export class ReefAquariumCard extends LitElement {
         title="${name}"
         @click=${() => this._open_device(element.device_id!)}
       >
-        ${thumb
-          ? html`<img src="${thumb}" alt="${name}" />`
-          : html`<span class="chip"
-              ><svg viewBox="0 0 24 24"><path d="${mdiDevices}"></path></svg
-              >${name}</span
-            >`}
-        ${feeding
-          ? html`<span class="badge"
-              ><svg viewBox="0 0 24 24">
-                <path d="${mdiShakerOutline}"></path></svg
-            ></span>`
-          : nothing}
+        ${
+          thumb
+            ? html`<img src="${thumb}" alt="${name}" />`
+            : html`<span class="chip"
+                ><svg viewBox="0 0 24 24"><path d="${mdiDevices}"></path></svg
+                >${name}</span
+              >`
+        }
+        ${
+          feeding
+            ? html`<span class="badge"
+                ><svg viewBox="0 0 24 24">
+                  <path d="${mdiShakerOutline}"></path></svg
+              ></span>`
+            : nothing
+        }
       </div>`;
     }
     return html`<div class="el marker" style="${style}">
@@ -666,16 +670,18 @@ export class ReefAquariumCard extends LitElement {
     }
     return html`<ha-card>
       <div class="stage" style="aspect-ratio:${this._aspect}">
-        ${url
-          ? html`<img
-              class="bg"
-              src="${url}"
-              alt="${doc.name}"
-              crossorigin="anonymous"
-              @load=${this._on_bg_load}
-              @error=${() => this._images.failed(path)}
-            />`
-          : nothing}
+        ${
+          url
+            ? html`<img
+                class="bg"
+                src="${url}"
+                alt="${doc.name}"
+                crossorigin="anonymous"
+                @load=${this._on_bg_load}
+                @error=${() => this._images.failed(path)}
+              />`
+            : nothing
+        }
         ${is_drawn ? html`<canvas class="backdrop"></canvas>` : nothing}
         ${level === "full" ? html`<canvas class="life"></canvas>` : nothing}
         ${this._render_water(view, level)}
@@ -700,22 +706,28 @@ export class ReefAquariumCard extends LitElement {
         </svg>
         ${(view.elements ?? []).map((e) => this._element_node(e))}
         <div class="nav">
-          ${this._stack.length
-            ? html`<button @click=${this._back} title="${i18n._("back")}">
-                ←
-              </button>`
-            : nothing}
-          ${this._stack.length && view.name
-            ? html`<span class="chip">${view.name}</span>`
-            : nothing}
+          ${
+            this._stack.length
+              ? html`<button @click=${this._back} title="${i18n._("back")}">
+                  ←
+                </button>`
+              : nothing
+          }
+          ${
+            this._stack.length && view.name
+              ? html`<span class="chip">${view.name}</span>`
+              : nothing
+          }
         </div>
       </div>
-      ${this._overlay
-        ? html`<div class="overlay">
-            <button class="close" @click=${this._close_overlay}>✕</button>
-            ${this._overlay}
-          </div>`
-        : nothing}
+      ${
+        this._overlay
+          ? html`<div class="overlay">
+              <button class="close" @click=${this._close_overlay}>✕</button>
+              ${this._overlay}
+            </div>`
+          : nothing
+      }
     </ha-card>`;
   }
 }

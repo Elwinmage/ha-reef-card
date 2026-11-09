@@ -207,11 +207,13 @@ export class RSMessagesHistory extends LitElement {
             <time datetime="${entry.ts}"
               >${format_long(entry.ts, this._hass)}</time
             >
-            ${origin
-              ? html`<span class="origin origin-${entry.origin}"
-                  >${origin}</span
-                >`
-              : nothing}
+            ${
+              origin
+                ? html`<span class="origin origin-${entry.origin}"
+                    >${origin}</span
+                  >`
+                : nothing
+            }
             ${detail ? html`<span class="detail">${detail}</span>` : nothing}
           </div>
           <div class="text">${entry.text}</div>
@@ -264,25 +266,31 @@ export class RSMessagesHistory extends LitElement {
             ⟳
           </button>
         </div>
-        ${this.error
-          ? html`<div class="error">${this.error}</div>`
-          : this.entries.length === 0
-            ? html`<div class="empty">
-                ${this.loading
-                  ? i18n._("messages_history_loading")
-                  : i18n._("messages_history_empty")}
-              </div>`
-            : html`<ul class="list">
-                ${this.entries.map((e) => this._render_entry(e))}
-              </ul>`}
+        ${
+          this.error
+            ? html`<div class="error">${this.error}</div>`
+            : this.entries.length === 0
+              ? html`<div class="empty">
+                  ${
+                    this.loading
+                      ? i18n._("messages_history_loading")
+                      : i18n._("messages_history_empty")
+                  }
+                </div>`
+              : html`<ul class="list">
+                  ${this.entries.map((e) => this._render_entry(e))}
+                </ul>`
+        }
         <div class="footer">
           ${i18n._("messages_history_count", { count: this.entries.length })}
-          ${this.retention
-            ? html` ·
-              ${i18n._("messages_history_retention", {
-                days: this.retention,
-              })}`
-            : nothing}
+          ${
+            this.retention
+              ? html` ·
+                ${i18n._("messages_history_retention", {
+                  days: this.retention,
+                })}`
+              : nothing
+          }
         </div>
       </div>
     `;

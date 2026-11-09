@@ -991,20 +991,26 @@ export class PowerSensor extends LitElement {
   override render(): TemplateResult {
     return html`
       ${this._renderModeSelector()} ${this._renderOverride()}
-      ${this._mode === "schedule"
-        ? html`<div class="sce-divider"></div>
-            ${this._renderSchedule()}`
-        : nothing}
-      ${this._mode === "sensor"
-        ? html`<div class="sce-divider"></div>
-            ${this._renderSensor()}`
-        : nothing}
+      ${
+        this._mode === "schedule"
+          ? html`<div class="sce-divider"></div>
+              ${this._renderSchedule()}`
+          : nothing
+      }
+      ${
+        this._mode === "sensor"
+          ? html`<div class="sce-divider"></div>
+              ${this._renderSensor()}`
+          : nothing
+      }
       ${this._renderExtra()}
-      ${this._saveError
-        ? html`<div class="sce-error" style="margin-top:6px">
-            ${this._saveError}
-          </div>`
-        : nothing}
+      ${
+        this._saveError
+          ? html`<div class="sce-error" style="margin-top:6px">
+              ${this._saveError}
+            </div>`
+          : nothing
+      }
       <div class="sce-footer">
         <button
           class="sce-save-btn"
@@ -1041,12 +1047,14 @@ export class PowerSensor extends LitElement {
                   style="--mdc-icon-size:18px"
                 ></ha-icon>
                 ${i18n._(m.labelKey)}
-                ${this._override?.mode === m.id
-                  ? html`<ha-icon
-                      class="sce-mode-paused"
-                      icon="mdi:hand-back-left-outline"
-                    ></ha-icon>`
-                  : nothing}
+                ${
+                  this._override?.mode === m.id
+                    ? html`<ha-icon
+                        class="sce-mode-paused"
+                        icon="mdi:hand-back-left-outline"
+                      ></ha-icon>`
+                    : nothing
+                }
               </button>
             `,
           )}
@@ -1107,13 +1115,15 @@ export class PowerSensor extends LitElement {
           <span style="text-align:center">${i18n._("sched_from")}</span>
           <span style="text-align:center">${i18n._("sched_to")}</span>
         </div>
-        ${this._intervals.length === 0
-          ? html`<div
-              style="font-size:0.83em;color:var(--secondary-text-color,#888);padding:6px 0 4px;"
-            >
-              ${i18n._("sched_off")} — 00:00 → 23:59
-            </div>`
-          : nothing}
+        ${
+          this._intervals.length === 0
+            ? html`<div
+                style="font-size:0.83em;color:var(--secondary-text-color,#888);padding:6px 0 4px;"
+              >
+                ${i18n._("sched_off")} — 00:00 → 23:59
+              </div>`
+            : nothing
+        }
         ${this._intervals.map(
           (iv, i) => html`
             <div
@@ -1215,11 +1225,13 @@ export class PowerSensor extends LitElement {
           </select>
         </div>
 
-        ${def?.isAto
-          ? html`<div class="sce-ato-info">${i18n._("sensor_ato_info")}</div>`
-          : def
-            ? this._renderSensorParams(def)
-            : nothing}
+        ${
+          def?.isAto
+            ? html`<div class="sce-ato-info">${i18n._("sensor_ato_info")}</div>`
+            : def
+              ? this._renderSensorParams(def)
+              : nothing
+        }
       </div>
     `;
   }
@@ -1227,119 +1239,129 @@ export class PowerSensor extends LitElement {
   private _renderSensorParams(def: ProbeTypeDef): TemplateResult {
     return html`
       <div class="sce-params">
-        ${def.hasTurnOn
-          ? html`
-              <div class="sce-row">
-                <div class="sce-row-label">
-                  ${i18n._("sensor_activate_when")}
+        ${
+          def.hasTurnOn
+            ? html`
+                <div class="sce-row">
+                  <div class="sce-row-label">
+                    ${i18n._("sensor_activate_when")}
+                  </div>
+                  <div class="sce-toggle-pair">
+                    <button
+                      class="sce-toggle-btn ${this._turnOn ? "active-green" : ""}"
+                      @click="${() => (this._turnOn = true)}"
+                    >
+                      ${i18n._("sensor_turn_on")}
+                    </button>
+                    <button
+                      class="sce-toggle-btn ${!this._turnOn ? "active-red" : ""}"
+                      @click="${() => (this._turnOn = false)}"
+                    >
+                      ${i18n._("sensor_turn_off")}
+                    </button>
+                  </div>
                 </div>
-                <div class="sce-toggle-pair">
-                  <button
-                    class="sce-toggle-btn ${this._turnOn ? "active-green" : ""}"
-                    @click="${() => (this._turnOn = true)}"
-                  >
-                    ${i18n._("sensor_turn_on")}
-                  </button>
-                  <button
-                    class="sce-toggle-btn ${!this._turnOn ? "active-red" : ""}"
-                    @click="${() => (this._turnOn = false)}"
-                  >
-                    ${i18n._("sensor_turn_off")}
-                  </button>
+              `
+            : nothing
+        }
+        ${
+          def.hasDirection
+            ? html`
+                <div class="sce-row">
+                  <div class="sce-row-label">${i18n._("sensor_direction")}</div>
+                  <div class="sce-toggle-pair">
+                    <button
+                      class="sce-toggle-btn ${this._isAbove ? "active-blue" : ""}"
+                      @click="${() => (this._isAbove = true)}"
+                    >
+                      ${i18n._("sensor_above")}
+                    </button>
+                    <button
+                      class="sce-toggle-btn ${
+                        !this._isAbove ? "active-blue" : ""
+                      }"
+                      @click="${() => (this._isAbove = false)}"
+                    >
+                      ${i18n._("sensor_below")}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            `
-          : nothing}
-        ${def.hasDirection
-          ? html`
-              <div class="sce-row">
-                <div class="sce-row-label">${i18n._("sensor_direction")}</div>
-                <div class="sce-toggle-pair">
-                  <button
-                    class="sce-toggle-btn ${this._isAbove ? "active-blue" : ""}"
-                    @click="${() => (this._isAbove = true)}"
-                  >
-                    ${i18n._("sensor_above")}
-                  </button>
-                  <button
-                    class="sce-toggle-btn ${!this._isAbove
-                      ? "active-blue"
-                      : ""}"
-                    @click="${() => (this._isAbove = false)}"
-                  >
-                    ${i18n._("sensor_below")}
-                  </button>
+              `
+            : nothing
+        }
+        ${
+          def.hasValue
+            ? html`
+                <div class="sce-row">
+                  <div class="sce-row-label">${i18n._("sensor_value")}</div>
+                  <input
+                    class="sce-number-input"
+                    type="number"
+                    step="0.1"
+                    .value="${String(this._shownValue(def))}"
+                    @input="${(e: Event) =>
+                      this._setShownValue(
+                        def,
+                        Number((e.target as HTMLInputElement).value),
+                      )}"
+                  />
+                  <span class="sce-unit">${this._thresholdUnit(def)}</span>
                 </div>
-              </div>
-            `
-          : nothing}
-        ${def.hasValue
-          ? html`
-              <div class="sce-row">
-                <div class="sce-row-label">${i18n._("sensor_value")}</div>
-                <input
-                  class="sce-number-input"
-                  type="number"
-                  step="0.1"
-                  .value="${String(this._shownValue(def))}"
-                  @input="${(e: Event) =>
-                    this._setShownValue(
-                      def,
-                      Number((e.target as HTMLInputElement).value),
-                    )}"
-                />
-                <span class="sce-unit">${this._thresholdUnit(def)}</span>
-              </div>
-            `
-          : nothing}
-        ${def.hasHysteresis
-          ? html`
-              <div class="sce-row">
-                <div class="sce-row-label">
-                  ${i18n._("sensor_hysteresis")}
-                  <small>${i18n._("sensor_hysteresis_hint")}</small>
+              `
+            : nothing
+        }
+        ${
+          def.hasHysteresis
+            ? html`
+                <div class="sce-row">
+                  <div class="sce-row-label">
+                    ${i18n._("sensor_hysteresis")}
+                    <small>${i18n._("sensor_hysteresis_hint")}</small>
+                  </div>
+                  <input
+                    class="sce-number-input"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    .value="${String(this._shownHysteresis(def))}"
+                    @input="${(e: Event) =>
+                      this._setShownHysteresis(
+                        def,
+                        Number((e.target as HTMLInputElement).value),
+                      )}"
+                  />
+                  <span class="sce-unit">${this._thresholdUnit(def)}</span>
                 </div>
-                <input
-                  class="sce-number-input"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  .value="${String(this._shownHysteresis(def))}"
-                  @input="${(e: Event) =>
-                    this._setShownHysteresis(
-                      def,
-                      Number((e.target as HTMLInputElement).value),
-                    )}"
-                />
-                <span class="sce-unit">${this._thresholdUnit(def)}</span>
-              </div>
-            `
-          : nothing}
-        ${def.hasFallback
-          ? html`
-              <div class="sce-row">
-                <div class="sce-row-label">${i18n._("sensor_fallback")}</div>
-                <div class="sce-toggle-pair">
-                  <button
-                    class="sce-toggle-btn ${!this._fallbackOn
-                      ? "active-red"
-                      : ""}"
-                    @click="${() => (this._fallbackOn = false)}"
-                  >
-                    ${i18n._("sensor_fallback_off")}
-                  </button>
-                  <button
-                    class="sce-toggle-btn ${this._fallbackOn
-                      ? "active-green"
-                      : ""}"
-                    @click="${() => (this._fallbackOn = true)}"
-                  >
-                    ${i18n._("sensor_fallback_on")}
-                  </button>
+              `
+            : nothing
+        }
+        ${
+          def.hasFallback
+            ? html`
+                <div class="sce-row">
+                  <div class="sce-row-label">${i18n._("sensor_fallback")}</div>
+                  <div class="sce-toggle-pair">
+                    <button
+                      class="sce-toggle-btn ${
+                        !this._fallbackOn ? "active-red" : ""
+                      }"
+                      @click="${() => (this._fallbackOn = false)}"
+                    >
+                      ${i18n._("sensor_fallback_off")}
+                    </button>
+                    <button
+                      class="sce-toggle-btn ${
+                        this._fallbackOn ? "active-green" : ""
+                      }"
+                      @click="${() => (this._fallbackOn = true)}"
+                    >
+                      ${i18n._("sensor_fallback_on")}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            `
-          : nothing}
+              `
+            : nothing
+        }
       </div>
     `;
   }

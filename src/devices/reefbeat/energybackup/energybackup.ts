@@ -451,23 +451,27 @@ export class EnergyBackup extends RSDevice {
                     )}"
                 />
                 <span>${labels[pos]}</span>
-                ${labels[pos] === pump.name
-                  ? ""
-                  : html`<span class="eb-pump-device">${pump.name}</span>`}
+                ${
+                  labels[pos] === pump.name
+                    ? ""
+                    : html`<span class="eb-pump-device">${pump.name}</span>`
+                }
               </label>
             `,
           )}
         </div>
         <div class="eb-hint">
-          ${selection.length === 0
-            ? i18n._("energy_backup_pumps_hint")
-            : html`<button
-                type="button"
-                class="eb-clear"
-                @click="${() => this.set_config_value("pumps", [])}"
-              >
-                ${i18n._("energy_backup_pumps_auto")}
-              </button>`}
+          ${
+            selection.length === 0
+              ? i18n._("energy_backup_pumps_hint")
+              : html`<button
+                  type="button"
+                  class="eb-clear"
+                  @click="${() => this.set_config_value("pumps", [])}"
+                >
+                  ${i18n._("energy_backup_pumps_auto")}
+                </button>`
+          }
         </div>
       </form>
     `;

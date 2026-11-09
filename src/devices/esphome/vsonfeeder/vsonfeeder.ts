@@ -376,26 +376,32 @@ export class VSONFeeder extends RSDevice {
             src="${this._picture(open, empty)}"
             @click="${() => this._more_info(roles.trap)}"
           />
-          ${open || feeding
-            ? html`<div class="ff-pellets" aria-hidden="true">
-                ${Array.from(
-                  { length: PELLETS },
-                  (_, i) =>
-                    html`<span style="--i:${i};--x:${(i * 37) % 100}%"></span>`,
-                )}
-              </div>`
-            : ""}
+          ${
+            open || feeding
+              ? html`<div class="ff-pellets" aria-hidden="true">
+                  ${Array.from(
+                    { length: PELLETS },
+                    (_, i) =>
+                      html`<span
+                        style="--i:${i};--x:${(i * 37) % 100}%"
+                      ></span>`,
+                  )}
+                </div>`
+              : ""
+          }
           ${this._render_uptime(online)} ${this._render_restart(online)}
           ${this._render_schedule(slots)}
-          ${empty
-            ? html`<div
-                class="ff-face top ff-food-alert blink"
-                title="${i18n._("feeder_food_low")}"
-                @click="${() => this._more_info(roles.food_low)}"
-              >
-                <ha-icon icon="mdi:alert"></ha-icon>
-              </div>`
-            : ""}
+          ${
+            empty
+              ? html`<div
+                  class="ff-face top ff-food-alert blink"
+                  title="${i18n._("feeder_food_low")}"
+                  @click="${() => this._more_info(roles.food_low)}"
+                >
+                  <ha-icon icon="mdi:alert"></ha-icon>
+                </div>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -539,17 +545,18 @@ export class VSONFeeder extends RSDevice {
     const disabled = slot.unavailable;
     return html`
       <div
-        class="ff-slot ${off ? "off" : ""} ${is_next ? "next" : ""} ${shadowed
-          ? "shadowed"
-          : ""}"
+        class="ff-slot ${off ? "off" : ""} ${is_next ? "next" : ""} ${
+          shadowed ? "shadowed" : ""
+        }"
         title="${shadowed ? i18n._("feeder_slot_shadowed") : ""}"
       >
         <span class="ff-slot-index">${slot.index}</span>
         <input
-          class="ff-slot-time ${slot.time_entity &&
-          slot.time_entity in this._pending
-            ? "pending"
-            : ""}"
+          class="ff-slot-time ${
+            slot.time_entity && slot.time_entity in this._pending
+              ? "pending"
+              : ""
+          }"
           type="time"
           .value="${slot.minutes === null ? "" : format_time(slot.minutes)}"
           ?disabled="${disabled}"
@@ -566,10 +573,11 @@ export class VSONFeeder extends RSDevice {
             <ha-icon icon="mdi:minus"></ha-icon>
           </button>
           <span
-            class="ff-portions-value ${slot.portions_entity &&
-            slot.portions_entity in this._pending
-              ? "pending"
-              : ""}"
+            class="ff-portions-value ${
+              slot.portions_entity && slot.portions_entity in this._pending
+                ? "pending"
+                : ""
+            }"
             >${slot.portions}</span
           >
           <button
@@ -631,11 +639,13 @@ export class VSONFeeder extends RSDevice {
         <div class="ff-panel">
           <div class="ff-title">
             <span>${this.device?.name ?? ""}</span>
-            ${online
-              ? ""
-              : html`<span class="ff-offline"
-                  >${i18n._("feeder_offline")}</span
-                >`}
+            ${
+              online
+                ? ""
+                : html`<span class="ff-offline"
+                    >${i18n._("feeder_offline")}</span
+                  >`
+            }
           </div>
           ${this._render_next(slots)}
           <div class="ff-slots-head">
