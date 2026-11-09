@@ -42129,7 +42129,7 @@ customElements.get("reef-aquarium-card-editor") || customElements.define("reef-a
 customElements.get("reef-aquarium-scene-editor") || customElements.define("reef-aquarium-scene-editor", U);
 customElements.get("reef-coral-preview") || customElements.define("reef-coral-preview", xe);
 customElements.get("reef-colour-picker") || customElements.define("reef-colour-picker", ba);
-var tNA = "v2.1.4";
+var tNA = "v2.1.5";
 function aNA() {
   console.info(`%c 🪸 REEF CARD %c ${tNA} `, "color:#fff;background:#0097a7;font-weight:700;padding:2px 4px;border-radius:3px 0 0 3px", "color:#0097a7;background:#e0f7fa;font-weight:700;padding:2px 4px;border-radius:0 3px 3px 0");
 }
