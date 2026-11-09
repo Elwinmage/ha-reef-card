@@ -62,7 +62,7 @@ function copyPlugin() {
           let copiedCount = 0;
 
           // ── 1. Copier les fichiers de dist/ ────────────────────────────────
-          const distDir = resolve(__dirname, "dist");
+          const distDir = resolve(import.meta.dirname, "dist");
           if (existsSync(distDir)) {
             const distFiles = readdirSync(distDir);
 
@@ -79,7 +79,7 @@ function copyPlugin() {
           }
 
           // ── 2. Copier les fichiers de public/ (supplements, images, etc.) ───
-          const publicDir = resolve(__dirname, "public");
+          const publicDir = resolve(import.meta.dirname, "public");
           if (existsSync(publicDir)) {
             copyDirectoryRecursive(publicDir, COPY_TO_DIR);
             console.log(`✅ Copié (public): dossier complet`);
@@ -152,12 +152,10 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: "[name].[ext]",
         // Forcer l'encoding UTF-8
         banner: "/* ha-reef-card - Home Assistant custom card */",
-        // Éviter les caractères Unicode problématiques
-        compact: true,
       },
     },
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(import.meta.dirname, "src/index.ts"),
       name: "HaReefCard",
       fileName: () => "ha-reef-card.js",
       formats: ["es"],
