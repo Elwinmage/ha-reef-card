@@ -1093,22 +1093,75 @@ describe("add_supplement() — L65: cc!=null + different uid rebuild", () => {
   });
 });
 describe("head_configuration() — L278-279: form.remove() branch", () => {
-  it("removes existing #schedule and rebuilds it on second call", () => {
+  it("removes a #schedule outside the content and rebuilds it inside", () => {
     const sr = makeShadowRoot();
     const elt = makeElt_B();
     const hass = makeHassDlg();
-
-    head_configuration(elt, hass, sr as any);
-    const form1 = sr.querySelector("#schedule");
-    expect(form1).not.toBeNull();
-
-    const removeSpy = vi.spyOn(form1!, "remove");
+    const stray = sr.querySelector("#schedule")!;
+    const removeSpy = vi.spyOn(stray, "remove");
 
     head_configuration(elt, hass, sr as any);
 
     expect(removeSpy).toHaveBeenCalledOnce();
+    const form = sr.querySelector("#schedule")!;
+    expect(form.parentElement?.id).toBe("dialog-content");
+  });
 
-    expect(sr.querySelector("#schedule")).not.toBeNull();
+  it("follows the head on hass updates, until the user edits the form", () => {
+    const sr = makeShadowRoot();
+    const elt = makeElt_B();
+    const hass = makeHassDlg();
+    sr.querySelector("#dialog-content")!.after(document.createElement("hr"));
+    head_configuration(elt, hass, sr as any);
+    const form1 = sr.querySelector("#schedule") as HTMLElement;
+    expect(form1.dataset.dirty).toBe("false");
+
+    // Same head: nothing rebuilt
+    head_configuration(elt, hass, sr as any);
+    expect(sr.querySelector("#schedule")).toBe(form1);
+
+    // A dose applied from the assisted regulation: rebuilt in place
+    elt.device.entities.daily_dose.state = "7.5";
+    head_configuration(elt, hass, sr as any);
+    const form2 = sr.querySelector("#schedule") as HTMLElement;
+    expect(form2).not.toBe(form1);
+    expect(form2.parentElement?.id).toBe("dialog-content");
+
+    // Being edited: the head does not overwrite the user's input
+    form2.dispatchEvent(new Event("input"));
+    expect(form2.dataset.dirty).toBe("true");
+    elt.device.entities.daily_dose.state = "9";
+    head_configuration(elt, hass, sr as any);
+    expect(sr.querySelector("#schedule")).toBe(form2);
+
+    // A schedule type picked by hand rebuilds it, as an edit
+    head_configuration(elt, hass, sr as any, { type: "single" });
+    const form3 = sr.querySelector("#schedule") as HTMLElement;
+    expect(form3).not.toBe(form2);
+    expect(form3.dataset.dirty).toBe("true");
+  });
+
+  it("follows the head again once the schedule is saved", () => {
+    const sr = makeShadowRoot();
+    const elt = makeElt_B();
+    const hass = makeHassDlg();
+    head_configuration(elt, hass, sr as any);
+    const form = sr.querySelector("#schedule") as HTMLElement;
+    form.dispatchEvent(new Event("change"));
+    const save = form.querySelector("#save_schedule") as HTMLElement | null;
+    const button = save ?? (form.querySelector("button") as HTMLElement);
+    button.click();
+    expect(form.dataset.dirty).toBe("false");
+  });
+
+  it("draws nothing for a head without schedule", () => {
+    const sr = makeShadowRoot();
+    const elt = makeElt_B({}, {});
+    elt.device.entities.schedule_head = null;
+    elt.device.entities.daily_dose = null;
+    sr.querySelector("#schedule")!.remove();
+    head_configuration(elt, makeHassDlg(), sr as any);
+    expect(sr.querySelector("#schedule")).toBeNull();
   });
 });
 describe("head_configuration() — L289-291 + L724-726: schedule change listener", () => {
@@ -1428,6 +1481,7 @@ describe("dose_head.dialog_func_ext.ts — L559, L65 3rd branch, L278", () => {
       style: { width: "" },
       appendChild: vi.fn(),
       addEventListener: vi.fn(),
+      dataset: {},
     };
 
     const shadowRoot = {

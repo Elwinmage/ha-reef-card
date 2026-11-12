@@ -102,6 +102,17 @@ export const VSON_FEEDER_SLOTS = 5;
 /** Highest number of portions a slot accepts (see the firmware numbers). */
 export const VSON_FEEDER_MAX_PORTIONS = 10;
 
+// ─── VSON cloud feeder (ha-vson-component, domain `vson`) ─────────────────────
+
+/**
+ * Models the cloud VSON feeder view is registered under. The device model
+ * comes straight from ha-vson-component (device_info: "WP8621" for the base
+ * family, "WP8621A" for the 8622/86221 classic family), so the custom
+ * element tag derives from it ("vson-wp8621", "vson-wp8621a"). Both tags map
+ * to the same VSONCloudFeeder view.
+ */
+export const VSON_CLOUD_MODELS = ["WP8621", "WP8621A"] as const;
+
 // ─── Device domains ───────────────────────────────────────────────────────────
 
 /**
@@ -223,5 +234,11 @@ export const KNOWN_DEVICE_DOMAINS: Record<string, KnownDeviceDomain> = {
     project_names: {
       [VSON_FEEDER_PROJECT]: VSON_FEEDER_MODEL,
     },
+  },
+  // ha-vson-component (cloud). Devices carry a ("vson", <id>) identifier, so
+  // they are recognised by domain; the model ("WP8621"/"WP8621A") names the
+  // view directly (see VSON_CLOUD_MODELS).
+  vson: {
+    tag_prefix: "vson",
   },
 };

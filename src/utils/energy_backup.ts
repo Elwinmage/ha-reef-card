@@ -1051,6 +1051,11 @@ export function build_power_flow(
     sort_individual_devices: false,
     // Four pumps and a battery: the bottom row would be dropped otherwise
     allow_layout_break: true,
+    // The battery sits on the bus between the charger and the pumps (a DC
+    // UPS): every load runs through it, never mains -> aquarium directly.
+    // Power Flow Card Plus >= 0.5.0; older versions ignore it.
+    // isolated_battery would drop the mains <-> battery wire the charger uses.
+    topology: "battery_hub",
   };
   return flow;
 }

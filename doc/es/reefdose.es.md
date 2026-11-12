@@ -94,6 +94,8 @@ La configuración del cabezal contiene la **Regulación de dosificación** de la
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  La ventana muestra la dosis actual (solo lectura) justo encima de la propuesta. Un resultado se introduce a mano o se lee en la jeringa de un kit: elija el kit (Red Sea, Salifert, Colombo…) e introduzca la lectura del reactivo en mL, el resultado se calcula. El botón **Resultados de pruebas** lista los resultados para añadir uno con una fecha pasada, corregirlo o eliminarlo; el gráfico se actualiza al instante. Un suplemento que ninguna prueba guía (Red Sea NO3:PO4-X, alimentos) no ofrece dosificación asistida y su potencia aparece en gris. Una dosis aplicada aparece en el programa del cabezal al volver a él.
+
 - **Salmuera**: el cabezal lo controla solo Home Assistant, con dosis manuales, así que su configuración muestra la salmuera en lugar del programa: salinidad de la última semana, estado y alarma, salmuera prevista, control con refractómetro y ajustes. En la vista principal, el anillo y la etiqueta central muestran la salmuera dosificada hoy frente a la prevista, y la etiqueta inferior la salinidad.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

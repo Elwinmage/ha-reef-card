@@ -94,6 +94,8 @@ Konfiguracja głowicy zawiera **Regulację dozowania** [integracji redsea](https
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  Okno pokazuje bieżącą dawkę (tylko do odczytu) tuż nad proponowaną. Wynik testu wpisuje się ręcznie lub odczytuje ze strzykawki zestawu: wybierz zestaw (Red Sea, Salifert, Colombo…) i wpisz odczyt odczynnika w mL, wynik zostanie obliczony. Przycisk **Wyniki testów** wyświetla wyniki, aby dodać wynik z wcześniejszą datą, poprawić go lub usunąć; wykres od razu się aktualizuje. Suplement, którego nie steruje żaden test (Red Sea NO3:PO4-X, pokarmy), nie oferuje dawkowania wspomaganego, a jego moc jest wyszarzona. Zastosowana dawka pojawia się w harmonogramie głowicy po powrocie do niego.
+
 - **Solanka**: głowicą steruje wyłącznie Home Assistant, dawkami ręcznymi, więc jej konfiguracja pokazuje solankę zamiast harmonogramu: zasolenie z ostatniego tygodnia, stan i alarm, planowaną solankę, kontrolę refraktometrem i ustawienia. W widoku głównym pierścień i środkowa etykieta pokazują solankę dozowaną dziś względem planowanej, a dolna etykieta zasolenie.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

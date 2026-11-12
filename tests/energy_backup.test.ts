@@ -840,6 +840,8 @@ describe("energy backup power flow", () => {
     const e = flow.config!["entities"];
     expect(flow.config!["type"]).toBe("custom:power-flow-card-plus");
     expect(flow.config!["title"]).toBe("Reef Battery Backup");
+    // A DC UPS: every load runs through the battery
+    expect(flow.config!["topology"]).toBe("battery_hub");
     // Positive while discharging on both sides: no inversion
     expect(e.battery.entity).toBe(P + "puissance");
     expect(e.battery.invert_state).toBeUndefined();

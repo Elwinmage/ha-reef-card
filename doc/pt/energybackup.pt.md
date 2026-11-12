@@ -16,6 +16,8 @@ Os fluxos são desenhados pelo [Power Flow Card Plus](https://github.com/flixlix
 
 Os fluxos substituem esse painel assim que o cartão é carregado. A sua configuração é escrita pelo reef card: não é preciso YAML `power-flow-card-plus`, sensor de modelo nem `config-template-card`.
 
+Com o Power Flow Card Plus 0.5.0 ou posterior, os fluxos seguem a ligação do backup (`topology: battery_hub`): a bateria fica entre o carregador e as bombas, por isso a rede alimenta a bateria e a bateria o aquário. Uma versão mais antiga desenha a disposição padrão, com um fio rede → aquário.
+
 ## A vista
 
 O cartão está dividido em 5 zonas:

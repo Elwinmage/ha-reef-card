@@ -325,6 +325,7 @@ L'ensemble est documenté sur la [page du projet ReefTech](https://elwinmage.git
 - [Batterie de secours](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/fr/energybackup.fr.md#batterie-de-secours)
 - [Distributeur de nourriture VSON (hacké)](vsonfeeder.fr.md#distributeur-de-nourriture-vson-hacké)
 - [Vue aquarium](aquarium.fr.md#vue-aquarium)
+- [Alarme commune et suivi des paramètres](alarms-parameters.fr.md#alarme-commune-et-suivi-des-paramètres)
 - [FAQ](#faq)
 
 # Installation

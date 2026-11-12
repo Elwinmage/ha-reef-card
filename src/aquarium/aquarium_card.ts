@@ -57,6 +57,8 @@ import {
 import DeviceList from "../utils/common";
 import i18n from "../translations/myi18n";
 import style_aquarium from "./aquarium.styles";
+// The common alarm of the reef, placed as a marker with the "alarms" role
+import "../base/reef_alarms";
 
 /** Picture of the card, shown until an aquarium is chosen. */
 const PREVIEW_IMG = new URL("../img/preview-reeftank.webp", import.meta.url)
@@ -633,6 +635,12 @@ export class ReefAquariumCard extends LitElement {
               ></span>`
             : nothing
         }
+      </div>`;
+    }
+    if (element.roles?.includes("alarms")) {
+      // The common alarm of the reef, its list on a tap
+      return html`<div class="el marker alarms" style="${style}">
+        <reef-alarms .hass=${hass}></reef-alarms>
       </div>`;
     }
     return html`<div class="el marker" style="${style}">

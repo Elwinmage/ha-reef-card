@@ -22,6 +22,7 @@ import {
   mdiTextureBox,
   mdiShapeOutline,
   mdiMapMarker,
+  mdiAlarmLight,
   mdiUndo,
   mdiClose,
   mdiContentSave,
@@ -1479,6 +1480,11 @@ export class ReefAquariumSceneEditor extends LitElement {
         title="${s?.attributes?.friendly_name ?? el.entity_id}"
         >${text}</span
       >`;
+    } else if (el.roles.includes("alarms")) {
+      body = html`<span class="chip"
+        ><svg viewBox="0 0 24 24"><path d="${mdiAlarmLight}"></path></svg
+        >${el.label}</span
+      >`;
     } else {
       // A marker shows its role in its own icon: no badge
       body = html`<span class="chip"
@@ -2646,6 +2652,20 @@ export class ReefAquariumSceneEditor extends LitElement {
           )}
       >
         + ${i18n._("aq_add_marker")}
+      </button>
+      <button
+        @click=${() =>
+          v &&
+          this.change(
+            ops.add_element(doc, v, {
+              kind: "marker",
+              pos: [0.9, 0.08],
+              roles: ["alarms"],
+              label: i18n._("aq_add_alarms"),
+            })[0],
+          )}
+      >
+        + ${i18n._("aq_add_alarms")}
       </button>
       <div class="tree">
         ${tree?.floors.map((f) => this._render_tree_floor(f))}

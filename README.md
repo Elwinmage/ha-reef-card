@@ -332,6 +332,7 @@ All of them are documented together on the [ReefTech project page](https://elwin
 - [Energy backup](https://github.com/Elwinmage/ha-reef-card/blob/main/doc/en/energybackup.md#energy-backup)
 - [Fish feeder VSON (hacked)](doc/en/vsonfeeder.md#fish-feeder-vson-hacked)
 - [Aquarium view](doc/en/aquarium.md#aquarium-view)
+- [Common alarm and water parameters](doc/en/alarms-parameters.md#common-alarm-and-water-parameters)
 - [FAQ](https://github.com/Elwinmage/ha-reef-card/#faq)
 
 # Installation

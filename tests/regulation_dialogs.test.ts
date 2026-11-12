@@ -47,7 +47,9 @@ const BACKEND_KEYS = new Set([
   "brine_salinity",
   "brine_daily_volume",
   "regulation_alarm",
-  "number.daily_dose",
+  "regulation_test_kit",
+  "regulation_reagent",
+  "sensor.daily_dose",
   "schedule_enabled",
 ]);
 
@@ -112,7 +114,7 @@ describe("regulation dialogs", () => {
 
   it("only use entities the integration builds", () => {
     for (const dialog of [
-      ...Object.values(dialogs_regulation),
+      dialogs_regulation.regulation_assisted,
       regulation_content,
       schedule_content.slice(0, 1),
       brine_content,
@@ -123,6 +125,45 @@ describe("regulation dialogs", () => {
         expect(BACKEND_KEYS.has(key), `${dialog.name}: ${key}`).toBe(true);
       }
     }
+  });
+
+  it("show the dose in force right above the one proposed", () => {
+    const keys = entity_keys(dialogs_regulation.regulation_assisted);
+    const proposed = keys.indexOf("regulation_proposed_dose");
+    // The sensor: read only, the schedule is where the dose is changed
+    expect(keys[proposed - 1]).toBe("sensor.daily_dose");
+    expect(keys).not.toContain("number.daily_dose");
+    // A test kit reading comes before the result it gives
+    expect(keys.indexOf("regulation_test_kit")).toBeLessThan(
+      keys.indexOf("regulation_reagent"),
+    );
+    expect(keys.indexOf("regulation_reagent")).toBeLessThan(
+      keys.indexOf("regulation_measurement"),
+    );
+  });
+
+  it("chart the results the integration keeps, editable", () => {
+    const chart = dialogs_regulation.regulation_assisted.content.find(
+      (c: any) => c.view === "history-chart",
+    ) as any;
+    expect(chart.conf.points_attribute).toBe("measurements");
+    expect(opened(dialogs_regulation.regulation_assisted)).toEqual([
+      "regulation_history",
+    ]);
+    const button = dialogs_regulation.regulation_assisted.content.find(
+      (c: any) => c.view === "common-button",
+    ) as any;
+    // Back to the assisted dosing, not to the head configuration
+    expect(button.conf.tap_action.data.overload_quit).toBe(
+      "regulation_assisted",
+    );
+    expect(dialogs_regulation.regulation_history.content).toEqual([
+      {
+        view: "extend",
+        extend: "measurement_history_dialog_func_ext",
+        re_render: true,
+      },
+    ]);
   });
 
   it("chart a reading of each mode", () => {
@@ -142,7 +183,7 @@ describe("regulation dialogs", () => {
 
   it("are translated in every language", () => {
     for (const locale of [de, en, es, fr, it_, pl, pt]) {
-      for (const key of ["regulation_assisted"]) {
+      for (const key of ["regulation_assisted", "measurement_history"]) {
         expect((locale as Record<string, string>)[key]).toBeTruthy();
       }
     }
@@ -177,10 +218,11 @@ describe("regulation dialogs", () => {
     expect(shown("brine", brine_content).every(Boolean)).toBe(true);
     // The mode itself is always there
     expect(shown("brine", regulation_content.slice(0, 1))).toEqual([true]);
-    // The schedule editor is the head's own extension
+    // The schedule editor is the head's own extension, following the head
     expect(schedule_content[1]).toMatchObject({
       view: "extend",
       extend: "dose_head_dialog_func_ext",
+      re_render: true,
     });
   });
 

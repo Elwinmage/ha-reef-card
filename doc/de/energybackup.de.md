@@ -16,6 +16,8 @@ Die Flüsse werden von [Power Flow Card Plus](https://github.com/flixlix/power-f
 
 Die Flüsse ersetzen dieses Feld, sobald die Karte geladen ist. Ihre Konfiguration schreibt die Reef Card: weder `power-flow-card-plus`-YAML noch Template-Sensor noch `config-template-card` sind nötig.
 
+Ab Power Flow Card Plus 0.5.0 folgen die Flüsse der Verkabelung der Notstromversorgung (`topology: battery_hub`): Die Batterie liegt zwischen Ladegerät und Pumpen, das Netz speist also die Batterie und die Batterie das Aquarium. Eine ältere Version zeichnet ihr Standardlayout mit einer Leitung Netz → Aquarium.
+
 ## Die Ansicht
 
 Die Karte ist in 5 Zonen gegliedert:

@@ -16,6 +16,8 @@ Przepływy rysuje [Power Flow Card Plus](https://github.com/flixlix/power-flow-c
 
 Przepływy zastępują ten panel, gdy tylko karta zostanie załadowana. Jej konfigurację zapisuje reef card: nie potrzeba YAML `power-flow-card-plus`, czujnika szablonowego ani `config-template-card`.
 
+Od Power Flow Card Plus 0.5.0 przepływy odpowiadają okablowaniu zasilania awaryjnego (`topology: battery_hub`): bateria jest między ładowarką a pompami, więc sieć zasila baterię, a bateria akwarium. Starsza wersja rysuje układ standardowy, z przewodem sieć → akwarium.
+
 ## Widok
 
 Karta jest podzielona na 5 stref:

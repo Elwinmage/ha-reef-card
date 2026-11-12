@@ -55,6 +55,7 @@ import { AMDCRunner } from "./aquamedic/dcrunner";
 import { AMDCSkimmer } from "./aquamedic/dcskimmer";
 import { EnergyBackup } from "./reefbeat/energybackup";
 import { VSONFeeder } from "./esphome/vsonfeeder";
+import { VSONCloudFeeder } from "./vson";
 
 // register devices
 if (!customElements.get("redsea-nodevice"))
@@ -167,6 +168,11 @@ if (!customElements.get("reefbeat-energybackup"))
   customElements.define("reefbeat-energybackup", EnergyBackup);
 if (!customElements.get("esphome-vsonfeeder"))
   customElements.define("esphome-vsonfeeder", VSONFeeder);
+// ha-vson-component (cloud): both family models map to the same view.
+if (!customElements.get("vson-wp8621"))
+  customElements.define("vson-wp8621", VSONCloudFeeder);
+if (!customElements.get("vson-wp8621a"))
+  customElements.define("vson-wp8621a", class extends VSONCloudFeeder {});
 
 // Export devices
 export { NoDevice } from "./redsea/rsnodevice";
@@ -218,3 +224,4 @@ export { AMDCRunner } from "./aquamedic/dcrunner";
 export { AMDCSkimmer } from "./aquamedic/dcskimmer";
 export { EnergyBackup } from "./reefbeat/energybackup";
 export { VSONFeeder } from "./esphome/vsonfeeder";
+export { VSONCloudFeeder } from "./vson";

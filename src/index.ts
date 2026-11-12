@@ -6,6 +6,8 @@ import { ReefCardEditor } from "./editor";
 
 import "./devices/index";
 import "./aquarium/index";
+import "./base/reef_alarms";
+import "./base/reef_parameters";
 import { log_banner } from "./banner";
 
 log_banner();
@@ -54,5 +56,23 @@ window.customCards.push({
     "A living picture of your aquarium: its devices and entities, the water lit by your lamps, fish and corals (needs the reeftank integration).",
   documentationURL: "https://github.com/Elwinmage/ha-reef-card",
   // Rendered with its stub configuration (no aquarium): shows its picture
+  preview: true,
+});
+
+window.customCards.push({
+  type: "reef-alarms-card",
+  name: "Reef Alarms Card",
+  description:
+    "The common alarm of the reef: green while all is well, red with the alarms in progress, listed on a tap.",
+  documentationURL: "https://github.com/Elwinmage/ha-reef-card",
+  preview: true,
+});
+
+window.customCards.push({
+  type: "reef-parameters-card",
+  name: "Reef Parameters Card",
+  description:
+    "Follow-up of the water tests (KH, Ca, Mg, Fe...): one chart per parameter over its desired, acceptable and danger zones.",
+  documentationURL: "https://github.com/Elwinmage/ha-reef-card",
   preview: true,
 });

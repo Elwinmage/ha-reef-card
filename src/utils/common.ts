@@ -688,7 +688,6 @@ export function create_hour(
 export const LINKABLE_INTEGRATIONS: Record<string, string | null> = {
   redsea: null,
   aquamedic: null,
-  mqtt: "reefbeat-energy-backup",
 };
 
 /**
@@ -703,6 +702,13 @@ export const LINKABLE_INTEGRATIONS: Record<string, string | null> = {
  * appliance and may sit on its own socket.
  */
 const SUB_DEVICE_MARKERS = ["_head_"];
+
+/**
+ * Identifier prefixes of service devices: registry entries an integration
+ * creates for its own bookkeeping (the supplements and equipment catalogs
+ * of redsea, say), with no appliance behind them to plug in.
+ */
+const SERVICE_DEVICE_PREFIXES = ["catalog_"];
 
 /**
  * Models drawing their power through a sub-device rather than directly.
@@ -804,6 +810,9 @@ export function list_linkable_devices(
     // appliance as a whole, so those are not offered.
     const key = String(ident[1] ?? "");
     if (SUB_DEVICE_MARKERS.some((marker) => key.includes(marker))) {
+      continue;
+    }
+    if (SERVICE_DEVICE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
       continue;
     }
 

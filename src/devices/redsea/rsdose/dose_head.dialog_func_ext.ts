@@ -266,21 +266,42 @@ export function head_configuration(
   if (elt.device.bundle && elt.device.config.id > 1) {
     return;
   }
-  if (
-    saved_schedule === null ||
-    saved_schedule.type ===
-      elt.device.get_entity("schedule_head").attributes.schedule.type
-  ) {
-    saved_schedule = elt.device.get_entity("schedule_head").attributes.schedule;
+  // Called back on every hass update (re_render): the form follows the
+  // head (a dose applied by the assisted regulation, a schedule changed in
+  // the app) as long as the user has not started editing it.
+  const live = saved_schedule === null;
+  const head_schedule =
+    elt.device.get_entity("schedule_head")?.attributes?.schedule;
+  const head_dd = elt.device.get_entity("daily_dose")?.state;
+  const snapshot = JSON.stringify([head_schedule ?? null, head_dd ?? null]);
+  const previous = shadowRoot.querySelector("#schedule");
+  if (live && previous) {
+    if (
+      previous.dataset.snapshot === snapshot ||
+      previous.dataset.dirty === "true" ||
+      previous.contains(shadowRoot.activeElement)
+    ) {
+      return;
+    }
+  }
+  if (saved_schedule === null || saved_schedule.type === head_schedule?.type) {
+    saved_schedule = head_schedule;
+  }
+  if (!saved_schedule) {
+    return;
   }
 
-  let form = shadowRoot.querySelector("#schedule");
-  if (form) {
-    form.remove();
-  }
-  form = shadowRoot.createElement("form");
+  const form = shadowRoot.createElement("form");
   form.className = "schedule";
   form.id = "schedule";
+  form.dataset.snapshot = snapshot;
+  // A type picked by hand is an edit: the head must not overwrite it
+  form.dataset.dirty = live ? "false" : "true";
+  const mark_dirty = () => {
+    form.dataset.dirty = "true";
+  };
+  form.addEventListener("input", mark_dirty);
+  form.addEventListener("change", mark_dirty);
   const schedule_type = com.create_select(
     "schedule",
     ["single", "custom", "hourly", "timer"],
@@ -351,7 +372,14 @@ export function head_configuration(
     false,
   );
   form.appendChild(save_button);
-  shadowRoot.querySelector("#dialog-content").appendChild(content);
+  const container = shadowRoot.querySelector("#dialog-content");
+  if (previous && previous.parentNode === container) {
+    // Rebuilt in place, so the items after the schedule stay after it
+    previous.replaceWith(content);
+  } else {
+    previous?.remove();
+    container.appendChild(content);
+  }
 }
 
 function head_configuration_schedule_single(
@@ -473,6 +501,8 @@ function save_schedule(event, shadowRoot, form, elt, hass) {
     };
     console.debug("Call service", data);
     hass.callService("redsea", "request", data);
+    // Saved: the form follows the head again
+    form.dataset.dirty = "false";
     shadowRoot.dispatchEvent(
       new CustomEvent("hass-notification", {
         bubbles: true,

@@ -16,6 +16,8 @@ Los flujos los dibuja [Power Flow Card Plus](https://github.com/flixlix/power-fl
 
 Los flujos sustituyen a ese panel en cuanto la tarjeta está cargada. Su configuración la escribe la reef card: no hace falta YAML de `power-flow-card-plus`, ni sensor de plantilla, ni `config-template-card`.
 
+Con Power Flow Card Plus 0.5.0 o posterior, los flujos siguen el cableado del respaldo (`topology: battery_hub`): la batería está entre el cargador y las bombas, así que la red alimenta la batería y la batería el acuario. Una versión anterior dibuja su disposición estándar, con un cable red → acuario.
+
 ## La vista
 
 La tarjeta se divide en 5 zonas:

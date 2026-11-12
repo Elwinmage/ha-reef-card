@@ -12,8 +12,11 @@
  *   it works on, the brine planned per day, the refractometer check and the
  *   settings. Otherwise the schedule stays (schedule_content);
  * - "regulation_assisted", reached from the head configuration in assisted
- *   mode: record a test result, review the proposed daily dose and apply or
- *   dismiss it, then the settings of the computation.
+ *   mode: record a test result (typed in, or read on the syringe of a test
+ *   kit), review the proposed daily dose against the current one and apply
+ *   or dismiss it, then the settings of the computation;
+ * - "regulation_history", reached from "regulation_assisted": the test
+ *   results, to add one at a past date, correct or delete one.
  */
 
 /** Conditions on the head's regulation mode, for `disabled_if`. */
@@ -27,7 +30,13 @@ const row = (entity: string) => ({ entity, name: { type: "entity" } });
  * A button of a dialog opening another dialog of the same head, shown only
  * while the head's regulation mode is `mode`.
  */
-function open_dialog(type: string, icon: string, label: string, mode: string) {
+function open_dialog(
+  type: string,
+  icon: string,
+  label: string,
+  mode: string,
+  back: string = "head_configuration",
+) {
   return {
     view: "common-button",
     conf: {
@@ -39,7 +48,7 @@ function open_dialog(type: string, icon: string, label: string, mode: string) {
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
-        data: { type, overload_quit: "head_configuration" },
+        data: { type, overload_quit: back },
       },
       label,
       class: "dialog_button",
@@ -56,11 +65,17 @@ function open_dialog(type: string, icon: string, label: string, mode: string) {
  * @param step: true for a value holding between two changes (a test
  *   result), false for a signal (a salinity)
  */
-function history(entity: string, hours: number, step: boolean) {
+function history(
+  entity: string,
+  hours: number,
+  step: boolean,
+  extra: Record<string, unknown> = {},
+) {
   return {
     view: "history-chart",
     conf: {
       type: "history-chart",
+      ...extra,
       entities: [{ entity, color: "rgb(30,30,30)" }],
       step,
       // Nothing recorded yet (no test, no salinity read): no blank panel
@@ -105,6 +120,9 @@ export const schedule_content = [
   hidden_if(BRINE_MODE, {
     view: "extend",
     extend: "dose_head_dialog_func_ext",
+    // Follows the head: a dose applied from the assisted regulation shows
+    // at once when coming back here, without closing the dialog
+    re_render: true,
   }),
 ];
 
@@ -138,27 +156,53 @@ export const brine_content = [
 ].map((item) => hidden_if(NOT_BRINE_MODE, item));
 
 export const dialogs_regulation = {
+  regulation_history: {
+    name: "regulation_history",
+    title_key: "${i18n._('measurement_history')} n°${config.id}",
+    close_cross: true,
+    content: [
+      {
+        view: "extend",
+        extend: "measurement_history_dialog_func_ext",
+        re_render: true,
+      },
+    ],
+  },
   regulation_assisted: {
     name: "regulation_assisted",
     title_key: "${i18n._('regulation_assisted')} n°${config.id}",
     close_cross: true,
     content: [
-      // Tests over the last 90 days (as far as the recorder keeps them)
-      history("regulation_last_measurement", 24 * 90, true),
+      // Tests over the last 90 days, from the results the integration keeps
+      // (not the recorder): one added at a past date, corrected or deleted
+      // shows at once
+      history("regulation_last_measurement", 24 * 90, true, {
+        points_attribute: "measurements",
+      }),
       entities([
         row("regulation_status"),
         row("regulation_last_measurement"),
         row("regulation_consumption"),
+        // The dose in force (read only), right above the one proposed
+        row("sensor.daily_dose"),
         row("regulation_proposed_dose"),
-        // The number (0.1 mL steps), not the sensor of the same name
-        row("number.daily_dose"),
         divider,
+        // A test kit: its syringe reading gives the result
+        row("regulation_test_kit"),
+        row("regulation_reagent"),
         row("regulation_measurement"),
         row("regulation_record"),
         divider,
         row("regulation_apply"),
         row("regulation_dismiss"),
       ]),
+      open_dialog(
+        "regulation_history",
+        "mdi:history",
+        "${i18n._('measurement_history')}",
+        "assisted",
+        "regulation_assisted",
+      ),
       entities([
         row("regulation_parameter"),
         row("regulation_target"),

@@ -11,6 +11,7 @@ import {
   default as DeviceList,
   domain_of,
   hexToRgb,
+  LINKABLE_INTEGRATIONS,
   list_linkable_devices,
   resolve_device_model,
   rgbToHex,
@@ -799,7 +800,7 @@ describe("list_linkable_devices", () => {
     expect(list_linkable_devices(hass)).toHaveLength(1);
   });
 
-  it("offers the backup service published over MQTT", () => {
+  it("leaves out the backup service published over MQTT", () => {
     const hass = makeRegistry([
       {
         id: "d1",
@@ -809,7 +810,42 @@ describe("list_linkable_devices", () => {
       },
     ]);
 
-    expect(list_linkable_devices(hass)).toHaveLength(1);
+    expect(list_linkable_devices(hass)).toEqual([]);
+  });
+
+  it("keeps an integration to the model it requires", () => {
+    LINKABLE_INTEGRATIONS.mqtt = "reefbeat-energy-backup";
+    try {
+      const hass = makeRegistry([
+        {
+          id: "d1",
+          name: "Backup",
+          identifiers: [["mqtt", "a"]],
+          model_id: "reefbeat-energy-backup",
+        },
+        { id: "d2", name: "Other", identifiers: [["mqtt", "b"]] },
+      ]);
+      expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+        "Backup",
+      ]);
+    } finally {
+      delete LINKABLE_INTEGRATIONS.mqtt;
+    }
+  });
+
+  it("leaves out the catalog service devices of redsea", () => {
+    const hass = makeRegistry([
+      {
+        id: "d1",
+        name: "Supplements",
+        identifiers: [["redsea", "catalog_supplements"]],
+      },
+      { id: "d2", name: "ReefDose", identifiers: [["redsea", "RSDOSE4"]] },
+    ]);
+
+    expect(list_linkable_devices(hass).map((d) => d.text)).toEqual([
+      "ReefDose",
+    ]);
   });
 
   it("leaves out unrelated MQTT devices", () => {

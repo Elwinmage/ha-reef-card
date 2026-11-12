@@ -94,6 +94,8 @@ A configuração da cabeça contém a **Regulação da dosagem** da [integraçã
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  A janela mostra a dose em vigor (só leitura) logo acima da proposta. Um resultado é introduzido à mão ou lido na seringa de um kit: escolha o kit (Red Sea, Salifert, Colombo…) e introduza a leitura do reagente em mL, o resultado é calculado. O botão **Resultados dos testes** lista os resultados para adicionar um numa data passada, corrigi-lo ou eliminá-lo; o gráfico acompanha de imediato. Um suplemento que nenhum teste orienta (Red Sea NO3:PO4-X, alimentos) não oferece dosagem assistida e a sua potência fica a cinzento. Uma dose aplicada aparece no programa da cabeça ao voltar a ele.
+
 - **Salmoura**: a cabeça é controlada apenas pelo Home Assistant, com doses manuais, por isso a sua configuração mostra a salmoura em vez do programa: salinidade da última semana, estado e alarme, salmoura prevista, controlo com refratómetro e definições. Na vista principal, o anel e a etiqueta central mostram a salmoura dosada hoje face à prevista, e a etiqueta inferior a salinidade.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

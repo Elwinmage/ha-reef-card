@@ -94,6 +94,8 @@ The head configuration holds the **Dose regulation** of the [redsea integration]
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  The dialog shows the dose in force (read only) right above the proposed one. A test result can be typed in, or read on the syringe of a test kit: pick the kit (Red Sea, Salifert, Colombo…) and type the reagent reading in mL, the result is computed. The **Test results** button lists the results to add one at a past date, correct or delete one; the chart follows at once. A supplement no test drives (Red Sea NO3:PO4-X, foods) offers no assisted dosing and its potency is greyed. A dose applied shows in the schedule of the head when going back to it.
+
 - **Brine**: the head is driven by Home Assistant alone, with manual doses, so its configuration shows the brine instead of the schedule: salinity over the last week, state and alarm, brine planned, refractometer check and settings. On the main view, the ring and the middle label show the brine dosed today against the brine planned, and the bottom label the salinity.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

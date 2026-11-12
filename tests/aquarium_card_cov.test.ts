@@ -457,6 +457,14 @@ describe("card rendering", () => {
         label: "Rock",
         roles: [],
       },
+      {
+        id: "e5",
+        kind: "marker",
+        pos: [0.9, 0.1],
+        scale: 1,
+        label: "Alarms",
+        roles: ["alarms"],
+      },
     ];
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const { hass } = make_hass(d);
@@ -465,7 +473,10 @@ describe("card rendering", () => {
     // Only the lit water is tinted, with the white photo by default
     expect(root.querySelectorAll(".water.tint")).toHaveLength(1);
     const els = root.querySelectorAll(".el");
-    expect(els).toHaveLength(4);
+    expect(els).toHaveLength(5);
+    // The common alarm of the reef, drawn by its own element
+    expect(els[4].classList.contains("alarms")).toBe(true);
+    expect(els[4].querySelector("reef-alarms")).not.toBeNull();
     // No scale: drawn at scale 1; no type: the default element
     expect(els[0].getAttribute("style")).toContain("scale(1)");
     expect(els[0].querySelector("common-sensor")).not.toBeNull();

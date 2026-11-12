@@ -94,6 +94,8 @@ La configuration de la tête contient la **Régulation du dosage** de l'[intégr
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  La fenêtre affiche la dose en cours (en lecture seule) juste au-dessus de la dose proposée. Un résultat de test se saisit à la main ou se lit sur la seringue d'un kit : choisir le kit (Red Sea, Salifert, Colombo…) et saisir la lecture du réactif en mL, le résultat est calculé. Le bouton **Historique des mesures** liste les résultats pour en ajouter un à une date passée, en corriger ou en supprimer un ; le graphique suit aussitôt. Un supplément qu'aucun test ne pilote (Red Sea NO3:PO4-X, nourritures) n'offre pas de dosage assisté et sa puissance est grisée. Une dose appliquée apparaît dans le programme de la tête en y revenant.
+
 - **Saumure** : la tête est pilotée par Home Assistant seul, avec des doses manuelles ; sa configuration montre donc la saumure à la place du programme : salinité de la dernière semaine, état et alarme, saumure prévue, contrôle au réfractomètre et réglages. Sur la vue principale, l'anneau et le libellé central montrent la saumure dosée aujourd'hui par rapport à la saumure prévue, et le libellé du bas la salinité.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

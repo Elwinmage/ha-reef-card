@@ -76,6 +76,11 @@
  *   zones_entity   key of the entity whose `ranges` give the bands, for a
  *                  first series without any
  *   zone_alpha     opacity of the bands (default 0.3)
+ *   points_attribute  name of an attribute of the series' entities holding
+ *                  the samples themselves, as a list of `{ at, value }` (the
+ *                  test results of a ReefDose head). The recorder is not read:
+ *                  a sample added in the past, corrected or deleted shows at
+ *                  once, which a recorded state history cannot do.
  *   demo_seconds   demo aid, off by default. Compresses time: the last N real
  *                  seconds of recorded history are stretched across the whole
  *                  `window`, so a 24h axis fills in 30s. The recorder cannot
@@ -163,6 +168,8 @@ export class HistoryChart extends MyElement {
 
   /** Epoch ms of the last completed read, to honour `refresh`. */
   private _last_fetch = 0;
+  /** Attribute samples last drawn, to redraw only when they change. */
+  private _attribute_signature = "";
 
   /** Guards against two reads overlapping when states arrive in bursts. */
   private _fetching = false;
@@ -196,6 +203,11 @@ export class HistoryChart extends MyElement {
   override set hass(obj: HassConfig) {
     const previous = this._states_signature();
     super.hass = obj;
+    if (this.conf?.points_attribute) {
+      // Samples kept in an attribute: nothing to fetch, read at each update
+      this._read_attribute_points();
+      return;
+    }
 
     // `_last_fetch` stays 0 until a read succeeds, so this keeps retrying
     // until the chart has something to draw.
@@ -214,6 +226,55 @@ export class HistoryChart extends MyElement {
 
   override get hass(): HassConfig {
     return this._hass;
+  }
+
+  /**
+   * Take the samples of every series from `points_attribute`, a list of
+   * `{ at, value }` on its entity, clipped to the window.
+   */
+  private _read_attribute_points(): void {
+    const attribute = this.conf.points_attribute;
+    const hass: any = this._hass;
+    const wanted = this.series_config();
+    const span = this.fetch_window();
+    // The period, not the window start: a rolling window moves every
+    // millisecond, the samples do not
+    const signature = JSON.stringify([
+      this.hours,
+      wanted.map((s) => hass?.states?.[s.entity_id]?.attributes?.[attribute]),
+    ]);
+    if (signature === this._attribute_signature) {
+      return;
+    }
+    this._attribute_signature = signature;
+    for (const s of wanted) {
+      s.points = HistoryChart.parse_attribute_points(
+        hass?.states?.[s.entity_id]?.attributes?.[attribute],
+      ).filter((point) => point.t >= span.start);
+    }
+    this.series = wanted;
+    this._last_fetch = Date.now();
+  }
+
+  /**
+   * Samples of an attribute holding `{ at, value }` items.
+   * @param raw: the attribute
+   * @return the numeric samples, oldest first
+   */
+  static parse_attribute_points(raw: any): HistoryPoint[] {
+    if (!Array.isArray(raw)) {
+      return [];
+    }
+    const points: HistoryPoint[] = [];
+    for (const item of raw) {
+      const t = Date.parse(item?.at);
+      const v = Number(item?.value);
+      if (Number.isFinite(t) && item?.value !== null && Number.isFinite(v)) {
+        points.push({ t, v });
+      }
+    }
+    points.sort((a, b) => a.t - b.t);
+    return points;
   }
 
   /**
@@ -451,6 +512,11 @@ export class HistoryChart extends MyElement {
    * history all end up as an empty chart rather than a broken card.
    */
   async fetch_history(): Promise<void> {
+    if (this.conf?.points_attribute) {
+      this._attribute_signature = "";
+      this._read_attribute_points();
+      return;
+    }
     const wanted = this.series_config();
     const hass: any = this._hass;
     if (wanted.length === 0 || typeof hass?.callWS !== "function") {
@@ -930,6 +996,29 @@ export class HistoryChart extends MyElement {
   }
 
   /**
+   * Number of days between two day marks of the x axis.
+   *
+   * Picked among round steps (1, 2, 3, 7, 14, 30, 60, 90 days) so that every
+   * "dd/mm" label keeps about its own width of free space around it.
+   *
+   * @param days: span of the window, in days
+   * @param width: width of the plot area, in pixels
+   * @param font_size: size the labels are drawn at
+   * @return the step, in days
+   */
+  static day_step(days: number, width: number, font_size: number): number {
+    // "dd/mm" is five characters, plus one character of gap on each side
+    const label_w = font_size * 0.6 * 7;
+    const max_marks = Math.max(1, Math.floor(width / label_w));
+    for (const step of [1, 2, 3, 7, 14, 30, 60, 90]) {
+      if (days / step <= max_marks) {
+        return step;
+      }
+    }
+    return Math.ceil(days / max_marks);
+  }
+
+  /**
    * Label of a y tick, with as many decimals as the step needs.
    *
    * @param value: the tick value
@@ -1021,13 +1110,16 @@ export class HistoryChart extends MyElement {
     };
     if (hours > DAY_MARKS_ABOVE_HOURS) {
       // On local midnights, stepping by calendar days: a day of the change
-      // to daylight saving time does not last 24 hours.
+      // to daylight saving time does not last 24 hours. A long window (a
+      // 90-day test history) cannot carry one label per day: the step is
+      // widened until the "dd/mm" labels fit side by side.
+      const day_step = HistoryChart.day_step(hours / 24, chart_w, font_size);
       const day = new Date(scale.first);
       day.setHours(24, 0, 0, 0);
       for (
         ;
         day.getTime() < scale.first + scale.span;
-        day.setDate(day.getDate() + 1)
+        day.setDate(day.getDate() + day_step)
       ) {
         const date = day.getDate().toString().padStart(2, "0");
         const month = (day.getMonth() + 1).toString().padStart(2, "0");

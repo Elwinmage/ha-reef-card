@@ -1823,3 +1823,97 @@ describe("HistoryChart periods", () => {
     expect(labels(24)[0]).toBe("12h");
   });
 });
+
+//----------------------------------------------------------------------------//
+//   Long windows and samples kept in an attribute
+//----------------------------------------------------------------------------//
+
+describe("HistoryChart.day_step", () => {
+  it("keeps one mark a day while the labels fit", () => {
+    expect(HistoryChart.day_step(7, 400, 11)).toBe(1);
+  });
+
+  it("widens the step on a 90-day window", () => {
+    // 11px font: about 46px a label, 8 marks across 380px
+    const step = HistoryChart.day_step(90, 380, 11);
+    expect(step).toBe(14);
+    expect(90 / step).toBeLessThanOrEqual(Math.floor(380 / (11 * 0.6 * 7)));
+  });
+
+  it("goes past three months on a tiny chart", () => {
+    expect(HistoryChart.day_step(365, 40, 11)).toBe(365);
+    expect(HistoryChart.day_step(1000, 100, 11)).toBe(500);
+  });
+});
+
+describe("HistoryChart points_attribute", () => {
+  const now = Date.now();
+  const iso = (days_ago: number) =>
+    new Date(now - days_ago * 86400000).toISOString();
+
+  it("parses { at, value } items, oldest first", () => {
+    expect(
+      HistoryChart.parse_attribute_points([
+        { at: iso(1), value: 8.2 },
+        { at: iso(3), value: 8.0 },
+        { at: "nope", value: 1 },
+        { at: iso(2), value: null },
+        { at: iso(2), value: "x" },
+        null,
+      ]).map((p) => p.v),
+    ).toEqual([8.0, 8.2]);
+    expect(HistoryChart.parse_attribute_points(undefined)).toEqual([]);
+  });
+
+  it("draws the samples of the attribute, without the recorder", async () => {
+    const el = makeChart(
+      {
+        entities: ["last"],
+        points_attribute: "measurements",
+        hours: 24 * 10,
+      },
+      { last: "sensor.last" },
+    );
+    const callWS = vi.fn();
+    const states: any = {
+      "sensor.last": {
+        state: "8.2",
+        attributes: {
+          measurements: [
+            { at: iso(30), value: 7.5 },
+            { at: iso(3), value: 8.0 },
+            { at: iso(1), value: 8.2 },
+          ],
+        },
+      },
+    };
+    el.hass = { callWS, states };
+    expect(callWS).not.toHaveBeenCalled();
+    // The result 30 days ago is out of the 10-day window
+    expect(el.series[0].points.map((p: any) => p.v)).toEqual([8.0, 8.2]);
+
+    // Same results: the same series is kept
+    const series = el.series;
+    el.hass = { callWS, states: { ...states } };
+    expect(el.series).toBe(series);
+
+    // A result corrected in the past shows at once
+    states["sensor.last"] = {
+      state: "8.2",
+      attributes: {
+        measurements: [
+          { at: iso(3), value: 7.9 },
+          { at: iso(1), value: 8.2 },
+        ],
+      },
+    };
+    el.hass = { callWS, states: { ...states } };
+    expect(el.series[0].points.map((p: any) => p.v)).toEqual([7.9, 8.2]);
+
+    // Another period re-reads the attribute
+    el.select_period(24 * 60);
+    expect(el.series[0].points).toHaveLength(2);
+    await el.fetch_history();
+    expect(callWS).not.toHaveBeenCalled();
+  });
+});

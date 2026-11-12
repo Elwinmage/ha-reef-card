@@ -94,6 +94,8 @@ Die Kopfkonfiguration enthält die **Dosierregelung** der [redsea-Integration](h
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  Das Fenster zeigt die aktuelle Dosis (nur lesbar) direkt über der vorgeschlagenen. Ein Testergebnis wird von Hand eingegeben oder an der Spritze eines Testkits abgelesen: Kit wählen (Red Sea, Salifert, Colombo…) und die Reagenz-Ablesung in mL eingeben, das Ergebnis wird berechnet. Die Schaltfläche **Testergebnisse** listet die Ergebnisse, um eines mit einem früheren Datum hinzuzufügen, zu korrigieren oder zu löschen; das Diagramm folgt sofort. Ein Zusatz, den kein Test steuert (Red Sea NO3:PO4-X, Futter), bietet keine assistierte Dosierung, seine Wirksamkeit ist ausgegraut. Eine angewendete Dosis erscheint im Programm des Kopfes, wenn man dorthin zurückkehrt.
+
 - **Salzlösung**: Der Kopf wird allein von Home Assistant mit manuellen Dosen gesteuert, daher zeigt seine Konfiguration statt des Programms die Salzlösung: Salinität der letzten Woche, Zustand und Alarm, geplante Salzlösung, Refraktometerprüfung und Einstellungen. In der Hauptansicht zeigen Ring und mittlere Beschriftung die heute dosierte gegenüber der geplanten Salzlösung, die untere Beschriftung die Salinität.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

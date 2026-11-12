@@ -1626,6 +1626,37 @@ describe("scene editor: devices panel", () => {
     });
   });
 
+  it("adds the common alarm of the reef", async () => {
+    const [doc, front] = ops.add_view(ops.new_document("Bare"), "Front");
+    const editor = await open(make_hass({}), null);
+    const unsaved = structuredClone(editor.doc);
+    delete unsaved.id;
+    editor.change(unsaved);
+    editor._tab = "elements";
+    await editor.updateComplete;
+    const root = editor.shadowRoot;
+    // no view: the button does nothing
+    const before = editor.doc;
+    button(root, "+ Common alarm").click();
+    expect(editor.doc).toBe(before);
+    editor.change(doc);
+    editor._view_id = front;
+    await editor.updateComplete;
+    button(root, "+ Common alarm").click();
+    expect(editor.doc.views[front].elements.at(-1)).toMatchObject({
+      kind: "marker",
+      roles: ["alarms"],
+      label: "Common alarm",
+    });
+    await editor.updateComplete;
+    // On the stage: its chip, without the feeding badge
+    const chip = [...root.querySelectorAll(".el")].find((e: any) =>
+      e.textContent.includes("Common alarm"),
+    ) as HTMLElement;
+    expect(chip).toBeTruthy();
+    expect(chip.querySelector(".badge")).toBeNull();
+  });
+
   it("edits the properties of an element", async () => {
     const { doc, front } = existing_doc();
     delete (doc.views[front].elements[1] as any).type;

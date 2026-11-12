@@ -94,6 +94,8 @@ La configurazione della testa contiene la **Regolazione del dosaggio** dell'[int
 
   <img src="../img/rsdose/assisted_dose_dialog.png" width="300"/> <img src="../img/rsdose/assisted_dose_settings.png" width="300"/>
 
+  La finestra mostra la dose in vigore (sola lettura) subito sopra quella proposta. Un risultato si inserisce a mano o si legge sulla siringa di un kit: scegliere il kit (Red Sea, Salifert, Colombo…) e inserire la lettura del reagente in mL, il risultato viene calcolato. Il pulsante **Risultati dei test** elenca i risultati per aggiungerne uno a una data passata, correggerlo o eliminarlo; il grafico si aggiorna subito. Un integratore che nessun test guida (Red Sea NO3:PO4-X, alimenti) non offre il dosaggio assistito e la sua potenza è in grigio. Una dose applicata compare nel programma della testa tornandoci.
+
 - **Salamoia**: la testa è gestita dal solo Home Assistant, con dosi manuali, quindi la sua configurazione mostra la salamoia al posto del programma: salinità dell'ultima settimana, stato e allarme, salamoia prevista, controllo con rifrattometro e impostazioni. Nella vista principale, l'anello e l'etichetta centrale mostrano la salamoia dosata oggi rispetto a quella prevista, e l'etichetta in basso la salinità.
 
   <img src="../img/rsdose/brine_head.png" width="300"/> <img src="../img/rsdose/brine_status.png" width="300"/> <img src="../img/rsdose/brine_settings.png" width="300"/>

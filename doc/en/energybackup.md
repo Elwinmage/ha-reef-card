@@ -16,6 +16,8 @@ The flows are drawn by [Power Flow Card Plus](https://github.com/flixlix/power-f
 
 The flows replace that panel as soon as the card is loaded. Its configuration is written by the reef card: no `power-flow-card-plus` YAML, no template sensor and no `config-template-card` are needed.
 
+With Power Flow Card Plus 0.5.0 or later the flows follow the wiring of the backup (`topology: battery_hub`): the battery sits between the charger and the pumps, so the mains feeds the battery and the battery feeds the aquarium. An older version draws its standard layout, with a mains → aquarium wire.
+
 ## The view
 
 The card is divided into 5 zones:
