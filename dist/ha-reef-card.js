@@ -12809,7 +12809,7 @@ var hSA = G`
   }
   _sendPreviewValues() {
     if (!this._hass) return;
-    const V = this.device?.id, A = this.device?.parent_device?.elements?.[0]?.primary_config_entry;
+    const V = this.device?.pump_id, A = this.device?.parent_device?.elements?.[0]?.primary_config_entry;
     if (!V || !A) {
       console.error("Preview: missing pump id or device_id");
       return;
@@ -12841,7 +12841,7 @@ var hSA = G`
         [A]: s.value
       };
       return e && (r[e] = s.pulse ?? 0), r;
-    }), t = this.device?.id, a = this.device?.parent_device?.elements?.[0]?.primary_config_entry;
+    }), t = this.device?.pump_id, a = this.device?.parent_device?.elements?.[0]?.primary_config_entry;
     if (!t || !a) {
       console.error("Schedule save: missing pump id or device_id", {
         pumpId: t,

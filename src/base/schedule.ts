@@ -613,7 +613,9 @@ export class Schedule extends MyElement {
   /** Send current preview values via PUT /preview */
   private _sendPreviewValues(): void {
     if (!this._hass) return;
-    const pumpId = (this.device as any)?.id;
+    // The pump's slot is `pump_id`, NOT `id`: `id` is HTMLElement's DOM id
+    // (an empty string here), which made the save/preview silently abort.
+    const pumpId = (this.device as any)?.pump_id;
     const deviceId = (this.device as any)?.parent_device?.elements?.[0]
       ?.primary_config_entry;
     if (!pumpId || !deviceId) {
@@ -672,7 +674,9 @@ export class Schedule extends MyElement {
       return entry;
     });
 
-    const pumpId = (this.device as any)?.id;
+    // The pump's slot is `pump_id`, NOT `id`: `id` is HTMLElement's DOM id
+    // (an empty string here), which made the save/preview silently abort.
+    const pumpId = (this.device as any)?.pump_id;
     const deviceId = (this.device as any)?.parent_device?.elements?.[0]
       ?.primary_config_entry;
 

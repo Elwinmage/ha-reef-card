@@ -95,7 +95,9 @@ function makeSchedule(conf: any = {}, schedule: any = SCHEDULE): any {
   };
   el.stateOn = true;
   el.device = {
-    id: 1,
+    // RSPump exposes its slot as `pump_id` (NOT `id`, which is HTMLElement's
+    // DOM id). The save/preview must read `pump_id`.
+    pump_id: 1,
     entities: {
       preview_start: { entity_id: "button.preview_start" },
       preview_stop: { entity_id: "button.preview_stop" },
@@ -608,7 +610,7 @@ describe("Schedule save", () => {
     const el = makeSchedule();
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     el.openEditor();
-    el.device.id = null;
+    el.device.pump_id = null;
     el._saveSchedule();
     expect(error).toHaveBeenCalled();
     expect(el._editing).toBe(true);
