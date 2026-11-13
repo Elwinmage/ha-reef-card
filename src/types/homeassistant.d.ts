@@ -35,6 +35,8 @@ export interface HassDevice {
   manufacturer?: string;
   sw_version?: string;
   disabled_by: string | null;
+  /** "service" for a registry bookkeeping entry (a catalog), else absent. */
+  entry_type?: string | null;
   [key: string]: any;
 }
 

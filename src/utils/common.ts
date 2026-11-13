@@ -171,6 +171,11 @@ export default class DeviceList {
       const dev = this._hass.devices[device_id];
       if (!dev) continue;
 
+      // Service registry entries (the supplements and equipment catalogs of
+      // redsea, say) carry no appliance: they must never be offered as a
+      // selectable device, even though their domain is a known one.
+      if (dev.entry_type === "service") continue;
+
       // Identifier tuple of the device: absent for ESPHome, which is then
       // recognised by its project name (see KnownDeviceDomain.project_names)
       const ident = dev.identifiers?.[0];

@@ -769,5 +769,11 @@
   "parameter_i": "I",
   "parameter_fe": "Fe",
   "parameter_salinity": "Zasolenie",
-  "parameter_ph": "pH"
+  "parameter_ph": "pH",
+  "parameter_sr": "Sr",
+  "parameter_temperature": "Temperatura",
+  "parameter_orp": "ORP",
+  "parameters_editor_none": "Brak zgodnej encji",
+  "parameters_target": "cel",
+  "parameters_editor_bounds_auto": "Zakresy z integracji"
 }

@@ -324,3 +324,102 @@ describe("custom elements", () => {
     expect(customElements.get("reef-parameters-card")).toBeTruthy();
   });
 });
+
+describe("reef-measurement-history from a reeftank sensor", () => {
+  const TANK = "sensor.reefer_425_ca";
+
+  function tankHass(results: any = []): any {
+    return {
+      language: "en",
+      states: {
+        [TANK]: {
+          state: "430",
+          attributes: {
+            measurements: results,
+            unit_of_measurement: "ppm",
+            aquarium: "a1b2",
+            reef_parameter: "ca",
+          },
+        },
+      },
+      entities: { [TANK]: { platform: "reeftank", device_id: "tankdev" } },
+      callWS: vi.fn().mockResolvedValue({}),
+    };
+  }
+
+  async function tankView(hass: any): Promise<ReefMeasurementHistory> {
+    const view = document.createElement(
+      "reef-measurement-history",
+    ) as ReefMeasurementHistory;
+    view.entity_id = TANK;
+    view.hass = hass;
+    document.body.appendChild(view);
+    await view.updateComplete;
+    return view;
+  }
+
+  it("records through the reeftank water_test action", async () => {
+    const hass = tankHass();
+    const view = await tankView(hass);
+    expect(view.reeftank()).toBe(true);
+    $(view, "#new-at").value = "2026-10-30T08:15";
+    $(view, "#new-value").value = "432";
+    $(view, ".add button").click();
+    await vi.waitFor(() => expect(hass.callWS).toHaveBeenCalled());
+    expect(hass.callWS).toHaveBeenCalledWith({
+      type: "call_service",
+      domain: "reeftank",
+      service: "water_test",
+      service_data: {
+        aquarium: "a1b2",
+        parameter: "ca",
+        value: 432,
+        at: "2026-10-30 08:15:00",
+      },
+    });
+    view.remove();
+  });
+
+  it("shows the history read-only (no edit or delete)", async () => {
+    const view = await tankView(
+      tankHass([
+        { at: "2026-11-01T09:00:00+01:00", parameter: "ca", value: 430 },
+      ]),
+    );
+    const row = $(view, ".row");
+    expect(row).toBeTruthy();
+    expect(row.querySelector("button")).toBeNull();
+    view.remove();
+  });
+
+  it("reports when the aquarium or chemistry is missing", async () => {
+    const hass = tankHass();
+    delete hass.states[TANK].attributes.aquarium;
+    const view = await tankView(hass);
+    $(view, "#new-at").value = "2026-10-30T08:15";
+    $(view, "#new-value").value = "432";
+    await view.add();
+    expect(hass.callWS).not.toHaveBeenCalled();
+    expect($(view, ".error")).toBeTruthy();
+    view.remove();
+  });
+
+  it("reports when the service bus is unavailable", async () => {
+    const hass = tankHass();
+    hass.callWS = undefined;
+    const view = await tankView(hass);
+    expect(await view.call("water_test", {})).toBe(false);
+    await view.updateComplete;
+    expect($(view, ".error")).toBeTruthy();
+    view.remove();
+  });
+
+  it("refuses before the aquarium sensor has any attribute", async () => {
+    const hass = tankHass();
+    hass.states[TANK] = { state: "unknown" };
+    const view = await tankView(hass);
+    expect(await view.call("water_test", {})).toBe(false);
+    expect(hass.callWS).not.toHaveBeenCalled();
+    view.remove();
+  });
+});

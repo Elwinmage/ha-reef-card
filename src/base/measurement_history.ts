@@ -169,25 +169,59 @@ export class ReefMeasurementHistory extends LitElement {
   }
 
   /**
-   * Call a redsea action and report its error.
+   * Whether the results belong to the reeftank integration (the aquarium's
+   * own chemistry sensors) rather than a redsea ReefDose head. Reeftank is
+   * the canonical home of a test but only records them: it has no edit or
+   * delete, so those are hidden for it.
+   */
+  reeftank(): boolean {
+    return this._hass?.entities?.[this.entity_id]?.platform === "reeftank";
+  }
+
+  /**
+   * Call the integration's action and report its error. Routes to redsea
+   * (by the head's device) or to reeftank (by its aquarium and chemistry).
    * @param service: the action
-   * @param data: its data, the head's device added
+   * @param data: its data
    * @return true when the integration accepted it
    */
   async call(service: string, data: Record<string, unknown>): Promise<boolean> {
-    const device_id = this.device_id();
-    if (!device_id || typeof this._hass?.callWS !== "function") {
+    if (typeof this._hass?.callWS !== "function") {
       this._error = i18n._("measurement_history_unavailable");
       return false;
+    }
+    const attributes = this._state()?.attributes ?? {};
+    let domain: string;
+    let service_data: Record<string, unknown>;
+    let with_response: boolean;
+    if (this.reeftank()) {
+      const aquarium = attributes.aquarium;
+      const parameter = attributes.reef_parameter;
+      if (!aquarium || !parameter) {
+        this._error = i18n._("measurement_history_unavailable");
+        return false;
+      }
+      domain = "reeftank";
+      service_data = { aquarium, parameter, ...data };
+      with_response = false;
+    } else {
+      const device_id = this.device_id();
+      if (!device_id) {
+        this._error = i18n._("measurement_history_unavailable");
+        return false;
+      }
+      domain = "redsea";
+      service_data = { device_id, ...data };
+      with_response = true;
     }
     this._busy = true;
     try {
       const answer = await this._hass.callWS({
         type: "call_service",
-        domain: "redsea",
+        domain,
         service,
-        service_data: { device_id, ...data },
-        return_response: true,
+        service_data,
+        ...(with_response ? { return_response: true } : {}),
       });
       const response = answer?.response ?? {};
       if (response.ok === false) {
@@ -216,12 +250,13 @@ export class ReefMeasurementHistory extends LitElement {
       this._error = i18n._("measurement_history_invalid");
       return;
     }
-    if (
-      await this.call("record_measurement", {
-        value,
-        measured_at: from_local_input(at),
-      })
-    ) {
+    const recorded = this.reeftank()
+      ? await this.call("water_test", { value, at: from_local_input(at) })
+      : await this.call("record_measurement", {
+          value,
+          measured_at: from_local_input(at),
+        });
+    if (recorded) {
       const field = this._input("new-value");
       if (field) field.value = "";
     }
@@ -302,25 +337,29 @@ export class ReefMeasurementHistory extends LitElement {
       >
         ${entry.suspect ? "⚠ " : ""}${entry.value} ${unit}
       </div>
-      <button
-        class="flat"
-        title=${i18n._("measurement_history_edit")}
-        @click=${() => (this._editing = entry.at)}
-      >
-        ✎
-      </button>
-      <button
-        class="flat delete"
-        title=${i18n._("measurement_history_delete")}
-        ?disabled=${this._busy}
-        @click=${() => this.delete_entry(entry)}
-      >
-        ${
-          this._confirming === entry.at
-            ? i18n._("measurement_history_confirm")
-            : "🗑"
-        }
-      </button>
+      ${
+        this.reeftank()
+          ? nothing
+          : html`<button
+                class="flat"
+                title=${i18n._("measurement_history_edit")}
+                @click=${() => (this._editing = entry.at)}
+              >
+                ✎
+              </button>
+              <button
+                class="flat delete"
+                title=${i18n._("measurement_history_delete")}
+                ?disabled=${this._busy}
+                @click=${() => this.delete_entry(entry)}
+              >
+                ${
+                  this._confirming === entry.at
+                    ? i18n._("measurement_history_confirm")
+                    : "🗑"
+                }
+              </button>`
+      }
     </div>`;
   }
 

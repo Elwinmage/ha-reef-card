@@ -8,6 +8,7 @@ import "./devices/index";
 import "./aquarium/index";
 import "./base/reef_alarms";
 import "./base/reef_parameters";
+import "./base/reef_parameters_editor";
 import { log_banner } from "./banner";
 
 log_banner();

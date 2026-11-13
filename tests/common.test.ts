@@ -296,6 +296,18 @@ describe("DeviceList — filters", () => {
     expect(new DeviceList(hass).main_devices).toHaveLength(0);
   });
 
+  it("excludes service devices such as the catalogs", () => {
+    const hass = makeHass({
+      e1: {
+        identifiers: [["redsea", "catalog_supplements"]],
+        primary_config_entry: "e1",
+        name: "Supplements",
+        entry_type: "service",
+      },
+    });
+    expect(new DeviceList(hass).main_devices).toHaveLength(0);
+  });
+
   it("get_by_name returns correct device", () => {
     const hass = makeHass({
       e1: {

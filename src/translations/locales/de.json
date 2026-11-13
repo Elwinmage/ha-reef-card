@@ -769,5 +769,11 @@
   "parameter_i": "I",
   "parameter_fe": "Fe",
   "parameter_salinity": "Salinität",
-  "parameter_ph": "pH"
+  "parameter_ph": "pH",
+  "parameter_sr": "Sr",
+  "parameter_temperature": "Temperatur",
+  "parameter_orp": "ORP",
+  "parameters_editor_none": "Keine kompatible Entität",
+  "parameters_target": "Ziel",
+  "parameters_editor_bounds_auto": "Grenzen von der Integration"
 }
