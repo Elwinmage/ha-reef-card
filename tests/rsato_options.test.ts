@@ -121,6 +121,47 @@ describe("RSAto infinite reservoir", () => {
     expect(els.volume_left.tap_action).toBeUndefined();
   });
 
+  it("hides the water level while no volume is reported", () => {
+    // An ATO+ on automatic refill does not track its volume: volume_left has
+    // no state, and the water level would print "Missing state".
+    const water = elements().volume_left;
+    expect(water.no_br_if_disabled).toBe(true);
+    const states = (
+      volume?: string,
+    ): { device: any; ctx: Record<string, any> } => {
+      const device = makeAto(
+        { infinite_tank: true },
+        volume === undefined
+          ? {}
+          : {
+              "sensor.ato_volume_left": {
+                entity_id: "sensor.ato_volume_left",
+                state: volume,
+                attributes: {},
+              },
+            },
+      );
+      if (volume !== undefined) {
+        device.entities = {
+          volume_left: { entity_id: "sensor.ato_volume_left" },
+        };
+      }
+      return { device, ctx: device.config.elements.volume_left };
+    };
+    const disabled = ({ device, ctx }: any) =>
+      new SafeEval({ device }).evaluateCondition(ctx.disabled_if);
+
+    expect(disabled(states())).toBe(true); // no entity at all
+    expect(disabled(states("unknown"))).toBe(true);
+    expect(disabled(states("unavailable"))).toBe(true);
+    expect(disabled(states("1500"))).toBe(false); // a real volume stays drawn
+  });
+
+  it("keeps the water level untouched outside the infinite mode", () => {
+    const water = makeAto().config.elements.volume_left;
+    expect(water.disabled_if).toBe("!device.has_pump()");
+  });
+
   it("shows an autonomy that never ends", () => {
     const els = elements();
     expect(els.days_till_empty.unit).toBe("");

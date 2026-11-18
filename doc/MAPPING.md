@@ -358,15 +358,16 @@ Displays a clickable image (file or MDI icon).
 
 Displays the value of a HA entity as text.
 
-| Option             | Type                | Description                                              |
-| ------------------ | ------------------- | -------------------------------------------------------- |
-| `label`            | `string \| boolean` | `false` = no label. Otherwise an evaluated expression.   |
-| `prefix`           | `string`            | Prefix text (can be a `${...}` expression)               |
-| `unit`             | `string`            | Unit displayed after the value (can be `${i18n._(...)}`) |
-| `icon`             | `boolean \| string` | `true` = entity icon, `"mdi:..."` = fixed icon           |
-| `icon_color`       | `string`            | Icon color                                               |
-| `force_integer`    | `boolean`           | Rounds the value to the nearest integer                  |
-| `translate_values` | `boolean`           | Passes the value through `i18n._()` before display       |
+| Option                | Type                | Description                                                                                                                                             |
+| --------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`               | `string \| boolean` | `false` = no label. Otherwise an evaluated expression.                                                                                                  |
+| `prefix`              | `string`            | Prefix text (can be a `${...}` expression)                                                                                                              |
+| `unit`                | `string`            | Unit displayed after the value (can be `${i18n._(...)}`)                                                                                                |
+| `icon`                | `boolean \| string` | `true` = entity icon, `"mdi:..."` = fixed icon                                                                                                          |
+| `icon_color`          | `string`            | Icon color                                                                                                                                              |
+| `force_integer`       | `boolean`           | Rounds the value to the nearest integer                                                                                                                 |
+| `translate_values`    | `boolean`           | Passes the value through `i18n._()` before display                                                                                                      |
+| `format_entity_state` | `boolean`           | Prints the state formatted by Home Assistant (entity display precision, unit included); the card's `unit`, `round` and `force_integer` are then ignored |
 
 ```ts
 {

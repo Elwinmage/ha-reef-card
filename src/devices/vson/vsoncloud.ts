@@ -1,5 +1,5 @@
 /**
- * VSON cloud feeder view (ha-vson-component, domain `vson`).
+ * VSON cloud feeder view (ha-vson-component, domain `vson_cloud`).
  *
  * Same look as the hacked ESPHome feeder: the feeder is drawn from four
  * pictures (trap open/closed, reserve full/empty) with pellets falling while

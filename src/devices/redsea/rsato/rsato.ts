@@ -73,6 +73,18 @@ export class RSAto extends RSDevice {
   }
 
   /**
+   * Whether the device reports a volume left in its reservoir.
+   *
+   * An ATO+ on automatic refill does not track its volume: `volume_left` then
+   * has no state (or "unknown"), and the water level has nothing to draw.
+   * @return true when the volume entity holds a usable state
+   */
+  has_volume_left(): boolean {
+    const state = this.get_entity("volume_left")?.state;
+    return !!state && state !== "unknown" && state !== "unavailable";
+  }
+
+  /**
    * Whether the attached pump is prevented from filling.
    * @return true when the device mode names a pump-blocking condition
    */
@@ -387,6 +399,14 @@ export class RSAto extends RSDevice {
       // behind the water only holds the tank capacity.
       water.show_value = false;
       delete water.tap_action;
+      // A boundless reservoir is typically fed by an automatic refill that
+      // does not track any volume: without a volume there is no water level
+      // to draw, and the element would only print "Missing state". The
+      // condition is re-evaluated on render, so the water comes back as soon
+      // as a volume is reported. no_br_if_disabled is already set by the
+      // mapping (absolutely positioned element).
+      water.disabled_if = "!device.has_pump() || !device.has_volume_left()";
+      water.no_br_if_disabled = true;
     }
     const days = elements.days_till_empty;
     if (days) {

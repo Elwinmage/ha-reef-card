@@ -182,25 +182,36 @@ export class Sensor extends MyElement {
         unit = this.evaluate(this.conf.unit);
       }
     } else if (this.stateObj) {
-      if (this.conf?.translate_values) {
+      // Home Assistant formats the state itself: the entity display precision
+      // is applied and the unit is part of the text, so neither the unit nor
+      // the rounding of the card must be added on top of it.
+      const ha_format =
+        this.conf?.format_entity_state === true &&
+        typeof this._hass?.formatEntityState === "function";
+
+      if (ha_format || this.conf?.translate_values) {
         value = this.label || this._hass.formatEntityState(this.stateObj);
       } else {
         value = this.label || this.stateObj.state;
       }
 
-      if (this.conf.unit) {
-        unit = this.evaluate(this.conf.unit);
+      if (ha_format) {
+        unit = "";
       } else {
-        unit = this.stateObj.attributes?.unit_of_measurement || "";
-      }
-
-      if (this.conf.force_integer && typeof value === "string") {
-        const numValue = parseFloat(value);
-        if (!isNaN(numValue)) {
-          value = Math.round(numValue).toString();
+        if (this.conf.unit) {
+          unit = this.evaluate(this.conf.unit);
+        } else {
+          unit = this.stateObj.attributes?.unit_of_measurement || "";
         }
+
+        if (this.conf.force_integer && typeof value === "string") {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue)) {
+            value = Math.round(numValue).toString();
+          }
+        }
+        value = this.apply_round(value);
       }
-      value = this.apply_round(value);
       if (this.conf.prefix) {
         value = this.evaluate(this.conf.prefix).replaceAll('"', "") + value;
       }

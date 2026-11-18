@@ -2,6 +2,26 @@
 
 ## MODIFICATIONS
 
+### ReefATO+: no more "Missing state" with an infinite tank (#127)
+
+- With _Infinite tank_ on an ATO+ on automatic refill, the device reports no
+  volume: the water level printed "Missing state" above the tank. It is now
+  hidden while `volume_left` has no usable state, and comes back as soon as a
+  volume is reported.
+
+### ReefMat: display precision of the entities (#128)
+
+- New `format_entity_state` option on `common-sensor`: the state is printed by
+  Home Assistant (`formatEntityState`), so the display precision set on the
+  entity is honoured and the unit comes with the text.
+- Used by the ReefMat total usage, remaining length, daily average and custom
+  advance sensors, which showed every decimal the integration reports.
+
+### VSON: integration domain renamed to `vson_cloud`
+
+- ha-vson-component moved from the `vson` domain to `vson_cloud`: the card
+  recognises its devices under the new domain (the former one stays known).
+
 ### ReefDose: supplements from the redsea integration (reeftech-catalog)
 
 - The card no longer bundles the supplement list nor the bottle pictures

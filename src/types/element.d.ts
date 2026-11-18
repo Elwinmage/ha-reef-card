@@ -160,6 +160,14 @@ export interface SensorConfig extends BaseElementConfig {
    */
   round?: number;
   /**
+   * Render the state with Home Assistant's own formatter
+   * (`hass.formatEntityState`): the display precision set on the entity is
+   * honoured and the unit comes with the text. The card's own unit, `round`
+   * and `force_integer` are then left out. Does nothing when the frontend does
+   * not provide the formatter.
+   */
+  format_entity_state?: boolean;
+  /**
    * Colour of the rendered text, unit included.
    * Use this rather than `css: { color }` when a `unit_css` is also set, since
    * the unit span would otherwise be able to diverge. Accepts the

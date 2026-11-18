@@ -1,5 +1,5 @@
 /**
- * VSON cloud feeder (ha-vson-component, domain `vson`).
+ * VSON cloud feeder (ha-vson-component, domain `vson_cloud`).
  *
  * Same look as the hacked ESPHome feeder — the four feeder pictures (trap
  * open/closed, reserve full/empty) and the falling pellets — but driven by
@@ -7,7 +7,7 @@
  * food_shortage, feed, firmware, schedule). The pictures are shared with the
  * ESPHome view, so no new asset is needed.
  *
- * The device is recognised by its domain (`vson`); the HA device model
+ * The device is recognised by its domain (`vson_cloud`); the HA device model
  * ("WP8621"/"WP8621A") names the view (see VSON_CLOUD_MODELS).
  */
 import { maintenance_shortcut } from "../redsea/maintenance/maintenance.shortcut";

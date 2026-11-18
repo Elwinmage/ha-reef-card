@@ -4,6 +4,7 @@ import { describe, expect, it, vi, afterEach } from "vitest";
 
 import { domain_of, resolve_device_model } from "../src/utils/common";
 import { RSDevice } from "../src/devices/device";
+import { KNOWN_DEVICE_DOMAINS } from "../src/utils/constants";
 import {
   device_entity_ids,
   resolve_cloud_feeder_entities,
@@ -18,7 +19,7 @@ function make_hass(
 ) {
   const device = {
     id: "dev_vson",
-    identifiers: [["vson", "abc123"]],
+    identifiers: [["vson_cloud", "abc123"]],
     connections: [],
     manufacturer: "VSON",
     model: "WP8621A",
@@ -91,11 +92,18 @@ describe("vson device detection", () => {
   it("recognises the vson domain and keeps the model as the view", () => {
     const hass = make_hass();
     const dev = hass.devices.dev_vson;
-    expect(domain_of(dev.identifiers, dev)).toBe("vson");
+    expect(domain_of(dev.identifiers, dev)).toBe("vson_cloud");
     const info = { name: "x", elements: [dev] };
-    expect(resolve_device_model(hass, info as any, "vson", "WP8621A")).toBe(
-      "WP8621A",
-    );
+    expect(
+      resolve_device_model(hass, info as any, "vson_cloud", "WP8621A"),
+    ).toBe("WP8621A");
+  });
+
+  it("registers the renamed domain and still knows the legacy one", () => {
+    // ha-vson-component moved from `vson` to `vson_cloud`: both build the
+    // same `vson-*` tags, so an installation not yet updated keeps its view.
+    expect(KNOWN_DEVICE_DOMAINS.vson_cloud?.tag_prefix).toBe("vson");
+    expect(KNOWN_DEVICE_DOMAINS.vson?.tag_prefix).toBe("vson");
   });
 });
 

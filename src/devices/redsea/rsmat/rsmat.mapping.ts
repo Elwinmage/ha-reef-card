@@ -336,6 +336,7 @@ export const config = {
     remaining_length: {
       name: "remaining_length",
       type: "common-sensor",
+      format_entity_state: true,
       master: true,
       css: {
         position: "absolute",
@@ -362,6 +363,7 @@ export const config = {
     total_usage: {
       name: "total_usage",
       type: "common-sensor",
+      format_entity_state: true,
       css: {
         position: "absolute",
         "background-color": "rgb(150,150,150,0.9)",
@@ -404,6 +406,7 @@ export const config = {
     daily_average_usage: {
       name: "daily_average_usage",
       type: "common-sensor",
+      format_entity_state: true,
       prefix: "${i18n._('daily_average')}  ",
       css: {
         position: "absolute",
@@ -499,6 +502,7 @@ export const config = {
     custom_advance_value: {
       name: "custom_advance_value",
       type: "common-sensor",
+      format_entity_state: true,
       tap_action: {
         domain: "redsea_ui",
         action: "dialog",
