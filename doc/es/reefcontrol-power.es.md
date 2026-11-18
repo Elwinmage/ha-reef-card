@@ -248,6 +248,7 @@ Además de las dos líneas de mensajes, el ReefControl-Power tiene tres opciones
   tubo hacia su dispositivo vinculado.
 - **Dispositivo vinculado**: por toma, el dispositivo enchufado en ella, o
   **Ninguno**. **Otro** designa un aparato que Home Assistant no conoce.
+- **Equipo vinculado**: por toma, un equipo del [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog) con el que Home Assistant no puede comunicarse (calentador, ventilador, bomba…), elegido por categoría, marca y modelo. Su imagen se dibuja en la toma, si no la imagen o el icono de su categoría. Requiere la integración _Reef maintenance_; una toma tiene un dispositivo vinculado o un equipo vinculado. Debajo, **Seguir su mantenimiento** hace que la integración _Reef maintenance_ cree el equipo con las tareas del catálogo (aparecen luego en la vista de mantenimiento); **Dejar de seguirlo** lo elimina. Ambos requieren un administrador.
 
 Las opciones se guardan bajo el modelo tal como lo informa Home Assistant:
 
@@ -266,6 +267,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # category:heater
 ```
 
 ---

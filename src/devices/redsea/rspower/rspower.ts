@@ -1,4 +1,4 @@
-import { html, TemplateResult } from "lit";
+import { html, nothing, TemplateResult } from "lit";
 import { RSDevice } from "../../device";
 import { config } from "./rspower6.mapping";
 import { config2 } from "./rspower8.mapping";
@@ -7,6 +7,20 @@ import { dialogs_rspower } from "./rspower.dialogs";
 
 import style_common from "../../../utils/common.styles";
 import i18n from "../../../translations/myi18n";
+import {
+  cached_equipment,
+  drop_maintenance,
+  equipment_groups,
+  equipment_visual,
+  keep_maintenance,
+  list_kept,
+  load_equipment,
+} from "../../../utils/equipment_catalog";
+import type {
+  EquipmentView,
+  EquipmentVisual,
+  KeptEquipment,
+} from "../../../utils/equipment_catalog";
 import { merge } from "../../../utils/merge";
 import {
   ambiguous_model_of,
@@ -693,39 +707,242 @@ export class RSPower extends RSDevice {
       this._hass?.states[this._sockets[socket].entities.name.entity_id]?.state;
 
     return html`<tr>
+        <td>
+          <label for="linked_device_${socket}">
+            ${socket}${socket_name ? " — " + socket_name : ""}
+          </label>
+        </td>
+        <td>
+          <select
+            id="linked_device_${socket}"
+            .value="${selected ?? ""}"
+            @change="${(e: Event) => this._handle_socket_link_change(socket, e)}"
+          >
+            <option value="" ?selected=${!selected}>
+              ${i18n._("no_device")}
+            </option>
+            <option
+              value="${OTHER_DEVICE_VALUE}"
+              ?selected=${selected === OTHER_DEVICE_VALUE}
+            >
+              ${i18n._("other_device")}
+            </option>
+            ${candidates.map(
+              (candidate) => html`
+                <option
+                  value="${candidate.value}"
+                  ?selected=${candidate.value === selected}
+                >
+                  ${candidate.text}
+                </option>
+              `,
+            )}
+          </select>
+        </td>
+      </tr>
+      ${this._editor_equipment_row(socket)}`;
+  }
+
+  /**
+   * The picker of the equipment of the catalog, under the device one.
+   *
+   * Only shown when the reef_maintenance integration serves the catalog; a
+   * socket linked to a device has none (the two are exclusive).
+   * @param socket: the 1-based socket number
+   */
+  private _editor_equipment_row(socket: number): TemplateResult {
+    const view = this._equipment();
+    if (!view) {
+      return html``;
+    }
+    const selected = this.linked_equipment(socket) ?? "";
+    const linked_device = this.linked_device_id(socket) !== null;
+    if (selected && !this._kept_asked) {
+      this._refresh_kept();
+    }
+    const groups = equipment_groups(
+      view,
+      this._hass?.language ?? "en",
+      (name) => i18n._("equipment_any", { category: name }),
+    );
+    return html`<tr>
       <td>
-        <label for="linked_device_${socket}">
-          ${socket}${socket_name ? " — " + socket_name : ""}
+        <label for="linked_equipment_${socket}">
+          ${i18n._("linked_equipment")}
         </label>
       </td>
       <td>
         <select
-          id="linked_device_${socket}"
-          .value="${selected ?? ""}"
-          @change="${(e: Event) => this._handle_socket_link_change(socket, e)}"
+          id="linked_equipment_${socket}"
+          .value="${selected}"
+          ?disabled=${linked_device}
+          @change="${(e: Event) =>
+            this._handle_socket_equipment_change(socket, e)}"
         >
           <option value="" ?selected=${!selected}>
             ${i18n._("no_device")}
           </option>
-          <option
-            value="${OTHER_DEVICE_VALUE}"
-            ?selected=${selected === OTHER_DEVICE_VALUE}
-          >
-            ${i18n._("other_device")}
-          </option>
-          ${candidates.map(
-            (candidate) => html`
-              <option
-                value="${candidate.value}"
-                ?selected=${candidate.value === selected}
-              >
-                ${candidate.text}
-              </option>
+          ${groups.map(
+            (group) => html`
+              <optgroup label="${group.name}">
+                ${group.options.map(
+                  (option) => html`
+                    <option
+                      value="${option.value}"
+                      ?selected=${option.value === selected}
+                    >
+                      ${option.text}
+                    </option>
+                  `,
+                )}
+              </optgroup>
             `,
           )}
         </select>
+        ${selected ? this._maintenance_controls(socket) : nothing}
       </td>
     </tr>`;
+  }
+
+  /**
+   * Keep (or stop keeping) the maintenance of the linked equipment: the
+   * reef_maintenance integration creates it with the tasks of the catalog.
+   * @param socket: the 1-based socket number
+   */
+  private _maintenance_controls(socket: number): TemplateResult {
+    const id = this.linked_maintenance(socket);
+    const kept = id ? this._kept?.find((e) => e.equipment_id === id) : null;
+    if (kept) {
+      return html`<div class="maintenance_link">
+        ${i18n._("maintenance_kept", { count: kept.tasks.length })}
+        <button
+          @click="${() => this._handle_stop_maintenance(socket, kept.equipment_id)}"
+        >
+          ${i18n._("maintenance_stop")}
+        </button>
+      </div>`;
+    }
+    return html`<div class="maintenance_link">
+      <button @click="${() => this._handle_keep_maintenance(socket)}">
+        ${i18n._("maintenance_keep")}
+      </button>
+    </div>`;
+  }
+
+  /**
+   * Create the equipment in reef_maintenance and remember its id.
+   * @param socket: the 1-based socket number
+   */
+  private async _handle_keep_maintenance(socket: number): Promise<void> {
+    const link = this.linked_equipment(socket);
+    if (!link) {
+      return;
+    }
+    const id = await keep_maintenance(this._hass, link);
+    if (!id) {
+      return;
+    }
+    const target = this._writable_socket_config(socket);
+    if (target) {
+      target.socket_conf.linked_maintenance = id;
+      this.fire_config_changed(target.config);
+    }
+    this._refresh_kept();
+  }
+
+  /**
+   * Remove the equipment from reef_maintenance and forget its id.
+   * @param socket: the 1-based socket number
+   * @param equipment_id: the equipment to remove
+   */
+  private async _handle_stop_maintenance(
+    socket: number,
+    equipment_id: string,
+  ): Promise<void> {
+    // Gone already (removed from the integration): the link is dropped anyway
+    await drop_maintenance(this._hass, equipment_id);
+    const target = this._writable_socket_config(socket);
+    if (target) {
+      delete target.socket_conf.linked_maintenance;
+      this.fire_config_changed(target.config);
+    }
+    this._refresh_kept();
+  }
+
+  /**
+   * Equipment of the catalog linked to a socket, if any.
+   *
+   * A socket feeds either a device Home Assistant knows (`linked_device`) or
+   * a piece of equipment of the reeftech-catalog it cannot talk to (heater,
+   * fan...): the editor keeps the two exclusive, and a device wins if both
+   * are somehow there.
+   * @param socket: the 1-based socket number
+   * @return an item id, `category:<id>`, or null when nothing is linked
+   */
+  linked_equipment(socket: number): string | null {
+    if (this.linked_device_id(socket)) {
+      return null;
+    }
+    const linked = this.config?.sockets?.["socket_" + socket]?.linked_equipment;
+    return typeof linked === "string" && linked.length > 0 ? linked : null;
+  }
+
+  /** Whether the equipment catalog was asked for by this card */
+  private _equipment_asked = false;
+
+  /**
+   * The equipment catalog, once the integration served it.
+   *
+   * Asked for the first time it is needed; the sockets are drawn again when
+   * it arrives. Without the reef_maintenance integration it never does, and
+   * a linked equipment is then simply not drawn.
+   */
+  private _equipment(): EquipmentView | null {
+    const view = cached_equipment();
+    if (!view && !this._equipment_asked && this._hass) {
+      this._equipment_asked = true;
+      void load_equipment(this._hass).then((loaded) => {
+        if (!loaded) return;
+        this.requestUpdate();
+        for (const socket of this._sockets) {
+          socket?.power_socket?.requestUpdate();
+        }
+      });
+    }
+    return view;
+  }
+
+  /**
+   * Equipment kept by reef_maintenance for a socket's linked equipment: the
+   * maintenance of what is plugged in (`linked_maintenance` of the socket).
+   * @param socket: the 1-based socket number
+   * @return the equipment id, or null when none is kept
+   */
+  linked_maintenance(socket: number): string | null {
+    const kept = this.config?.sockets?.["socket_" + socket]?.linked_maintenance;
+    return typeof kept === "string" && kept.length > 0 ? kept : null;
+  }
+
+  /** The equipments reef_maintenance keeps, null until asked for */
+  private _kept: KeptEquipment[] | null = null;
+  private _kept_asked = false;
+
+  /** Ask reef_maintenance what it keeps (once, again after a change). */
+  private _refresh_kept(): void {
+    this._kept_asked = true;
+    void list_kept(this._hass).then((kept) => {
+      this._kept = kept;
+      this.requestUpdate();
+    });
+  }
+
+  /** What is drawn for the equipment linked to a socket, if known. */
+  private _equipment_visual(socket: number): EquipmentVisual | null {
+    return equipment_visual(
+      this._equipment(),
+      this.linked_equipment(socket),
+      this._hass?.language ?? "en",
+    );
   }
 
   /**
@@ -754,7 +971,7 @@ export class RSPower extends RSDevice {
   linked_device_image(socket: number): string | null {
     const device_id = this.linked_device_id(socket);
     if (!device_id) {
-      return null;
+      return this._equipment_visual(socket)?.image ?? null;
     }
     const model = this._linked_model(socket, device_id);
     // The role is tried first and the model only as a fallback. Keying on
@@ -806,7 +1023,9 @@ export class RSPower extends RSDevice {
     const fallback = on ? DEFAULT_SOCKET_ICONS.on : DEFAULT_SOCKET_ICONS.off;
     const device_id = this.linked_device_id(socket);
     if (!device_id) {
-      return fallback;
+      // Equipment of the catalog: the icon of its category (the picture,
+      // when it has one, is drawn by the socket itself)
+      return this._equipment_visual(socket)?.icon ?? fallback;
     }
     if (device_id === OTHER_DEVICE_VALUE) {
       return OTHER_DEVICE_ICON;
@@ -977,6 +1196,9 @@ export class RSPower extends RSDevice {
     }
     const socket_conf = target.socket_conf;
     if (value) {
+      // A device and a piece of equipment of the catalog exclude each other
+      delete socket_conf.linked_equipment;
+      delete socket_conf.linked_maintenance;
       socket_conf.linked_device = value;
       // A ReefRun pump is pictured by its job, which is readable now but not
       // once the device is disabled in Home Assistant. Recording it here
@@ -1010,6 +1232,28 @@ export class RSPower extends RSDevice {
       delete socket_conf.linked_model;
     }
 
+    this.fire_config_changed(target.config);
+  }
+
+  /**
+   * The equipment picker changed: keep the link in the socket's configuration.
+   * @param socket: the 1-based socket number
+   * @param event: the change event of the picker
+   */
+  private _handle_socket_equipment_change(socket: number, event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    const target = this._writable_socket_config(socket);
+    if (!target) {
+      return;
+    }
+    // The tasks kept for the former equipment stay in reef_maintenance (their
+    // history is worth keeping); the socket just stops pointing at them
+    delete target.socket_conf.linked_maintenance;
+    if (value) {
+      target.socket_conf.linked_equipment = value;
+    } else {
+      delete target.socket_conf.linked_equipment;
+    }
     this.fire_config_changed(target.config);
   }
 }

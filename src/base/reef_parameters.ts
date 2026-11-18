@@ -37,6 +37,10 @@ import { LitElement, css, html, nothing } from "lit";
 import i18n from "../translations/myi18n.js";
 import { MyElement } from "./element";
 import { parse_ranges } from "../utils/levels";
+import {
+  apply_parameters_catalog,
+  fetch_parameters_catalog,
+} from "../utils/parameters_catalog";
 import "./measurement_history";
 
 //----------------------------------------------------------------------------//
@@ -88,6 +92,33 @@ export const CHEMISTRIES: Record<string, Chemistry> = {
   no3: { unit: "ppm" },
   po4: { unit: "ppm" },
 };
+
+/** Page-wide: the catalog is asked once, whatever the number of cards. */
+let catalog_loading: Promise<boolean> | null = null;
+
+/**
+ * Complete the built-in tables with the `parameters` catalog of the
+ * integration. Asked once per page; asked again after a failure.
+ *
+ * @returns true when the tables changed
+ */
+export function load_catalog(hass: any): Promise<boolean> {
+  if (!catalog_loading) {
+    catalog_loading = fetch_parameters_catalog(hass).then((view) => {
+      const count = view
+        ? apply_parameters_catalog(view, CHEMISTRIES, DEFAULT_RANGES)
+        : 0;
+      if (count === 0) catalog_loading = null;
+      return count > 0;
+    });
+  }
+  return catalog_loading;
+}
+
+/** Forget what was loaded (tests). */
+export function reset_catalog(): void {
+  catalog_loading = null;
+}
 
 /**
  * One chemistry followed and the entity its value is read from (its
@@ -522,8 +553,14 @@ export class ReefParametersCard extends LitElement {
   }
 
   set hass(hass: any) {
+    const first = !this._hass;
     this._hass = hass;
     for (const chart of this._charts.values()) chart.hass = hass;
+    // The zones and units come from the catalog once the page knows them
+    if (first && hass)
+      void load_catalog(hass).then((changed) => {
+        if (changed) this.requestUpdate();
+      });
     this.requestUpdate();
   }
 

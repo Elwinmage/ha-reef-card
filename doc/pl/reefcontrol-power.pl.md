@@ -245,6 +245,7 @@ Oprócz dwóch linii komunikatów ReefControl-Power ma trzy opcje:
   rurkę do powiązanego urządzenia.
 - **Powiązane urządzenie**: dla każdego gniazda urządzenie do niego podłączone
   lub **Brak**. **Inne** oznacza urządzenie, którego Home Assistant nie zna.
+- **Powiązane wyposażenie**: dla każdego gniazda element wyposażenia z [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog), z którym Home Assistant nie może się komunikować (grzałka, wentylator, pompa…), wybierany według kategorii, marki i modelu. Jego obraz jest rysowany na gnieździe, w przeciwnym razie obraz lub ikona jego kategorii. Wymaga integracji _Reef maintenance_; gniazdo ma albo powiązane urządzenie, albo powiązane wyposażenie. Pod spodem **Śledź jego konserwację** każe integracji _Reef maintenance_ utworzyć wyposażenie z zadaniami z katalogu (pojawią się potem w widoku konserwacji); **Przestań śledzić** je usuwa. Oba wymagają administratora.
 
 Opcje są zapisywane pod modelem zgłaszanym przez Home Assistant:
 
@@ -263,6 +264,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # category:heater
 ```
 
 ---

@@ -254,6 +254,7 @@ Neben den beiden Meldungszeilen hat das ReefControl-Power drei Optionen:
   Schaltfläche und das Rohr zu ihrem verknüpften Gerät.
 - **Verknüpftes Gerät**: pro Steckdose das daran angeschlossene Gerät oder
   **Keines**. **Andere** steht für ein Gerät, das Home Assistant nicht kennt.
+- **Verknüpfte Ausrüstung**: pro Steckdose ein Gerät des [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog), mit dem Home Assistant nicht kommunizieren kann (Heizung, Lüfter, Pumpe…), nach Kategorie, Marke und Modell gewählt. Sein Bild wird auf der Steckdose gezeichnet, sonst Bild oder Symbol seiner Kategorie. Benötigt die Integration _Reef maintenance_; eine Steckdose hat entweder ein verknüpftes Gerät oder eine verknüpfte Ausrüstung. Darunter lässt **Wartung verfolgen** die Integration _Reef maintenance_ die Ausrüstung mit den Aufgaben des Katalogs anlegen (sie erscheinen dann in der Wartungsansicht); **Nicht mehr verfolgen** entfernt sie. Beides erfordert einen Administrator.
 
 Die Optionen werden unter dem Modell gespeichert, wie Home Assistant es meldet:
 
@@ -272,6 +273,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # category:heater
 ```
 
 ---

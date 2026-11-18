@@ -248,6 +248,7 @@ En plus des deux lignes de messages, le ReefControl-Power a trois options :
 - **Couleur des prises** : la couleur de chaque prise, utilisée par son bouton
   et par le tuyau vers son appareil lié.
 - **Appareil lié** : pour chaque prise, l'appareil branché dessus, ou **Aucun**. **Autre** désigne un appareil que Home Assistant ne connaît pas.
+- **Équipement lié** : par prise, un équipement du [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog) avec lequel Home Assistant ne peut pas communiquer (chauffage, ventilateur, pompe…), choisi par catégorie, marque et modèle. Son image est dessinée sur la prise, sinon l'image ou l'icône de sa catégorie. Demande l'intégration _Reef maintenance_, qui sert le catalogue ; une prise a soit un appareil lié, soit un équipement lié. Dessous, **Suivre sa maintenance** fait créer l'équipement par l'intégration _Reef maintenance_, avec les tâches du catalogue (elles apparaissent ensuite dans la vue maintenance) ; **Ne plus la suivre** le supprime. Les deux demandent un administrateur.
 
 Les options sont enregistrées sous le modèle tel que Home Assistant le remonte :
 
@@ -266,6 +267,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # ou category:heater
 ```
 
 ---

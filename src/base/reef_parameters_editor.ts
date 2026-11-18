@@ -17,6 +17,7 @@ import i18n from "../translations/myi18n.js";
 import {
   CHEMISTRIES,
   DEFAULT_RANGES,
+  load_catalog,
   type FollowedParameter,
   type ParametersConfig,
   compatible_entities,
@@ -93,7 +94,12 @@ export class ReefParametersCardEditor extends LitElement {
   }
 
   set hass(hass: any) {
+    const first = !this._hass;
     this._hass = hass;
+    if (first && hass)
+      void load_catalog(hass).then((changed) => {
+        if (changed) this.requestUpdate();
+      });
     this.requestUpdate();
   }
 

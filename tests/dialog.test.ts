@@ -1216,6 +1216,23 @@ describe("Dialog — entity cards follow entities swapped while open", () => {
     return { dlg, card, warn };
   }
 
+  it("keeps section labels, which name no entity", () => {
+    const { dlg } = open({ current: "ec" });
+    const resolved = dlg._resolve_entities(
+      {
+        entities: [
+          { type: "section", label: "Careful" },
+          { entity: "probe_ec_unit" },
+        ],
+      },
+      true,
+    );
+    expect(resolved.entities).toEqual([
+      { type: "section", label: "Careful" },
+      { entity: "select.unit" },
+    ]);
+  });
+
   it("rebuilds the card on the bounds of the newly selected unit", () => {
     const unit = { current: "ec" };
     const { dlg, card, warn } = open(unit);

@@ -23,6 +23,16 @@
 export const BRINE_MODE = "${entity.regulation_mode.state}==='brine'";
 export const NOT_BRINE_MODE = "${entity.regulation_mode.state}!=='brine'";
 
+/** Daily dose set on the head, as the proposal reports it (mL). */
+const CURRENT_DOSE = {
+  type: "attribute",
+  entity: "regulation_proposed_dose",
+  attribute: "current_dose",
+  name: "${i18n._('regulation_current_dose')}",
+  icon: "mdi:cup-water",
+  suffix: "mL",
+};
+
 /** Plain entity row named after its entity. */
 const row = (entity: string) => ({ entity, name: { type: "entity" } });
 
@@ -97,6 +107,16 @@ function entities(rows: Array<Record<string, any>>) {
 }
 
 const divider = { type: "divider" };
+
+/** `disabled_if` of the warning: shown for a test marked `verified: false`. */
+export const UNVERIFIED_TEST_HIDDEN =
+  "${entity.regulation_test_kit.attributes.verified}!==false";
+
+/** The warning of an unverified water test. */
+const UNVERIFIED_WARNING = {
+  type: "section",
+  label: "${i18n._('regulation_test_unverified')}",
+};
 
 /** Hide a dialog item unless `condition` is false. */
 function hidden_if<T extends object>(condition: string, item: T) {
@@ -183,13 +203,21 @@ export const dialogs_regulation = {
         row("regulation_status"),
         row("regulation_last_measurement"),
         row("regulation_consumption"),
-        // The dose in force (read only), right above the one proposed
-        row("sensor.daily_dose"),
+        // The dose in force (read only), right above the one proposed. Read
+        // from the proposal itself: the daily_dose sensor of the head may be
+        // disabled, and its row would then silently vanish
+        CURRENT_DOSE,
         row("regulation_proposed_dose"),
         divider,
-        // A test kit: its syringe reading gives the result
+        // A water test of the catalog: the amount of reagent used gives the
+        // result (typed in otherwise)
         row("regulation_test_kit"),
         row("regulation_reagent"),
+      ]),
+      // A test whose table was not checked against its manual: it works, the
+      // result is to be checked
+      hidden_if(UNVERIFIED_TEST_HIDDEN, entities([UNVERIFIED_WARNING])),
+      entities([
         row("regulation_measurement"),
         row("regulation_record"),
         divider,

@@ -249,6 +249,7 @@ Oltre alle due righe di messaggi, il ReefControl-Power ha tre opzioni:
   tubo verso il suo dispositivo collegato.
 - **Dispositivo collegato**: per presa, il dispositivo collegato ad essa, oppure
   **Nessuno**. **Altro** indica un apparecchio che Home Assistant non conosce.
+- **Attrezzatura collegata**: per presa, un'attrezzatura del [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog) con cui Home Assistant non può comunicare (riscaldatore, ventola, pompa…), scelta per categoria, marca e modello. La sua immagine è disegnata sulla presa, altrimenti l'immagine o l'icona della sua categoria. Richiede l'integrazione _Reef maintenance_; una presa ha un dispositivo collegato oppure un'attrezzatura collegata. Sotto, **Segui la sua manutenzione** fa creare l'attrezzatura dall'integrazione _Reef maintenance_ con le attività del catalogo (compaiono poi nella vista manutenzione); **Non seguirla più** la rimuove. Entrambi richiedono un amministratore.
 
 Le opzioni sono salvate sotto il modello come riportato da Home Assistant:
 
@@ -267,6 +268,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # category:heater
 ```
 
 ---

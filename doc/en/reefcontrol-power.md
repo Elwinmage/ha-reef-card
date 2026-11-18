@@ -244,6 +244,7 @@ Besides the two message lines, the ReefControl-Power has three options:
 - **Sockets colors**: the colour of each socket, used by its button and by the
   pipe to its linked device.
 - **Linked device**: per socket, the device plugged into it, or **None**. **Other** stands for an appliance Home Assistant does not know about.
+- **Linked equipment**: per socket, a piece of equipment of the [reeftech-catalog](https://github.com/Elwinmage/reeftech-catalog) Home Assistant cannot talk to (heater, fan, pump...), chosen by category, brand and model. Its picture is drawn on the socket, else the picture or the icon of its category. Needs the _Reef maintenance_ integration, which serves the catalog; a socket has either a linked device or a linked equipment. Under it, **Keep its maintenance** has the _Reef maintenance_ integration create the equipment with the tasks of the catalog (they then show up in the maintenance view); **Stop keeping it** removes it. Both need an administrator.
 
 The options are stored under the model as Home Assistant reports it:
 
@@ -262,6 +263,8 @@ conf:
             linked_device: 0123456789abcdef0123456789abcdef
           socket_3:
             linked_device: fedcba9876543210fedcba9876543210
+          socket_4:
+            linked_equipment: eheim-thermocontrol-200 # or category:heater
 ```
 
 ---

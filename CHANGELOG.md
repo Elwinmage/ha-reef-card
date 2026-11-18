@@ -2,6 +2,26 @@
 
 ## MODIFICATIONS
 
+### Water parameters and tests from the reeftech-catalog
+
+- ReefDose, assisted dosing: the **Test kit** list now holds the water tests of
+  the catalog (a ⚠ warning shows under it when the table of the chosen test was
+  not verified) and **Reagent used** is the amount used, in mL or drops. The
+  result is worked out by the integration (needs the matching version of
+  ha-reefbeat-component).
+- The parameters card takes the units and the zones (acceptable / desired) of
+  the `parameters` catalog from the integration; the built-in values stay the
+  fallback.
+- ReefControl-Power: a socket can be linked to a piece of **equipment** of the
+  catalog (heater, fan, pump...), chosen by category, brand and model
+  (`linked_equipment`, or `category:<id>`): its picture, else the picture or
+  icon of its category, is drawn on the socket. Needs the Reef maintenance
+  integration; exclusive with a linked device.
+- Under the equipment picker, **Keep its maintenance** has the Reef maintenance
+  integration create the equipment with the tasks of the catalog
+  (`linked_maintenance` records its id), **Stop keeping it** removes it. The
+  tasks show up in the maintenance view like the others.
+
 ### ReefATO+: no more "Missing state" with an infinite tank (#127)
 
 - With _Infinite tank_ on an ATO+ on automatic refill, the device reports no

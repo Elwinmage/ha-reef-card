@@ -49,7 +49,6 @@ const BACKEND_KEYS = new Set([
   "regulation_alarm",
   "regulation_test_kit",
   "regulation_reagent",
-  "sensor.daily_dose",
   "schedule_enabled",
 ]);
 
@@ -72,7 +71,7 @@ function entity_keys(dialog: any): string[] {
   const keys: string[] = [];
   for (const content of dialog.content ?? dialog) {
     for (const row of content.conf?.entities ?? []) {
-      if (row.type === "divider") continue;
+      if (row.type === "divider" || row.type === "section") continue;
       keys.push(typeof row === "string" ? row : row.entity);
     }
   }
@@ -127,12 +126,56 @@ describe("regulation dialogs", () => {
     }
   });
 
+  it("warn about a water test whose table is not verified", () => {
+    const content = dialogs_regulation.regulation_assisted.content as any[];
+    const warning = content.find((c) =>
+      c.conf?.entities?.some((r: any) => r.type === "section"),
+    );
+    expect(warning.conf.entities[0].label).toContain(
+      "regulation_test_unverified",
+    );
+    // Under the rows of the test, above the result it gives
+    const index = content.indexOf(warning);
+    expect(entity_keys([content[index - 1]])).toContain("regulation_reagent");
+    expect(entity_keys([content[index + 1]])).toContain(
+      "regulation_measurement",
+    );
+    const hidden = (verified: unknown) => {
+      const device = {
+        entities: { regulation_test_kit: { entity_id: "select.kit" } },
+      };
+      const attributes = verified === undefined ? {} : { verified };
+      const hass = { states: { "select.kit": { state: "x", attributes } } };
+      return new SafeEval({
+        entity: MyElement.createEntitiesContext(device, hass),
+      } as any).evaluateCondition(warning.disabled_if);
+    };
+    expect(hidden(false)).toBe(false);
+    expect(hidden(true)).toBe(true);
+    // Typed in by hand: no test, no warning
+    expect(hidden(undefined)).toBe(true);
+    for (const locale of [de, en, es, fr, it_, pl, pt] as any[])
+      expect(locale.regulation_test_unverified).toMatch(/^⚠/);
+  });
+
   it("show the dose in force right above the one proposed", () => {
     const keys = entity_keys(dialogs_regulation.regulation_assisted);
-    const proposed = keys.indexOf("regulation_proposed_dose");
-    // The sensor: read only, the schedule is where the dose is changed
-    expect(keys[proposed - 1]).toBe("sensor.daily_dose");
+    // Read only, from the proposal: no second entity that may be disabled
+    const rows = dialogs_regulation.regulation_assisted.content
+      .flatMap((c: any) => c.conf?.entities ?? [])
+      .filter((r: any) => r.type !== "divider" && r.type !== "section");
+    const proposed = rows.findIndex(
+      (r: any) => r.entity === "regulation_proposed_dose" && !r.type,
+    );
+    expect(rows[proposed - 1]).toMatchObject({
+      type: "attribute",
+      entity: "regulation_proposed_dose",
+      attribute: "current_dose",
+    });
+    expect(keys).not.toContain("sensor.daily_dose");
     expect(keys).not.toContain("number.daily_dose");
+    for (const locale of [de, en, es, fr, it_, pl, pt] as any[])
+      expect(locale.regulation_current_dose).toBeTruthy();
     // A test kit reading comes before the result it gives
     expect(keys.indexOf("regulation_test_kit")).toBeLessThan(
       keys.indexOf("regulation_reagent"),
