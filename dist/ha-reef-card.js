@@ -44473,7 +44473,7 @@ var f8A = class extends k {
   }
 };
 customElements.get("reef-parameters-card-editor") || customElements.define("reef-parameters-card-editor", f8A);
-var Z8A = "v2.2.0";
+var Z8A = "v2.3.0";
 function b8A() {
   console.info(`%c 🪸 REEF CARD %c ${Z8A} `, "color:#fff;background:#0097a7;font-weight:700;padding:2px 4px;border-radius:3px 0 0 3px", "color:#0097a7;background:#e0f7fa;font-weight:700;padding:2px 4px;border-radius:0 3px 3px 0");
 }
