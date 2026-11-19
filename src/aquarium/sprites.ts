@@ -12,6 +12,7 @@
  */
 
 import type {
+  Catalog,
   Clip,
   CoralSpecies,
   FishSpecies,
@@ -315,6 +316,47 @@ export function generic_fish(): FishSpecies | null {
     feeding_response: 0.6,
   };
   return _generic;
+}
+
+// ── Default fish for a species without picture ───────────────────────────────
+
+/** Id of the default picture of a fish without one, in the catalog. */
+export const UNKNOWN_FISH_ID = "unknown_fish";
+
+/** The default "?" fish of the catalog; null in a catalog without it. */
+export function unknown_fish(
+  catalog: Catalog | null | undefined,
+): FishSpecies | null {
+  return (
+    catalog?.defaults?.find(
+      (d) => d.id === UNKNOWN_FISH_ID && d.atlas?.["1x"],
+    ) ?? null
+  );
+}
+
+/**
+ * The fish as it is drawn: itself when it has a picture, else with the
+ * sprite of the default fish (it keeps its own size and behaviour). Null
+ * when it has no picture and the catalog has no default one.
+ */
+export function drawn_fish(
+  species: FishSpecies,
+  catalog: Catalog | null | undefined,
+): FishSpecies | null {
+  if (species.atlas?.["1x"]) return species;
+  const unknown = unknown_fish(catalog);
+  if (!unknown) return null;
+  return {
+    ...species,
+    frame: unknown.frame,
+    columns: unknown.columns,
+    clips: unknown.clips,
+    atlas: unknown.atlas,
+    thumbnail: species.thumbnail ?? unknown.thumbnail,
+    facing: unknown.facing,
+    length_frac: unknown.length_frac,
+    placeholder: true,
+  };
 }
 
 /** Forget the generic fish (tests). */

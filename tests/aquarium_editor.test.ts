@@ -383,6 +383,41 @@ describe("scene editor", () => {
     expect(editor.shadowRoot.textContent).toContain("generic fish");
   });
 
+  it("shows a species without picture as the default fish", async () => {
+    const { doc } = existing_doc();
+    const editor = await open(make_hass(doc), "a1b2");
+    const unknown = {
+      ...catalog.fish[0],
+      id: "unknown_fish",
+      names: undefined,
+    };
+    const bare = {
+      id: "guppy",
+      kind: "fish",
+      source: "pack",
+      water_types: ["freshwater"],
+      names: { en: "Guppy" },
+    };
+    editor._catalog = {
+      ...catalog,
+      fish: [...catalog.fish, bare],
+      defaults: [unknown],
+    } as any;
+    editor._tab = "livestock";
+    // Only the species of the water are offered, and a pictureless one
+    // is shown with the default fish
+    editor.change({ ...editor.doc, water_type: "freshwater" });
+    editor.doc.waters.main.livestock = [
+      { id: "l9", kind: "fish", species: "guppy", count: 2 },
+    ];
+    await editor.updateComplete;
+    expect(editor.shadowRoot.textContent).toContain("no picture yet");
+    expect(editor._species_fish("guppy").placeholder).toBe(true);
+    // Without default fish, the species cannot be drawn: it stays itself
+    editor._catalog = { ...catalog, fish: [bare] } as any;
+    expect(editor._species_fish("guppy").placeholder).toBeUndefined();
+  });
+
   it("draws decor, lasso and hotspots on the stage, with undo", async () => {
     const { doc, front, cabinet } = existing_doc();
     const editor = await open(make_hass(doc), "a1b2");

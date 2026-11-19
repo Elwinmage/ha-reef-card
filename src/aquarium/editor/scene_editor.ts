@@ -47,7 +47,8 @@ import type {
   SceneElement,
   View,
 } from "../types";
-import { RENDER_LEVELS } from "../types";
+import { RENDER_LEVELS, WATER_TYPES } from "../types";
+import type { WaterType } from "../types";
 import { ApiError, ImageUrls, ReefTankApi } from "../api";
 import {
   WaterProjection,
@@ -81,7 +82,7 @@ import {
 import { kelvin_rgb } from "../../devices/redsea/rsled/rsled_program";
 import { Backdrop, drawn_region } from "../backdrop";
 import { device_name, device_thumbnail } from "../elements";
-import { coral_palette, rgb_hex } from "../sprites";
+import { coral_palette, drawn_fish, rgb_hex } from "../sprites";
 import DeviceList from "../../utils/common";
 import i18n from "../../translations/myi18n";
 import * as ops from "./ops";
@@ -626,7 +627,9 @@ export class ReefAquariumSceneEditor extends LitElement {
   }
 
   private _species_fish(id: string): FishSpecies | undefined {
-    return this._catalog?.fish.find((s) => s.id === id);
+    const found = this._catalog?.fish.find((s) => s.id === id);
+    // Without picture of its own: the sprite of the default fish
+    return found ? (drawn_fish(found, this._catalog) ?? found) : undefined;
   }
 
   private _species_coral(id: string): CoralSpecies | undefined {
@@ -1713,6 +1716,29 @@ export class ReefAquariumSceneEditor extends LitElement {
             </label>`
           : nothing
       }
+      <fieldset>
+        <legend>${i18n._("aq_water_type")}</legend>
+        <label class="field">
+          <select
+            @change=${(e: Event) =>
+              this.change({
+                ...structuredClone(doc),
+                water_type: (e.target as HTMLSelectElement).value as WaterType,
+              })}
+          >
+            ${WATER_TYPES.map(
+              (w) =>
+                html`<option
+                  value="${w}"
+                  ?selected=${(doc.water_type ?? "marine") === w}
+                >
+                  ${i18n._(`aq_water_${w}`)}
+                </option>`,
+            )}
+          </select>
+          <span class="hint">${i18n._("aq_water_type_hint")}</span>
+        </label>
+      </fieldset>
       <fieldset>
         <legend>${i18n._("aq_dimensions")}</legend>
         <div class="row3">
@@ -3167,8 +3193,11 @@ export class ReefAquariumSceneEditor extends LitElement {
   private _panel_livestock(): TemplateResult {
     const doc = this._doc!;
     const water = doc.waters[this._water_id];
-    const fish = this._catalog?.fish ?? [];
-    const corals = this._catalog?.corals ?? [];
+    // Only the species of the aquarium's water are offered
+    const fish = ops
+      .for_water(this._catalog?.fish ?? [], doc.water_type)
+      .map((s) => drawn_fish(s, this._catalog) ?? s);
+    const corals = ops.for_water(this._catalog?.corals ?? [], doc.water_type);
     const sel = this._selection;
     return html`
       ${this._water_select()} ${this._catalog_notice()}
@@ -3191,11 +3220,15 @@ export class ReefAquariumSceneEditor extends LitElement {
                         ${species_latin(species)}</strong
                       >
                       ${
-                        species
-                          ? nothing
-                          : html`<span class="hint"
-                              >${i18n._("aq_no_animation")}</span
+                        species?.placeholder
+                          ? html`<span class="hint"
+                              >${i18n._("aq_no_picture")}</span
                             >`
+                          : species
+                            ? nothing
+                            : html`<span class="hint"
+                                >${i18n._("aq_no_animation")}</span
+                              >`
                       }
                       <button
                         class="icon"

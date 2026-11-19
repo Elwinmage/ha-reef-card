@@ -6,6 +6,12 @@
 /** A point of a picture, normalised to 0..1: [x, y]. */
 export type Point = [number, number];
 
+/** Water of an aquarium, and of the species living in it. */
+export type WaterType = "marine" | "freshwater" | "brackish";
+export const WATER_TYPES: WaterType[] = ["marine", "freshwater", "brackish"];
+/** Water of a document saved before the water types (and of a species that does not say). */
+export const DEFAULT_WATER_TYPE: WaterType = "marine";
+
 /** Render levels, from the cheapest to the richest. */
 export type RenderLevel = "static" | "light" | "full";
 export const RENDER_LEVELS: RenderLevel[] = ["static", "light", "full"];
@@ -166,6 +172,8 @@ export interface AquariumDocument {
   revision: number;
   name: string;
   cloud?: { provider: string; uid: string } | null;
+  /** Marine, freshwater or brackish: filters the species offered. */
+  water_type?: WaterType;
   preset?: string | null;
   dimensions_cm?: { length: number; width: number; height: number } | null;
   /** Net water volume (L): tank and sump, without rock and sand. */
@@ -192,6 +200,7 @@ export interface AquariumSummary {
   id: string;
   name: string;
   revision: number;
+  water_type?: WaterType;
   preset?: string | null;
   cloud?: { provider: string; uid: string } | null;
   render_level: RenderLevel;
@@ -288,6 +297,15 @@ export interface SpeciesBase {
   /** Small picture for the editor's lists. */
   thumbnail?: string;
   demo?: boolean;
+  /** Waters the species lives in; none: marine. */
+  water_types?: WaterType[];
+  /**
+   * False for a species published without a picture (no atlas, frame or
+   * clips): it is drawn with the default "?" fish of the catalog.
+   */
+  has_image?: boolean;
+  /** Atlas made from a single photo (a simple animation). */
+  degraded?: boolean;
 }
 
 export interface FishSpecies extends SpeciesBase {
@@ -300,6 +318,8 @@ export interface FishSpecies extends SpeciesBase {
   behavior?: FishBehavior;
   night?: NightMode;
   feeding_response?: number;
+  /** Drawn with the sprite of the default fish (the species has none). */
+  placeholder?: boolean;
 }
 
 export interface PaletteColour {
@@ -311,6 +331,19 @@ export interface CoralSpecies extends SpeciesBase {
   kind: "coral";
   atlas: { shade: string; mask: string; shade_2x?: string; mask_2x?: string };
   palette: PaletteColour[];
+  size_cm?: [number, number];
+}
+
+export interface PlantSpecies extends SpeciesBase {
+  kind: "plant";
+  zone: "background" | "midground" | "foreground" | "floating" | "epiphyte";
+  size_cm?: [number, number];
+}
+
+export interface InvertebrateSpecies extends SpeciesBase {
+  kind: "invertebrate";
+  role: string[];
+  movement: "ground" | "glass" | "decor" | "sessile" | "swim";
   size_cm?: [number, number];
 }
 
@@ -341,6 +374,14 @@ export interface Preset {
 export interface Catalog {
   fish: FishSpecies[];
   corals: CoralSpecies[];
+  /** Plants and invertebrates (none in older releases). */
+  plants?: PlantSpecies[];
+  invertebrates?: InvertebrateSpecies[];
+  /**
+   * Pictures shown for a species that has none (`unknown_fish`: a black fish
+   * with a white "?"); none in older releases.
+   */
+  defaults?: FishSpecies[];
   /** Rock and sand textures of the drawn decor (none in older releases). */
   textures?: Texture[];
   presets: Preset[];

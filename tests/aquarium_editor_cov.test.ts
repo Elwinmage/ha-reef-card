@@ -1203,6 +1203,16 @@ describe("scene editor: aquarium panel", () => {
     fire(light, "blue");
     expect(editor.doc.photo_light).toBe("blue");
     await editor.updateComplete;
+    // Water type of the aquarium
+    const water = [...root.querySelectorAll("fieldset")]
+      .find(
+        (f: any) => f.querySelector("legend")?.textContent?.trim() === "Water",
+      )!
+      .querySelector("select") as any;
+    expect(water.value).toBe("marine");
+    fire(water, "freshwater");
+    expect(editor.doc.water_type).toBe("freshwater");
+    await editor.updateComplete;
     // Night darkness: a percentage, stored as a share
     const night = () =>
       fieldset(root, "Rendering").querySelector('input[type="range"]') as any;

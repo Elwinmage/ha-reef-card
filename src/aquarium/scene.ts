@@ -41,6 +41,7 @@ import {
 import {
   coral_atlas,
   frame_rect,
+  drawn_fish,
   generic_fish,
   load_image,
   loop_frame,
@@ -285,11 +286,12 @@ export function fish_groups(
   for (const line of water.livestock ?? []) {
     if (line.kind !== "fish" || line.count <= 0) continue;
     // A species missing from the catalog swims as a generic fish (once the
-    // catalog is known, so that nothing flashes while it loads)
+    // catalog is known, so that nothing flashes while it loads); one
+    // without picture swims as the default "?" fish
     if (!catalog) continue;
+    const found = catalog.fish.find((s) => s.id === line.species);
     const species =
-      catalog.fish.find((s) => s.id === line.species && s.atlas?.["1x"]) ??
-      generic_fish();
+      (found ? drawn_fish(found, catalog) : null) ?? generic_fish();
     if (!species?.atlas?.["1x"]) continue;
     const length = line.size_cm ?? species.size_cm ?? [5, 8];
     const home = line.home;

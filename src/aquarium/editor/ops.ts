@@ -20,7 +20,9 @@ import type {
   View,
   Monitoring,
   Water,
+  WaterType,
 } from "../types";
+import { DEFAULT_WATER_TYPE } from "../types";
 import { MAX_DARKNESS } from "../light";
 
 /** Depth presets of the decor and corals. */
@@ -69,6 +71,22 @@ export function empty_view(name: string = ""): View {
   };
 }
 
+/**
+ * The species living in a water; one that does not say lives in the marine
+ * one.
+ */
+export function for_water<T extends { water_types?: WaterType[] }>(
+  list: T[],
+  water: WaterType | undefined,
+): T[] {
+  const wanted = water ?? DEFAULT_WATER_TYPE;
+  return list.filter((s) =>
+    (s.water_types?.length ? s.water_types : [DEFAULT_WATER_TYPE]).includes(
+      wanted,
+    ),
+  );
+}
+
 /** A new document, with a main water and no view. */
 export function new_document(name: string): AquariumDocument {
   return {
@@ -77,6 +95,7 @@ export function new_document(name: string): AquariumDocument {
     revision: 0,
     name,
     cloud: null,
+    water_type: DEFAULT_WATER_TYPE,
     preset: null,
     dimensions_cm: null,
     photo_light: "white",
