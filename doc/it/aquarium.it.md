@@ -111,4 +111,10 @@ Ogni acquario è reso a uno di tre livelli; una scheda può abbassarlo, ad esemp
 
 Una foto del locale tecnico con i dispositivi in tempo reale è un ottimo acquario `static`.
 
+## In House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) disegna la vostra abitazione in 3D sulla dashboard. La vista acquario vi prende posto, sulla vasca: una zona grande come l'acquario mostra la vista dal vivo, con i pesci in movimento, e un tocco la apre in una finestra. Nulla da impostare in questa scheda: la zona si aggiunge dall'editor di House View (_Zone toccabili_ → _Aggiungi un acquario_), che trova i vostri acquari da solo.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Demo House View" width="300"/></a>
+
 La guida completa (editor di scena, entità, servizi, catalogo) è nel [README di ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/it/README.it.md).

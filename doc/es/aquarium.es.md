@@ -111,4 +111,10 @@ Cada acuario se muestra en uno de tres niveles; una tarjeta puede bajarlo, por e
 
 Una foto del cuarto técnico con sus dispositivos en vivo es un acuario `static` perfectamente válido.
 
+## En House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) dibuja su vivienda en 3D en el panel. La vista de acuario ocupa su lugar en ella, sobre el acuario: una zona del tamaño del acuario muestra la vista en directo, con los peces en movimiento, y un toque la abre en una ventana. Nada que ajustar en esta tarjeta: la zona se añade desde el editor de House View (_Zonas pulsables_ → _Añadir un acuario_), que encuentra sus acuarios por sí solo.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Demo House View" width="300"/></a>
+
 La guía completa (editor de escena, entidades, servicios, catálogo) está en el [README de ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/es/README.es.md).

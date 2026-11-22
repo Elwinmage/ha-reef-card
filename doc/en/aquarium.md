@@ -111,4 +111,10 @@ Each aquarium renders at one of three levels; a card can lower it, e.g. on a slo
 
 A picture of the technical room with live devices on it is a perfectly good `static` aquarium.
 
+## In House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) draws your home in 3D on the dashboard. The aquarium view takes its place in it, on the tank: a zone at the size of the aquarium shows the view live, fish moving, and a tap opens it in a window. Nothing to set in this card: the zone is added from the editor of House View (_Clickable zones_ → _Add an aquarium_), which finds your aquariums by itself.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="House View demo" width="300"/></a>
+
 The full guide (scene editor, entities, services, catalog) is in the [ReefTank README](https://github.com/Elwinmage/ha-reeftank-component).

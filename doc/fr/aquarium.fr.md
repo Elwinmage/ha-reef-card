@@ -111,4 +111,10 @@ Chaque aquarium s'affiche à l'un de trois niveaux ; une carte peut l'abaisser, 
 
 Une photo du local technique avec ses appareils en direct est un très bon aquarium `static`.
 
+## Dans House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) dessine votre logement en 3D sur le tableau de bord. La vue aquarium y prend sa place, sur le bac : une zone à la taille de l'aquarium affiche la vue en direct, poissons animés, et un clic l'ouvre dans une fenêtre. Rien à régler dans cette carte : la zone s'ajoute depuis l'éditeur de House View (_Zones cliquables_ → _Ajouter un aquarium_), qui trouve vos aquariums tout seul.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Démo House View" width="300"/></a>
+
 Le guide complet (éditeur de scène, entités, services, catalogue) est dans le [README de ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/fr/README.fr.md).

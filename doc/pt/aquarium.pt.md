@@ -111,4 +111,10 @@ Cada aquário é mostrado num de três níveis; um cartão pode baixá-lo, por e
 
 Uma foto da sala técnica com os dispositivos em direto é um aquário `static` perfeitamente válido.
 
+## No House View
+
+O [House View](https://github.com/Elwinmage/ha-house-view-component) desenha a sua habitação em 3D no painel. A vista de aquário ocupa nele o seu lugar, sobre o aquário: uma zona do tamanho do aquário mostra a vista em direto, com os peixes em movimento, e um toque abre-a numa janela. Nada a definir neste cartão: a zona é adicionada a partir do editor do House View (_Zonas tocáveis_ → _Adicionar um aquário_), que encontra os seus aquários sozinho.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Demo House View" width="300"/></a>
+
 O guia completo (editor de cena, entidades, serviços, catálogo) está no [README do ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/pt/README.pt.md).

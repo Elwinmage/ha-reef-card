@@ -63,6 +63,9 @@ Une seconde carte donne vie à votre bac avec [ha-reeftank-component](https://gi
 <td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Démo Aqua Medic" width="300"/></a><br/><em>Démo Aqua Medic</em></td>
 <td><a href="https://www.youtube.com/watch?v=ZtYobmQZf9k"><img src="https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg" alt="Démo vue aquarium" width="300"/></a><br/><em>Démo vue aquarium</em></td>
 </tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Démo House View (vue 3D de la maison)" width="300"/></a><br/><em>Démo House View (vue 3D de la maison)</em></td>
+</tr>
 </table>
 
 <!-- generated:demo-videos:end -->

@@ -63,6 +63,9 @@ Um segundo cartão dá vida ao seu aquário com [ha-reeftank-component](https://
 <td><a href="https://www.youtube.com/watch?v=9Gh4YE6Ck9g"><img src="https://img.youtube.com/vi/9Gh4YE6Ck9g/0.jpg" alt="Demo Aqua Medic" width="300"/></a><br/><em>Demo Aqua Medic</em></td>
 <td><a href="https://www.youtube.com/watch?v=ZtYobmQZf9k"><img src="https://img.youtube.com/vi/ZtYobmQZf9k/0.jpg" alt="Demo vista de aquário" width="300"/></a><br/><em>Demo vista de aquário</em></td>
 </tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Demo House View (vista 3D da casa)" width="300"/></a><br/><em>Demo House View (vista 3D da casa)</em></td>
+</tr>
 </table>
 
 <!-- generated:demo-videos:end -->

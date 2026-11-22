@@ -111,4 +111,10 @@ Każde akwarium jest wyświetlane na jednym z trzech poziomów; karta może go o
 
 Zdjęcie pomieszczenia technicznego z urządzeniami na żywo to pełnoprawne akwarium `static`.
 
+## W House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) rysuje Twój dom w 3D na pulpicie. Widok akwarium zajmuje w nim swoje miejsce, na zbiorniku: strefa wielkości akwarium pokazuje widok na żywo, z poruszającymi się rybami, a dotknięcie otwiera go w oknie. W tej karcie nie trzeba nic ustawiać: strefę dodaje się w edytorze House View (_Strefy do dotykania_ → _Dodaj akwarium_), który sam znajduje Twoje akwaria.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="Demo House View" width="300"/></a>
+
 Pełny przewodnik (edytor sceny, encje, usługi, katalog) znajduje się w [README ReefTank](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/pl/README.pl.md).

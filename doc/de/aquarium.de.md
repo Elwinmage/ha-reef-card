@@ -111,4 +111,10 @@ Jedes Aquarium wird in einer von drei Stufen dargestellt; eine Karte kann sie se
 
 Ein Foto des Technikraums mit live angezeigten Geräten ist ein vollwertiges `static`-Aquarium.
 
+## In House View
+
+[House View](https://github.com/Elwinmage/ha-house-view-component) zeichnet Ihr Zuhause in 3D auf dem Dashboard. Die Aquarienansicht nimmt darin ihren Platz ein, am Becken: Eine Zone in der Größe des Aquariums zeigt die Ansicht live, mit bewegten Fischen, und ein Tippen öffnet sie in einem Fenster. In dieser Karte ist nichts einzustellen: Die Zone wird im Editor von House View hinzugefügt (_Antippbare Zonen_ → _Aquarium hinzufügen_), das Ihre Aquarien selbst findet.
+
+<a href="https://www.youtube.com/watch?v=MyXz5AVbtJI"><img src="https://img.youtube.com/vi/MyXz5AVbtJI/0.jpg" alt="House-View-Demo" width="300"/></a>
+
 Die vollständige Anleitung (Szeneneditor, Entitäten, Dienste, Katalog) steht im [ReefTank-README](https://github.com/Elwinmage/ha-reeftank-component/blob/main/doc/de/README.de.md).
