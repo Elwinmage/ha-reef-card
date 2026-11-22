@@ -44565,7 +44565,7 @@ var YJA = class extends k {
   }
 };
 customElements.get("reef-parameters-card-editor") || customElements.define("reef-parameters-card-editor", YJA);
-var vJA = "v2.3.0";
+var vJA = "v2.4.0";
 function wJA() {
   console.info(`%c 🪸 REEF CARD %c ${vJA} `, "color:#fff;background:#0097a7;font-weight:700;padding:2px 4px;border-radius:3px 0 0 3px", "color:#0097a7;background:#e0f7fa;font-weight:700;padding:2px 4px;border-radius:0 3px 3px 0");
 }
