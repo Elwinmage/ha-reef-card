@@ -1,5 +1,5 @@
 /**
- * Canvas renderer of the living part of a view: fish, corals, decor
+ * Canvas renderer of the living part of a view: fish, corals, plants, decor
  * cut-outs and food, depth sorted.
  *
  * Every frame draws one list sorted from the back (z = 1) to the front:
@@ -19,6 +19,8 @@ import type {
   Coral,
   CoralSpecies,
   FishSpecies,
+  Plant,
+  PlantSpecies,
   Point,
   View,
   Water,
@@ -46,8 +48,15 @@ import {
   load_image,
   loop_frame,
   once_frame,
+  plant_atlas,
+  plant_clip,
+  plant_floats,
+  plant_image_url,
+  BEND_FRAMES,
   type CoralAtlas,
+  type PlantAtlas,
 } from "./sprites";
+import { Rng } from "./rng";
 
 const DEFAULT_DIMENSIONS = { length: 100, width: 50, height: 50 };
 const FRAME_STEP = 1 / 30;
@@ -330,6 +339,125 @@ interface DrawItem {
   coral?: boolean;
 }
 
+/** How a plant of the view sways: its own phase in the species' sheet. */
+export interface PlantSway {
+  /** Frames of the sheet, from upright to fully bent. */
+  frames: number;
+  /** Time of one sway when the current is at rest, seconds. */
+  period_s: number;
+  /** Where this plant is in its sway (frames), and how far it reaches. */
+  phase: number;
+  amp: number;
+  /** Where a floating plant is in its wander along the surface, radians. */
+  drift_phase: number;
+}
+
+/** A plant of a view, with the picture it is drawn from. */
+export interface PlantScene {
+  plant: Plant;
+  species: PlantSpecies;
+  /** Picture of the species, preloaded into the atlas cache. */
+  url: string;
+  /** Sway sheet made from that picture; null for a plant that stands still. */
+  atlas: PlantAtlas | null;
+  sway: PlantSway;
+  /** Frame to draw: of the sheet, or of the species' own clip. */
+  frame: number;
+  /** A floating plant: how far it has wandered, in tank lengths. */
+  drift: number;
+  /** How tall it stands today, cm: it has grown since it was planted. */
+  height_cm: number;
+}
+
+/** Over how long a plant grows into the full size of its species, days. */
+const GROWTH_DAYS = 180;
+
+/**
+ * How tall a plant stands today: the height it was planted at, growing
+ * towards the full size of its species over a season. Plainly its own
+ * height when the species gives no size, when the date it was planted is
+ * not known, or when it was planted grown.
+ * @param now: today, as a timestamp
+ */
+export function plant_height(
+  plant: Plant,
+  species: PlantSpecies,
+  now: number,
+): number {
+  const grown = species.size_cm?.[1];
+  const planted = plant.added ? Date.parse(plant.added) : NaN;
+  if (!grown || !Number.isFinite(planted) || grown <= plant.size_cm)
+    return plant.size_cm;
+  // Whole days: a plant does not grow under the eye, and the one planted
+  // today stands at exactly the height it was given
+  const days = Math.floor((now - planted) / 86400000);
+  return plant.size_cm + (grown - plant.size_cm) * clamp01(days / GROWTH_DAYS);
+}
+
+/**
+ * Last frame of the sheet the current reaches: the window played is 0 .. it,
+ * so a quiet corner only trembles while a tank in full wave lies down. 0
+ * when the plant is to stand still.
+ */
+export function sway_window(frames: number, flow: number, amp: number): number {
+  const open = clamp01((0.15 + 0.85 * clamp01(flow)) * amp);
+  return Math.max(0, Math.min(frames - 1, Math.round(open * (frames - 1))));
+}
+
+/**
+ * Advance a plant's sway, back and forth over the window the flow opens.
+ * @param sway: its state, updated in place
+ * @param flow: pumps' flow 0..1 (reaches further, and faster)
+ * @param dt: seconds
+ * @return the frame of the sheet to draw
+ */
+export function step_plant(sway: PlantSway, flow: number, dt: number): number {
+  const end = sway_window(sway.frames, flow, sway.amp);
+  if (end <= 0) return 0;
+  // Back and forth over 0 .. end: 2 x end frames for one full sway
+  const period = sway.period_s / (0.6 + 0.8 * clamp01(flow));
+  sway.phase += (dt * 2 * end) / Math.max(0.1, period);
+  return loop_frame(
+    { from: 0, to: end, fps: 0, loop: true, pingpong: true },
+    sway.phase,
+  );
+}
+
+/** How far a floating plant wanders from its spot, share of the tank. */
+const DRIFT_REACH = 0.06;
+/** Time of one wander, seconds, with the current at rest. */
+const DRIFT_PERIOD = 40;
+
+/**
+ * Advance a floating plant: it does not bend, it rides the surface and
+ * wanders along it, the further and the faster the stronger the current.
+ * @param sway: its state, updated in place
+ * @param flow: pumps' flow 0..1
+ * @param dt: seconds
+ * @return how far it stands from its spot, in tank lengths
+ */
+export function step_drift(sway: PlantSway, flow: number, dt: number): number {
+  const f = clamp01(flow);
+  sway.drift_phase += (2 * Math.PI * dt * (0.6 + 0.8 * f)) / DRIFT_PERIOD;
+  return DRIFT_REACH * sway.amp * (0.3 + 0.7 * f) * Math.sin(sway.drift_phase);
+}
+
+/**
+ * Advance a plant that ships its own atlas: its clip plays faster with the
+ * current, as a coral's does.
+ * @return the frame of its atlas to draw
+ */
+export function step_plant_clip(
+  p: PlantScene,
+  flow: number,
+  dt: number,
+): number {
+  const clip = plant_clip(p.species);
+  if (!clip) return 0;
+  p.sway.phase += dt * (clip.fps || 12) * (0.6 + 0.8 * clamp01(flow));
+  return loop_frame(clip, p.sway.phase);
+}
+
 interface RegionScene {
   water_id: string;
   water: Water;
@@ -342,6 +470,7 @@ interface RegionScene {
     state: CoralState;
     frame: number;
   }[];
+  plants: PlantScene[];
   light: WaterLight | null;
 }
 
@@ -450,6 +579,41 @@ export class AquariumScene {
           () => undefined,
         );
       }
+      const plants: PlantScene[] = [];
+      for (const plant of water.plants ?? []) {
+        if ((plant.view ?? view_id) !== view_id) continue;
+        const species = catalog?.plants?.find((s) => s.id === plant.species);
+        const url = species ? plant_image_url(species) : null;
+        if (!species || !url) continue;
+        // Its own phase and reach, so a bed of one species does not beat
+        // as one man
+        const rng = new Rng(`${setup.seed}:${plant.id}`);
+        const entry: PlantScene = {
+          plant,
+          species,
+          url,
+          atlas: null,
+          sway: {
+            frames: BEND_FRAMES,
+            period_s: species.period_s ?? 3,
+            phase: rng.range(0, 2 * BEND_FRAMES),
+            amp: rng.range(0.85, 1.15),
+            drift_phase: rng.range(0, 2 * Math.PI),
+          },
+          frame: 0,
+          drift: 0,
+          height_cm: plant_height(plant, species, Date.now()),
+        };
+        plants.push(entry);
+        plant_atlas(species).then(
+          (atlas) => (entry.atlas = atlas),
+          () => undefined,
+        );
+        load_image(url).then(
+          (img) => this._atlases.set(url, img),
+          () => undefined,
+        );
+      }
       for (const group of fish_groups(water, catalog)) {
         const url = group.species.atlas["1x"];
         load_image(url).then(
@@ -463,6 +627,7 @@ export class AquariumScene {
         projection,
         sim,
         corals,
+        plants,
         light: null,
       });
     }
@@ -603,6 +768,13 @@ export class AquariumScene {
     this._dt = dt;
     for (const r of this._regions) {
       r.sim.step(dt);
+      for (const p of r.plants) {
+        p.frame = p.atlas
+          ? step_plant(p.sway, r.sim.flow, dt)
+          : step_plant_clip(p, r.sim.flow, dt);
+        if (plant_floats(p.species))
+          p.drift = step_drift(p.sway, r.sim.flow, dt);
+      }
       for (const c of r.corals) {
         c.frame = step_coral(
           c.state,
@@ -670,6 +842,14 @@ export class AquariumScene {
             c.arc(x * W, y * H, rad, 0, Math.PI * 2);
             c.fill();
           },
+        });
+      }
+      for (const p of r.plants) {
+        const img = this._atlases.get(p.url) ?? null;
+        if (!p.atlas && !img) continue;
+        items.push({
+          z: p.plant.z,
+          draw: (ctx2) => this._draw_plant(ctx2, r, p, img),
         });
       }
       for (const c of r.corals) {
@@ -801,6 +981,81 @@ export class AquariumScene {
     c.globalCompositeOperation = "source-over";
     c.globalAlpha = 1;
     return canvas;
+  }
+
+  /**
+   * A plant, standing on its foot: a frame of its sway sheet, of its own
+   * atlas, or its plain picture while the sheet is still being made. Its
+   * size is its height (a plant stands), the width following the picture.
+   */
+  private _draw_plant(
+    ctx: CanvasRenderingContext2D,
+    r: RegionScene,
+    p: PlantScene,
+    img: HTMLImageElement | null,
+  ): void {
+    const W = this._canvas.width;
+    const H = this._canvas.height;
+    const [px, py] = p.plant.pos;
+    const [, v] = r.projection.to_water(px, py);
+    const height =
+      p.height_cm *
+      this._px_per_cm(r, clamp01(v), 0) *
+      WaterProjection.depth_scale(p.plant.z);
+    let source: CanvasImageSource;
+    let sx = 0;
+    let sy = 0;
+    let sw: number;
+    let sh: number;
+    // Where the foot stands across the frame: its middle, but a sway frame
+    // keeps room on one side for the plant to lean into
+    let anchor = 0.5;
+    if (p.atlas) {
+      const [fw, fh] = p.atlas.frame;
+      source = p.atlas.sheet;
+      sx = Math.min(p.atlas.frames - 1, Math.max(0, p.frame)) * fw;
+      sw = fw;
+      sh = fh;
+      anchor = p.atlas.anchor_x;
+    } else if (!img) {
+      return;
+    } else if (p.species.frame && plant_clip(p.species)) {
+      [sx, sy, sw, sh] = frame_rect(
+        { frame: p.species.frame, columns: p.species.columns ?? 1 },
+        p.frame,
+      );
+      source = img;
+    } else {
+      source = img;
+      sw = img.width;
+      sh = img.height;
+    }
+    const width = sh ? (height * sw) / sh : height;
+    // A floating plant hangs from the surface it rides, and has wandered
+    // along it since it was placed; any other stands on its foot
+    let x = px;
+    let top = py * H - height;
+    if (plant_floats(p.species)) {
+      const [u] = r.projection.to_water_at(px, py, p.plant.z);
+      const [fx, fy] = r.projection.to_picture(
+        clamp01(u + p.drift),
+        0,
+        p.plant.z,
+      );
+      x = fx;
+      top = fy * H;
+    }
+    ctx.drawImage(
+      source,
+      sx,
+      sy,
+      sw,
+      sh,
+      x * W - width * anchor,
+      top,
+      width,
+      height,
+    );
   }
 
   private _draw_coral(

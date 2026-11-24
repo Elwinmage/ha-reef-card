@@ -731,6 +731,22 @@ export default css`
   .coral.selected {
     box-shadow: 0 0 0 3px #00e5ff;
   }
+  .plant {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 0 50% 0 50%;
+    transform: rotate(-45deg);
+    background: #4caf50;
+    border: 2px solid white;
+    cursor: move;
+    touch-action: none;
+    z-index: 3;
+  }
+  .plant.selected {
+    box-shadow: 0 0 0 3px #00e5ff;
+  }
   .home {
     position: absolute;
     width: 24px;

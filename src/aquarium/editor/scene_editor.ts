@@ -4,7 +4,8 @@
  * Tabs: the aquarium (name, cloud link, preset, dimensions, rendering),
  * its views (pictures, water outlines, decor, hotspots), the elements
  * placed on them (device tree, drag and drop), the lights and flow, the
- * livestock (inventory, corals), the feeding sources and the monitoring.
+ * livestock (inventory, corals, plants), the feeding sources and the
+ * monitoring.
  *
  * Every change goes through the pure operations of ops.ts on a working
  * copy, kept in an undo history; nothing reaches Home Assistant before
@@ -28,6 +29,7 @@ import {
   mdiContentSave,
   mdiFish,
   mdiFlowerPollen,
+  mdiSprout,
 } from "@mdi/js";
 
 import type { HassConfig } from "../../types/index";
@@ -43,6 +45,7 @@ import type {
   Hotspot,
   LivestockLine,
   Monitoring,
+  PlantSpecies,
   Point,
   SceneElement,
   View,
@@ -106,11 +109,12 @@ type Tool =
   | "hotspot_rect"
   | "hotspot_lasso"
   | "coral"
+  | "plant"
   | "home";
 
 type Selection =
   | { type: "decor" | "hotspot" | "element"; id: string }
-  | { type: "coral"; id: string; water: string }
+  | { type: "coral" | "plant"; id: string; water: string }
   | null;
 
 type Drag =
@@ -119,7 +123,7 @@ type Drag =
   | { type: "home"; water: string; line: string }
   | { type: "vertex"; kind: "decor" | "hotspots"; id: string; index: number }
   | { type: "element"; id: string }
-  | { type: "coral"; water: string; id: string }
+  | { type: "coral" | "plant"; water: string; id: string }
   | { type: "lamp"; water: string; index: number }
   | {
       type: "new";
@@ -264,25 +268,23 @@ const THUMB_BOX: [number, number] = [48, 32];
  * atlas (cropped with CSS), else an icon.
  */
 export function species_thumb(
-  species: FishSpecies | CoralSpecies | undefined,
-  kind: "fish" | "coral",
+  species: FishSpecies | CoralSpecies | PlantSpecies | undefined,
+  kind: "fish" | "coral" | "plant",
 ): TemplateResult {
-  if (species?.thumbnail) {
-    return html`<img
-      class="thumb"
-      src="${species.thumbnail}"
-      alt=""
-      loading="lazy"
-    />`;
+  // A plant drawn from a still picture: the picture is its thumbnail
+  const still =
+    species?.thumbnail ??
+    (species?.kind === "plant" ? species.image : undefined);
+  if (still) {
+    return html`<img class="thumb" src="${still}" alt="" loading="lazy" />`;
   }
   const atlas =
-    species?.kind === "fish"
-      ? (species as FishSpecies).atlas?.["1x"]
-      : (species as CoralSpecies | undefined)?.atlas?.shade;
+    species?.kind === "coral" ? species.atlas?.shade : species?.atlas?.["1x"];
   const clips = species?.clips ?? {};
   const clip = clips.swim ?? clips.day ?? Object.values(clips)[0];
-  if (species && atlas && clip && species.frame) {
-    const [fw, fh] = species.frame;
+  const frame = species?.frame;
+  if (species && atlas && clip && frame) {
+    const [fw, fh] = frame;
     const scale = Math.min(THUMB_BOX[0] / fw, THUMB_BOX[1] / fh);
     const columns = Math.max(1, species.columns || 1);
     const index = clip.from;
@@ -295,9 +297,11 @@ export function species_thumb(
     ].join(";");
     return html`<span class="thumb sprite" style="${style}"></span>`;
   }
+  const icon =
+    kind === "fish" ? mdiFish : kind === "coral" ? mdiFlowerPollen : mdiSprout;
   return html`<span class="thumb icon"
     ><svg viewBox="0 0 24 24">
-      <path d="${kind === "fish" ? mdiFish : mdiFlowerPollen}"></path></svg
+      <path d="${icon}"></path></svg
   ></span>`;
 }
 
@@ -338,6 +342,7 @@ export class ReefAquariumSceneEditor extends LitElement {
   /** Device being outlined on the picture (Devices tab). */
   @state() private _outline_device = "";
   @state() private _coral_species = "";
+  @state() private _plant_species = "";
   /** Colours of a coral while its colour picker is dragged (not saved). */
   @state() private _palette_draft: {
     coral: string;
@@ -363,8 +368,10 @@ export class ReefAquariumSceneEditor extends LitElement {
   /** Sand line edited by the sand tool: front glass or back wall. */
   @state() private _sand_line: ops.SandLine = "sand";
   /** Species picker opened (fish or coral), with its search text. */
-  @state() private _picker: { kind: "fish" | "coral"; text: string } | null =
-    null;
+  @state() private _picker: {
+    kind: "fish" | "coral" | "plant";
+    text: string;
+  } | null = null;
   @state() private _message: { kind: "info" | "error"; text: string } | null =
     null;
   @state() private _busy = false;
@@ -636,6 +643,10 @@ export class ReefAquariumSceneEditor extends LitElement {
     return this._catalog?.corals.find((s) => s.id === id);
   }
 
+  private _species_plant(id: string): PlantSpecies | undefined {
+    return this._catalog?.plants?.find((s) => s.id === id);
+  }
+
   private _entity_ids(domains?: string[]): string[] {
     const ids = Object.keys((this._hass?.states as any) ?? {});
     return (
@@ -738,6 +749,21 @@ export class ReefAquariumSceneEditor extends LitElement {
       this._selection = { type: "coral", id, water: this._water_id };
       return;
     }
+    if (this._tool === "plant" && this._plant_species) {
+      const species = this._species_plant(this._plant_species) ?? {
+        id: this._plant_species,
+      };
+      const [doc, id] = ops.add_plant(
+        this._doc,
+        this._water_id,
+        species as PlantSpecies,
+        this._view_id,
+        p,
+      );
+      this.change(doc);
+      this._selection = { type: "plant", id, water: this._water_id };
+      return;
+    }
     if (
       e.target === e.currentTarget ||
       (e.target as Element)?.tagName === "IMG"
@@ -801,6 +827,12 @@ export class ReefAquariumSceneEditor extends LitElement {
       case "coral":
         this.change(
           ops.update_coral(this._doc, drag.water, drag.id, { pos: p }),
+          false,
+        );
+        break;
+      case "plant":
+        this.change(
+          ops.update_plant(this._doc, drag.water, drag.id, { pos: p }),
           false,
         );
         break;
@@ -1064,6 +1096,8 @@ export class ReefAquariumSceneEditor extends LitElement {
       this.change(ops.remove_element(this._doc, v, sel.id));
     else if (sel.type === "coral")
       this.change(ops.remove_coral(this._doc, sel.water, sel.id));
+    else if (sel.type === "plant")
+      this.change(ops.remove_plant(this._doc, sel.water, sel.id));
     this._selection = null;
   }
 
@@ -1376,6 +1410,7 @@ export class ReefAquariumSceneEditor extends LitElement {
             : nothing
         }
         ${tab === "livestock" ? this._render_coral_marks() : nothing}
+        ${tab === "livestock" ? this._render_plant_marks() : nothing}
         ${tab === "livestock" ? this._render_home_marks() : nothing}
         ${tab === "lights" ? this._render_lamp_marks(view) : nothing}
       </div>
@@ -1547,6 +1582,39 @@ export class ReefAquariumSceneEditor extends LitElement {
                 type: "coral",
                 water: water_id,
                 id: coral.id,
+              });
+            }}
+          ></div>`,
+        );
+      }
+    }
+    return out;
+  }
+
+  private _render_plant_marks(): TemplateResult[] {
+    const doc = this._doc!;
+    const out: TemplateResult[] = [];
+    for (const [water_id, water] of Object.entries(doc.waters)) {
+      for (const plant of water.plants ?? []) {
+        if ((plant.view ?? this._view_id) !== this._view_id) continue;
+        const species = this._species_plant(plant.species);
+        const selected =
+          this._selection?.type === "plant" && this._selection.id === plant.id;
+        out.push(
+          html`<div
+            class="plant ${selected ? "selected" : ""}"
+            style="left:${plant.pos[0] * 100}%;top:${plant.pos[1] * 100}%"
+            title="${plant.name || species_name(species, plant.species)}"
+            @pointerdown=${(e: PointerEvent) => {
+              this._selection = {
+                type: "plant",
+                id: plant.id,
+                water: water_id,
+              };
+              this._start_drag(e, {
+                type: "plant",
+                water: water_id,
+                id: plant.id,
               });
             }}
           ></div>`,
@@ -3088,8 +3156,8 @@ export class ReefAquariumSceneEditor extends LitElement {
    * that is not in the catalog can be added too (a generic fish).
    */
   private _species_picker(
-    kind: "fish" | "coral",
-    list: (FishSpecies | CoralSpecies)[],
+    kind: "fish" | "coral" | "plant",
+    list: (FishSpecies | CoralSpecies | PlantSpecies)[],
     placeholder: string,
     on_pick: (id: string) => void,
   ): TemplateResult {
@@ -3168,7 +3236,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                   : nothing
               }
               ${
-                !matches.length && kind === "coral"
+                !matches.length && kind !== "fish"
                   ? html`<span class="hint">${i18n._("aq_no_match")}</span>`
                   : nothing
               }
@@ -3181,7 +3249,12 @@ export class ReefAquariumSceneEditor extends LitElement {
   /** Why the catalog is empty, when it is. */
   private _catalog_notice(): TemplateResult | typeof nothing {
     const catalog = this._catalog;
-    if (!catalog || catalog.fish.length || catalog.corals.length)
+    if (
+      !catalog ||
+      catalog.fish.length ||
+      catalog.corals.length ||
+      catalog.plants?.length
+    )
       return nothing;
     return html`<p class="notice">
       ${i18n._(
@@ -3198,6 +3271,7 @@ export class ReefAquariumSceneEditor extends LitElement {
       .for_water(this._catalog?.fish ?? [], doc.water_type)
       .map((s) => drawn_fish(s, this._catalog) ?? s);
     const corals = ops.for_water(this._catalog?.corals ?? [], doc.water_type);
+    const plants = ops.for_water(this._catalog?.plants ?? [], doc.water_type);
     const sel = this._selection;
     return html`
       ${this._water_select()} ${this._catalog_notice()}
@@ -3501,6 +3575,118 @@ export class ReefAquariumSceneEditor extends LitElement {
                   ${this._tool_button("select", "aq_tool_select")}
                 </div>
                 <span class="hint">${i18n._("aq_coral_hint")}</span>
+              </fieldset>
+              <fieldset>
+                <legend>${i18n._("aq_plants")}</legend>
+                ${(water.plants ?? []).map((plant) => {
+                  const species = this._species_plant(plant.species);
+                  const set = (patch: any) =>
+                    this.change(
+                      ops.update_plant(doc, this._water_id, plant.id, patch),
+                    );
+                  const selected = sel?.type === "plant" && sel.id === plant.id;
+                  return html`<div
+                    class="card ${selected ? "current" : ""}"
+                    @click=${() =>
+                      (this._selection = {
+                        type: "plant",
+                        id: plant.id,
+                        water: this._water_id,
+                      })}
+                  >
+                    <div class="line">
+                      ${species_thumb(species, "plant")}
+                      <strong class="grow"
+                        >${plant.name || species_name(species, plant.species)}
+                        ${species_latin(species)}</strong
+                      >
+                      <button
+                        class="icon"
+                        @click=${() =>
+                          this.change(
+                            ops.remove_plant(doc, this._water_id, plant.id),
+                          )}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div class="row3">
+                      <label class="field small"
+                        >${i18n._("aq_height_cm")}<input
+                          type="number"
+                          min="0.5"
+                          step="0.5"
+                          .value=${String(plant.size_cm)}
+                          @change=${(e: Event) =>
+                            set({
+                              size_cm:
+                                Number((e.target as HTMLInputElement).value) ||
+                                20,
+                            })}
+                      /></label>
+                      <label class="field small"
+                        >${i18n._("aq_depth")}
+                        <select
+                          @change=${(e: Event) =>
+                            set({
+                              z: ops.DEPTHS[
+                                (e.target as HTMLSelectElement)
+                                  .value as ops.DepthName
+                              ],
+                            })}
+                        >
+                          ${(
+                            ["front", "middle", "back"] as ops.DepthName[]
+                          ).map(
+                            (n) =>
+                              html`<option
+                                value="${n}"
+                                ?selected=${ops.depth_name(plant.z) === n}
+                              >
+                                ${i18n._(`aq_depth_${n}`)}
+                              </option>`,
+                          )}
+                        </select>
+                      </label>
+                    </div>
+                  </div>`;
+                })}
+                <div class="field">
+                  ${i18n._("aq_plant_species")}
+                  ${
+                    this._plant_species
+                      ? html`<div class="line chosen">
+                          ${species_thumb(
+                            this._species_plant(this._plant_species),
+                            "plant",
+                          )}
+                          <span class="grow"
+                            >${species_name(
+                              this._species_plant(this._plant_species),
+                              this._plant_species,
+                            )}
+                            ${species_latin(
+                              this._species_plant(this._plant_species),
+                            )}</span
+                          >
+                        </div>`
+                      : nothing
+                  }
+                  ${this._species_picker(
+                    "plant",
+                    plants,
+                    i18n._("aq_search"),
+                    (id) => {
+                      this._plant_species = id;
+                      this._tool = "plant";
+                    },
+                  )}
+                </div>
+                <div class="buttons">
+                  ${this._tool_button("plant", "aq_place_plant")}
+                  ${this._tool_button("select", "aq_tool_select")}
+                </div>
+                <span class="hint">${i18n._("aq_plant_hint")}</span>
               </fieldset>`
           : nothing
       }

@@ -52,6 +52,21 @@ export interface Coral {
   note: string;
 }
 
+/** A plant of an aquarium, standing where it was planted. */
+export interface Plant {
+  id: string;
+  species: string;
+  name: string;
+  view?: string | null;
+  /** Foot of the plant, picture space. */
+  pos: Point;
+  z: number;
+  /** How tall it stands, cm. */
+  size_cm: number;
+  added?: string | null;
+  note: string;
+}
+
 export interface Water {
   name: string;
   lights: LightSource[];
@@ -59,6 +74,8 @@ export interface Water {
   sand_band: number;
   livestock: LivestockLine[];
   corals: Coral[];
+  /** None in a document saved before the plants. */
+  plants?: Plant[];
 }
 
 export interface Region {
@@ -284,13 +301,14 @@ export interface FishBehavior {
   burrow?: boolean;
 }
 
-export interface SpeciesBase {
+/**
+ * What every species of the catalog carries, whatever its assets: a species
+ * drawn from a still picture has no frames and no clips.
+ */
+export interface SpeciesIdentity {
   id: string;
   /** pack: downloaded catalog, user: <config>/reeftank/catalog/ */
   source: "pack" | "user" | "bundled" | "generic";
-  frame: [number, number];
-  columns: number;
-  clips: Record<string, Clip>;
   names?: Record<string, string>;
   /** Latin name ("Siganus vulpinus", "Amphiprion sp." for a genus). */
   scientific?: string;
@@ -306,6 +324,37 @@ export interface SpeciesBase {
   has_image?: boolean;
   /** Atlas made from a single photo (a simple animation). */
   degraded?: boolean;
+}
+
+/** A species drawn from an atlas of frames, played as clips. */
+export interface SpeciesBase extends SpeciesIdentity {
+  frame: [number, number];
+  columns: number;
+  clips: Record<string, Clip>;
+}
+
+/**
+ * Assets of a species whose motion the card computes itself: a still cutout
+ * picture, and how the current moves it. A ready-made atlas may come along
+ * (a filmed species), and then it is played as it is.
+ *
+ * Which assets are there is what says how the species is drawn — a still
+ * `image` alone means the card makes the frames, an `atlas` means the plain
+ * sprite path. There is no field to keep in step with them, and shipping an
+ * atlas later upgrades a species without touching its other fields.
+ */
+export interface StillSpecies extends SpeciesIdentity {
+  /** Still cutout picture, upright, cut at the foot. */
+  image?: string;
+  /** Ready-made atlas; with `frame`, `columns` and `clips`. */
+  atlas?: { "1x": string; "2x"?: string };
+  frame?: [number, number];
+  columns?: number;
+  clips?: Record<string, Clip>;
+  /** How far the current bends it: 0 stiff, 1 very supple. */
+  flex?: number;
+  /** Time of one sway, seconds. */
+  period_s?: number;
 }
 
 export interface FishSpecies extends SpeciesBase {
@@ -334,15 +383,17 @@ export interface CoralSpecies extends SpeciesBase {
   size_cm?: [number, number];
 }
 
-export interface PlantSpecies extends SpeciesBase {
+export interface PlantSpecies extends StillSpecies {
   kind: "plant";
   zone: "background" | "midground" | "foreground" | "floating" | "epiphyte";
+  /** Height of the grown plant (it stands, so size is how tall it is). */
   size_cm?: [number, number];
 }
 
-export interface InvertebrateSpecies extends SpeciesBase {
+export interface InvertebrateSpecies extends StillSpecies {
   kind: "invertebrate";
   role: string[];
+  /** Where it lives: the surface it is bound to. */
   movement: "ground" | "glass" | "decor" | "sessile" | "swim";
   size_cm?: [number, number];
 }

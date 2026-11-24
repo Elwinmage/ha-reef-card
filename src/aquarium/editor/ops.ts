@@ -14,6 +14,8 @@ import type {
   Hotspot,
   LightSource,
   LivestockLine,
+  Plant,
+  PlantSpecies,
   Point,
   Preset,
   SceneElement,
@@ -25,7 +27,7 @@ import type {
 import { DEFAULT_WATER_TYPE } from "../types";
 import { MAX_DARKNESS } from "../light";
 
-/** Depth presets of the decor and corals. */
+/** Depth presets of the decor, the corals and the plants. */
 export const DEPTHS = { front: 0.2, middle: 0.5, back: 0.8 } as const;
 export type DepthName = keyof typeof DEPTHS;
 
@@ -56,6 +58,7 @@ export function empty_water(name: string = ""): Water {
     sand_band: 0.12,
     livestock: [],
     corals: [],
+    plants: [],
   };
 }
 
@@ -235,6 +238,7 @@ export function apply_preset(
       ...clone(water),
       livestock: out.waters[water_id]?.livestock ?? [],
       corals: out.waters[water_id]?.corals ?? [],
+      plants: out.waters[water_id]?.plants ?? [],
     };
   }
   for (const [view_id, view] of Object.entries(preset.views ?? {})) {
@@ -300,6 +304,7 @@ export function remove_view(
   }
   for (const water of Object.values(out.waters)) {
     water.corals = water.corals.filter((c) => c.view !== view_id);
+    water.plants = (water.plants ?? []).filter((p) => p.view !== view_id);
   }
   if (out.default_view === view_id)
     out.default_view = Object.keys(out.views)[0] ?? null;
@@ -786,6 +791,64 @@ export function remove_coral(
   const out = clone(doc);
   const water = out.waters[water_id];
   if (water) water.corals = water.corals.filter((c) => c.id !== coral_id);
+  return out;
+}
+
+// ── Plants ───────────────────────────────────────────────────────────────────
+
+export function add_plant(
+  doc: AquariumDocument,
+  water_id: string,
+  species: PlantSpecies | { id: string; size_cm?: [number, number] },
+  view_id: string | null,
+  pos: Point,
+): [AquariumDocument, string] {
+  const out = clone(doc);
+  if (!out.waters[water_id]) out.waters[water_id] = empty_water();
+  const id = new_id();
+  const size = species.size_cm
+    ? (species.size_cm[0] + species.size_cm[1]) / 2
+    : 20;
+  const plant: Plant = {
+    id,
+    species: species.id,
+    name: "",
+    view: view_id,
+    pos: clamp_point(pos),
+    z: DEPTHS.middle,
+    size_cm: Number(size.toFixed(1)),
+    added: new Date().toISOString().slice(0, 10),
+    note: "",
+  };
+  const water = out.waters[water_id];
+  water.plants = [...(water.plants ?? []), plant];
+  return [out, id];
+}
+
+export function update_plant(
+  doc: AquariumDocument,
+  water_id: string,
+  plant_id: string,
+  patch: Partial<Plant>,
+): AquariumDocument {
+  const out = clone(doc);
+  const plant = out.waters[water_id]?.plants?.find((p) => p.id === plant_id);
+  if (plant) {
+    Object.assign(plant, clone(patch));
+    if (patch.pos) plant.pos = clamp_point(patch.pos);
+  }
+  return out;
+}
+
+export function remove_plant(
+  doc: AquariumDocument,
+  water_id: string,
+  plant_id: string,
+): AquariumDocument {
+  const out = clone(doc);
+  const water = out.waters[water_id];
+  if (water)
+    water.plants = (water.plants ?? []).filter((p) => p.id !== plant_id);
   return out;
 }
 
