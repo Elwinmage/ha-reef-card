@@ -27,6 +27,7 @@ import {
   plant_atlas,
   plant_clip,
   plant_floats,
+  plant_frames,
   plant_image_url,
   plant_sways,
   reset_plant_atlases,
@@ -47,18 +48,37 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/**
+ * A plant as the catalog publishes it: an atlas of a single frame (a still
+ * picture), with how far the current bends it.
+ */
 const vallisneria: PlantSpecies = {
   id: "vallisneria_spiralis",
   kind: "plant",
   source: "pack",
   zone: "background",
-  image: "/plants/vallisneria.webp",
+  atlas: { "1x": "/plants/vallisneria.webp" },
+  frame: [320, 320],
+  columns: 1,
+  clips: { still: { from: 0, to: 0, fps: 1, loop: false } },
+  degraded: true,
+  thumbnail: "/plants/thumb.webp",
   size_cm: [20, 60],
   flex: 0.9,
   period_s: 3.5,
   names: { en: "Vallisneria" },
   scientific: "Vallisneria spiralis",
   water_types: ["marine", "freshwater"],
+};
+
+/** An entry shipping an atlas and nothing else: drawn as it comes. */
+const bare: PlantSpecies = {
+  id: "bare_weed",
+  kind: "plant",
+  source: "user",
+  zone: "midground",
+  atlas: { "1x": "/plants/bare.webp" },
+  size_cm: [10, 20],
 };
 
 /** A filmed plant: it ships an atlas and is played like a fish. */
@@ -79,7 +99,10 @@ const frogbit: PlantSpecies = {
   kind: "plant",
   source: "pack",
   zone: "floating",
-  image: "/plants/frogbit.webp",
+  atlas: { "1x": "/plants/frogbit.webp" },
+  frame: [320, 320],
+  columns: 1,
+  clips: { still: { from: 0, to: 0, fps: 1, loop: false } },
   flex: 0.6,
   size_cm: [3, 6],
   names: { en: "Frogbit" },
@@ -159,10 +182,15 @@ function stage_1000x500(): void {
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe("plant assets", () => {
-  it("says what a plant is drawn from", () => {
+  it("says what a plant is drawn from, and how many frames it has", () => {
     expect(plant_image_url(vallisneria)).toBe("/plants/vallisneria.webp");
     expect(plant_image_url(filmed)).toBe("/plants/cabomba.webp");
     expect(plant_image_url(pictureless)).toBeNull();
+    // A single frame is a still picture; several are an animation to play
+    expect(plant_frames(vallisneria)).toBe(1);
+    expect(plant_frames(bare)).toBe(1);
+    expect(plant_frames(filmed)).toBe(4);
+    expect(plant_frames({ ...vallisneria, clips: {} })).toBe(1);
   });
 });
 
@@ -248,15 +276,17 @@ describe("the sway of a plant", () => {
     await expect(
       plant_atlas({ ...vallisneria, flex: undefined }),
     ).resolves.toBeNull();
-    // Its own atlas: played as it comes
+    // Several frames of its own: played as they come
     await expect(plant_atlas(filmed)).resolves.toBeNull();
-    expect(plant_clip(filmed)?.from).toBe(0);
-    expect(plant_clip(vallisneria)).toBeNull();
+    expect(plant_clip(filmed)?.to).toBe(3);
+    // A still picture is a clip of one frame; an entry may ship none
+    expect(plant_clip(vallisneria)?.to).toBe(0);
+    expect(plant_clip(bare)).toBeNull();
   });
 
   it("knows which plants it has to animate itself", () => {
     expect(plant_sways(vallisneria)).toBe(true);
-    // Its own atlas: played as it comes
+    // Several frames: they are played as they come
     expect(plant_sways(filmed)).toBe(false);
     // No picture, or a plant the current does not bend
     expect(plant_sways(pictureless)).toBe(false);
@@ -586,7 +616,12 @@ describe("plants in the scene", () => {
   });
 
   it("draws a plant standing on its foot", () => {
-    const { doc, view } = scene_doc();
+    let doc = ops.new_document("T");
+    let view: string;
+    doc.dimensions_cm = { length: 120, width: 60, height: 50 };
+    [doc, view] = ops.add_view(doc, "Front");
+    doc = ops.set_region(doc, view, "main", rect_quad(0.1, 0.1, 0.9, 0.7));
+    [doc] = ops.add_plant(doc, "main", bare, view, [0.3, 0.6]);
     const drawn: any[][] = [];
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
       recording_ctx(drawn),
@@ -598,7 +633,7 @@ describe("plants in the scene", () => {
     scene.configure({
       doc,
       view_id: view,
-      catalog,
+      catalog: { fish: [], corals: [], plants: [bare], presets: [] },
       background: null,
       seed: "s",
     });
@@ -608,7 +643,7 @@ describe("plants in the scene", () => {
     const img = document.createElement("img");
     img.width = 100;
     img.height = 200;
-    (scene as any)._atlases.set("/plants/vallisneria.webp", img);
+    (scene as any)._atlases.set("/plants/bare.webp", img);
     scene.draw();
     const [src, , , , , dx, dy, w, h] = drawn.find((a) => a[0] === img)!;
     expect(src).toBe(img);
@@ -623,7 +658,7 @@ describe("plants in the scene", () => {
     const flat = document.createElement("img");
     flat.width = 100;
     flat.height = 0;
-    (scene as any)._atlases.set("/plants/vallisneria.webp", flat);
+    (scene as any)._atlases.set("/plants/bare.webp", flat);
     scene.draw();
     const square = drawn.find((a) => a[0] === flat)!;
     expect(square[7]).toBeCloseTo(square[8], 5);
@@ -635,12 +670,12 @@ describe("plant pictures", () => {
     const good: PlantSpecies = {
       ...vallisneria,
       id: "good",
-      image: "/plants-cov/good.webp",
+      atlas: { "1x": "/plants-cov/good.webp" },
     };
     const bad: PlantSpecies = {
       ...vallisneria,
       id: "bad",
-      image: "/plants-cov/bad.webp",
+      atlas: { "1x": "/plants-cov/bad.webp" },
     };
     let doc = ops.new_document("T");
     let view: string;
@@ -672,7 +707,7 @@ describe("plant pictures", () => {
     const supple: PlantSpecies = {
       ...vallisneria,
       id: "supple",
-      image: "/plants-cov/supple.webp",
+      atlas: { "1x": "/plants-cov/supple.webp" },
       flex: 0.9,
     };
     let doc = ops.new_document("T");
@@ -960,7 +995,7 @@ describe("plants in the editor", () => {
 
   it("shows a thumbnail for every kind of plant", () => {
     const still: any = species_thumb(vallisneria, "plant");
-    expect(JSON.stringify(still.values)).toContain("vallisneria.webp");
+    expect(JSON.stringify(still.values)).toContain("thumb.webp");
     const sprite: any = species_thumb(filmed, "plant");
     expect(JSON.stringify(sprite.values)).toContain("cabomba.webp");
     // No picture at all: an icon

@@ -273,12 +273,13 @@ export function species_thumb(
   species: FishSpecies | CoralSpecies | PlantSpecies | undefined,
   kind: "fish" | "coral" | "plant",
 ): TemplateResult {
-  // A plant drawn from a still picture: the picture is its thumbnail
-  const still =
-    species?.thumbnail ??
-    (species?.kind === "plant" ? species.image : undefined);
-  if (still) {
-    return html`<img class="thumb" src="${still}" alt="" loading="lazy" />`;
+  if (species?.thumbnail) {
+    return html`<img
+      class="thumb"
+      src="${species.thumbnail}"
+      alt=""
+      loading="lazy"
+    />`;
   }
   const atlas =
     species?.kind === "coral" ? species.atlas?.shade : species?.atlas?.["1x"];

@@ -251,20 +251,28 @@ export function coral_atlas(
 // ── Plants ───────────────────────────────────────────────────────────────────
 
 /**
- * The picture a plant is drawn from: its still cutout, or its atlas when the
- * species ships one. Null for a species published without a picture.
- *
- * Which of the two it is also says how the plant is animated, so this is the
- * one place where the assets are read to pick a path.
+ * The atlas a plant is drawn from. Null for a species published without a
+ * picture.
  */
 export function plant_image_url(species: PlantSpecies): string | null {
-  return species.image ?? species.atlas?.["1x"] ?? null;
+  return species.atlas?.["1x"] ?? null;
 }
 
-/** The clip of a plant shipping its own atlas (a filmed species). */
+/** The clip a plant's atlas is played with. */
 export function plant_clip(species: PlantSpecies): Clip | null {
   const clips = species.clips ?? {};
   return clips.sway ?? clips.day ?? Object.values(clips)[0] ?? null;
+}
+
+/**
+ * Frames of a plant's atlas. One frame is a still picture — what the catalog
+ * publishes for a species with no filmed animation — and that is what says
+ * the card has to make the motion itself.
+ */
+export function plant_frames(species: PlantSpecies): number {
+  const clips = Object.values(species.clips ?? {});
+  if (!clips.length) return 1;
+  return Math.max(1, ...clips.map((clip) => clip.to + 1));
 }
 
 // ── Sway of a plant ──────────────────────────────────────────────────────────
@@ -386,14 +394,18 @@ export function build_plant_sheet(
 }
 
 /**
- * Whether the card makes the motion of a plant itself. A plant shipping its
- * own atlas plays it, a moss does not move, and a floating plant does not
- * bend: it wanders along the surface instead. So what the generator is for
- * is read off `kind` and `zone`, not off a field to keep in step with them.
+ * Whether the card makes the motion of a plant itself: it takes a still
+ * picture (a one frame atlas) that the current bends. A filmed plant plays
+ * its own frames, a moss does not move, and a floating plant does not bend —
+ * it wanders along the surface instead. So what the generator is for is read
+ * off the assets and off `zone`, with no field to keep in step with them.
  */
 export function plant_sways(species: PlantSpecies): boolean {
   return Boolean(
-    species.image && (species.flex ?? 0) > 0 && species.zone !== "floating",
+    plant_image_url(species) &&
+    plant_frames(species) <= 1 &&
+    (species.flex ?? 0) > 0 &&
+    species.zone !== "floating",
   );
 }
 
@@ -410,7 +422,7 @@ const _plants = new Map<string, Promise<PlantAtlas | null>>();
  * is drawn from its picture as it is.
  */
 export function plant_atlas(species: PlantSpecies): Promise<PlantAtlas | null> {
-  const url = species.image;
+  const url = plant_image_url(species);
   const flex = species.flex ?? 0;
   if (!url || !plant_sways(species)) return Promise.resolve(null);
   const key = `${species.source}:${species.id}:${flex}`;

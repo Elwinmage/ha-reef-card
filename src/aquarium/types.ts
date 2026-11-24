@@ -334,19 +334,17 @@ export interface SpeciesBase extends SpeciesIdentity {
 }
 
 /**
- * Assets of a species whose motion the card computes itself: a still cutout
- * picture, and how the current moves it. A ready-made atlas may come along
- * (a filmed species), and then it is played as it is.
+ * Assets of a species whose motion the card computes itself, and how the
+ * current moves it.
  *
- * Which assets are there is what says how the species is drawn — a still
- * `image` alone means the card makes the frames, an `atlas` means the plain
- * sprite path. There is no field to keep in step with them, and shipping an
- * atlas later upgrades a species without touching its other fields.
+ * Everything in the catalog is an atlas, so what says how a species is drawn
+ * is **how many frames it holds**: a single frame is a still picture and the
+ * card makes the motion from it, several frames are played as they come.
+ * There is no field to keep in step with the assets, and a species is
+ * upgraded by shipping a real animation over its still one.
  */
 export interface StillSpecies extends SpeciesIdentity {
-  /** Still cutout picture, upright, cut at the foot. */
-  image?: string;
-  /** Ready-made atlas; with `frame`, `columns` and `clips`. */
+  /** Atlas of the species; a single frame when it is a still picture. */
   atlas?: { "1x": string; "2x"?: string };
   frame?: [number, number];
   columns?: number;
