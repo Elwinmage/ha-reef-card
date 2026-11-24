@@ -589,6 +589,7 @@
   "aq_new_aquarium_name": "Mi acuario",
   "aq_no_animation": "pez genérico",
   "aq_place_plant": "Colocar en la imagen",
+  "aq_plant_float_hint": "Haga clic donde flota; permanece en la superficie.",
   "aq_plant_hint": "Haga clic donde está el pie de la planta; arrastre para moverla.",
   "aq_plant_species": "Especie a colocar",
   "aq_plants": "Plantas",

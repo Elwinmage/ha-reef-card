@@ -589,6 +589,7 @@
   "aq_new_aquarium_name": "Mon aquarium",
   "aq_no_animation": "poisson générique",
   "aq_place_plant": "Placer sur l'image",
+  "aq_plant_float_hint": "Cliquez à l'endroit où elle flotte ; elle reste à la surface.",
   "aq_plant_hint": "Cliquez à l'endroit du pied de la plante ; glissez pour la déplacer.",
   "aq_plant_species": "Espèce à placer",
   "aq_plants": "Plantes",

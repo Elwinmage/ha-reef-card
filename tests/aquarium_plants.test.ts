@@ -886,7 +886,7 @@ describe("plants in the editor", () => {
   const catalog = {
     fish: [],
     corals: [],
-    plants: [vallisneria, filmed, pictureless],
+    plants: [vallisneria, filmed, pictureless, frogbit],
     presets: [],
   };
 
@@ -1033,7 +1033,7 @@ describe("plants in the editor", () => {
     const picks = root
       .querySelectorAll("fieldset")[2]
       .querySelectorAll("button.pick");
-    expect(picks.length).toBe(3);
+    expect(picks.length).toBe(4);
     picks[0].dispatchEvent(new MouseEvent("click"));
     expect(editor._plant_species).toBe("vallisneria_spiralis");
     expect(editor._tool).toBe("plant");
@@ -1091,6 +1091,94 @@ describe("plants in the editor", () => {
     expect(editor.doc.waters.main.plants).toHaveLength(3);
     expect(editor.doc.waters.main.plants[2].species).toBe("mystery_moss");
     expect(editor.doc.waters.main.plants[2].size_cm).toBe(20);
+  });
+
+  it("marks a floating plant where it floats, not where it was dropped", async () => {
+    const { editor } = await open_editor();
+    const root = editor.shadowRoot;
+    const proj = (editor as any)._projection("main");
+    const waterline = (pos: [number, number], z: number) => {
+      const [u] = proj.to_water_at(pos[0], pos[1], z);
+      return proj.to_picture(u, 0, z);
+    };
+
+    // Dropped low on the picture: what is stored is the surface above it
+    editor._tool = "plant";
+    editor._plant_species = frogbit.id;
+    root
+      .querySelector(".stage")
+      .dispatchEvent(pointer("pointerdown", 400, 400));
+    const plant = editor.doc.waters.main.plants[1];
+    expect(plant.species).toBe(frogbit.id);
+    const [ex, ey] = waterline([0.4, 0.8], plant.z);
+    expect(plant.pos[0]).toBeCloseTo(ex, 3);
+    expect(plant.pos[1]).toBeCloseTo(ey, 3);
+    expect(plant.pos[1]).toBeLessThan(0.3);
+
+    // Its mark says so too, and wears its own shape
+    await editor.updateComplete;
+    const at = (el: any): [number, number] => [
+      parseFloat(el.style.left) / 100,
+      parseFloat(el.style.top) / 100,
+    ];
+    const marks = [...root.querySelectorAll(".plant.floating")];
+    expect(marks).toHaveLength(1);
+    expect(at(marks[0])[1]).toBeCloseTo(plant.pos[1], 3);
+
+    // A point gone stale is still shown on the surface
+    const stale = ops.update_plant(editor._doc, "main", plant.id, {
+      pos: [0.4, 0.95],
+    });
+    editor._doc = stale;
+    await editor.updateComplete;
+    const moved = root.querySelector(".plant.floating");
+    const [sx, sy] = waterline([0.4, 0.95], plant.z);
+    expect(at(moved)[0]).toBeCloseTo(sx, 5);
+    expect(at(moved)[1]).toBeCloseTo(sy, 5);
+    expect(sy).toBeLessThan(0.3);
+
+    // Dragging it down leaves it on the surface
+    const stage = root.querySelector(".stage");
+    moved.dispatchEvent(pointer("pointerdown", sx * 1000, sy * 500));
+    stage.dispatchEvent(pointer("pointermove", 700, 450));
+    stage.dispatchEvent(pointer("pointerup", 700, 450));
+    const dragged = editor.doc.waters.main.plants.find(
+      (x: any) => x.id === plant.id,
+    );
+    const [dx, dy] = waterline([0.7, 0.9], plant.z);
+    expect(dragged.pos[0]).toBeCloseTo(dx, 3);
+    expect(dragged.pos[1]).toBeCloseTo(dy, 3);
+
+    // Removed from under the drag: the point is taken as it comes
+    editor._drag = { type: "plant", water: "main", id: "gone" };
+    stage.dispatchEvent(pointer("pointermove", 200, 100));
+    stage.dispatchEvent(pointer("pointerup", 200, 100));
+
+    // A plant that stands is left where it was put
+    const standing = editor.doc.waters.main.plants[0];
+    expect(standing.pos).toEqual([0.5, 0.55]);
+  });
+
+  it("tells where to click, and falls back without an outline", async () => {
+    const { editor } = await open_editor();
+    const hint = () =>
+      [
+        ...editor.shadowRoot
+          .querySelectorAll("fieldset")[2]
+          .querySelectorAll(".hint"),
+      ]
+        .map((e: any) => e.textContent.trim())
+        .join(" ");
+    editor._plant_species = vallisneria.id;
+    await editor.updateComplete;
+    expect(hint()).toContain("foot of the plant");
+    editor._plant_species = frogbit.id;
+    await editor.updateComplete;
+    expect(hint()).toContain("surface");
+
+    // A water with no outline: the point is kept as it is
+    const pos: [number, number] = [0.3, 0.4];
+    expect((editor as any)._waterline("sump", pos, 0.5)).toBe(pos);
   });
 
   it("does not call a catalog of plants empty", async () => {

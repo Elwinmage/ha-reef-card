@@ -589,6 +589,7 @@
   "aq_new_aquarium_name": "Il mio acquario",
   "aq_no_animation": "pesce generico",
   "aq_place_plant": "Posiziona sull'immagine",
+  "aq_plant_float_hint": "Clicca dove galleggia; resta in superficie.",
   "aq_plant_hint": "Clicca dove poggia il piede della pianta; trascina per spostarla.",
   "aq_plant_species": "Specie da posizionare",
   "aq_plants": "Piante",

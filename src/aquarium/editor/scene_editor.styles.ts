@@ -747,6 +747,23 @@ export default css`
   .plant.selected {
     box-shadow: 0 0 0 3px #00e5ff;
   }
+  /* Floating: a flat leaf lying on the waterline */
+  .plant.floating {
+    width: 20px;
+    height: 10px;
+    margin: -5px 0 0 -10px;
+    border-radius: 50%;
+    transform: none;
+    background: #8bc34a;
+  }
+  .plant.floating::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    right: -5px;
+    top: 50%;
+    border-top: 2px solid rgba(255, 255, 255, 0.85);
+  }
   .home {
     position: absolute;
     width: 24px;

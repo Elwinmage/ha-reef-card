@@ -45,6 +45,7 @@ import type {
   Hotspot,
   LivestockLine,
   Monitoring,
+  Plant,
   PlantSpecies,
   Point,
   SceneElement,
@@ -55,6 +56,7 @@ import type { WaterType } from "../types";
 import { ApiError, ImageUrls, ReefTankApi } from "../api";
 import {
   WaterProjection,
+  clamp01,
   clip_path,
   rect_quad,
   sand_profile,
@@ -85,7 +87,7 @@ import {
 import { kelvin_rgb } from "../../devices/redsea/rsled/rsled_program";
 import { Backdrop, drawn_region } from "../backdrop";
 import { device_name, device_thumbnail } from "../elements";
-import { coral_palette, drawn_fish, rgb_hex } from "../sprites";
+import { coral_palette, drawn_fish, plant_floats, rgb_hex } from "../sprites";
 import DeviceList from "../../utils/common";
 import i18n from "../../translations/myi18n";
 import * as ops from "./ops";
@@ -753,12 +755,16 @@ export class ReefAquariumSceneEditor extends LitElement {
       const species = this._species_plant(this._plant_species) ?? {
         id: this._plant_species,
       };
+      // A floating plant rides the surface, at the depth a new plant is given
+      const pos = plant_floats(species as PlantSpecies)
+        ? this._waterline(this._water_id, p, ops.DEPTHS.middle)
+        : p;
       const [doc, id] = ops.add_plant(
         this._doc,
         this._water_id,
         species as PlantSpecies,
         this._view_id,
-        p,
+        pos,
       );
       this.change(doc);
       this._selection = { type: "plant", id, water: this._water_id };
@@ -830,12 +836,18 @@ export class ReefAquariumSceneEditor extends LitElement {
           false,
         );
         break;
-      case "plant":
+      case "plant": {
+        const plant = this._doc.waters[drag.water]?.plants?.find(
+          (x) => x.id === drag.id,
+        );
         this.change(
-          ops.update_plant(this._doc, drag.water, drag.id, { pos: p }),
+          ops.update_plant(this._doc, drag.water, drag.id, {
+            pos: this._plant_pos(drag.water, plant, p),
+          }),
           false,
         );
         break;
+      }
       case "lamp": {
         const region = this._view?.regions.find((r) => r.water === drag.water);
         if (region && WaterProjection.valid(region.quad)) {
@@ -936,6 +948,39 @@ export class ReefAquariumSceneEditor extends LitElement {
     return region && WaterProjection.valid(region.quad)
       ? new WaterProjection(region.quad)
       : null;
+  }
+
+  /**
+   * The point of the waterline above a picture point, at a depth: where a
+   * floating plant ends up, whatever height it was dropped at. The point
+   * itself when the water is not outlined yet.
+   */
+  private _waterline(water_id: string, pos: Point, z: number): Point {
+    const projection = this._projection(water_id);
+    if (!projection) return pos;
+    const [u] = projection.to_water_at(pos[0], pos[1], z);
+    return projection.to_picture(clamp01(u), 0, z);
+  }
+
+  /**
+   * Where to store a plant dragged to a picture point. A floating plant
+   * rides the surface, so the pointer is carried up to the waterline: the
+   * document then says what the card draws.
+   *
+   * Its mark is computed the same way at every render, so a point that went
+   * stale (its depth changed, its water was outlined again) still shows and
+   * draws in the right place.
+   *
+   * @param plant: the plant dragged, gone if it was removed under the drag
+   */
+  private _plant_pos(
+    water_id: string,
+    plant: Plant | undefined,
+    pos: Point,
+  ): Point {
+    const species = plant && this._species_plant(plant.species);
+    if (!plant || !species || !plant_floats(species)) return pos;
+    return this._waterline(water_id, pos, plant.z);
   }
 
   /**
@@ -1598,12 +1643,19 @@ export class ReefAquariumSceneEditor extends LitElement {
       for (const plant of water.plants ?? []) {
         if ((plant.view ?? this._view_id) !== this._view_id) continue;
         const species = this._species_plant(plant.species);
+        const floating = Boolean(species && plant_floats(species));
+        // A floating plant shows where it floats, not where it was dropped
+        const [x, y] = floating
+          ? this._waterline(water_id, plant.pos, plant.z)
+          : plant.pos;
         const selected =
           this._selection?.type === "plant" && this._selection.id === plant.id;
         out.push(
           html`<div
-            class="plant ${selected ? "selected" : ""}"
-            style="left:${plant.pos[0] * 100}%;top:${plant.pos[1] * 100}%"
+            class="plant ${floating ? "floating" : ""} ${
+              selected ? "selected" : ""
+            }"
+            style="left:${x * 100}%;top:${y * 100}%"
             title="${plant.name || species_name(species, plant.species)}"
             @pointerdown=${(e: PointerEvent) => {
               this._selection = {
@@ -3272,6 +3324,8 @@ export class ReefAquariumSceneEditor extends LitElement {
       .map((s) => drawn_fish(s, this._catalog) ?? s);
     const corals = ops.for_water(this._catalog?.corals ?? [], doc.water_type);
     const plants = ops.for_water(this._catalog?.plants ?? [], doc.water_type);
+    const to_plant = this._species_plant(this._plant_species);
+    const floats = Boolean(to_plant && plant_floats(to_plant));
     const sel = this._selection;
     return html`
       ${this._water_select()} ${this._catalog_notice()}
@@ -3686,7 +3740,9 @@ export class ReefAquariumSceneEditor extends LitElement {
                   ${this._tool_button("plant", "aq_place_plant")}
                   ${this._tool_button("select", "aq_tool_select")}
                 </div>
-                <span class="hint">${i18n._("aq_plant_hint")}</span>
+                <span class="hint"
+                  >${i18n._(floats ? "aq_plant_float_hint" : "aq_plant_hint")}</span
+                >
               </fieldset>`
           : nothing
       }

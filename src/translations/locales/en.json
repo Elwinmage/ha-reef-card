@@ -589,6 +589,7 @@
   "aq_new_aquarium_name": "My aquarium",
   "aq_no_animation": "generic fish",
   "aq_place_plant": "Place on the picture",
+  "aq_plant_float_hint": "Click where it floats; it stays at the surface.",
   "aq_plant_hint": "Click where the foot of the plant stands; drag to move it.",
   "aq_plant_species": "Species to place",
   "aq_plants": "Plants",
