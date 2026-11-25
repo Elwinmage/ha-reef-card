@@ -793,6 +793,8 @@
   "parameter_sr": "Sr",
   "parameter_temperature": "Temperatura",
   "parameter_orp": "ORP",
+  "parameters_editor_aquarium": "Acquario",
+  "parameters_editor_every_aquarium": "Tutti gli acquari",
   "parameters_editor_none": "Nessuna entità compatibile",
   "parameters_target": "target",
   "parameters_editor_bounds_auto": "Limiti dall'integrazione"

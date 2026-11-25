@@ -60,6 +60,115 @@ function nextConfig(editor: ReefParametersCardEditor): Promise<any> {
   });
 }
 
+/** The same bench, with the KH sensor filed against a named aquarium. */
+function makeTankHass(): any {
+  const hass = makeHass();
+  hass.states[KH].attributes.aquarium = "a1b2";
+  hass.entities[KH].device_id = "dev_a1b2";
+  hass.devices = { dev_a1b2: { name: "Reefer 425" } };
+  return hass;
+}
+
+const PROBE = "sensor.my_own_kh_probe";
+
+describe("reef-parameters-card-editor, following one aquarium", () => {
+  it("offers the aquariums, and nothing when reeftank backs none", async () => {
+    const editor = await makeEditor({}, makeTankHass());
+    const select = editor.shadowRoot!.querySelector(
+      ".field select",
+    ) as HTMLSelectElement;
+    expect([...select.options].map((o) => o.value)).toEqual(["", "a1b2"]);
+    expect([...select.options].map((o) => o.textContent!.trim())).toEqual([
+      "Every aquarium",
+      "Reefer 425",
+    ]);
+    editor.remove();
+    // No aquarium known: no picker at all
+    const plain = await makeEditor({});
+    expect(plain.shadowRoot!.querySelector(".field select")).toBeNull();
+    plain.remove();
+  });
+
+  it("drops the overrides of the tank being left", async () => {
+    const editor = await makeEditor(
+      { aquarium: "c3d4", parameters: [{ chemistry: "kh", hide: true }] },
+      makeTankHass(),
+    );
+    const select = editor.shadowRoot!.querySelector(
+      ".field select",
+    ) as HTMLSelectElement;
+    const pending = nextConfig(editor);
+    select.value = "a1b2";
+    select.dispatchEvent(new Event("change"));
+    expect(await pending).toEqual({ aquarium: "a1b2" });
+    editor.remove();
+  });
+
+  it("goes back to following every aquarium", async () => {
+    const editor = await makeEditor({ aquarium: "a1b2" }, makeTankHass());
+    const select = editor.shadowRoot!.querySelector(
+      ".field select",
+    ) as HTMLSelectElement;
+    const pending = nextConfig(editor);
+    select.value = "";
+    select.dispatchEvent(new Event("change"));
+    expect(await pending).toEqual({});
+    editor.remove();
+  });
+
+  it("writes only what differs from the aquarium", async () => {
+    const hass = makeTankHass();
+    hass.states[PROBE] = {
+      state: "8.1",
+      attributes: { unit_of_measurement: "dKH" },
+    };
+    hass.entities[PROBE] = { platform: "template" };
+    const editor = await makeEditor({ aquarium: "a1b2" }, hass);
+    const pending = nextConfig(editor);
+    (editor as any)._source("kh", PROBE);
+    expect(await pending).toEqual({
+      aquarium: "a1b2",
+      parameters: [{ chemistry: "kh", source: PROBE }],
+    });
+    editor.remove();
+  });
+
+  it("records an unticked chemistry of the aquarium as hidden", async () => {
+    const editor = await makeEditor({ aquarium: "a1b2" }, makeTankHass());
+    const kh = $$(editor, ".row").find((r) =>
+      r.textContent.trim().startsWith("KH"),
+    );
+    const box = kh.querySelector("input[type=checkbox]");
+    // The aquarium's chemistries are ticked without being configured
+    expect(box.checked).toBe(true);
+    const pending = nextConfig(editor);
+    box.checked = false;
+    box.dispatchEvent(new Event("change"));
+    expect(await pending).toEqual({
+      aquarium: "a1b2",
+      parameters: [{ chemistry: "kh", hide: true }],
+    });
+    editor.remove();
+  });
+
+  it("drops the overrides once nothing differs any more", async () => {
+    const editor = await makeEditor(
+      { aquarium: "a1b2", parameters: [{ chemistry: "kh", hide: true }] },
+      makeTankHass(),
+    );
+    const kh = $$(editor, ".row").find((r) =>
+      r.textContent.trim().startsWith("KH"),
+    );
+    const box = kh.querySelector("input[type=checkbox]");
+    expect(box.checked).toBe(false);
+    const pending = nextConfig(editor);
+    box.checked = true;
+    box.dispatchEvent(new Event("change"));
+    expect(await pending).toEqual({ aquarium: "a1b2" });
+    editor.remove();
+  });
+});
+
 describe("reef-parameters-card-editor", () => {
   it("is the card's config element", () => {
     expect(ReefParametersCard.getConfigElement().tagName.toLowerCase()).toBe(
@@ -94,7 +203,10 @@ describe("reef-parameters-card-editor", () => {
     box.checked = true;
     box.dispatchEvent(new Event("change"));
     const config = await pending;
+    // The chemistries the card already draws stay followed: ticking one more
+    // adds to them instead of silently dropping them.
     expect(config.parameters).toEqual([
+      { chemistry: "kh", source: KH },
       { chemistry: "temperature", source: TEMP },
     ]);
     editor.remove();
@@ -262,7 +374,8 @@ describe("reef-parameters-card-editor", () => {
     const editor = await makeEditor({});
     const changed = vi.fn();
     editor.addEventListener("config-changed", changed);
-    (editor as any)._source("kh", KH);
+    // Nothing backs magnesium here, so no row of it is followed
+    (editor as any)._source("mg", KH);
     expect(changed).not.toHaveBeenCalled();
     editor.remove();
   });

@@ -9,11 +9,15 @@ import "../src/base/index";
 import {
   DEFAULT_RANGES,
   ReefParametersCard,
+  aquarium_name,
+  aquariums,
   auto_follow,
   compatible_entities,
   gauge_scale,
   normalise,
+  normalise_override,
   parameter_ranges,
+  resolve_parameters,
   scale_pct,
   trend,
 } from "../src/base/reef_parameters";
@@ -110,6 +114,139 @@ describe("auto_follow", () => {
     const hass = makeHass();
     hass.states[CA].attributes.measurements = [];
     expect(auto_follow(hass)).toEqual([{ chemistry: "kh", source: KH }]);
+  });
+});
+
+// A second tank: magnesium is filed against it, the ReefDose head is not in
+// it, and both aquariums have a device of their own to be named by.
+const MG = "sensor.nano_mg";
+
+function makeTwoTanks(): any {
+  const hass = makeHass();
+  hass.devices = {
+    dev_a1b2: { name: "Reefer 425" },
+    dev_c3d4: { name: "Nano", name_by_user: "Bouturage" },
+    dev_head: { name: "ReefDose 4" },
+  };
+  hass.entities[KH].device_id = "dev_a1b2";
+  hass.entities[CA].device_id = "dev_head";
+  // The ReefDose head is placed in the first tank
+  hass.states[KH].attributes.device_ids = ["dev_head"];
+  hass.states[MG] = {
+    state: "1320",
+    attributes: {
+      unit_of_measurement: "ppm",
+      reef_parameter: "mg",
+      aquarium: "c3d4",
+      device_ids: [],
+      measurements: [],
+    },
+  };
+  hass.entities[MG] = { platform: "reeftank", device_id: "dev_c3d4" };
+  return hass;
+}
+
+describe("aquariums", () => {
+  it("lists them by name, keyed by the id the sensors carry", () => {
+    expect(aquariums(makeTwoTanks())).toEqual([
+      { id: "c3d4", name: "Bouturage" },
+      { id: "a1b2", name: "Reefer 425" },
+    ]);
+    expect(aquariums(null)).toEqual([]);
+  });
+
+  it("falls back to the id when the tank has no device to name it", () => {
+    // makeHass has no device registry at all
+    expect(aquariums(makeHass())).toEqual([{ id: "a1b2", name: "a1b2" }]);
+    expect(aquarium_name(makeTwoTanks(), "a1b2")).toBe("Reefer 425");
+    expect(aquarium_name(makeTwoTanks(), "nope")).toBe("nope");
+  });
+});
+
+describe("auto_follow of one aquarium", () => {
+  it("keeps its own sensors and the heads placed in it", () => {
+    const hass = makeTwoTanks();
+    expect(auto_follow(hass, "a1b2")).toEqual([
+      { chemistry: "ca", source: CA },
+      { chemistry: "kh", source: KH },
+    ]);
+    // The other tank: its magnesium, and not a head it does not hold
+    expect(auto_follow(hass, "c3d4")).toEqual([
+      { chemistry: "mg", source: MG },
+    ]);
+    // A tank nothing is filed against follows nothing
+    expect(auto_follow(hass, "gone")).toEqual([]);
+  });
+});
+
+describe("normalise_override", () => {
+  it("reads an entry that only changes part of a chemistry", () => {
+    expect(normalise_override({ chemistry: "kh" })).toEqual({
+      chemistry: "kh",
+    });
+    expect(
+      normalise_override({ parameter: "fe", entity: FE, name: "Iron" }),
+    ).toEqual({ chemistry: "fe", source: FE, name: "Iron" });
+    expect(normalise_override({ chemistry: "kh", hide: true })).toEqual({
+      chemistry: "kh",
+      hide: true,
+    });
+    expect(
+      normalise_override({ chemistry: "kh", ranges: [1, 2, 3, 4] }),
+    ).toEqual({ chemistry: "kh", ranges: [1, 2, 3, 4] });
+    expect(normalise_override(null)).toBeNull();
+    expect(normalise_override({ source: KH })).toBeNull();
+  });
+});
+
+describe("resolve_parameters", () => {
+  it("replaces the defaults when no aquarium is followed", () => {
+    const hass = makeTwoTanks();
+    expect(
+      resolve_parameters(hass, {
+        parameters: [{ chemistry: "kh", source: KH }],
+      }),
+    ).toEqual([{ chemistry: "kh", source: KH }]);
+    expect(resolve_parameters(hass, {})).toEqual(auto_follow(hass));
+  });
+
+  it("merges the overrides over the aquarium's own chemistries", () => {
+    const hass = makeTwoTanks();
+    expect(
+      resolve_parameters(hass, {
+        aquarium: "a1b2",
+        parameters: [
+          // A source of one's own on a chemistry the tank already backs
+          { chemistry: "kh", source: TEMP, name: "Alcalinité" },
+          // A chemistry the tank does not back, added by hand
+          { chemistry: "temperature", source: TEMP },
+          // And one dropped
+          { chemistry: "ca", hide: true },
+        ],
+      }),
+    ).toEqual([
+      { chemistry: "kh", source: TEMP, name: "Alcalinité" },
+      { chemistry: "temperature", source: TEMP },
+    ]);
+  });
+
+  it("keeps the tank's source when the override only changes the zones", () => {
+    expect(
+      resolve_parameters(makeTwoTanks(), {
+        aquarium: "a1b2",
+        parameters: [{ chemistry: "kh", ranges: [1, 2, 3, 4] }],
+      }),
+    ).toContainEqual({ chemistry: "kh", source: KH, ranges: [1, 2, 3, 4] });
+  });
+
+  it("drops an override with nothing to read from", () => {
+    expect(
+      resolve_parameters(makeTwoTanks(), {
+        aquarium: "a1b2",
+        // po4 is backed by neither the tank nor the override
+        parameters: [{ chemistry: "po4" }, null as any, { source: KH } as any],
+      }),
+    ).toEqual(auto_follow(makeTwoTanks(), "a1b2"));
   });
 });
 
@@ -367,15 +504,48 @@ describe("reef-parameters-card", () => {
     card.remove();
   });
 
+  it("heads the card with the followed aquarium's name", async () => {
+    const card = await makeCard({ aquarium: "a1b2" }, makeTwoTanks());
+    expect(card.shadowRoot!.querySelector("h1")!.textContent).toBe(
+      "Water parameters — Reefer 425",
+    );
+    // Only that tank's chemistries, never the other one's magnesium
+    expect(
+      [...card.shadowRoot!.querySelectorAll(".parameter .name")].map(
+        (n) => n.textContent,
+      ),
+    ).toEqual(["Ca", "KH"]);
+    card.remove();
+  });
+
+  it("keeps a title of one's own over the aquarium's name", async () => {
+    const card = await makeCard(
+      { aquarium: "a1b2", title: "Mes tests" },
+      makeTwoTanks(),
+    );
+    expect(card.shadowRoot!.querySelector("h1")!.textContent).toBe("Mes tests");
+    card.remove();
+  });
+
   it("refuses parameters that are not a list", () => {
     const card = new ReefParametersCard();
     card.setConfig(undefined as any);
     expect(() => card.setConfig({ parameters: "kh" } as any)).toThrow();
   });
 
-  it("offers the backed chemistries as its first configuration", () => {
+  it("offers the aquarium it finds as its first configuration", () => {
+    // Following the tank beats freezing a list: a chemistry tested later
+    // turns up by itself.
     expect(ReefParametersCard.getStubConfig(makeHass())).toEqual({
-      parameters: auto_follow(makeHass()),
+      aquarium: "a1b2",
+    });
+  });
+
+  it("falls back to the chemistries found when no aquarium is known", () => {
+    const hass = makeHass();
+    delete hass.states[KH].attributes.aquarium;
+    expect(ReefParametersCard.getStubConfig(hass)).toEqual({
+      parameters: auto_follow(hass),
     });
   });
 

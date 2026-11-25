@@ -793,6 +793,8 @@
   "parameter_sr": "Sr",
   "parameter_temperature": "Temperatura",
   "parameter_orp": "ORP",
+  "parameters_editor_aquarium": "Akwarium",
+  "parameters_editor_every_aquarium": "Wszystkie akwaria",
   "parameters_editor_none": "Brak zgodnej encji",
   "parameters_target": "cel",
   "parameters_editor_bounds_auto": "Zakresy z integracji"

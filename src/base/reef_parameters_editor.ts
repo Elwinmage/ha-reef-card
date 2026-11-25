@@ -6,6 +6,11 @@
  * among the compatible entities (a reeftank chemistry sensor — the manual,
  * canonical source — a ReefDose head, or a probe matched by device_class or
  * unit). The view then shows only the ticked chemistries.
+ *
+ * An aquarium can be picked first: the chemistries it backs are then ticked
+ * by themselves and only what differs from them is written to the
+ * configuration (another source, other bounds, or an unticked chemistry as
+ * `hide`), so a chemistry tested later turns up without touching the card.
  */
 
 //----------------------------------------------------------------------------//
@@ -19,9 +24,12 @@ import {
   DEFAULT_RANGES,
   load_catalog,
   type FollowedParameter,
+  type ParameterOverride,
   type ParametersConfig,
+  aquariums,
+  auto_follow,
   compatible_entities,
-  normalise,
+  resolve_parameters,
 } from "./reef_parameters";
 
 //----------------------------------------------------------------------------//
@@ -107,13 +115,11 @@ export class ReefParametersCardEditor extends LitElement {
     return this._hass;
   }
 
-  /** The chemistries followed, by chemistry. */
+  /** The chemistries followed, by chemistry: what the card itself shows. */
   private _followed(): Map<string, FollowedParameter> {
     const map = new Map<string, FollowedParameter>();
-    for (const entry of this._config.parameters ?? []) {
-      const followed = normalise(entry);
-      if (followed) map.set(followed.chemistry, followed);
-    }
+    for (const followed of resolve_parameters(this._hass, this._config))
+      map.set(followed.chemistry, followed);
     return map;
   }
 
@@ -130,8 +136,54 @@ export class ReefParametersCardEditor extends LitElement {
     this.requestUpdate();
   }
 
+  /**
+   * Save the followed chemistries.
+   *
+   * Under an aquarium, only what differs from what the aquarium already
+   * gives is written: an entry that was changed or added, and a `hide` for
+   * one that was unticked. Without an aquarium the whole list is written, as
+   * it always was.
+   */
   private _commit_followed(followed: Map<string, FollowedParameter>): void {
-    this._commit({ ...this._config, parameters: [...followed.values()] });
+    const aquarium = this._config.aquarium;
+    if (!aquarium) {
+      this._commit({ ...this._config, parameters: [...followed.values()] });
+      return;
+    }
+    const base = new Map(
+      auto_follow(this._hass, aquarium).map((p) => [p.chemistry, p]),
+    );
+    const overrides: Array<FollowedParameter | ParameterOverride> = [];
+    for (const [chemistry, entry] of followed) {
+      const from_aquarium = base.get(chemistry);
+      const same =
+        from_aquarium !== undefined &&
+        from_aquarium.source === entry.source &&
+        entry.name === undefined &&
+        entry.ranges === undefined;
+      if (!same) overrides.push(entry);
+    }
+    for (const chemistry of base.keys())
+      if (!followed.has(chemistry)) overrides.push({ chemistry, hide: true });
+    const config = { ...this._config };
+    if (overrides.length) config.parameters = overrides;
+    else delete config.parameters;
+    this._commit(config);
+  }
+
+  /**
+   * Follow another aquarium, or none.
+   *
+   * The overrides are dropped on the way: they name the chemistries of the
+   * aquarium being left, and a source from another tank is exactly what the
+   * picker is there to avoid.
+   */
+  private _set_aquarium(aquarium: string): void {
+    const config = { ...this._config };
+    delete config.parameters;
+    if (aquarium) config.aquarium = aquarium;
+    else delete config.aquarium;
+    this._commit(config);
   }
 
   private _set_meta(key: "title" | "days", value: string): void {
@@ -273,6 +325,30 @@ export class ReefParametersCardEditor extends LitElement {
     </div>`;
   }
 
+  /** The aquarium picker, shown only when reeftank backs one. */
+  private _aquarium_field() {
+    const known = aquariums(this._hass);
+    if (!known.length) return nothing;
+    const current = this._config.aquarium ?? "";
+    return html`<label class="field">
+      <span>${i18n._("parameters_editor_aquarium")}</span>
+      <select
+        @change=${(e: Event) =>
+          this._set_aquarium((e.target as HTMLSelectElement).value)}
+      >
+        <option value="" ?selected=${current === ""}>
+          ${i18n._("parameters_editor_every_aquarium")}
+        </option>
+        ${known.map(
+          (a) =>
+            html`<option value=${a.id} ?selected=${a.id === current}>
+              ${a.name}
+            </option>`,
+        )}
+      </select>
+    </label>`;
+  }
+
   private _row(chemistry: string, followed: Map<string, FollowedParameter>) {
     const on = followed.has(chemistry);
     const source = followed.get(chemistry)?.source ?? "";
@@ -296,6 +372,7 @@ export class ReefParametersCardEditor extends LitElement {
   override render() {
     const followed = this._followed();
     return html`<div class="editor">
+      ${this._aquarium_field()}
       <label class="field">
         <span>${i18n._("parameters_title")}</span>
         <input

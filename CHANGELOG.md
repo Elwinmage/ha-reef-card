@@ -14,6 +14,13 @@
   fallback.
 - **NO2** (nitrite) joins the chemistries the parameters card follows, with its
   own zones; nothing doses it, so it is never offered on a ReefDose head.
+- The parameters card can follow **one aquarium** (`aquarium`, the id the
+  editor writes): its chemistry sensors and the ReefDose heads placed in it,
+  and its name in the heading. With two tanks, each card keeps to its own
+  instead of taking whichever sensor came first. `parameters` then holds only
+  the overrides — another source, other bounds, `hide: true` — merged over the
+  aquarium's list, so a chemistry tested later turns up by itself. Without
+  `aquarium` nothing changes.
 - ReefControl-Power: a socket can be linked to a piece of **equipment** of the
   catalog (heater, fan, pump...), chosen by category, brand and model
   (`linked_equipment`, or `category:<id>`): its picture, else the picture or

@@ -8,6 +8,7 @@
  * chemistry sensor, a ReefDose head, or any probe).
  *
  *   type: custom:reef-parameters-card
+ *   aquarium: 01HX…             # optional, the id the editor writes for you
  *   title: Water tests          # optional
  *   days: 90                    # window of the charts (default 90)
  *   parameters:                 # default: every chemistry an integration backs
@@ -19,6 +20,23 @@
  *       source: sensor.my_iron_tests
  *       name: Iron              # optional, the chemistry's name otherwise
  *       ranges: [2, 5, 20, 50]  # optional, see below
+ *
+ * With `aquarium`, the card follows that aquarium alone: its reeftank
+ * chemistry sensors and the ReefDose heads placed in it, nothing from
+ * another tank. `parameters` then holds *overrides* merged over that list —
+ * a `source` of one's own, a `name`, `ranges`, or `hide: true` to drop a
+ * chemistry — so a new chemistry shows up by itself and the configuration
+ * only carries what was changed:
+ *
+ *   aquarium: 01HX…
+ *   parameters:
+ *     - chemistry: temperature
+ *       source: sensor.my_own_probe
+ *     - chemistry: fe
+ *       hide: true
+ *
+ * Without `aquarium` the list replaces the defaults instead, as before, and
+ * the chemistries of every aquarium are mixed in the same card.
  *
  * `ranges` are the four bounds [acceptable low, desired low, desired high,
  * acceptable high]; DEFAULT_RANGES gives them per chemistry, the `ranges`
@@ -134,10 +152,25 @@ export interface FollowedParameter {
   ranges?: number[];
 }
 
+/**
+ * What a `parameters` entry may change on a followed chemistry when an
+ * aquarium is set: where it is read from, how it is named, its zones, or
+ * `hide` to drop it. Everything it leaves out is kept from the aquarium.
+ */
+export interface ParameterOverride {
+  chemistry: string;
+  source?: string;
+  name?: string;
+  ranges?: number[];
+  hide?: boolean;
+}
+
 export interface ParametersConfig {
+  /** Id of the aquarium followed (the `aquarium` attribute of its sensors). */
+  aquarium?: string;
   title?: string;
   days?: number;
-  parameters?: Array<FollowedParameter | LegacyParameter>;
+  parameters?: Array<FollowedParameter | ParameterOverride | LegacyParameter>;
 }
 
 /** The entity-keyed shape earlier versions configured; still accepted. */
@@ -199,31 +232,137 @@ export function compatible_entities(hass: any, chemistry: string): string[] {
 }
 
 /**
+ * The aquariums reeftank backs, `{ id, name }` by name.
+ *
+ * The id is the one its chemistry sensors carry, not the name: an aquarium
+ * can be renamed, and an entity id renamed by hand, without the card losing
+ * what it follows. The name is only what the editor shows.
+ */
+export function aquariums(hass: any): Array<{ id: string; name: string }> {
+  const found = new Map<string, string>();
+  for (const [entity_id, entry] of Object.entries<any>(hass?.entities ?? {})) {
+    if (entry?.platform !== "reeftank") continue;
+    const attributes = hass?.states?.[entity_id]?.attributes;
+    const id = attributes?.aquarium;
+    if (!id || !attributes?.reef_parameter || found.has(id)) continue;
+    const device = hass?.devices?.[entry?.device_id];
+    found.set(id, String(device?.name_by_user || device?.name || id));
+  }
+  return [...found]
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** The name an aquarium's device goes by, its id when it has none. */
+export function aquarium_name(hass: any, aquarium: string): string {
+  return aquariums(hass).find((a) => a.id === aquarium)?.name ?? aquarium;
+}
+
+/** The devices placed in an aquarium, as its chemistry sensors report them. */
+function aquarium_devices(hass: any, aquarium: string): Set<string> {
+  for (const [entity_id, entry] of Object.entries<any>(hass?.entities ?? {})) {
+    if (entry?.platform !== "reeftank") continue;
+    const attributes = hass?.states?.[entity_id]?.attributes;
+    if (attributes?.aquarium !== aquarium) continue;
+    if (Array.isArray(attributes?.device_ids))
+      return new Set(attributes.device_ids.map(String));
+  }
+  return new Set();
+}
+
+/**
  * The chemistries to follow by default: those an integration already backs,
  * each bound to its canonical source. Reeftank is the canonical home of a
  * water test, so its sensors are taken first and the view works without the
  * redsea integration; a regulated ReefDose head is taken for a chemistry
  * reeftank does not cover, so a chemistry never shows up twice.
+ *
+ * Given an aquarium, only what belongs to it is kept: the sensors filed
+ * against it, and the heads among the devices it has placed. Without one,
+ * the first sensor found wins for each chemistry, whichever tank it is in.
  */
-export function auto_follow(hass: any): FollowedParameter[] {
+export function auto_follow(hass: any, aquarium?: string): FollowedParameter[] {
   const out: FollowedParameter[] = [];
   const seen = new Set<string>();
   for (const [entity_id, entry] of Object.entries<any>(hass?.entities ?? {})) {
     if (entry?.platform !== "reeftank") continue;
-    const chemistry = hass?.states?.[entity_id]?.attributes?.reef_parameter;
+    const attributes = hass?.states?.[entity_id]?.attributes;
+    if (aquarium && attributes?.aquarium !== aquarium) continue;
+    const chemistry = attributes?.reef_parameter;
     if (!chemistry || seen.has(chemistry)) continue;
     seen.add(chemistry);
     out.push({ chemistry, source: entity_id });
   }
+  const placed = aquarium ? aquarium_devices(hass, aquarium) : null;
   for (const [entity_id, entry] of Object.entries<any>(hass?.entities ?? {})) {
     if (entry?.platform !== "redsea") continue;
     if (entry?.translation_key !== LAST_MEASUREMENT) continue;
+    if (placed && !placed.has(String(entry?.device_id))) continue;
     const chemistry = head_chemistry(hass, entity_id);
     if (!chemistry || seen.has(chemistry)) continue;
     seen.add(chemistry);
     out.push({ chemistry, source: entity_id });
   }
   return out.sort((a, b) => a.chemistry.localeCompare(b.chemistry));
+}
+
+/** A `parameters` entry read as an override: only `chemistry` is required. */
+export function normalise_override(entry: any): ParameterOverride | null {
+  if (!entry) return null;
+  const chemistry = entry.chemistry ?? entry.parameter;
+  if (typeof chemistry !== "string") return null;
+  const source = entry.source ?? entry.entity;
+  const out: ParameterOverride = { chemistry };
+  if (typeof source === "string") out.source = source;
+  if (entry.name) out.name = entry.name;
+  if (entry.ranges) out.ranges = entry.ranges;
+  if (entry.hide) out.hide = true;
+  return out;
+}
+
+/**
+ * The chemistries a configuration ends up following.
+ *
+ * With an aquarium, the aquarium's own list is the base and `parameters`
+ * only changes it, entry by entry; an override with no source of its own and
+ * no chemistry to attach to is dropped, as there would be nothing to read.
+ * Without one, the configured list replaces the defaults, as it always did.
+ */
+export function resolve_parameters(
+  hass: any,
+  config: ParametersConfig,
+): FollowedParameter[] {
+  const listed = config?.parameters;
+  if (!config?.aquarium) {
+    const configured = listed?.map(normalise);
+    return (configured ?? auto_follow(hass)).filter(
+      (p): p is FollowedParameter => p !== null && p !== undefined,
+    );
+  }
+  const followed = new Map<string, FollowedParameter>();
+  for (const entry of auto_follow(hass, config.aquarium))
+    followed.set(entry.chemistry, entry);
+  for (const entry of listed ?? []) {
+    const override = normalise_override(entry);
+    if (!override) continue;
+    if (override.hide) {
+      followed.delete(override.chemistry);
+      continue;
+    }
+    const base = followed.get(override.chemistry);
+    const merged: FollowedParameter = {
+      ...(base ?? {}),
+      chemistry: override.chemistry,
+      source: override.source ?? base?.source ?? "",
+    };
+    if (override.name !== undefined) merged.name = override.name;
+    if (override.ranges !== undefined) merged.ranges = override.ranges;
+    if (!merged.source) continue;
+    followed.set(override.chemistry, merged);
+  }
+  return [...followed.values()].sort((a, b) =>
+    a.chemistry.localeCompare(b.chemistry),
+  );
 }
 
 /** A legacy `{ parameter, entity }` entry read as `{ chemistry, source }`. */
@@ -575,19 +714,28 @@ export class ReefParametersCard extends LitElement {
   }
 
   static getStubConfig(hass: any): ParametersConfig {
-    return { parameters: auto_follow(hass) };
+    // One aquarium to follow beats a frozen list: a chemistry tested later
+    // then shows up by itself.
+    const [first] = aquariums(hass);
+    return first ? { aquarium: first.id } : { parameters: auto_follow(hass) };
   }
 
   static getConfigElement(): HTMLElement {
     return document.createElement("reef-parameters-card-editor");
   }
 
-  /** Chemistries followed: the configured ones, else the ones auto-found. */
+  /** Chemistries followed: the aquarium's, the configured ones, or both. */
   parameters(): FollowedParameter[] {
-    const configured = this._config.parameters?.map(normalise);
-    return (configured ?? auto_follow(this._hass)).filter(
-      (p): p is FollowedParameter => p !== null && p !== undefined,
-    );
+    return resolve_parameters(this._hass, this._config);
+  }
+
+  /** Heading: the configured title, else the followed aquarium's name. */
+  private _title(): string {
+    if (this._config.title) return this._config.title;
+    const title = i18n._("parameters_title");
+    return this._config.aquarium
+      ? `${title} — ${aquarium_name(this._hass, this._config.aquarium)}`
+      : title;
   }
 
   /** Whether the entity holds the results itself (reeftank sensor or head). */
@@ -848,7 +996,7 @@ export class ReefParametersCard extends LitElement {
   override render() {
     const parameters = this.parameters();
     return html`<ha-card>
-      <h1>${this._config.title || i18n._("parameters_title")}</h1>
+      <h1>${this._title()}</h1>
       ${
         parameters.length
           ? html`<div class="grid">
