@@ -42,4 +42,4 @@ parameters:
     ranges: [0.002, 0.005, 0.02, 0.05] # acceptable low, desired low, desired high, acceptable high
 ```
 
-`ranges` are optional for `kh ca mg k no3 po4 i fe salinity ph`, which have usual zones; the `ranges` attribute of the entity wins when it has one.
+`ranges` are optional for `kh ca mg k no2 no3 po4 i fe salinity ph`, which have usual zones; the `ranges` attribute of the entity wins when it has one.

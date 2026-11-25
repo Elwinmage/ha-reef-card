@@ -12,6 +12,8 @@
 - The parameters card takes the units and the zones (acceptable / desired) of
   the `parameters` catalog from the integration; the built-in values stay the
   fallback.
+- **NO2** (nitrite) joins the chemistries the parameters card follows, with its
+  own zones; nothing doses it, so it is never offered on a ReefDose head.
 - ReefControl-Power: a socket can be linked to a piece of **equipment** of the
   catalog (heater, fan, pump...), chosen by category, brand and model
   (`linked_equipment`, or `category:<id>`): its picture, else the picture or

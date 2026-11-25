@@ -42,4 +42,4 @@ parameters:
     ranges: [0.002, 0.005, 0.02, 0.05] # acceptable bas, souhaité bas, souhaité haut, acceptable haut
 ```
 
-`ranges` est optionnel pour `kh ca mg k no3 po4 i fe salinity ph`, qui ont des zones usuelles ; l'attribut `ranges` de l'entité l'emporte quand il existe.
+`ranges` est optionnel pour `kh ca mg k no2 no3 po4 i fe salinity ph`, qui ont des zones usuelles ; l'attribut `ranges` de l'entité l'emporte quand il existe.

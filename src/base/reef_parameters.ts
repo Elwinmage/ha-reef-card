@@ -11,7 +11,7 @@
  *   title: Water tests          # optional
  *   days: 90                    # window of the charts (default 90)
  *   parameters:                 # default: every chemistry an integration backs
- *     - chemistry: kh           # kh ca mg k sr no3 po4 i fe salinity temperature ph orp
+ *     - chemistry: kh           # kh ca mg k sr no2 no3 po4 i fe salinity temperature ph orp
  *       source: sensor.reefer_425_kh
  *     - chemistry: temperature
  *       source: sensor.tank_temperature
@@ -54,6 +54,7 @@ export const DEFAULT_RANGES: Record<string, number[]> = {
   mg: [1150, 1250, 1400, 1550],
   k: [340, 380, 420, 460],
   sr: [4, 8, 10, 14],
+  no2: [0, 0, 0.05, 0.1],
   no3: [0.5, 2, 10, 25],
   po4: [0.01, 0.03, 0.1, 0.2],
   // ppb
@@ -89,6 +90,7 @@ export const CHEMISTRIES: Record<string, Chemistry> = {
   sr: { unit: "ppm" },
   i: { unit: "ppb" },
   fe: { unit: "ppb" },
+  no2: { unit: "ppm" },
   no3: { unit: "ppm" },
   po4: { unit: "ppm" },
 };
