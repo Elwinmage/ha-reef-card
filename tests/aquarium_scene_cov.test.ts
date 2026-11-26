@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AquariumScene,
   fish_frame,
-  fish_groups,
+  animal_groups,
   fish_layers,
   fish_scale_x,
   hideouts,
@@ -284,7 +284,7 @@ describe("scene helpers without optional data", () => {
     ).toEqual([]);
     const water = { ...ops.empty_water(), livestock: undefined } as any;
     expect(
-      fish_groups(water, { fish: [fish], corals: [], presets: [] }),
+      animal_groups(water, { fish: [fish], corals: [], presets: [] }),
     ).toEqual([]);
     const doc = ops.new_document("x");
     doc.dimensions_cm = { length: 0, width: 0, height: 0 };

@@ -1,6 +1,7 @@
 /**
- * Canvas renderer of the living part of a view: fish, corals, plants, decor
- * cut-outs and food, depth sorted.
+ * Canvas renderer of the living part of a view: fish, invertebrates, corals,
+ * plants, decor cut-outs, food and the sand raised by a digging animal,
+ * depth sorted.
  *
  * Every frame draws one list sorted from the back (z = 1) to the front:
  * a fish at z = 0.7 is drawn before a decor at z = 0.5, hence hidden behind
@@ -14,11 +15,13 @@
  */
 
 import type {
+  AnimalSpecies,
   AquariumDocument,
   Catalog,
   Coral,
   CoralSpecies,
   FishSpecies,
+  InvertebrateSpecies,
   Plant,
   PlantSpecies,
   Point,
@@ -35,9 +38,12 @@ import {
 } from "./geometry";
 import {
   FishSim,
+  puff_alpha,
+  puff_radius,
   type Fish,
   type FishGroup,
   type Hideout,
+  type Puff,
   type SimEnv,
 } from "./sim";
 import {
@@ -45,16 +51,18 @@ import {
   frame_rect,
   drawn_fish,
   generic_fish,
+  invertebrate_animal,
   load_image,
   loop_frame,
   once_frame,
-  plant_atlas,
-  plant_clip,
   plant_floats,
-  plant_image_url,
+  still_atlas,
+  still_clip,
+  still_image_url,
   BEND_FRAMES,
   type CoralAtlas,
-  type PlantAtlas,
+  type StillAtlas,
+  type StillKind,
 } from "./sprites";
 import { Rng } from "./rng";
 
@@ -64,6 +72,12 @@ const FRAME_STEP = 1 / 30;
 const HAZE = 0.25;
 /** Colour of the water depth (the light tint is laid over it by the card). */
 const HAZE_RGB = "rgb(120,150,170)";
+/** Colour of the sand pushed out of a burrow. */
+const PUFF_RGB = "rgb(214,192,158)";
+/** How far apart the animals of one sessile line settle, in body sizes. */
+const SESSILE_SPREAD = 1.6;
+/** Most animals drawn for one sessile line. */
+const MAX_SESSILE = 24;
 /** Angle of a fish coming out of its burrow, radians from level: head up. */
 const BURROW_TILT = 1.15;
 
@@ -282,25 +296,44 @@ export function hideouts(
   return out;
 }
 
+/** The species a fish line swims as. */
+function sim_fish(catalog: Catalog, id: string): AnimalSpecies | null {
+  const found = catalog.fish.find((s) => s.id === id);
+  return (found ? drawn_fish(found, catalog) : null) ?? generic_fish();
+}
+
 /**
- * Fish groups of a water: its inventory lines, with their sprites.
+ * The species an invertebrate line moves as; null for a sessile one and for
+ * a species the catalog does not know.
+ */
+function sim_invertebrate(catalog: Catalog, id: string): AnimalSpecies | null {
+  const found = catalog.invertebrates?.find((s) => s.id === id);
+  return found ? invertebrate_animal(found) : null;
+}
+
+/**
+ * Animal groups of a water: its inventory lines, with their sprites.
+ *
+ * A fish line swims as its species; one missing from the catalog swims as a
+ * generic fish (once the catalog is known, so that nothing flashes while it
+ * loads) and one published without a picture as the default "?" fish. An
+ * invertebrate line crawls or swims as its own species, and is left out
+ * when the catalog does not know it; a sessile one is left out too — it
+ * does not move, it is placed where it settled (`sessile_scenes`).
  * @param size: the tank, to place the homes (cm)
  */
-export function fish_groups(
+export function animal_groups(
   water: Water,
   catalog: Catalog | null,
   size: SimEnv["size"] = DEFAULT_DIMENSIONS,
 ): FishGroup[] {
   const groups: FishGroup[] = [];
   for (const line of water.livestock ?? []) {
-    if (line.kind !== "fish" || line.count <= 0) continue;
-    // A species missing from the catalog swims as a generic fish (once the
-    // catalog is known, so that nothing flashes while it loads); one
-    // without picture swims as the default "?" fish
-    if (!catalog) continue;
-    const found = catalog.fish.find((s) => s.id === line.species);
+    if (line.count <= 0 || !catalog) continue;
     const species =
-      (found ? drawn_fish(found, catalog) : null) ?? generic_fish();
+      line.kind === "invertebrate"
+        ? sim_invertebrate(catalog, line.species)
+        : sim_fish(catalog, line.species);
     if (!species?.atlas?.["1x"]) continue;
     const length = line.size_cm ?? species.size_cm ?? [5, 8];
     const home = line.home;
@@ -322,6 +355,69 @@ export function fish_groups(
   return groups;
 }
 
+/**
+ * The sessile invertebrates of a water, where they settled: one item per
+ * animal of the line, the first exactly on the home placed in the editor and
+ * the others scattered around it. A line with no home yet is left out — it
+ * has nowhere to sit; so is a species the catalog does not know, or one
+ * published without a picture.
+ * @param projection: the water of the view, to put them on the picture
+ * @param size: the tank (cm), to spread them by their own size
+ */
+export function sessile_scenes(
+  water: Water,
+  catalog: Catalog | null,
+  projection: WaterProjection,
+  size: SimEnv["size"] = DEFAULT_DIMENSIONS,
+  seed: string = "",
+): StillScene[] {
+  const out: StillScene[] = [];
+  for (const line of water.livestock ?? []) {
+    const home = line.home;
+    if (line.kind !== "invertebrate" || line.count <= 0 || !home) continue;
+    const species: InvertebrateSpecies | undefined =
+      catalog?.invertebrates?.find((s) => s.id === line.species);
+    if (!species || species.movement !== "sessile") continue;
+    const url = still_image_url(species);
+    if (!url) continue;
+    const span = line.size_cm ?? species.size_cm ?? [3, 5];
+    const count = Math.min(line.count, MAX_SESSILE);
+    for (let n = 0; n < count; n++) {
+      // Its own size, phase and reach: a clutch of them does not look cloned
+      const rng = new Rng(`${seed}:${line.id}:${n}`);
+      const size_cm = rng.range(
+        Math.min(span[0], span[1]),
+        Math.max(span[0], span[1]),
+      );
+      const reach = n
+        ? (SESSILE_SPREAD * size_cm) / Math.max(1, size.length)
+        : 0;
+      const u = clamp01(home[0] + rng.range(-reach, reach));
+      const z = clamp01(home[2] + rng.range(-reach, reach));
+      out.push({
+        species,
+        url,
+        atlas: null,
+        sway: {
+          frames: BEND_FRAMES,
+          period_s: species.period_s ?? 3,
+          phase: rng.range(0, 2 * BEND_FRAMES),
+          amp: rng.range(0.85, 1.15),
+          drift_phase: 0,
+        },
+        frame: 0,
+        drift: 0,
+        pos: projection.to_picture(u, clamp01(home[1]), z),
+        z,
+        size_cm: Number(size_cm.toFixed(1)),
+        fit: "width",
+        floats: false,
+      });
+    }
+  }
+  return out;
+}
+
 /** Tank size in cm, defaulted. */
 export function tank_size(doc: AquariumDocument): SimEnv["size"] {
   const d = doc.dimensions_cm ?? DEFAULT_DIMENSIONS;
@@ -339,8 +435,8 @@ interface DrawItem {
   coral?: boolean;
 }
 
-/** How a plant of the view sways: its own phase in the species' sheet. */
-export interface PlantSway {
+/** How a still thing of the view sways: its own phase in the sheet. */
+export interface StillSway {
   /** Frames of the sheet, from upright to fully bent. */
   frames: number;
   /** Time of one sway when the current is at rest, seconds. */
@@ -352,21 +448,40 @@ export interface PlantSway {
   drift_phase: number;
 }
 
-/** A plant of a view, with the picture it is drawn from. */
-export interface PlantScene {
-  plant: Plant;
-  species: PlantSpecies;
+/**
+ * Something of a view standing where it was put: a plant on its foot, a
+ * sessile invertebrate on the rock it settled on. Both are drawn the same
+ * way, from a still picture the current bends or from their own clip.
+ */
+export interface StillScene {
+  species: StillKind;
   /** Picture of the species, preloaded into the atlas cache. */
   url: string;
-  /** Sway sheet made from that picture; null for a plant that stands still. */
-  atlas: PlantAtlas | null;
-  sway: PlantSway;
+  /** Sway sheet made from that picture; null when it stands still. */
+  atlas: StillAtlas | null;
+  sway: StillSway;
   /** Frame to draw: of the sheet, or of the species' own clip. */
   frame: number;
-  /** A floating plant: how far it has wandered, in tank lengths. */
+  /** Riding the surface (a floating plant): how far it has wandered. */
   drift: number;
-  /** How tall it stands today, cm: it has grown since it was planted. */
-  height_cm: number;
+  /** Where its foot stands, picture space, and how deep it sits. */
+  pos: Point;
+  z: number;
+  /**
+   * How big it is drawn, cm, read along `fit`: a plant stands, so it is its
+   * height; an animal lies on the rock, so it is its width. The other side
+   * follows the picture.
+   */
+  size_cm: number;
+  fit: "height" | "width";
+  /** Rides the surface and wanders along it instead of standing. */
+  floats: boolean;
+}
+
+/** A plant of a view, with the picture it is drawn from. */
+export interface PlantScene extends StillScene {
+  plant: Plant;
+  species: PlantSpecies;
 }
 
 /** Over how long a plant grows into the full size of its species, days. */
@@ -411,7 +526,7 @@ export function sway_window(frames: number, flow: number, amp: number): number {
  * @param dt: seconds
  * @return the frame of the sheet to draw
  */
-export function step_plant(sway: PlantSway, flow: number, dt: number): number {
+export function step_sway(sway: StillSway, flow: number, dt: number): number {
   const end = sway_window(sway.frames, flow, sway.amp);
   if (end <= 0) return 0;
   // Back and forth over 0 .. end: 2 x end frames for one full sway
@@ -436,26 +551,34 @@ const DRIFT_PERIOD = 40;
  * @param dt: seconds
  * @return how far it stands from its spot, in tank lengths
  */
-export function step_drift(sway: PlantSway, flow: number, dt: number): number {
+export function step_drift(sway: StillSway, flow: number, dt: number): number {
   const f = clamp01(flow);
   sway.drift_phase += (2 * Math.PI * dt * (0.6 + 0.8 * f)) / DRIFT_PERIOD;
   return DRIFT_REACH * sway.amp * (0.3 + 0.7 * f) * Math.sin(sway.drift_phase);
 }
 
 /**
- * Advance a plant that ships its own atlas: its clip plays faster with the
+ * Advance something that ships its own atlas: its clip plays faster with the
  * current, as a coral's does.
  * @return the frame of its atlas to draw
  */
-export function step_plant_clip(
-  p: PlantScene,
+export function step_still_clip(
+  p: StillScene,
   flow: number,
   dt: number,
 ): number {
-  const clip = plant_clip(p.species);
+  const clip = still_clip(p.species);
   if (!clip) return 0;
   p.sway.phase += dt * (clip.fps || 12) * (0.6 + 0.8 * clamp01(flow));
   return loop_frame(clip, p.sway.phase);
+}
+
+/** Advance one still thing of a view: its sway, or its own clip. */
+export function step_still(p: StillScene, flow: number, dt: number): void {
+  p.frame = p.atlas
+    ? step_sway(p.sway, flow, dt)
+    : step_still_clip(p, flow, dt);
+  if (p.floats) p.drift = step_drift(p.sway, flow, dt);
 }
 
 interface RegionScene {
@@ -471,6 +594,8 @@ interface RegionScene {
     frame: number;
   }[];
   plants: PlantScene[];
+  /** The sessile invertebrates settled in this water. */
+  sessiles: StillScene[];
   light: WaterLight | null;
 }
 
@@ -557,7 +682,7 @@ export class AquariumScene {
       };
       const sim = new FishSim(
         env,
-        fish_groups(water, catalog, size),
+        animal_groups(water, catalog, size),
         doc.render?.max_fish ?? 30,
         `${setup.seed}:${region.water}`,
       );
@@ -583,7 +708,7 @@ export class AquariumScene {
       for (const plant of water.plants ?? []) {
         if ((plant.view ?? view_id) !== view_id) continue;
         const species = catalog?.plants?.find((s) => s.id === plant.species);
-        const url = species ? plant_image_url(species) : null;
+        const url = species ? still_image_url(species) : null;
         if (!species || !url) continue;
         // Its own phase and reach, so a bed of one species does not beat
         // as one man
@@ -602,19 +727,24 @@ export class AquariumScene {
           },
           frame: 0,
           drift: 0,
-          height_cm: plant_height(plant, species, Date.now()),
+          pos: plant.pos,
+          z: plant.z,
+          size_cm: plant_height(plant, species, Date.now()),
+          fit: "height",
+          floats: plant_floats(species),
         };
         plants.push(entry);
-        plant_atlas(species).then(
-          (atlas) => (entry.atlas = atlas),
-          () => undefined,
-        );
-        load_image(url).then(
-          (img) => this._atlases.set(url, img),
-          () => undefined,
-        );
+        this._load_still(entry);
       }
-      for (const group of fish_groups(water, catalog)) {
+      const sessiles = sessile_scenes(
+        water,
+        catalog,
+        projection,
+        size,
+        setup.seed,
+      );
+      for (const entry of sessiles) this._load_still(entry);
+      for (const group of animal_groups(water, catalog)) {
         const url = group.species.atlas["1x"];
         load_image(url).then(
           (img) => this._atlases.set(url, img),
@@ -628,10 +758,23 @@ export class AquariumScene {
         sim,
         corals,
         plants,
+        sessiles,
         light: null,
       });
     }
     this.resize();
+  }
+
+  /** Load the picture of a still thing, and the sway sheet made from it. */
+  private _load_still(entry: StillScene): void {
+    still_atlas(entry.species).then(
+      (atlas) => (entry.atlas = atlas),
+      () => undefined,
+    );
+    load_image(entry.url).then(
+      (img) => this._atlases.set(entry.url, img),
+      () => undefined,
+    );
   }
 
   /** Light of every water: night for the fish, glow of the corals. */
@@ -768,13 +911,8 @@ export class AquariumScene {
     this._dt = dt;
     for (const r of this._regions) {
       r.sim.step(dt);
-      for (const p of r.plants) {
-        p.frame = p.atlas
-          ? step_plant(p.sway, r.sim.flow, dt)
-          : step_plant_clip(p, r.sim.flow, dt);
-        if (plant_floats(p.species))
-          p.drift = step_drift(p.sway, r.sim.flow, dt);
-      }
+      for (const p of r.plants) step_still(p, r.sim.flow, dt);
+      for (const p of r.sessiles) step_still(p, r.sim.flow, dt);
       for (const c of r.corals) {
         c.frame = step_coral(
           c.state,
@@ -844,13 +982,17 @@ export class AquariumScene {
           },
         });
       }
-      for (const p of r.plants) {
+      for (const p of [...r.plants, ...r.sessiles]) {
         const img = this._atlases.get(p.url) ?? null;
         if (!p.atlas && !img) continue;
         items.push({
-          z: p.plant.z,
-          draw: (ctx2) => this._draw_plant(ctx2, r, p, img),
+          z: p.z,
+          draw: (ctx2) => this._draw_still(ctx2, r, p, img),
         });
+      }
+      for (const puff of r.sim.puffs) {
+        const z = puff.d / size.width;
+        items.push({ z, draw: (c) => this._draw_puff(c, r, puff, z) });
       }
       for (const c of r.corals) {
         if (!c.atlas) continue;
@@ -984,24 +1126,25 @@ export class AquariumScene {
   }
 
   /**
-   * A plant, standing on its foot: a frame of its sway sheet, of its own
-   * atlas, or its plain picture while the sheet is still being made. Its
-   * size is its height (a plant stands), the width following the picture.
+   * Something standing where it was put — a plant on its foot, a sessile
+   * invertebrate on its rock: a frame of its sway sheet, of its own atlas,
+   * or its plain picture while the sheet is still being made. Its size is
+   * read along `fit` and the other side follows the picture.
    */
-  private _draw_plant(
+  private _draw_still(
     ctx: CanvasRenderingContext2D,
     r: RegionScene,
-    p: PlantScene,
+    p: StillScene,
     img: HTMLImageElement | null,
   ): void {
     const W = this._canvas.width;
     const H = this._canvas.height;
-    const [px, py] = p.plant.pos;
+    const [px, py] = p.pos;
     const [, v] = r.projection.to_water(px, py);
-    const height =
-      p.height_cm *
+    const span =
+      p.size_cm *
       this._px_per_cm(r, clamp01(v), 0) *
-      WaterProjection.depth_scale(p.plant.z);
+      WaterProjection.depth_scale(p.z);
     let source: CanvasImageSource;
     let sx = 0;
     let sy = 0;
@@ -1019,7 +1162,7 @@ export class AquariumScene {
       anchor = p.atlas.anchor_x;
     } else if (!img) {
       return;
-    } else if (p.species.frame && plant_clip(p.species)) {
+    } else if (p.species.frame && still_clip(p.species)) {
       [sx, sy, sw, sh] = frame_rect(
         { frame: p.species.frame, columns: p.species.columns ?? 1 },
         p.frame,
@@ -1030,18 +1173,16 @@ export class AquariumScene {
       sw = img.width;
       sh = img.height;
     }
-    const width = sh ? (height * sw) / sh : height;
+    const ratio = sw && sh ? sw / sh : 1;
+    const height = p.fit === "width" ? span / ratio : span;
+    const width = height * ratio;
     // A floating plant hangs from the surface it rides, and has wandered
     // along it since it was placed; any other stands on its foot
     let x = px;
     let top = py * H - height;
-    if (plant_floats(p.species)) {
-      const [u] = r.projection.to_water_at(px, py, p.plant.z);
-      const [fx, fy] = r.projection.to_picture(
-        clamp01(u + p.drift),
-        0,
-        p.plant.z,
-      );
+    if (p.floats) {
+      const [u] = r.projection.to_water_at(px, py, p.z);
+      const [fx, fy] = r.projection.to_picture(clamp01(u + p.drift), 0, p.z);
       x = fx;
       top = fy * H;
     }
@@ -1056,6 +1197,34 @@ export class AquariumScene {
       width,
       height,
     );
+  }
+
+  /** A puff of sand pushed out of a burrow: a soft grain of the sand. */
+  private _draw_puff(
+    ctx: CanvasRenderingContext2D,
+    r: RegionScene,
+    p: Puff,
+    z: number,
+  ): void {
+    const alpha = puff_alpha(p);
+    if (alpha <= 0.002) return;
+    const size = tank_size(this._setup!.doc);
+    const v = clamp01(p.y / size.height);
+    const [x, y] = r.projection.to_picture(clamp01(p.x / size.length), v, z);
+    const radius = Math.max(1, puff_radius(p) * this._px_per_cm(r, v, z));
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = PUFF_RGB;
+    ctx.beginPath();
+    ctx.arc(
+      x * this._canvas.width,
+      y * this._canvas.height,
+      radius,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+    ctx.restore();
   }
 
   private _draw_coral(

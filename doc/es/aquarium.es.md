@@ -24,7 +24,7 @@ No hay zonas fijas como en las vistas de los dispositivos: coloque sus dispositi
 2. En su editor, cree un acuario (**Nuevo acuario**) y luego **Editar la escena**.
 3. **Vistas**: suba una foto de su acuario, contornee el agua, trace la línea de arena y las rocas.
 4. **Dispositivos** y **Luz y corriente**: coloque sus dispositivos y entidades en la imagen, sitúe sus lámparas.
-5. **Fauna**: añada sus peces y corales y guarde.
+5. **Fauna**: añada sus peces, invertebrados, corales y plantas, y guarde.
 
 La configuración de la tarjeta solo contiene el id del acuario; todo lo demás lo guarda la integración:
 
@@ -78,10 +78,11 @@ Las lámparas que iluminan cada agua y su posición; las bombas que mueven el ag
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Peces (especie, número, tamaño, refugio) y corales (especie, tamaño, colores, posición).
+Peces, invertebrados, corales y plantas. Cada grupo se abre por su cuenta — uno a la vez, las listas se alargan — y dentro una especie solo muestra su imagen y su nombre hasta que la abre con un clic para editarla.
 
+- **Invertebrados**: camarones, cangrejos, ermitaños, caracoles, erizos, estrellas de mar... Cada especie lleva el soporte donde vive, indicado junto a su nombre: la arena, el cristal, la roca, o fijada para siempre. Un camarón o un caracol se desplaza solo; una especie **fijada** (tridacna, espirógrafo) se dibuja donde coloque su sitio, y ondula con la corriente cuando el catálogo indica su flexibilidad. Un camarón pistola cava: de vez en cuando trabaja en la entrada de su madriguera y empuja una nube de arena.
 - **Comportamiento**: bancos, nadadores de aguas abiertas, peces de fondo, peces que viven alrededor de un refugio, gobios asomando de su madriguera; de noche los peces se esconden o descansan, bajo un velo que mantiene legible el acuario.
-- **Especies**: peces y corales vienen del [catálogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), descargado y actualizado por la integración. El editor los lista con una miniatura; un nombre que no está en el catálogo nada como un pez genérico.
+- **Especies**: peces, invertebrados, corales y plantas vienen del [catálogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), descargado y actualizado por la integración. El editor los lista con una miniatura; un nombre que no está en el catálogo nada como un pez genérico.
 
 ### Alimentación
 

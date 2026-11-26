@@ -24,7 +24,7 @@ Nie ma stałych stref jak w widokach urządzeń: umieszczasz urządzenia i encje
 2. W jej edytorze utwórz akwarium (**Nowe akwarium**), następnie **Edytuj scenę**.
 3. **Widoki**: prześlij zdjęcie zbiornika, obrysuj wodę, wyznacz linię piasku i skały.
 4. **Urządzenia** i **Światło i przepływ**: umieść urządzenia i encje na obrazie, ustaw lampy.
-5. **Obsada**: dodaj ryby i koralowce, potem zapisz.
+5. **Obsada**: dodaj ryby, bezkręgowce, koralowce i rośliny, potem zapisz.
 
 Konfiguracja karty zawiera tylko id akwarium; resztę przechowuje integracja:
 
@@ -78,10 +78,11 @@ Lampy oświetlające każdą wodę i ich położenie; pompy poruszające wodę.
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Ryby (gatunek, liczba, rozmiar, schronienie) i koralowce (gatunek, rozmiar, kolory, położenie).
+Ryby, bezkręgowce, koralowce i rośliny. Każda grupa otwiera się osobno — tylko jedna naraz, listy są długie — a w niej gatunek pokazuje jedynie swój obrazek i nazwę, dopóki nie klikniesz, aby go edytować.
 
+- **Bezkręgowce**: krewetki, kraby, pustelniki, ślimaki, jeżowce, rozgwiazdy... Każdy gatunek nosi podłoże, na którym żyje, podane obok nazwy: piasek, szyba, skała albo osiadły na stałe. Krewetka czy ślimak poruszają się same; gatunek **osiadły** (trydakna, wieloszczet) jest rysowany tam, gdzie umieścisz jego miejsce, i kołysze się w prądzie, gdy katalog podaje jego giętkość. Krewetka pistoletowa kopie: od czasu do czasu pracuje u wejścia do norki i wypycha z niej obłok piasku.
 - **Zachowanie**: ławice, pływaki otwartej wody, gatunki denne, ryby żyjące wokół kryjówki, babki wyglądające z nory; nocą ryby chowają się lub odpoczywają, pod zasłoną, która utrzymuje czytelność akwarium.
-- **Gatunki**: ryby i koralowce pochodzą z [katalogu ReefTank](https://github.com/Elwinmage/reeftank-catalog), pobieranego i aktualizowanego przez integrację. Edytor pokazuje je z miniaturą; nazwa spoza katalogu pływa jako ryba ogólna.
+- **Gatunki**: ryby, bezkręgowce, koralowce i rośliny pochodzą z [katalogu ReefTank](https://github.com/Elwinmage/reeftank-catalog), pobieranego i aktualizowanego przez integrację. Edytor pokazuje je z miniaturą; nazwa spoza katalogu pływa jako ryba ogólna.
 
 ### Karmienie
 

@@ -12,10 +12,12 @@
  */
 
 import type {
+  AnimalSpecies,
   Catalog,
   Clip,
   CoralSpecies,
   FishSpecies,
+  InvertebrateSpecies,
   PaletteColour,
   PlantSpecies,
   SpeciesBase,
@@ -248,38 +250,45 @@ export function coral_atlas(
   return promise;
 }
 
-// ── Plants ───────────────────────────────────────────────────────────────────
+// ── Still species (plants, sessile invertebrates) ────────────────────────────
 
 /**
- * The atlas a plant is drawn from. Null for a species published without a
- * picture.
+ * A species the card can draw from a still picture and move itself: a plant,
+ * an invertebrate.
  */
-export function plant_image_url(species: PlantSpecies): string | null {
+export type StillKind = PlantSpecies | InvertebrateSpecies;
+
+/**
+ * The atlas a still species is drawn from. Null for a species published
+ * without a picture.
+ */
+export function still_image_url(species: StillKind): string | null {
   return species.atlas?.["1x"] ?? null;
 }
 
-/** The clip a plant's atlas is played with. */
-export function plant_clip(species: PlantSpecies): Clip | null {
+/** The clip a still species' atlas is played with. */
+export function still_clip(species: StillKind): Clip | null {
   const clips = species.clips ?? {};
   return clips.sway ?? clips.day ?? Object.values(clips)[0] ?? null;
 }
 
 /**
- * Frames of a plant's atlas. One frame is a still picture — what the catalog
- * publishes for a species with no filmed animation — and that is what says
- * the card has to make the motion itself.
+ * Frames of a still species' atlas. One frame is a still picture — what the
+ * catalog publishes for a species with no filmed animation — and that is
+ * what says the card has to make the motion itself.
  */
-export function plant_frames(species: PlantSpecies): number {
+export function still_frames(species: StillKind): number {
   const clips = Object.values(species.clips ?? {});
   if (!clips.length) return 1;
   return Math.max(1, ...clips.map((clip) => clip.to + 1));
 }
 
-// ── Sway of a plant ──────────────────────────────────────────────────────────
+// ── Sway of a still species ──────────────────────────────────────────────────
 
 /**
- * A plant anchored at its foot bends with the current, and the card makes
- * that motion itself from the still picture of the species.
+ * A plant anchored at its foot, or a sessile invertebrate settled on the
+ * rock, bends with the current, and the card makes that motion itself from
+ * the still picture of the species.
  *
  * The frames are not moments in time but **states of bend**, from upright
  * (frame 0) to fully bent (the last one). The flow then picks how many of
@@ -329,7 +338,7 @@ export function bend_offset(
   return amplitude * deflection * Math.pow(clamp01(rise), exponent);
 }
 
-export interface PlantAtlas {
+export interface StillAtlas {
   /** The frames, side by side, from upright to fully bent. */
   sheet: HTMLCanvasElement;
   /** One frame of the sheet, pixels. */
@@ -340,14 +349,14 @@ export interface PlantAtlas {
 }
 
 /**
- * Build the sway sheet of a plant from its still picture: the picture is cut
- * into rows and every row is shifted, the more the higher it stands.
+ * Build the sway sheet of a still species from its picture: the picture is
+ * cut into rows and every row is shifted, the more the higher it stands.
  * @return null without a 2D canvas, or for a picture of no height
  */
-export function build_plant_sheet(
+export function build_still_sheet(
   img: CanvasImageSource & { width: number; height: number },
   flex: number,
-): PlantAtlas | null {
+): StillAtlas | null {
   if (!img.height || !img.width) return null;
   const height = Math.min(BEND_HEIGHT, img.height);
   const scale = height / img.height;
@@ -394,18 +403,19 @@ export function build_plant_sheet(
 }
 
 /**
- * Whether the card makes the motion of a plant itself: it takes a still
- * picture (a one frame atlas) that the current bends. A filmed plant plays
- * its own frames, a moss does not move, and a floating plant does not bend —
- * it wanders along the surface instead. So what the generator is for is read
- * off the assets and off `zone`, with no field to keep in step with them.
+ * Whether the card makes the motion of a species itself: it takes a still
+ * picture (a one frame atlas) that the current bends. A filmed plant or
+ * shrimp plays its own frames, a moss or a clam does not move, and a
+ * floating plant does not bend — it wanders along the surface instead. So
+ * what the generator is for is read off the assets, off `flex` and off
+ * `zone`, with no field to keep in step with them.
  */
-export function plant_sways(species: PlantSpecies): boolean {
+export function still_sways(species: StillKind): boolean {
   return Boolean(
-    plant_image_url(species) &&
-    plant_frames(species) <= 1 &&
+    still_image_url(species) &&
+    still_frames(species) <= 1 &&
     (species.flex ?? 0) > 0 &&
-    species.zone !== "floating",
+    (species.kind !== "plant" || species.zone !== "floating"),
   );
 }
 
@@ -414,30 +424,53 @@ export function plant_floats(species: PlantSpecies): boolean {
   return species.zone === "floating";
 }
 
-const _plants = new Map<string, Promise<PlantAtlas | null>>();
+const _stills = new Map<string, Promise<StillAtlas | null>>();
 
 /**
- * The sway sheet of a plant (cached per species). Null for a plant that does
- * not move with the current (a moss, a species shipping its own atlas): it
- * is drawn from its picture as it is.
+ * The sway sheet of a still species (cached per species). Null for one that
+ * does not move with the current (a moss, a clam, a species shipping its own
+ * atlas): it is drawn from its picture as it is.
  */
-export function plant_atlas(species: PlantSpecies): Promise<PlantAtlas | null> {
-  const url = plant_image_url(species);
+export function still_atlas(species: StillKind): Promise<StillAtlas | null> {
+  const url = still_image_url(species);
   const flex = species.flex ?? 0;
-  if (!url || !plant_sways(species)) return Promise.resolve(null);
-  const key = `${species.source}:${species.id}:${flex}`;
-  let promise = _plants.get(key);
+  if (!url || !still_sways(species)) return Promise.resolve(null);
+  const key = `${species.kind}:${species.source}:${species.id}:${flex}`;
+  let promise = _stills.get(key);
   if (!promise) {
-    promise = load_image(url).then((img) => build_plant_sheet(img, flex));
-    promise.catch(() => _plants.delete(key));
-    _plants.set(key, promise);
+    promise = load_image(url).then((img) => build_still_sheet(img, flex));
+    promise.catch(() => _stills.delete(key));
+    _stills.set(key, promise);
   }
   return promise;
 }
 
 /** Forget the sway sheets (tests). */
-export function reset_plant_atlases(): void {
-  _plants.clear();
+export function reset_still_atlases(): void {
+  _stills.clear();
+}
+
+// ── Invertebrates ────────────────────────────────────────────────────────────
+
+/**
+ * An invertebrate as the simulation moves it: a crawling or swimming one
+ * carries the same sprites and the same behaviour as a fish, so it is drawn
+ * by the same code. Null for a sessile species — it is placed where it
+ * settled, like a plant — and for one published without a picture.
+ */
+export function invertebrate_animal(
+  species: InvertebrateSpecies,
+): AnimalSpecies | null {
+  const url = species.atlas?.["1x"];
+  if (!url || !species.frame || species.movement === "sessile") return null;
+  return {
+    ...species,
+    kind: "invertebrate",
+    atlas: { ...species.atlas, "1x": url },
+    frame: species.frame,
+    columns: species.columns ?? 1,
+    clips: species.clips ?? {},
+  };
 }
 
 // ── Generic fish ─────────────────────────────────────────────────────────────

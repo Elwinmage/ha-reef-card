@@ -274,6 +274,51 @@ export default css`
     flex-direction: column;
     gap: 6px;
   }
+  /* Livestock: a group and a species of it open on their own */
+  fieldset.group {
+    padding-bottom: 0;
+  }
+  fieldset.group.open {
+    padding-bottom: 8px;
+  }
+  .group-head,
+  .entry-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    padding: 2px 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .group-head small {
+    color: var(--secondary-text-color, #777);
+    font-size: 0.85em;
+  }
+  .group-head svg.chevron,
+  .entry-head svg.chevron {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    transition: transform 0.15s;
+    color: var(--secondary-text-color, #777);
+  }
+  .group-head svg.chevron.open,
+  .entry-head svg.chevron.open {
+    transform: rotate(90deg);
+  }
+  .entry-head svg.chevron {
+    margin-left: auto;
+  }
+  .line.end {
+    justify-content: flex-end;
+  }
+
   .suggestion {
     font-size: 0.85em;
   }

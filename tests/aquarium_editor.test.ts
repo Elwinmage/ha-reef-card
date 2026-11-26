@@ -378,6 +378,7 @@ describe("scene editor", () => {
     await editor.updateComplete;
     expect(editor.shadowRoot.querySelector("fieldset.props")).not.toBeNull();
     editor._tab = "livestock";
+    editor._group = "fish";
     await editor.updateComplete;
     expect(editor.shadowRoot.textContent).toContain("Demo damselfish");
     expect(editor.shadowRoot.textContent).toContain("generic fish");
@@ -404,6 +405,7 @@ describe("scene editor", () => {
       defaults: [unknown],
     } as any;
     editor._tab = "livestock";
+    editor._group = "fish";
     // Only the species of the water are offered, and a pictureless one
     // is shown with the default fish
     editor.change({ ...editor.doc, water_type: "freshwater" });
@@ -665,6 +667,8 @@ describe("scene editor", () => {
 
     // homes: placed on the stage, moved, put back, removed
     editor._tab = "livestock";
+    editor._group = "fish";
+    editor._entry = editor.doc.waters.main.livestock[0].id;
     await editor.updateComplete;
     const line = () => editor.doc.waters.main.livestock[0];
     const place = root.querySelector(".home-row button") as HTMLButtonElement;
@@ -839,6 +843,7 @@ describe("scene editor", () => {
     );
     const editor = await open(hass, "a1b2");
     editor._tab = "livestock";
+    editor._group = "fish";
     await editor.updateComplete;
     const root = editor.shadowRoot;
     const lines = () => editor.doc.waters.main.livestock.length;
@@ -909,10 +914,11 @@ describe("scene editor", () => {
     again.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
     expect(lines()).toBe(count);
 
-    // corals: picking sets the species to place and the tool
-    const coral_input = root.querySelectorAll(
-      ".picker input",
-    )[1] as HTMLInputElement;
+    // corals: picking sets the species to place and the tool (their own
+    // group, the panel opening one at a time)
+    editor._group = "corals";
+    await editor.updateComplete;
+    const coral_input = root.querySelector(".picker input") as HTMLInputElement;
     coral_input.dispatchEvent(new Event("focus"));
     coral_input.value = "zzz";
     coral_input.dispatchEvent(new Event("input"));

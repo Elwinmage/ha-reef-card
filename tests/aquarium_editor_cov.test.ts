@@ -278,6 +278,13 @@ const button = (root: ParentNode, text: string) =>
     (b: any) => b.textContent.trim() === text,
   ) as HTMLButtonElement;
 
+/** A group of the livestock panel, by the label of its head. */
+const group = (root: ParentNode, label: string) =>
+  [...root.querySelectorAll("fieldset.group")].find(
+    (f: any) =>
+      f.querySelector(".group-head span")?.textContent.trim() === label,
+  ) as HTMLFieldSetElement;
+
 const fieldset = (root: ParentNode, legend: string) =>
   [...root.querySelectorAll("fieldset")].find(
     (f: any) => f.querySelector("legend")?.textContent.trim() === legend,
@@ -404,6 +411,7 @@ describe("scene editor: loading and saving", () => {
     expect(root.textContent).not.toContain("Aquarium of the cloud account");
     expect(root.textContent).not.toContain("Preset");
     editor._tab = "livestock";
+    editor._group = "fish";
     await editor.updateComplete;
     expect(root.querySelector(".notice")).toBeNull();
     expect(root.textContent).toContain("generic fish");
@@ -1774,8 +1782,9 @@ describe("scene editor: lights panel", () => {
     await editor.updateComplete;
     expect(fieldset(editor.shadowRoot, "Lamps")).toBeUndefined();
     editor._tab = "livestock";
+    editor._group = "corals";
     await editor.updateComplete;
-    expect(fieldset(editor.shadowRoot, "Corals")).toBeUndefined();
+    expect(group(editor.shadowRoot, "Corals")).toBeUndefined();
   });
 });
 
@@ -1783,26 +1792,39 @@ describe("scene editor: livestock panel", () => {
   it("edits the inventory lines", async () => {
     const { doc, front } = existing_doc();
     const editor = await open_on(doc, "livestock", front);
+    editor._group = "fish";
+    await editor.updateComplete;
     const root = editor.shadowRoot;
     const lines = () => editor.doc.waters.main.livestock;
-    const card = (i: number) =>
-      fieldset(root, "Fish and invertebrates").querySelectorAll(".card")[i];
-    const inputs = (i: number) =>
-      [...card(i).querySelectorAll("input")] as HTMLInputElement[];
-    fire(inputs(0)[0], "x");
+    // A line shows its picture and its name; its settings once it is open
+    const head = (i: number) =>
+      group(root, "Fish").querySelectorAll(".entry-head")[
+        i
+      ] as HTMLButtonElement;
+    expect(group(root, "Fish").querySelectorAll(".card input")).toHaveLength(0);
+    const card = async (i: number) => {
+      if (editor._entry !== lines()[i].id) {
+        head(i).click();
+        await editor.updateComplete;
+      }
+      return group(root, "Fish").querySelectorAll(".card")[i] as HTMLElement;
+    };
+    const inputs = async (i: number) =>
+      [...(await card(i)).querySelectorAll("input")] as HTMLInputElement[];
+    fire((await inputs(0))[0], "x");
     expect(lines()[0].count).toBe(0);
     await editor.updateComplete;
     // the free text fish has no size: defaults
-    fire(inputs(1)[1], "x");
+    fire((await inputs(1))[1], "x");
     expect(lines()[1].size_cm).toEqual([1, 5]);
     await editor.updateComplete;
-    fire(inputs(1)[2], "x");
+    fire((await inputs(1))[2], "x");
     expect(lines()[1].size_cm).toEqual([1, 5]);
     await editor.updateComplete;
-    fire(inputs(1)[2], "9");
+    fire((await inputs(1))[2], "9");
     expect(lines()[1].size_cm).toEqual([1, 9]);
     await editor.updateComplete;
-    fire(inputs(1)[3], "Shy");
+    fire((await inputs(1))[3], "Shy");
     expect(lines()[1].note).toBe("Shy");
     await editor.updateComplete;
     // a line without size, without species: size max keeps 1 as min
@@ -1810,16 +1832,28 @@ describe("scene editor: livestock panel", () => {
       ops.update_line(editor.doc, "main", lines()[1].id, { size_cm: null }),
     );
     await editor.updateComplete;
-    fire(inputs(1)[2], "7");
+    fire((await inputs(1))[2], "7");
     expect(lines()[1].size_cm).toEqual([1, 7]);
     await editor.updateComplete;
-    (card(1).querySelector("button.icon") as HTMLButtonElement).click();
+    (
+      (await card(1)).querySelector("button.icon.remove") as HTMLButtonElement
+    ).click();
     expect(lines()).toHaveLength(1);
+    // Closing it again hides the settings, and the one open closes too
+    head(0).click();
+    await editor.updateComplete;
+    expect(editor._entry).toBe(lines()[0].id);
+    head(0).click();
+    await editor.updateComplete;
+    expect(editor._entry).toBeNull();
+    expect(group(root, "Fish").querySelectorAll(".card input")).toHaveLength(0);
   });
 
   it("adds a fish with the custom choice of the picker", async () => {
     const { doc, front } = existing_doc();
     const editor = await open_on(doc, "livestock", front);
+    editor._group = "fish";
+    await editor.updateComplete;
     const root = editor.shadowRoot;
     const input = root.querySelector(".picker input") as HTMLInputElement;
     input.dispatchEvent(new Event("focus"));
@@ -1840,11 +1874,13 @@ describe("scene editor: livestock panel", () => {
   it("edits the corals", async () => {
     const { doc, front } = existing_doc();
     const editor = await open_on(doc, "livestock", front);
+    editor._group = "corals";
+    await editor.updateComplete;
     const root = editor.shadowRoot;
     const coral = () => editor.doc.waters.main.corals[0];
     const card = () =>
-      fieldset(root, "Corals").querySelector(".card") as HTMLElement;
-    card().click();
+      group(root, "Corals").querySelector(".card") as HTMLElement;
+    (card().querySelector(".entry-head") as HTMLButtonElement).click();
     expect(editor._selection).toEqual({
       type: "coral",
       id: coral().id,
@@ -1874,26 +1910,30 @@ describe("scene editor: livestock panel", () => {
     expect(coral().palette).toEqual([]);
     expect(editor._colour_edit).toBeNull();
     await editor.updateComplete;
-    (card().querySelector("button.icon") as HTMLButtonElement).click();
+    (card().querySelector("button.icon.remove") as HTMLButtonElement).click();
     expect(editor.doc.waters.main.corals).toHaveLength(0);
   });
 
   it("previews the coral in large while its colours are chosen", async () => {
     const { doc, front } = existing_doc();
     const editor = await open_on(doc, "livestock", front);
+    editor._group = "corals";
+    await editor.updateComplete;
     const root = editor.shadowRoot;
     const coral = () => editor.doc.waters.main.corals[0];
     const card = () =>
-      fieldset(root, "Corals").querySelector(".card") as HTMLElement;
+      group(root, "Corals").querySelector(".card") as HTMLElement;
+    const open_coral = () =>
+      (card().querySelector(".entry-head") as HTMLButtonElement).click();
     const preview = () => card().querySelector("reef-coral-preview") as any;
     const picker = () => card().querySelector("reef-colour-picker") as any;
     const swatch = (i: number) =>
       card().querySelectorAll(".palette .swatch")[i] as HTMLButtonElement;
     const send = (type: string, value: string) =>
       picker().dispatchEvent(new CustomEvent(type, { detail: { value } }));
-    // only for the selected coral, the picker closed
+    // only for the coral open, the picker closed
     expect(preview()).toBeNull();
-    card().click();
+    open_coral();
     await editor.updateComplete;
     expect(preview().species.id).toBe(coral().species);
     expect(picker()).toBeNull();
@@ -1937,10 +1977,11 @@ describe("scene editor: livestock panel", () => {
     await editor.updateComplete;
     expect(picker()).toBeNull();
 
-    // the picker of an unselected coral stays closed
+    // the picker of a coral closed again stays closed
     swatch(0).click();
-    editor._selection = null;
+    open_coral();
     await editor.updateComplete;
+    expect(editor._entry).toBeNull();
     expect(picker()).toBeNull();
   });
 });

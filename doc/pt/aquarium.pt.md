@@ -24,7 +24,7 @@ Não há zonas fixas como nas vistas dos dispositivos: coloque os seus dispositi
 2. No seu editor, crie um aquário (**Novo aquário**) e depois **Editar a cena**.
 3. **Vistas**: envie uma foto do aquário, contorne a água, trace a linha da areia e as rochas.
 4. **Dispositivos** e **Luz e corrente**: coloque os seus dispositivos e entidades na imagem, posicione as lâmpadas.
-5. **Fauna**: adicione os seus peixes e corais e guarde.
+5. **Fauna**: adicione os seus peixes, invertebrados, corais e plantas, e guarde.
 
 A configuração do cartão só contém o id do aquário; tudo o resto é guardado pela integração:
 
@@ -78,10 +78,11 @@ As lâmpadas que iluminam cada água e a sua posição; as bombas que movem a á
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Peixes (espécie, número, tamanho, abrigo) e corais (espécie, tamanho, cores, posição).
+Peixes, invertebrados, corais e plantas. Cada grupo abre-se por si — um de cada vez, as listas ficam longas — e dentro dele uma espécie mostra apenas a sua imagem e o seu nome até que a abra com um clique para a editar.
 
+- **Invertebrados**: camarões, caranguejos, paguros, caracóis, ouriços, estrelas-do-mar... Cada espécie leva o suporte onde vive, indicado ao lado do nome: a areia, o vidro, a rocha, ou fixa de vez. Um camarão ou um caracol desloca-se sozinho; uma espécie **fixa** (tridacna, espirógrafo) é desenhada onde colocar o seu lugar, e ondula com a corrente quando o catálogo diz a sua flexibilidade. Um camarão-pistola escava: de vez em quando trabalha à entrada da sua toca e empurra uma nuvem de areia.
 - **Comportamento**: cardumes, nadadores de águas abertas, peixes de fundo, peixes que vivem à volta de um refúgio, gobídeos a espreitar da toca; à noite os peixes escondem-se ou descansam, sob um véu que mantém o aquário legível.
-- **Espécies**: peixes e corais vêm do [catálogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), descarregado e mantido atualizado pela integração. O editor lista-os com uma miniatura; um nome fora do catálogo nada como um peixe genérico.
+- **Espécies**: peixes, invertebrados, corais e plantas vêm do [catálogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), descarregado e mantido atualizado pela integração. O editor lista-os com uma miniatura; um nome fora do catálogo nada como um peixe genérico.
 
 ### Alimentação
 

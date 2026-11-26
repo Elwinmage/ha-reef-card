@@ -24,7 +24,7 @@ Non ci sono zone fisse come nelle viste dei dispositivi: posiziona i tuoi dispos
 2. Nel suo editor, create un acquario (**Nuovo acquario**), poi **Modifica la scena**.
 3. **Viste**: caricate una foto della vasca, contornate l'acqua, tracciate la linea della sabbia e le rocce.
 4. **Dispositivi** e **Luce e corrente**: posate dispositivi ed entità sull'immagine, posizionate le lampade.
-5. **Fauna**: aggiungete pesci e coralli, poi salvate.
+5. **Fauna**: aggiungete pesci, invertebrati, coralli e piante, poi salvate.
 
 La configurazione della scheda contiene solo l'id dell'acquario; tutto il resto è conservato dall'integrazione:
 
@@ -78,10 +78,11 @@ Le lampade che illuminano ogni acqua e la loro posizione; le pompe che muovono l
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Pesci (specie, numero, taglia, rifugio) e coralli (specie, taglia, colori, posizione).
+Pesci, invertebrati, coralli e piante. Ogni gruppo si apre da solo — uno alla volta, le liste si allungano — e al suo interno una specie mostra solo la sua immagine e il suo nome, finché non la aprite con un clic per modificarla.
 
+- **Invertebrati**: gamberetti, granchi, paguri, lumache, ricci, stelle marine... Ogni specie porta il supporto su cui vive, indicato accanto al nome: la sabbia, il vetro, la roccia, o fissa per sempre. Un gamberetto o una lumaca si sposta da sé; una specie **fissa** (tridacna, spirografo) è disegnata dove ne mettete il posto, e ondeggia con la corrente quando il catalogo ne dice la flessibilità. Un gambero pistola scava: di tanto in tanto lavora all'ingresso della tana e ne spinge fuori uno sbuffo di sabbia.
 - **Comportamento**: banchi, nuotatori di acque libere, pesci di fondo, pesci che vivono attorno a un rifugio, ghiozzi che spuntano dalla tana; di notte i pesci si nascondono o riposano, sotto un velo che mantiene leggibile la vasca.
-- **Specie**: pesci e coralli vengono dal [catalogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), scaricato e aggiornato dall'integrazione. L'editor li elenca con una miniatura; un nome assente dal catalogo nuota come un pesce generico.
+- **Specie**: pesci, invertebrati, coralli e piante vengono dal [catalogo ReefTank](https://github.com/Elwinmage/reeftank-catalog), scaricato e aggiornato dall'integrazione. L'editor li elenca con una miniatura; un nome assente dal catalogo nuota come un pesce generico.
 
 ### Alimentazione
 

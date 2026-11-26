@@ -24,7 +24,7 @@ Pas de zones fixes comme sur les vues des appareils : vous placez vos appareils 
 2. Dans son éditeur, créez un aquarium (**Nouvel aquarium**), puis **Éditer la scène**.
 3. **Vues** : envoyez une photo de votre bac, détourez l'eau, tracez la ligne de sable et les roches.
 4. **Appareils** et **Lumière et brassage** : posez vos appareils et entités sur l'image, placez vos lampes.
-5. **Population** : ajoutez vos poissons et coraux, puis enregistrez.
+5. **Population** : ajoutez vos poissons, invertébrés, coraux et plantes, puis enregistrez.
 
 La configuration de la carte ne contient que l'identifiant de l'aquarium ; tout le reste est stocké par l'intégration :
 
@@ -78,10 +78,11 @@ Les lampes qui éclairent chaque eau et leur position ; les pompes qui font boug
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Poissons (espèce, nombre, taille, abri) et coraux (espèce, taille, couleurs, position).
+Poissons, invertébrés, coraux et plantes. Chaque groupe se déplie seul — un seul à la fois, les listes sont longues — et à l'intérieur une espèce n'affiche que son image et son nom jusqu'à ce que vous cliquiez dessus pour l'éditer.
 
+- **Invertébrés** : crevettes, crabes, bernard-l'hermite, escargots, oursins, étoiles de mer... Chaque espèce porte le support où elle vit, indiqué à côté de son nom : le sable, la vitre, le décor, ou fixée une fois pour toutes. Une crevette ou un escargot se déplace seul ; une espèce **fixée** (bénitier, spirographe) est dessinée là où vous posez son emplacement, et ondule avec le courant quand le catalogue dit sa souplesse. Une crevette pistolet creuse : de temps en temps elle travaille à l'entrée de son terrier et en pousse un panache de sable.
 - **Comportement** : bancs, nageurs de pleine eau, espèces de fond, poissons vivant autour d'un refuge, gobies sortant de leur terrier ; la nuit, les poissons se cachent ou se reposent, sous un voile qui garde le bac lisible.
-- **Espèces** : poissons et coraux viennent du [catalogue ReefTank](https://github.com/Elwinmage/reeftank-catalog), téléchargé et tenu à jour par l'intégration. L'éditeur les liste avec une vignette ; un nom absent du catalogue nage comme un poisson générique.
+- **Espèces** : poissons, invertébrés, coraux et plantes viennent du [catalogue ReefTank](https://github.com/Elwinmage/reeftank-catalog), téléchargé et tenu à jour par l'intégration. L'éditeur les liste avec une vignette ; un nom absent du catalogue nage comme un poisson générique.
 
 ### Nourrissage
 

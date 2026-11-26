@@ -8,13 +8,13 @@ import { nothing } from "lit";
 import "../src/aquarium/index";
 import {
   AquariumScene,
-  step_plant,
-  step_plant_clip,
+  step_sway,
+  step_still_clip,
   plant_height,
   step_drift,
   sway_window,
   type PlantScene,
-  type PlantSway,
+  type StillSway,
 } from "../src/aquarium/scene";
 import {
   BEND_FRAMES,
@@ -23,14 +23,14 @@ import {
   bend_amplitude,
   bend_exponent,
   bend_offset,
-  build_plant_sheet,
-  plant_atlas,
-  plant_clip,
+  build_still_sheet,
+  still_atlas,
+  still_clip,
   plant_floats,
-  plant_frames,
-  plant_image_url,
-  plant_sways,
-  reset_plant_atlases,
+  still_frames,
+  still_image_url,
+  still_sways,
+  reset_still_atlases,
 } from "../src/aquarium/sprites";
 import { rect_quad } from "../src/aquarium/geometry";
 import {
@@ -43,7 +43,7 @@ import type { Catalog, PlantSpecies } from "../src/aquarium/types";
 
 afterEach(() => {
   reset_catalog_cache();
-  reset_plant_atlases();
+  reset_still_atlases();
   document.body.innerHTML = "";
   vi.restoreAllMocks();
 });
@@ -183,14 +183,14 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe("plant assets", () => {
   it("says what a plant is drawn from, and how many frames it has", () => {
-    expect(plant_image_url(vallisneria)).toBe("/plants/vallisneria.webp");
-    expect(plant_image_url(filmed)).toBe("/plants/cabomba.webp");
-    expect(plant_image_url(pictureless)).toBeNull();
+    expect(still_image_url(vallisneria)).toBe("/plants/vallisneria.webp");
+    expect(still_image_url(filmed)).toBe("/plants/cabomba.webp");
+    expect(still_image_url(pictureless)).toBeNull();
     // A single frame is a still picture; several are an animation to play
-    expect(plant_frames(vallisneria)).toBe(1);
-    expect(plant_frames(bare)).toBe(1);
-    expect(plant_frames(filmed)).toBe(4);
-    expect(plant_frames({ ...vallisneria, clips: {} })).toBe(1);
+    expect(still_frames(vallisneria)).toBe(1);
+    expect(still_frames(bare)).toBe(1);
+    expect(still_frames(filmed)).toBe(4);
+    expect(still_frames({ ...vallisneria, clips: {} })).toBe(1);
   });
 });
 
@@ -228,7 +228,7 @@ describe("the sway of a plant", () => {
     ctx.drawImage = (...args: any[]) => calls.push(args);
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(ctx);
     const img = { width: 100, height: 400 } as any;
-    const atlas = build_plant_sheet(img, 0.9)!;
+    const atlas = build_still_sheet(img, 0.9)!;
 
     // Built at the working height, never taller than the picture
     const height = BEND_HEIGHT;
@@ -264,42 +264,42 @@ describe("the sway of a plant", () => {
   });
 
   it("builds nothing it cannot draw", () => {
-    expect(build_plant_sheet({ width: 0, height: 0 } as any, 1)).toBeNull();
-    expect(build_plant_sheet({ width: 10, height: 0 } as any, 1)).toBeNull();
+    expect(build_still_sheet({ width: 0, height: 0 } as any, 1)).toBeNull();
+    expect(build_still_sheet({ width: 10, height: 0 } as any, 1)).toBeNull();
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
-    expect(build_plant_sheet({ width: 10, height: 10 } as any, 1)).toBeNull();
+    expect(build_still_sheet({ width: 10, height: 10 } as any, 1)).toBeNull();
   });
 
   it("has no sheet for a plant the current does not move", async () => {
     // No flex: a moss, drawn as it is
-    await expect(plant_atlas({ ...vallisneria, flex: 0 })).resolves.toBeNull();
+    await expect(still_atlas({ ...vallisneria, flex: 0 })).resolves.toBeNull();
     await expect(
-      plant_atlas({ ...vallisneria, flex: undefined }),
+      still_atlas({ ...vallisneria, flex: undefined }),
     ).resolves.toBeNull();
     // Several frames of its own: played as they come
-    await expect(plant_atlas(filmed)).resolves.toBeNull();
-    expect(plant_clip(filmed)?.to).toBe(3);
+    await expect(still_atlas(filmed)).resolves.toBeNull();
+    expect(still_clip(filmed)?.to).toBe(3);
     // A still picture is a clip of one frame; an entry may ship none
-    expect(plant_clip(vallisneria)?.to).toBe(0);
-    expect(plant_clip(bare)).toBeNull();
+    expect(still_clip(vallisneria)?.to).toBe(0);
+    expect(still_clip(bare)).toBeNull();
   });
 
   it("knows which plants it has to animate itself", () => {
-    expect(plant_sways(vallisneria)).toBe(true);
+    expect(still_sways(vallisneria)).toBe(true);
     // Several frames: they are played as they come
-    expect(plant_sways(filmed)).toBe(false);
+    expect(still_sways(filmed)).toBe(false);
     // No picture, or a plant the current does not bend
-    expect(plant_sways(pictureless)).toBe(false);
-    expect(plant_sways({ ...vallisneria, flex: 0 })).toBe(false);
-    expect(plant_sways({ ...vallisneria, flex: undefined })).toBe(false);
+    expect(still_sways(pictureless)).toBe(false);
+    expect(still_sways({ ...vallisneria, flex: 0 })).toBe(false);
+    expect(still_sways({ ...vallisneria, flex: undefined })).toBe(false);
     // Floating: it wanders along the surface, it does not bend
-    expect(plant_sways(frogbit)).toBe(false);
+    expect(still_sways(frogbit)).toBe(false);
     expect(plant_floats(frogbit)).toBe(true);
     expect(plant_floats(vallisneria)).toBe(false);
   });
 
   it("has no sheet for a floating plant, however supple", async () => {
-    await expect(plant_atlas(frogbit)).resolves.toBeNull();
+    await expect(still_atlas(frogbit)).resolves.toBeNull();
   });
 
   it("wanders a floating plant along the surface", () => {
@@ -355,7 +355,7 @@ describe("the sway of a plant", () => {
   });
 
   it("plays the window back and forth", () => {
-    const sway = (): PlantSway => ({
+    const sway = (): StillSway => ({
       frames: 8,
       period_s: 2,
       phase: 0,
@@ -363,7 +363,7 @@ describe("the sway of a plant", () => {
     });
     const s1 = sway();
     const seen = new Set<number>();
-    for (let i = 0; i < 60; i++) seen.add(step_plant(s1, 1, 0.05));
+    for (let i = 0; i < 60; i++) seen.add(step_sway(s1, 1, 0.05));
     // Every frame of the sheet is reached, and none beyond it
     expect(Math.min(...seen)).toBe(0);
     expect(Math.max(...seen)).toBe(7);
@@ -371,13 +371,13 @@ describe("the sway of a plant", () => {
     // One full sway takes the period the current leaves it
     const one = sway();
     const end = sway_window(8, 1, 1);
-    step_plant(one, 1, 2 / (0.6 + 0.8));
+    step_sway(one, 1, 2 / (0.6 + 0.8));
     expect(one.phase).toBeCloseTo(2 * end, 5);
 
     // And the stronger the current, the more of a sway in the same time
     const cycles = (flow: number) => {
       const p = sway();
-      step_plant(p, flow, 1);
+      step_sway(p, flow, 1);
       return p.phase / (2 * sway_window(8, flow, 1));
     };
     expect(cycles(1)).toBeGreaterThan(cycles(0.5));
@@ -385,7 +385,7 @@ describe("the sway of a plant", () => {
 
     // Standing still: no frame, and no phase running away
     const still = { ...sway(), amp: 0.1 };
-    expect(step_plant(still, 0, 1)).toBe(0);
+    expect(step_sway(still, 0, 1)).toBe(0);
     expect(still.phase).toBe(0);
   });
 
@@ -394,17 +394,17 @@ describe("the sway of a plant", () => {
       species: filmed,
       sway: { frames: 0, period_s: 3, phase: 0, amp: 1 },
     } as PlantScene;
-    expect(step_plant_clip(p, 0, 0.5)).toBeGreaterThanOrEqual(0);
+    expect(step_still_clip(p, 0, 0.5)).toBeGreaterThanOrEqual(0);
     const quiet = p.sway.phase;
     p.sway.phase = 0;
-    step_plant_clip(p, 1, 0.5);
+    step_still_clip(p, 1, 0.5);
     expect(p.sway.phase).toBeGreaterThan(quiet);
     // Without a clip there is nothing to play
     const bare = {
       species: { ...filmed, clips: {} },
       sway: { frames: 0, period_s: 3, phase: 0, amp: 1 },
     } as PlantScene;
-    expect(step_plant_clip(bare, 1, 0.5)).toBe(0);
+    expect(step_still_clip(bare, 1, 0.5)).toBe(0);
     expect(bare.sway.phase).toBe(0);
   });
 });
@@ -589,7 +589,7 @@ describe("plants in the scene", () => {
     expect(scene.regions[0].plants[0].url).toBe("/plants/vallisneria.webp");
 
     // Planted today: drawn at the height it was given
-    expect(scene.regions[0].plants[0].height_cm).toBe(40);
+    expect(scene.regions[0].plants[0].size_cm).toBe(40);
 
     // A plant with no view of its own stands on whichever view shows it
     const [more] = ops.add_plant(doc, "main", vallisneria, null, [0.2, 0.6]);
@@ -783,7 +783,7 @@ describe("plant pictures", () => {
       },
       sway: { frames: 0, period_s: 3, phase: 0, amp: 1 },
     } as PlantScene;
-    step_plant_clip(slow, 0, 0.5);
+    step_still_clip(slow, 0, 0.5);
     expect(slow.sway.phase).toBeCloseTo(0.5 * 12 * 0.6, 5);
 
     // An atlas that says no columns: its frames stand in a single column
@@ -818,7 +818,7 @@ describe("plant pictures", () => {
 
     // And nothing at all to draw from: nothing drawn
     drawn.length = 0;
-    (scene as any)._draw_plant(ctx, scene.regions[0], p, null);
+    (scene as any)._draw_still(ctx, scene.regions[0], p, null);
     expect(drawn).toHaveLength(0);
   });
 
@@ -989,6 +989,8 @@ describe("plants in the editor", () => {
     } as DOMRect);
     editor._view_id = view;
     editor._tab = "livestock";
+    // The panel opens one group at a time: these tests are about the plants
+    editor._group = "plants";
     await editor.updateComplete;
     return { editor, view };
   }
@@ -1022,39 +1024,45 @@ describe("plants in the editor", () => {
       water: "main",
     });
 
-    // Planting another one with the tool
+    // Dragging it open it as well
+    expect(editor._entry).toBe(editor.doc.waters.main.plants[0].id);
+
+    // Planting another one with the tool opens it in its turn
     editor._tool = "plant";
     editor._plant_species = "vallisneria_spiralis";
     stage.dispatchEvent(pointer("pointerdown", 700, 250));
     expect(editor.doc.waters.main.plants).toHaveLength(2);
+    expect(editor._entry).toBe(editor.doc.waters.main.plants[1].id);
     await editor.updateComplete;
 
-    // Height and depth of the selected plant
-    const card = root.querySelectorAll("fieldset")[2];
-    const height = card.querySelector('input[type="number"]');
+    // Height and depth of the plant open
+    const card = () =>
+      root.querySelectorAll("fieldset")[3].querySelector(".card.current");
+    const height = card().querySelector('input[type="number"]');
     height.value = "45";
     height.dispatchEvent(new Event("change"));
-    expect(editor.doc.waters.main.plants[0].size_cm).toBe(45);
+    expect(editor.doc.waters.main.plants[1].size_cm).toBe(45);
     height.value = "";
     height.dispatchEvent(new Event("change"));
-    expect(editor.doc.waters.main.plants[0].size_cm).toBe(20);
-    const depth = card.querySelector("select");
+    expect(editor.doc.waters.main.plants[1].size_cm).toBe(20);
+    const depth = card().querySelector("select");
     depth.value = "back";
     depth.dispatchEvent(new Event("change"));
-    expect(ops.depth_name(editor.doc.waters.main.plants[0].z)).toBe("back");
+    expect(ops.depth_name(editor.doc.waters.main.plants[1].z)).toBe("back");
 
-    // Selecting by clicking its card, then uprooting with the keyboard
+    // Uprooting the selected one with the keyboard
     await editor.updateComplete;
-    root.querySelectorAll("fieldset")[2].querySelector(".card").click();
     editor._delete_selection();
     expect(editor.doc.waters.main.plants).toHaveLength(1);
 
-    // And the last one with its ✕ button
+    // And the last one with the ✕ of its own panel
     await editor.updateComplete;
-    const cross = [
-      ...root.querySelectorAll("fieldset")[2].querySelectorAll("button.icon"),
-    ][0];
-    cross.dispatchEvent(new MouseEvent("click"));
+    root.querySelectorAll("fieldset")[3].querySelector(".entry-head").click();
+    await editor.updateComplete;
+    root
+      .querySelectorAll("fieldset")[3]
+      .querySelector("button.icon")
+      .dispatchEvent(new MouseEvent("click"));
     expect(editor.doc.waters.main.plants).toHaveLength(0);
   });
 
@@ -1066,7 +1074,7 @@ describe("plants in the editor", () => {
     search.dispatchEvent(new Event("focus"));
     await editor.updateComplete;
     const picks = root
-      .querySelectorAll("fieldset")[2]
+      .querySelectorAll("fieldset")[3]
       .querySelectorAll("button.pick");
     expect(picks.length).toBe(4);
     picks[0].dispatchEvent(new MouseEvent("click"));
@@ -1077,7 +1085,7 @@ describe("plants in the editor", () => {
     editor._picker = { kind: "plant", text: "zzz" };
     await editor.updateComplete;
     expect(
-      root.querySelectorAll("fieldset")[2].querySelector(".picker-list")
+      root.querySelectorAll("fieldset")[3].querySelector(".picker-list")
         .textContent,
     ).toContain("Nothing found");
   });
@@ -1090,7 +1098,7 @@ describe("plants in the editor", () => {
     await editor.updateComplete;
     expect(root.querySelector(".plant")).toBeNull();
     expect(
-      root.querySelectorAll("fieldset")[2].querySelectorAll(".card"),
+      root.querySelectorAll("fieldset")[3].querySelectorAll(".card"),
     ).toHaveLength(0);
 
     // A plant with no view of its own shows on the view that holds it
@@ -1199,7 +1207,7 @@ describe("plants in the editor", () => {
     const hint = () =>
       [
         ...editor.shadowRoot
-          .querySelectorAll("fieldset")[2]
+          .querySelectorAll("fieldset")[3]
           .querySelectorAll(".hint"),
       ]
         .map((e: any) => e.textContent.trim())

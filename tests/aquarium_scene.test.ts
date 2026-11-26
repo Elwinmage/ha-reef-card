@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   AquariumScene,
   fish_frame,
-  fish_groups,
+  animal_groups,
   fish_scale_x,
   fish_layers,
   fish_tilt,
@@ -255,12 +255,12 @@ describe("scene inputs", () => {
         note: "",
       },
     ];
-    const groups = fish_groups(water, catalog);
+    const groups = animal_groups(water, catalog);
     expect(groups.map((g) => [g.line_id, g.size_cm])).toEqual([
       ["1", [5, 8]],
       ["5", [2, 3]],
     ]);
-    expect(fish_groups(water, null)).toEqual([]);
+    expect(animal_groups(water, null)).toEqual([]);
 
     // with a 2D canvas, a species missing from the catalog swims as a
     // generic fish
@@ -297,7 +297,7 @@ describe("scene inputs", () => {
         loop: true,
       });
       expect(generic_fish()).toBe(generic); // drawn once
-      const with_generic = fish_groups(water, catalog);
+      const with_generic = animal_groups(water, catalog);
       expect(with_generic.map((g) => [g.line_id, g.species.id])).toEqual([
         ["1", "damsel"],
         ["2", GENERIC_FISH_ID],
@@ -525,7 +525,7 @@ describe("AquariumScene", () => {
     let line: string;
     [doc, line] = ops.add_line(doc, "main", { species: "damsel", count: 2 });
     doc = ops.update_line(doc, "main", line, { home: [0.5, 2, 0.2] });
-    const groups = fish_groups(
+    const groups = animal_groups(
       doc.waters.main,
       { fish: [fish], corals: [], presets: [] },
       tank_size(doc),

@@ -24,7 +24,7 @@ There are no fixed zones as on the device views: you put your devices and entiti
 2. In its editor, create an aquarium (**New aquarium**), then **Edit the scene**.
 3. **Views**: upload a photo of your tank, outline the water, trace the sand line and the rocks.
 4. **Devices** and **Light & flow**: drop your devices and entities on the picture, place your lamps.
-5. **Livestock**: add your fish and corals, then save.
+5. **Livestock**: add your fish, invertebrates, corals and plants, then save.
 
 The card configuration only holds the aquarium id; everything else is stored by the integration:
 
@@ -78,10 +78,11 @@ Lamps lighting each water and their position; pumps that make the water move.
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Fish (species, count, size, home) and corals (species, size, colours, position).
+Fish, invertebrates, corals and plants. Each group opens on its own — one at a time, the lists get long — and inside it a species shows its picture and its name until you click it open to edit it.
 
+- **Invertebrates**: shrimps, crabs, hermit crabs, snails, urchins, starfish... Each species carries the surface it lives on, shown next to its name: the sand, the glass, the rock, or settled for good. A shrimp or a snail goes about on its own; a **settled** species (a clam, a feather duster) is drawn where you place its home, and sways with the current when the catalog says how supple it is. A pistol shrimp digs: now and then it works at the mouth of its burrow and pushes out a puff of sand.
 - **Behaviour**: shoals, open-water cruisers, sand dwellers, fish living around a home, gobies peeking out of their burrow; at night fish hide or rest, under a veil that keeps the tank readable.
-- **Species**: fish and corals come from the [ReefTank catalog](https://github.com/Elwinmage/reeftank-catalog), downloaded and kept up to date by the integration. The editor lists them with a thumbnail; a name that is not in the catalog swims as a generic fish.
+- **Species**: fish, invertebrates, corals and plants come from the [ReefTank catalog](https://github.com/Elwinmage/reeftank-catalog), downloaded and kept up to date by the integration. The editor lists them with a thumbnail; a name that is not in the catalog swims as a generic fish.
 
 ### Feeding
 

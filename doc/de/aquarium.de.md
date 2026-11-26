@@ -24,7 +24,7 @@ Anders als bei den Geräteansichten gibt es keine festen Zonen: Sie platzieren I
 2. Legen Sie in ihrem Editor ein Aquarium an (**Neues Aquarium**), dann **Szene bearbeiten**.
 3. **Ansichten**: ein Foto Ihres Beckens hochladen, das Wasser umranden, Sandlinie und Steine nachzeichnen.
 4. **Geräte** und **Licht & Strömung**: Geräte und Entitäten auf das Bild ziehen, Lampen platzieren.
-5. **Besatz**: Fische und Korallen hinzufügen, dann speichern.
+5. **Besatz**: Fische, Wirbellose, Korallen und Pflanzen hinzufügen, dann speichern.
 
 Die Kartenkonfiguration enthält nur die Aquarium-ID; alles andere speichert die Integration:
 
@@ -78,10 +78,11 @@ Lampen, die jedes Wasser beleuchten, und ihre Position; Pumpen, die das Wasser b
 
 <img src="../img/aquarium/editor_livestock.png"/>
 
-Fische (Art, Anzahl, Größe, Revier) und Korallen (Art, Größe, Farben, Position).
+Fische, Wirbellose, Korallen und Pflanzen. Jede Gruppe öffnet sich für sich — immer nur eine, die Listen werden lang — und darin zeigt eine Art nur ihr Bild und ihren Namen, bis Sie sie zum Bearbeiten anklicken.
 
+- **Wirbellose**: Garnelen, Krabben, Einsiedlerkrebse, Schnecken, Seeigel, Seesterne... Jede Art trägt den Untergrund, auf dem sie lebt, neben ihrem Namen: Sand, Scheibe, Gestein oder festsitzend. Eine Garnelle oder Schnecke bewegt sich selbst; eine **festsitzende** Art (Mördermuschel, Röhrenwurm) wird dort gezeichnet, wo Sie ihren Platz setzen, und wiegt sich in der Strömung, wenn der Katalog ihre Biegsamkeit angibt. Ein Pistolenkrebs grabt: hin und wieder arbeitet er am Eingang seines Baus und schiebt eine Sandwolke heraus.
 - **Verhalten**: Schwärme, Freiwasserschwimmer, Bodenbewohner, Fische mit festem Revier, Grundeln, die aus ihrem Bau schauen; nachts verstecken sich die Fische oder ruhen, unter einem Schleier, der das Becken lesbar lässt.
-- **Arten**: Fische und Korallen stammen aus dem [ReefTank-Katalog](https://github.com/Elwinmage/reeftank-catalog), den die Integration herunterlädt und aktuell hält. Der Editor listet sie mit einer Miniatur auf; ein Name, der nicht im Katalog steht, schwimmt als generischer Fisch.
+- **Arten**: Fische, Wirbellose, Korallen und Pflanzen stammen aus dem [ReefTank-Katalog](https://github.com/Elwinmage/reeftank-catalog), den die Integration herunterlädt und aktuell hält. Der Editor listet sie mit einer Miniatur auf; ein Name, der nicht im Katalog steht, schwimmt als generischer Fisch.
 
 ### Fütterung
 

@@ -12,6 +12,13 @@ export const WATER_TYPES: WaterType[] = ["marine", "freshwater", "brackish"];
 /** Water of a document saved before the water types (and of a species that does not say). */
 export const DEFAULT_WATER_TYPE: WaterType = "marine";
 
+/**
+ * Where an animal moves: the surface it is bound to. A fish swims; an
+ * invertebrate crawls on the sand, on the glass or over the decor, stays
+ * where it settled, or swims too.
+ */
+export type Movement = "ground" | "glass" | "decor" | "sessile" | "swim";
+
 /** Render levels, from the cheapest to the richest. */
 export type RenderLevel = "static" | "light" | "full";
 export const RENDER_LEVELS: RenderLevel[] = ["static", "light", "full"];
@@ -299,6 +306,11 @@ export interface FishBehavior {
    * its head out during the day (watchman gobies, sleeper gobies).
    */
   burrow?: boolean;
+  /**
+   * Digs its burrow: now and then it works at its mouth and pushes the sand
+   * it shifts out of it, raising a plume (pistol shrimps).
+   */
+  digs?: boolean;
 }
 
 /**
@@ -355,11 +367,16 @@ export interface StillSpecies extends SpeciesIdentity {
   period_s?: number;
 }
 
-export interface FishSpecies extends SpeciesBase {
-  kind: "fish";
+/**
+ * What the simulation and the renderer need of an animal that moves: its
+ * atlas and how it behaves. A fish and a crawling or swimming invertebrate
+ * are moved and drawn by the same code, so they share this shape.
+ */
+export interface AnimalSpecies extends SpeciesBase {
+  kind: "fish" | "invertebrate";
   atlas: { "1x": string; "2x"?: string };
   facing?: "left" | "right";
-  /** Share of the frame width taken by the fish length (default 1). */
+  /** Share of the frame width taken by the animal's length (default 1). */
   length_frac?: number;
   size_cm?: [number, number];
   behavior?: FishBehavior;
@@ -367,6 +384,12 @@ export interface FishSpecies extends SpeciesBase {
   feeding_response?: number;
   /** Drawn with the sprite of the default fish (the species has none). */
   placeholder?: boolean;
+  /** Surface it is bound to; a fish swims the open water. */
+  movement?: Movement;
+}
+
+export interface FishSpecies extends AnimalSpecies {
+  kind: "fish";
 }
 
 export interface PaletteColour {
@@ -392,8 +415,16 @@ export interface InvertebrateSpecies extends StillSpecies {
   kind: "invertebrate";
   role: string[];
   /** Where it lives: the surface it is bound to. */
-  movement: "ground" | "glass" | "decor" | "sessile" | "swim";
+  movement: Movement;
   size_cm?: [number, number];
+  /** Side it faces in its atlas, as a fish's (default right). */
+  facing?: "left" | "right";
+  /** Share of the frame width taken by its length (default 1). */
+  length_frac?: number;
+  /** How it moves on its surface; defaulted from `movement` when absent. */
+  behavior?: FishBehavior;
+  night?: NightMode;
+  feeding_response?: number;
 }
 
 export interface Texture {

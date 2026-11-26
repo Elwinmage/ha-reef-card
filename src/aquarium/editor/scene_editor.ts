@@ -4,8 +4,8 @@
  * Tabs: the aquarium (name, cloud link, preset, dimensions, rendering),
  * its views (pictures, water outlines, decor, hotspots), the elements
  * placed on them (device tree, drag and drop), the lights and flow, the
- * livestock (inventory, corals, plants), the feeding sources and the
- * monitoring.
+ * livestock (fish, invertebrates, corals and plants, each group opening on
+ * its own), the feeding sources and the monitoring.
  *
  * Every change goes through the pure operations of ops.ts on a working
  * copy, kept in an undo history; nothing reaches Home Assistant before
@@ -29,6 +29,7 @@ import {
   mdiContentSave,
   mdiFish,
   mdiFlowerPollen,
+  mdiJellyfishOutline,
   mdiSprout,
 } from "@mdi/js";
 
@@ -39,12 +40,15 @@ import type {
   AquariumPayload,
   Catalog,
   CloudAquarium,
+  Coral,
   CoralSpecies,
   Decor,
   FishSpecies,
   Hotspot,
+  InvertebrateSpecies,
   LivestockLine,
   Monitoring,
+  Movement,
   Plant,
   PlantSpecies,
   Point,
@@ -113,6 +117,24 @@ type Tool =
   | "coral"
   | "plant"
   | "home";
+
+/** Groups of the livestock panel, each opening on its own. */
+type LiveGroup = "fish" | "invertebrates" | "corals" | "plants";
+const GROUP_LABELS: Record<LiveGroup, string> = {
+  fish: "aq_fish",
+  invertebrates: "aq_invertebrates",
+  corals: "aq_corals",
+  plants: "aq_plants",
+};
+
+/** Where an invertebrate lives, as shown next to its name. */
+const MOVEMENT_LABELS: Record<Movement, string> = {
+  ground: "aq_movement_ground",
+  glass: "aq_movement_glass",
+  decor: "aq_movement_decor",
+  sessile: "aq_movement_sessile",
+  swim: "aq_movement_swim",
+};
 
 type Selection =
   | { type: "decor" | "hotspot" | "element"; id: string }
@@ -265,13 +287,28 @@ function water_label(id: string, name: string): string {
 /** Box of a thumbnail in the editor's lists, pixels. */
 const THUMB_BOX: [number, number] = [48, 32];
 
+/** Kinds of species the editor lists and picks from. */
+export type SpeciesKind = "fish" | "invertebrate" | "coral" | "plant";
+
+/** A species of the catalog, whatever its kind. */
+export type AnySpecies =
+  FishSpecies | InvertebrateSpecies | CoralSpecies | PlantSpecies;
+
+/** Icon shown for a species of which no picture can be drawn. */
+const KIND_ICONS: Record<SpeciesKind, string> = {
+  fish: mdiFish,
+  invertebrate: mdiJellyfishOutline,
+  coral: mdiFlowerPollen,
+  plant: mdiSprout,
+};
+
 /**
  * Small picture of a species: its thumbnail, else the first frame of its
  * atlas (cropped with CSS), else an icon.
  */
 export function species_thumb(
-  species: FishSpecies | CoralSpecies | PlantSpecies | undefined,
-  kind: "fish" | "coral" | "plant",
+  species: AnySpecies | undefined,
+  kind: SpeciesKind,
 ): TemplateResult {
   if (species?.thumbnail) {
     return html`<img
@@ -300,8 +337,7 @@ export function species_thumb(
     ].join(";");
     return html`<span class="thumb sprite" style="${style}"></span>`;
   }
-  const icon =
-    kind === "fish" ? mdiFish : kind === "coral" ? mdiFlowerPollen : mdiSprout;
+  const icon = KIND_ICONS[kind];
   return html`<span class="thumb icon"
     ><svg viewBox="0 0 24 24">
       <path d="${icon}"></path></svg
@@ -370,11 +406,15 @@ export class ReefAquariumSceneEditor extends LitElement {
   @state() private _preview_intensity = 100;
   /** Sand line edited by the sand tool: front glass or back wall. */
   @state() private _sand_line: ops.SandLine = "sand";
-  /** Species picker opened (fish or coral), with its search text. */
+  /** Species picker opened (fish, invertebrate...), with its search text. */
   @state() private _picker: {
-    kind: "fish" | "coral" | "plant";
+    kind: SpeciesKind;
     text: string;
   } | null = null;
+  /** Group of the livestock panel open: one at a time, the lists are long. */
+  @state() private _group: LiveGroup | null = null;
+  /** Species of that group open for editing: one at a time as well. */
+  @state() private _entry: string | null = null;
   @state() private _message: { kind: "info" | "error"; text: string } | null =
     null;
   @state() private _busy = false;
@@ -642,6 +682,10 @@ export class ReefAquariumSceneEditor extends LitElement {
     return found ? (drawn_fish(found, this._catalog) ?? found) : undefined;
   }
 
+  private _species_invertebrate(id: string): InvertebrateSpecies | undefined {
+    return this._catalog?.invertebrates?.find((s) => s.id === id);
+  }
+
   private _species_coral(id: string): CoralSpecies | undefined {
     return this._catalog?.corals.find((s) => s.id === id);
   }
@@ -750,6 +794,8 @@ export class ReefAquariumSceneEditor extends LitElement {
       );
       this.change(doc);
       this._selection = { type: "coral", id, water: this._water_id };
+      // Just placed: open it, the size and the colours usually follow
+      this._entry = id;
       return;
     }
     if (this._tool === "plant" && this._plant_species) {
@@ -769,6 +815,7 @@ export class ReefAquariumSceneEditor extends LitElement {
       );
       this.change(doc);
       this._selection = { type: "plant", id, water: this._water_id };
+      this._entry = id;
       return;
     }
     if (
@@ -1624,6 +1671,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                 id: coral.id,
                 water: water_id,
               };
+              this._entry = coral.id;
               this._start_drag(e, {
                 type: "coral",
                 water: water_id,
@@ -1664,6 +1712,7 @@ export class ReefAquariumSceneEditor extends LitElement {
                 id: plant.id,
                 water: water_id,
               };
+              this._entry = plant.id;
               this._start_drag(e, {
                 type: "plant",
                 water: water_id,
@@ -1687,7 +1736,10 @@ export class ReefAquariumSceneEditor extends LitElement {
       for (const line of water.livestock) {
         if (!line.home) continue;
         const [x, y] = projection.to_picture(...line.home);
-        const species = this._species_fish(line.species);
+        const species =
+          line.kind === "invertebrate"
+            ? this._species_invertebrate(line.species)
+            : this._species_fish(line.species);
         out.push(
           html`<div
             class="home"
@@ -3209,8 +3261,8 @@ export class ReefAquariumSceneEditor extends LitElement {
    * that is not in the catalog can be added too (a generic fish).
    */
   private _species_picker(
-    kind: "fish" | "coral" | "plant",
-    list: (FishSpecies | CoralSpecies | PlantSpecies)[],
+    kind: SpeciesKind,
+    list: AnySpecies[],
     placeholder: string,
     on_pick: (id: string) => void,
   ): TemplateResult {
@@ -3306,7 +3358,8 @@ export class ReefAquariumSceneEditor extends LitElement {
       !catalog ||
       catalog.fish.length ||
       catalog.corals.length ||
-      catalog.plants?.length
+      catalog.plants?.length ||
+      catalog.invertebrates?.length
     )
       return nothing;
     return html`<p class="notice">
@@ -3316,6 +3369,12 @@ export class ReefAquariumSceneEditor extends LitElement {
     </p>`;
   }
 
+  /**
+   * Livestock of a water: its fish, its invertebrates, its corals and its
+   * plants. The lists get long, so one group opens at a time, and inside it
+   * a species shows no more than its picture and its name until it is
+   * clicked open for editing — one at a time too.
+   */
   private _panel_livestock(): TemplateResult {
     const doc = this._doc!;
     const water = doc.waters[this._water_id];
@@ -3323,431 +3382,544 @@ export class ReefAquariumSceneEditor extends LitElement {
     const fish = ops
       .for_water(this._catalog?.fish ?? [], doc.water_type)
       .map((s) => drawn_fish(s, this._catalog) ?? s);
+    const invertebrates = ops.for_water(
+      this._catalog?.invertebrates ?? [],
+      doc.water_type,
+    );
     const corals = ops.for_water(this._catalog?.corals ?? [], doc.water_type);
     const plants = ops.for_water(this._catalog?.plants ?? [], doc.water_type);
-    const to_plant = this._species_plant(this._plant_species);
-    const floats = Boolean(to_plant && plant_floats(to_plant));
-    const sel = this._selection;
+    const header = html`${this._water_select()} ${this._catalog_notice()}`;
+    if (!water) return header;
+    const fish_lines = water.livestock.filter((l) => l.kind !== "invertebrate");
+    const invertebrate_lines = water.livestock.filter(
+      (l) => l.kind === "invertebrate",
+    );
+    const bed = water.plants ?? [];
     return html`
-      ${this._water_select()} ${this._catalog_notice()}
+      ${header}
+      ${this._live_group("fish", fish_lines.length, () =>
+        this._fish_group(fish_lines, fish),
+      )}
+      ${this._live_group("invertebrates", invertebrate_lines.length, () =>
+        this._invertebrate_group(invertebrate_lines, invertebrates),
+      )}
+      ${this._live_group("corals", water.corals.length, () =>
+        this._coral_group(water.corals, corals),
+      )}
+      ${this._live_group("plants", bed.length, () =>
+        this._plant_group(bed, plants),
+      )}
+    `;
+  }
+
+  /** Open a group of the livestock panel, and close the one open. */
+  private _open_group(group: LiveGroup): void {
+    this._group = this._group === group ? null : group;
+    this._entry = null;
+    // The placing tools belong to the group that armed them
+    this._tool = "select";
+    this._home_line = null;
+  }
+
+  /** Open a species of the group for editing, and close the one open. */
+  private _open_entry(id: string, select?: Selection): void {
+    const open = this._entry === id;
+    this._entry = open ? null : id;
+    this._colour_edit = null;
+    this._palette_draft = null;
+    if (!open && select) this._selection = select;
+  }
+
+  /**
+   * One group of the livestock panel: the head that opens it, how many it
+   * holds, and its content only while it is the group open.
+   */
+  private _live_group(
+    group: LiveGroup,
+    count: number,
+    body: () => TemplateResult,
+  ): TemplateResult {
+    const open = this._group === group;
+    return html`<fieldset class="group ${open ? "open" : ""}">
+      <legend>
+        <button class="group-head" @click=${() => this._open_group(group)}>
+          ${this._chevron(open)}
+          <span>${i18n._(GROUP_LABELS[group])}</span>
+          <small>${count}</small>
+        </button>
+      </legend>
+      ${open ? body() : nothing}
+    </fieldset>`;
+  }
+
+  /**
+   * One species of a group: its picture and its name, which open its
+   * settings when clicked, and those settings while it is the one open.
+   */
+  private _live_entry(
+    id: string,
+    head: TemplateResult,
+    body: () => TemplateResult,
+    select?: Selection,
+  ): TemplateResult {
+    const open = this._entry === id;
+    return html`<div class="card ${open ? "current" : ""}">
+      <button class="entry-head" @click=${() => this._open_entry(id, select)}>
+        ${head}${this._chevron(open)}
+      </button>
+      ${open ? body() : nothing}
+    </div>`;
+  }
+
+  /** What is missing from a species' pictures, in a word. */
+  private _picture_hint(
+    species: FishSpecies | InvertebrateSpecies | undefined,
+    kind: "fish" | "invertebrate",
+  ): TemplateResult | typeof nothing {
+    if (species?.kind === "fish" && species.placeholder)
+      return html`<span class="hint">${i18n._("aq_no_picture")}</span>`;
+    if (species) return nothing;
+    // A fish the catalog does not know still swims, an invertebrate does not
+    return html`<span class="hint"
+      >${i18n._(kind === "fish" ? "aq_no_animation" : "aq_not_in_catalog")}</span
+    >`;
+  }
+
+  /**
+   * One line of the inventory, fish or invertebrate: how many of them, how
+   * big they are, and where they live. A sessile invertebrate is drawn where
+   * its home is placed, so it says so until one is.
+   */
+  private _live_line(
+    line: LivestockLine,
+    species: FishSpecies | InvertebrateSpecies | undefined,
+    kind: "fish" | "invertebrate",
+  ): TemplateResult {
+    const doc = this._doc!;
+    const set = (patch: Partial<LivestockLine>) =>
+      this.change(ops.update_line(doc, this._water_id, line.id, patch));
+    const size = line.size_cm ?? species?.size_cm ?? null;
+    const movement = species?.kind === "invertebrate" ? species.movement : null;
+    const head = html`${species_thumb(species, kind)}
+      <strong class="grow"
+        >${line.name || species_name(species, line.species)}
+        ${species_latin(species)}</strong
+      >
+      <span class="hint">×${line.count}</span>
       ${
-        water
-          ? html`<fieldset>
-                <legend>${i18n._("aq_fish_inventory")}</legend>
-                ${water.livestock.map((line) => {
-                  const species = this._species_fish(line.species);
-                  const set = (patch: any) =>
-                    this.change(
-                      ops.update_line(doc, this._water_id, line.id, patch),
-                    );
-                  const size = line.size_cm ?? species?.size_cm ?? null;
-                  return html`<div class="card">
-                    <div class="line">
-                      ${species_thumb(species, "fish")}
-                      <strong class="grow"
-                        >${line.name || species_name(species, line.species)}
-                        ${species_latin(species)}</strong
-                      >
-                      ${
-                        species?.placeholder
-                          ? html`<span class="hint"
-                              >${i18n._("aq_no_picture")}</span
-                            >`
-                          : species
-                            ? nothing
-                            : html`<span class="hint"
-                                >${i18n._("aq_no_animation")}</span
-                              >`
-                      }
-                      <button
-                        class="icon"
-                        @click=${() =>
-                          this.change(
-                            ops.remove_line(doc, this._water_id, line.id),
-                          )}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="row3">
-                      <label class="field small"
-                        >${i18n._("aq_count")}<input
-                          type="number"
-                          min="0"
-                          .value=${String(line.count)}
-                          @change=${(e: Event) =>
-                            set({
-                              count: Math.max(
-                                0,
-                                Number((e.target as HTMLInputElement).value) ||
-                                  0,
-                              ),
-                            })}
-                      /></label>
-                      <label class="field small"
-                        >${i18n._("aq_size_min")}<input
-                          type="number"
-                          min="0.1"
-                          step="0.5"
-                          .value=${size ? String(size[0]) : ""}
-                          @change=${(e: Event) =>
-                            set({
-                              size_cm: [
-                                Number((e.target as HTMLInputElement).value) ||
-                                  1,
-                                size?.[1] ?? 5,
-                              ],
-                            })}
-                      /></label>
-                      <label class="field small"
-                        >${i18n._("aq_size_max")}<input
-                          type="number"
-                          min="0.1"
-                          step="0.5"
-                          .value=${size ? String(size[1]) : ""}
-                          @change=${(e: Event) =>
-                            set({
-                              size_cm: [
-                                size?.[0] ?? 1,
-                                Number((e.target as HTMLInputElement).value) ||
-                                  5,
-                              ],
-                            })}
-                      /></label>
-                    </div>
-                    <label class="field"
-                      >${i18n._("aq_note")}<input
-                        .value=${line.note}
-                        @change=${(e: Event) =>
-                          set({ note: (e.target as HTMLInputElement).value })}
-                    /></label>
-                    ${this._home_controls(line, set)}
-                  </div>`;
+        movement
+          ? html`<span class="hint">${i18n._(MOVEMENT_LABELS[movement])}</span>`
+          : nothing
+      }
+      ${this._picture_hint(species, kind)}`;
+    return this._live_entry(
+      line.id,
+      head,
+      () => html`
+        <div class="row3">
+          <label class="field small"
+            >${i18n._("aq_count")}<input
+              type="number"
+              min="0"
+              .value=${String(line.count)}
+              @change=${(e: Event) =>
+                set({
+                  count: Math.max(
+                    0,
+                    Number((e.target as HTMLInputElement).value) || 0,
+                  ),
                 })}
-                ${this._species_picker(
-                  "fish",
-                  fish,
-                  `+ ${i18n._("aq_add_fish")}`,
-                  (id) => {
-                    const species = fish.find((s) => s.id === id);
-                    const [next] = ops.add_line(doc, this._water_id, {
-                      species: id,
-                      count: 1,
-                      size_cm: species?.size_cm ?? null,
-                      kind: "fish",
-                    });
-                    this.change(next);
-                  },
-                )}
-                <span class="hint">${i18n._("aq_fish_hint")}</span>
-                ${
-                  this._tool === "home"
-                    ? html`<span class="hint">${i18n._("aq_home_hint")}</span>`
-                    : nothing
-                }
-              </fieldset>
-              <fieldset>
-                <legend>${i18n._("aq_corals")}</legend>
-                ${water.corals.map((coral) => {
-                  const species = this._species_coral(coral.species);
-                  const palette = species
-                    ? coral_palette(species, coral.palette)
-                    : [];
-                  const set = (patch: any) =>
-                    this.change(
-                      ops.update_coral(doc, this._water_id, coral.id, patch),
-                    );
-                  const selected = sel?.type === "coral" && sel.id === coral.id;
-                  // Colours shown: the one being chosen, else the saved ones
-                  const shown =
-                    this._palette_draft?.coral === coral.id
-                      ? this._palette_draft.palette
-                      : palette.map(rgb_hex);
-                  const editing =
-                    this._colour_edit?.coral === coral.id
-                      ? this._colour_edit.index
-                      : null;
-                  return html`<div
-                    class="card ${selected ? "current" : ""}"
-                    @click=${() =>
-                      (this._selection = {
-                        type: "coral",
-                        id: coral.id,
-                        water: this._water_id,
-                      })}
-                  >
-                    <div class="line">
-                      ${species_thumb(species, "coral")}
-                      <strong class="grow"
-                        >${coral.name || species_name(species, coral.species)}
-                        ${species_latin(species)}</strong
-                      >
-                      <button
-                        class="icon"
-                        @click=${() =>
-                          this.change(
-                            ops.remove_coral(doc, this._water_id, coral.id),
-                          )}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="row3">
-                      <label class="field small"
-                        >${i18n._("aq_size_cm")}<input
-                          type="number"
-                          min="0.5"
-                          step="0.5"
-                          .value=${String(coral.size_cm)}
-                          @change=${(e: Event) =>
-                            set({
-                              size_cm:
-                                Number((e.target as HTMLInputElement).value) ||
-                                10,
-                            })}
-                      /></label>
-                      <label class="field small"
-                        >${i18n._("aq_depth")}
-                        <select
-                          @change=${(e: Event) =>
-                            set({
-                              z: ops.DEPTHS[
-                                (e.target as HTMLSelectElement)
-                                  .value as ops.DepthName
-                              ],
-                            })}
-                        >
-                          ${(
-                            ["front", "middle", "back"] as ops.DepthName[]
-                          ).map(
-                            (n) =>
-                              html`<option
-                                value="${n}"
-                                ?selected=${ops.depth_name(coral.z) === n}
-                              >
-                                ${i18n._(`aq_depth_${n}`)}
-                              </option>`,
-                          )}
-                        </select>
-                      </label>
-                    </div>
-                    ${
-                      palette.length && selected
-                        ? html`<reef-coral-preview
-                            class="coral-preview"
-                            .species=${species}
-                            .palette=${shown}
-                          ></reef-coral-preview>`
-                        : nothing
-                    }
-                    ${
-                      palette.length
-                        ? html`<div class="palette">
-                            ${shown.map(
-                              (hex, i) =>
-                                html`<button
-                                  class="swatch ${editing === i ? "active" : ""}"
-                                  style="background: ${hex}"
-                                  title="${i18n._("aq_colour")} ${i + 1}"
-                                  @click=${() =>
-                                    (this._colour_edit =
-                                      editing === i
-                                        ? null
-                                        : { coral: coral.id, index: i })}
-                                ></button>`,
-                            )}
-                            <button
-                              class="icon reset"
-                              title="${i18n._("aq_reset_colours")}"
-                              @click=${() => {
-                                this._colour_edit = null;
-                                this._palette_draft = null;
-                                set({ palette: [] });
-                              }}
-                            >
-                              ↺
-                            </button>
-                          </div>`
-                        : nothing
-                    }
-                    ${
-                      selected && editing !== null
-                        ? html`<reef-colour-picker
-                            class="colour-picker"
-                            .value=${shown[editing]}
-                            @colour-input=${(e: CustomEvent) => {
-                              const next = [...shown];
-                              next[editing] = e.detail.value;
-                              this._palette_draft = {
-                                coral: coral.id,
-                                palette: next,
-                              };
-                            }}
-                            @colour-change=${(e: CustomEvent) => {
-                              const next = [...shown];
-                              next[editing] = e.detail.value;
-                              this._palette_draft = null;
-                              set({ palette: next });
-                            }}
-                          ></reef-colour-picker>`
-                        : nothing
-                    }
-                  </div>`;
+          /></label>
+          <label class="field small"
+            >${i18n._("aq_size_min")}<input
+              type="number"
+              min="0.1"
+              step="0.5"
+              .value=${size ? String(size[0]) : ""}
+              @change=${(e: Event) =>
+                set({
+                  size_cm: [
+                    Number((e.target as HTMLInputElement).value) || 1,
+                    size?.[1] ?? 5,
+                  ],
                 })}
-                <div class="field">
-                  ${i18n._("aq_coral_species")}
-                  ${
-                    this._coral_species
-                      ? html`<div class="line chosen">
-                          ${species_thumb(
-                            this._species_coral(this._coral_species),
-                            "coral",
-                          )}
-                          <span class="grow"
-                            >${species_name(
-                              this._species_coral(this._coral_species),
-                              this._coral_species,
-                            )}
-                            ${species_latin(
-                              this._species_coral(this._coral_species),
-                            )}</span
-                          >
-                        </div>`
-                      : nothing
-                  }
-                  ${this._species_picker(
-                    "coral",
-                    corals,
-                    i18n._("aq_search"),
-                    (id) => {
-                      this._coral_species = id;
-                      this._tool = "coral";
-                    },
-                  )}
-                </div>
-                <div class="buttons">
-                  ${this._tool_button("coral", "aq_place_coral")}
-                  ${this._tool_button("select", "aq_tool_select")}
-                </div>
-                <span class="hint">${i18n._("aq_coral_hint")}</span>
-              </fieldset>
-              <fieldset>
-                <legend>${i18n._("aq_plants")}</legend>
-                ${(water.plants ?? []).map((plant) => {
-                  const species = this._species_plant(plant.species);
-                  const set = (patch: any) =>
-                    this.change(
-                      ops.update_plant(doc, this._water_id, plant.id, patch),
-                    );
-                  const selected = sel?.type === "plant" && sel.id === plant.id;
-                  return html`<div
-                    class="card ${selected ? "current" : ""}"
-                    @click=${() =>
-                      (this._selection = {
-                        type: "plant",
-                        id: plant.id,
-                        water: this._water_id,
-                      })}
-                  >
-                    <div class="line">
-                      ${species_thumb(species, "plant")}
-                      <strong class="grow"
-                        >${plant.name || species_name(species, plant.species)}
-                        ${species_latin(species)}</strong
-                      >
-                      <button
-                        class="icon"
-                        @click=${() =>
-                          this.change(
-                            ops.remove_plant(doc, this._water_id, plant.id),
-                          )}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="row3">
-                      <label class="field small"
-                        >${i18n._("aq_height_cm")}<input
-                          type="number"
-                          min="0.5"
-                          step="0.5"
-                          .value=${String(plant.size_cm)}
-                          @change=${(e: Event) =>
-                            set({
-                              size_cm:
-                                Number((e.target as HTMLInputElement).value) ||
-                                20,
-                            })}
-                      /></label>
-                      <label class="field small"
-                        >${i18n._("aq_depth")}
-                        <select
-                          @change=${(e: Event) =>
-                            set({
-                              z: ops.DEPTHS[
-                                (e.target as HTMLSelectElement)
-                                  .value as ops.DepthName
-                              ],
-                            })}
-                        >
-                          ${(
-                            ["front", "middle", "back"] as ops.DepthName[]
-                          ).map(
-                            (n) =>
-                              html`<option
-                                value="${n}"
-                                ?selected=${ops.depth_name(plant.z) === n}
-                              >
-                                ${i18n._(`aq_depth_${n}`)}
-                              </option>`,
-                          )}
-                        </select>
-                      </label>
-                    </div>
-                  </div>`;
+          /></label>
+          <label class="field small"
+            >${i18n._("aq_size_max")}<input
+              type="number"
+              min="0.1"
+              step="0.5"
+              .value=${size ? String(size[1]) : ""}
+              @change=${(e: Event) =>
+                set({
+                  size_cm: [
+                    size?.[0] ?? 1,
+                    Number((e.target as HTMLInputElement).value) || 5,
+                  ],
                 })}
-                <div class="field">
-                  ${i18n._("aq_plant_species")}
-                  ${
-                    this._plant_species
-                      ? html`<div class="line chosen">
-                          ${species_thumb(
-                            this._species_plant(this._plant_species),
-                            "plant",
-                          )}
-                          <span class="grow"
-                            >${species_name(
-                              this._species_plant(this._plant_species),
-                              this._plant_species,
-                            )}
-                            ${species_latin(
-                              this._species_plant(this._plant_species),
-                            )}</span
-                          >
-                        </div>`
-                      : nothing
-                  }
-                  ${this._species_picker(
-                    "plant",
-                    plants,
-                    i18n._("aq_search"),
-                    (id) => {
-                      this._plant_species = id;
-                      this._tool = "plant";
-                    },
-                  )}
-                </div>
-                <div class="buttons">
-                  ${this._tool_button("plant", "aq_place_plant")}
-                  ${this._tool_button("select", "aq_tool_select")}
-                </div>
-                <span class="hint"
-                  >${i18n._(floats ? "aq_plant_float_hint" : "aq_plant_hint")}</span
-                >
-              </fieldset>`
+          /></label>
+        </div>
+        <label class="field"
+          >${i18n._("aq_note")}<input
+            .value=${line.note}
+            @change=${(e: Event) =>
+              set({ note: (e.target as HTMLInputElement).value })}
+        /></label>
+        ${this._home_controls(line, set)}
+        ${
+          movement === "sessile" && !line.home
+            ? html`<span class="hint">${i18n._("aq_sessile_hint")}</span>`
+            : nothing
+        }
+        <div class="line end">
+          <button
+            class="icon remove"
+            title="${i18n._("aq_delete")}"
+            @click=${() => {
+              this._entry = null;
+              this.change(ops.remove_line(doc, this._water_id, line.id));
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      `,
+    );
+  }
+
+  /** The fish of the inventory, and the search that adds a species. */
+  private _fish_group(
+    lines: LivestockLine[],
+    offered: FishSpecies[],
+  ): TemplateResult {
+    const doc = this._doc!;
+    return html`
+      ${lines.map((line) =>
+        this._live_line(line, this._species_fish(line.species), "fish"),
+      )}
+      ${this._species_picker(
+        "fish",
+        offered,
+        `+ ${i18n._("aq_add_fish")}`,
+        (id) => {
+          const species = offered.find((s) => s.id === id);
+          const [next, line_id] = ops.add_line(doc, this._water_id, {
+            species: id,
+            count: 1,
+            size_cm: species?.size_cm ?? null,
+            kind: "fish",
+          });
+          this.change(next);
+          this._entry = line_id;
+        },
+      )}
+      <span class="hint">${i18n._("aq_fish_hint")}</span>
+      ${
+        this._tool === "home"
+          ? html`<span class="hint">${i18n._("aq_home_hint")}</span>`
           : nothing
       }
     `;
+  }
+
+  /**
+   * The invertebrates of the inventory. A shrimp, a snail or a crab walks
+   * its own surface; a sessile one stays where it was put, so adding one
+   * arms the home tool straight away.
+   */
+  private _invertebrate_group(
+    lines: LivestockLine[],
+    offered: InvertebrateSpecies[],
+  ): TemplateResult {
+    const doc = this._doc!;
+    return html`
+      ${lines.map((line) =>
+        this._live_line(
+          line,
+          this._species_invertebrate(line.species),
+          "invertebrate",
+        ),
+      )}
+      ${this._species_picker(
+        "invertebrate",
+        offered,
+        `+ ${i18n._("aq_add_fish")}`,
+        (id) => {
+          const species = offered.find((s) => s.id === id);
+          const [next, line_id] = ops.add_line(doc, this._water_id, {
+            species: id,
+            count: 1,
+            size_cm: species?.size_cm ?? null,
+            kind: "invertebrate",
+          });
+          this.change(next);
+          this._entry = line_id;
+          if (species?.movement === "sessile") {
+            this._tool = "home";
+            this._home_line = line_id;
+          }
+        },
+      )}
+      <span class="hint">${i18n._("aq_invertebrate_hint")}</span>
+      ${
+        this._tool === "home"
+          ? html`<span class="hint">${i18n._("aq_home_hint")}</span>`
+          : nothing
+      }
+    `;
+  }
+
+  /** One coral of the water: its size, its depth and its colours. */
+  private _coral_entry(coral: Coral): TemplateResult {
+    const doc = this._doc!;
+    const species = this._species_coral(coral.species);
+    const palette = species ? coral_palette(species, coral.palette) : [];
+    const set = (patch: Partial<Coral>) =>
+      this.change(ops.update_coral(doc, this._water_id, coral.id, patch));
+    const head = html`${species_thumb(species, "coral")}
+      <strong class="grow"
+        >${coral.name || species_name(species, coral.species)}
+        ${species_latin(species)}</strong
+      >`;
+    return this._live_entry(
+      coral.id,
+      head,
+      () => {
+        // Colours shown: the one being chosen, else the saved ones
+        const shown =
+          this._palette_draft?.coral === coral.id
+            ? this._palette_draft.palette
+            : palette.map(rgb_hex);
+        const editing =
+          this._colour_edit?.coral === coral.id
+            ? this._colour_edit.index
+            : null;
+        return html`
+          <div class="row3">
+            <label class="field small"
+              >${i18n._("aq_size_cm")}<input
+                type="number"
+                min="0.5"
+                step="0.5"
+                .value=${String(coral.size_cm)}
+                @change=${(e: Event) =>
+                  set({
+                    size_cm: Number((e.target as HTMLInputElement).value) || 10,
+                  })}
+            /></label>
+            ${this._depth_field(coral.z, (z) => set({ z }))}
+          </div>
+          ${
+            palette.length
+              ? html`<reef-coral-preview
+                  class="coral-preview"
+                  .species=${species}
+                  .palette=${shown}
+                ></reef-coral-preview>`
+              : nothing
+          }
+          ${
+            palette.length
+              ? html`<div class="palette">
+                  ${shown.map(
+                    (hex, i) =>
+                      html`<button
+                        class="swatch ${editing === i ? "active" : ""}"
+                        style="background: ${hex}"
+                        title="${i18n._("aq_colour")} ${i + 1}"
+                        @click=${() =>
+                          (this._colour_edit =
+                            editing === i
+                              ? null
+                              : { coral: coral.id, index: i })}
+                      ></button>`,
+                  )}
+                  <button
+                    class="icon reset"
+                    title="${i18n._("aq_reset_colours")}"
+                    @click=${() => {
+                      this._colour_edit = null;
+                      this._palette_draft = null;
+                      set({ palette: [] });
+                    }}
+                  >
+                    ↺
+                  </button>
+                </div>`
+              : nothing
+          }
+          ${
+            editing !== null
+              ? html`<reef-colour-picker
+                  class="colour-picker"
+                  .value=${shown[editing]}
+                  @colour-input=${(e: CustomEvent) => {
+                    const next = [...shown];
+                    next[editing] = e.detail.value;
+                    this._palette_draft = {
+                      coral: coral.id,
+                      palette: next,
+                    };
+                  }}
+                  @colour-change=${(e: CustomEvent) => {
+                    const next = [...shown];
+                    next[editing] = e.detail.value;
+                    this._palette_draft = null;
+                    set({ palette: next });
+                  }}
+                ></reef-colour-picker>`
+              : nothing
+          }
+          <div class="line end">
+            <button
+              class="icon remove"
+              title="${i18n._("aq_delete")}"
+              @click=${() => {
+                this._entry = null;
+                this.change(ops.remove_coral(doc, this._water_id, coral.id));
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        `;
+      },
+      { type: "coral", id: coral.id, water: this._water_id },
+    );
+  }
+
+  /** The corals of the water, and the species waiting to be placed. */
+  private _coral_group(
+    corals: Coral[],
+    offered: CoralSpecies[],
+  ): TemplateResult {
+    const chosen = this._species_coral(this._coral_species);
+    return html`
+      ${corals.map((coral) => this._coral_entry(coral))}
+      <div class="field">
+        ${i18n._("aq_coral_species")}
+        ${
+          this._coral_species
+            ? html`<div class="line chosen">
+                ${species_thumb(chosen, "coral")}
+                <span class="grow"
+                  >${species_name(chosen, this._coral_species)}
+                  ${species_latin(chosen)}</span
+                >
+              </div>`
+            : nothing
+        }
+        ${this._species_picker("coral", offered, i18n._("aq_search"), (id) => {
+          this._coral_species = id;
+          this._tool = "coral";
+        })}
+      </div>
+      <div class="buttons">
+        ${this._tool_button("coral", "aq_place_coral")}
+        ${this._tool_button("select", "aq_tool_select")}
+      </div>
+      <span class="hint">${i18n._("aq_coral_hint")}</span>
+    `;
+  }
+
+  /** One plant of the water: how tall it stands and how deep it is. */
+  private _plant_entry(plant: Plant): TemplateResult {
+    const doc = this._doc!;
+    const species = this._species_plant(plant.species);
+    const set = (patch: Partial<Plant>) =>
+      this.change(ops.update_plant(doc, this._water_id, plant.id, patch));
+    const head = html`${species_thumb(species, "plant")}
+      <strong class="grow"
+        >${plant.name || species_name(species, plant.species)}
+        ${species_latin(species)}</strong
+      >`;
+    return this._live_entry(
+      plant.id,
+      head,
+      () => html`
+        <div class="row3">
+          <label class="field small"
+            >${i18n._("aq_height_cm")}<input
+              type="number"
+              min="0.5"
+              step="0.5"
+              .value=${String(plant.size_cm)}
+              @change=${(e: Event) =>
+                set({
+                  size_cm: Number((e.target as HTMLInputElement).value) || 20,
+                })}
+          /></label>
+          ${this._depth_field(plant.z, (z) => set({ z }))}
+        </div>
+        <div class="line end">
+          <button
+            class="icon remove"
+            title="${i18n._("aq_delete")}"
+            @click=${() => {
+              this._entry = null;
+              this.change(ops.remove_plant(doc, this._water_id, plant.id));
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      `,
+      { type: "plant", id: plant.id, water: this._water_id },
+    );
+  }
+
+  /** The plants of the water, and the species waiting to be planted. */
+  private _plant_group(bed: Plant[], offered: PlantSpecies[]): TemplateResult {
+    const chosen = this._species_plant(this._plant_species);
+    const floats = Boolean(chosen && plant_floats(chosen));
+    return html`
+      ${bed.map((plant) => this._plant_entry(plant))}
+      <div class="field">
+        ${i18n._("aq_plant_species")}
+        ${
+          this._plant_species
+            ? html`<div class="line chosen">
+                ${species_thumb(chosen, "plant")}
+                <span class="grow"
+                  >${species_name(chosen, this._plant_species)}
+                  ${species_latin(chosen)}</span
+                >
+              </div>`
+            : nothing
+        }
+        ${this._species_picker("plant", offered, i18n._("aq_search"), (id) => {
+          this._plant_species = id;
+          this._tool = "plant";
+        })}
+      </div>
+      <div class="buttons">
+        ${this._tool_button("plant", "aq_place_plant")}
+        ${this._tool_button("select", "aq_tool_select")}
+      </div>
+      <span class="hint"
+        >${i18n._(floats ? "aq_plant_float_hint" : "aq_plant_hint")}</span
+      >
+    `;
+  }
+
+  /** The depth a coral or a plant sits at, as the three presets. */
+  private _depth_field(z: number, set: (z: number) => void): TemplateResult {
+    return html`<label class="field small"
+      >${i18n._("aq_depth")}
+      <select
+        @change=${(e: Event) =>
+          set(
+            ops.DEPTHS[(e.target as HTMLSelectElement).value as ops.DepthName],
+          )}
+      >
+        ${(["front", "middle", "back"] as ops.DepthName[]).map(
+          (n) =>
+            html`<option value="${n}" ?selected=${ops.depth_name(z) === n}>
+              ${i18n._(`aq_depth_${n}`)}
+            </option>`,
+        )}
+      </select>
+    </label>`;
   }
 
   /** An entity of the monitoring, with the list of what suits it. */

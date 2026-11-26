@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as ops from "../src/aquarium/editor/ops";
-import { fish_groups } from "../src/aquarium/scene";
+import { animal_groups } from "../src/aquarium/scene";
 import { drawn_fish, unknown_fish } from "../src/aquarium/sprites";
 import type { Catalog, FishSpecies } from "../src/aquarium/types";
 
@@ -84,11 +84,11 @@ describe("default fish", () => {
     water.livestock = [
       { id: "l1", kind: "fish", species: "guppy", count: 3 },
     ] as any;
-    const groups = fish_groups(water, catalog([unknown]));
+    const groups = animal_groups(water, catalog([unknown]));
     expect(groups).toHaveLength(1);
     expect(groups[0].species.atlas["1x"]).toBe("unknown_fish.webp");
     // No default fish: the generic one (drawn at runtime, none without canvas)
-    expect(() => fish_groups(water, catalog())).not.toThrow();
+    expect(() => animal_groups(water, catalog())).not.toThrow();
   });
 });
 

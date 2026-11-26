@@ -2,6 +2,29 @@
 
 ## MODIFICATIONS
 
+### Aquarium view: invertebrates, and a livestock panel that folds
+
+- The **Livestock** tab of the scene editor is now four groups — fish,
+  invertebrates, corals, plants — that open one at a time, each saying how much
+  it holds. Inside one, a species shows its picture and its name only: a click
+  on either opens its settings, and opens them for one species at a time.
+  Clicking a coral or a plant on the picture, or placing one, opens it too.
+- **Invertebrates** join the inventory (`kind: invertebrate`, species of the
+  `invertebrates` section of the reeftank-catalog). What a species carries as
+  `movement` is the surface it is bound to, shown next to its name in the
+  editor: it crawls on the sand, grazes the glass, walks the rock, swims, or is
+  settled for good. Shrimps, crabs and snails are moved and drawn by the same
+  code as the fish (clips `swim`, `idle` and `turn`, a still picture for a
+  species filmed in one frame), at a pace that suits their surface.
+- A **settled** species (a clam, a feather duster) is drawn where its home is
+  placed: picking one in the editor arms the home tool straight away, and the
+  line says so until a spot is given. It sways with the current when the
+  catalog says how supple it is (`flex`, `period_s`), the sheet of bends being
+  generated as the plants' one is.
+- A species that **digs** its burrow (`behavior.digs`, a pistol shrimp) now
+  works at its mouth now and then, half out, and pushes the sand it shifts out
+  of the hole: a puff that rises, drifts with the current and settles back.
+
 ### Water parameters and tests from the reeftech-catalog
 
 - ReefDose, assisted dosing: the **Test kit** list now holds the water tests of

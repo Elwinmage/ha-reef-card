@@ -1,9 +1,15 @@
 /**
- * Fish simulation.
+ * Simulation of the animals of a tank: its fish, and the invertebrates that
+ * crawl or swim (a sessile one is placed where it settled, like a plant, and
+ * never comes here).
  *
- * Fish live in tank space, in centimetres: x along the front glass (0 at the
- * left), y from the surface (0) down, d from the front glass (0) back. Every
- * species follows a behaviour profile from its catalog descriptor:
+ * Animals live in tank space, in centimetres: x along the front glass (0 at
+ * the left), y from the surface (0) down, d from the front glass (0) back.
+ *
+ * Two things say how one moves. Its **surface** is where it is bound: the
+ * open water, the sand, the glass or the decor — it is what an invertebrate
+ * carries as `movement`, and a fish has one too (read off its profile). Its
+ * **profile** is how it goes about on that surface:
  *
  * - shoal:   boids (cohesion, alignment, separation) following a target the
  *            whole school shares;
@@ -18,17 +24,19 @@
  *
  * A burrowing species (`behavior.burrow`) lives in a hole at its home: in it
  * at night, and during the day mostly peeking out (only its head shows),
- * sometimes out around it, sometimes back in.
+ * sometimes out around it, sometimes back in. One that digs its hole
+ * (`behavior.digs`, a pistol shrimp) also works at its mouth and pushes out
+ * the sand it shifts, in puffs.
  *
  * At night (ramping in and out) a species hides behind the nearest decor,
  * hovers in place or rests on the bottom. When food is dropped, fish are
  * drawn to the particles, each species as eager as its `feeding_response`.
  *
- * The simulation is pure (no DOM): the renderer reads `fish` and
- * `particles` after every step.
+ * The simulation is pure (no DOM): the renderer reads `fish`, `particles`
+ * and `puffs` after every step.
  */
 
-import type { BehaviorProfile, FishSpecies, NightMode } from "./types";
+import type { AnimalSpecies, BehaviorProfile, NightMode } from "./types";
 import { sand_v, type SandSurface } from "./geometry";
 import { Rng } from "./rng";
 
@@ -59,8 +67,35 @@ export interface SimEnv {
   hideouts: Hideout[];
 }
 
+/**
+ * Surface an animal is bound to, as the simulation holds it: the sessile
+ * invertebrates of `Movement` are placed, not simulated.
+ */
+export type Surface = "ground" | "glass" | "decor" | "swim";
+
+/**
+ * Surface an animal is bound to: what its species says, else what its
+ * profile implies (a sand dweller lives on the sand, a benthic fish over
+ * the decor, anything else in the open water).
+ */
+export function surface_of(species: AnimalSpecies): Surface {
+  const movement = species.movement;
+  if (movement && movement !== "sessile") return movement;
+  const profile = species.behavior?.profile;
+  if (profile === "sand") return "ground";
+  if (profile === "benthic") return "decor";
+  return "swim";
+}
+
+/** How an animal goes about on its surface, when its species does not say. */
+export function default_profile(surface: Surface): BehaviorProfile {
+  if (surface === "ground" || surface === "glass") return "sand";
+  if (surface === "decor") return "benthic";
+  return "cruiser";
+}
+
 export interface FishGroup {
-  species: FishSpecies;
+  species: AnimalSpecies;
   /** Inventory line the group stands for. */
   line_id: string;
   count: number;
@@ -71,8 +106,10 @@ export interface FishGroup {
 
 export interface Fish {
   id: string;
-  species: FishSpecies;
+  species: AnimalSpecies;
   profile: BehaviorProfile;
+  /** Surface it is bound to (the open water for a fish). */
+  movement: Surface;
   size: number;
   x: number;
   y: number;
@@ -108,11 +145,14 @@ export interface Fish {
    * (only for burrowing species).
    */
   emerge: number;
-  /** What a burrowing fish does now, and for how long. */
-  burrow?: { mode: BurrowMode; left: number };
+  /**
+   * What a burrowing animal does now, for how long, and the seconds left
+   * before the next puff of sand while it digs.
+   */
+  burrow?: { mode: BurrowMode; left: number; puff?: number };
 }
 
-export type BurrowMode = "in" | "peek" | "out";
+export type BurrowMode = "in" | "peek" | "out" | "work";
 
 export interface FishAnim {
   clip: string;
@@ -132,11 +172,38 @@ export interface Particle {
   age: number;
 }
 
+/**
+ * A puff of sand pushed out of a burrow by a digging animal: it rises, then
+ * spreads and settles back.
+ */
+export interface Puff {
+  x: number;
+  y: number;
+  d: number;
+  vx: number;
+  vy: number;
+  /** Seconds since it was raised, and how long it lives. */
+  age: number;
+  life: number;
+  /** How wide it starts, cm. */
+  radius: number;
+}
+
 const TURN_DURATION = 0.35;
 /** Bounds of a turn drawn by a clip, seconds. */
 const TURN_CLIP_S: [number, number] = [0.25, 3];
 const NIGHT_RAMP_S = 20;
 const DEFAULT_SPEED: [number, number] = [4, 10];
+/**
+ * Cruising speed of an invertebrate on its surface, cm/s, for a species
+ * whose catalog descriptor gives none: a snail is slower than a shrimp.
+ */
+const SURFACE_SPEED: Record<Surface, [number, number]> = {
+  ground: [1, 3],
+  glass: [0.3, 1],
+  decor: [1.5, 4],
+  swim: [3, 6],
+};
 /** Territory of a fish whose species has none but whose line has a home. */
 const DEFAULT_TERRITORY_SIZES = 3;
 const MIN_TERRITORY_CM = 6;
@@ -145,15 +212,33 @@ export const PEEK = 0.32;
 /** Body out of (or into) the burrow per second. */
 const EMERGE_RATE = 0.7;
 /** How long each burrow mode lasts, seconds, and how often it comes. */
-const BURROW_MODES: {
+type BurrowModes = {
   mode: BurrowMode;
   weight: number;
   s: [number, number];
-}[] = [
+}[];
+const BURROW_MODES: BurrowModes = [
   { mode: "peek", weight: 0.6, s: [12, 40] },
   { mode: "out", weight: 0.28, s: [5, 15] },
   { mode: "in", weight: 0.12, s: [3, 10] },
 ];
+/** A digging species spends a good share of its day working at its hole. */
+const DIG_MODES: BurrowModes = [
+  { mode: "peek", weight: 0.4, s: [10, 30] },
+  { mode: "work", weight: 0.3, s: [8, 25] },
+  { mode: "out", weight: 0.2, s: [5, 15] },
+  { mode: "in", weight: 0.1, s: [3, 10] },
+];
+/** Share of the body out of the burrow while working at its mouth. */
+export const WORK = 0.5;
+/** Seconds between two puffs of sand while digging. */
+const PUFF_EVERY: [number, number] = [0.6, 1.8];
+/** Grains pushed out at once. */
+const PUFF_GRAINS: [number, number] = [2, 5];
+/** How fast a puff falls back, cm/s². */
+const PUFF_FALL = 6;
+/** How much wider a puff gets per second. */
+const PUFF_SPREAD = 1.6;
 
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
@@ -195,6 +280,8 @@ export class FishSim {
   readonly env: SimEnv;
   fish: Fish[] = [];
   particles: Particle[] = [];
+  /** Sand raised by the animals digging their burrow. */
+  puffs: Puff[] = [];
   /** 0 day .. 1 night (ramped). */
   nightness = 0;
   /** Flow of the pumps, 0..1. */
@@ -242,13 +329,10 @@ export class FishSim {
     if (!species.behavior?.territory_cm && !species.behavior?.burrow)
       return null;
     const size = Math.max(group.size_cm[0], group.size_cm[1]);
-    const profile = species.behavior.profile;
-    if (profile === "sand") return this._sand_point(size, null, 0);
-    if (profile === "benthic") return this._perch(size, null, 0);
-    return this._random_point(species, size, null, 0);
+    return this._surface_point(surface_of(species), species, size, null, 0);
   }
 
-  private _band(species: FishSpecies): [number, number] {
+  private _band(species: AnimalSpecies): [number, number] {
     const band = species.behavior?.band ?? [0.1, 0.8];
     return [clamp(band[0], 0, 1), clamp(band[1], 0, 1)];
   }
@@ -270,13 +354,13 @@ export class FishSim {
     return this._rng.range(Math.min(a, b), Math.max(a, b));
   }
 
-  private _depth(species: FishSpecies): [number, number] {
+  private _depth(species: AnimalSpecies): [number, number] {
     const depth = species.behavior?.depth ?? [0.1, 0.9];
     return [clamp(depth[0], 0, 1), clamp(depth[1], 0, 1)];
   }
 
   private _random_point(
-    species: FishSpecies,
+    species: AnimalSpecies,
     size: number,
     home: [number, number, number] | null = null,
     radius: number = 0,
@@ -325,6 +409,33 @@ export class FishSim {
     return [x, this.sand_y(x, d) - size * 0.2, d];
   }
 
+  /**
+   * A point on the front glass (within the territory when given): a snail
+   * grazes it from just under the surface down to the sand.
+   */
+  private _glass_point(
+    size: number,
+    home: [number, number, number] | null,
+    radius: number,
+  ): [number, number, number] {
+    const { length } = this.env.size;
+    const x = this._around(size, length - size, home?.[0] ?? null, radius);
+    const d = this._glass_depth(size);
+    const bottom = this.sand_y(x, d) - size * 0.2;
+    const y = this._around(
+      Math.min(size * 0.5, bottom),
+      bottom,
+      home?.[1] ?? null,
+      radius * 0.6,
+    );
+    return [x, y, d];
+  }
+
+  /** How far from the front glass an animal grazing it swims, cm. */
+  private _glass_depth(size: number): number {
+    return Math.min(this.env.size.width, size * 0.3);
+  }
+
   private _perch(
     size: number,
     home: [number, number, number] | null = null,
@@ -358,13 +469,35 @@ export class FishSim {
     return [x, this.sand_y(x, d) - size * 0.3, d];
   }
 
-  /** Where a fish heads next during the day, by profile. */
+  /** A point of the surface an animal is bound to. */
+  private _surface_point(
+    movement: Surface,
+    species: AnimalSpecies,
+    size: number,
+    home: [number, number, number] | null,
+    radius: number,
+  ): [number, number, number] {
+    switch (movement) {
+      case "ground":
+        return this._sand_point(size, home, radius);
+      case "glass":
+        return this._glass_point(size, home, radius);
+      case "decor":
+        return this._perch(size, home, radius);
+      default:
+        return this._random_point(species, size, home, radius);
+    }
+  }
+
+  /** Where an animal heads next during the day, on its surface. */
   private _next_target(f: Fish): [number, number, number] {
-    if (f.profile === "sand")
-      return this._sand_point(f.size, f.home, f.territory);
-    if (f.profile === "benthic")
-      return this._perch(f.size, f.home, f.territory);
-    return this._random_point(f.species, f.size, f.home, f.territory);
+    return this._surface_point(
+      f.movement,
+      f.species,
+      f.size,
+      f.home,
+      f.territory,
+    );
   }
 
   private _spawn(
@@ -376,26 +509,27 @@ export class FishSim {
     const lo = Math.min(group.size_cm[0], group.size_cm[1]);
     const hi = Math.max(group.size_cm[0], group.size_cm[1]);
     const size = this._rng.range(lo, hi);
-    const profile = species.behavior?.profile ?? "cruiser";
-    const [s0, s1] = species.behavior?.speed_cm_s ?? DEFAULT_SPEED;
+    const movement = surface_of(species);
+    const profile = species.behavior?.profile ?? default_profile(movement);
+    const [s0, s1] =
+      species.behavior?.speed_cm_s ??
+      (species.kind === "invertebrate"
+        ? SURFACE_SPEED[movement]
+        : DEFAULT_SPEED);
     const territory = home
       ? Math.max(
           MIN_TERRITORY_CM,
           species.behavior?.territory_cm ?? hi * DEFAULT_TERRITORY_SIZES,
         )
       : 0;
-    const start =
-      profile === "sand"
-        ? this._sand_point(size, home, territory)
-        : profile === "benthic"
-          ? this._perch(size, home, territory)
-          : this._random_point(species, size, home, territory);
+    const start = this._surface_point(movement, species, size, home, territory);
     const facing = this._rng.next() < 0.5 ? -1 : 1;
     const speed = this._rng.range(s0, s1);
     return {
       id: `${group.line_id}:${n}`,
       species,
       profile,
+      movement,
       size,
       x: start[0],
       y: start[1],
@@ -432,20 +566,48 @@ export class FishSim {
     };
   }
 
-  /** Share of the body a burrowing fish wants out of its burrow. */
+  /** Share of the body a burrowing animal wants out of its burrow. */
   private _burrow_want(f: Fish, dt: number): number {
     const state = f.burrow!;
     if (this.nightness > 0.5) return 0;
     if (this.feeding && (f.species.feeding_response ?? 0.5) > 0) return 1;
+    const modes = f.species.behavior?.digs ? DIG_MODES : BURROW_MODES;
     state.left -= dt;
     if (state.left <= 0) {
       let pick = this._rng.next();
-      const next =
-        BURROW_MODES.find((m) => (pick -= m.weight) < 0) ?? BURROW_MODES[0];
+      const next = modes.find((m) => (pick -= m.weight) < 0) ?? modes[0];
       state.mode = next.mode;
       state.left = this._rng.range(next.s[0], next.s[1]);
     }
-    return state.mode === "out" ? 1 : state.mode === "peek" ? PEEK : 0;
+    if (state.mode === "out") return 1;
+    if (state.mode === "peek") return PEEK;
+    return state.mode === "work" ? WORK : 0;
+  }
+
+  /**
+   * An animal digging at the mouth of its burrow: it pushes the sand it
+   * shifts out of the hole, in puffs.
+   */
+  private _step_work(f: Fish, dt: number): void {
+    const state = f.burrow!;
+    state.puff = (state.puff ?? 0) - dt;
+    if (state.puff > 0) return;
+    state.puff = this._rng.range(PUFF_EVERY[0], PUFF_EVERY[1]);
+    const grains = Math.round(this._rng.range(PUFF_GRAINS[0], PUFF_GRAINS[1]));
+    const top = this.sand_y(f.x, f.d);
+    for (let i = 0; i < grains; i++) {
+      this.puffs.push({
+        x: f.x + this._rng.range(-f.size * 0.4, f.size * 0.4),
+        y: top,
+        d: f.d,
+        vx: this._rng.range(-1.5, 1.5),
+        // Up out of the hole (y grows downwards)
+        vy: -this._rng.range(2, 5),
+        age: 0,
+        life: this._rng.range(1.2, 2.4),
+        radius: Math.max(0.2, f.size * this._rng.range(0.06, 0.14)),
+      });
+    }
   }
 
   /**
@@ -475,6 +637,7 @@ export class FishSim {
     f.turn = -1;
     const step = EMERGE_RATE * dt;
     f.emerge = clamp(f.emerge + clamp(want - f.emerge, -step, step), 0, 1);
+    if (f.burrow!.mode === "work") this._step_work(f, dt);
     f.phase += dt * this.frame_rate(f);
     return true;
   }
@@ -531,8 +694,22 @@ export class FishSim {
       1,
     );
     this._step_particles(dt);
+    this._step_puffs(dt);
     this._step_schools(dt);
     for (const f of this.fish) this._step_fish(f, dt);
+  }
+
+  /** Advance the sand puffs: they rise, drift with the current, settle. */
+  private _step_puffs(dt: number): void {
+    const { length } = this.env.size;
+    for (const p of this.puffs) {
+      p.age += dt;
+      p.vy += PUFF_FALL * dt;
+      p.vx *= 1 - Math.min(1, dt * 1.5);
+      p.x = clamp(p.x + (p.vx + this.flow * 2) * dt, 0, length);
+      p.y += p.vy * dt;
+    }
+    this.puffs = this.puffs.filter((p) => p.age < p.life);
   }
 
   private _step_particles(dt: number): void {
@@ -784,6 +961,8 @@ export class FishSim {
     const floor =
       this.sand_y(f.x, f.d) - f.size * (f.profile === "sand" ? 0.15 : 0.3);
     if (f.y > floor) ay -= (f.y - floor) * 4;
+    // A grazer of the glass stays against it
+    if (f.movement === "glass") ad += (this._glass_depth(f.size) - f.d) * 4;
 
     const turn_rate = f.species.behavior?.turn_rate ?? 2.5;
     const gain = clamp(turn_rate * dt, 0, 1);
@@ -859,4 +1038,15 @@ export class FishSim {
     const h = Math.max(0.5, Math.abs(f.vx));
     return clamp(Math.atan2(f.vy, h), -0.45, 0.45);
   }
+}
+
+/** How opaque a puff of sand is now: it shows at once, then thins out. */
+export function puff_alpha(p: Puff): number {
+  const t = clamp(p.age / Math.max(0.01, p.life), 0, 1);
+  return 0.5 * (1 - t) * Math.min(1, t * 8);
+}
+
+/** How wide a puff of sand is now, cm: it spreads as it drifts. */
+export function puff_radius(p: Puff): number {
+  return p.radius * (1 + PUFF_SPREAD * p.age);
 }
