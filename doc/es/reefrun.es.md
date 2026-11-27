@@ -153,6 +153,12 @@ llena, protección contra el sobreescumado — el punto se desplaza a la velocid
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+El pasado del día también se conserva: la velocidad real se traza en rojo allí
+donde se apartó de la programación, sobre una franja más clara hasta el eje, de
+modo que un periodo de autorregulación — un espumador que bajó su velocidad por
+sí mismo — se lee de un vistazo. Viene del recorder, así que la entidad de
+velocidad debe estar registrada en él (lo está por defecto).
+
 Al hacer clic en el gráfico se abre el editor de programación: añadir o eliminar puntos, editar horas y velocidades, previsualizar un punto en el aparato y guardar.
 
 <img src="../img/rsrun/schedule_editor.png"/>

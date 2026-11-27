@@ -150,6 +150,12 @@ segment materializes the gap, labelled with the difference:
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+The past of the day is kept as well: the real speed is traced in red wherever it
+left the schedule, over a lighter band down to the axis, so a period of auto
+regulation — a skimmer that lowered its own speed while nobody watched — reads
+at a glance. It comes from the recorder, so it needs the speed entity to be
+recorded (it is, unless you excluded it).
+
 Clicking the chart opens the schedule editor: add or remove points, edit times and speeds, preview a point on the device, then save.
 
 <img src="../img/rsrun/schedule_editor.png"/>

@@ -154,6 +154,12 @@ cheio, proteção contra sobre-escumação — o ponto desloca-se para a velocid
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+O passado do dia também fica no gráfico: a velocidade real é traçada a vermelho
+onde se afastou da programação, sobre uma faixa mais clara até ao eixo, de modo
+que um período de autorregulação — um escumador que baixou a velocidade sozinho
+— se lê num relance. Vem do recorder, pelo que a entidade de velocidade tem de
+estar lá registada (está, por omissão).
+
 Um clique no gráfico abre o editor de programação: adicionar ou remover pontos, editar horas e velocidades, pré-visualizar um ponto no aparelho e guardar.
 
 <img src="../img/rsrun/schedule_editor.png"/>

@@ -11,6 +11,11 @@
  * the current time: the dot moves to the real value and a coloured segment
  * links it to the scheduled value, making any override (feed mode, level
  * sensor, foam protection, ...) immediately visible.
+ *
+ * The same entity is read back from the recorder for the day being drawn, so
+ * every past override is kept on the chart: the measured value is traced where
+ * it left the schedule, over a band down to the baseline that shows how long
+ * it lasted (a skimmer regulating itself, for instance).
  */
 
 //----------------------------------------------------------------------------//
@@ -20,6 +25,7 @@ import { html, TemplateResult, CSSResultGroup, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 
 import { MyElement } from "./element";
+import { HistoryChart, type HistoryPoint } from "./history_chart";
 import style_schedule from "./schedule.styles";
 import style_animations from "../utils/animations.styles";
 import i18n from "../translations/myi18n.js";
@@ -71,6 +77,18 @@ export interface ScheduleConfig extends BaseElementConfig {
   deviation_threshold?: number;
   /** Force-disable the deviation overlay even when current_entity resolves */
   show_deviation?: boolean;
+
+  // ---- History of the deviations of the day (recorder) ----
+  /**
+   * Force-disable the measured history even when `current_entity` resolves.
+   * On by default: the recorder is read for the day being drawn and the
+   * measured value is traced wherever it left the schedule.
+   */
+  show_history?: boolean;
+  /** RGB triplet of the history trace (default: the deviation colour) */
+  history_color?: string;
+  /** Opacity of the band drawn under the history trace */
+  history_fill_alpha?: number;
 }
 
 interface SchedulePoint {
@@ -89,6 +107,10 @@ const PADDING_LEFT = 36;
 const PADDING_RIGHT = 8;
 /** Colour of the "now" cursor and, by default, of the deviation segment */
 const NOW_COLOR = "255,40,40";
+/** How often the recorder is read again for the history of the day */
+const HISTORY_REFRESH_MS = 10 * 60_000;
+/** Most samples kept: a day of live changes, one per minute, and some slack */
+const HISTORY_MAX_SAMPLES = 2000;
 
 //----------------------------------------------------------------------------//
 //   Schedule element
@@ -120,6 +142,13 @@ export class Schedule extends MyElement {
   /** Serialized schedule attribute, used to detect changes in the hass setter */
   private _lastScheduleRaw: string | null = null;
 
+  /** Measured values of the day: read from the recorder, then followed live */
+  private _history: HistoryPoint[] = [];
+  /** When the recorder was last read (0: never) */
+  private _historyAt = 0;
+  /** A read of the recorder is in flight */
+  private _historyPending = false;
+
   constructor() {
     super();
   }
@@ -140,6 +169,14 @@ export class Schedule extends MyElement {
     const current = this._getCurrentValue();
     if (current !== this._lastCurrentValue) {
       this._lastCurrentValue = current;
+      // The recorder is read now and then; in between, what is seen live
+      // extends the curve so a deviation shows up at once.
+      if (current !== null && this._historyWanted()) {
+        this._history.push({ t: Date.now(), v: current });
+        if (this._history.length > HISTORY_MAX_SAMPLES) {
+          this._history.splice(0, this._history.length - HISTORY_MAX_SAMPLES);
+        }
+      }
       this.requestUpdate();
     }
 
@@ -196,6 +233,127 @@ export class Schedule extends MyElement {
   }
 
   // ------------------------------------------------------------------
+  //  Measured history of the day
+  // ------------------------------------------------------------------
+
+  /** Whether the measured values of the day are drawn. */
+  private _historyWanted(): boolean {
+    return (
+      this.conf?.show_deviation !== false &&
+      this.conf?.show_history !== false &&
+      this._historyEntityId() !== null
+    );
+  }
+
+  /**
+   * Entity whose history is read, or null when there is none to read.
+   *
+   * Only an entity whose *state* carries the value can be read back: a value
+   * taken from an attribute (`current_attribute`) is left to the live marker.
+   */
+  private _historyEntityId(): string | null {
+    if (this.conf?.current_attribute) return null;
+    const key = this.conf?.current_entity;
+    if (!key) return null;
+    const dev = this.device as any;
+    const entity = dev?.entities?.[key] ?? dev?.parent_entities?.[key];
+    return entity?.entity_id ?? null;
+  }
+
+  /** Midnight of the day being drawn, in ms. */
+  private static _midnight(): number {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    return start.getTime();
+  }
+
+  /** Read the recorder again when it is time to (or the day changed). */
+  private _refreshHistory(): void {
+    if (!this._historyWanted() || this._historyPending) return;
+    const now = Date.now();
+    if (
+      this._historyAt >= Schedule._midnight() &&
+      now - this._historyAt < HISTORY_REFRESH_MS
+    ) {
+      return;
+    }
+    void this._fetchHistory();
+  }
+
+  /**
+   * Read the measured value of the day from the recorder.
+   *
+   * What was seen live meanwhile is kept: a sample the recorder has not
+   * written yet would otherwise be lost and the curve would jump back.
+   */
+  private async _fetchHistory(): Promise<void> {
+    const entity_id = this._historyEntityId();
+    const hass = this._hass as any;
+    if (!entity_id || typeof hass?.callWS !== "function") return;
+
+    this._historyPending = true;
+    const start = Schedule._midnight();
+    try {
+      const answer = await hass.callWS({
+        type: "history/history_during_period",
+        start_time: new Date(start).toISOString(),
+        end_time: new Date().toISOString(),
+        entity_ids: [entity_id],
+        minimal_response: true,
+        no_attributes: true,
+        significant_changes_only: false,
+      });
+      const read = HistoryChart.parse_history(answer, entity_id);
+      const newest = read.length ? read[read.length - 1].t : start;
+      const live = this._history.filter((point) => point.t > newest);
+      this._history = [...read, ...live];
+      this._historyAt = Date.now();
+      this._draw();
+    } catch {
+      // No recorder, or an entity excluded from it: the chart keeps the live
+      // marker alone, and the read is simply tried again later.
+      this._historyAt = Date.now();
+    } finally {
+      this._historyPending = false;
+    }
+  }
+
+  /**
+   * The measured value of every minute of the day up to now.
+   *
+   * A value holds until the next sample (the recorder only stores changes), so
+   * the samples are spread over the minutes they cover. A sample dated before
+   * midnight is the value in force when the day started.
+   *
+   * @return one value per minute (null while nothing is known), or null when
+   *   there is no history to draw
+   */
+  private _historyPerMinute(nowMinutes: number): (number | null)[] | null {
+    if (!this._historyWanted() || this._history.length === 0) return null;
+    const start = Schedule._midnight();
+    const samples = this._history
+      .map((point) => ({
+        m: Math.round((point.t - start) / 60_000),
+        v: point.v,
+      }))
+      .filter((point) => point.m <= nowMinutes)
+      .sort((a, b) => a.m - b.m);
+    if (samples.length === 0) return null;
+
+    const held: (number | null)[] = new Array(nowMinutes + 1).fill(null);
+    let index = 0;
+    let value: number | null = null;
+    for (let minute = 0; minute <= nowMinutes; minute++) {
+      while (index < samples.length && samples[index].m <= minute) {
+        value = samples[index].v;
+        index++;
+      }
+      held[minute] = value;
+    }
+    return held;
+  }
+
+  // ------------------------------------------------------------------
   //  Lifecycle
   // ------------------------------------------------------------------
 
@@ -206,7 +364,11 @@ export class Schedule extends MyElement {
       this._ro = new ResizeObserver(() => this._draw());
       this._ro.observe(this._canvas);
     }
-    this._clockTimer = setInterval(() => this._draw(), 60_000);
+    this._clockTimer = setInterval(() => {
+      this._refreshHistory();
+      this._draw();
+    }, 60_000);
+    this._refreshHistory();
     this._draw();
   }
 
@@ -830,6 +992,8 @@ export class Schedule extends MyElement {
     }
 
     if (showNow) {
+      // Under the marker: what the device really did today
+      this._drawHistory(ctx, points, linear, xOf, yOf, minVal, maxVal);
       this._drawNowMarker(
         ctx,
         points,
@@ -845,6 +1009,89 @@ export class Schedule extends MyElement {
         unit,
       );
     }
+  }
+
+  // ------------------------------------------------------------------
+  //  History of the deviations of the day
+  // ------------------------------------------------------------------
+
+  /**
+   * Trace the measured value wherever it left the schedule today.
+   *
+   * Only the deviating stretches are drawn, each as a staircase (the measured
+   * value holds until the next sample) over a band down to the baseline: the
+   * band is the period the device ran on something other than its schedule —
+   * a skimmer lowering its own speed, a feed mode, a level sensor.
+   */
+  private _drawHistory(
+    ctx: CanvasRenderingContext2D,
+    points: SchedulePoint[],
+    linear: boolean,
+    xOf: (m: number) => number,
+    yOf: (v: number) => number,
+    minVal: number,
+    maxVal: number,
+  ): void {
+    // Off, or driven by something else: the schedule is not what is followed,
+    // so a gap with it means nothing (the whole chart is greyed out anyway).
+    if (!this.stateOn || points.length === 0) return;
+
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const measured = this._historyPerMinute(nowMinutes);
+    if (measured === null) return;
+
+    const threshold = this.conf?.deviation_threshold ?? 1;
+    const rgb =
+      this.conf?.history_color ?? this.conf?.deviation_color ?? NOW_COLOR;
+    const alpha = this.conf?.history_fill_alpha ?? 0.2;
+    const baseY = yOf(minVal);
+    const clamp = (value: number): number =>
+      Math.min(maxVal, Math.max(minVal, value));
+
+    /** Draw one stretch of deviation, from minute `from` to minute `to`. */
+    const drawRun = (from: number, to: number): void => {
+      // The last minute of the run holds until the next one starts
+      const end = Math.min(to + 1, nowMinutes);
+      let value = measured[from] as number;
+
+      ctx.beginPath();
+      ctx.moveTo(xOf(from), yOf(clamp(value)));
+      for (let minute = from + 1; minute <= to; minute++) {
+        const next = measured[minute] as number;
+        if (next === value) continue;
+        ctx.lineTo(xOf(minute), yOf(clamp(value)));
+        ctx.lineTo(xOf(minute), yOf(clamp(next)));
+        value = next;
+      }
+      ctx.lineTo(xOf(end), yOf(clamp(value)));
+      ctx.strokeStyle = `rgba(${rgb},0.9)`;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = "round";
+      ctx.stroke();
+
+      // Band under the trace: how long the deviation lasted
+      ctx.lineTo(xOf(end), baseY);
+      ctx.lineTo(xOf(from), baseY);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${rgb},${alpha})`;
+      ctx.fill();
+    };
+
+    let runStart = -1;
+    for (let minute = 0; minute <= nowMinutes; minute++) {
+      const value = measured[minute];
+      const scheduled = this._interpolateValue(points, minute, linear);
+      const deviating =
+        value !== null && Math.abs(value - scheduled) > threshold;
+      if (deviating) {
+        if (runStart < 0) runStart = minute;
+      } else if (runStart >= 0) {
+        drawRun(runStart, minute - 1);
+        runStart = -1;
+      }
+    }
+    if (runStart >= 0) drawRun(runStart, nowMinutes);
   }
 
   // ------------------------------------------------------------------
@@ -1189,7 +1436,12 @@ export class Schedule extends MyElement {
       if (minutes <= points[i].minutes) {
         const prev = points[i - 1];
         const next = points[i];
-        if (!linear || prev.minutes === next.minutes) return prev.value;
+        // A step takes effect on its own start minute, as the device applies
+        // it: without that, every change would read as a one-minute gap
+        // between the schedule and what the device really does.
+        if (!linear || prev.minutes === next.minutes) {
+          return minutes === next.minutes ? next.value : prev.value;
+        }
         const t = (minutes - prev.minutes) / (next.minutes - prev.minutes);
         return prev.value + t * (next.value - prev.value);
       }

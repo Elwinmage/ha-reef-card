@@ -2,6 +2,21 @@
 
 ## MODIFICATIONS
 
+### ReefRun: the deviations of the day stay on the speed schedule
+
+- The speed chart no longer shows only the gap of the moment: the real speed is
+  now read from the recorder for the whole day and traced in red wherever it
+  left the schedule, over a lighter band down to the axis. A period of auto
+  regulation — a skimmer that lowered its own speed while the water column rose
+  — is readable at a glance, long after it ended.
+- The trace follows the live value between two reads of the recorder, so a
+  deviation shows up at once. It can be tuned per element with `show_history`,
+  `history_color` and `history_fill_alpha`, and reuses `deviation_threshold`.
+- The skimmer card shows the warning of the ReefBeat app, next to the
+  over-skimming switch, fed by the new **Auto regulation** sensor of the redsea
+  integration (and hidden when the integration does not have it yet). Being a
+  problem sensor, it also joins the common alarm of the reef.
+
 ### Aquarium view: invertebrates, and a livestock panel that folds
 
 - The **Livestock** tab of the scene editor is now four groups — fish,
@@ -734,6 +749,12 @@ acceptable_high]`, read from `/probe/config` (`temp.ranges` for the
   `entity.binary_sensor.buzzer_enabled` removed with its entity.
 
 ## FIXES
+
+### RSRUN schedule
+
+- A step of the schedule now takes effect on its own start minute, as the
+  device applies it. It used to read as a one-minute gap between the schedule
+  and the real speed at every change of the day.
 
 ### RSWAVE
 

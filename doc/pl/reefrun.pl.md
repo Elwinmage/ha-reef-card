@@ -152,6 +152,12 @@ prędkość, a czerwony odcinek obrazuje różnicę wraz z jej wartością:
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+Zachowana jest też przeszłość dnia: rzeczywista prędkość jest rysowana na
+czerwono wszędzie tam, gdzie odbiegła od harmonogramu, nad jaśniejszym polem
+sięgającym osi — okres autoregulacji, gdy odpieniacz sam obniżył prędkość, widać
+więc od razu. Pochodzi z recordera, więc encja prędkości musi być w nim
+zapisywana (domyślnie jest).
+
 Kliknięcie wykresu otwiera edytor harmonogramu: dodawanie i usuwanie punktów, zmiana godzin i prędkości, podgląd punktu na urządzeniu oraz zapis.
 
 <img src="../img/rsrun/schedule_editor.png"/>

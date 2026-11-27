@@ -154,6 +154,13 @@ vitesse **réelle** et un segment rouge matérialise l'écart, chiffré à côt�
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+Le passé de la journée est conservé lui aussi : la vitesse réelle est tracée en
+rouge partout où elle a quitté le programme, sur un aplat plus clair jusqu'à
+l'axe, ce qui rend lisible d'un coup d'œil une période d'auto-régulation — un
+écumeur qui a baissé sa vitesse tout seul pendant votre absence. Elle vient du
+recorder : il faut donc que l'entité vitesse y soit enregistrée (c'est le cas
+par défaut).
+
 Un clic sur le graphique ouvre l'éditeur de programme : ajout et suppression de points, modification des heures et des vitesses, aperçu d'un point sur l'appareil, puis enregistrement.
 
 <img src="../img/rsrun/schedule_editor.png"/>

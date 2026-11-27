@@ -154,6 +154,13 @@ und ein rotes Segment stellt die Abweichung dar, mit dem Zahlenwert daneben:
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+Auch der bisherige Tag bleibt erhalten: Die tatsächliche Drehzahl wird überall
+dort rot gezeichnet, wo sie vom Programm abwich, über einer helleren Fläche bis
+zur Achse — eine Phase automatischer Regelung, in der ein Abschäumer seine
+Drehzahl von selbst gesenkt hat, ist so auf einen Blick zu sehen. Sie stammt aus
+dem Recorder, die Drehzahl-Entität muss dort also aufgezeichnet werden
+(standardmäßig ist sie es).
+
 Ein Klick auf das Diagramm öffnet den Programmeditor: Punkte hinzufügen oder entfernen, Zeiten und Drehzahlen ändern, einen Punkt am Gerät vorab testen und speichern.
 
 <img src="../img/rsrun/schedule_editor.png"/>

@@ -155,6 +155,13 @@ il valore accanto:
 
 <img src="../img/rsrun/schedule_deviation.png"/>
 
+Anche il passato della giornata resta sul grafico: la velocità reale è tracciata
+in rosso ovunque si sia allontanata dalla programmazione, su una fascia più
+chiara fino all'asse, così un periodo di autoregolazione — uno schiumatoio che
+ha abbassato la velocità da solo — si legge a colpo d'occhio. Viene dal
+recorder, quindi l'entità velocità deve esservi registrata (lo è per
+impostazione predefinita).
+
 Un clic sul grafico apre l'editor della programmazione: aggiungere o rimuovere punti, modificare orari e velocità, provare un punto sull'apparecchio e salvare.
 
 <img src="../img/rsrun/schedule_editor.png"/>

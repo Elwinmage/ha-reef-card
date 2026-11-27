@@ -456,6 +456,32 @@ export const config = {
         left: "17.7%",
       },
     },
+    // The pump lowering its own speed (over-skimming protection): the warning
+    // the ReefBeat app shows, next to the switch it belongs to. Stays hidden
+    // when the integration does not expose the sensor (older versions).
+    autoregulation_warning: {
+      name: "auto_regulation",
+      type: "click-image",
+      image: new URL("../../../img/warning.svg", import.meta.url),
+      class: "blink",
+      put_in: "ctrl",
+      disabled_if: "entity.auto_regulation?.state !== 'on'",
+      no_br_if_disabled: true,
+      tap_action: {
+        domain: "redsea_ui",
+        action: "more-info",
+        data: "auto_regulation",
+      },
+      css: {
+        flex: "0 0 auto",
+        position: "absolute",
+        top: "11.4%",
+        left: "7.7%",
+      },
+      elt_css: {
+        width: "24px",
+      },
+    },
     overskimming_percent: {
       name: "overskimming_threshold",
       type: "common-slider",
